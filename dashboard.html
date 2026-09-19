@@ -349,8 +349,9 @@ button { font-family: inherit; }
     </div>
 
     <div style="display:flex;align-items:center;gap:1rem;">
-      <span class="avatar-pill" id="whoami"><span class="dot">AR</span> Ananya Reddy</span>
+      <span class="avatar-pill" id="whoami"><span class="dot">...</span> Loading...</span>
       <a href="index.html" class="btn btn--ghost btn--sm">Back to Home</a>
+      <button id="logoutBtn" class="btn btn--ghost btn--sm">Logout</button>
     </div>
   </div>
 </header>
@@ -426,6 +427,82 @@ button { font-family: inherit; }
 <script>
 (function () {
 "use strict";
+
+const API_BASE = 'http://localhost:3001/api';
+
+// Authentication Check and User Fetching
+async function fetchCurrentUser() {
+  try {
+    const response = await fetch(`${API_BASE}/auth/me`, {
+      credentials: 'include'
+    });
+
+    if (!response.ok) {
+      if (response.status === 401 || response.status === 403) {
+        window.location.href = 'auth.html';
+        return null;
+      }
+      throw new Error('Failed to fetch user data');
+    }
+
+    const data = await response.json();
+    return data.user;
+  } catch (error) {
+    console.error('Auth check failed:', error);
+    window.location.href = 'auth.html';
+    return null;
+  }
+}
+
+// Update UI with user data
+function updateUserUI(user) {
+  if (!user) return;
+
+  const whoami = document.getElementById('whoami');
+  const initials = (user.full_name || user.email).split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  const displayName = user.full_name || user.email.split('@')[0];
+
+  whoami.innerHTML = `<span class="dot">${initials}</span> ${displayName}`;
+
+  // Update greeting based on role
+  const greetingElement = document.querySelector('.fv-header__intro h1');
+  if (greetingElement && user.role === 'mother') {
+    greetingElement.textContent = `Hi ${user.full_name?.split(' ')[0] || displayName} 👋`;
+  }
+
+  // Show/hide views based on role
+  if (user.role === 'doctor') {
+    document.getElementById('tabFamily').style.display = 'none';
+    document.getElementById('tabDoctor').click();
+  }
+}
+
+// Logout functionality
+document.getElementById('logoutBtn').addEventListener('click', async () => {
+  try {
+    await fetch(`${API_BASE}/auth/logout`, {
+      method: 'POST',
+      credentials: 'include'
+    });
+    window.location.href = 'index.html';
+  } catch (error) {
+    console.error('Logout failed:', error);
+    window.location.href = 'index.html';
+  }
+});
+
+// Initialize authentication
+let currentUser = null;
+
+// Check authentication and initialize dashboard
+fetchCurrentUser().then(user => {
+  if (user) {
+    currentUser = user;
+    updateUserUI(user);
+    renderFamilyView();
+    renderDoctorDashboard();
+  }
+});
 
 /* ======================================================================
    DEMO DATA
@@ -807,19 +884,26 @@ tabFamily.addEventListener("click", function () {
   tabFamily.classList.add("is-active"); tabFamily.setAttribute("aria-selected", "true");
   tabDoctor.classList.remove("is-active"); tabDoctor.setAttribute("aria-selected", "false");
   viewFamily.classList.add("is-active"); viewDoctor.classList.remove("is-active");
-  whoami.innerHTML = '<span class="dot">AR</span> Ananya Reddy';
+  if (currentUser) {
+    const initials = (currentUser.full_name || currentUser.email).split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    const displayName = currentUser.full_name || currentUser.email.split('@')[0];
+    whoami.innerHTML = `<span class="dot">${initials}</span> ${displayName}`;
+  }
 });
 tabDoctor.addEventListener("click", function () {
   tabDoctor.classList.add("is-active"); tabDoctor.setAttribute("aria-selected", "true");
   tabFamily.classList.remove("is-active"); tabFamily.setAttribute("aria-selected", "false");
   viewDoctor.classList.add("is-active"); viewFamily.classList.remove("is-active");
-  whoami.innerHTML = '<span class="dot">KM</span> Dr. Kavita Menon';
+  if (currentUser) {
+    const initials = (currentUser.full_name || currentUser.email).split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    const displayName = currentUser.full_name || currentUser.email.split('@')[0];
+    whoami.innerHTML = `<span class="dot">${initials}</span> ${displayName}`;
+  }
   renderDoctorDashboard();
 });
 
 /* ---- Init ---- */
-renderFamilyView();
-renderDoctorDashboard();
+// Dashboard initialization is now handled in fetchCurrentUser after auth check
 
 })();
 </script>
