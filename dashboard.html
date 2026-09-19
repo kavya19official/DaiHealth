@@ -109,6 +109,12 @@ button { font-family: inherit; }
 /* ---- Views ----------------------------------------------------------- */
 .view { display: none; padding-block: clamp(1.5rem, 3.5vw, 2.5rem) 4rem; }
 .view.is-active { display: block; }
+/* Each dashboard only ever renders for its own role. There is no UI control
+   that switches a signed-in user into the other role's view — access is also
+   enforced server-side on every /api/timeline, /api/doctor/* and
+   /api/appointments call. */
+body[data-role="mother"] #viewDoctor,
+body[data-role="doctor"] #viewFamily { display: none !important; }
 
 /* ---- Badges / tags ----------------------------------------------------- */
 .tag { display: inline-flex; align-items: center; gap: .35rem; font-size: .72rem; font-weight: 700;
@@ -306,6 +312,39 @@ button { font-family: inherit; }
   .milestone { grid-template-columns: 20px 1fr; }
   .milestone__right { grid-column: 1 / -1; padding-left: 2.85rem; }
 }
+
+/* ---- Appointments ------------------------------------------------- */
+.appt-section { margin-top: 2.5rem; }
+.appt-grid { display: grid; grid-template-columns: 1.1fr 1.4fr; gap: 1.25rem; align-items: start; }
+@media (max-width: 860px) { .appt-grid { grid-template-columns: 1fr; } }
+
+.form-group { margin-bottom: 1.1rem; }
+.form-group label { display: block; font-weight: 500; margin-bottom: .4rem; color: var(--ink); font-size: .88rem; }
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%; padding: .68rem .9rem; border: 1px solid var(--line); border-radius: var(--r-md);
+  font-family: inherit; font-size: .95rem; color: var(--ink); background: var(--surface);
+  transition: border-color .2s ease;
+}
+.form-group textarea { resize: vertical; min-height: 5rem; }
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: var(--coral); }
+
+.appt-list { display: flex; flex-direction: column; gap: .75rem; }
+.appt-card {
+  border: 1px solid var(--line); border-radius: var(--r-md); padding: .9rem 1.05rem;
+  display: flex; flex-direction: column; gap: .35rem; background: var(--surface);
+}
+.appt-card__top { display: flex; align-items: center; justify-content: space-between; gap: .6rem; flex-wrap: wrap; }
+.appt-card__who { font-weight: 600; font-size: .92rem; }
+.appt-card__meta { font-size: .82rem; color: var(--ink-3); }
+.appt-card__reason { font-size: .88rem; color: var(--ink-2); }
+.appt-card__actions { display: flex; gap: .5rem; align-items: center; flex-wrap: wrap; margin-top: .3rem; }
+.appt-card__actions select { width: auto; padding: .4rem .6rem; font-size: .82rem; }
+.tag--pending   { background: var(--amber-soft); color: var(--amber); }
+.tag--confirmed { background: var(--lilac); color: var(--violet); }
+.tag--completed { background: var(--mint); color: var(--green); }
+.tag--cancelled { background: var(--line-soft); color: var(--ink-3); }
 </style>
 </head>
 <body>
@@ -338,15 +377,6 @@ button { font-family: inherit; }
       </svg>
       <span><span class="brand__name">anvaya</span><span class="brand__tag">CONNECTED CARE</span></span>
     </a>
-
-    <div class="segmented" role="tablist" aria-label="Switch view">
-      <button type="button" id="tabFamily" class="is-active" role="tab" aria-selected="true">
-        <svg aria-hidden="true"><use href="#i-heart"/></svg>Family view
-      </button>
-      <button type="button" id="tabDoctor" role="tab" aria-selected="false">
-        <svg aria-hidden="true"><use href="#i-users"/></svg>Doctor dashboard
-      </button>
-    </div>
 
     <div style="display:flex;align-items:center;gap:1rem;">
       <span class="avatar-pill" id="whoami"><span class="dot">...</span> Loading...</span>
@@ -386,6 +416,36 @@ button { font-family: inherit; }
       <div class="stage-stepper" id="stageStepper"></div>
       <div id="familyTimeline"></div>
 
+      <div class="appt-section">
+        <h2 style="margin-bottom:1rem;">Appointments</h2>
+        <div class="appt-grid">
+          <div class="card">
+            <h3 style="margin-bottom:1rem;">Request an appointment</h3>
+            <form id="appointmentForm">
+              <div class="form-group">
+                <label for="apptDoctor">Doctor</label>
+                <select id="apptDoctor" required>
+                  <option value="" disabled selected>Choose a doctor</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="apptDate">Preferred date</label>
+                <input type="date" id="apptDate" required>
+              </div>
+              <div class="form-group">
+                <label for="apptReason">Reason (optional)</label>
+                <textarea id="apptReason" placeholder="e.g. Follow-up on last scan"></textarea>
+              </div>
+              <button type="submit" class="btn btn--primary" id="apptSubmit">Request appointment</button>
+            </form>
+          </div>
+          <div class="card">
+            <h3 style="margin-bottom:1rem;">Your requests</h3>
+            <div class="appt-list" id="motherApptList"></div>
+          </div>
+        </div>
+      </div>
+
     </div>
   </section>
 
@@ -417,6 +477,13 @@ button { font-family: inherit; }
 
         <div class="detail-panel" id="detailPanel"></div>
       </div>
+
+      <div class="appt-section">
+        <h2 style="margin-bottom:1rem;">Appointment requests</h2>
+        <div class="card">
+          <div class="appt-list" id="doctorApptList"></div>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -430,155 +497,65 @@ button { font-family: inherit; }
 
 const API_BASE = 'http://localhost:3001/api';
 
-// Authentication Check and User Fetching
-async function fetchCurrentUser() {
+/* ======================================================================
+   API HELPERS
+   ====================================================================== */
+
+async function apiRequest(path, options) {
+  options = options || {};
+  var opts = Object.assign({ credentials: 'include' }, options);
+  if (opts.body) {
+    opts.headers = Object.assign({ 'Content-Type': 'application/json' }, opts.headers || {});
+  }
+  var response;
   try {
-    const response = await fetch(`${API_BASE}/auth/me`, {
-      credentials: 'include'
-    });
-
-    if (!response.ok) {
-      if (response.status === 401 || response.status === 403) {
-        window.location.href = 'auth.html';
-        return null;
-      }
-      throw new Error('Failed to fetch user data');
-    }
-
-    const data = await response.json();
-    return data.user;
+    response = await fetch(API_BASE + path, opts);
   } catch (error) {
-    console.error('Auth check failed:', error);
+    console.error('Network error:', error);
+    showToast('Network error — please try again');
+    return null;
+  }
+
+  if (response.status === 401) {
     window.location.href = 'auth.html';
     return null;
   }
+
+  var data = null;
+  try { data = await response.json(); } catch (e) { data = {}; }
+
+  if (!response.ok) {
+    showToast((data && data.error) || 'Something went wrong');
+    return null;
+  }
+  return data;
 }
 
-// Update UI with user data
-function updateUserUI(user) {
-  if (!user) return;
-
-  const whoami = document.getElementById('whoami');
-  const initials = (user.full_name || user.email).split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
-  const displayName = user.full_name || user.email.split('@')[0];
-
-  whoami.innerHTML = `<span class="dot">${initials}</span> ${displayName}`;
-
-  // Update greeting based on role
-  const greetingElement = document.querySelector('.fv-header__intro h1');
-  if (greetingElement && user.role === 'mother') {
-    greetingElement.textContent = `Hi ${user.full_name?.split(' ')[0] || displayName} 👋`;
-  }
-
-  // Show/hide views based on role
-  if (user.role === 'doctor') {
-    document.getElementById('tabFamily').style.display = 'none';
-    document.getElementById('tabDoctor').click();
-  }
+async function fetchCurrentUser() {
+  var data = await apiRequest('/auth/me');
+  return data ? data.user : null;
 }
-
-// Logout functionality
-document.getElementById('logoutBtn').addEventListener('click', async () => {
-  try {
-    await fetch(`${API_BASE}/auth/logout`, {
-      method: 'POST',
-      credentials: 'include'
-    });
-    window.location.href = 'index.html';
-  } catch (error) {
-    console.error('Logout failed:', error);
-    window.location.href = 'index.html';
-  }
-});
-
-// Initialize authentication
-let currentUser = null;
-
-// Check authentication and initialize dashboard
-fetchCurrentUser().then(user => {
-  if (user) {
-    currentUser = user;
-    updateUserUI(user);
-    renderFamilyView();
-    renderDoctorDashboard();
-  }
-});
 
 /* ======================================================================
-   DEMO DATA
-   A shared milestone template models one continuous journey: antenatal →
-   delivery → postpartum → child's first year. Each patient is placed at
-   a point on that journey, with an optional set of "missed" indexes that
-   power the Care Gap Alerts.
+   SHARED HELPERS
    ====================================================================== */
 
-var STAGES = ["Trimester 1", "Trimester 2", "Trimester 3", "Delivery", "Postpartum", "Child (0–1y)"];
+var STAGES = ["Trimester 1", "Trimester 2", "Trimester 3", "Delivery", "Postpartum", "Child (0\u20131y)"];
+var DAY_MS = 24 * 60 * 60 * 1000;
+var FALLBACK_GUIDANCE = "Book this with your doctor or nearest facility as soon as you can.";
 
-var TEMPLATE = [
-  { stage: 0, when: "Week 6",  title: "First antenatal visit & registration" },
-  { stage: 0, when: "Week 10", title: "Blood work: HIV, syphilis & anaemia screening" },
-  { stage: 0, when: "Week 12", title: "Dating ultrasound" },
-  { stage: 1, when: "Week 16", title: "Second antenatal visit" },
-  { stage: 1, when: "Week 20", title: "Anomaly scan" },
-  { stage: 1, when: "Week 24", title: "Glucose tolerance test" },
-  { stage: 1, when: "Week 28", title: "Haemoglobin recheck & Anti-D" },
-  { stage: 2, when: "Week 30", title: "Third-trimester check-up" },
-  { stage: 2, when: "Week 34", title: "Growth scan" },
-  { stage: 2, when: "Week 36", title: "Birth plan & facility readiness" },
-  { stage: 3, when: "Week 40", title: "Delivery" },
-  { stage: 4, when: "Day 7",   title: "Postpartum check-up (mother)" },
-  { stage: 4, when: "Day 42",  title: "Six-week postnatal visit" },
-  { stage: 5, when: "Birth",   title: "BCG, OPV-0 & Hepatitis-B birth dose" },
-  { stage: 5, when: "Week 6",  title: "Penta-1, OPV-1 & Rotavirus-1" },
-  { stage: 5, when: "Week 10", title: "Penta-2, OPV-2 & Rotavirus-2" },
-  { stage: 5, when: "Month 9", title: "Measles-Rubella-1 & Vitamin A" }
-];
+function stageIndex(stageName) { return STAGES.indexOf(stageName); }
 
-var ACTIONS = {
-  1:  "Complete the pending blood work at the nearest lab — this screens for infections and anaemia that raise risk later in pregnancy.",
-  2:  "Book a dating ultrasound to confirm gestational age and rule out early complications.",
-  3:  "Schedule the second antenatal visit — spacing between visits is how early warning signs get caught.",
-  5:  "Take the glucose tolerance test to screen for gestational diabetes before the third trimester.",
-  6:  "Book a haemoglobin recheck. Anaemia is treatable now but raises delivery risk if it's still low at week 36.",
-  9:  "Confirm the birth plan and facility readiness with your doctor before week 38.",
-  12: "Attend the six-week postnatal visit — this is when postpartum recovery and mental health are screened.",
-  13: "Visit the nearest PHC for the birth-dose vaccines (BCG, OPV-0, Hepatitis-B) — ideally within the first week.",
-  14: "Book Penta-1, OPV-1 & Rotavirus-1 — protects against six serious childhood diseases."
-};
-
-function buildTimeline(currentIndex, missed) {
-  missed = missed || [];
-  return TEMPLATE.map(function (item, i) {
-    var status;
-    if (missed.indexOf(i) > -1) status = "missed";
-    else if (i < currentIndex) status = "done";
-    else if (i === currentIndex) status = "current";
-    else status = "upcoming";
-    return { idx: i, stage: item.stage, when: item.when, title: item.title, status: status,
-             action: ACTIONS[i] || "Book this with your doctor or nearest facility as soon as you can." };
-  });
+function initials(name) {
+  return (name || "").split(" ").filter(Boolean).map(function (n) { return n[0]; }).join("").slice(0, 2).toUpperCase();
 }
 
-var PATIENTS = [
-  { id: "p1", name: "Ananya Reddy", age: 28, week: "Wk 30", risk: "medium", currentIndex: 7, missed: [1, 6] },
-  { id: "p2", name: "Priya Sharma", age: 24, week: "Wk 20", risk: "low", currentIndex: 4, missed: [] },
-  { id: "p3", name: "Fatima Sheikh", age: 31, week: "Wk 12", risk: "high", currentIndex: 2, missed: [1] },
-  { id: "p4", name: "Meera Nair", age: 26, week: "Postpartum · Day 18", risk: "low", currentIndex: 14, missed: [13] },
-  { id: "p5", name: "Kavya Iyer", age: 29, week: "Wk 36", risk: "medium", currentIndex: 9, missed: [] },
-  { id: "p6", name: "Sunita Devi", age: 22, week: "Wk 24", risk: "high", currentIndex: 5, missed: [2, 3] },
-  { id: "p7", name: "Rhea Kapoor", age: 33, week: "Child · 4 months", risk: "low", currentIndex: 15, missed: [] },
-  { id: "p8", name: "Anjali Verma", age: 27, week: "Wk 10", risk: "low", currentIndex: 1, missed: [] }
-];
-
-PATIENTS.forEach(function (p) { p.timeline = buildTimeline(p.currentIndex, p.missed); p.reviewed = {}; });
-
-var me = PATIENTS[0]; // the signed-in family member, for the Family view
-
-/* ======================================================================
-   HELPERS
-   ====================================================================== */
-
-function initials(name) { return name.split(" ").map(function (n) { return n[0]; }).join("").slice(0, 2).toUpperCase(); }
+function fmtDate(dateStr) {
+  if (!dateStr) return "";
+  var d = new Date(dateStr);
+  if (isNaN(d.getTime())) return dateStr;
+  return d.toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
+}
 
 function iconFor(status) {
   if (status === "done") return "i-check-circle";
@@ -599,48 +576,38 @@ function showToast(msg) {
   showToast._t = setTimeout(function () { t.classList.remove("is-shown"); }, 2600);
 }
 
-function currentStageIndex(p) {
-  var live = p.timeline.filter(function (m) { return m.status === "current" || m.status === "missed"; });
-  if (live.length) return live[0].stage;
-  var done = p.timeline.filter(function (m) { return m.status === "done"; });
-  return done.length ? done[done.length - 1].stage : 0;
+// Map a DB milestone (status: completed | overdue | upcoming) plus whether it
+// is the single nearest not-yet-completed item, onto the same done/missed/
+// current/upcoming vocabulary the timeline UI already renders.
+function displayStatus(m, nearestId) {
+  if (m.status === "completed") return "done";
+  if (m.status === "overdue") return "missed";
+  if (nearestId != null && m.id === nearestId) return "current";
+  return "upcoming";
+}
+
+function nearestActive(milestones) {
+  var active = milestones.filter(function (m) { return m.status !== "completed"; })
+    .slice()
+    .sort(function (a, b) { return new Date(a.due_date) - new Date(b.due_date); });
+  return active.length ? active[0] : null;
+}
+
+function currentStageIdx(milestones) {
+  var near = nearestActive(milestones);
+  if (near) return stageIndex(near.stage);
+  var doneStages = milestones.filter(function (m) { return m.status === "completed"; }).map(function (m) { return stageIndex(m.stage); });
+  return doneStages.length ? Math.max.apply(null, doneStages) : 0;
 }
 
 /* ======================================================================
-   FAMILY VIEW — Personalized Care Timeline + Care Gap Alerts
+   TIMELINE RENDERING (shared markup between the mother's own timeline and
+   the read-only view a doctor sees for one of their patients)
    ====================================================================== */
 
-function renderGapAlerts() {
-  var list = document.getElementById("famGapList");
-  var gaps = me.timeline.filter(function (m) { return m.status === "missed"; });
-  document.getElementById("famGapCount").textContent = gaps.length;
-
-  if (!gaps.length) {
-    list.innerHTML = '<div class="gap-empty"><svg aria-hidden="true"><use href="#i-check-circle"/></svg>No overdue care right now — you\'re all caught up.</div>';
-    return;
-  }
-
-  list.innerHTML = gaps.map(function (m) {
-    return (
-      '<div class="gap-alert" data-idx="' + m.idx + '">' +
-        '<div class="gap-alert__icon"><svg aria-hidden="true"><use href="#i-alert-tri"/></svg></div>' +
-        '<div class="gap-alert__body">' +
-          '<h3>' + m.title + ' is overdue</h3>' +
-          '<div class="gap-alert__meta"><span class="tag tag--due">' + STAGES[m.stage] + '</span><span>Was due ' + m.when + '</span></div>' +
-          '<p class="gap-alert__action"><svg aria-hidden="true"><use href="#i-lightbulb"/></svg><span>' + m.action + '</span></p>' +
-        '</div>' +
-        '<div class="gap-alert__buttons">' +
-          '<button class="btn btn--primary btn--sm" data-action="resolve" data-idx="' + m.idx + '"><svg aria-hidden="true"><use href="#i-check-circle"/></svg>Mark as done</button>' +
-          '<button class="btn btn--ghost btn--sm" data-action="remind" data-idx="' + m.idx + '">Remind me later</button>' +
-        '</div>' +
-      '</div>'
-    );
-  }).join("");
-}
-
-function renderStageStepper() {
-  var curStage = currentStageIndex(me);
-  document.getElementById("stageStepper").innerHTML = STAGES.map(function (label, i) {
+function renderStageStepper(containerId, milestones) {
+  var curStage = currentStageIdx(milestones);
+  document.getElementById(containerId).innerHTML = STAGES.map(function (label, i) {
     var cls = i < curStage ? "is-done" : (i === curStage ? "is-current" : "");
     var inner = i < curStage
       ? '<svg aria-hidden="true"><use href="#i-check-circle"/></svg>'
@@ -650,38 +617,42 @@ function renderStageStepper() {
   }).join("");
 }
 
-function renderFamilyTimeline() {
-  var container = document.getElementById("familyTimeline");
-  var curStage = currentStageIndex(me);
+function renderTimelineGroups(containerId, milestones, editable) {
+  var container = document.getElementById(containerId);
+  var curStage = currentStageIdx(milestones);
+  var near = nearestActive(milestones);
 
   container.innerHTML = STAGES.map(function (stageLabel, sIdx) {
-    var items = me.timeline.filter(function (m) { return m.stage === sIdx; });
+    var items = milestones.filter(function (m) { return stageIndex(m.stage) === sIdx; });
     if (!items.length) return "";
-    var doneCount = items.filter(function (m) { return m.status === "done"; }).length;
-    var missedCount = items.filter(function (m) { return m.status === "missed"; }).length;
+    var doneCount = items.filter(function (m) { return m.status === "completed"; }).length;
+    var missedCount = items.filter(function (m) { return m.status === "overdue"; }).length;
     var summary = missedCount ? (missedCount + " overdue") : (doneCount + " of " + items.length + " done");
     var openByDefault = sIdx === curStage;
 
     var rows = items.map(function (m) {
+      var status = displayStatus(m, near ? near.id : null);
       var actionRow = "";
-      if (m.status === "missed") {
+      if (status === "missed" || status === "current") {
         actionRow =
           '<div class="milestone__detail">' +
-            '<p class="gap-alert__action" style="margin:0;"><svg aria-hidden="true"><use href="#i-lightbulb"/></svg><span>' + m.action + '</span></p>' +
+            '<p class="gap-alert__action" style="margin:0;"><svg aria-hidden="true"><use href="#i-lightbulb"/></svg><span>' + (m.guidance || FALLBACK_GUIDANCE) + '</span></p>' +
           '</div>';
       }
-      var rightControl = m.status === "done"
+      var rightControl = status === "done"
         ? '<span class="tag tag--ok"><svg aria-hidden="true"><use href="#i-tick"/></svg>Done</span>'
-        : m.status === "missed"
-          ? '<button class="btn btn--sm btn--primary" data-action="resolve" data-idx="' + m.idx + '">Mark done</button>'
-          : m.status === "current"
-            ? '<button class="btn btn--sm btn--ghost" data-action="resolve" data-idx="' + m.idx + '">Mark done</button>'
-            : '<span class="tag tag--next">Upcoming</span>';
+        : (status === "missed" && editable)
+          ? '<button class="btn btn--sm btn--primary" data-action="resolve" data-id="' + m.id + '">Mark done</button>'
+          : (status === "current" && editable)
+            ? '<button class="btn btn--sm btn--ghost" data-action="resolve" data-id="' + m.id + '">Mark done</button>'
+            : (status === "missed")
+              ? '<span class="tag tag--due">Overdue</span>'
+              : '<span class="tag tag--next">Upcoming</span>';
 
       return (
         '<div class="milestone">' +
-          '<span class="milestone__icon ' + classFor(m.status) + '"><svg aria-hidden="true"><use href="#' + iconFor(m.status) + '"/></svg></span>' +
-          '<span><span class="milestone__title">' + m.title + '</span><br><span class="milestone__when">' + m.when + '</span></span>' +
+          '<span class="milestone__icon ' + classFor(status) + '"><svg aria-hidden="true"><use href="#' + iconFor(status) + '"/></svg></span>' +
+          '<span><span class="milestone__title">' + m.title + '</span><br><span class="milestone__when">' + fmtDate(m.due_date) + '</span></span>' +
           '<span class="milestone__right">' + rightControl + '</span>' +
         '</div>' + actionRow
       );
@@ -699,73 +670,190 @@ function renderFamilyTimeline() {
   }).join("");
 }
 
-function renderFamilyView() {
-  var doneMilestones = me.timeline.filter(function (m) { return m.status === "done"; }).length;
-  document.querySelector(".progress-fill").style.width = Math.round((doneMilestones / TEMPLATE.length) * 100) + "%";
-  renderGapAlerts();
-  renderStageStepper();
-  renderFamilyTimeline();
-}
+/* ======================================================================
+   FAMILY VIEW (mother only) — Care Timeline + Care Gap Alerts + Appointments
+   ====================================================================== */
 
-/* ---- Family view interactions --------------------------------------- */
+var motherMilestones = [];
+var motherAppointments = [];
+var doctorsList = [];
 
-function resolveMilestone(idx) {
-  var m = me.timeline.filter(function (x) { return x.idx === idx; })[0];
-  if (!m) return;
-  m.status = "done";
-  renderFamilyView();
-  showToast("Marked complete — timeline updated");
-}
+function renderFamilyHeader() {
+  var careStart = currentUser.care_start_date ? new Date(currentUser.care_start_date) : null;
+  var greetingElement = document.querySelector('.fv-header__intro h1');
+  var displayName = (currentUser.full_name || currentUser.email).split(' ')[0];
+  if (greetingElement) greetingElement.textContent = 'Hi ' + displayName + ' \uD83D\uDC4B';
 
-document.addEventListener("click", function (e) {
-  var target = e.target.closest("[data-action]");
-  if (!target) return;
-  var action = target.getAttribute("data-action");
+  if (!careStart || isNaN(careStart.getTime())) return;
 
-  if (action === "resolve") {
-    resolveMilestone(Number(target.getAttribute("data-idx")));
-  } else if (action === "remind") {
-    showToast("We'll remind you again tomorrow");
-  } else if (action === "toggle-group") {
-    target.closest(".timeline-group").classList.toggle("is-open");
-  } else if (action === "mark-reviewed") {
-    var pid = target.getAttribute("data-pid"), idx = Number(target.getAttribute("data-idx"));
-    var p = PATIENTS.filter(function (x) { return x.id === pid; })[0];
-    if (p) { p.reviewed[idx] = !p.reviewed[idx]; renderDetailPanel(pid); showToast(p.reviewed[idx] ? "Flagged as reviewed" : "Unmarked as reviewed"); }
-  } else if (action === "select-patient") {
-    selectPatient(target.getAttribute("data-pid"));
+  var daysAlong = Math.max(0, Math.floor((Date.now() - careStart.getTime()) / DAY_MS));
+  var weeksAlong = Math.min(40, Math.floor(daysAlong / 7));
+  var dueDate = new Date(careStart.getTime() + 280 * DAY_MS);
+
+  var stageLabel = weeksAlong < 13 ? "First trimester" : weeksAlong < 27 ? "Second trimester" : weeksAlong <= 40 ? "Third trimester" : "Postpartum & child care";
+
+  var eyebrow = document.querySelector('.fv-header__intro .eyebrow');
+  if (eyebrow) eyebrow.lastChild.textContent = stageLabel;
+
+  var introP = document.querySelector('.fv-header__intro p');
+  if (introP) {
+    introP.innerHTML = "You're <strong>" + weeksAlong + " weeks</strong> along. Estimated due date <strong>" + fmtDate(dueDate) + "</strong>. Here's what's done, what's next, and what needs attention.";
   }
+
+  var progTop = document.querySelector('.progress-card__top b');
+  if (progTop) progTop.textContent = 'Week ' + weeksAlong;
+  var fill = document.querySelector('.progress-fill');
+  if (fill) fill.style.width = Math.round((weeksAlong / 40) * 100) + '%';
+}
+
+function renderGapAlerts() {
+  var list = document.getElementById("famGapList");
+  var gaps = motherMilestones.filter(function (m) { return m.status === "overdue"; });
+  document.getElementById("famGapCount").textContent = gaps.length;
+
+  if (!gaps.length) {
+    list.innerHTML = '<div class="gap-empty"><svg aria-hidden="true"><use href="#i-check-circle"/></svg>No overdue care right now \u2014 you\'re all caught up.</div>';
+    return;
+  }
+
+  list.innerHTML = gaps.map(function (m) {
+    return (
+      '<div class="gap-alert" data-id="' + m.id + '">' +
+        '<div class="gap-alert__icon"><svg aria-hidden="true"><use href="#i-alert-tri"/></svg></div>' +
+        '<div class="gap-alert__body">' +
+          '<h3>' + m.title + ' is overdue</h3>' +
+          '<div class="gap-alert__meta"><span class="tag tag--due">' + m.stage + '</span><span>Was due ' + fmtDate(m.due_date) + '</span></div>' +
+          '<p class="gap-alert__action"><svg aria-hidden="true"><use href="#i-lightbulb"/></svg><span>' + (m.guidance || FALLBACK_GUIDANCE) + '</span></p>' +
+        '</div>' +
+        '<div class="gap-alert__buttons">' +
+          '<button class="btn btn--primary btn--sm" data-action="resolve" data-id="' + m.id + '"><svg aria-hidden="true"><use href="#i-check-circle"/></svg>Mark as done</button>' +
+          '<button class="btn btn--ghost btn--sm" data-action="remind" data-id="' + m.id + '">Remind me later</button>' +
+        '</div>' +
+      '</div>'
+    );
+  }).join("");
+}
+
+function renderFamilyView() {
+  var doneCount = motherMilestones.filter(function (m) { return m.status === "completed"; }).length;
+  renderFamilyHeader();
+  renderGapAlerts();
+  renderStageStepper("stageStepper", motherMilestones);
+  renderTimelineGroups("familyTimeline", motherMilestones, true);
+}
+
+async function loadFamilyView() {
+  var data = await apiRequest('/timeline');
+  if (!data) return;
+  motherMilestones = data.milestones;
+  renderFamilyView();
+}
+
+async function resolveMilestone(id) {
+  var data = await apiRequest('/timeline/' + id + '/complete', { method: 'PATCH' });
+  if (!data) return;
+  var m = motherMilestones.filter(function (x) { return x.id === id; })[0];
+  if (m) {
+    m.status = 'completed';
+    m.completed_at = data.milestone.completed_at;
+  }
+  renderFamilyView();
+  showToast("Marked complete \u2014 timeline updated");
+}
+
+/* ---- Appointments: mother side ---------------------------------------- */
+
+function apptStatusTag(status) {
+  var label = status.charAt(0).toUpperCase() + status.slice(1);
+  return '<span class="tag tag--' + status + '">' + label + '</span>';
+}
+
+function renderMotherAppointments() {
+  var list = document.getElementById('motherApptList');
+  if (!motherAppointments.length) {
+    list.innerHTML = '<div class="empty-state">No appointment requests yet.</div>';
+    return;
+  }
+  list.innerHTML = motherAppointments.map(function (a) {
+    return (
+      '<div class="appt-card">' +
+        '<div class="appt-card__top"><span class="appt-card__who">' + a.doctor_name + '</span>' + apptStatusTag(a.status) + '</div>' +
+        '<div class="appt-card__meta">' + (a.specialization || '') + ' \u00B7 Requested for ' + fmtDate(a.requested_date) + '</div>' +
+        (a.reason ? '<div class="appt-card__reason">' + a.reason + '</div>' : '') +
+        (a.doctor_notes ? '<div class="appt-card__reason"><b>Doctor note:</b> ' + a.doctor_notes + '</div>' : '') +
+      '</div>'
+    );
+  }).join("");
+}
+
+async function loadDoctorsForBooking() {
+  var data = await apiRequest('/doctors');
+  if (!data) return;
+  doctorsList = data.doctors;
+  var select = document.getElementById('apptDoctor');
+  select.innerHTML = '<option value="" disabled selected>Choose a doctor</option>' +
+    doctorsList.map(function (d) {
+      return '<option value="' + d.id + '">' + d.full_name + (d.specialization ? ' \u2014 ' + d.specialization : '') + '</option>';
+    }).join("");
+}
+
+async function loadMotherAppointments() {
+  var data = await apiRequest('/appointments');
+  if (!data) return;
+  motherAppointments = data.appointments;
+  renderMotherAppointments();
+}
+
+document.getElementById('appointmentForm').addEventListener('submit', async function (e) {
+  e.preventDefault();
+  var doctorId = document.getElementById('apptDoctor').value;
+  var date = document.getElementById('apptDate').value;
+  var reason = document.getElementById('apptReason').value.trim();
+  if (!doctorId || !date) return;
+
+  var submitBtn = document.getElementById('apptSubmit');
+  submitBtn.disabled = true;
+  var data = await apiRequest('/appointments', {
+    method: 'POST',
+    body: JSON.stringify({ doctor_id: Number(doctorId), requested_date: date, reason: reason || undefined })
+  });
+  submitBtn.disabled = false;
+  if (!data) return;
+
+  showToast('Appointment requested');
+  document.getElementById('appointmentForm').reset();
+  loadMotherAppointments();
 });
 
 /* ======================================================================
-   DOCTOR DASHBOARD
+   DOCTOR DASHBOARD (doctor only)
    ====================================================================== */
 
+var doctorPatients = [];
+var doctorAppointments = [];
 var selectedPatientId = null;
+var patientTimelineCache = {};
 var activeFilter = "all";
 var searchTerm = "";
 
-function gapCount(p) { return p.timeline.filter(function (m) { return m.status === "missed"; }).length; }
-
 function renderDoctorStats() {
-  var totalGaps = PATIENTS.reduce(function (sum, p) { return sum + gapCount(p); }, 0);
-  var highRisk = PATIENTS.filter(function (p) { return p.risk === "high"; }).length;
-  var dueThisWeek = PATIENTS.filter(function (p) {
-    return p.timeline.some(function (m) { return m.status === "current"; });
-  }).length;
-
+  var totalGaps = doctorPatients.reduce(function (sum, p) { return sum + Number(p.gap_count); }, 0);
   document.getElementById("doctorStats").innerHTML =
-    '<div class="stat-cell"><b>' + PATIENTS.length + '</b><span>Total patients</span></div>' +
-    '<div class="stat-cell is-alert"><b>' + totalGaps + '</b><span>Active care gaps</span></div>' +
-    '<div class="stat-cell"><b>' + highRisk + '</b><span>High-risk patients</span></div>' +
-    '<div class="stat-cell"><b>' + dueThisWeek + '</b><span>Follow-ups due this week</span></div>';
+    '<div class="stat-cell"><b>' + doctorPatients.length + '</b><span>Total patients</span></div>' +
+    '<div class="stat-cell is-alert"><b>' + totalGaps + '</b><span>Active care gaps</span></div>';
+}
+
+function patientWeekLabel(p) {
+  if (!p.care_start_date) return "";
+  var days = Math.max(0, Math.floor((Date.now() - new Date(p.care_start_date).getTime()) / DAY_MS));
+  var weeks = Math.floor(days / 7);
+  return weeks <= 40 ? ("Wk " + weeks) : "Postpartum / child care";
 }
 
 function filteredPatients() {
-  return PATIENTS.filter(function (p) {
-    if (activeFilter === "gap" && gapCount(p) === 0) return false;
-    if (activeFilter === "risk" && p.risk !== "high") return false;
-    if (searchTerm && p.name.toLowerCase().indexOf(searchTerm) === -1) return false;
+  return doctorPatients.filter(function (p) {
+    if (activeFilter === "gap" && Number(p.gap_count) === 0) return false;
+    if (searchTerm && p.full_name.toLowerCase().indexOf(searchTerm) === -1) return false;
     return true;
   });
 }
@@ -780,13 +868,13 @@ function renderPatientList() {
   }
 
   container.innerHTML = list.map(function (p) {
-    var gc = gapCount(p);
+    var gc = Number(p.gap_count);
     return (
       '<button class="patient-card ' + (p.id === selectedPatientId ? "is-selected" : "") + '" data-action="select-patient" data-pid="' + p.id + '">' +
-        '<span class="patient-card__avatar">' + initials(p.name) + '</span>' +
+        '<span class="patient-card__avatar">' + initials(p.full_name) + '</span>' +
         '<span class="patient-card__body">' +
-          '<span class="patient-card__name">' + p.name + (p.risk === "high" ? '<span class="tag tag--risk-high">High risk</span>' : "") + '</span>' +
-          '<span class="patient-card__meta">' + p.week + '</span>' +
+          '<span class="patient-card__name">' + p.full_name + '</span>' +
+          '<span class="patient-card__meta">' + patientWeekLabel(p) + '</span>' +
         '</span>' +
         '<span class="patient-card__gap">' + (gc ? '<span class="tag tag--due">' + gc + ' gap' + (gc > 1 ? "s" : "") + '</span>' : '<span class="tag tag--ok">On track</span>') + '</span>' +
       '</button>'
@@ -794,37 +882,36 @@ function renderPatientList() {
   }).join("");
 }
 
-function renderDetailPanel(pid) {
-  var p = PATIENTS.filter(function (x) { return x.id === pid; })[0];
+function renderDetailPanel(pid, cached) {
   var panel = document.getElementById("detailPanel");
-  if (!p) { panel.innerHTML = '<div class="empty-state">Select a patient to see their care timeline.</div>'; return; }
+  var p = doctorPatients.filter(function (x) { return x.id === pid; })[0];
+  if (!p || !cached) { panel.innerHTML = '<div class="empty-state">Select a patient to see their care timeline.</div>'; return; }
 
-  var gaps = p.timeline.filter(function (m) { return m.status === "missed"; });
+  var milestones = cached.milestones;
+  var gaps = milestones.filter(function (m) { return m.status === "overdue"; });
   var gapsHtml = gaps.length
     ? gaps.map(function (m) {
-        var reviewed = !!p.reviewed[m.idx];
         return (
-          '<div class="dgap ' + (reviewed ? "is-reviewed" : "") + '">' +
-            '<div><div class="dgap__title">' + m.title + '</div><p class="dgap__note">' + STAGES[m.stage] + ' · was due ' + m.when + (reviewed ? " · reviewed" : "") + '</p></div>' +
-            '<button class="btn btn--sm ' + (reviewed ? "btn--done" : "btn--ghost") + '" data-action="mark-reviewed" data-pid="' + p.id + '" data-idx="' + m.idx + '">' +
-              (reviewed ? '<svg aria-hidden="true"><use href="#i-tick"/></svg>Reviewed' : "Mark reviewed") +
-            '</button>' +
+          '<div class="dgap">' +
+            '<div><div class="dgap__title">' + m.title + '</div><p class="dgap__note">' + m.stage + ' \u00B7 was due ' + fmtDate(m.due_date) + '</p></div>' +
           '</div>'
         );
       }).join("")
     : '<div class="gap-empty"><svg aria-hidden="true"><use href="#i-check-circle"/></svg>No active care gaps for this patient.</div>';
 
-  var visible = p.timeline.filter(function (m) {
-    return m.status !== "upcoming" || Math.abs(m.idx - p.currentIndex) <= 2;
+  var near = nearestActive(milestones);
+  var visible = milestones.filter(function (m) {
+    return m.status !== "upcoming" || (near && Math.abs(m.id - near.id) <= 2);
   });
 
   var timelineHtml = visible.map(function (m) {
+    var status = displayStatus(m, near ? near.id : null);
     return (
       '<div class="mini-milestone">' +
-        '<span class="milestone__icon ' + classFor(m.status) + '"><svg aria-hidden="true"><use href="#' + iconFor(m.status) + '"/></svg></span>' +
+        '<span class="milestone__icon ' + classFor(status) + '"><svg aria-hidden="true"><use href="#' + iconFor(status) + '"/></svg></span>' +
         '<span>' + m.title + '</span>' +
-        '<span class="mini-milestone__stage">' + STAGES[m.stage] + '</span>' +
-        '<span class="milestone__when">' + m.when + '</span>' +
+        '<span class="mini-milestone__stage">' + m.stage + '</span>' +
+        '<span class="milestone__when">' + fmtDate(m.due_date) + '</span>' +
       '</div>'
     );
   }).join("");
@@ -832,22 +919,25 @@ function renderDetailPanel(pid) {
   panel.innerHTML =
     '<div class="detail-head">' +
       '<div class="detail-head__id">' +
-        '<span class="detail-head__avatar">' + initials(p.name) + '</span>' +
-        '<div><h2 style="margin-bottom:.15rem;">' + p.name + '</h2><span style="font-size:.85rem;color:var(--ink-3);">' + p.age + ' yrs · ' + p.week + '</span>' +
-          '<div class="detail-head__tags"><span class="tag tag--risk-' + p.risk + '">' + p.risk.charAt(0).toUpperCase() + p.risk.slice(1) + ' risk</span>' +
-          (gaps.length ? '<span class="tag tag--due">' + gaps.length + ' active gap' + (gaps.length > 1 ? "s" : "") + '</span>' : '<span class="tag tag--ok">On track</span>') + '</div>' +
+        '<span class="detail-head__avatar">' + initials(p.full_name) + '</span>' +
+        '<div><h2 style="margin-bottom:.15rem;">' + p.full_name + '</h2><span style="font-size:.85rem;color:var(--ink-3);">' + patientWeekLabel(p) + '</span>' +
+          '<div class="detail-head__tags">' + (gaps.length ? '<span class="tag tag--due">' + gaps.length + ' active gap' + (gaps.length > 1 ? "s" : "") + '</span>' : '<span class="tag tag--ok">On track</span>') + '</div>' +
         '</div>' +
       '</div>' +
-      '<button class="btn btn--ghost btn--sm" type="button" onclick="alert(\'Demo only — would open the full chart.\')">Open full chart</button>' +
     '</div>' +
     '<div class="detail-gaps"><h4>Active care gaps</h4>' + gapsHtml + '</div>' +
     '<div><h4 style="font-size:.82rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-3);margin-bottom:.7rem;">Care timeline (nearby milestones)</h4><div class="mini-timeline">' + timelineHtml + '</div></div>';
 }
 
-function selectPatient(pid) {
+async function selectPatient(pid) {
   selectedPatientId = pid;
   renderPatientList();
-  renderDetailPanel(pid);
+  if (!patientTimelineCache[pid]) {
+    var data = await apiRequest('/doctor/patients/' + pid + '/timeline');
+    if (!data) return;
+    patientTimelineCache[pid] = data;
+  }
+  renderDetailPanel(pid, patientTimelineCache[pid]);
 }
 
 document.getElementById("patientSearch").addEventListener("input", function (e) {
@@ -864,46 +954,139 @@ document.getElementById("filterChips").addEventListener("click", function (e) {
   renderPatientList();
 });
 
-function renderDoctorDashboard() {
+async function loadDoctorDashboard() {
+  var data = await apiRequest('/doctor/patients');
+  if (!data) return;
+  doctorPatients = data.patients;
   renderDoctorStats();
   renderPatientList();
-  if (!selectedPatientId) selectPatient(PATIENTS[0].id); else renderDetailPanel(selectedPatientId);
+  if (doctorPatients.length) {
+    selectPatient(selectedPatientId || doctorPatients[0].id);
+  } else {
+    document.getElementById('detailPanel').innerHTML = '<div class="empty-state">No patients yet \u2014 they\'ll appear here once a mother requests an appointment with you.</div>';
+  }
 }
 
+/* ---- Appointments: doctor side ---------------------------------------- */
+
+var APPT_STATUSES = ["pending", "confirmed", "completed", "cancelled"];
+
+function renderDoctorAppointments() {
+  var list = document.getElementById('doctorApptList');
+  if (!doctorAppointments.length) {
+    list.innerHTML = '<div class="empty-state">No appointment requests yet.</div>';
+    return;
+  }
+  list.innerHTML = doctorAppointments.map(function (a) {
+    var options = APPT_STATUSES.map(function (s) {
+      return '<option value="' + s + '"' + (s === a.status ? ' selected' : '') + '>' + s.charAt(0).toUpperCase() + s.slice(1) + '</option>';
+    }).join("");
+    return (
+      '<div class="appt-card">' +
+        '<div class="appt-card__top"><span class="appt-card__who">' + a.mother_name + '</span>' + apptStatusTag(a.status) + '</div>' +
+        '<div class="appt-card__meta">Requested for ' + fmtDate(a.requested_date) + '</div>' +
+        (a.reason ? '<div class="appt-card__reason">' + a.reason + '</div>' : '') +
+        '<div class="appt-card__actions">' +
+          '<select data-action="appt-status" data-id="' + a.id + '">' + options + '</select>' +
+        '</div>' +
+      '</div>'
+    );
+  }).join("");
+}
+
+async function loadDoctorAppointments() {
+  var data = await apiRequest('/appointments');
+  if (!data) return;
+  doctorAppointments = data.appointments;
+  renderDoctorAppointments();
+}
+
+document.getElementById('doctorApptList').addEventListener('change', async function (e) {
+  var select = e.target.closest('[data-action="appt-status"]');
+  if (!select) return;
+  var id = select.getAttribute('data-id');
+  var status = select.value;
+  var data = await apiRequest('/appointments/' + id + '/status', {
+    method: 'PATCH',
+    body: JSON.stringify({ status: status })
+  });
+  if (!data) return;
+  var a = doctorAppointments.filter(function (x) { return String(x.id) === String(id); })[0];
+  if (a) a.status = status;
+  renderDoctorAppointments();
+  // A confirmed/completed patient may now have (or clear) care gaps in the
+  // patient list stats, so refresh the roster alongside the appointment list.
+  loadDoctorDashboard();
+  showToast('Appointment updated');
+});
+
 /* ======================================================================
-   VIEW SWITCHING
+   SHARED INTERACTIONS (mark-done / gap alert / accordion toggles)
    ====================================================================== */
 
-var tabFamily = document.getElementById("tabFamily");
-var tabDoctor = document.getElementById("tabDoctor");
-var viewFamily = document.getElementById("viewFamily");
-var viewDoctor = document.getElementById("viewDoctor");
-var whoami = document.getElementById("whoami");
+document.addEventListener("click", function (e) {
+  var target = e.target.closest("[data-action]");
+  if (!target) return;
+  var action = target.getAttribute("data-action");
 
-tabFamily.addEventListener("click", function () {
-  tabFamily.classList.add("is-active"); tabFamily.setAttribute("aria-selected", "true");
-  tabDoctor.classList.remove("is-active"); tabDoctor.setAttribute("aria-selected", "false");
-  viewFamily.classList.add("is-active"); viewDoctor.classList.remove("is-active");
-  if (currentUser) {
-    const initials = (currentUser.full_name || currentUser.email).split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
-    const displayName = currentUser.full_name || currentUser.email.split('@')[0];
-    whoami.innerHTML = `<span class="dot">${initials}</span> ${displayName}`;
+  if (action === "resolve") {
+    resolveMilestone(Number(target.getAttribute("data-id")));
+  } else if (action === "remind") {
+    showToast("We'll remind you again tomorrow");
+  } else if (action === "toggle-group") {
+    target.closest(".timeline-group").classList.toggle("is-open");
+  } else if (action === "select-patient") {
+    selectPatient(Number(target.getAttribute("data-pid")));
   }
 });
-tabDoctor.addEventListener("click", function () {
-  tabDoctor.classList.add("is-active"); tabDoctor.setAttribute("aria-selected", "true");
-  tabFamily.classList.remove("is-active"); tabFamily.setAttribute("aria-selected", "false");
-  viewDoctor.classList.add("is-active"); viewFamily.classList.remove("is-active");
-  if (currentUser) {
-    const initials = (currentUser.full_name || currentUser.email).split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
-    const displayName = currentUser.full_name || currentUser.email.split('@')[0];
-    whoami.innerHTML = `<span class="dot">${initials}</span> ${displayName}`;
+
+/* ======================================================================
+   AUTH / ROLE GATING
+   ====================================================================== */
+
+var currentUser = null;
+
+function updateUserUI(user) {
+  var whoami = document.getElementById('whoami');
+  var userInitials = (user.full_name || user.email).split(' ').map(function (n) { return n[0]; }).join('').toUpperCase().slice(0, 2);
+  var displayName = user.full_name || user.email.split('@')[0];
+  whoami.innerHTML = '<span class="dot">' + userInitials + '</span> ' + displayName;
+
+  // Each account only ever renders its own dashboard \u2014 there is no control
+  // that lets a signed-in user switch into the other role's view.
+  document.body.setAttribute('data-role', user.role);
+  if (user.role === 'mother') {
+    document.getElementById('viewFamily').classList.add('is-active');
+    document.getElementById('viewDoctor').classList.remove('is-active');
+  } else {
+    document.getElementById('viewDoctor').classList.add('is-active');
+    document.getElementById('viewFamily').classList.remove('is-active');
   }
-  renderDoctorDashboard();
+}
+
+document.getElementById('logoutBtn').addEventListener('click', async function () {
+  try {
+    await fetch(API_BASE + '/auth/logout', { method: 'POST', credentials: 'include' });
+  } catch (error) {
+    console.error('Logout failed:', error);
+  }
+  window.location.href = 'index.html';
 });
 
-/* ---- Init ---- */
-// Dashboard initialization is now handled in fetchCurrentUser after auth check
+fetchCurrentUser().then(function (user) {
+  if (!user) return;
+  currentUser = user;
+  updateUserUI(user);
+
+  if (user.role === 'mother') {
+    loadFamilyView();
+    loadDoctorsForBooking();
+    loadMotherAppointments();
+  } else if (user.role === 'doctor') {
+    loadDoctorDashboard();
+    loadDoctorAppointments();
+  }
+});
 
 })();
 </script>
