@@ -380,6 +380,8 @@ body[data-role="doctor"] #viewFamily { display: none !important; }
 .modal-close svg { width: 18px; height: 18px; }
 .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
 @media (max-width: 480px) { .field-row { grid-template-columns: 1fr; } }
+
+.wellness-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.1rem;margin:2rem 0}.module-card{padding:1.25rem 1.35rem}.module-card__head{display:flex;align-items:flex-start;justify-content:space-between;gap:.8rem;margin-bottom:1rem}.module-card__head h3{margin:0}.module-card__head p{font-size:.78rem;margin:.15rem 0 0}.module-stat{display:flex;align-items:center;justify-content:space-between;padding:.65rem .75rem;border:1px solid var(--line-soft);border-radius:12px;background:var(--ground);margin-bottom:.55rem}.module-stat span{font-size:.8rem;color:var(--ink-2)}.check-row{display:flex;align-items:center;gap:.65rem;padding:.55rem .65rem;border:1px solid var(--line-soft);border-radius:12px;margin-bottom:.5rem}.check-row input{width:17px;height:17px;accent-color:var(--coral)}.check-row label{flex:1;font-size:.88rem}.small-input{width:100%;padding:.58rem .7rem;border:1px solid var(--line);border-radius:11px;font:inherit;color:var(--ink);background:var(--surface)}.form-row-3{display:grid;grid-template-columns:repeat(3,1fr);gap:.55rem}.fruit-card{display:flex;align-items:center;gap:1rem;padding:1rem;background:linear-gradient(135deg,var(--coral-tint),var(--lilac));border:1px solid var(--line);border-radius:16px;margin-bottom:.8rem}.fruit-emoji{font-size:2.6rem;line-height:1}.fruit-card strong{font-size:1.05rem}.fruit-card small{display:block;color:var(--ink-2);margin-top:.2rem}.contraction-display{text-align:center;padding:.5rem 0 1rem}.contraction-time{font-family:var(--display);font-size:2.5rem;font-weight:600}.contraction-actions{display:flex;justify-content:center;gap:.6rem;flex-wrap:wrap}.contraction-log{max-height:160px;overflow:auto;margin-top:.8rem}.contraction-item{display:flex;justify-content:space-between;font-size:.8rem;padding:.5rem 0;border-bottom:1px solid var(--line-soft)}.sos-card{margin:1.2rem 0 2rem;padding:1.1rem 1.25rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;border:1px solid #f5c6c1;background:linear-gradient(90deg,#fff5f3,#fff);border-radius:18px}.sos-card h3{margin-bottom:.15rem;color:var(--coral-deep)}.sos-card p{margin:0;font-size:.8rem}.btn--sos{background:var(--coral-deep);color:#fff}.modal-box--wide{width:min(620px,100%)}.sos-status{padding:1rem;border-radius:14px;background:var(--coral-soft);color:var(--coral-deep);font-weight:600;margin-bottom:1rem}.growth-table{width:100%;border-collapse:collapse;font-size:.8rem;margin-top:.8rem}.growth-table th,.growth-table td{padding:.55rem .4rem;text-align:left;border-bottom:1px solid var(--line-soft)}.growth-empty{font-size:.8rem;color:var(--ink-3);padding:.7rem 0}@media(max-width:850px){.wellness-grid{grid-template-columns:1fr}}@media(max-width:560px){.form-row-3{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -453,8 +455,16 @@ body[data-role="doctor"] #viewFamily { display: none !important; }
       <div class="stage-stepper" id="stageStepper"></div>
       <div id="familyTimeline"></div>
 
-      <div class="appt-section">
-        <h2 style="margin-bottom:1rem;">Appointments</h2>
+      <div class="sos-card"><div><h3>Need urgent help?</h3><p>Open emergency options. This prototype does not automatically dispatch help.</p></div><button class="btn btn--sos" data-action="open-sos">🚨 Emergency SOS</button></div>
+      <div class="wellness-grid">
+        <div class="card module-card"><div class="module-card__head"><div><h3>🥗 Nutrition tracker</h3><p>Log meals and hydration.</p></div><span class="tag tag--ok" id="nutritionScore">0 meals</span></div><div id="nutritionList"></div><div style="display:grid;grid-template-columns:1fr auto;gap:.55rem;margin-top:.75rem"><input class="small-input" id="nutritionInput" placeholder="e.g. Dal, roti & vegetables"><button class="btn btn--primary btn--sm" data-action="add-nutrition">Add meal</button></div><div class="module-stat" style="margin-top:.7rem"><span>Water</span><b id="waterCount">0 / 8 glasses</b></div><button class="btn btn--ghost btn--sm" data-action="add-water">+ Add glass</button></div>
+        <div class="card module-card"><div class="module-card__head"><div><h3>💊 Supplement tracker</h3><p>Daily adherence — only for supplements prescribed/recommended by a clinician.</p></div><span class="tag tag--next" id="supplementScore">0 / 3</span></div><div class="check-row"><input type="checkbox" id="supIron" data-supplement="Iron"><label for="supIron"><b>Iron</b></label></div><div class="check-row"><input type="checkbox" id="supFolate" data-supplement="Folic acid"><label for="supFolate"><b>Folic acid</b></label></div><div class="check-row"><input type="checkbox" id="supCalcium" data-supplement="Calcium"><label for="supCalcium"><b>Calcium</b></label></div></div>
+        <div class="card module-card"><div class="module-card__head"><div><h3>🤰 Pregnancy week & baby size</h3><p>Approximate fruit-size analogy for easy visual understanding.</p></div></div><div class="fruit-card"><div class="fruit-emoji" id="fruitEmoji">🥑</div><div><strong id="fruitName">Avocado</strong><small id="fruitMeta">Around week 16</small></div></div><div class="module-stat"><span>Pregnancy progress</span><b id="pregnancyWeekStat">Week 0 of 40</b></div><p style="font-size:.72rem;margin:0">Fruit comparisons are approximate and are not a clinical measurement.</p></div>
+        <div class="card module-card"><div class="module-card__head"><div><h3>📈 Child growth tracker</h3><p>Record height and weight after birth.</p></div></div><div class="form-row-3"><input class="small-input" id="growthDate" type="date"><input class="small-input" id="growthWeight" type="number" step="0.1" placeholder="Weight kg"><input class="small-input" id="growthHeight" type="number" step="0.1" placeholder="Height cm"></div><button class="btn btn--primary btn--sm" data-action="add-growth" style="margin-top:.65rem">Save measurement</button><div id="growthList"></div></div>
+        <div class="card module-card"><div class="module-card__head"><div><h3>⏱️ Contraction timer</h3><p>Record start/stop times and duration.</p></div><span class="tag tag--next" id="contractionCount">0 today</span></div><div class="contraction-display"><div class="contraction-time" id="contractionTimer">00:00</div><div style="font-size:.78rem;color:var(--ink-3)" id="contractionStatus">Ready to start</div></div><div class="contraction-actions"><button class="btn btn--primary" data-action="contraction-start" id="contractionStart">Start contraction</button><button class="btn btn--ghost" data-action="contraction-stop" id="contractionStop" disabled>Stop & log</button></div><div class="contraction-log" id="contractionLog"></div><p style="font-size:.72rem;margin:.65rem 0 0">Tracking only. For urgent symptoms or suspected labor, contact your healthcare professional or emergency services.</p></div>
+      </div>
+
+      <div class="appt-section"><h2 style="margin-bottom:1rem;">Appointments</h2>
         <div class="appt-grid">
           <div class="card">
             <h3 style="margin-bottom:1rem;">Request an appointment</h3>
@@ -536,6 +546,7 @@ body[data-role="doctor"] #viewFamily { display: none !important; }
 
 </main>
 
+<div class="modal-backdrop" id="sosModal" aria-hidden="true"><div class="modal-box modal-box--wide" role="dialog" aria-modal="true"><div class="modal-box__head"><div><h2 style="margin-bottom:.2rem;color:var(--coral-deep)">Emergency SOS</h2><p style="margin:0;font-size:.86rem">Choose an emergency action.</p></div><button class="modal-close" data-action="close-sos">✕</button></div><div class="sos-status">🚨 SOS screen opened. In a real deployment, this would securely share consented emergency information with configured contacts/facilities.</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem"><a class="btn btn--sos" href="tel:112" style="text-decoration:none">Call 112</a><button class="btn btn--ghost" data-action="call-emergency-contact">Call emergency contact</button></div><p style="font-size:.72rem;margin:.9rem 0 0">This prototype does not dispatch help or share live location automatically.</p></div></div>
 <div class="toast" id="toast"><svg aria-hidden="true"><use href="#i-tick"/></svg><span id="toastMsg"></span></div>
 
 <!-- ======================= Add doctor modal ======================= -->
@@ -924,6 +935,26 @@ document.getElementById('appointmentForm').addEventListener('submit', async func
   loadMotherAppointments();
 });
 
+/* MATERNAL WELLNESS MODULES */
+var wellnessKey=function(s){return 'anvaya_'+s+'_'+(currentUser&&currentUser.id?currentUser.id:'demo');};
+var nutritionLogs=[],waterCount=0,supplements={Iron:false,'Folic acid':false,Calcium:false},growthLogs=[],contractionLogs=[],contractionStartedAt=null,contractionInterval=null;
+function loadWellnessState(){try{nutritionLogs=JSON.parse(localStorage.getItem(wellnessKey('nutrition'))||'[]');waterCount=Number(localStorage.getItem(wellnessKey('water'))||0);supplements=JSON.parse(localStorage.getItem(wellnessKey('supplements'))||'{"Iron":false,"Folic acid":false,"Calcium":false}');growthLogs=JSON.parse(localStorage.getItem(wellnessKey('growth'))||'[]');contractionLogs=JSON.parse(localStorage.getItem(wellnessKey('contractions'))||'[]');}catch(e){}}
+function saveWellnessState(){localStorage.setItem(wellnessKey('nutrition'),JSON.stringify(nutritionLogs));localStorage.setItem(wellnessKey('water'),String(waterCount));localStorage.setItem(wellnessKey('supplements'),JSON.stringify(supplements));localStorage.setItem(wellnessKey('growth'),JSON.stringify(growthLogs));localStorage.setItem(wellnessKey('contractions'),JSON.stringify(contractionLogs));}
+function escapeHtml(v){return String(v==null?'':v).replace(/[&<>'"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c];});}
+function renderWellness(){var nl=document.getElementById('nutritionList');if(nl)nl.innerHTML=nutritionLogs.slice().reverse().map(function(x){return '<div class="module-stat"><span>🍽️ '+escapeHtml(x.text)+'</span><b>'+x.time+'</b></div>';}).join('')||'<div class="growth-empty">No meals logged today.</div>';var ns=document.getElementById('nutritionScore');if(ns)ns.textContent=nutritionLogs.length+' meals';var wc=document.getElementById('waterCount');if(wc)wc.textContent=Math.min(waterCount,8)+' / 8 glasses';Object.keys(supplements).forEach(function(n){var id=n==='Iron'?'supIron':n==='Folic acid'?'supFolate':'supCalcium',e=document.getElementById(id);if(e)e.checked=!!supplements[n];});var done=Object.keys(supplements).filter(function(n){return supplements[n];}).length,ss=document.getElementById('supplementScore');if(ss)ss.textContent=done+' / 3';renderGrowth();renderContractions();}
+function addNutrition(){var e=document.getElementById('nutritionInput'),t=e.value.trim();if(!t)return;nutritionLogs.push({text:t,time:new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})});e.value='';saveWellnessState();renderWellness();showToast('Meal added');}
+function addWater(){if(waterCount<8)waterCount++;saveWellnessState();renderWellness();}
+function renderGrowth(){var e=document.getElementById('growthList');if(!e)return;if(!growthLogs.length){e.innerHTML='<div class="growth-empty">No measurements yet.</div>';return;}e.innerHTML='<table class="growth-table"><tr><th>Date</th><th>Weight</th><th>Height</th></tr>'+growthLogs.slice().reverse().slice(0,6).map(function(g){return '<tr><td>'+g.date+'</td><td>'+g.weight+' kg</td><td>'+g.height+' cm</td></tr>';}).join('')+'</table>';}
+function addGrowth(){var d=document.getElementById('growthDate').value||new Date().toISOString().slice(0,10),w=document.getElementById('growthWeight').value,h=document.getElementById('growthHeight').value;if(!w||!h){showToast('Enter weight and height');return;}growthLogs.push({date:d,weight:Number(w),height:Number(h)});saveWellnessState();renderWellness();document.getElementById('growthWeight').value='';document.getElementById('growthHeight').value='';showToast('Growth measurement saved');}
+var fruitSizes=[[8,'🫘','Bean'],[10,'🍓','Strawberry'],[12,'🍋','Lime'],[14,'🍋','Lemon'],[16,'🥑','Avocado'],[18,'🍅','Tomato'],[20,'🥭','Mango'],[22,'🍌','Banana'],[24,'🌽','Corn'],[26,'🥬','Lettuce'],[28,'🥦','Cauliflower'],[30,'🥥','Coconut'],[32,'🍍','Pineapple'],[34,'🍈','Cantaloupe'],[36,'🍈','Honeydew melon'],[38,'🍉','Watermelon'],[40,'🍉','Watermelon']];
+function updatePregnancyInfo(){var cs=currentUser&&currentUser.care_start_date?new Date(currentUser.care_start_date):null;if(!cs||isNaN(cs.getTime()))return;var days=Math.max(0,Math.floor((Date.now()-cs.getTime())/DAY_MS)),week=Math.min(40,Math.floor(days/7)),chosen=fruitSizes[0];fruitSizes.forEach(function(x){if(week>=x[0])chosen=x;});document.getElementById('pregnancyWeekStat').textContent='Week '+week+' of 40';document.getElementById('fruitName').textContent=chosen[2];document.getElementById('fruitEmoji').textContent=chosen[1];document.getElementById('fruitMeta').textContent='Around week '+chosen[0];}
+function formatTimer(ms){var t=Math.floor(ms/1000),m=Math.floor(t/60),s=t%60;return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');}
+function renderContractions(){var day=new Date().toISOString().slice(0,10),a=contractionLogs.filter(function(x){return x.date===day}),c=document.getElementById('contractionCount');if(c)c.textContent=a.length+' today';var e=document.getElementById('contractionLog');if(e)e.innerHTML=a.slice().reverse().slice(0,8).map(function(x){return '<div class="contraction-item"><span>'+x.time+'</span><b>'+formatTimer(x.durationMs)+'</b></div>';}).join('')||'<div class="growth-empty">No contractions logged today.</div>';}
+function startContraction(){if(contractionStartedAt)return;contractionStartedAt=Date.now();document.getElementById('contractionStart').disabled=true;document.getElementById('contractionStop').disabled=false;document.getElementById('contractionStatus').textContent='Contraction in progress';contractionInterval=setInterval(function(){document.getElementById('contractionTimer').textContent=formatTimer(Date.now()-contractionStartedAt);},250);}
+function stopContraction(){if(!contractionStartedAt)return;var end=Date.now(),duration=end-contractionStartedAt;clearInterval(contractionInterval);contractionInterval=null;contractionLogs.push({date:new Date(end).toISOString().slice(0,10),time:new Date(end).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}),durationMs:duration});contractionStartedAt=null;document.getElementById('contractionStart').disabled=false;document.getElementById('contractionStop').disabled=true;document.getElementById('contractionTimer').textContent='00:00';document.getElementById('contractionStatus').textContent='Logged — ready for the next one';saveWellnessState();renderContractions();}
+function openSos(){document.getElementById('sosModal').classList.add('is-open');}function closeSos(){document.getElementById('sosModal').classList.remove('is-open');}function callEmergencyContact(){var p=currentUser&&currentUser.emergency_contact_phone;if(p)location.href='tel:'+p;else showToast('No emergency contact number is saved');}
+function initWellness(){loadWellnessState();renderWellness();updatePregnancyInfo();document.querySelectorAll('[data-supplement]').forEach(function(e){e.addEventListener('change',function(){supplements[e.dataset.supplement]=e.checked;saveWellnessState();renderWellness();});});document.getElementById('growthDate').value=new Date().toISOString().slice(0,10);}
+
 /* ======================================================================
    DOCTOR DASHBOARD (doctor only)
    ====================================================================== */
@@ -1217,7 +1248,15 @@ document.addEventListener("click", function (e) {
   if (!target) return;
   var action = target.getAttribute("data-action");
 
-  if (action === "resolve") {
+  if (action === "add-nutrition") { addNutrition();
+  } else if (action === "add-water") { addWater();
+  } else if (action === "add-growth") { addGrowth();
+  } else if (action === "contraction-start") { startContraction();
+  } else if (action === "contraction-stop") { stopContraction();
+  } else if (action === "open-sos") { openSos();
+  } else if (action === "close-sos") { closeSos();
+  } else if (action === "call-emergency-contact") { callEmergencyContact();
+  } else if (action === "resolve") {
     resolveMilestone(Number(target.getAttribute("data-id")));
   } else if (action === "remind") {
     showToast("We'll remind you again tomorrow");
@@ -1278,6 +1317,7 @@ fetchCurrentUser().then(function (user) {
 
   if (user.role === 'mother') {
     loadFamilyView();
+    initWellness();
     loadDoctorsForBooking();
     loadMotherAppointments();
   } else if (user.role === 'doctor') {
