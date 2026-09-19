@@ -499,6 +499,78 @@ app.get('/api/doctor/patients/:motherId/timeline', authenticateToken, authorizeR
   }
 });
 
+// Doctor: list colleague doctors at the practice, for the "Care team" panel
+app.get('/api/doctor/colleagues', authenticateToken, authorizeRole(['doctor']), async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT u.id, dp.full_name, dp.specialization, dp.facility_name, dp.phone
+       FROM users u
+       JOIN doctor_profiles dp ON dp.user_id = u.id
+       WHERE u.role = 'doctor' AND u.id != $1
+       ORDER BY dp.full_name ASC`,
+      [req.user.id]
+    );
+    res.json({ colleagues: result.rows });
+  } catch (error) {
+    console.error('Fetch colleagues error:', error);
+    res.status(500).json({ error: 'Failed to fetch colleagues' });
+  }
+});
+
+// Doctor: add a new doctor to the platform (e.g. a colleague joining the
+// practice). This creates a real, separately-loginable doctor account —
+// it does not touch the requesting doctor's own session.
+app.post('/api/doctor/colleagues', authenticateToken, authorizeRole(['doctor']), async (req, res) => {
+  try {
+    const { email, password, full_name, phone, specialization, medical_license_number, facility_name } = req.body;
+
+    if (!email || !password || !full_name || !specialization || !medical_license_number) {
+      return res.status(400).json({ error: 'Email, password, full name, specialization, and license number are required' });
+    }
+    if (password.length < 8) {
+      return res.status(400).json({ error: 'Password must be at least 8 characters' });
+    }
+
+    const existingUser = await pool.query('SELECT id FROM users WHERE email = $1', [email]);
+    if (existingUser.rows.length > 0) {
+      return res.status(400).json({ error: 'A user with this email already exists' });
+    }
+
+    const password_hash = await bcrypt.hash(password, 10);
+
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+
+      const userResult = await client.query(
+        'INSERT INTO users (email, password_hash, role) VALUES ($1, $2, $3) RETURNING id',
+        [email, password_hash, 'doctor']
+      );
+      const userId = userResult.rows[0].id;
+
+      await client.query(
+        'INSERT INTO doctor_profiles (user_id, full_name, phone, specialization, medical_license_number, facility_name) VALUES ($1, $2, $3, $4, $5, $6)',
+        [userId, full_name, phone || null, specialization, medical_license_number, facility_name || null]
+      );
+
+      await client.query('COMMIT');
+
+      res.status(201).json({
+        message: 'Doctor added',
+        colleague: { id: userId, full_name, specialization, facility_name: facility_name || null, phone: phone || null }
+      });
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
+  } catch (error) {
+    console.error('Add colleague error:', error);
+    res.status(500).json({ error: 'Failed to add doctor' });
+  }
+});
+
 // ============================================================================
 // Appointments Routes
 // ============================================================================

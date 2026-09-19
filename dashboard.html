@@ -345,6 +345,41 @@ body[data-role="doctor"] #viewFamily { display: none !important; }
 .tag--confirmed { background: var(--lilac); color: var(--violet); }
 .tag--completed { background: var(--mint); color: var(--green); }
 .tag--cancelled { background: var(--line-soft); color: var(--ink-3); }
+
+/* ---- Care team (colleague doctors) --------------------------------- */
+.team-section { margin-bottom: 2rem; }
+.team-section__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: .9rem; gap: 1rem; flex-wrap: wrap; }
+.team-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: .9rem; }
+.team-card {
+  display: flex; align-items: center; gap: .8rem; padding: 1rem 1.1rem;
+  border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--surface);
+}
+.team-card__avatar { width: 42px; height: 42px; border-radius: 999px; background: var(--lilac); color: var(--violet);
+  display: grid; place-items: center; font-family: var(--display); font-weight: 700; font-size: .92rem; flex: none; }
+.team-card__body { min-width: 0; }
+.team-card__name { font-size: .92rem; font-weight: 600; color: var(--ink); }
+.team-card__meta { font-size: .78rem; color: var(--ink-3); margin-top: .1rem; }
+.team-empty { grid-column: 1 / -1; }
+
+/* ---- Modal ------------------------------------------------------------ */
+.modal-backdrop {
+  position: fixed; inset: 0; background: rgba(15,31,41,.5); z-index: 300;
+  display: flex; align-items: center; justify-content: center; padding: 1.25rem;
+  opacity: 0; pointer-events: none; transition: opacity .18s ease;
+}
+.modal-backdrop.is-open { opacity: 1; pointer-events: auto; }
+.modal-box {
+  width: min(480px, 100%); max-height: 90vh; overflow-y: auto;
+  background: var(--surface); border-radius: var(--r-xl); box-shadow: var(--shadow-md);
+  padding: 1.8rem 1.9rem; transform: translateY(10px); transition: transform .18s ease;
+}
+.modal-backdrop.is-open .modal-box { transform: translateY(0); }
+.modal-box__head { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: .3rem; }
+.modal-close { background: none; border: none; cursor: pointer; color: var(--ink-3); padding: .3rem; border-radius: 999px; flex: none; }
+.modal-close:hover { color: var(--ink); background: var(--ground); }
+.modal-close svg { width: 18px; height: 18px; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+@media (max-width: 480px) { .field-row { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
@@ -364,6 +399,8 @@ body[data-role="doctor"] #viewFamily { display: none !important; }
     <symbol id="i-lightbulb" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4M12 2a6 6 0 0 0-4 10.5c.6.6 1 1.4 1 2.3V15h6v-.2c0-.9.4-1.7 1-2.3A6 6 0 0 0 12 2Z"/></symbol>
     <symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6 6 18"/></symbol>
     <symbol id="i-stage-baby" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M6 21v-2a6 6 0 0 1 12 0v2"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-stethoscope" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 3v6a4.5 4.5 0 0 0 9 0V3"/><path d="M9 15.5V18a4 4 0 0 0 8 0v-1.3a3.5 3.5 0 1 0-2 0"/><circle cx="19" cy="9" r="1.6"/></symbol>
   </defs>
 </svg>
 
@@ -462,6 +499,16 @@ body[data-role="doctor"] #viewFamily { display: none !important; }
 
       <div class="stat-strip" id="doctorStats"></div>
 
+      <div class="team-section">
+        <div class="team-section__head">
+          <h2 style="margin:0;display:flex;align-items:center;gap:.55rem;"><svg width="18" height="18" aria-hidden="true"><use href="#i-users"/></svg>Your care team</h2>
+          <button class="btn btn--primary btn--sm" data-action="open-add-doctor">
+            <svg width="15" height="15" aria-hidden="true"><use href="#i-plus"/></svg>Add doctor
+          </button>
+        </div>
+        <div class="team-grid" id="teamGrid"></div>
+      </div>
+
       <div class="dv-grid">
         <div class="patient-panel">
           <div class="patient-panel__controls">
@@ -490,6 +537,58 @@ body[data-role="doctor"] #viewFamily { display: none !important; }
 </main>
 
 <div class="toast" id="toast"><svg aria-hidden="true"><use href="#i-tick"/></svg><span id="toastMsg"></span></div>
+
+<!-- ======================= Add doctor modal ======================= -->
+<div class="modal-backdrop" id="addDoctorModal" aria-hidden="true">
+  <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="addDoctorTitle">
+    <div class="modal-box__head">
+      <div>
+        <h2 id="addDoctorTitle" style="margin-bottom:.2rem;">Add a doctor</h2>
+        <p style="margin:0;font-size:.86rem;">Creates a separate login for a colleague joining this practice.</p>
+      </div>
+      <button class="modal-close" type="button" data-action="close-modal" aria-label="Close"><svg aria-hidden="true"><use href="#i-x"/></svg></button>
+    </div>
+    <form id="addDoctorForm">
+      <div class="form-group">
+        <label for="docFullName">Full name</label>
+        <input type="text" id="docFullName" required placeholder="Dr. Arjun Nair">
+      </div>
+      <div class="field-row">
+        <div class="form-group">
+          <label for="docEmail">Email</label>
+          <input type="email" id="docEmail" required placeholder="arjun@clinic.com">
+        </div>
+        <div class="form-group">
+          <label for="docPassword">Temporary password</label>
+          <input type="password" id="docPassword" required minlength="8" placeholder="At least 8 characters">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="form-group">
+          <label for="docSpecialization">Specialization</label>
+          <input type="text" id="docSpecialization" required placeholder="Obstetrics">
+        </div>
+        <div class="form-group">
+          <label for="docLicense">Medical license no.</label>
+          <input type="text" id="docLicense" required placeholder="MCI-000000">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="form-group">
+          <label for="docPhone">Phone (optional)</label>
+          <input type="tel" id="docPhone" placeholder="+91 90000 00000">
+        </div>
+        <div class="form-group">
+          <label for="docFacility">Facility</label>
+          <input type="text" id="docFacility" placeholder="Same clinic as you">
+        </div>
+      </div>
+      <button type="submit" class="btn btn--primary" id="addDoctorSubmit" style="width:100%;">
+        <svg aria-hidden="true"><use href="#i-plus"/></svg>Add doctor
+      </button>
+    </form>
+  </div>
+</div>
 
 <script>
 (function () {
@@ -836,11 +935,30 @@ var patientTimelineCache = {};
 var activeFilter = "all";
 var searchTerm = "";
 
+// Risk is derived from a patient's live overdue-milestone count so the
+// "High risk" filter reflects real data, not a placeholder.
+function riskLevel(p) {
+  var gc = Number(p.gap_count);
+  if (gc >= 2) return "high";
+  if (gc === 1) return "medium";
+  return "low";
+}
+function riskTag(p) {
+  var level = riskLevel(p);
+  if (level === "high") return '<span class="tag tag--risk-high"><svg aria-hidden="true"><use href="#i-alert-tri"/></svg>High risk</span>';
+  if (level === "medium") return '<span class="tag tag--risk-medium">Medium risk</span>';
+  return '<span class="tag tag--risk-low"><svg aria-hidden="true"><use href="#i-tick"/></svg>On track</span>';
+}
+
 function renderDoctorStats() {
   var totalGaps = doctorPatients.reduce(function (sum, p) { return sum + Number(p.gap_count); }, 0);
+  var highRisk = doctorPatients.filter(function (p) { return riskLevel(p) === "high"; }).length;
+  var pending = doctorAppointments.filter(function (a) { return a.status === "pending"; }).length;
   document.getElementById("doctorStats").innerHTML =
     '<div class="stat-cell"><b>' + doctorPatients.length + '</b><span>Total patients</span></div>' +
-    '<div class="stat-cell is-alert"><b>' + totalGaps + '</b><span>Active care gaps</span></div>';
+    '<div class="stat-cell is-alert"><b>' + totalGaps + '</b><span>Active care gaps</span></div>' +
+    '<div class="stat-cell is-alert"><b>' + highRisk + '</b><span>High risk patients</span></div>' +
+    '<div class="stat-cell"><b>' + pending + '</b><span>Pending requests</span></div>';
 }
 
 function patientWeekLabel(p) {
@@ -853,6 +971,7 @@ function patientWeekLabel(p) {
 function filteredPatients() {
   return doctorPatients.filter(function (p) {
     if (activeFilter === "gap" && Number(p.gap_count) === 0) return false;
+    if (activeFilter === "risk" && riskLevel(p) !== "high") return false;
     if (searchTerm && p.full_name.toLowerCase().indexOf(searchTerm) === -1) return false;
     return true;
   });
@@ -868,7 +987,6 @@ function renderPatientList() {
   }
 
   container.innerHTML = list.map(function (p) {
-    var gc = Number(p.gap_count);
     return (
       '<button class="patient-card ' + (p.id === selectedPatientId ? "is-selected" : "") + '" data-action="select-patient" data-pid="' + p.id + '">' +
         '<span class="patient-card__avatar">' + initials(p.full_name) + '</span>' +
@@ -876,7 +994,7 @@ function renderPatientList() {
           '<span class="patient-card__name">' + p.full_name + '</span>' +
           '<span class="patient-card__meta">' + patientWeekLabel(p) + '</span>' +
         '</span>' +
-        '<span class="patient-card__gap">' + (gc ? '<span class="tag tag--due">' + gc + ' gap' + (gc > 1 ? "s" : "") + '</span>' : '<span class="tag tag--ok">On track</span>') + '</span>' +
+        '<span class="patient-card__gap">' + riskTag(p) + '</span>' +
       '</button>'
     );
   }).join("");
@@ -921,7 +1039,7 @@ function renderDetailPanel(pid, cached) {
       '<div class="detail-head__id">' +
         '<span class="detail-head__avatar">' + initials(p.full_name) + '</span>' +
         '<div><h2 style="margin-bottom:.15rem;">' + p.full_name + '</h2><span style="font-size:.85rem;color:var(--ink-3);">' + patientWeekLabel(p) + '</span>' +
-          '<div class="detail-head__tags">' + (gaps.length ? '<span class="tag tag--due">' + gaps.length + ' active gap' + (gaps.length > 1 ? "s" : "") + '</span>' : '<span class="tag tag--ok">On track</span>') + '</div>' +
+          '<div class="detail-head__tags">' + riskTag(p) + (gaps.length ? '<span class="tag tag--due">' + gaps.length + ' active gap' + (gaps.length > 1 ? "s" : "") + '</span>' : '') + '</div>' +
         '</div>' +
       '</div>' +
     '</div>' +
@@ -999,6 +1117,7 @@ async function loadDoctorAppointments() {
   if (!data) return;
   doctorAppointments = data.appointments;
   renderDoctorAppointments();
+  renderDoctorStats();
 }
 
 document.getElementById('doctorApptList').addEventListener('change', async function (e) {
@@ -1020,6 +1139,75 @@ document.getElementById('doctorApptList').addEventListener('change', async funct
   showToast('Appointment updated');
 });
 
+/* ---- Care team: colleague doctors -------------------------------------- */
+
+var doctorColleagues = [];
+
+function renderColleagues() {
+  var grid = document.getElementById('teamGrid');
+  if (!doctorColleagues.length) {
+    grid.innerHTML = '<div class="empty-state team-empty">No colleagues added yet — use "Add doctor" to bring one onto the platform.</div>';
+    return;
+  }
+  grid.innerHTML = doctorColleagues.map(function (d) {
+    var meta = [d.specialization, d.facility_name].filter(Boolean).join(' \u00B7 ');
+    return (
+      '<div class="team-card">' +
+        '<span class="team-card__avatar">' + initials(d.full_name) + '</span>' +
+        '<span class="team-card__body">' +
+          '<span class="team-card__name">' + d.full_name + '</span>' +
+          '<span class="team-card__meta">' + (meta || 'Doctor') + '</span>' +
+        '</span>' +
+      '</div>'
+    );
+  }).join("");
+}
+
+async function loadDoctorColleagues() {
+  var data = await apiRequest('/doctor/colleagues');
+  if (!data) return;
+  doctorColleagues = data.colleagues;
+  renderColleagues();
+}
+
+function openAddDoctorModal() {
+  document.getElementById('addDoctorModal').classList.add('is-open');
+  document.getElementById('addDoctorModal').setAttribute('aria-hidden', 'false');
+  document.getElementById('docFullName').focus();
+}
+function closeAddDoctorModal() {
+  document.getElementById('addDoctorModal').classList.remove('is-open');
+  document.getElementById('addDoctorModal').setAttribute('aria-hidden', 'true');
+}
+
+document.getElementById('addDoctorModal').addEventListener('click', function (e) {
+  if (e.target === this) closeAddDoctorModal();
+});
+
+document.getElementById('addDoctorForm').addEventListener('submit', async function (e) {
+  e.preventDefault();
+  var payload = {
+    full_name: document.getElementById('docFullName').value.trim(),
+    email: document.getElementById('docEmail').value.trim(),
+    password: document.getElementById('docPassword').value,
+    specialization: document.getElementById('docSpecialization').value.trim(),
+    medical_license_number: document.getElementById('docLicense').value.trim(),
+    phone: document.getElementById('docPhone').value.trim() || undefined,
+    facility_name: document.getElementById('docFacility').value.trim() || undefined
+  };
+
+  var submitBtn = document.getElementById('addDoctorSubmit');
+  submitBtn.disabled = true;
+  var data = await apiRequest('/doctor/colleagues', { method: 'POST', body: JSON.stringify(payload) });
+  submitBtn.disabled = false;
+  if (!data) return;
+
+  showToast(payload.full_name + ' added to your care team');
+  document.getElementById('addDoctorForm').reset();
+  closeAddDoctorModal();
+  loadDoctorColleagues();
+});
+
 /* ======================================================================
    SHARED INTERACTIONS (mark-done / gap alert / accordion toggles)
    ====================================================================== */
@@ -1037,6 +1225,16 @@ document.addEventListener("click", function (e) {
     target.closest(".timeline-group").classList.toggle("is-open");
   } else if (action === "select-patient") {
     selectPatient(Number(target.getAttribute("data-pid")));
+  } else if (action === "open-add-doctor") {
+    openAddDoctorModal();
+  } else if (action === "close-modal") {
+    closeAddDoctorModal();
+  }
+});
+
+document.addEventListener("keydown", function (e) {
+  if (e.key === "Escape" && document.getElementById('addDoctorModal').classList.contains('is-open')) {
+    closeAddDoctorModal();
   }
 });
 
@@ -1085,6 +1283,7 @@ fetchCurrentUser().then(function (user) {
   } else if (user.role === 'doctor') {
     loadDoctorDashboard();
     loadDoctorAppointments();
+    loadDoctorColleagues();
   }
 });
 
