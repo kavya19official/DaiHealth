@@ -1,0 +1,1213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Anvaya — Connected Care. Every Step.</title>
+<meta name="description" content="Anvaya is a maternal, newborn and child healthcare continuity platform. It finds the gaps in a family's care journey, turns each one into a clear next step, and tracks it until the care is completed.">
+<meta name="theme-color" content="#EE5A4F">
+
+<!--
+  ============================================================================
+  PHOTOGRAPHY
+  ----------------------------------------------------------------------------
+  All photographs are hotlinked from the Unsplash CDN under the Unsplash
+  License (free for commercial use, no attribution required). They are listed
+  here so you can swap them for your own shoot later — search for
+  "data-photo" in the markup to find each slot.
+
+    hero-primary   photo-1694081983566  Pyx Photography     (Hyderabad, India)
+    hero-inset     photo-1470116945706  Aditya Romansa
+    journey        photo-1551049215     Christian Bowen
+    clinician      photo-1659353888906  Fotos
+    postpartum     photo-1542644384     Kelly Sikkema
+    aud-mother     photo-1591394765848  Gigin Krishnan
+    aud-doctor     photo-1637059824899  vaibhav vivian
+    aud-facility   photo-1565018054866  Chandan Chaurasia
+
+  For production, download these, compress to WebP/AVIF and serve them from
+  your own domain rather than hotlinking.
+  ============================================================================
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://images.unsplash.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..700&family=Inter+Tight:wght@400;500;600;700&family=Mukta:wght@400;600&display=swap" rel="stylesheet">
+
+<style>
+/* ==========================================================================
+   ANVAYA — Connected Care. Every Step.
+   --------------------------------------------------------------------------
+   tokens → base → type → buttons → nav → hero → sections → media → footer
+   ========================================================================== */
+
+:root {
+  /* Brand — carried over from the product UI so landing and app read as one */
+  --coral:       #EE5A4F;
+  --coral-deep:  #C9392C;
+  --coral-soft:  #FDEDEB;
+  --coral-tint:  #FEF7F5;
+
+  --green:       #23815A;
+  --mint:        #E4F2EA;
+  --mint-deep:   #C6E2D3;
+
+  --violet:      #6B4FC4;
+  --lilac:       #F1EDFB;
+
+  /* Neutrals are cooled slightly — clinical rather than cosy, so the coral
+     stays the only warm thing on the page and carries all the emphasis. */
+  --ink:         #0F1F29;
+  --ink-2:       #465864;
+  --ink-3:       #7A8994;
+
+  --surface:     #FFFFFF;
+  --ground:      #F4F7F8;
+  --deep:        #0F1F29;
+  --line:        #E3E9EC;
+  --line-soft:   #EDF1F3;
+
+  /* Type */
+  --display: "Fraunces", Georgia, "Times New Roman", serif;
+  --sans:    "Inter Tight", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --deva:    "Mukta", "Inter Tight", system-ui, sans-serif;
+
+  --step--2: 0.75rem;
+  --step--1: clamp(0.84rem, 0.82rem + 0.1vw, 0.91rem);
+  --step-0:  clamp(1rem, 0.97rem + 0.16vw, 1.07rem);
+  --step-1:  clamp(1.1rem, 1.03rem + 0.34vw, 1.28rem);
+  --step-2:  clamp(1.45rem, 1.24rem + 0.92vw, 2.05rem);
+  --step-3:  clamp(1.9rem, 1.55rem + 1.55vw, 2.85rem);
+  --step-4:  clamp(2.3rem, 1.7rem + 2.5vw, 3.9rem);
+
+  /* Shape & depth */
+  --gutter: clamp(1.15rem, 4.5vw, 3.5rem);
+  --r-sm: 10px;
+  --r-md: 16px;
+  --r-lg: 22px;
+  --r-xl: 30px;
+
+  --shadow-sm: 0 1px 2px rgba(15,31,41,.05), 0 4px 12px -6px rgba(15,31,41,.09);
+  --shadow-md: 0 1px 2px rgba(15,31,41,.04), 0 14px 34px -16px rgba(15,31,41,.18);
+  --shadow-lg: 0 2px 4px rgba(15,31,41,.04), 0 40px 80px -34px rgba(15,31,41,.34);
+  --shadow-coral: 0 10px 26px -12px rgba(201,57,44,.5);
+}
+
+/* --------------------------------------------------------------------------
+   Base
+   -------------------------------------------------------------------------- */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; scroll-padding-top: 6rem; -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--surface);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: var(--step-0);
+  line-height: 1.62;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+svg { display: block; }
+img { max-width: 100%; display: block; }
+
+/* --------------------------------------------------------------------------
+   Typography
+   Fraunces carries the headlines: an optical serif with enough warmth for a
+   family-facing product and enough authority for a clinical one. Inter Tight
+   handles everything a person has to read carefully. Mukta covers Devanagari.
+   -------------------------------------------------------------------------- */
+
+h1, h2, h3, h4 {
+  font-family: var(--display);
+  font-variation-settings: "SOFT" 0, "WONK" 0;
+  font-weight: 500;
+  line-height: 1.1;
+  letter-spacing: -0.015em;
+  margin: 0 0 0.5em;
+  text-wrap: balance;
+}
+
+h1 {
+  font-size: var(--step-4);
+  font-variation-settings: "opsz" 144, "SOFT" 0, "WONK" 0;
+  letter-spacing: -0.022em;
+  line-height: 1.02;
+}
+h2 {
+  font-size: var(--step-3);
+  font-variation-settings: "opsz" 120, "SOFT" 0, "WONK" 0;
+  letter-spacing: -0.018em;
+}
+h3 {
+  font-size: var(--step-1);
+  font-weight: 600;
+  line-height: 1.22;
+  letter-spacing: -0.008em;
+}
+
+p { margin: 0 0 1rem; max-width: 68ch; }
+
+a { color: var(--coral-deep); text-underline-offset: 3px; }
+
+:focus-visible {
+  outline: 2.5px solid var(--coral);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+.wrap { width: min(1240px, 100%); margin-inline: auto; padding-inline: var(--gutter); }
+
+.section { padding-block: clamp(4rem, 8.5vw, 7.5rem); }
+.section--ground { background: var(--ground); }
+
+.section__head { max-width: 48rem; margin-bottom: clamp(2.5rem, 4.5vw, 3.5rem); }
+.section__head p {
+  color: var(--ink-2);
+  font-size: var(--step-1);
+  line-height: 1.52;
+  max-width: 36rem;
+  margin: 0;
+}
+
+/* The eyebrow is a live status marker, not a decorative label: it names the
+   part of the care loop the section describes. */
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: var(--step--1);
+  font-weight: 500;
+  color: var(--coral-deep);
+  background: var(--coral-soft);
+  border-radius: 999px;
+  padding: 0.3rem 0.85rem 0.34rem;
+  margin-bottom: 1.15rem;
+}
+.eyebrow svg { width: 15px; height: 15px; }
+
+.skip-link {
+  position: absolute; left: 1rem; top: -4rem; z-index: 200;
+  background: var(--ink); color: #fff; padding: 0.7rem 1.1rem;
+  border-radius: 0 0 10px 10px; text-decoration: none;
+  transition: top .18s ease;
+}
+.skip-link:focus { top: 0; }
+
+/* --------------------------------------------------------------------------
+   Buttons
+   -------------------------------------------------------------------------- */
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: .55rem;
+  font-family: var(--sans); font-size: 1rem; font-weight: 600; letter-spacing: -0.005em;
+  padding: .82rem 1.5rem;
+  border-radius: 999px;
+  border: 1.5px solid transparent;
+  text-decoration: none; cursor: pointer; white-space: nowrap;
+  transition: background-color .2s ease, box-shadow .25s ease,
+              border-color .2s ease, color .2s ease;
+}
+.btn svg { width: 17px; height: 17px; flex: none; }
+
+.btn--primary { background: var(--coral); color: #fff; box-shadow: var(--shadow-coral); }
+.btn--primary:hover { background: var(--coral-deep); box-shadow: 0 14px 30px -12px rgba(201,57,44,.62); }
+
+.btn--ghost { background: var(--surface); color: var(--ink); border-color: var(--line); }
+.btn--ghost:hover { border-color: var(--ink-3); box-shadow: var(--shadow-sm); }
+
+.btn--light { background: #fff; color: var(--coral-deep); }
+.btn--light:hover { box-shadow: 0 14px 30px -14px rgba(0,0,0,.45); }
+
+.btn--outline-light { background: transparent; color: #fff; border-color: rgba(255,255,255,.45); }
+.btn--outline-light:hover { border-color: #fff; background: rgba(255,255,255,.12); }
+
+.btn--lg { padding: 1rem 1.9rem; font-size: 1.03rem; }
+
+/* --------------------------------------------------------------------------
+   Navbar
+   -------------------------------------------------------------------------- */
+
+.nav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(255,255,255,.84);
+  backdrop-filter: saturate(180%) blur(14px);
+  -webkit-backdrop-filter: saturate(180%) blur(14px);
+  border-bottom: 1px solid transparent;
+  transition: border-color .25s ease, box-shadow .25s ease;
+}
+.nav.is-stuck { border-bottom-color: var(--line); box-shadow: 0 4px 20px -16px rgba(15,31,41,.5); }
+
+.nav__inner { display: flex; align-items: center; gap: 1.25rem; min-height: 4.75rem; }
+
+.brand { display: flex; align-items: center; gap: .65rem; text-decoration: none; color: var(--ink); margin-right: auto; }
+.brand__mark { width: 34px; height: 34px; flex: none; }
+.brand__name {
+  font-family: var(--display); font-weight: 600; font-size: 1.42rem;
+  font-variation-settings: "opsz" 120, "SOFT" 0, "WONK" 0;
+  letter-spacing: -0.02em; line-height: 1; display: block;
+}
+.brand__tag {
+  display: block; font-size: .585rem; font-weight: 600;
+  letter-spacing: .19em; color: var(--ink-3); margin-top: .22rem;
+}
+
+.nav__links { display: flex; align-items: center; gap: 1.9rem; list-style: none; margin: 0; padding: 0; }
+.nav__links > li > a:not(.btn) {
+  position: relative; color: var(--ink); text-decoration: none;
+  font-size: .95rem; font-weight: 500; padding-block: .4rem;
+}
+.nav__links > li > a:not(.btn)::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 2px;
+  background: var(--coral); border-radius: 2px;
+  transform: scaleX(0); transform-origin: left; transition: transform .28s cubic-bezier(.2,.7,.3,1);
+}
+.nav__links > li > a:not(.btn):hover::after { transform: scaleX(1); }
+
+.nav__toggle {
+  display: none; background: var(--surface); border: 1px solid var(--line);
+  border-radius: 12px; padding: .55rem .6rem; cursor: pointer; color: var(--ink);
+}
+.nav__toggle span {
+  display: block; width: 19px; height: 2px; background: currentColor;
+  border-radius: 2px; margin: 4px 0; transition: transform .25s ease, opacity .2s ease;
+}
+.nav__toggle[aria-expanded="true"] span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+.nav__toggle[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
+.nav__toggle[aria-expanded="true"] span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+
+/* --------------------------------------------------------------------------
+   Photography
+   One shared treatment so every photograph on the page reads as the same
+   shoot: generous radius, a hairline edge, and a faint warm lift in the
+   shadows to tie the imagery to the coral.
+   -------------------------------------------------------------------------- */
+
+.shot {
+  position: relative;
+  margin: 0;
+  overflow: hidden;
+  border-radius: var(--r-xl);
+  background: var(--ground);
+  isolation: isolate;
+}
+.shot img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  transform: scale(1.001); /* hides sub-pixel edge seams on rounded corners */
+}
+.shot::after {
+  content: "";
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(238,90,79,.06) 0%, rgba(15,31,41,.16) 100%);
+  pointer-events: none;
+}
+.shot--plain::after { background: linear-gradient(180deg, rgba(238,90,79,.04), rgba(15,31,41,.06)); }
+.shot--flat { border-radius: var(--r-lg); }
+
+/* --------------------------------------------------------------------------
+   Hero
+   -------------------------------------------------------------------------- */
+
+.hero { position: relative; padding-block: clamp(2.75rem, 6vw, 4.75rem) clamp(4rem, 8vw, 6.5rem); overflow: hidden; }
+
+.hero__glow {
+  position: absolute; border-radius: 50%; z-index: 0; pointer-events: none;
+  width: 44rem; height: 44rem; right: -19rem; top: -22rem;
+  background: radial-gradient(circle, var(--coral-tint) 0%, rgba(255,255,255,0) 66%);
+}
+
+.hero__grid {
+  position: relative; z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1.02fr) minmax(0, 1fr);
+  gap: clamp(2rem, 5vw, 4.25rem);
+  align-items: center;
+}
+
+.hero h1 { margin-bottom: 1.15rem; }
+.hero__lede { color: var(--ink-2); font-size: var(--step-1); line-height: 1.55; max-width: 34rem; }
+
+.hero__actions { display: flex; flex-wrap: wrap; gap: .8rem; margin-top: 2.1rem; }
+
+.hero__trust {
+  display: flex; flex-wrap: wrap; align-items: center; gap: .8rem 1.9rem;
+  margin-top: 2.35rem; padding-top: 1.8rem; border-top: 1px solid var(--line);
+}
+.hero__trust div { display: flex; align-items: center; gap: .55rem; font-size: var(--step--1); color: var(--ink-2); }
+.hero__trust svg { width: 18px; height: 18px; flex: none; color: var(--green); }
+.hero__trust .deva { font-family: var(--deva); font-size: .95em; }
+
+/* Hero composition: a tall primary frame with a smaller newborn frame
+   overlapping it, and the two live data chips reading over both. */
+
+.hero__art { position: relative; }
+
+.hero__shot {
+  aspect-ratio: 4 / 5;
+  box-shadow: var(--shadow-lg);
+}
+
+.hero__shot-inset {
+  position: absolute;
+  right: -1.75rem; bottom: -2.25rem;
+  width: 46%;
+  aspect-ratio: 1 / 1;
+  border: 6px solid var(--surface);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-md);
+  z-index: 2;
+}
+
+.chip {
+  position: absolute;
+  z-index: 3;
+  background: rgba(255,255,255,.97);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-md);
+  padding: .8rem 1rem;
+  display: flex; align-items: center; gap: .75rem;
+  font-size: var(--step--1); line-height: 1.3;
+}
+.chip strong { display: block; font-size: .95rem; font-weight: 600; letter-spacing: -.005em; }
+.chip span { color: var(--ink-2); }
+.chip__icon {
+  width: 38px; height: 38px; border-radius: 11px; flex: none;
+  display: grid; place-items: center;
+}
+.chip__icon svg { width: 20px; height: 20px; }
+
+.chip--gap { top: 8%; left: -1.75rem; }
+.chip--gap .chip__icon { background: var(--coral-soft); color: var(--coral-deep); }
+
+.chip--stage { top: 46%; right: -2.25rem; }
+.chip--stage .chip__icon { background: var(--mint); color: var(--green); }
+
+/* --------------------------------------------------------------------------
+   Stat strip
+   -------------------------------------------------------------------------- */
+
+.stats {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 1px; background: var(--line);
+  border: 1px solid var(--line); border-radius: var(--r-lg); overflow: hidden;
+  list-style: none; margin: 0; padding: 0;
+}
+.stat { background: var(--surface); padding: 1.6rem 1.45rem; transition: background-color .25s ease; }
+.stat:hover { background: var(--coral-tint); }
+.stat b {
+  display: block; font-family: var(--display); font-weight: 600;
+  font-variation-settings: "opsz" 120, "SOFT" 0, "WONK" 0;
+  font-size: clamp(1.55rem, 1.2rem + 1.4vw, 2.2rem); letter-spacing: -.02em;
+  color: var(--ink); line-height: 1.05;
+}
+.stat span { display: block; margin-top: .5rem; font-size: var(--step--1); color: var(--ink-2); }
+
+/* --------------------------------------------------------------------------
+   How it works — a genuine four-step sequence, so it is numbered
+   -------------------------------------------------------------------------- */
+
+.steps {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.25rem;
+}
+
+.step {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  padding: 1.8rem 1.55rem;
+  transition: box-shadow .3s ease, border-color .3s ease;
+}
+.step:hover { box-shadow: var(--shadow-md); border-color: transparent; }
+
+.step__icon {
+  width: 48px; height: 48px; border-radius: 14px;
+  display: grid; place-items: center; margin-bottom: 1.15rem;
+  background: var(--coral-soft); color: var(--coral-deep);
+}
+.step__icon svg { width: 24px; height: 24px; }
+
+.step:nth-child(2) .step__icon { background: var(--lilac); color: var(--violet); }
+.step:nth-child(3) .step__icon { background: #E8F0FA; color: #2F63B4; }
+.step:nth-child(4) .step__icon { background: var(--mint); color: var(--green); }
+
+.step__n {
+  position: absolute; top: 1.7rem; right: 1.55rem;
+  font-family: var(--display); font-weight: 600; font-size: .95rem;
+  font-variation-settings: "opsz" 20, "SOFT" 0, "WONK" 0;
+  color: var(--ink-3);
+}
+.step h3 { margin-bottom: .4rem; }
+.step p { color: var(--ink-2); font-size: var(--step--1); margin: 0; }
+
+.loop-note {
+  margin-top: 1.75rem;
+  display: flex; align-items: center; gap: .85rem; flex-wrap: wrap;
+  background: var(--surface); border: 1px solid var(--mint-deep);
+  border-radius: var(--r-md); padding: 1.05rem 1.3rem;
+  font-size: var(--step--1); color: var(--ink-2);
+  max-width: none;
+}
+.loop-note svg { width: 20px; height: 20px; color: var(--green); flex: none; }
+.loop-note b { color: var(--ink); font-weight: 600; }
+
+/* --------------------------------------------------------------------------
+   Alternating feature rows
+   -------------------------------------------------------------------------- */
+
+.feature {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: clamp(2rem, 5vw, 4.5rem);
+  align-items: center;
+}
+.feature + .feature { margin-top: clamp(4rem, 8vw, 6.5rem); }
+.feature--flip .feature__media { order: -1; }
+
+.feature__media { position: relative; }
+.feature__shot { aspect-ratio: 5 / 4; box-shadow: var(--shadow-md); }
+
+/* A single overlaid record card per photograph: the product speaking over
+   the reality it describes. */
+.overlay {
+  position: absolute;
+  z-index: 2;
+  background: rgba(255,255,255,.97);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-md);
+  padding: 1rem 1.15rem;
+  width: min(19rem, 76%);
+}
+.overlay__head {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: .75rem; margin-bottom: .7rem;
+}
+.overlay__head b { font-size: .88rem; font-weight: 600; letter-spacing: -.005em; }
+.overlay__head em {
+  font-style: normal; font-size: .72rem; font-weight: 600;
+  color: var(--green); background: var(--mint);
+  padding: .16rem .55rem; border-radius: 999px;
+}
+.overlay__head em.is-due { color: var(--coral-deep); background: var(--coral-soft); }
+
+.rows { list-style: none; margin: 0; padding: 0; display: grid; gap: .55rem; }
+.rows li {
+  display: grid; grid-template-columns: 18px 1fr auto; gap: .6rem;
+  align-items: center; font-size: .82rem; color: var(--ink-2);
+}
+.rows svg { width: 18px; height: 18px; }
+.rows .ok   { color: var(--green); }
+.rows .due  { color: var(--coral); }
+.rows .next { color: var(--ink-3); }
+.rows time { font-size: .74rem; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+
+.overlay--bl { left: -1.5rem; bottom: -1.5rem; }
+.overlay--br { right: -1.5rem; bottom: -1.5rem; }
+.overlay--tr { right: -1.5rem; top: -1.5rem; }
+
+.feature p { color: var(--ink-2); max-width: 32rem; }
+
+.ticks { list-style: none; margin: 1.6rem 0 0; padding: 0; display: grid; gap: .85rem; }
+.ticks li { display: grid; grid-template-columns: 22px 1fr; gap: .8rem; align-items: start; font-size: var(--step--1); color: var(--ink-2); }
+.ticks svg { width: 22px; height: 22px; color: var(--green); margin-top: 1px; }
+.ticks b { color: var(--ink); font-weight: 600; }
+
+/* --------------------------------------------------------------------------
+   Audience cards
+   -------------------------------------------------------------------------- */
+
+.audience { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.4rem; }
+
+.acard {
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--r-lg); overflow: hidden;
+  display: flex; flex-direction: column;
+  transition: box-shadow .3s ease, border-color .3s ease;
+}
+.acard:hover { box-shadow: var(--shadow-md); border-color: transparent; }
+
+.acard__shot { aspect-ratio: 16 / 10; border-radius: 0; }
+.acard__body { padding: 1.5rem 1.6rem 1.75rem; }
+.acard h3 { margin-bottom: .45rem; }
+.acard p { color: var(--ink-2); font-size: var(--step--1); margin: 0; }
+
+/* --------------------------------------------------------------------------
+   Safety note
+   -------------------------------------------------------------------------- */
+
+.safety {
+  display: grid; grid-template-columns: 54px minmax(0, 1fr); gap: 1.3rem;
+  background: var(--surface); border: 1px solid var(--line);
+  border-left: 4px solid var(--violet);
+  border-radius: var(--r-md); padding: 1.7rem 1.8rem;
+  box-shadow: var(--shadow-sm);
+}
+.safety__icon { width: 54px; height: 54px; border-radius: 15px; background: var(--lilac); color: var(--violet); display: grid; place-items: center; }
+.safety__icon svg { width: 27px; height: 27px; }
+.safety h3 { margin-bottom: .35rem; }
+.safety p { color: var(--ink-2); font-size: var(--step--1); margin: 0; max-width: 62ch; }
+
+/* --------------------------------------------------------------------------
+   Closing CTA — photograph, darkened, with the type sitting over it
+   -------------------------------------------------------------------------- */
+
+.cta {
+  position: relative; overflow: hidden;
+  border-radius: var(--r-xl);
+  padding: clamp(3rem, 6.5vw, 5.5rem) clamp(1.75rem, 5vw, 4rem);
+  text-align: center;
+  color: #fff;
+  isolation: isolate;
+}
+.cta__bg { position: absolute; inset: 0; z-index: -2; }
+.cta__bg img { width: 100%; height: 100%; object-fit: cover; }
+.cta::before {
+  content: ""; position: absolute; inset: 0; z-index: -1;
+  background:
+    linear-gradient(200deg, rgba(201,57,44,.92) 0%, rgba(238,90,79,.84) 45%, rgba(15,31,41,.9) 100%);
+}
+.cta h2 { color: #fff; margin-bottom: .75rem; }
+.cta p { color: rgba(255,255,255,.92); font-size: var(--step-1); max-width: 34rem; margin-inline: auto; }
+.cta .hero__actions { justify-content: center; margin-top: 2rem; }
+.cta small { display: block; margin-top: 1.6rem; color: rgba(255,255,255,.78); font-size: var(--step--1); }
+
+/* --------------------------------------------------------------------------
+   Footer
+   -------------------------------------------------------------------------- */
+
+.footer { background: var(--ground); border-top: 1px solid var(--line); padding-block: 3.25rem 2rem; margin-top: clamp(3.5rem, 8vw, 6rem); }
+
+.footer__grid {
+  display: grid; grid-template-columns: 1.5fr repeat(3, 1fr);
+  gap: 2.5rem 2rem; padding-bottom: 2.4rem; border-bottom: 1px solid var(--line);
+}
+.footer__blurb { color: var(--ink-2); font-size: var(--step--1); max-width: 26rem; margin: 1.1rem 0 0; }
+.footer h4 { font-family: var(--sans); font-size: .84rem; letter-spacing: 0; color: var(--ink-3); font-weight: 600; margin-bottom: .9rem; }
+.footer ul { list-style: none; margin: 0; padding: 0; display: grid; gap: .62rem; }
+.footer ul a { color: var(--ink-2); text-decoration: none; font-size: var(--step--1); transition: color .2s ease; }
+.footer ul a:hover { color: var(--coral-deep); }
+
+.footer__base {
+  display: flex; flex-wrap: wrap; gap: .75rem 1.5rem;
+  justify-content: space-between; align-items: center;
+  padding-top: 1.6rem; font-size: var(--step--2); color: var(--ink-3);
+}
+
+/* --------------------------------------------------------------------------
+   Motion — one quiet entrance, no per-card theatrics
+   -------------------------------------------------------------------------- */
+
+.reveal { opacity: 0; transform: translateY(16px); }
+.reveal.is-in {
+  opacity: 1; transform: none;
+  transition: opacity .65s cubic-bezier(.2,.7,.3,1), transform .65s cubic-bezier(.2,.7,.3,1);
+  transition-delay: var(--delay, 0ms);
+}
+
+/* --------------------------------------------------------------------------
+   Responsive
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 1080px) {
+  .steps { grid-template-columns: repeat(2, 1fr); }
+  .footer__grid { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 900px) {
+  .hero__grid { grid-template-columns: 1fr; gap: 3.25rem; }
+  .hero__art { max-width: 30rem; margin-inline: auto; width: 100%; }
+  .feature, .feature--flip { grid-template-columns: 1fr; gap: 2.25rem; }
+  .feature--flip .feature__media { order: 0; }
+  .feature__media { order: -1; }
+  .audience { grid-template-columns: 1fr; }
+  .stats { grid-template-columns: repeat(2, 1fr); }
+  .overlay { width: min(19rem, 86%); }
+  .overlay--bl, .overlay--br { left: 50%; right: auto; transform: translateX(-50%); bottom: -1.25rem; }
+  .overlay--tr { right: 1rem; top: -1.25rem; }
+  .feature + .feature { margin-top: 5.5rem; }
+}
+
+@media (max-width: 760px) {
+  .steps { grid-template-columns: 1fr; }
+  .nav__toggle { display: block; }
+  .nav__inner { flex-wrap: wrap; }
+  .nav__links {
+    display: none; flex-direction: column; align-items: stretch;
+    gap: 0; width: 100%; padding-bottom: .9rem;
+  }
+  .nav__links.is-open { display: flex; }
+  .nav__links > li { border-top: 1px solid var(--line); }
+  .nav__links > li > a:not(.btn) { display: block; padding: .95rem .15rem; }
+  .nav__links .btn { width: 100%; margin-top: .9rem; }
+
+  .chip--gap { left: -.5rem; top: 5%; }
+  .chip--stage { right: -.5rem; top: 42%; }
+  .chip { padding: .6rem .75rem; font-size: .76rem; }
+  .chip__icon { width: 31px; height: 31px; border-radius: 9px; }
+  .chip__icon svg { width: 16px; height: 16px; }
+  .hero__shot-inset { right: -.75rem; bottom: -1.25rem; border-width: 5px; }
+
+  .safety { grid-template-columns: 1fr; gap: 1rem; }
+  .hero__actions .btn, .cta .hero__actions .btn { flex: 1 1 100%; }
+}
+
+@media (max-width: 460px) {
+  .stats { grid-template-columns: 1fr; }
+  .footer__grid { grid-template-columns: 1fr; }
+  .overlay { width: min(17rem, 92%); padding: .85rem 1rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .reveal { opacity: 1; transform: none; }
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+  }
+}
+</style>
+</head>
+<body>
+
+<a class="skip-link" href="#main">Skip to content</a>
+
+<!-- ======================= Shared icon sprite ======================= -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/><path d="M11 8v6M8 11h6"/>
+    </symbol>
+    <symbol id="i-list" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M9 6h11M9 12h11M9 18h11"/><path d="m3 6 1.5 1.5L7 5"/><path d="m3 12 1.5 1.5L7 11"/><path d="m3 18 1.5 1.5L7 17"/>
+    </symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 21s7-5.5 7-11a7 7 0 1 0-14 0c0 5.5 7 11 7 11Z"/><path d="M12 7v6M9 10h6"/>
+    </symbol>
+    <symbol id="i-check-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="9"/><path d="m8 12.5 2.5 2.5L16 9.5"/>
+    </symbol>
+    <symbol id="i-alert-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="9"/><path d="M12 8v4.5M12 16v.5"/>
+    </symbol>
+    <symbol id="i-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+      <circle cx="12" cy="12" r="8" stroke-dasharray="3 3"/>
+    </symbol>
+    <symbol id="i-tick" viewBox="0 0 24 24" fill="none">
+      <circle cx="12" cy="12" r="10" fill="currentColor" opacity=".13"/>
+      <path d="m8 12.4 2.6 2.6L16 9.6" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 3 5 6v6c0 4.4 3 8 7 9 4-1 7-4.6 7-9V6l-7-3Z"/><path d="m9 12 2 2 4-4"/>
+    </symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.5 2.6 2.5 15 0 18-2.5-3-2.5-15.4 0-18Z"/>
+    </symbol>
+    <symbol id="i-loop" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M20 12a8 8 0 0 1-13.7 5.6"/><path d="M4 12a8 8 0 0 1 13.7-5.6"/><path d="M17.7 3v3.4h-3.4"/><path d="M6.3 21v-3.4h3.4"/>
+    </symbol>
+    <symbol id="i-heart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 20s-7-4.4-7-9.3A4.1 4.1 0 0 1 12 8a4.1 4.1 0 0 1 7 2.7C19 15.6 12 20 12 20Z"/>
+    </symbol>
+    <symbol id="i-spark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 3.5 13.7 9l5.5 1.7-5.5 1.7L12 18l-1.7-5.6L4.8 10.7 10.3 9 12 3.5Z"/>
+    </symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 12h15"/><path d="m13 6 6 6-6 6"/>
+    </symbol>
+  </defs>
+</svg>
+
+<!-- ============================ Navbar ============================ -->
+<header class="nav" id="nav">
+  <div class="wrap nav__inner">
+    <a class="brand" href="#home" aria-label="Anvaya — Connected Care. Every Step.">
+      <svg class="brand__mark" viewBox="0 0 40 40" aria-hidden="true">
+        <ellipse cx="16.4" cy="16" rx="8.4" ry="11.6" transform="rotate(-28 16.4 16)" fill="none" stroke="#EE5A4F" stroke-width="2.5"/>
+        <ellipse cx="23.6" cy="16" rx="8.4" ry="11.6" transform="rotate(28 23.6 16)" fill="none" stroke="#F58A7C" stroke-width="2.5"/>
+      </svg>
+      <span>
+        <span class="brand__name">anvaya</span>
+        <span class="brand__tag">CONNECTED CARE</span>
+      </span>
+    </a>
+
+    <button class="nav__toggle" id="navToggle" aria-expanded="false" aria-controls="navLinks" aria-label="Open menu">
+      <span></span><span></span><span></span>
+    </button>
+
+    <ul class="nav__links" id="navLinks">
+      <li><a href="#home">Home</a></li>
+      <li><a href="#how-it-works">How it works</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="dashboard.html">Login</a></li>
+      <li><a class="btn btn--primary" href="dashboard.html">Get started</a></li>
+    </ul>
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- ============================ Hero ============================ -->
+  <section class="hero" id="home">
+    <span class="hero__glow" aria-hidden="true"></span>
+
+    <div class="wrap hero__grid">
+      <div class="reveal">
+        <span class="eyebrow"><svg aria-hidden="true"><use href="#i-heart"/></svg>Pregnancy to childhood, on one record</span>
+
+        <h1>A mother's care and her child's care, kept on the same thread.</h1>
+
+        <p class="hero__lede">
+          Anvaya follows a family through antenatal visits, delivery, postpartum recovery,
+          newborn vaccinations and early childhood milestones — noticing what has been
+          missed, explaining the next step in plain language, and keeping the doctor in the loop.
+        </p>
+
+        <div class="hero__actions">
+          <a class="btn btn--primary btn--lg" href="dashboard.html">Get started<svg aria-hidden="true"><use href="#i-arrow"/></svg></a>
+          <a class="btn btn--ghost btn--lg" href="#how-it-works">See how it works</a>
+        </div>
+
+        <div class="hero__trust">
+          <div><svg aria-hidden="true"><use href="#i-globe"/></svg><span class="deva">हिंदी</span>, English and regional languages</div>
+          <div><svg aria-hidden="true"><use href="#i-shield"/></svg>Consent-based record sharing</div>
+          <div><svg aria-hidden="true"><use href="#i-check-circle"/></svg>Doctor-validated pathways</div>
+        </div>
+      </div>
+
+      <div class="hero__art reveal" style="--delay:120ms">
+        <figure class="shot hero__shot" data-photo="hero-primary">
+          <img
+            src="https://images.unsplash.com/photo-1694081983566-a9be243c58e9?auto=format&fit=crop&w=960&q=80"
+            srcset="https://images.unsplash.com/photo-1694081983566-a9be243c58e9?auto=format&fit=crop&w=640&q=80 640w,
+                    https://images.unsplash.com/photo-1694081983566-a9be243c58e9?auto=format&fit=crop&w=960&q=80 960w,
+                    https://images.unsplash.com/photo-1694081983566-a9be243c58e9?auto=format&fit=crop&w=1400&q=80 1400w"
+            sizes="(max-width: 900px) 90vw, 46vw"
+            width="960" height="1200" fetchpriority="high" decoding="async"
+            alt="An expectant mother standing outdoors, hands resting on her bump.">
+        </figure>
+
+        <figure class="shot shot--plain hero__shot-inset" data-photo="hero-inset">
+          <img
+            src="https://images.unsplash.com/photo-1470116945706-e6bf5d5a53ca?auto=format&fit=crop&w=520&q=80"
+            srcset="https://images.unsplash.com/photo-1470116945706-e6bf5d5a53ca?auto=format&fit=crop&w=400&q=80 400w,
+                    https://images.unsplash.com/photo-1470116945706-e6bf5d5a53ca?auto=format&fit=crop&w=720&q=80 720w"
+            sizes="(max-width: 900px) 40vw, 21vw"
+            width="520" height="520" loading="lazy" decoding="async"
+            alt="A newborn baby's hand curled around an adult finger.">
+        </figure>
+
+        <div class="chip chip--gap">
+          <span class="chip__icon"><svg aria-hidden="true"><use href="#i-search"/></svg></span>
+          <span><strong>Care gap found</strong><span>Anaemia recheck, 11 days overdue</span></span>
+        </div>
+
+        <div class="chip chip--stage">
+          <span class="chip__icon"><svg aria-hidden="true"><use href="#i-check-circle"/></svg></span>
+          <span><strong>Week 32 of 40</strong><span>Third trimester on track</span></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ Stats ============================ -->
+  <section class="section" style="padding-block:0">
+    <div class="wrap">
+      <ul class="stats reveal">
+        <li class="stat"><b>One record</b><span>Mother and every child, from pregnancy to childhood</span></li>
+        <li class="stat"><b>Four steps</b><span>Gap found, action given, access offered, care completed</span></li>
+        <li class="stat"><b>No guesswork</b><span>Pathways validated by treating clinicians</span></li>
+        <li class="stat"><b>Every role</b><span>Mothers, caregivers, doctors, PHCs, CHCs, labs</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ======================= How it works ======================= -->
+  <section class="section section--ground" id="how-it-works">
+    <div class="wrap">
+      <div class="section__head reveal">
+        <span class="eyebrow"><svg aria-hidden="true"><use href="#i-loop"/></svg>The care loop</span>
+        <h2>How Anvaya works</h2>
+        <p>Most health apps stop at a reminder. Anvaya runs a loop that only closes once the care has actually happened.</p>
+      </div>
+
+      <ol class="steps">
+        <li class="step reveal">
+          <span class="step__n">1</span>
+          <div class="step__icon"><svg aria-hidden="true"><use href="#i-search"/></svg></div>
+          <h3>Care gap</h3>
+          <p>The expected pathway for this stage is compared against what has actually been recorded, and anything overdue or missing surfaces.</p>
+        </li>
+        <li class="step reveal" style="--delay:80ms">
+          <span class="step__n">2</span>
+          <div class="step__icon"><svg aria-hidden="true"><use href="#i-list"/></svg></div>
+          <h3>Action</h3>
+          <p>The gap becomes one clear instruction — what is needed, why it matters now, and what to ask the doctor about it.</p>
+        </li>
+        <li class="step reveal" style="--delay:160ms">
+          <span class="step__n">3</span>
+          <div class="step__icon"><svg aria-hidden="true"><use href="#i-pin"/></svg></div>
+          <h3>Access</h3>
+          <p>The family is pointed to a suitable gynaecologist, paediatrician, PHC, CHC, lab or vaccination centre — and any government scheme that applies.</p>
+        </li>
+        <li class="step reveal" style="--delay:240ms">
+          <span class="step__n">4</span>
+          <div class="step__icon"><svg aria-hidden="true"><use href="#i-check-circle"/></svg></div>
+          <h3>Completion</h3>
+          <p>The visit, report or vaccination is recorded. The journey updates, the doctor sees it, and the next milestone opens.</p>
+        </li>
+      </ol>
+
+      <p class="loop-note reveal">
+        <svg aria-hidden="true"><use href="#i-loop"/></svg>
+        <span><b>Completion feeds the next gap.</b> That is what keeps a pregnancy, a delivery and a child's first years on one continuous record instead of scattered across providers.</span>
+      </p>
+    </div>
+  </section>
+
+  <!-- ======================= Feature rows ======================= -->
+  <section class="section" id="about">
+    <div class="wrap">
+      <div class="section__head reveal">
+        <span class="eyebrow"><svg aria-hidden="true"><use href="#i-spark"/></svg>About Anvaya</span>
+        <h2>Care is rarely missed on purpose</h2>
+        <p>It slips when a report sits with one lab, a follow-up sits with another hospital, and nobody holds the whole picture — least of all the doctor with eight minutes on the clock.</p>
+      </div>
+
+      <!-- Row 1 ------------------------------------------------------- -->
+      <div class="feature">
+        <div class="reveal">
+          <h3 style="font-size:var(--step-2)">One journey, from the first antenatal visit onward</h3>
+          <p>Every visit, investigation, supplement, scan and vaccination lands on a single timeline that knows which stage the family is in and what should happen next.</p>
+          <ul class="ticks">
+            <li><svg aria-hidden="true"><use href="#i-tick"/></svg><span><b>Stage-aware.</b> The timeline reshapes itself at each trimester, at delivery, and again as the child grows.</span></li>
+            <li><svg aria-hidden="true"><use href="#i-tick"/></svg><span><b>Readable by anyone.</b> Plain language, multilingual, with voice support for low-literacy users.</span></li>
+            <li><svg aria-hidden="true"><use href="#i-tick"/></svg><span><b>Caregivers included.</b> A husband, mother-in-law or ASHA worker can be given consent-based access.</span></li>
+          </ul>
+        </div>
+
+        <div class="feature__media reveal" style="--delay:100ms">
+          <figure class="shot feature__shot" data-photo="journey">
+            <img
+              src="https://images.unsplash.com/flagged/photo-1551049215-23fd6d2ac3f1?auto=format&fit=crop&w=1000&q=80"
+              srcset="https://images.unsplash.com/flagged/photo-1551049215-23fd6d2ac3f1?auto=format&fit=crop&w=700&q=80 700w,
+                      https://images.unsplash.com/flagged/photo-1551049215-23fd6d2ac3f1?auto=format&fit=crop&w=1000&q=80 1000w,
+                      https://images.unsplash.com/flagged/photo-1551049215-23fd6d2ac3f1?auto=format&fit=crop&w=1400&q=80 1400w"
+              sizes="(max-width: 900px) 92vw, 46vw"
+              width="1000" height="800" loading="lazy" decoding="async"
+              alt="A health worker weighing an infant during a routine growth check.">
+          </figure>
+
+          <div class="overlay overlay--bl">
+            <div class="overlay__head">
+              <b>Care timeline</b>
+              <em class="is-due">1 overdue</em>
+            </div>
+            <ul class="rows">
+              <li><svg class="ok" aria-hidden="true"><use href="#i-check-circle"/></svg><span>Anomaly scan recorded</span><time>Wk 20</time></li>
+              <li><svg class="due" aria-hidden="true"><use href="#i-alert-circle"/></svg><span>Haemoglobin recheck</span><time>Wk 30</time></li>
+              <li><svg class="next" aria-hidden="true"><use href="#i-circle"/></svg><span>Growth scan</span><time>Wk 34</time></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Row 2 ------------------------------------------------------- -->
+      <div class="feature feature--flip">
+        <div class="reveal">
+          <h3 style="font-size:var(--step-2)">Your doctor sees the same record you do</h3>
+          <p>Authorised clinicians open a patient timeline instead of a pile of paper — pending investigations, missed follow-ups, upcoming milestones and delivery readiness, all in one view.</p>
+          <ul class="ticks">
+            <li><svg aria-hidden="true"><use href="#i-tick"/></svg><span><b>Clinicians stay in charge.</b> Doctors validate and adjust the care pathway; Anvaya coordinates around their decisions.</span></li>
+            <li><svg aria-hidden="true"><use href="#i-tick"/></svg><span><b>Ready before the delivery.</b> Facilities can see expected cases, staff availability and equipment readiness in advance.</span></li>
+            <li><svg aria-hidden="true"><use href="#i-tick"/></svg><span><b>Minimum necessary data.</b> Role-based access and audit logs, so each person sees only what their role requires.</span></li>
+          </ul>
+        </div>
+
+        <div class="feature__media reveal" style="--delay:100ms">
+          <figure class="shot feature__shot" data-photo="clinician">
+            <img
+              src="https://images.unsplash.com/photo-1659353888906-adb3e0041693?auto=format&fit=crop&w=1000&q=80"
+              srcset="https://images.unsplash.com/photo-1659353888906-adb3e0041693?auto=format&fit=crop&w=700&q=80 700w,
+                      https://images.unsplash.com/photo-1659353888906-adb3e0041693?auto=format&fit=crop&w=1000&q=80 1000w,
+                      https://images.unsplash.com/photo-1659353888906-adb3e0041693?auto=format&fit=crop&w=1400&q=80 1400w"
+              sizes="(max-width: 900px) 92vw, 46vw"
+              width="1000" height="800" loading="lazy" decoding="async"
+              alt="A doctor in a white coat during a consultation.">
+          </figure>
+
+          <div class="overlay overlay--br">
+            <div class="overlay__head">
+              <b>Patient view</b>
+              <em>Validated</em>
+            </div>
+            <ul class="rows">
+              <li><svg class="ok" aria-hidden="true"><use href="#i-check-circle"/></svg><span>Pathway confirmed</span><time>Today</time></li>
+              <li><svg class="due" aria-hidden="true"><use href="#i-alert-circle"/></svg><span>Follow-up missed</span><time>12 Aug</time></li>
+              <li><svg class="next" aria-hidden="true"><use href="#i-circle"/></svg><span>Delivery readiness</span><time>Wk 36</time></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Row 3 ------------------------------------------------------- -->
+      <div class="feature">
+        <div class="reveal">
+          <h3 style="font-size:var(--step-2)">Delivery is not the end of the journey</h3>
+          <p>Anvaya splits into two linked journeys — the mother's recovery and each child's growth — so postpartum care does not quietly fall away once the baby arrives.</p>
+          <ul class="ticks">
+            <li><svg aria-hidden="true"><use href="#i-tick"/></svg><span><b>For the mother.</b> Postpartum follow-ups, recovery, breastfeeding support and mental-health screening with referral.</span></li>
+            <li><svg aria-hidden="true"><use href="#i-tick"/></svg><span><b>For the child.</b> Vaccinations, growth monitoring, developmental milestones and paediatric follow-ups.</span></li>
+            <li><svg aria-hidden="true"><use href="#i-tick"/></svg><span><b>Twins stay separate.</b> Each child gets their own profile under the same family account, so records never mix.</span></li>
+          </ul>
+        </div>
+
+        <div class="feature__media reveal" style="--delay:100ms">
+          <figure class="shot feature__shot" data-photo="postpartum">
+            <img
+              src="https://images.unsplash.com/photo-1542644384-49f9febd8443?auto=format&fit=crop&w=1000&q=80"
+              srcset="https://images.unsplash.com/photo-1542644384-49f9febd8443?auto=format&fit=crop&w=700&q=80 700w,
+                      https://images.unsplash.com/photo-1542644384-49f9febd8443?auto=format&fit=crop&w=1000&q=80 1000w,
+                      https://images.unsplash.com/photo-1542644384-49f9febd8443?auto=format&fit=crop&w=1400&q=80 1400w"
+              sizes="(max-width: 900px) 92vw, 46vw"
+              width="1000" height="800" loading="lazy" decoding="async"
+              alt="A parent holding a young baby against their shoulder at home.">
+          </figure>
+
+          <div class="overlay overlay--tr">
+            <div class="overlay__head">
+              <b>Two linked journeys</b>
+              <em>Active</em>
+            </div>
+            <ul class="rows">
+              <li><svg class="ok" aria-hidden="true"><use href="#i-check-circle"/></svg><span>Mother — recovery</span><time>Day 21</time></li>
+              <li><svg class="due" aria-hidden="true"><use href="#i-alert-circle"/></svg><span>Child — BCG, OPV-0</span><time>Due</time></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= Audience cards ======================= -->
+  <section class="section section--ground">
+    <div class="wrap">
+      <div class="section__head reveal">
+        <h2>Built for everyone in the loop</h2>
+        <p>The same record, shown differently depending on who is looking at it and what they are allowed to see.</p>
+      </div>
+
+      <div class="audience">
+        <article class="acard reveal">
+          <figure class="shot shot--plain acard__shot" data-photo="aud-mother">
+            <img
+              src="https://images.unsplash.com/photo-1591394765848-0fdc9ea2a7a9?auto=format&fit=crop&w=760&q=80"
+              srcset="https://images.unsplash.com/photo-1591394765848-0fdc9ea2a7a9?auto=format&fit=crop&w=560&q=80 560w,
+                      https://images.unsplash.com/photo-1591394765848-0fdc9ea2a7a9?auto=format&fit=crop&w=760&q=80 760w"
+              sizes="(max-width: 900px) 92vw, 30vw"
+              width="760" height="475" loading="lazy" decoding="async"
+              alt="A mother resting with her swaddled newborn.">
+          </figure>
+          <div class="acard__body">
+            <h3>Mothers &amp; caregivers</h3>
+            <p>Current stage, upcoming milestones, reports, appointments, nearby services and recommended next steps — in their own language, by voice if reading is hard.</p>
+          </div>
+        </article>
+
+        <article class="acard reveal" style="--delay:90ms">
+          <figure class="shot shot--plain acard__shot" data-photo="aud-doctor">
+            <img
+              src="https://images.unsplash.com/photo-1637059824899-a441006a6875?auto=format&fit=crop&w=760&q=80"
+              srcset="https://images.unsplash.com/photo-1637059824899-a441006a6875?auto=format&fit=crop&w=560&q=80 560w,
+                      https://images.unsplash.com/photo-1637059824899-a441006a6875?auto=format&fit=crop&w=760&q=80 760w"
+              sizes="(max-width: 900px) 92vw, 30vw"
+              width="760" height="475" loading="lazy" decoding="async"
+              alt="A clinician with a stethoscope around their neck.">
+          </figure>
+          <div class="acard__body">
+            <h3>Doctors</h3>
+            <p>A patient timeline with pending investigations, missed follow-ups and delivery readiness. Clinicians validate the pathway and keep the system clinically grounded.</p>
+          </div>
+        </article>
+
+        <article class="acard reveal" style="--delay:180ms">
+          <figure class="shot shot--plain acard__shot" data-photo="aud-facility">
+            <img
+              src="https://images.unsplash.com/photo-1565018054866-968e244671af?auto=format&fit=crop&w=760&q=80"
+              srcset="https://images.unsplash.com/photo-1565018054866-968e244671af?auto=format&fit=crop&w=560&q=80 560w,
+                      https://images.unsplash.com/photo-1565018054866-968e244671af?auto=format&fit=crop&w=760&q=80 760w"
+              sizes="(max-width: 900px) 92vw, 30vw"
+              width="760" height="475" loading="lazy" decoding="async"
+              alt="A health facility building seen from its approach road.">
+          </figure>
+          <div class="acard__body">
+            <h3>Facilities &amp; PHCs</h3>
+            <p>Expected cases, service and staff availability, equipment readiness and authorised incoming patient information ahead of a delivery.</p>
+          </div>
+        </article>
+      </div>
+
+      <div class="safety reveal" style="margin-top:2.75rem">
+        <div class="safety__icon"><svg aria-hidden="true"><use href="#i-shield"/></svg></div>
+        <div>
+          <h3>Anvaya does not practise medicine</h3>
+          <p>No diagnosis, no prescriptions, and no declaring a pregnancy high-risk on its own. That judgement stays with qualified healthcare professionals — Anvaya coordinates care around their decisions and escalates to them when something needs attention.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================= Closing CTA ========================= -->
+  <section class="section" id="get-started">
+    <div class="wrap">
+      <div class="cta reveal">
+        <div class="cta__bg" aria-hidden="true">
+          <img
+            src="https://images.unsplash.com/photo-1470116945706-e6bf5d5a53ca?auto=format&fit=crop&w=1600&q=70"
+            width="1600" height="900" loading="lazy" decoding="async" alt="">
+        </div>
+        <h2>Start a care journey</h2>
+        <p>Create a family profile and Anvaya builds the care timeline for your current stage — then keeps it moving, visit by visit.</p>
+        <div class="hero__actions">
+          <a class="btn btn--light btn--lg" href="dashboard.html">Get started<svg aria-hidden="true"><use href="#i-arrow"/></svg></a>
+          <a class="btn btn--outline-light btn--lg" href="dashboard.html">Login</a>
+        </div>
+        <small>Free for families. Built with clinicians, PHCs and CHCs.</small>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ============================ Footer ============================ -->
+<footer class="footer" id="login">
+  <div class="wrap">
+    <div class="footer__grid">
+      <div>
+        <a class="brand" href="#home" style="margin-right:0">
+          <svg class="brand__mark" viewBox="0 0 40 40" aria-hidden="true">
+            <ellipse cx="16.4" cy="16" rx="8.4" ry="11.6" transform="rotate(-28 16.4 16)" fill="none" stroke="#EE5A4F" stroke-width="2.5"/>
+            <ellipse cx="23.6" cy="16" rx="8.4" ry="11.6" transform="rotate(28 23.6 16)" fill="none" stroke="#F58A7C" stroke-width="2.5"/>
+          </svg>
+          <span><span class="brand__name">anvaya</span><span class="brand__tag">CONNECTED CARE</span></span>
+        </a>
+        <p class="footer__blurb">Maternal, newborn and child healthcare continuity — turning scattered visits into one coordinated journey.</p>
+      </div>
+
+      <div>
+        <h4>Platform</h4>
+        <ul>
+          <li><a href="#how-it-works">How it works</a></li>
+          <li><a href="#about">The care loop</a></li>
+          <li><a href="#about">For doctors</a></li>
+          <li><a href="#about">For facilities</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4>Care</h4>
+        <ul>
+          <li><a href="#about">Pregnancy</a></li>
+          <li><a href="#about">Delivery</a></li>
+          <li><a href="#about">Postpartum</a></li>
+          <li><a href="#about">Child health</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4>Account</h4>
+        <ul>
+          <li><a href="dashboard.html">Get started</a></li>
+          <li><a href="dashboard.html">Login</a></li>
+          <li><a href="#about">Privacy</a></li>
+          <li><a href="#about">Contact</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer__base">
+      <span>Anvaya — Connected Care. Every Step.</span>
+      <span>Early prototype. Not a substitute for medical advice.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* Anvaya — landing page behaviour.
+   Mobile navigation, sticky-nav state, and scroll reveals. No app logic yet. */
+
+(function () {
+  "use strict";
+
+  /* ---- Mobile navigation ------------------------------------------------ */
+  var toggle = document.getElementById("navToggle");
+  var links = document.getElementById("navLinks");
+
+  if (toggle && links) {
+    var setOpen = function (open) {
+      links.classList.toggle("is-open", open);
+      toggle.setAttribute("aria-expanded", String(open));
+      toggle.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+    };
+
+    toggle.addEventListener("click", function () {
+      setOpen(!links.classList.contains("is-open"));
+    });
+
+    links.addEventListener("click", function (e) {
+      if (e.target.closest("a")) setOpen(false);
+    });
+
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && links.classList.contains("is-open")) {
+        setOpen(false);
+        toggle.focus();
+      }
+    });
+  }
+
+  /* ---- Nav gets a border once the page scrolls -------------------------- */
+  var nav = document.getElementById("nav");
+  if (nav) {
+    var onScroll = function () {
+      nav.classList.toggle("is-stuck", window.scrollY > 8);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+  }
+
+  /* ---- Scroll reveals ---------------------------------------------------- */
+  var items = document.querySelectorAll(".reveal");
+  var still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  if (still || !("IntersectionObserver" in window)) {
+    items.forEach(function (el) { el.classList.add("is-in"); });
+    return;
+  }
+
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (!entry.isIntersecting) return;
+      entry.target.classList.add("is-in");
+      io.unobserve(entry.target);
+    });
+  }, { rootMargin: "0px 0px -8% 0px", threshold: 0.12 });
+
+  items.forEach(function (el) { io.observe(el); });
+})();
+</script>
+</body>
+</html>
