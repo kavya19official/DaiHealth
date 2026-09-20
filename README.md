@@ -55,4 +55,4 @@ Known limitation: `contraction_logs.started_at` is a `TIMESTAMP` without a time
 zone that holds the UTC clock time the client sends. `GET /api/wellness` and the
 server-side 5-1-1 window (`NOW() - INTERVAL '2 hours'`) in `server.js` misread it
 when the server/database time zone is not UTC. `GET /api/wellness/history`
-reads it correctly; the existing routes have not been changed.
+reads it correctly; the existing routes have not been changed
