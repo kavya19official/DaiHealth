@@ -13,7 +13,7 @@ const PORT = process.env.PORT || 3001;
 
 
   app.use(cors({
-  origin: ['http://localhost:8000', 'http://localhost:8080', 'http://127.0.0.1:8000', 'http://127.0.0.1:8080', 'http://localhost:5500'],
+  origin: ['http://localhost:8000', 'http://localhost:8080', 'http://localhost:8081', 'http://127.0.0.1:8000', 'http://127.0.0.1:8080', 'http://localhost:5500'],
   credentials: true
 }));
 
@@ -907,6 +907,9 @@ app.patch('/api/appointments/:id/status', authenticateToken, authorizeRole(['doc
     res.status(500).json({ error: 'Failed to update appointment' });
   }
 });
+
+// Mother dashboard: pregnancy profile, vitals/kick logs, reports
+require('./motherDashboard')(app, { pool, authenticateToken, authorizeRole, MILESTONE_TEMPLATE });
 
 // Health check
 app.get('/api/health', (req, res) => {
