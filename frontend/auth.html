@@ -17,7 +17,9 @@
       <span><span class="brand__name">DAI</span><span class="brand__tag">Hospital Workflow</span></span>
     </a>
     <nav class="site-nav" aria-label="Primary navigation">
-      <a href="dashboard.html">Dashboard</a>
+      <a href="dashboard.html">Mother / Patient</a>
+      <a href="doctor.html">Doctor</a>
+      <a href="hospital.html">Hospital Team</a>
       <a href="index.html#modules">Features</a>
       <a href="index.html#why">About</a>
     </nav>
@@ -167,7 +169,8 @@
       <h4>Resources</h4>
       <ul class="footer-links">
         <li><a href="index.html#why">Safety model</a></li>
-        <li><a href="dashboard.html">Mother dashboard</a></li>
+        <li><a href="dashboard.html">Mother / patient portal</a></li>
+        <li><a href="doctor.html">Doctor portal</a></li>
         <li><a href="hospital.html">Hospital console</a></li>
       </ul>
     </div>
@@ -191,6 +194,11 @@ var errorBox = document.getElementById('errorBox');
 function showError(msg) { errorBox.textContent = msg; errorBox.classList.add('is-visible'); }
 function clearError() { errorBox.classList.remove('is-visible'); }
 
+function redirectForUser(user) {
+  if (user && user.role === 'doctor') return 'doctor.html';
+  return 'dashboard.html';
+}
+
 async function submitAuth(path, payload, btn) {
   clearError();
   btn.disabled = true;
@@ -208,7 +216,7 @@ async function submitAuth(path, payload, btn) {
       return;
     }
     localStorage.removeItem('dai_guest');
-    window.location.href = 'dashboard.html';
+    window.location.href = redirectForUser(data && data.user);
   } catch (err) {
     showError('Network error \u2014 is the DAI server running?');
   } finally {

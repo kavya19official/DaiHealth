@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DAI — Doctor Portal</title>
+<meta name="description" content="DAI doctor portal for patient panels, care gaps, pre-consult briefs, appointments, reviewed drafts and manual priority flags.">
+<meta name="theme-color" content="#c23a76">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="doctor-page">
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="appbar">
+  <div class="wrap appbar__inner">
+    <a class="brand" href="index.html" aria-label="DAI home">
+      <img class="brand__mark" src="assets/logo.jpeg" width="48" height="48" alt="">
+      <span><span class="brand__name">DAI</span><span class="brand__tag">Doctor Portal</span></span>
+    </a>
+    <nav class="site-nav" aria-label="Primary navigation">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="index.html#modules">Features</a>
+      <a href="index.html#why">About</a>
+    </nav>
+    <div class="header-actions">
+      <nav class="interface-switch" aria-label="Switch DAI interface">
+        <a href="dashboard.html">Mother / Patient</a>
+        <a class="is-active" href="doctor.html">Doctor</a>
+        <a href="hospital.html">Hospital Team</a>
+      </nav>
+      <span class="avatar-pill"><span class="dot">SK</span> Dr. S. Kumar</span>
+    </div>
+  </div>
+</header>
+
+<main id="main" class="doctor-shell">
+  <section class="doctor-hero">
+    <div class="wrap doctor-hero__grid">
+      <div>
+        <span class="eyebrow">Daily clinical workspace</span>
+        <h1>Today’s patients, gaps and consult context.</h1>
+        <p>The doctor portal is focused on what you need before and during consultations: your panel, open operational gaps, upcoming appointments, fact-only briefs and reviewable drafts.</p>
+      </div>
+      <div class="doctor-safety card">
+        <h2>Assistive-only controls</h2>
+        <p>No diagnosis, treatment recommendation or clinical risk score is generated here. Priority flags are doctor-set only.</p>
+        <div class="doctor-status-row">
+          <span class="tag tag--ok">Human review required</span>
+          <span class="tag tag--next">Audit enabled</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap doctor-workspace">
+    <div class="doctor-metrics" id="doctorMetrics"></div>
+
+    <div class="doctor-layout">
+      <aside class="doctor-panel card">
+        <div class="doctor-panel__head">
+          <div>
+            <h2>My patients</h2>
+            <p>Sorted for daily follow-up work.</p>
+          </div>
+          <input id="doctorSearch" class="search-input" type="search" placeholder="Search name or ID">
+        </div>
+        <div id="doctorPatientList" class="doctor-list"></div>
+      </aside>
+
+      <section class="doctor-detail card" id="doctorDetail"></section>
+    </div>
+
+    <div class="doctor-grid">
+      <section class="card doctor-card">
+        <div class="doctor-card__head">
+          <div>
+            <h2>Pre-consult brief</h2>
+            <p>Facts, dates and flags only. No clinical interpretation.</p>
+          </div>
+          <span class="tag" id="briefState">pending review</span>
+        </div>
+        <div class="doctor-brief-grid">
+          <div>
+            <h3>Extracted facts</h3>
+            <div id="briefFacts" class="doctor-stack"></div>
+          </div>
+          <div>
+            <h3>Missing or inconsistent info</h3>
+            <div id="briefFlags" class="doctor-stack"></div>
+          </div>
+        </div>
+        <div class="doctor-actions">
+          <button class="btn btn--primary" data-action="review-brief">Mark reviewed</button>
+          <button class="btn btn--ghost" data-action="reject-brief">Reject extracted item</button>
+        </div>
+      </section>
+
+      <section class="card doctor-card">
+        <div class="doctor-card__head">
+          <div>
+            <h2>Upcoming appointments</h2>
+            <p>Queue context for patients under your care.</p>
+          </div>
+        </div>
+        <div id="doctorAppointments" class="doctor-stack"></div>
+      </section>
+    </div>
+
+    <div class="doctor-grid">
+      <section class="card doctor-card">
+        <div class="doctor-card__head">
+          <div>
+            <h2>Drafting assistant</h2>
+            <p>Draft generation and finalization stay separate.</p>
+          </div>
+          <button class="btn btn--primary btn--sm" data-action="new-draft">Generate draft</button>
+        </div>
+        <div id="doctorDrafts" class="doctor-draft-grid"></div>
+      </section>
+
+      <section class="card doctor-card">
+        <div class="doctor-card__head">
+          <div>
+            <h2>Recent audit</h2>
+            <p>Actions from doctor, hospital and agent workflows.</p>
+          </div>
+        </div>
+        <div id="doctorAudit" class="doctor-stack"></div>
+      </section>
+    </div>
+  </section>
+</main>
+
+<div class="modal-backdrop" id="doctorModal" aria-hidden="true">
+  <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="doctorModalTitle">
+    <div class="modal-box__head">
+      <div>
+        <h2 id="doctorModalTitle">Review action</h2>
+        <p id="doctorModalCopy">Add notes before this action is audited.</p>
+      </div>
+      <button class="modal-close" data-action="close-modal">x</button>
+    </div>
+    <div class="form-group">
+      <label for="doctorModalNotes">Notes</label>
+      <textarea id="doctorModalNotes" placeholder="Reason, correction or next step"></textarea>
+    </div>
+    <button class="btn btn--primary" data-action="confirm-modal">Confirm and audit</button>
+  </div>
+</div>
+
+<div class="toast" id="doctorToast"><span id="doctorToastMsg"></span></div>
+
+<script>
+(function () {
+  "use strict";
+
+  var API_BASE = "http://localhost:3001/api";
+  var state = null;
+  var selectedPatientId = null;
+  var pendingAction = null;
+
+  function byId(id) { return document.getElementById(id); }
+  function html(value) {
+    return String(value == null ? "" : value).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  function statusClass(status) {
+    if (status === "approved" || status === "published" || status === "reviewed") return "tag--ok";
+    if (status === "pending_review" || status === "draft") return "tag--pending";
+    if (status === "rejected" || status === "rejected_item") return "tag--due";
+    return "tag--next";
+  }
+  function patientName(id) {
+    var p = (state.patients || []).filter(function (x) { return x.id === id; })[0];
+    return p ? p.name : id;
+  }
+  function showToast(message) {
+    byId("doctorToastMsg").textContent = message;
+    byId("doctorToast").classList.add("is-shown");
+    clearTimeout(showToast.t);
+    showToast.t = setTimeout(function () { byId("doctorToast").classList.remove("is-shown"); }, 2400);
+  }
+  async function api(path, options) {
+    var res = await fetch(API_BASE + path, Object.assign({
+      headers: { "Content-Type": "application/json" }
+    }, options || {}));
+    var data = await res.json().catch(function () { return {}; });
+    if (!res.ok) throw new Error(data.error || "Request failed");
+    return data;
+  }
+  async function loadState() {
+    try {
+      state = await api("/doctor-portal/state");
+    } catch (error) {
+      var hospital = await api("/hospital/state");
+      state = {
+        doctor: { name: "Dr. S. Kumar", specialty: "Maternal continuity and OPD follow-up" },
+        patients: hospital.patients.filter(function (p) { return p.provider === "Dr. S. Kumar"; }).map(function (p) {
+          var gaps = hospital.gaps.filter(function (g) { return g.patientId === p.id; });
+          return Object.assign({}, p, { openGaps: gaps, openGapCount: gaps.length, doctorPriorityFlag: hospital.doctorPriorityFlags && hospital.doctorPriorityFlags[p.id] && hospital.doctorPriorityFlags[p.id].active ? hospital.doctorPriorityFlags[p.id] : null });
+        }),
+        consultationBrief: hospital.consultationBrief,
+        appointments: hospital.queue.filter(function (q) { return q.patientId === "P-1002" || q.patientId === "P-1001"; }).map(function (q) { return Object.assign({}, q, { patient: hospital.patients.filter(function (p) { return p.id === q.patientId; })[0] }); }),
+        drafts: hospital.drafts,
+        audit: hospital.audit
+      };
+    }
+    if (!selectedPatientId && state.patients.length) selectedPatientId = state.patients[0].id;
+    renderAll();
+  }
+  async function post(path, payload) {
+    var result = await api(path, {
+      method: "POST",
+      body: JSON.stringify(Object.assign({ actor: state.doctor.name }, payload || {}))
+    });
+    if (result.state) state = result.state;
+    renderAll();
+    return result;
+  }
+  function selectedPatient() {
+    return state.patients.filter(function (p) { return p.id === selectedPatientId; })[0] || state.patients[0];
+  }
+  function renderMetrics() {
+    var gaps = state.patients.reduce(function (sum, p) { return sum + p.openGapCount; }, 0);
+    var flags = state.patients.filter(function (p) { return p.doctorPriorityFlag; }).length;
+    var reviews = state.drafts.filter(function (d) { return d.status === "draft" || d.status === "pending_review"; }).length + (state.consultationBrief.status === "pending_review" ? 1 : 0);
+    byId("doctorMetrics").innerHTML = [
+      ["My patients", state.patients.length, "Under current doctor"],
+      ["Open care gaps", gaps, "Operational follow-up"],
+      ["Manual priority flags", flags, "Doctor-set only"],
+      ["Needs review", reviews, "Briefs and drafts"]
+    ].map(function (m) {
+      return '<div class="card doctor-metric"><span>' + m[0] + '</span><b>' + m[1] + '</b><em>' + m[2] + '</em></div>';
+    }).join("");
+  }
+  function renderPatients() {
+    var search = byId("doctorSearch").value.trim().toLowerCase();
+    var patients = state.patients.filter(function (p) { return !search || (p.name + " " + p.id).toLowerCase().indexOf(search) !== -1; });
+    byId("doctorPatientList").innerHTML = patients.map(function (p) {
+      return '<button class="doctor-patient ' + (p.id === selectedPatientId ? 'is-selected' : '') + '" data-patient="' + p.id + '">' +
+        '<span class="doctor-avatar">' + html(p.name.split(" ").map(function (x) { return x[0]; }).join("").slice(0, 2)) + '</span>' +
+        '<span><b>' + html(p.name) + '</b><small>' + html(p.id) + ' · ' + html(p.stage) + '</small></span>' +
+        '<span class="tag ' + (p.openGapCount ? 'tag--due' : 'tag--ok') + '">' + p.openGapCount + ' gaps</span>' +
+      '</button>';
+    }).join("") || '<div class="empty-state">No patients match this search.</div>';
+  }
+  function renderDetail() {
+    var p = selectedPatient();
+    if (!p) {
+      byId("doctorDetail").innerHTML = '<div class="empty-state">No patients available.</div>';
+      return;
+    }
+    byId("doctorDetail").innerHTML =
+      '<div class="doctor-detail__head">' +
+        '<div><span class="eyebrow">Selected patient</span><h2>' + html(p.name) + '</h2><p>' + html(p.id) + ' · Age ' + html(p.age) + ' · ' + html(p.stage) + '</p></div>' +
+        '<span class="tag ' + (p.doctorPriorityFlag ? 'tag--due' : 'tag--next') + '">' + (p.doctorPriorityFlag ? 'doctor-set priority' : 'no manual priority') + '</span>' +
+      '</div>' +
+      '<div class="doctor-actions">' +
+        '<button class="btn btn--primary" data-action="set-priority" data-patient="' + p.id + '">Set manual priority</button>' +
+        '<button class="btn btn--ghost" data-action="clear-priority" data-patient="' + p.id + '">Clear priority</button>' +
+      '</div>' +
+      '<h3>Open care gaps</h3>' +
+      '<div class="doctor-stack">' +
+        (p.openGaps && p.openGaps.length ? p.openGaps.map(function (g) {
+          return '<div class="doctor-item"><b>' + html(g.expectedType) + '</b><p>Due ' + html(g.dueDate) + ' · ' + g.daysOverdue + ' days overdue</p><p>' + html(g.provenance) + '</p></div>';
+        }).join("") : '<div class="empty-state">No open gaps for this patient.</div>') +
+      '</div>';
+  }
+  function renderBrief() {
+    var brief = state.consultationBrief;
+    byId("briefState").className = "tag " + statusClass(brief.status);
+    byId("briefState").textContent = brief.status.replace("_", " ");
+    byId("briefFacts").innerHTML = brief.facts.map(function (f) {
+      return '<div class="doctor-item"><b>' + html(f.label) + ': ' + html(f.value) + '</b><p>Source: ' + html(f.source) + ' · Confidence: ' + html(f.confidence) + '</p></div>';
+    }).join("");
+    byId("briefFlags").innerHTML = brief.flags.map(function (f) {
+      return '<div class="doctor-item"><b>' + html(f.type.replace("_", " ")) + '</b><p>' + html(f.text) + '</p><p>Source: ' + html(f.source) + '</p></div>';
+    }).join("");
+  }
+  function renderAppointments() {
+    byId("doctorAppointments").innerHTML = state.appointments.map(function (a) {
+      return '<div class="doctor-item"><b>' + html(a.slot) + ' · ' + html(a.patient ? a.patient.name : patientName(a.patientId)) + '</b><p>Status: ' + html(a.status) + ' · waiting ' + html(a.waitMins) + ' min</p><p>' + (a.urgency ? html(a.urgency) : 'No manual urgency flag') + '</p></div>';
+    }).join("") || '<div class="empty-state">No appointments in the current queue.</div>';
+  }
+  function renderDrafts() {
+    byId("doctorDrafts").innerHTML = state.drafts.map(function (d) {
+      var canApprove = d.status === "draft" || d.status === "pending_review";
+      var canFinalize = d.status === "approved";
+      return '<article class="doctor-draft">' +
+        '<div class="doctor-status-row"><span class="tag tag--next">' + html(d.type) + '</span><span class="tag ' + statusClass(d.status) + '">' + html(d.status.replace("_", " ")) + '</span></div>' +
+        '<p>' + html(d.body) + '</p>' +
+        '<div class="doctor-actions">' +
+          (canApprove ? '<button class="btn btn--primary btn--sm" data-action="approve-draft" data-draft="' + d.id + '">Approve</button>' : '') +
+          (canFinalize ? '<button class="btn btn--primary btn--sm" data-action="finalize-draft" data-draft="' + d.id + '">Finalize</button>' : '') +
+          '<button class="btn btn--ghost btn--sm" data-action="reject-draft" data-draft="' + d.id + '">Reject</button>' +
+        '</div>' +
+      '</article>';
+    }).join("");
+  }
+  function renderAudit() {
+    byId("doctorAudit").innerHTML = state.audit.slice(0, 10).map(function (a) {
+      return '<div class="doctor-item"><b>' + html(a.actor) + ' · ' + html(a.action) + '</b><p>' + html(a.entityType) + ' ' + html(a.entityId) + ' · ' + new Date(a.timestamp).toLocaleString("en-IN") + '</p><p>' + html(a.detail) + '</p></div>';
+    }).join("");
+  }
+  function renderAll() {
+    renderMetrics();
+    renderPatients();
+    renderDetail();
+    renderBrief();
+    renderAppointments();
+    renderDrafts();
+    renderAudit();
+  }
+  function openModal(title, copy, callback) {
+    pendingAction = callback;
+    byId("doctorModalTitle").textContent = title;
+    byId("doctorModalCopy").textContent = copy;
+    byId("doctorModalNotes").value = "";
+    byId("doctorModal").classList.add("is-open");
+    byId("doctorModal").setAttribute("aria-hidden", "false");
+  }
+  function closeModal() {
+    byId("doctorModal").classList.remove("is-open");
+    byId("doctorModal").setAttribute("aria-hidden", "true");
+    pendingAction = null;
+  }
+
+  document.addEventListener("click", function (event) {
+    var patientBtn = event.target.closest("[data-patient]");
+    if (patientBtn && patientBtn.classList.contains("doctor-patient")) {
+      selectedPatientId = patientBtn.dataset.patient;
+      renderPatients();
+      renderDetail();
+      return;
+    }
+    var btn = event.target.closest("[data-action]");
+    if (!btn) return;
+    var action = btn.dataset.action;
+    if (action === "close-modal") closeModal();
+    if (action === "confirm-modal" && pendingAction) {
+      var run = pendingAction;
+      var notes = byId("doctorModalNotes").value.trim();
+      closeModal();
+      run(notes);
+    }
+    if (action === "set-priority" || action === "clear-priority") {
+      var pid = btn.dataset.patient;
+      openModal(action === "set-priority" ? "Set doctor priority" : "Clear doctor priority", "This manual flag is set only by the doctor and is audited.", function (notes) {
+        post("/doctor-portal/patients/" + encodeURIComponent(pid) + "/priority", { active: action === "set-priority", notes: notes }).then(function () {
+          showToast("Manual priority updated.");
+        }).catch(function (err) { showToast(err.message); });
+      });
+    }
+    if (action === "review-brief" || action === "reject-brief") {
+      var briefAction = action === "review-brief" ? "review" : "reject";
+      post("/doctor-portal/consultations/" + encodeURIComponent(state.consultationBrief.appointmentId) + "/brief/" + briefAction, {}).then(function () {
+        showToast("Brief review state updated.");
+      }).catch(function (err) { showToast(err.message); });
+    }
+    if (action === "new-draft") {
+      var p = selectedPatient();
+      post("/doctor-portal/drafts", { patientId: p && p.id }).then(function () {
+        showToast("Draft generated for review.");
+      }).catch(function (err) { showToast(err.message); });
+    }
+    if (btn.dataset.draft) {
+      var draftAction = action === "approve-draft" ? "approve" : action === "finalize-draft" ? "finalize" : "reject";
+      openModal("Review draft", "Draft action: " + draftAction + ". Finalize is blocked until approved.", function (notes) {
+        post("/doctor-portal/drafts/" + encodeURIComponent(btn.dataset.draft) + "/" + draftAction, { notes: notes }).then(function () {
+          showToast("Draft state updated.");
+        }).catch(function (err) { showToast(err.message); });
+      });
+    }
+  });
+
+  byId("doctorSearch").addEventListener("input", renderPatients);
+  loadState().catch(function (error) {
+    byId("doctorDetail").innerHTML = '<div class="empty-state">Start the backend server to load the doctor portal API. ' + html(error.message) + '</div>';
+  });
+})();
+</script>
+</body>
+</html>

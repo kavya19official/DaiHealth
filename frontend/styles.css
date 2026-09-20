@@ -480,13 +480,46 @@ body[data-role="mother"] #viewDoctor, body[data-role="doctor"] #viewFamily { dis
 .chat-panel__input { display: grid; grid-template-columns: 1fr 42px; gap: .5rem; padding: .8rem; border-top: 1px solid var(--line); }
 .chat-panel__input button { border: 0; border-radius: 999px; background: var(--brand); color: #fff; }
 
+.doctor-shell { padding-bottom: 4rem; }
+.doctor-hero { padding-block: clamp(1.5rem, 4vw, 3rem); background: var(--surface); border-bottom: 1px solid var(--line); }
+.doctor-hero__grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, 420px); gap: 1.25rem; align-items: stretch; }
+.doctor-hero h1 { max-width: 820px; font-size: clamp(2rem, 4vw, 3.7rem); font-weight: 850; }
+.doctor-hero p { max-width: 760px; font-size: 1.05rem; }
+.doctor-safety { padding: 1.2rem; display: flex; flex-direction: column; justify-content: center; }
+.doctor-workspace { padding-block: 1.4rem; }
+.doctor-metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .85rem; margin-bottom: 1rem; }
+.doctor-metric { padding: 1rem; }
+.doctor-metric span { display: block; color: var(--ink-3); font-size: .75rem; font-weight: 850; text-transform: uppercase; letter-spacing: .05em; }
+.doctor-metric b { display: block; margin-top: .35rem; color: var(--brand); font-size: 1.8rem; line-height: 1; font-weight: 850; }
+.doctor-metric em { display: block; margin-top: .35rem; color: var(--ink-3); font-style: normal; font-size: .82rem; }
+.doctor-layout { display: grid; grid-template-columns: minmax(290px, 390px) minmax(0, 1fr); gap: 1rem; align-items: start; }
+.doctor-panel, .doctor-detail, .doctor-card { padding: 1rem; }
+.doctor-panel__head, .doctor-card__head, .doctor-detail__head { display: flex; align-items: start; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; }
+.doctor-panel__head { display: grid; }
+.doctor-panel__head p, .doctor-card__head p, .doctor-detail__head p { margin: 0; font-size: .88rem; }
+.doctor-list, .doctor-stack { display: grid; gap: .7rem; }
+.doctor-patient { width: 100%; display: grid; grid-template-columns: 42px minmax(0, 1fr) auto; gap: .75rem; align-items: center; padding: .85rem; border: 1px solid var(--line); border-radius: var(--radius); background: #fff; color: var(--ink); text-align: left; cursor: pointer; }
+.doctor-patient:hover, .doctor-patient.is-selected { border-color: var(--brand); background: var(--brand-soft); }
+.doctor-patient b, .doctor-patient small { display: block; }
+.doctor-patient small { color: var(--ink-3); font-size: .78rem; }
+.doctor-avatar { width: 42px; height: 42px; border-radius: 999px; display: grid; place-items: center; background: var(--brand-soft); color: var(--brand); font-weight: 850; }
+.doctor-actions, .doctor-status-row { display: flex; flex-wrap: wrap; gap: .55rem; align-items: center; }
+.doctor-detail h3, .doctor-card h3 { margin-top: 1rem; font-size: .92rem; text-transform: uppercase; letter-spacing: .05em; color: var(--ink-3); }
+.doctor-item, .doctor-draft { padding: .85rem; border: 1px solid var(--line); border-radius: var(--radius); background: var(--ground); }
+.doctor-item b { display: block; color: var(--ink); }
+.doctor-item p, .doctor-draft p { margin: .35rem 0 0; font-size: .86rem; }
+.doctor-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 1rem; margin-top: 1rem; }
+.doctor-brief-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.doctor-draft-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .8rem; }
+.doctor-draft .doctor-status-row { margin-bottom: .6rem; }
+
 @media (max-width: 1000px) {
   .site-header__inner, .appbar__inner, .nav__inner { min-height: auto; padding-block: .8rem; flex-wrap: wrap; }
   .site-nav { order: 3; width: 100%; justify-content: flex-start; overflow-x: auto; }
-  .hero__grid, .workflow-row, .auth-main, .fv-header, .appt-grid, .dv-grid { grid-template-columns: 1fr; }
+  .hero__grid, .workflow-row, .auth-main, .fv-header, .appt-grid, .dv-grid, .doctor-hero__grid, .doctor-layout, .doctor-grid, .doctor-brief-grid { grid-template-columns: 1fr; }
   .workflow-row:nth-child(even) .workflow-mock { order: 0; }
   .module-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .why-grid, .patient-actionbar, .wellness-grid, .team-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .why-grid, .patient-actionbar, .wellness-grid, .team-grid, .doctor-metrics, .doctor-draft-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .footer-grid { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 640px) {
@@ -494,7 +527,7 @@ body[data-role="mother"] #viewDoctor, body[data-role="doctor"] #viewFamily { dis
   .header-actions { width: 100%; justify-content: space-between; flex-wrap: wrap; }
   .contact-link { display: none; }
   .hero-art { min-height: 0; }
-  .module-grid, .why-grid, .patient-actionbar, .wellness-grid, .team-grid, .field-row, .form-row-3, .footer-grid, .stat-strip { grid-template-columns: 1fr; }
+  .module-grid, .why-grid, .patient-actionbar, .wellness-grid, .team-grid, .field-row, .form-row-3, .footer-grid, .stat-strip, .doctor-metrics, .doctor-draft-grid { grid-template-columns: 1fr; }
   .role-toggle, .contraction-actions { grid-template-columns: 1fr; flex-direction: column; }
   .gap-alert { grid-template-columns: 1fr; }
   .mini-milestone, .milestone { grid-template-columns: 24px 1fr; }

@@ -974,6 +974,15 @@ const hospitalCareEvents = [
 
 const hospitalState = {
   resolvedGapIds: {},
+  doctorPriorityFlags: {
+    'P-1002': {
+      active: true,
+      setBy: 'Dr. S. Kumar',
+      label: 'Doctor-set high-priority follow-up',
+      notes: 'Manual flag for closer follow-up before next OPD visit.',
+      updatedAt: '2026-09-20T09:00:00+05:30'
+    }
+  },
   consultationBrief: {
     patientId: 'P-1002',
     appointmentId: 'A-902',
@@ -1073,6 +1082,7 @@ function hospitalSnapshot() {
     patients: hospitalPatients,
     careEvents: hospitalCareEvents,
     resolvedGapIds: hospitalState.resolvedGapIds,
+    doctorPriorityFlags: hospitalState.doctorPriorityFlags,
     consultationBrief: hospitalState.consultationBrief,
     queue: hospitalState.queue,
     drafts: hospitalState.drafts,
@@ -1185,6 +1195,159 @@ app.post('/api/hospital/content/:id/publish', (req, res) => {
 
 app.get('/api/hospital/audit', (req, res) => {
   res.json({ audit: hospitalState.audit });
+});
+
+function doctorPortalSnapshot(provider = 'Dr. S. Kumar') {
+  const allGaps = computeHospitalGaps();
+  const doctorPatients = hospitalPatients
+    .filter((patient) => patient.provider === provider)
+    .map((patient) => {
+      const gaps = allGaps.filter((gap) => gap.patientId === patient.id);
+      const flag = hospitalState.doctorPriorityFlags[patient.id] || null;
+      return {
+        ...patient,
+        openGaps: gaps,
+        openGapCount: gaps.length,
+        doctorPriorityFlag: flag && flag.active ? flag : null,
+        nextAppointment: hospitalState.queue.find((slot) => slot.patientId === patient.id) || null
+      };
+    });
+
+  return {
+    today: HOSPITAL_TODAY,
+    safety: {
+      mode: 'assistive_only',
+      doctorSetPriorityOnly: true,
+      disallowed: ['diagnosis', 'treatment_recommendation', 'clinical_risk_scoring', 'autonomous_clinical_action'],
+      requiredHumanReview: true
+    },
+    doctor: {
+      id: 'DOC-100',
+      name: provider,
+      role: 'doctor',
+      specialty: 'Maternal continuity and OPD follow-up'
+    },
+    patients: doctorPatients,
+    consultationBrief: hospitalState.consultationBrief,
+    appointments: hospitalState.queue
+      .filter((slot) => doctorPatients.some((patient) => patient.id === slot.patientId))
+      .map((slot) => ({ ...slot, patient: hospitalPatients.find((patient) => patient.id === slot.patientId) })),
+    drafts: hospitalState.drafts,
+    audit: hospitalState.audit
+  };
+}
+
+app.get('/api/doctor-portal/state', (req, res) => {
+  res.json(doctorPortalSnapshot(req.query.provider || 'Dr. S. Kumar'));
+});
+
+app.post('/api/doctor-portal/patients/:id/priority', (req, res) => {
+  const patient = hospitalPatients.find((item) => item.id === req.params.id);
+  if (!patient) return res.status(404).json({ error: 'Patient not found' });
+
+  const active = req.body.active !== false;
+  if (active) {
+    hospitalState.doctorPriorityFlags[patient.id] = {
+      active: true,
+      setBy: req.body.actor || patient.provider,
+      label: 'Doctor-set high-priority follow-up',
+      notes: req.body.notes || 'Manual doctor-set priority flag. This is not inferred by AI.',
+      updatedAt: new Date().toISOString()
+    };
+    hospitalAudit(req.body.actor || patient.provider, 'doctor_priority_flag_set', 'Patient', patient.id, hospitalState.doctorPriorityFlags[patient.id].notes);
+  } else {
+    const existing = hospitalState.doctorPriorityFlags[patient.id];
+    hospitalState.doctorPriorityFlags[patient.id] = {
+      ...(existing || {}),
+      active: false,
+      setBy: req.body.actor || patient.provider,
+      notes: req.body.notes || 'Manual doctor-set priority flag removed.',
+      updatedAt: new Date().toISOString()
+    };
+    hospitalAudit(req.body.actor || patient.provider, 'doctor_priority_flag_removed', 'Patient', patient.id, hospitalState.doctorPriorityFlags[patient.id].notes);
+  }
+
+  res.json({ message: 'Doctor-set priority updated and audited', state: doctorPortalSnapshot(patient.provider) });
+});
+
+app.post('/api/doctor-portal/consultations/:id/brief/review', (req, res) => {
+  hospitalState.consultationBrief.status = 'reviewed';
+  hospitalAudit(req.body.actor || 'Dr. S. Kumar', 'doctor_brief_reviewed', 'ConsultationBrief', req.params.id, req.body.notes || 'Doctor reviewed fact-only pre-consult brief.');
+  res.json({ message: 'Brief reviewed', state: doctorPortalSnapshot(req.body.actor || 'Dr. S. Kumar') });
+});
+
+app.post('/api/doctor-portal/consultations/:id/brief/reject', (req, res) => {
+  hospitalState.consultationBrief.status = 'rejected_item';
+  hospitalAudit(req.body.actor || 'Dr. S. Kumar', 'doctor_brief_item_rejected', 'ConsultationBrief', req.params.id, req.body.notes || 'Doctor rejected an extracted brief item for correction.');
+  res.json({ message: 'Brief item rejected', state: doctorPortalSnapshot(req.body.actor || 'Dr. S. Kumar') });
+});
+
+app.post('/api/doctor-portal/drafts', (req, res) => {
+  const id = `D-${Math.floor(900 + Math.random() * 90)}`;
+  const draft = {
+    id,
+    type: req.body.type || 'referral letter',
+    patientId: req.body.patientId || null,
+    status: 'draft',
+    body: req.body.body || 'Doctor portal draft generated from available patient facts and approved source material. Review and approval required before finalizing.'
+  };
+  hospitalState.drafts.unshift(draft);
+  hospitalAudit('drafting-agent', 'doctor_draft_generated', 'ContentDraft', id, 'Doctor portal draft generated; no send/file action performed.');
+  res.status(201).json({ draft, state: doctorPortalSnapshot(req.body.actor || 'Dr. S. Kumar') });
+});
+
+app.post('/api/doctor-portal/drafts/:id/approve', (req, res) => {
+  const draft = hospitalState.drafts.find((item) => item.id === req.params.id);
+  if (!draft) return res.status(404).json({ error: 'Draft not found' });
+  draft.status = 'approved';
+  hospitalAudit(req.body.actor || 'Dr. S. Kumar', 'doctor_draft_approved', 'ContentDraft', draft.id, req.body.notes || 'Doctor approved draft content.');
+  res.json({ message: 'Draft approved', state: doctorPortalSnapshot(req.body.actor || 'Dr. S. Kumar') });
+});
+
+app.post('/api/doctor-portal/drafts/:id/reject', (req, res) => {
+  const draft = hospitalState.drafts.find((item) => item.id === req.params.id);
+  if (!draft) return res.status(404).json({ error: 'Draft not found' });
+  draft.status = 'rejected';
+  hospitalAudit(req.body.actor || 'Dr. S. Kumar', 'doctor_draft_rejected', 'ContentDraft', draft.id, req.body.notes || 'Doctor rejected draft content.');
+  res.json({ message: 'Draft rejected', state: doctorPortalSnapshot(req.body.actor || 'Dr. S. Kumar') });
+});
+
+app.post('/api/doctor-portal/drafts/:id/finalize', (req, res) => {
+  const draft = hospitalState.drafts.find((item) => item.id === req.params.id);
+  if (!draft) return res.status(404).json({ error: 'Draft not found' });
+  if (draft.status !== 'approved') {
+    return res.status(409).json({ error: 'Finalizing is blocked until the doctor approves the draft.' });
+  }
+  draft.status = 'published';
+  hospitalAudit(req.body.actor || 'Dr. S. Kumar', 'doctor_draft_finalized', 'ContentDraft', draft.id, req.body.notes || 'Approved doctor draft finalized.');
+  res.json({ message: 'Draft finalized', state: doctorPortalSnapshot(req.body.actor || 'Dr. S. Kumar') });
+});
+
+app.get('/api/patient/state', (req, res) => {
+  res.json({
+    patient: {
+      id: 'P-1002',
+      name: 'Meera Joshi',
+      stage: 'Trimester 3',
+      language: 'English',
+      consent: { documents: true, emergencyLocation: false }
+    },
+    timeline: hospitalPathways.maternal.events.map((event) => ({
+      id: event.id,
+      title: event.type,
+      stage: event.stage,
+      status: computeHospitalGaps().some((gap) => gap.patientId === 'P-1002' && gap.expectedType === event.type) ? 'needs_attention' : 'recorded_or_upcoming'
+    })),
+    appointments: hospitalState.queue.filter((slot) => slot.patientId === 'P-1002'),
+    documents: [
+      { id: 'doc-ref-192', type: 'Referral letter', status: 'uploaded', reviewStatus: 'pending_review' },
+      { id: 'scan-8322', type: 'Anomaly scan report', status: 'available', reviewStatus: 'reviewed' }
+    ],
+    safety: {
+      companionScope: 'milestone_explanation_only',
+      noDiagnosisOrTreatmentAdvice: true
+    }
+  });
 });
 
 // Health check

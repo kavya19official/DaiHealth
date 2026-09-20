@@ -854,12 +854,15 @@ h1, h2, h3, h4 { font-family: var(--sans); font-weight: 820; letter-spacing: -.0
       <div><span class="brand-name">DAI</span><small>Hospital console</small></div>
     </div>
     <nav class="primary-nav" aria-label="Primary navigation">
-      <a href="dashboard.html">Dashboard</a>
+      <a href="dashboard.html">Mother / Patient</a>
+      <a href="doctor.html">Doctor</a>
+      <a href="hospital.html">Hospital Team</a>
       <a href="index.html#modules">Features</a>
       <a href="index.html#why">About</a>
     </nav>
     <nav class="surface-switch" aria-label="Switch DAI interface">
-      <a href="dashboard.html">Mother / caregiver</a>
+      <a href="dashboard.html">Mother / Patient</a>
+      <a href="doctor.html">Doctor</a>
       <a class="is-active" href="hospital.html">Hospital team</a>
     </nav>
     <nav class="nav" aria-label="Hospital modules">
@@ -867,6 +870,7 @@ h1, h2, h3, h4 { font-family: var(--sans); font-weight: 820; letter-spacing: -.0
       <a href="#registry">Registry</a>
       <a href="#brief">Pre-consult brief</a>
       <a href="#clinic">Clinic flow</a>
+      <a href="#facility">Facility</a>
       <a href="#drafts">Drafts</a>
       <a href="#audit">Audit</a>
     </nav>
@@ -1003,6 +1007,37 @@ h1, h2, h3, h4 { font-family: var(--sans); font-weight: 820; letter-spacing: -.0
           <button class="btn btn-primary" data-action="new-draft">Generate draft</button>
         </div>
         <div class="grid grid-3" id="draftCards"></div>
+      </section>
+
+      <section id="facility" class="section">
+        <div class="section-head">
+          <div>
+            <h2>Facility readiness and SOS intake</h2>
+            <p>Hospital/admin placeholders for expected cases, staff availability, equipment readiness and verified emergency intake. Status is coordinated around human-set urgency only.</p>
+          </div>
+        </div>
+        <div class="grid grid-3">
+          <div class="panel detail-block">
+            <h4>Expected high-acuity cases</h4>
+            <div class="detail-list">
+              <div class="queue-card"><strong>Meera Joshi · 09:30 OPD</strong><p>Doctor-set high-priority follow-up. Room and care team review pending.</p><span class="tag tag-violet">manual flag</span></div>
+              <div class="queue-card"><strong>No AI-generated urgency</strong><p>Cases appear here only after clinician or staff action.</p><span class="tag tag-gray">guardrail</span></div>
+            </div>
+          </div>
+          <div class="panel detail-block">
+            <h4>Equipment readiness</h4>
+            <div class="detail-list">
+              <div class="queue-card"><strong>Delivery kit</strong><p>Checked by front desk at 08:50.</p><span class="tag tag-green">ready</span></div>
+              <div class="queue-card"><strong>Ambulance bay</strong><p>Needs manual confirmation before SOS routing.</p><span class="tag tag-amber">confirm</span></div>
+            </div>
+          </div>
+          <div class="panel detail-block">
+            <h4>SOS intake</h4>
+            <div class="detail-list">
+              <div class="queue-card"><strong>No active emergency request</strong><p>Authenticated request, anti-abuse check and human confirmation will be required before facility notification.</p><span class="tag tag-gray">standby</span></div>
+            </div>
+          </div>
+        </div>
       </section>
 
       <section id="audit" class="section">
