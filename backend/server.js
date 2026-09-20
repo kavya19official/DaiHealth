@@ -442,6 +442,178 @@ app.patch('/api/timeline/:id/complete', authenticateToken, authorizeRole(['mothe
 });
 
 // ============================================================================
+// Wellness Routes (mother: own data only)
+// Every table is scoped by `log_date`, a plain DATE string (YYYY-MM-DD) the
+// client supplies — the mother's own local calendar date, not the server's.
+// That's what makes "today" reset at local midnight instead of at UTC
+// midnight (5:30am IST), and it's why every route below requires `date`
+// rather than computing it with CURRENT_DATE.
+// ============================================================================
+
+const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+const isValidDate = (d) => typeof d === 'string' && DATE_RE.test(d);
+
+// Mother: everything needed to render one day of the wellness dashboard
+app.get('/api/wellness', authenticateToken, authorizeRole(['mother']), async (req, res) => {
+  try {
+    const date = req.query.date;
+    if (!isValidDate(date)) {
+      return res.status(400).json({ error: 'A valid date (YYYY-MM-DD) is required' });
+    }
+
+    const [nutrition, water, supplements, contractions, growth] = await Promise.all([
+      pool.query('SELECT id, text, logged_at FROM nutrition_logs WHERE mother_id = $1 AND log_date = $2 ORDER BY logged_at ASC', [req.user.id, date]),
+      pool.query('SELECT glasses FROM water_logs WHERE mother_id = $1 AND log_date = $2', [req.user.id, date]),
+      pool.query('SELECT supplement, taken FROM supplement_logs WHERE mother_id = $1 AND log_date = $2', [req.user.id, date]),
+      pool.query('SELECT id, started_at, duration_ms, gap_ms FROM contraction_logs WHERE mother_id = $1 AND log_date = $2 ORDER BY started_at ASC', [req.user.id, date]),
+      pool.query('SELECT id, log_date, weight_kg, height_cm FROM growth_logs WHERE mother_id = $1 ORDER BY log_date ASC', [req.user.id]),
+    ]);
+
+    const supplementMap = {};
+    supplements.rows.forEach((r) => { supplementMap[r.supplement] = r.taken; });
+
+    res.json({
+      nutrition: nutrition.rows,
+      water_glasses: water.rows[0] ? water.rows[0].glasses : 0,
+      supplements: supplementMap,
+      contractions: contractions.rows,
+      growth: growth.rows,
+    });
+  } catch (error) {
+    console.error('Fetch wellness error:', error);
+    res.status(500).json({ error: 'Failed to fetch wellness data' });
+  }
+});
+
+// Mother: log a meal
+app.post('/api/wellness/nutrition', authenticateToken, authorizeRole(['mother']), async (req, res) => {
+  try {
+    const { date, text } = req.body;
+    if (!isValidDate(date) || !text || !text.trim()) {
+      return res.status(400).json({ error: 'A valid date and meal text are required' });
+    }
+    const result = await pool.query(
+      'INSERT INTO nutrition_logs (mother_id, log_date, text) VALUES ($1, $2, $3) RETURNING id, text, logged_at',
+      [req.user.id, date, text.trim()]
+    );
+    res.status(201).json({ meal: result.rows[0] });
+  } catch (error) {
+    console.error('Add nutrition error:', error);
+    res.status(500).json({ error: 'Failed to log meal' });
+  }
+});
+
+// Mother: add one glass of water for a given day (capped at 8)
+app.post('/api/wellness/water', authenticateToken, authorizeRole(['mother']), async (req, res) => {
+  try {
+    const { date } = req.body;
+    if (!isValidDate(date)) {
+      return res.status(400).json({ error: 'A valid date is required' });
+    }
+    const result = await pool.query(
+      `INSERT INTO water_logs (mother_id, log_date, glasses) VALUES ($1, $2, 1)
+       ON CONFLICT (mother_id, log_date)
+       DO UPDATE SET glasses = LEAST(water_logs.glasses + 1, 8)
+       RETURNING glasses`,
+      [req.user.id, date]
+    );
+    res.json({ water_glasses: result.rows[0].glasses });
+  } catch (error) {
+    console.error('Add water error:', error);
+    res.status(500).json({ error: 'Failed to log water' });
+  }
+});
+
+// Mother: set whether a supplement was taken on a given day
+app.put('/api/wellness/supplements', authenticateToken, authorizeRole(['mother']), async (req, res) => {
+  try {
+    const { date, supplement, taken } = req.body;
+    if (!isValidDate(date) || !supplement) {
+      return res.status(400).json({ error: 'A valid date and supplement name are required' });
+    }
+    await pool.query(
+      `INSERT INTO supplement_logs (mother_id, log_date, supplement, taken) VALUES ($1, $2, $3, $4)
+       ON CONFLICT (mother_id, log_date, supplement) DO UPDATE SET taken = $4`,
+      [req.user.id, date, supplement, !!taken]
+    );
+    res.json({ supplement, taken: !!taken });
+  } catch (error) {
+    console.error('Update supplement error:', error);
+    res.status(500).json({ error: 'Failed to update supplement' });
+  }
+});
+
+// Mother: log a growth measurement (baby weight/height — historical, never resets)
+app.post('/api/wellness/growth', authenticateToken, authorizeRole(['mother']), async (req, res) => {
+  try {
+    const { date, weight, height } = req.body;
+    if (!isValidDate(date) || weight == null || height == null) {
+      return res.status(400).json({ error: 'A valid date, weight and height are required' });
+    }
+    const result = await pool.query(
+      'INSERT INTO growth_logs (mother_id, log_date, weight_kg, height_cm) VALUES ($1, $2, $3, $4) RETURNING id, log_date, weight_kg, height_cm',
+      [req.user.id, date, weight, height]
+    );
+    res.status(201).json({ measurement: result.rows[0] });
+  } catch (error) {
+    console.error('Add growth error:', error);
+    res.status(500).json({ error: 'Failed to log growth measurement' });
+  }
+});
+
+// The 5-1-1 rule: contractions about 5 minutes apart (gap), each lasting
+// about a minute (duration), sustained for about an hour. We treat a
+// contraction as matching if its gap is <=6min and duration is >=40s, then
+// require a run of matching contractions whose total span is >=55 minutes.
+const FIVE_ONE_ONE = { maxGapMs: 6 * 60 * 1000, minDurationMs: 40 * 1000, minSpanMs: 55 * 60 * 1000 };
+
+function checkFiveOneOne(rowsAsc) {
+  // rowsAsc: [{ started_at, duration_ms, gap_ms }], oldest first
+  let runStart = null;
+  for (let i = 0; i < rowsAsc.length; i++) {
+    const r = rowsAsc[i];
+    const matches = r.duration_ms >= FIVE_ONE_ONE.minDurationMs &&
+      (r.gap_ms == null || r.gap_ms <= FIVE_ONE_ONE.maxGapMs);
+    if (!matches) { runStart = null; continue; }
+    if (runStart === null) runStart = new Date(r.started_at).getTime();
+    const span = new Date(r.started_at).getTime() - runStart;
+    if (span >= FIVE_ONE_ONE.minSpanMs) return true;
+  }
+  return false;
+}
+
+// Mother: log a contraction. The client sends its own gap (ms since the
+// previous contraction's start) since only the client knows "no previous
+// contraction today" vs "this really is the first one after midnight".
+app.post('/api/wellness/contractions', authenticateToken, authorizeRole(['mother']), async (req, res) => {
+  try {
+    const { date, started_at, duration_ms, gap_ms } = req.body;
+    if (!isValidDate(date) || !started_at || duration_ms == null) {
+      return res.status(400).json({ error: 'A valid date, start time and duration are required' });
+    }
+    const result = await pool.query(
+      'INSERT INTO contraction_logs (mother_id, log_date, started_at, duration_ms, gap_ms) VALUES ($1, $2, $3, $4, $5) RETURNING id, started_at, duration_ms, gap_ms',
+      [req.user.id, date, started_at, duration_ms, gap_ms == null ? null : gap_ms]
+    );
+
+    // Look at the last 2 hours of contractions (not just today's, so a
+    // labour that starts just before midnight still gets evaluated properly)
+    const recent = await pool.query(
+      `SELECT started_at, duration_ms, gap_ms FROM contraction_logs
+       WHERE mother_id = $1 AND started_at >= NOW() - INTERVAL '2 hours'
+       ORDER BY started_at ASC`,
+      [req.user.id]
+    );
+    const fiveOneOne = checkFiveOneOne(recent.rows);
+
+    res.status(201).json({ contraction: result.rows[0], five_one_one: fiveOneOne });
+  } catch (error) {
+    console.error('Add contraction error:', error);
+    res.status(500).json({ error: 'Failed to log contraction' });
+  }
+});
+
+// ============================================================================
 // Doctor Routes — scoped to patients who have booked an appointment with
 // this doctor. A doctor can never read a mother who has no appointment
 // relationship with them (enforced below, not just hidden in the UI).
@@ -496,6 +668,65 @@ app.get('/api/doctor/patients/:motherId/timeline', authenticateToken, authorizeR
   } catch (error) {
     console.error('Fetch patient timeline error:', error);
     res.status(500).json({ error: 'Failed to fetch patient timeline' });
+  }
+});
+
+// Doctor: read one patient's wellness tracking — only if that patient has
+// an appointment with this doctor. This is the "continuity" view: supplement
+// adherence, recent contraction log, and whether the 5-1-1 threshold has
+// been hit recently, so a doctor doesn't have to ask the mother to read her
+// own app out loud over the phone.
+app.get('/api/doctor/patients/:motherId/wellness', authenticateToken, authorizeRole(['doctor']), async (req, res) => {
+  try {
+    const motherId = parseInt(req.params.motherId, 10);
+    if (Number.isNaN(motherId)) {
+      return res.status(400).json({ error: 'Invalid patient id' });
+    }
+
+    const relation = await pool.query(
+      'SELECT 1 FROM appointments WHERE doctor_id = $1 AND mother_id = $2 LIMIT 1',
+      [req.user.id, motherId]
+    );
+    if (relation.rows.length === 0) {
+      return res.status(403).json({ error: 'You do not have access to this patient' });
+    }
+
+    const [adherence, recentContractions, allRecent] = await Promise.all([
+      pool.query(
+        `SELECT log_date,
+                COUNT(*) FILTER (WHERE taken) AS taken_count,
+                COUNT(*) AS total_count
+         FROM supplement_logs
+         WHERE mother_id = $1 AND log_date >= CURRENT_DATE - INTERVAL '13 days'
+         GROUP BY log_date ORDER BY log_date DESC`,
+        [motherId]
+      ),
+      pool.query(
+        `SELECT id, started_at, duration_ms, gap_ms FROM contraction_logs
+         WHERE mother_id = $1 ORDER BY started_at DESC LIMIT 20`,
+        [motherId]
+      ),
+      pool.query(
+        `SELECT started_at, duration_ms, gap_ms FROM contraction_logs
+         WHERE mother_id = $1 AND started_at >= NOW() - INTERVAL '2 hours'
+         ORDER BY started_at ASC`,
+        [motherId]
+      ),
+    ]);
+
+    const totalTaken = adherence.rows.reduce((sum, r) => sum + Number(r.taken_count), 0);
+    const totalPossible = adherence.rows.reduce((sum, r) => sum + Number(r.total_count), 0);
+    const adherencePct = totalPossible ? Math.round((totalTaken / totalPossible) * 100) : null;
+
+    res.json({
+      supplement_adherence_pct: adherencePct,
+      supplement_days_tracked: adherence.rows.length,
+      recent_contractions: recentContractions.rows,
+      five_one_one_flag: checkFiveOneOne(allRecent.rows),
+    });
+  } catch (error) {
+    console.error('Fetch patient wellness error:', error);
+    res.status(500).json({ error: 'Failed to fetch patient wellness data' });
   }
 });
 
