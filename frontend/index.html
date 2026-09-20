@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DAI — Hospital Workflow Platform</title>
+<meta name="description" content="DAI helps hospital and care teams manage follow-up, pre-consult context, patient registries and clinic operations with human-reviewed assistive workflows.">
+<meta name="theme-color" content="#c23a76">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h15"/><path d="m13 6 6 6-6 6"/></symbol>
+    <symbol id="i-calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4M16 2v4M3 10h18"/><rect x="3" y="4" width="18" height="18" rx="2"/></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></symbol>
+    <symbol id="i-activity" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 8-6-16-3 8H2"/></symbol>
+    <symbol id="i-edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></symbol>
+  </defs>
+</svg>
+
+<header class="site-header">
+  <div class="site-header__inner">
+    <a class="brand" href="index.html" aria-label="DAI home">
+      <img class="brand__mark" src="assets/logo.jpeg" width="48" height="48" alt="">
+      <span><span class="brand__name">DAI</span><span class="brand__tag">Hospital Workflow</span></span>
+    </a>
+    <nav class="site-nav" aria-label="Primary navigation">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="#modules">Features</a>
+      <a href="#why">About</a>
+    </nav>
+    <div class="header-actions">
+      <a class="contact-link" href="mailto:hello@dai.health">Contact</a>
+      <a class="btn btn--primary" href="auth.html">Book a Demo</a>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+  <section class="hero">
+    <div class="wrap hero__grid">
+      <div class="hero__copy">
+        <span class="eyebrow">Assistive healthcare operations</span>
+        <h1>DAI helps hospitals stay ahead of patient follow-up.</h1>
+        <p>One shared workspace for care gaps, pre-consult context, registry views, clinic flow and human-reviewed patient communication.</p>
+        <div class="hero__actions">
+          <a class="btn btn--primary" href="auth.html">Book a Demo <svg width="17" height="17" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+          <a class="btn btn--outline" href="hospital.html">Open Hospital Console</a>
+        </div>
+      </div>
+      <div class="hero-art">
+        <div class="hero-card">
+          <img class="hero-photo" src="assets/mother-care.png" alt="Expectant mother holding a small teddy bear">
+          <div class="hero-card__top">
+            <div><span>Today in OPD</span><b>42 follow-ups tracked</b></div>
+            <div class="mini-avatar"><svg width="26" height="26" aria-hidden="true"><use href="#i-activity"/></svg></div>
+          </div>
+          <div class="hero-panel">
+            <div class="hero-panel__row"><span class="hero-panel__icon"><svg width="20" height="20"><use href="#i-calendar"/></svg></span><div><b>Care-gap queue</b><span>Overdue visits become assignable tasks</span></div><span class="status-pill">Review</span></div>
+            <div class="hero-panel__row"><span class="hero-panel__icon"><svg width="20" height="20"><use href="#i-file"/></svg></span><div><b>Pre-consult brief</b><span>Facts, dates and missing-info flags</span></div><span class="status-pill">Ready</span></div>
+            <div class="hero-panel__row"><span class="hero-panel__icon"><svg width="20" height="20"><use href="#i-shield"/></svg></span><div><b>Audit trail</b><span>Every important action is logged</span></div><span class="status-pill">On</span></div>
+          </div>
+          <div class="hero-brief" aria-hidden="true">
+            <strong>Patient context brief</strong>
+            <div class="hero-brief__line"></div>
+            <div class="hero-brief__line"></div>
+            <div class="hero-brief__line"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="trust-strip" aria-label="DAI trust markers">
+      <span class="trust-pill"><svg width="16" height="16" aria-hidden="true"><use href="#i-check"/></svg>Built for busy OPDs</span>
+      <span class="trust-pill"><svg width="16" height="16" aria-hidden="true"><use href="#i-check"/></svg>Human override on every step</span>
+      <span class="trust-pill"><svg width="16" height="16" aria-hidden="true"><use href="#i-check"/></svg>Full audit trail</span>
+      <span class="trust-pill"><svg width="16" height="16" aria-hidden="true"><use href="#i-check"/></svg>Assistive, not diagnostic</span>
+    </div>
+  </section>
+
+  <section class="section" id="modules">
+    <div class="wrap">
+      <div class="section__head">
+        <span class="eyebrow">Modules</span>
+        <h2>Hospital-side workflows in one clean system.</h2>
+        <p>Each module is designed to ship independently while sharing the same patient, gap and audit data layer.</p>
+      </div>
+      <div class="module-grid">
+        <a class="speciality-card" href="#workflow"><span class="speciality-card__icon"><svg width="25" height="25"><use href="#i-calendar"/></svg></span><b>Continuity & Follow-Up</b></a>
+        <a class="speciality-card" href="#workflow"><span class="speciality-card__icon"><svg width="25" height="25"><use href="#i-file"/></svg></span><b>Pre-Consultation Brief</b></a>
+        <a class="speciality-card" href="#workflow"><span class="speciality-card__icon"><svg width="25" height="25"><use href="#i-users"/></svg></span><b>Patient Registry</b></a>
+        <a class="speciality-card" href="#workflow"><span class="speciality-card__icon"><svg width="25" height="25"><use href="#i-activity"/></svg></span><b>Clinic Operations</b></a>
+        <a class="speciality-card" href="#why"><span class="speciality-card__icon"><svg width="25" height="25"><use href="#i-edit"/></svg></span><b>Doctor Productivity</b></a>
+        <a class="speciality-card" href="#why"><span class="speciality-card__icon"><svg width="25" height="25"><use href="#i-shield"/></svg></span><b>Emergency Coordination</b></a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="workflow">
+    <div class="wrap workflow">
+      <div class="workflow-row">
+        <div class="workflow-mock" aria-label="Care gap detection mockup">
+          <img class="workflow-photo" src="assets/baby-feet.png" alt="Newborn baby feet wrapped in a blanket">
+          <div class="mock-header"><span class="mock-dot"></span><span class="mock-dot"></span><span class="mock-dot"></span></div>
+          <div class="mock-body mock-list">
+            <div class="mock-item"><span class="mock-icon"></span><div><b>ANC visit overdue</b><span>Expected item missing from recorded care events</span></div><span class="status-pill">Assign</span></div>
+            <div class="mock-item"><span class="mock-icon"></span><div><b>Investigation pending</b><span>Source checked: lab feed and document store</span></div><span class="status-pill">Review</span></div>
+            <div class="mock-item"><span class="mock-icon"></span><div><b>Contact patient</b><span>Human approves outreach before it is sent</span></div><span class="status-pill">Draft</span></div>
+          </div>
+        </div>
+        <div class="workflow-copy">
+          <span class="eyebrow">Continuity engine</span>
+          <h2>Expected care and recorded care stay visibly aligned.</h2>
+          <p>DAI compares configurable pathway templates against actual events and turns missing follow-up into clear, assignable operational tasks.</p>
+          <ul>
+            <li>Configurable stage-based pathways per program.</li>
+            <li>Gap provenance: expected item, data source and flag timestamp.</li>
+            <li>Operational outreach priority, never clinical risk scoring.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="workflow-row">
+        <div class="workflow-mock" aria-label="Pre-consultation brief mockup">
+          <img class="workflow-photo" src="assets/baby-hand.png" alt="Baby hand holding an adult finger">
+          <div class="mock-header"><span class="mock-dot"></span><span class="mock-dot"></span><span class="mock-dot"></span></div>
+          <div class="mock-body">
+            <div class="hero-brief">
+              <strong>One-minute pre-consult brief</strong>
+              <div class="hero-brief__line"></div>
+              <div class="hero-brief__line"></div>
+              <div class="hero-brief__line"></div>
+              <p style="margin-top:1rem">Flags: missing labs since March, referral mentions scan not in record.</p>
+            </div>
+          </div>
+        </div>
+        <div class="workflow-copy">
+          <span class="eyebrow">Context aggregation</span>
+          <h2>Doctors walk in with facts, not generated clinical conclusions.</h2>
+          <p>The brief organizes dates, documents, values and missing-information flags from structured and unstructured sources without interpreting what they mean clinically.</p>
+          <ul>
+            <li>Extracted facts carry source and confidence metadata.</li>
+            <li>Missing or inconsistent information is shown explicitly.</li>
+            <li>No autonomous diagnosis, treatment suggestion or clinical summary.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="workflow-row">
+        <div class="workflow-mock" aria-label="Clinic operations mockup">
+          <img class="workflow-photo" src="assets/doctor-consult.jpg" alt="Clean hospital procedure room with clinical equipment">
+          <div class="mock-header"><span class="mock-dot"></span><span class="mock-dot"></span><span class="mock-dot"></span></div>
+          <div class="mock-body mock-list">
+            <div class="mock-item"><span class="mock-icon"></span><div><b>Queue view</b><span>Checked in, waiting and vacant slots</span></div><span class="status-pill">Live</span></div>
+            <div class="mock-item"><span class="mock-icon"></span><div><b>Slot reallocation</b><span>Suggested from waitlist or outreach queue</span></div><span class="status-pill">Approve</span></div>
+          </div>
+        </div>
+        <div class="workflow-copy">
+          <span class="eyebrow">Clinic flow</span>
+          <h2>Operations support that keeps staff in control.</h2>
+          <p>DAI supports interruption-heavy front-desk workflows with suggestions, alerts and logged schedule changes. Urgency is only shown when staff explicitly set it.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="why">
+    <div class="wrap">
+      <div class="section__head">
+        <span class="eyebrow">Why DAI</span>
+        <h2>Built with safety constraints in the architecture.</h2>
+      </div>
+      <div class="why-grid">
+        <article class="why-card"><span class="why-card__num">1</span><h3>Assistive, not diagnostic</h3><p>DAI surfaces facts, gaps and drafts. It does not diagnose, recommend treatment or score clinical risk.</p></article>
+        <article class="why-card"><span class="why-card__num">2</span><h3>Human override</h3><p>AI-touched output must be reviewed, edited, rejected or approved before it affects downstream work.</p></article>
+        <article class="why-card"><span class="why-card__num">3</span><h3>Audit trail</h3><p>Important actions are logged with who, what, when and affected entity for operational traceability.</p></article>
+        <article class="why-card"><span class="why-card__num">4</span><h3>Caregiver-friendly</h3><p>Non-clinician touchpoints are designed for clear next steps, multilingual use and low training.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="section__head">
+        <span class="eyebrow">Social proof</span>
+        <h2>Designed for real care-team pressure.</h2>
+      </div>
+      <!-- Placeholder testimonials for demo layout only. Replace with real, approved DAI customer/user quotes before production. -->
+      <div class="testimonial-row" aria-label="Placeholder testimonials">
+        <article class="testimonial-card"><blockquote>"Placeholder quote: the care-gap queue helps our team see who needs follow-up before clinic starts."</blockquote><div class="testimonial-person"><span class="testimonial-avatar">CM</span><div><b>Care Manager</b><span>Maternal health program</span></div></div></article>
+        <article class="testimonial-card"><blockquote>"Placeholder quote: the brief keeps patient context scannable without pretending to make clinical decisions."</blockquote><div class="testimonial-person"><span class="testimonial-avatar">DR</span><div><b>Doctor</b><span>OPD consultant</span></div></div></article>
+        <article class="testimonial-card"><blockquote>"Placeholder quote: the audit log makes it easier to understand what changed and who reviewed it."</blockquote><div class="testimonial-person"><span class="testimonial-avatar">AO</span><div><b>Administrator</b><span>Clinic operations</span></div></div></article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="section__head">
+        <span class="eyebrow">FAQ</span>
+        <h2>Common questions about DAI.</h2>
+      </div>
+      <div class="faq-list">
+        <article class="faq-item is-open"><button class="faq-question" type="button" aria-expanded="true">Does DAI diagnose patients?<span class="faq-icon" aria-hidden="true"></span></button><div class="faq-answer"><p>No. DAI is assistive infrastructure for workflows, facts, drafts and care-gap tracking. Clinical judgement stays with qualified professionals.</p></div></article>
+        <article class="faq-item"><button class="faq-question" type="button" aria-expanded="false">Can AI-generated content be sent automatically?<span class="faq-icon" aria-hidden="true"></span></button><div class="faq-answer"><p>No. Drafting and sending are separate steps. A clinician or authorized staff member reviews and approves before anything is filed or sent.</p></div></article>
+        <article class="faq-item"><button class="faq-question" type="button" aria-expanded="false">What happens if AI extraction fails?<span class="faq-icon" aria-hidden="true"></span></button><div class="faq-answer"><p>The system degrades to raw source data and visible missing-information flags instead of guessing or blocking the care team.</p></div></article>
+        <article class="faq-item"><button class="faq-question" type="button" aria-expanded="false">Is the registry separate from gap detection?<span class="faq-icon" aria-hidden="true"></span></button><div class="faq-answer"><p>No. The registry is the population view of the same patient, pathway and care-gap data used by the continuity engine.</p></div></article>
+        <article class="faq-item"><button class="faq-question" type="button" aria-expanded="false">Does DAI auto-assign clinical urgency?<span class="faq-icon" aria-hidden="true"></span></button><div class="faq-answer"><p>No. Urgency flags are manually set by clinicians or staff. DAI can coordinate around them but does not infer them.</p></div></article>
+        <article class="faq-item"><button class="faq-question" type="button" aria-expanded="false">Can this support multilingual patient engagement?<span class="faq-icon" aria-hidden="true"></span></button><div class="faq-answer"><p>Yes. Patient-facing drafts and education workflows are designed to support caregiver-friendly, multilingual content with clinician approval.</p></div></article>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="footer-grid">
+    <div>
+      <h3>DAI</h3>
+      <p>Assistive healthcare workflow infrastructure for continuity of care, operations and reviewed patient communication.</p>
+      <div class="social-row" aria-label="Social links">
+        <a href="#" aria-label="LinkedIn">in</a>
+        <a href="#" aria-label="X">X</a>
+        <a href="#" aria-label="Email">@</a>
+      </div>
+    </div>
+    <div>
+      <h4>Modules</h4>
+      <ul class="footer-links">
+        <li><a href="#modules">Follow-Up Engine</a></li>
+        <li><a href="#modules">Pre-Consult Brief</a></li>
+        <li><a href="#modules">Patient Registry</a></li>
+        <li><a href="#modules">Clinic Operations</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Resources</h4>
+      <ul class="footer-links">
+        <li><a href="#why">Safety model</a></li>
+        <li><a href="#workflow">Workflow overview</a></li>
+        <li><a href="dashboard.html">Mother dashboard</a></li>
+        <li><a href="hospital.html">Hospital console</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Contact</h4>
+      <ul class="footer-links">
+        <li><a href="mailto:hello@dai.health">hello@dai.health</a></li>
+        <li><a href="auth.html">Book a demo</a></li>
+        <li><a href="auth.html">Sign in</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">Copyright © 2026 DAI. Demo content only.</div>
+</footer>
+
+<script>
+document.querySelectorAll('.faq-question').forEach(function (button) {
+  button.addEventListener('click', function () {
+    var item = button.closest('.faq-item');
+    var open = !item.classList.contains('is-open');
+    document.querySelectorAll('.faq-item').forEach(function (faq) {
+      faq.classList.remove('is-open');
+      faq.querySelector('.faq-question').setAttribute('aria-expanded', 'false');
+    });
+    if (open) {
+      item.classList.add('is-open');
+      button.setAttribute('aria-expanded', 'true');
+    }
+  });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DAI — Sign in</title>
+<meta name="theme-color" content="#c23a76">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="auth-page">
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <div class="site-header__inner">
+    <a class="brand" href="index.html" aria-label="DAI home">
+      <img class="brand__mark" src="assets/logo.jpeg" width="48" height="48" alt="">
+      <span><span class="brand__name">DAI</span><span class="brand__tag">Hospital Workflow</span></span>
+    </a>
+    <nav class="site-nav" aria-label="Primary navigation">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="index.html#modules">Features</a>
+      <a href="index.html#why">About</a>
+    </nav>
+    <div class="header-actions">
+      <a class="contact-link" href="mailto:hello@dai.health">Contact</a>
+      <a class="btn btn--primary" href="auth.html">Sign In</a>
+    </div>
+  </div>
+</header>
+
+<main class="auth-main" id="main">
+  <section class="auth-intro" aria-labelledby="authTitle">
+    <span class="eyebrow">Secure workspace</span>
+    <h1 id="authTitle">Access DAI care workflows.</h1>
+    <p>Log in to continue care timelines, appointment requests and hospital-side follow-up workflows. Demo mode stays local to this device.</p>
+    <div class="trust-strip" style="width:auto;margin:1.5rem 0 0">
+      <span class="trust-pill">Human-reviewed outputs</span>
+      <span class="trust-pill">Audit-ready workflows</span>
+    </div>
+  </section>
+
+  <section class="auth-card" aria-label="Authentication form">
+    <div class="tabs" role="tablist">
+      <button type="button" class="is-active" data-tab="login" role="tab" aria-selected="true">Log in</button>
+      <button type="button" data-tab="register" role="tab" aria-selected="false">Create account</button>
+    </div>
+
+    <div class="error-box" id="errorBox"></div>
+
+    <div class="panel is-active" id="panelLogin">
+      <h2>Welcome back</h2>
+      <p>Log in to see your care timeline, tracking data and appointments.</p>
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="loginEmail">Email</label>
+          <input type="email" id="loginEmail" required autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label for="loginPassword">Password</label>
+          <input type="password" id="loginPassword" required autocomplete="current-password">
+        </div>
+        <button type="submit" class="btn btn--primary" id="loginSubmit">Log in</button>
+      </form>
+    </div>
+
+    <div class="panel" id="panelRegister">
+      <h2>Create your account</h2>
+      <p>Mothers get a care timeline seeded automatically. Doctors get a dashboard of their patients.</p>
+
+      <div class="role-toggle">
+        <button type="button" class="is-active" data-role="mother">I'm a mother / caregiver</button>
+        <button type="button" data-role="doctor">I'm a doctor</button>
+      </div>
+
+      <form id="registerMotherForm" class="panel is-active">
+        <div class="form-group">
+          <label for="mFullName">Full name</label>
+          <input type="text" id="mFullName" required placeholder="Ananya Sharma">
+        </div>
+        <div class="field-row">
+          <div class="form-group">
+            <label for="mEmail">Email</label>
+            <input type="email" id="mEmail" required>
+          </div>
+          <div class="form-group">
+            <label for="mPassword">Password</label>
+            <input type="password" id="mPassword" required minlength="8" placeholder="At least 8 characters">
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="form-group">
+            <label for="mPhone">Phone (optional)</label>
+            <input type="tel" id="mPhone" placeholder="+91 90000 00000">
+          </div>
+          <div class="form-group">
+            <label for="mEmergencyPhone">Emergency contact phone</label>
+            <input type="tel" id="mEmergencyPhone" placeholder="+91 90000 00000">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="mEmergencyName">Emergency contact name (optional)</label>
+          <input type="text" id="mEmergencyName" placeholder="e.g. Husband, mother, neighbour">
+        </div>
+        <button type="submit" class="btn btn--primary" id="mSubmit">Create account</button>
+      </form>
+
+      <form id="registerDoctorForm" class="panel">
+        <div class="form-group">
+          <label for="dFullName">Full name</label>
+          <input type="text" id="dFullName" required placeholder="Dr. Kavita Menon">
+        </div>
+        <div class="field-row">
+          <div class="form-group">
+            <label for="dEmail">Email</label>
+            <input type="email" id="dEmail" required>
+          </div>
+          <div class="form-group">
+            <label for="dPassword">Password</label>
+            <input type="password" id="dPassword" required minlength="8" placeholder="At least 8 characters">
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="form-group">
+            <label for="dSpecialization">Specialization</label>
+            <input type="text" id="dSpecialization" required placeholder="Obstetrics">
+          </div>
+          <div class="form-group">
+            <label for="dLicense">Medical license no.</label>
+            <input type="text" id="dLicense" required placeholder="MCI-000000">
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="form-group">
+            <label for="dPhone">Phone (optional)</label>
+            <input type="tel" id="dPhone" placeholder="+91 90000 00000">
+          </div>
+          <div class="form-group">
+            <label for="dFacility">Facility (optional)</label>
+            <input type="text" id="dFacility" placeholder="Clinic or PHC name">
+          </div>
+        </div>
+        <button type="submit" class="btn btn--primary" id="dSubmit">Create account</button>
+      </form>
+    </div>
+
+    <div class="divider">or</div>
+    <button type="button" class="btn btn--ghost" id="guestBtn">Continue without an account</button>
+    <p class="footnote" style="margin-top:.75rem">Demo mode — your tracking data stays on this device only and your doctor won't be able to see it.</p>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="footer-grid">
+    <div>
+      <h3>DAI</h3>
+      <p>Assistive healthcare workflow infrastructure for continuity of care, operations and reviewed patient communication.</p>
+    </div>
+    <div>
+      <h4>Modules</h4>
+      <ul class="footer-links">
+        <li><a href="index.html#modules">Follow-Up Engine</a></li>
+        <li><a href="index.html#modules">Pre-Consult Brief</a></li>
+        <li><a href="index.html#modules">Patient Registry</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Resources</h4>
+      <ul class="footer-links">
+        <li><a href="index.html#why">Safety model</a></li>
+        <li><a href="dashboard.html">Mother dashboard</a></li>
+        <li><a href="hospital.html">Hospital console</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Contact</h4>
+      <ul class="footer-links">
+        <li><a href="mailto:hello@dai.health">hello@dai.health</a></li>
+        <li><a href="auth.html">Sign in</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">Copyright © 2026 DAI. Demo content only.</div>
+</footer>
+
+<script>
+(function () {
+"use strict";
+const API_BASE = 'http://localhost:3001/api';
+
+var errorBox = document.getElementById('errorBox');
+function showError(msg) { errorBox.textContent = msg; errorBox.classList.add('is-visible'); }
+function clearError() { errorBox.classList.remove('is-visible'); }
+
+async function submitAuth(path, payload, btn) {
+  clearError();
+  btn.disabled = true;
+  try {
+    var res = await fetch(API_BASE + path, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    var data = null;
+    try { data = await res.json(); } catch (e) { data = {}; }
+    if (!res.ok) {
+      showError((data && data.error) || 'Something went wrong. Please try again.');
+      return;
+    }
+    localStorage.removeItem('dai_guest');
+    window.location.href = 'dashboard.html';
+  } catch (err) {
+    showError('Network error \u2014 is the DAI server running?');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+document.querySelectorAll('.tabs [data-tab]').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    document.querySelectorAll('.tabs [data-tab]').forEach(function (b) { b.classList.remove('is-active'); b.setAttribute('aria-selected', 'false'); });
+    btn.classList.add('is-active'); btn.setAttribute('aria-selected', 'true');
+    document.getElementById('panelLogin').classList.toggle('is-active', btn.dataset.tab === 'login');
+    document.getElementById('panelRegister').classList.toggle('is-active', btn.dataset.tab === 'register');
+    clearError();
+  });
+});
+
+document.querySelectorAll('.role-toggle [data-role]').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    document.querySelectorAll('.role-toggle [data-role]').forEach(function (b) { b.classList.remove('is-active'); });
+    btn.classList.add('is-active');
+    document.getElementById('registerMotherForm').classList.toggle('is-active', btn.dataset.role === 'mother');
+    document.getElementById('registerDoctorForm').classList.toggle('is-active', btn.dataset.role === 'doctor');
+    clearError();
+  });
+});
+
+document.getElementById('loginForm').addEventListener('submit', function (e) {
+  e.preventDefault();
+  submitAuth('/auth/login', {
+    email: document.getElementById('loginEmail').value.trim(),
+    password: document.getElementById('loginPassword').value
+  }, document.getElementById('loginSubmit'));
+});
+
+document.getElementById('registerMotherForm').addEventListener('submit', function (e) {
+  e.preventDefault();
+  submitAuth('/auth/register/mother', {
+    full_name: document.getElementById('mFullName').value.trim(),
+    email: document.getElementById('mEmail').value.trim(),
+    password: document.getElementById('mPassword').value,
+    phone: document.getElementById('mPhone').value.trim() || undefined,
+    emergency_contact_name: document.getElementById('mEmergencyName').value.trim() || undefined,
+    emergency_contact_phone: document.getElementById('mEmergencyPhone').value.trim() || undefined
+  }, document.getElementById('mSubmit'));
+});
+
+document.getElementById('registerDoctorForm').addEventListener('submit', function (e) {
+  e.preventDefault();
+  submitAuth('/auth/register/doctor', {
+    full_name: document.getElementById('dFullName').value.trim(),
+    email: document.getElementById('dEmail').value.trim(),
+    password: document.getElementById('dPassword').value,
+    specialization: document.getElementById('dSpecialization').value.trim(),
+    medical_license_number: document.getElementById('dLicense').value.trim(),
+    phone: document.getElementById('dPhone').value.trim() || undefined,
+    facility_name: document.getElementById('dFacility').value.trim() || undefined
+  }, document.getElementById('dSubmit'));
+});
+
+document.getElementById('guestBtn').addEventListener('click', function () {
+  localStorage.setItem('dai_guest', '1');
+  window.location.href = 'dashboard.html';
+});
+})();
+</script>
+</body>
+</html>

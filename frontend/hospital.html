@@ -1,0 +1,1540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DAI Hospital Console</title>
+<meta name="description" content="DAI hospital-side console for continuity, registry, pre-consult briefs, clinic flow, draft review, and audit trails.">
+<meta name="theme-color" content="#c23a76">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..700&family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f5f7f9;
+  --panel: #ffffff;
+  --panel-2: #f9fbfc;
+  --ink: #10212b;
+  --muted: #687783;
+  --line: #dce4e9;
+  --line-soft: #edf2f5;
+  --blue: #2563eb;
+  --blue-soft: #eaf1ff;
+  --green: #138052;
+  --green-soft: #e6f4ee;
+  --amber: #9a6500;
+  --amber-soft: #fff5d8;
+  --red: #ba2f2f;
+  --red-soft: #fdeaea;
+  --violet: #635bff;
+  --violet-soft: #f0efff;
+  --shadow: 0 18px 50px -34px rgba(16, 33, 43, .35);
+  --radius: 8px;
+  --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--sans);
+  line-height: 1.45;
+}
+button, input, select, textarea { font: inherit; }
+button { cursor: pointer; }
+.app {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+}
+.sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  padding: 20px 16px;
+  border-right: 1px solid var(--line);
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+.brand-mark {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  object-fit: contain;
+  background: transparent;
+  color: inherit;
+  display: block;
+}
+.brand small { display: block; color: var(--muted); font-weight: 600; font-size: 12px; margin-top: 1px; }
+.nav { display: grid; gap: 6px; }
+.nav a {
+  color: var(--ink);
+  text-decoration: none;
+  padding: 10px 11px;
+  border-radius: 7px;
+  font-size: 14px;
+  font-weight: 700;
+}
+.nav a:hover, .nav a.is-active { background: var(--blue-soft); color: #174fbd; }
+.guardrail {
+  margin-top: auto;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel-2);
+  font-size: 12px;
+  color: var(--muted);
+}
+.guardrail b { color: var(--ink); display: block; margin-bottom: 4px; }
+.main { min-width: 0; }
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 24px;
+  background: rgba(245, 247, 249, .88);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--line);
+}
+.topbar h1 { margin: 0; font-size: 20px; letter-spacing: 0; }
+.topbar p { margin: 2px 0 0; color: var(--muted); font-size: 13px; }
+.user-pill {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 7px 11px;
+  font-size: 13px;
+  font-weight: 700;
+}
+.avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--violet-soft);
+  color: var(--violet);
+  display: grid;
+  place-items: center;
+  font-weight: 900;
+}
+.content { padding: 24px; display: grid; gap: 24px; }
+.section { scroll-margin-top: 84px; }
+.section-head {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 12px;
+}
+.section-head h2 { margin: 0; font-size: 18px; letter-spacing: 0; }
+.section-head p { margin: 4px 0 0; color: var(--muted); max-width: 70ch; font-size: 13px; }
+.grid { display: grid; gap: 16px; }
+.grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+.metric { padding: 15px; }
+.metric span { display: block; color: var(--muted); font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
+.metric b { display: block; margin-top: 6px; font-size: 26px; letter-spacing: 0; }
+.metric em { display: block; margin-top: 2px; color: var(--muted); font-style: normal; font-size: 12px; }
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 12px;
+}
+.control {
+  display: grid;
+  gap: 5px;
+  min-width: 170px;
+}
+.control label {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+select, input, textarea {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: #fff;
+  color: var(--ink);
+  padding: 9px 10px;
+}
+textarea { min-height: 96px; resize: vertical; }
+.table-wrap { overflow: auto; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+th, td {
+  padding: 12px;
+  border-top: 1px solid var(--line-soft);
+  text-align: left;
+  vertical-align: top;
+}
+th {
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  background: var(--panel-2);
+  border-top: 0;
+}
+tr.is-selected { background: #f8fbff; }
+.patient-name { font-weight: 800; }
+.subtle { color: var(--muted); font-size: 12px; }
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 24px;
+  border-radius: 999px;
+  padding: 3px 8px;
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.tag-blue { background: var(--blue-soft); color: #174fbd; }
+.tag-green { background: var(--green-soft); color: var(--green); }
+.tag-amber { background: var(--amber-soft); color: var(--amber); }
+.tag-red { background: var(--red-soft); color: var(--red); }
+.tag-violet { background: var(--violet-soft); color: var(--violet); }
+.tag-gray { background: #eef2f4; color: #53636f; }
+.btn-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.btn {
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--ink);
+  border-radius: 7px;
+  padding: 8px 10px;
+  font-size: 12px;
+  font-weight: 800;
+}
+.btn:hover { border-color: #b9c6cf; }
+.btn-primary { background: var(--blue); border-color: var(--blue); color: #fff; }
+.btn-danger { background: var(--red-soft); border-color: #f4c4c4; color: var(--red); }
+.btn-ok { background: var(--green-soft); border-color: #bfe6d6; color: var(--green); }
+.split {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(340px, .75fr);
+  gap: 16px;
+  align-items: start;
+}
+.detail { padding: 16px; display: grid; gap: 14px; }
+.detail h3 { margin: 0; font-size: 18px; }
+.detail-block {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.detail-block h4 {
+  margin: 0;
+  padding: 10px 12px;
+  background: var(--panel-2);
+  border-bottom: 1px solid var(--line);
+  font-size: 12px;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.detail-list { display: grid; }
+.fact, .gap-card, .queue-card, .draft-card, .audit-row {
+  padding: 12px;
+  border-top: 1px solid var(--line-soft);
+}
+.fact:first-child, .gap-card:first-child, .queue-card:first-child, .draft-card:first-child, .audit-row:first-child { border-top: 0; }
+.fact strong, .gap-card strong, .queue-card strong, .draft-card strong { display: block; font-size: 13px; }
+.fact p, .gap-card p, .queue-card p, .draft-card p, .audit-row p { margin: 4px 0 0; color: var(--muted); font-size: 12px; }
+.empty {
+  padding: 18px;
+  color: var(--muted);
+  font-size: 13px;
+  text-align: center;
+}
+.banner {
+  padding: 12px 14px;
+  border: 1px solid #bfdbfe;
+  background: #eff6ff;
+  border-radius: var(--radius);
+  color: #1e3a8a;
+  font-size: 13px;
+}
+.banner b { display: block; margin-bottom: 2px; }
+.status-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.modal {
+  position: fixed;
+  inset: 0;
+  display: none;
+  place-items: center;
+  background: rgba(16, 33, 43, .42);
+  padding: 20px;
+  z-index: 50;
+}
+.modal.is-open { display: grid; }
+.modal-card {
+  width: min(560px, 100%);
+  background: #fff;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  box-shadow: 0 25px 80px -30px rgba(16, 33, 43, .7);
+}
+.modal-card header {
+  padding: 15px 16px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.modal-card header h3 { margin: 0; font-size: 16px; }
+.modal-body { padding: 16px; display: grid; gap: 12px; }
+.toast {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  max-width: 360px;
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  background: var(--ink);
+  color: #fff;
+  font-size: 13px;
+  box-shadow: 0 20px 60px -28px rgba(16, 33, 43, .8);
+  transform: translateY(20px);
+  opacity: 0;
+  pointer-events: none;
+  transition: .2s ease;
+}
+.toast.is-visible { opacity: 1; transform: translateY(0); }
+@media (max-width: 1100px) {
+  .app { grid-template-columns: 1fr; }
+  .sidebar { position: static; height: auto; }
+  .nav { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .guardrail { margin-top: 0; }
+  .split, .grid-4, .grid-3, .grid-2 { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  .content, .topbar { padding-inline: 14px; }
+  .topbar { align-items: start; flex-direction: column; }
+  .nav { grid-template-columns: 1fr 1fr; }
+}
+
+/* --------------------------------------------------------------------------
+   DAI alignment layer
+   This page started as a standalone console. These overrides intentionally
+   reuse the visual system from index/auth/dashboard: Fraunces headings,
+   coral/mint/lilac status colors, pill navigation, and soft rounded cards.
+   -------------------------------------------------------------------------- */
+:root {
+  --coral:       #c23a76;
+  --coral-deep:  #7b235d;
+  --coral-soft:  #fbe7f0;
+  --coral-tint:  #fff6fa;
+  --green:       #8b3fb6;
+  --mint:        #f2e7fb;
+  --mint-deep:   #e1c5ee;
+  --violet:      #8b3fb6;
+  --lilac:       #f2e7fb;
+  --amber:       #B8790A;
+  --amber-soft:  #FBF0DD;
+  --ink:         #261526;
+  --ink-2:       #625062;
+  --ink-3:       #8b7c8b;
+  --surface:     #FFFFFF;
+  --ground:      #fff8fb;
+  --line:        #eedbe7;
+  --line-soft:   #f7edf3;
+  --display: "Fraunces", Georgia, serif;
+  --sans: "Inter Tight", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --r-sm: 10px;
+  --r-md: 16px;
+  --r-lg: 22px;
+  --shadow-sm: 0 1px 2px rgba(15,31,41,.05), 0 4px 12px -6px rgba(15,31,41,.09);
+  --shadow-md: 0 1px 2px rgba(15,31,41,.04), 0 14px 34px -16px rgba(15,31,41,.18);
+  --shadow-coral: 0 10px 26px -12px rgba(201,57,44,.5);
+}
+
+body {
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 1rem;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3, h4 {
+  font-family: var(--display);
+  font-weight: 500;
+  line-height: 1.15;
+  letter-spacing: -.015em;
+}
+h1 { font-size: clamp(1.55rem, 1.3rem + 1.1vw, 2.1rem); font-variation-settings: "opsz" 90; }
+h2 { font-size: clamp(1.2rem, 1.08rem + .5vw, 1.45rem); font-variation-settings: "opsz" 60; }
+h3 { font-family: var(--sans); font-size: 1.05rem; font-weight: 600; letter-spacing: -.005em; }
+p { color: var(--ink-2); }
+:focus-visible { outline: 2.5px solid var(--coral); outline-offset: 2px; border-radius: 6px; }
+
+.app { display: block; min-height: 100vh; }
+.sidebar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  height: auto;
+  min-height: 4.25rem;
+  padding: .5rem clamp(1rem, 3.5vw, 2.25rem);
+  border-right: 0;
+  border-bottom: 1px solid var(--line);
+  background: rgba(255,255,255,.92);
+  backdrop-filter: saturate(180%) blur(14px);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+.brand {
+  gap: .6rem;
+  margin-right: auto;
+  font-weight: 600;
+}
+.brand-mark {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: transparent;
+  color: inherit;
+  display: block;
+  object-fit: contain;
+}
+.brand-name {
+  display: block;
+  font-family: var(--display);
+  font-size: 1.22rem;
+  line-height: 1;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+.brand small {
+  color: var(--ink-3);
+  font-size: .56rem;
+  font-weight: 600;
+  letter-spacing: .17em;
+  text-transform: uppercase;
+}
+.primary-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .25rem;
+  margin-inline: auto;
+}
+.primary-nav a {
+  color: var(--ink-2);
+  text-decoration: none;
+  padding: .55rem .85rem;
+  border-radius: 999px;
+  font-size: .9rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.primary-nav a:hover {
+  background: var(--coral-soft);
+  color: var(--coral-deep);
+}
+.nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--ground);
+}
+.nav a {
+  color: var(--ink-2);
+  padding: .55rem .85rem;
+  border-radius: 999px;
+  font-size: .84rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.nav a:hover { color: var(--ink); }
+.nav a.is-active {
+  background: var(--ink);
+  color: #fff;
+}
+.surface-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--ground);
+}
+.surface-switch a {
+  color: var(--ink-2);
+  text-decoration: none;
+  padding: .55rem 1.05rem;
+  border-radius: 999px;
+  font-size: .84rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.surface-switch a.is-active {
+  color: #fff;
+  background: var(--ink);
+}
+.surface-switch a:not(.is-active):hover { color: var(--ink); }
+.guardrail {
+  max-width: 280px;
+  margin-top: 0;
+  padding: .55rem .75rem;
+  border-radius: var(--r-md);
+  background: var(--coral-tint);
+  color: var(--ink-2);
+  font-size: .72rem;
+}
+
+.topbar {
+  position: static;
+  width: min(1180px, 100%);
+  margin-inline: auto;
+  padding: clamp(1.5rem, 3.5vw, 2.5rem) clamp(1rem, 3.5vw, 2.25rem) 0;
+  background: transparent;
+  border-bottom: 0;
+  backdrop-filter: none;
+  align-items: flex-start;
+}
+.topbar h1 {
+  margin: 0 0 .25rem;
+  font-size: clamp(1.55rem, 1.3rem + 1.1vw, 2.1rem);
+}
+.topbar p {
+  margin: 0;
+  max-width: 56rem;
+  color: var(--ink-2);
+  font-size: .95rem;
+}
+.hospital-actionbar {
+  width: min(1180px, 100%);
+  margin: 1.1rem auto 0;
+  padding: 0 clamp(1rem, 3.5vw, 2.25rem);
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: .9rem;
+}
+.hospital-action {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .8rem;
+  min-height: 72px;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  color: var(--ink);
+  text-decoration: none;
+  box-shadow: var(--shadow-sm);
+}
+.hospital-action b { display: block; font-size: .95rem; }
+.hospital-action span { display: block; margin-top: .1rem; color: var(--ink-3); font-size: .78rem; }
+.hospital-action i {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: var(--coral-soft);
+  color: var(--coral-deep);
+  font-style: normal;
+  font-weight: 700;
+}
+.hospital-action:hover {
+  border-color: var(--coral-soft);
+  background: var(--coral-tint);
+}
+.user-pill {
+  padding: .35rem .8rem .35rem .35rem;
+  border-color: var(--line);
+  font-size: .84rem;
+  font-weight: 600;
+}
+.avatar {
+  width: 30px;
+  height: 30px;
+  background: var(--lilac);
+  color: var(--violet);
+  font-family: var(--display);
+  font-weight: 700;
+}
+.content {
+  width: min(1180px, 100%);
+  margin-inline: auto;
+  padding: 1.5rem clamp(1rem, 3.5vw, 2.25rem) 4rem;
+  gap: 2rem;
+}
+.section { scroll-margin-top: 6rem; }
+.section-head { gap: 1rem; margin-bottom: .9rem; flex-wrap: wrap; }
+.section-head h2 { font-size: clamp(1.2rem, 1.08rem + .5vw, 1.45rem); }
+.section-head p { color: var(--ink-2); font-size: .88rem; }
+.grid { gap: 1.1rem; }
+.panel {
+  background: var(--surface);
+  border-color: var(--line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-sm);
+}
+.metric { padding: 1.2rem 1.3rem; }
+.metric span {
+  color: var(--ink-3);
+  font-size: .8rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.metric b {
+  margin-top: .15rem;
+  font-family: var(--display);
+  font-size: 1.7rem;
+  font-weight: 600;
+  letter-spacing: -.015em;
+}
+.metric em { color: var(--ink-3); font-size: .78rem; }
+.banner {
+  margin-bottom: 1.1rem;
+  padding: 1.1rem 1.25rem;
+  border-color: var(--coral-soft);
+  border-radius: var(--r-lg);
+  background: var(--coral-tint);
+  color: var(--ink-2);
+  font-size: .88rem;
+}
+.banner b { color: var(--coral-deep); }
+
+.filters {
+  gap: .8rem;
+  padding: 1rem 1.1rem;
+  margin-bottom: 1rem;
+}
+.control { gap: .35rem; }
+.control label {
+  color: var(--ink-3);
+  font-size: .82rem;
+  font-weight: 600;
+}
+select, input, textarea {
+  border-color: var(--line);
+  border-radius: 11px;
+  background: var(--surface);
+  padding: .62rem .85rem;
+}
+select:focus, input:focus, textarea:focus {
+  outline: none;
+  border-color: var(--coral);
+}
+table { font-size: .86rem; }
+th, td { padding: .9rem 1rem; }
+th {
+  background: var(--ground);
+  color: var(--ink-3);
+  font-size: .72rem;
+}
+tbody tr { cursor: pointer; }
+tbody tr:hover { background: var(--ground); }
+tr.is-selected { background: var(--coral-tint); }
+.patient-name { font-weight: 600; }
+.subtle { color: var(--ink-3); font-size: .78rem; }
+
+.tag {
+  min-height: 0;
+  gap: .35rem;
+  padding: .22rem .62rem;
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .01em;
+}
+.tag-blue, .tag-violet { background: var(--lilac); color: var(--violet); }
+.tag-green { background: var(--mint); color: var(--green); }
+.tag-amber { background: var(--amber-soft); color: var(--amber); }
+.tag-red { background: var(--coral-soft); color: var(--coral-deep); }
+.tag-gray { background: var(--line-soft); color: var(--ink-3); }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  border: 1.5px solid transparent;
+  border-radius: 999px;
+  padding: .62rem 1.1rem;
+  font-size: .87rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.btn:hover { border-color: var(--ink-3); }
+.btn-primary {
+  background: var(--coral);
+  border-color: var(--coral);
+  color: #fff;
+  box-shadow: var(--shadow-coral);
+}
+.btn-primary:hover {
+  background: var(--coral-deep);
+  border-color: var(--coral-deep);
+}
+.btn-danger {
+  background: var(--coral-soft);
+  border-color: var(--coral-soft);
+  color: var(--coral-deep);
+}
+.btn-ok {
+  background: var(--mint);
+  border-color: var(--mint-deep);
+  color: var(--green);
+}
+.btn-row { gap: .55rem; }
+.split {
+  grid-template-columns: minmax(0,1.25fr) minmax(340px,.75fr);
+  gap: 1.5rem;
+}
+.detail {
+  padding: 1.6rem 1.7rem;
+  gap: 1.1rem;
+}
+.detail h3 { font-size: 1.05rem; }
+.detail-block {
+  border-radius: var(--r-lg);
+  background: var(--surface);
+}
+.detail-block h4 {
+  padding: 1rem 1.2rem;
+  background: var(--ground);
+  font-family: var(--sans);
+  font-size: .82rem;
+  font-weight: 700;
+  color: var(--ink-3);
+}
+.fact, .queue-card, .draft-card, .audit-row {
+  padding: 1rem;
+}
+.gap-card {
+  margin: .75rem;
+  padding: 1rem;
+  border: 1px solid var(--coral-soft);
+  background: var(--surface);
+  border-radius: var(--r-md);
+}
+.gap-card + .gap-card { margin-top: 0; }
+.fact strong, .gap-card strong, .queue-card strong, .draft-card strong {
+  font-size: .92rem;
+  color: var(--ink);
+}
+.fact p, .gap-card p, .queue-card p, .draft-card p, .audit-row p {
+  margin: .3rem 0 0;
+  color: var(--ink-2);
+  font-size: .82rem;
+}
+.empty { color: var(--ink-3); font-size: .86rem; }
+.modal-card {
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-md);
+}
+.modal-card header, .modal-body { padding: 1.25rem; }
+.modal-card header h3 { font-size: 1.05rem; }
+.toast {
+  left: 50%;
+  right: auto;
+  bottom: 1.6rem;
+  border-radius: 999px;
+  padding: .75rem 1.15rem;
+  font-size: .86rem;
+  font-weight: 600;
+  box-shadow: var(--shadow-md);
+  transform: translate(-50%, 12px);
+}
+.toast.is-visible { transform: translate(-50%, 0); }
+
+@media (max-width: 1100px) {
+  .sidebar { position: static; align-items: flex-start; }
+  .primary-nav { order: 3; width: 100%; justify-content: flex-start; overflow-x: auto; }
+  .nav { overflow-x: auto; max-width: 100%; }
+  .guardrail { max-width: none; }
+  .hospital-actionbar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .split, .grid-4, .grid-3, .grid-2 { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  .content, .topbar, .sidebar { padding-inline: 1rem; }
+  .topbar { align-items: start; flex-direction: column; }
+  .nav { border-radius: var(--r-md); flex-wrap: wrap; }
+  .nav a { flex: 1 1 auto; text-align: center; }
+  .hospital-actionbar { grid-template-columns: 1fr; padding-inline: 1rem; }
+}
+/* Shared DAI pink/purple hospital theme pass */
+:root {
+  --coral: #c23a76;
+  --coral-deep: #7b235d;
+  --coral-soft: #fbe7f0;
+  --coral-tint: #fff6fa;
+  --green: #8b3fb6;
+  --mint: #f2e7fb;
+  --mint-deep: #e1c5ee;
+  --violet: #8b3fb6;
+  --lilac: #f2e7fb;
+  --amber: #9b6b2d;
+  --amber-soft: #fff3dc;
+  --ink: #261526;
+  --ink-2: #625062;
+  --ink-3: #8b7c8b;
+  --surface: #ffffff;
+  --ground: #fff8fb;
+  --line: #eedbe7;
+  --line-soft: #f7edf3;
+  --display: var(--sans);
+  --sans: "Inter Tight", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+body { background: var(--ground); font-family: var(--sans); }
+h1, h2, h3, h4 { font-family: var(--sans); font-weight: 820; letter-spacing: -.01em; }
+.topbar h1, .section-head h2, .detail h3, .detail-block h4, .metric b {
+  font-weight: 850;
+}
+.brand-name { font-family: var(--sans); font-weight: 800; letter-spacing: .02em; }
+.sidebar { background: rgba(255,255,255,.96); }
+.nav a.is-active, .surface-switch a.is-active { background: var(--violet); color: #fff; }
+.btn-primary {
+  background: var(--coral);
+  border-color: var(--coral);
+  box-shadow: 0 12px 30px -14px rgba(123,35,93,.55);
+}
+.btn-primary:hover { background: var(--coral-deep); border-color: var(--coral-deep); }
+.banner, .guardrail, .gap-card { background: var(--coral-tint); border-color: var(--coral-soft); }
+.banner b, .tag-red { color: var(--violet); }
+.tag-blue, .tag-violet { background: var(--lilac); color: var(--violet); }
+.hospital-action i { background: var(--coral-soft); color: var(--violet); }
+.hospital-action:hover { border-color: var(--coral); background: var(--coral-tint); }
+.metric b { color: var(--violet); font-family: var(--sans); font-weight: 800; }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <img class="brand-mark" src="assets/logo.jpeg" width="48" height="48" alt="">
+      <div><span class="brand-name">DAI</span><small>Hospital console</small></div>
+    </div>
+    <nav class="primary-nav" aria-label="Primary navigation">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="index.html#modules">Features</a>
+      <a href="index.html#why">About</a>
+    </nav>
+    <nav class="surface-switch" aria-label="Switch DAI interface">
+      <a href="dashboard.html">Mother / caregiver</a>
+      <a class="is-active" href="hospital.html">Hospital team</a>
+    </nav>
+    <nav class="nav" aria-label="Hospital modules">
+      <a class="is-active" href="#overview">Overview</a>
+      <a href="#registry">Registry</a>
+      <a href="#brief">Pre-consult brief</a>
+      <a href="#clinic">Clinic flow</a>
+      <a href="#drafts">Drafts</a>
+      <a href="#audit">Audit</a>
+    </nav>
+    <div class="guardrail">
+      <b>Assistive-only guardrails</b>
+      No diagnosis, treatment recommendation, clinical risk score, or autonomous clinical action is modeled here. Every automated output is reviewable and audited.
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div>
+        <h1>Hospital-side continuity workspace</h1>
+        <p>Module A and C first: care gaps, panel registry, provenance, review states, and auditability.</p>
+      </div>
+      <div class="user-pill"><span class="avatar">SK</span> Dr. S. Kumar</div>
+    </header>
+
+    <div class="hospital-actionbar" aria-label="Hospital quick actions">
+      <a class="hospital-action" href="#clinic"><span><b>Book appointment</b><span>Review queue and open slots</span></span><i>→</i></a>
+      <a class="hospital-action" href="#registry"><span><b>Find a patient</b><span>Search registry and programs</span></span><i>⌕</i></a>
+      <a class="hospital-action" href="#brief"><span><b>Pre-consult brief</b><span>Open fact-only context</span></span><i>✓</i></a>
+      <a class="hospital-action" href="#audit"><span><b>Audit trail</b><span>Who touched what, when</span></span><i>↗</i></a>
+    </div>
+
+    <div class="content">
+      <section id="overview" class="section">
+        <div class="banner">
+          <b>Demo slice</b>
+          This page uses deterministic rules and local demo data. It is built to show the hospital-side workflow and safety architecture before connecting the real database/API.
+        </div>
+        <div class="grid grid-4" id="metrics"></div>
+      </section>
+
+      <section id="registry" class="section">
+        <div class="section-head">
+          <div>
+            <h2>Continuity registry</h2>
+            <p>Open care gaps are computed from expected pathway events versus recorded care events. Operational priority is scheduling logic only.</p>
+          </div>
+        </div>
+        <div class="panel filters">
+          <div class="control">
+            <label for="programFilter">Program</label>
+            <select id="programFilter"></select>
+          </div>
+          <div class="control">
+            <label for="providerFilter">Provider</label>
+            <select id="providerFilter"></select>
+          </div>
+          <div class="control">
+            <label for="overdueFilter">Days overdue</label>
+            <select id="overdueFilter">
+              <option value="0">Any overdue</option>
+              <option value="7">More than 7 days</option>
+              <option value="14">More than 14 days</option>
+              <option value="30">More than 30 days</option>
+            </select>
+          </div>
+          <div class="control">
+            <label for="searchInput">Search</label>
+            <input id="searchInput" type="search" placeholder="Patient name or ID">
+          </div>
+        </div>
+        <div class="split">
+          <div class="panel table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Patient</th>
+                  <th>Program</th>
+                  <th>Stage</th>
+                  <th>Open gaps</th>
+                  <th>Last touch</th>
+                  <th>Ops priority</th>
+                </tr>
+              </thead>
+              <tbody id="registryRows"></tbody>
+            </table>
+          </div>
+          <aside class="panel detail" id="patientDetail"></aside>
+        </div>
+      </section>
+
+      <section id="brief" class="section">
+        <div class="section-head">
+          <div>
+            <h2>Pre-consultation brief</h2>
+            <p>Fact-only aggregation: source, date, values, document type, and missing/inconsistent flags. No generated clinical interpretation is allowed.</p>
+          </div>
+          <div class="status-line">
+            <span class="tag tag-violet" id="briefStatus">Pending review</span>
+            <button class="btn btn-ok" data-action="review-brief">Mark reviewed</button>
+            <button class="btn btn-danger" data-action="reject-brief">Reject extracted item</button>
+          </div>
+        </div>
+        <div class="grid grid-2">
+          <div class="panel detail-block">
+            <h4>Extracted facts</h4>
+            <div class="detail-list" id="briefFacts"></div>
+          </div>
+          <div class="panel detail-block">
+            <h4>Missing or inconsistent information</h4>
+            <div class="detail-list" id="briefFlags"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="clinic" class="section">
+        <div class="section-head">
+          <div>
+            <h2>Clinic operations</h2>
+            <p>Queue state and slot suggestions are operational only. Urgency is shown only when staff manually set it.</p>
+          </div>
+        </div>
+        <div class="grid grid-2">
+          <div class="panel detail-block">
+            <h4>Live queue</h4>
+            <div class="detail-list" id="queueList"></div>
+          </div>
+          <div class="panel detail-block">
+            <h4>Cancellation slot suggestions</h4>
+            <div class="detail-list" id="slotSuggestions"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="drafts" class="section">
+        <div class="section-head">
+          <div>
+            <h2>Doctor productivity and education drafts</h2>
+            <p>Draft generation and send/publish are separate states. Nothing can be published without approval.</p>
+          </div>
+          <button class="btn btn-primary" data-action="new-draft">Generate draft</button>
+        </div>
+        <div class="grid grid-3" id="draftCards"></div>
+      </section>
+
+      <section id="audit" class="section">
+        <div class="section-head">
+          <div>
+            <h2>Audit log</h2>
+            <p>Every important read, flag, draft, approval, override, schedule change, and resolution is captured as an append-only event.</p>
+          </div>
+        </div>
+        <div class="panel detail-block">
+          <h4>Recent events</h4>
+          <div class="detail-list" id="auditRows"></div>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<div class="modal" id="actionModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal-card">
+    <header>
+      <h3 id="modalTitle">Human override</h3>
+      <button class="btn" data-action="close-modal">Close</button>
+    </header>
+    <div class="modal-body">
+      <div id="modalCopy" class="subtle"></div>
+      <div class="control">
+        <label for="modalNotes">Notes</label>
+        <textarea id="modalNotes" placeholder="Add the reason or next step."></textarea>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" data-action="confirm-modal">Confirm and audit</button>
+        <button class="btn" data-action="close-modal">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  "use strict";
+
+  var DAY_MS = 24 * 60 * 60 * 1000;
+  var today = new Date("2026-09-20T09:00:00+05:30");
+  var selectedPatientId = "P-1002";
+  var pendingAction = null;
+  var API_BASE = "http://localhost:3001/api";
+  var apiAvailable = false;
+
+  var pathways = {
+    maternal: {
+      name: "Maternal continuity",
+      events: [
+        { id: "anc-12", stage: "Trimester 1", type: "ANC visit", offset: 84, requiredDocs: ["visit_note"] },
+        { id: "anomaly-scan", stage: "Trimester 2", type: "Anomaly scan", offset: 140, requiredDocs: ["scan_report"] },
+        { id: "gtt", stage: "Trimester 2", type: "Glucose tolerance test", offset: 168, requiredDocs: ["lab_result"] },
+        { id: "birth-plan", stage: "Trimester 3", type: "Birth plan readiness", offset: 252, requiredDocs: ["care_plan"] }
+      ]
+    },
+    oncology: {
+      name: "Oncology follow-up",
+      events: [
+        { id: "cycle-review", stage: "Cycle review", type: "Post-cycle review", offset: 21, requiredDocs: ["visit_note"] },
+        { id: "cbc", stage: "Investigation", type: "CBC lab upload", offset: 28, requiredDocs: ["lab_result"] },
+        { id: "scan-review", stage: "Follow-up imaging", type: "Follow-up scan filed", offset: 90, requiredDocs: ["imaging_report"] }
+      ]
+    },
+    diabetes: {
+      name: "Diabetes clinic",
+      events: [
+        { id: "hba1c", stage: "Quarterly labs", type: "HbA1c result upload", offset: 90, requiredDocs: ["lab_result"] },
+        { id: "foot-check", stage: "Annual review", type: "Foot check recorded", offset: 180, requiredDocs: ["visit_note"] },
+        { id: "eye-referral", stage: "Annual review", type: "Eye referral letter", offset: 210, requiredDocs: ["referral_letter"] }
+      ]
+    }
+  };
+
+  var patients = [
+    { id: "P-1001", name: "Asha Nair", age: 31, program: "maternal", provider: "Dr. S. Kumar", stage: "Trimester 2", pathwayStart: "2026-04-07", lastTouch: "2026-08-28", noShows: 1, phone: "+91 90000 11111" },
+    { id: "P-1002", name: "Meera Joshi", age: 28, program: "maternal", provider: "Dr. S. Kumar", stage: "Trimester 3", pathwayStart: "2025-12-10", lastTouch: "2026-08-02", noShows: 3, phone: "+91 90000 22222" },
+    { id: "P-2030", name: "Farhan Ali", age: 54, program: "diabetes", provider: "Dr. N. Rao", stage: "Quarterly labs", pathwayStart: "2026-02-08", lastTouch: "2026-08-14", noShows: 2, phone: "+91 90000 33333" },
+    { id: "P-3091", name: "Leela Menon", age: 47, program: "oncology", provider: "Dr. A. Shah", stage: "Follow-up imaging", pathwayStart: "2026-05-14", lastTouch: "2026-09-17", noShows: 0, phone: "+91 90000 44444" },
+    { id: "P-3094", name: "Ritika Sen", age: 39, program: "oncology", provider: "Dr. A. Shah", stage: "Investigation", pathwayStart: "2026-06-01", lastTouch: "2026-07-24", noShows: 2, phone: "+91 90000 55555" }
+  ];
+
+  var careEvents = [
+    { patientId: "P-1001", type: "ANC visit", recordedAt: "2026-07-01", source: "EMR", documentRef: "visit-4401" },
+    { patientId: "P-1001", type: "Anomaly scan", recordedAt: "2026-08-25", source: "Radiology", documentRef: "scan-8840" },
+    { patientId: "P-1002", type: "ANC visit", recordedAt: "2026-03-10", source: "EMR", documentRef: "visit-4204" },
+    { patientId: "P-1002", type: "Anomaly scan", recordedAt: "2026-05-01", source: "Radiology", documentRef: "scan-8322" },
+    { patientId: "P-2030", type: "Foot check recorded", recordedAt: "2026-08-08", source: "EMR", documentRef: "visit-5180" },
+    { patientId: "P-3091", type: "Post-cycle review", recordedAt: "2026-06-06", source: "EMR", documentRef: "visit-7731" },
+    { patientId: "P-3091", type: "CBC lab upload", recordedAt: "2026-06-15", source: "Lab system", documentRef: "lab-9018" },
+    { patientId: "P-3094", type: "Post-cycle review", recordedAt: "2026-06-25", source: "EMR", documentRef: "visit-7852" }
+  ];
+
+  var resolvedGapIds = {};
+  var consultationBrief = {
+    patientId: "P-1002",
+    appointmentId: "A-902",
+    status: "pending_review",
+    facts: [
+      { label: "Last ANC visit", value: "2026-03-10", source: "EMR visit-4204", confidence: "typed/coded" },
+      { label: "Anomaly scan document", value: "Uploaded 2026-05-01", source: "Radiology scan-8322", confidence: "typed/coded" },
+      { label: "Referral letter", value: "Mentions scan planned after 2026-08-15", source: "OCR doc-ref-192", confidence: "0.82" }
+    ],
+    flags: [
+      { type: "missing_info", text: "No glucose tolerance test result found after expected date.", source: "Gap engine, pathway event gtt" },
+      { type: "inconsistent_info", text: "Referral letter references a scan not present in document store.", source: "OCR doc-ref-192" }
+    ]
+  };
+
+  var queue = [
+    { slot: "09:30", patientId: "P-1002", status: "checked in", waitMins: 18, urgency: "Staff-set: high-priority follow-up" },
+    { slot: "09:45", patientId: "P-3091", status: "waiting", waitMins: 11, urgency: "" },
+    { slot: "10:00", patientId: "P-2030", status: "delayed labs", waitMins: 8, urgency: "" },
+    { slot: "10:15", patientId: "P-1001", status: "cancelled", waitMins: 0, urgency: "" }
+  ];
+
+  var drafts = [
+    { id: "D-501", type: "referral letter", patientId: "P-1002", status: "pending_review", body: "Draft referral letter assembled from reviewed demographics, recent appointment history, and listed document references. Clinician must edit and approve before filing." },
+    { id: "D-502", type: "patient handout", patientId: null, status: "draft", body: "Draft multilingual clinic handout based on the hospital-approved antenatal visit schedule knowledge base." },
+    { id: "D-503", type: "department report", patientId: null, status: "approved", body: "Operational report draft: open follow-up gaps by program, outreach workload, and slot utilization. No clinical inference included." }
+  ];
+
+  var audit = [
+    event("system", "gap_engine_run", "CareGap", "all", "Deterministic expected-versus-recorded diff completed."),
+    event("Dr. S. Kumar", "record_accessed", "Patient", "P-1002", "Opened hospital registry detail panel.")
+  ];
+
+  function byId(id) { return document.getElementById(id); }
+  function fmtDate(value) {
+    return new Date(value).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
+  }
+  function daysBetween(a, b) {
+    return Math.floor((new Date(a).setHours(0, 0, 0, 0) - new Date(b).setHours(0, 0, 0, 0)) / DAY_MS);
+  }
+  function addDays(value, days) {
+    return new Date(new Date(value).getTime() + days * DAY_MS);
+  }
+  function patient(id) { return patients.filter(function (p) { return p.id === id; })[0]; }
+  function html(value) {
+    return String(value == null ? "" : value).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  function event(actor, action, entityType, entityId, detail) {
+    return {
+      id: "AUD-" + Math.random().toString(16).slice(2, 8).toUpperCase(),
+      actor: actor,
+      action: action,
+      entityType: entityType,
+      entityId: entityId,
+      detail: detail,
+      timestamp: new Date().toISOString()
+    };
+  }
+  function auditEvent(actor, action, entityType, entityId, detail) {
+    audit.unshift(event(actor, action, entityType, entityId, detail));
+    renderAudit();
+  }
+  function showToast(text) {
+    var el = byId("toast");
+    el.textContent = text;
+    el.classList.add("is-visible");
+    window.clearTimeout(showToast.t);
+    showToast.t = window.setTimeout(function () { el.classList.remove("is-visible"); }, 2600);
+  }
+  async function hospitalApi(path, options) {
+    var res = await fetch(API_BASE + "/hospital" + path, Object.assign({
+      headers: { "Content-Type": "application/json" }
+    }, options || {}));
+    var data = await res.json().catch(function () { return {}; });
+    if (!res.ok) throw new Error(data.error || "Hospital API request failed");
+    return data;
+  }
+  function applyHospitalState(data) {
+    today = new Date(data.today || today);
+    pathways = data.pathways || pathways;
+    patients = data.patients || patients;
+    careEvents = data.careEvents || careEvents;
+    resolvedGapIds = data.resolvedGapIds || resolvedGapIds;
+    consultationBrief = data.consultationBrief || consultationBrief;
+    queue = data.queue || queue;
+    drafts = data.drafts || drafts;
+    audit = data.audit || audit;
+    if (!patient(selectedPatientId) && patients.length) selectedPatientId = patients[0].id;
+  }
+  async function loadHospitalState(showStatus) {
+    try {
+      var data = await hospitalApi("/state");
+      applyHospitalState(data);
+      apiAvailable = true;
+      if (showStatus) showToast("Hospital backend connected.");
+      return true;
+    } catch (error) {
+      apiAvailable = false;
+      if (showStatus) showToast("Using local demo data until backend starts.");
+      return false;
+    }
+  }
+  async function postHospital(path, payload) {
+    if (!apiAvailable) return null;
+    try {
+      var result = await hospitalApi(path, {
+        method: "POST",
+        body: JSON.stringify(payload || {})
+      });
+      if (result.state) applyHospitalState(result.state);
+      return result;
+    } catch (error) {
+      apiAvailable = false;
+      showToast(error.message || "Backend action failed; using local fallback.");
+      return null;
+    }
+  }
+
+  function computeGaps() {
+    var gaps = [];
+    patients.forEach(function (p) {
+      var template = pathways[p.program];
+      template.events.forEach(function (expected) {
+        var dueDate = addDays(p.pathwayStart, expected.offset);
+        var daysOverdue = daysBetween(today, dueDate);
+        var actual = careEvents.filter(function (e) {
+          return e.patientId === p.id && e.type === expected.type && new Date(e.recordedAt) <= today;
+        })[0];
+        var id = p.id + ":" + expected.id;
+        if (!actual && daysOverdue > 0 && !resolvedGapIds[id]) {
+          gaps.push({
+            id: id,
+            patientId: p.id,
+            patientName: p.name,
+            program: p.program,
+            provider: p.provider,
+            stage: expected.stage,
+            expectedType: expected.type,
+            dueDate: dueDate.toISOString().slice(0, 10),
+            daysOverdue: daysOverdue,
+            requiredDocs: expected.requiredDocs,
+            assignedTo: p.provider,
+            operationalPriority: daysOverdue + p.noShows * 7,
+            provenance: "Expected event " + expected.id + " from " + template.name + "; no matching recorded care event found in EMR/lab/document sources."
+          });
+        }
+      });
+    });
+    return gaps.sort(function (a, b) { return b.operationalPriority - a.operationalPriority; });
+  }
+
+  function patientGapSummary(id) {
+    return computeGaps().filter(function (g) { return g.patientId === id; });
+  }
+
+  function renderMetrics() {
+    var gaps = computeGaps();
+    var touchedThisWeek = patients.filter(function (p) { return daysBetween(today, p.lastTouch) <= 7; }).length;
+    byId("metrics").innerHTML = [
+      ["Open care gaps", gaps.length, "Assignable outreach tasks"],
+      ["Patients in panel", patients.length, "Across 3 programs"],
+      ["Pending reviews", drafts.filter(function (d) { return d.status !== "approved" && d.status !== "published"; }).length + 1, "Drafts and extracted facts"],
+      ["Touched this week", touchedThisWeek, "Operational continuity only"]
+    ].map(function (m) {
+      return '<div class="panel metric"><span>' + m[0] + '</span><b>' + m[1] + '</b><em>' + m[2] + '</em></div>';
+    }).join("");
+  }
+
+  function populateFilters() {
+    var programs = Object.keys(pathways);
+    var providers = Array.from(new Set(patients.map(function (p) { return p.provider; })));
+    byId("programFilter").innerHTML = '<option value="">All programs</option>' + programs.map(function (k) {
+      return '<option value="' + k + '">' + pathways[k].name + '</option>';
+    }).join("");
+    byId("providerFilter").innerHTML = '<option value="">All providers</option>' + providers.map(function (p) {
+      return '<option value="' + html(p) + '">' + html(p) + '</option>';
+    }).join("");
+  }
+
+  function filteredPatients() {
+    var program = byId("programFilter").value;
+    var provider = byId("providerFilter").value;
+    var overdue = Number(byId("overdueFilter").value);
+    var search = byId("searchInput").value.trim().toLowerCase();
+    return patients.filter(function (p) {
+      var gaps = patientGapSummary(p.id).filter(function (g) { return g.daysOverdue > overdue; });
+      if (program && p.program !== program) return false;
+      if (provider && p.provider !== provider) return false;
+      if (overdue && !gaps.length) return false;
+      if (search && (p.name + " " + p.id).toLowerCase().indexOf(search) === -1) return false;
+      return true;
+    });
+  }
+
+  function renderRegistry() {
+    var rows = filteredPatients();
+    byId("registryRows").innerHTML = rows.map(function (p) {
+      var gaps = patientGapSummary(p.id);
+      var score = gaps.reduce(function (sum, g) { return sum + g.operationalPriority; }, 0);
+      return '<tr class="' + (p.id === selectedPatientId ? 'is-selected' : '') + '" data-patient="' + p.id + '">' +
+        '<td><div class="patient-name">' + html(p.name) + '</div><div class="subtle">' + p.id + ' · Age ' + p.age + '</div></td>' +
+        '<td>' + html(pathways[p.program].name) + '</td>' +
+        '<td>' + html(p.stage) + '</td>' +
+        '<td>' + (gaps.length ? '<span class="tag tag-red">' + gaps.length + ' open</span>' : '<span class="tag tag-green">none</span>') + '</td>' +
+        '<td>' + fmtDate(p.lastTouch) + '</td>' +
+        '<td><span class="tag tag-amber">' + score + '</span><div class="subtle">days overdue + no-show weight</div></td>' +
+      '</tr>';
+    }).join("") || '<tr><td colspan="6"><div class="empty">No patients match these filters.</div></td></tr>';
+    renderPatientDetail();
+  }
+
+  function renderPatientDetail() {
+    var p = patient(selectedPatientId) || patients[0];
+    var gaps = patientGapSummary(p.id);
+    byId("patientDetail").innerHTML =
+      '<div><h3>' + html(p.name) + '</h3><div class="subtle">' + p.id + ' · ' + html(pathways[p.program].name) + ' · ' + html(p.provider) + '</div></div>' +
+      '<div class="status-line">' +
+        '<span class="tag tag-blue">' + html(p.stage) + '</span>' +
+        '<span class="tag tag-gray">Last touch ' + fmtDate(p.lastTouch) + '</span>' +
+      '</div>' +
+      '<div class="detail-block"><h4>Open gaps with provenance</h4><div class="detail-list">' +
+        (gaps.length ? gaps.map(function (g) {
+          return '<div class="gap-card">' +
+            '<strong>' + html(g.expectedType) + '</strong>' +
+            '<p>Due ' + fmtDate(g.dueDate) + ' · ' + g.daysOverdue + ' days overdue · assigned to ' + html(g.assignedTo) + '</p>' +
+            '<p>Provenance: ' + html(g.provenance) + '</p>' +
+            '<div class="btn-row" style="margin-top:10px">' +
+              '<button class="btn btn-primary" data-action="contact" data-gap="' + g.id + '">Contact patient</button>' +
+              '<button class="btn" data-action="reassign" data-gap="' + g.id + '">Reassign</button>' +
+              '<button class="btn btn-ok" data-action="resolve" data-gap="' + g.id + '">Mark resolved</button>' +
+            '</div>' +
+          '</div>';
+        }).join("") : '<div class="empty">No open gaps for this patient.</div>') +
+      '</div></div>';
+  }
+
+  function renderBrief() {
+    byId("briefStatus").textContent = consultationBrief.status.replace("_", " ");
+    byId("briefStatus").className = "tag " + (consultationBrief.status === "reviewed" ? "tag-green" : consultationBrief.status === "rejected_item" ? "tag-red" : "tag-violet");
+    byId("briefFacts").innerHTML = consultationBrief.facts.map(function (f) {
+      return '<div class="fact"><strong>' + html(f.label) + ': ' + html(f.value) + '</strong><p>Source: ' + html(f.source) + ' · Confidence: ' + html(f.confidence) + '</p></div>';
+    }).join("");
+    byId("briefFlags").innerHTML = consultationBrief.flags.map(function (f) {
+      return '<div class="fact"><strong>' + html(f.type.replace("_", " ")) + '</strong><p>' + html(f.text) + '</p><p>Source: ' + html(f.source) + '</p></div>';
+    }).join("");
+  }
+
+  function renderClinic() {
+    byId("queueList").innerHTML = queue.map(function (q) {
+      var p = patient(q.patientId);
+      return '<div class="queue-card"><strong>' + q.slot + ' · ' + html(p.name) + '</strong>' +
+        '<p>Status: ' + html(q.status) + ' · waiting ' + q.waitMins + ' min</p>' +
+        (q.urgency ? '<p><span class="tag tag-red">' + html(q.urgency) + '</span></p>' : '<p><span class="tag tag-gray">No manual urgency flag</span></p>') +
+      '</div>';
+    }).join("");
+    var cancelled = queue.filter(function (q) { return q.status === "cancelled"; })[0];
+    var topGaps = computeGaps().slice(0, 3);
+    byId("slotSuggestions").innerHTML = topGaps.map(function (g) {
+      return '<div class="queue-card"><strong>' + (cancelled ? cancelled.slot : "Next open slot") + ' suggestion: ' + html(g.patientName) + '</strong>' +
+        '<p>Reason: open operational follow-up task, ' + g.daysOverdue + ' days overdue. This is not an automatic booking.</p>' +
+        '<button class="btn btn-primary" data-action="approve-slot" data-gap="' + g.id + '">Front desk approve</button>' +
+      '</div>';
+    }).join("") || '<div class="empty">No outreach suggestions right now.</div>';
+  }
+
+  function renderDrafts() {
+    byId("draftCards").innerHTML = drafts.map(function (d) {
+      var canApprove = d.status === "draft" || d.status === "pending_review";
+      var canPublish = d.status === "approved";
+      return '<div class="panel draft-card">' +
+        '<div class="status-line"><span class="tag tag-blue">' + html(d.type) + '</span><span class="tag ' + statusClass(d.status) + '">' + html(d.status.replace("_", " ")) + '</span></div>' +
+        '<p>' + html(d.body) + '</p>' +
+        '<div class="btn-row" style="margin-top:12px">' +
+          (canApprove ? '<button class="btn btn-ok" data-action="approve-draft" data-draft="' + d.id + '">Approve</button>' : '') +
+          (canPublish ? '<button class="btn btn-primary" data-action="publish-draft" data-draft="' + d.id + '">Publish/file</button>' : '') +
+          '<button class="btn btn-danger" data-action="reject-draft" data-draft="' + d.id + '">Reject</button>' +
+        '</div>' +
+      '</div>';
+    }).join("");
+  }
+
+  function statusClass(status) {
+    if (status === "approved" || status === "published") return "tag-green";
+    if (status === "rejected") return "tag-red";
+    if (status === "pending_review") return "tag-violet";
+    return "tag-gray";
+  }
+
+  function renderAudit() {
+    byId("auditRows").innerHTML = audit.slice(0, 14).map(function (a) {
+      return '<div class="audit-row"><strong>' + html(a.actor) + ' · ' + html(a.action) + '</strong>' +
+        '<p>' + html(a.entityType) + ' ' + html(a.entityId) + ' · ' + new Date(a.timestamp).toLocaleString("en-IN") + '</p>' +
+        '<p>' + html(a.detail) + '</p></div>';
+    }).join("");
+  }
+
+  function openModal(title, copy, confirm) {
+    pendingAction = confirm;
+    byId("modalTitle").textContent = title;
+    byId("modalCopy").textContent = copy;
+    byId("modalNotes").value = "";
+    byId("actionModal").classList.add("is-open");
+  }
+  function closeModal() {
+    byId("actionModal").classList.remove("is-open");
+    pendingAction = null;
+  }
+  function rerenderAll() {
+    renderMetrics();
+    renderRegistry();
+    renderBrief();
+    renderClinic();
+    renderDrafts();
+    renderAudit();
+  }
+
+  function handleGapAction(action, gapId) {
+    var gap = computeGaps().filter(function (g) { return g.id === gapId; })[0];
+    if (!gap) return;
+    var titles = {
+      contact: "Contact patient",
+      reassign: "Reassign gap",
+      resolve: "Resolve gap",
+      "approve-slot": "Approve slot suggestion"
+    };
+    openModal(titles[action], gap.patientName + " · " + gap.expectedType + ". Add notes before this human action is recorded.", async function (notes) {
+      var path = action === "approve-slot"
+        ? "/clinic/slots/" + encodeURIComponent(gap.id) + "/reassign"
+        : "/gaps/" + encodeURIComponent(gap.id) + "/" + action;
+      var synced = await postHospital(path, { actor: "Dr. S. Kumar", notes: notes || (titles[action] + " confirmed by user.") });
+      if (!synced) {
+        if (action === "resolve") resolvedGapIds[gap.id] = true;
+        auditEvent("Dr. S. Kumar", action, "CareGap", gap.id, notes || (titles[action] + " confirmed by user."));
+      }
+      showToast(titles[action] + " recorded and audited.");
+      rerenderAll();
+    });
+  }
+
+  function handleDraftAction(action, draftId) {
+    var d = drafts.filter(function (x) { return x.id === draftId; })[0];
+    if (!d) return;
+    if (action === "publish-draft" && d.status !== "approved") {
+      showToast("Publishing is blocked until a clinician approves the draft.");
+      return;
+    }
+    var next = action === "approve-draft" ? "approved" : action === "publish-draft" ? "published" : "rejected";
+    openModal(next === "published" ? "Publish/file approved content" : "Review draft", d.id + " will move to " + next + ".", async function (notes) {
+      var apiAction = action === "approve-draft" ? "approve" : action === "publish-draft" ? "publish" : "reject";
+      var synced = await postHospital("/content/" + encodeURIComponent(d.id) + "/" + apiAction, { actor: "Dr. S. Kumar", notes: notes || ("Draft status changed to " + next + ".") });
+      if (!synced) {
+        d.status = next;
+        auditEvent("Dr. S. Kumar", action, "ContentDraft", d.id, notes || ("Draft status changed to " + next + "."));
+      }
+      showToast("Draft status updated.");
+      rerenderAll();
+    });
+  }
+
+  document.addEventListener("click", function (e) {
+    var row = e.target.closest("tr[data-patient]");
+    if (row) {
+      selectedPatientId = row.dataset.patient;
+      auditEvent("Dr. S. Kumar", "record_accessed", "Patient", selectedPatientId, "Selected patient in registry.");
+      renderRegistry();
+      return;
+    }
+    var btn = e.target.closest("[data-action]");
+    if (!btn) return;
+    var action = btn.dataset.action;
+    if (action === "close-modal") closeModal();
+    if (action === "confirm-modal" && pendingAction) {
+      var notes = byId("modalNotes").value.trim();
+      var run = pendingAction;
+      closeModal();
+      run(notes);
+    }
+    if (btn.dataset.gap) handleGapAction(action, btn.dataset.gap);
+    if (btn.dataset.draft) handleDraftAction(action, btn.dataset.draft);
+    if (action === "review-brief") {
+      postHospital("/consultations/" + encodeURIComponent(consultationBrief.appointmentId) + "/brief/review", { actor: "Dr. S. Kumar" }).then(function (synced) {
+        if (!synced) {
+          consultationBrief.status = "reviewed";
+          auditEvent("Dr. S. Kumar", "brief_reviewed", "ConsultationBrief", consultationBrief.appointmentId, "Fact-only brief reviewed by clinician.");
+        }
+        renderBrief();
+      });
+      showToast("Brief marked reviewed.");
+    }
+    if (action === "reject-brief") {
+      postHospital("/consultations/" + encodeURIComponent(consultationBrief.appointmentId) + "/brief/reject", { actor: "Dr. S. Kumar" }).then(function (synced) {
+        if (!synced) {
+          consultationBrief.status = "rejected_item";
+          auditEvent("Dr. S. Kumar", "brief_item_rejected", "ConsultationBrief", consultationBrief.appointmentId, "Clinician rejected an extracted item for correction.");
+        }
+        renderBrief();
+      });
+      showToast("Extracted item rejection recorded.");
+    }
+    if (action === "new-draft") {
+      postHospital("/content/draft", {
+        type: "patient handout",
+        body: "New draft created from approved hospital source material. Review and edit required before publication."
+      }).then(function (synced) {
+        if (!synced) {
+          var id = "D-" + Math.floor(600 + Math.random() * 300);
+          drafts.unshift({ id: id, type: "patient handout", patientId: null, status: "draft", body: "New draft created from approved hospital source material. Review and edit required before publication." });
+          auditEvent("drafting-agent", "draft_generated", "ContentDraft", id, "Draft generated; no send/file action performed.");
+        }
+        showToast("Draft generated and held for review.");
+        rerenderAll();
+      });
+    }
+  });
+
+  ["programFilter", "providerFilter", "overdueFilter", "searchInput"].forEach(function (id) {
+    byId(id).addEventListener("input", renderRegistry);
+    byId(id).addEventListener("change", renderRegistry);
+  });
+
+  document.querySelectorAll(".nav a").forEach(function (a) {
+    a.addEventListener("click", function () {
+      document.querySelectorAll(".nav a").forEach(function (x) { x.classList.remove("is-active"); });
+      a.classList.add("is-active");
+    });
+  });
+
+  loadHospitalState(true).then(function () {
+    populateFilters();
+    rerenderAll();
+  });
+})();
+</script>
+</body>
+</html>

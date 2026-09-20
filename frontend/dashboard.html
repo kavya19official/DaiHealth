@@ -1,0 +1,1924 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DAI — Care Dashboard</title>
+<meta name="theme-color" content="#c23a76">
+
+<style>
+/* ==========================================================================
+   DAI — Care Dashboard (Timeline · Care Gap Alerts · Doctor Dashboard)
+   Tokens carried over 1:1 from the marketing site so the app reads as the
+   same product, not a bolt-on demo.
+   ========================================================================== */
+
+:root {
+  --coral:       #c23a76;
+  --coral-deep:  #7b235d;
+  --coral-soft:  #fbe7f0;
+  --coral-tint:  #fff6fa;
+
+  --green:       #8b3fb6;
+  --mint:        #f2e7fb;
+  --mint-deep:   #e1c5ee;
+
+  --violet:      #8b3fb6;
+  --lilac:       #f2e7fb;
+
+  --amber:       #B8790A;
+  --amber-soft:  #FBF0DD;
+
+  --ink:         #261526;
+  --ink-2:       #625062;
+  --ink-3:       #8b7c8b;
+
+  --surface:     #FFFFFF;
+  --ground:      #fff8fb;
+  --deep:        #261526;
+  --line:        #eedbe7;
+  --line-soft:   #f7edf3;
+
+  --display: "Fraunces", Georgia, serif;
+  --sans:    "Inter Tight", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --r-sm: 10px; --r-md: 16px; --r-lg: 22px; --r-xl: 30px;
+
+  --shadow-sm: 0 1px 2px rgba(15,31,41,.05), 0 4px 12px -6px rgba(15,31,41,.09);
+  --shadow-md: 0 1px 2px rgba(15,31,41,.04), 0 14px 34px -16px rgba(15,31,41,.18);
+  --shadow-coral: 0 10px 26px -12px rgba(201,57,44,.5);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--ground); color: var(--ink);
+  font-family: var(--sans); font-size: 1rem; line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+svg { display: block; }
+h1, h2, h3, h4 {
+  font-family: var(--display); font-weight: 500; line-height: 1.15;
+  letter-spacing: -0.015em; margin: 0 0 .4em;
+}
+h1 { font-size: clamp(1.55rem, 1.3rem + 1.1vw, 2.1rem); font-variation-settings: "opsz" 90; }
+h2 { font-size: clamp(1.2rem, 1.08rem + .5vw, 1.45rem); font-variation-settings: "opsz" 60; }
+h3 { font-size: 1.05rem; font-weight: 600; letter-spacing: -.005em; font-family: var(--sans); }
+p { margin: 0 0 .8rem; color: var(--ink-2); }
+button { font-family: inherit; }
+:focus-visible { outline: 2.5px solid var(--coral); outline-offset: 2px; border-radius: 6px; }
+
+.wrap { width: min(1180px, 100%); margin-inline: auto; padding-inline: clamp(1rem, 3.5vw, 2.25rem); }
+
+/* ---- Top app bar --------------------------------------------------- */
+.appbar {
+  position: sticky; top: 0; z-index: 50;
+  background: rgba(255,255,255,.92); backdrop-filter: saturate(180%) blur(14px);
+  border-bottom: 1px solid var(--line);
+}
+.appbar__inner { display: flex; align-items: center; gap: 1.25rem; min-height: 4.25rem; flex-wrap: wrap; padding-block: .5rem; }
+.brand { display: flex; align-items: center; gap: .6rem; text-decoration: none; color: var(--ink); margin-right: auto; }
+.brand__mark { width: 48px; height: 48px; flex: none; border-radius: 12px; object-fit: contain; }
+.brand__name { font-family: var(--display); font-weight: 700; font-size: 1.22rem; letter-spacing: 0; text-transform: uppercase; }
+.brand__tag { display: block; font-size: .56rem; font-weight: 600; letter-spacing: .17em; color: var(--ink-3); }
+
+.segmented {
+  display: inline-flex; background: var(--ground); border: 1px solid var(--line);
+  border-radius: 999px; padding: 3px; gap: 2px;
+}
+.segmented button {
+  border: none; background: transparent; padding: .55rem 1.05rem; border-radius: 999px;
+  font-size: .87rem; font-weight: 600; color: var(--ink-2); cursor: pointer;
+  display: inline-flex; align-items: center; gap: .45rem; transition: background .2s ease, color .2s ease;
+}
+.segmented button svg { width: 16px; height: 16px; }
+.segmented button.is-active { background: var(--ink); color: #fff; }
+.segmented button:not(.is-active):hover { color: var(--ink); }
+.interface-switch {
+  display: inline-flex; background: var(--ground); border: 1px solid var(--line);
+  border-radius: 999px; padding: 3px; gap: 2px;
+}
+.interface-switch a {
+  text-decoration: none; color: var(--ink-2); padding: .55rem 1.05rem; border-radius: 999px;
+  font-size: .87rem; font-weight: 600; white-space: nowrap;
+}
+.interface-switch a.is-active { background: var(--ink); color: #fff; }
+.interface-switch a:not(.is-active):hover { color: var(--ink); }
+
+.avatar-pill {
+  display: inline-flex; align-items: center; gap: .55rem; padding: .35rem .8rem .35rem .35rem;
+  border: 1px solid var(--line); border-radius: 999px; font-size: .84rem; font-weight: 600;
+}
+.avatar-pill .dot { width: 30px; height: 30px; border-radius: 999px; background: var(--coral-soft); color: var(--coral-deep);
+  display: grid; place-items: center; font-size: .78rem; font-weight: 700; font-family: var(--display); }
+
+/* ---- Views ----------------------------------------------------------- */
+.view { display: none; padding-block: clamp(1.5rem, 3.5vw, 2.5rem) 4rem; }
+.view.is-active { display: block; }
+/* Each dashboard only ever renders for its own role. There is no UI control
+   that switches a signed-in user into the other role's view — access is also
+   enforced server-side on every /api/timeline, /api/doctor/* and
+   /api/appointments call. */
+body[data-role="mother"] #viewDoctor,
+body[data-role="doctor"] #viewFamily { display: none !important; }
+
+/* ---- Badges / tags ----------------------------------------------------- */
+.tag { display: inline-flex; align-items: center; gap: .35rem; font-size: .72rem; font-weight: 700;
+  letter-spacing: .01em; padding: .22rem .62rem; border-radius: 999px; white-space: nowrap; }
+.tag svg { width: 12px; height: 12px; }
+.tag--ok    { background: var(--mint); color: var(--green); }
+.tag--due   { background: var(--coral-soft); color: var(--coral-deep); }
+.tag--next  { background: var(--line-soft); color: var(--ink-3); }
+.tag--risk-low    { background: var(--mint); color: var(--green); }
+.tag--risk-medium { background: var(--amber-soft); color: var(--amber); }
+.tag--risk-high   { background: var(--coral-soft); color: var(--coral-deep); }
+
+/* ---- Buttons ------------------------------------------------------- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+  font-size: .87rem; font-weight: 600; padding: .62rem 1.1rem; border-radius: 999px;
+  border: 1.5px solid transparent; cursor: pointer; white-space: nowrap;
+  transition: background-color .18s ease, border-color .18s ease, box-shadow .18s ease, opacity .18s ease;
+}
+.btn svg { width: 15px; height: 15px; flex: none; }
+.btn--primary { background: var(--coral); color: #fff; box-shadow: var(--shadow-coral); }
+.btn--primary:hover { background: var(--coral-deep); }
+.btn--ghost { background: var(--surface); color: var(--ink); border-color: var(--line); }
+.btn--ghost:hover { border-color: var(--ink-3); }
+.btn--sm { padding: .46rem .85rem; font-size: .8rem; }
+.btn:disabled { opacity: .55; cursor: default; }
+.btn--done { background: var(--mint); color: var(--green); border-color: var(--mint-deep); }
+
+/* ---- Cards ----------------------------------------------------------- */
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); box-shadow: var(--shadow-sm); }
+
+/* ---- Family view: header --------------------------------------------- */
+.fv-header {
+  display: grid; grid-template-columns: minmax(0,1.1fr) minmax(0,.9fr); gap: 1.5rem;
+  align-items: stretch; margin-bottom: 1.75rem;
+}
+.fv-header__intro { padding: 1.6rem 1.8rem; display: flex; flex-direction: column; justify-content: center; }
+.fv-header__intro .eyebrow {
+  display: inline-flex; align-items: center; gap: .5rem; font-size: .78rem; font-weight: 600;
+  color: var(--coral-deep); background: var(--coral-soft); border-radius: 999px; padding: .28rem .75rem; margin-bottom: .8rem; width: fit-content;
+}
+.fv-header__intro p { margin: 0; font-size: .95rem; }
+.fv-header__intro strong { color: var(--ink); }
+
+.progress-card { padding: 1.6rem 1.8rem; display: flex; flex-direction: column; justify-content: center; gap: .9rem; }
+.progress-card__top { display: flex; justify-content: space-between; align-items: baseline; }
+.progress-card__top b { font-family: var(--display); font-size: 1.4rem; font-weight: 600; }
+.progress-card__top span { font-size: .8rem; color: var(--ink-3); }
+.progress-track { position: relative; height: 10px; border-radius: 999px; background: var(--line-soft); overflow: hidden; }
+.progress-fill { position: absolute; inset: 0 auto 0 0; border-radius: 999px; background: var(--coral); transition: width .5s ease; }
+.progress-labels { display: flex; justify-content: space-between; font-size: .74rem; color: var(--ink-3); }
+
+/* ---- Care gap alerts --------------------------------------------------- */
+.gap-section { margin-bottom: 2rem; }
+.gap-section__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: .9rem; gap: 1rem; flex-wrap: wrap; }
+.gap-section__head h2 { margin: 0; display: flex; align-items: center; gap: .55rem; }
+.gap-count { display: inline-flex; align-items: center; justify-content: center; min-width: 1.5rem; height: 1.5rem; padding-inline: .4rem;
+  border-radius: 999px; background: var(--coral); color: #fff; font-family: var(--sans); font-size: .8rem; font-weight: 700; }
+.gap-empty { display: flex; align-items: center; gap: .8rem; padding: 1.1rem 1.3rem; background: var(--mint); border: 1px solid var(--mint-deep); border-radius: var(--r-md); color: var(--green); font-weight: 600; font-size: .92rem; }
+.gap-empty svg { width: 20px; height: 20px; flex: none; }
+
+.gap-alert {
+  display: grid; grid-template-columns: 46px minmax(0,1fr) auto; gap: 1.1rem; align-items: start;
+  padding: 1.25rem 1.4rem; border-radius: var(--r-lg); border: 1px solid var(--coral-soft);
+  background: var(--surface);
+  margin-bottom: .9rem;
+}
+.gap-alert__icon { width: 46px; height: 46px; border-radius: 13px; background: var(--coral-soft); color: var(--coral-deep); display: grid; place-items: center; flex: none; }
+.gap-alert__icon svg { width: 23px; height: 23px; }
+.gap-alert__body h3 { margin-bottom: .2rem; }
+.gap-alert__meta { display: flex; gap: .6rem; align-items: center; flex-wrap: wrap; margin-bottom: .5rem; font-size: .78rem; color: var(--ink-3); }
+.gap-alert__action {
+  display: flex; gap: .55rem; align-items: flex-start; background: var(--surface); border: 1px dashed var(--line);
+  border-radius: var(--r-sm); padding: .7rem .85rem; font-size: .84rem; color: var(--ink-2); margin: 0;
+}
+.gap-alert__action svg { width: 16px; height: 16px; color: var(--violet); flex: none; margin-top: 1px; }
+.gap-alert__buttons { display: flex; flex-direction: column; gap: .5rem; align-items: stretch; }
+.gap-alert.is-resolved { opacity: 0; max-height: 0; padding-block: 0; margin: 0; border-width: 0; overflow: hidden; transition: opacity .3s ease, max-height .4s ease .1s, padding .4s ease .1s, margin .4s ease .1s; }
+
+/* ---- Stage stepper ------------------------------------------------- */
+.stage-stepper { display: flex; align-items: center; margin-bottom: 2rem; overflow-x: auto; padding-bottom: .4rem; }
+.stage-step { display: flex; align-items: center; flex: 1 1 0; min-width: 118px; }
+.stage-step__dot {
+  width: 30px; height: 30px; border-radius: 999px; background: var(--surface); border: 2px solid var(--line);
+  color: var(--ink-3); display: grid; place-items: center; flex: none; font-size: .78rem; font-weight: 700;
+}
+.stage-step__dot svg { width: 15px; height: 15px; }
+.stage-step__label { margin-left: .6rem; font-size: .78rem; font-weight: 600; color: var(--ink-3); white-space: nowrap; }
+.stage-step__line { flex: 1 1 auto; height: 2px; background: var(--line); margin-inline: .5rem; }
+.stage-step.is-done .stage-step__dot { background: var(--mint); border-color: var(--mint-deep); color: var(--green); }
+.stage-step.is-done .stage-step__label { color: var(--ink); }
+.stage-step.is-done + .stage-step .stage-step__line, .stage-step.is-done .stage-step__line { background: var(--mint-deep); }
+.stage-step.is-current .stage-step__dot { background: var(--coral); border-color: var(--coral); color: #fff; box-shadow: 0 0 0 4px var(--coral-soft); }
+.stage-step.is-current .stage-step__label { color: var(--ink); }
+
+/* ---- Timeline accordion --------------------------------------------- */
+.timeline-group { border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--surface); margin-bottom: .9rem; overflow: hidden; }
+.timeline-group__head {
+  width: 100%; display: flex; align-items: center; gap: .9rem; padding: 1.05rem 1.3rem; background: none; border: none; cursor: pointer; text-align: left;
+}
+.timeline-group__head b { flex: 1 1 auto; font-family: var(--display); font-size: 1.02rem; font-weight: 600; }
+.timeline-group__head .stage-summary { font-size: .78rem; color: var(--ink-3); }
+.timeline-group__head svg.chev { width: 18px; height: 18px; color: var(--ink-3); transition: transform .2s ease; flex: none; }
+.timeline-group.is-open .chev { transform: rotate(180deg); }
+.timeline-group__body { display: none; border-top: 1px solid var(--line-soft); padding: .4rem 1.3rem 1.1rem; }
+.timeline-group.is-open .timeline-group__body { display: block; }
+
+.milestone { display: grid; grid-template-columns: 22px minmax(0,1fr) auto; gap: .8rem; align-items: center; padding: .75rem 0; border-bottom: 1px solid var(--line-soft); }
+.milestone:last-child { border-bottom: none; }
+.milestone__icon svg { width: 20px; height: 20px; }
+.milestone__icon.ok { color: var(--green); }
+.milestone__icon.due { color: var(--coral); }
+.milestone__icon.next { color: var(--ink-3); }
+.milestone__title { font-size: .92rem; font-weight: 600; color: var(--ink); }
+.milestone__when { font-size: .78rem; color: var(--ink-3); }
+.milestone__right { display: flex; align-items: center; gap: .6rem; }
+.milestone__detail { grid-column: 1 / -1; margin: -.2rem 0 .6rem 2.85rem; }
+
+/* ---- Toast -------------------------------------------------------------- */
+.toast {
+  position: fixed; left: 50%; bottom: 1.6rem; transform: translate(-50%, 12px); z-index: 200;
+  background: var(--ink); color: #fff; padding: .75rem 1.15rem; border-radius: 999px; font-size: .86rem; font-weight: 600;
+  display: flex; align-items: center; gap: .55rem; box-shadow: var(--shadow-md); opacity: 0; pointer-events: none;
+  transition: opacity .25s ease, transform .25s ease;
+}
+.toast.is-shown { opacity: 1; transform: translate(-50%, 0); }
+.toast svg { width: 16px; height: 16px; color: var(--mint-deep); }
+
+/* ---- Doctor dashboard ---------------------------------------------- */
+.dv-header { margin-bottom: 1.5rem; }
+.stat-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--r-lg); overflow: hidden; margin-bottom: 1.75rem; }
+.stat-cell { background: var(--surface); padding: 1.2rem 1.3rem; }
+.stat-cell b { display: block; font-family: var(--display); font-size: 1.7rem; font-weight: 600; }
+.stat-cell span { font-size: .8rem; color: var(--ink-3); }
+.stat-cell.is-alert b { color: var(--coral-deep); }
+
+.dv-grid { display: grid; grid-template-columns: minmax(280px, 360px) minmax(0,1fr); gap: 1.5rem; align-items: start; }
+
+.patient-panel { border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--surface); overflow: hidden; }
+.patient-panel__controls { padding: 1rem 1.1rem .3rem; border-bottom: 1px solid var(--line-soft); }
+.search-input { width: 100%; padding: .62rem .9rem; border: 1px solid var(--line); border-radius: var(--r-sm); font-size: .87rem; font-family: inherit; margin-bottom: .8rem; }
+.chips { display: flex; gap: .45rem; flex-wrap: wrap; margin-bottom: .9rem; }
+.chip {
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink-2); font-size: .78rem; font-weight: 600;
+  padding: .38rem .8rem; border-radius: 999px; cursor: pointer;
+}
+.chip.is-active { background: var(--ink); color: #fff; border-color: var(--ink); }
+
+.patient-list { max-height: 640px; overflow-y: auto; }
+.patient-card {
+  width: 100%; display: flex; align-items: center; gap: .8rem; padding: .95rem 1.1rem; background: none; border: none;
+  border-bottom: 1px solid var(--line-soft); cursor: pointer; text-align: left;
+}
+.patient-card:hover { background: var(--ground); }
+.patient-card.is-selected { background: var(--coral-tint); }
+.patient-card__avatar {
+  width: 40px; height: 40px; border-radius: 999px; background: var(--lilac); color: var(--violet);
+  display: grid; place-items: center; font-family: var(--display); font-weight: 700; font-size: .88rem; flex: none;
+}
+.patient-card__body { flex: 1 1 auto; min-width: 0; }
+.patient-card__name { font-size: .92rem; font-weight: 600; color: var(--ink); display: flex; align-items: center; gap: .4rem; }
+.patient-card__meta { font-size: .78rem; color: var(--ink-3); margin-top: .1rem; }
+.patient-card__gap { flex: none; }
+
+.detail-panel { border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--surface); padding: 1.6rem 1.7rem; min-height: 300px; }
+.detail-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.4rem; padding-bottom: 1.3rem; border-bottom: 1px solid var(--line-soft); }
+.detail-head__id { display: flex; align-items: center; gap: .9rem; }
+.detail-head__avatar { width: 52px; height: 52px; border-radius: 999px; background: var(--lilac); color: var(--violet); display: grid; place-items: center; font-family: var(--display); font-weight: 700; font-size: 1.1rem; }
+.detail-head__tags { display: flex; gap: .5rem; margin-top: .4rem; flex-wrap: wrap; }
+
+.detail-gaps { margin-bottom: 1.6rem; }
+.detail-gaps h4 { font-size: .82rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--ink-3); margin-bottom: .7rem; }
+.dgap { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 1rem; align-items: center; padding: .85rem 1rem; border: 1px solid var(--coral-soft); background: var(--coral-tint); border-radius: var(--r-md); margin-bottom: .6rem; }
+.dgap__title { font-size: .88rem; font-weight: 600; }
+.dgap__note { font-size: .8rem; color: var(--ink-2); margin: .2rem 0 0; }
+.dgap.is-reviewed { border-color: var(--line); background: var(--ground); }
+.dgap.is-reviewed .dgap__title { color: var(--ink-3); }
+
+.mini-timeline { display: grid; gap: 0; }
+.mini-milestone { display: grid; grid-template-columns: 20px 1fr auto auto; gap: .7rem; align-items: center; padding: .6rem 0; border-bottom: 1px solid var(--line-soft); font-size: .86rem; }
+.mini-milestone:last-child { border-bottom: none; }
+.mini-milestone__stage { font-size: .72rem; color: var(--ink-3); }
+
+.empty-state { text-align: center; padding: 3rem 1rem; color: var(--ink-3); }
+
+@media (max-width: 900px) {
+  .fv-header { grid-template-columns: 1fr; }
+  .dv-grid { grid-template-columns: 1fr; }
+  .stat-strip { grid-template-columns: repeat(2, 1fr); }
+  .gap-alert { grid-template-columns: 40px 1fr; }
+  .gap-alert__buttons { grid-column: 1 / -1; flex-direction: row; margin-top: .4rem; }
+}
+@media (max-width: 560px) {
+  .stat-strip { grid-template-columns: 1fr; }
+  .milestone { grid-template-columns: 20px 1fr; }
+  .milestone__right { grid-column: 1 / -1; padding-left: 2.85rem; }
+}
+
+/* ---- Appointments ------------------------------------------------- */
+.appt-section { margin-top: 2.5rem; }
+.appt-grid { display: grid; grid-template-columns: 1.1fr 1.4fr; gap: 1.25rem; align-items: start; }
+@media (max-width: 860px) { .appt-grid { grid-template-columns: 1fr; } }
+
+.form-group { margin-bottom: 1.1rem; }
+.form-group label { display: block; font-weight: 500; margin-bottom: .4rem; color: var(--ink); font-size: .88rem; }
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%; padding: .68rem .9rem; border: 1px solid var(--line); border-radius: var(--r-md);
+  font-family: inherit; font-size: .95rem; color: var(--ink); background: var(--surface);
+  transition: border-color .2s ease;
+}
+.form-group textarea { resize: vertical; min-height: 5rem; }
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: var(--coral); }
+
+.appt-list { display: flex; flex-direction: column; gap: .75rem; }
+.appt-card {
+  border: 1px solid var(--line); border-radius: var(--r-md); padding: .9rem 1.05rem;
+  display: flex; flex-direction: column; gap: .35rem; background: var(--surface);
+}
+.appt-card__top { display: flex; align-items: center; justify-content: space-between; gap: .6rem; flex-wrap: wrap; }
+.appt-card__who { font-weight: 600; font-size: .92rem; }
+.appt-card__meta { font-size: .82rem; color: var(--ink-3); }
+.appt-card__reason { font-size: .88rem; color: var(--ink-2); }
+.appt-card__actions { display: flex; gap: .5rem; align-items: center; flex-wrap: wrap; margin-top: .3rem; }
+.appt-card__actions select { width: auto; padding: .4rem .6rem; font-size: .82rem; }
+.tag--pending   { background: var(--amber-soft); color: var(--amber); }
+.tag--confirmed { background: var(--lilac); color: var(--violet); }
+.tag--completed { background: var(--mint); color: var(--green); }
+.tag--cancelled { background: var(--line-soft); color: var(--ink-3); }
+
+/* ---- Care team (colleague doctors) --------------------------------- */
+.team-section { margin-bottom: 2rem; }
+.team-section__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: .9rem; gap: 1rem; flex-wrap: wrap; }
+.team-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: .9rem; }
+.team-card {
+  display: flex; align-items: center; gap: .8rem; padding: 1rem 1.1rem;
+  border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--surface);
+}
+.team-card__avatar { width: 42px; height: 42px; border-radius: 999px; background: var(--lilac); color: var(--violet);
+  display: grid; place-items: center; font-family: var(--display); font-weight: 700; font-size: .92rem; flex: none; }
+.team-card__body { min-width: 0; }
+.team-card__name { font-size: .92rem; font-weight: 600; color: var(--ink); }
+.team-card__meta { font-size: .78rem; color: var(--ink-3); margin-top: .1rem; }
+.team-empty { grid-column: 1 / -1; }
+
+/* ---- Modal ------------------------------------------------------------ */
+.modal-backdrop {
+  position: fixed; inset: 0; background: rgba(15,31,41,.5); z-index: 300;
+  display: flex; align-items: center; justify-content: center; padding: 1.25rem;
+  opacity: 0; pointer-events: none; transition: opacity .18s ease;
+}
+.modal-backdrop.is-open { opacity: 1; pointer-events: auto; }
+.modal-box {
+  width: min(480px, 100%); max-height: 90vh; overflow-y: auto;
+  background: var(--surface); border-radius: var(--r-xl); box-shadow: var(--shadow-md);
+  padding: 1.8rem 1.9rem; transform: translateY(10px); transition: transform .18s ease;
+}
+.modal-backdrop.is-open .modal-box { transform: translateY(0); }
+.modal-box__head { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: .3rem; }
+.modal-close { background: none; border: none; cursor: pointer; color: var(--ink-3); padding: .3rem; border-radius: 999px; flex: none; }
+.modal-close:hover { color: var(--ink); background: var(--ground); }
+.modal-close svg { width: 18px; height: 18px; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+@media (max-width: 480px) { .field-row { grid-template-columns: 1fr; } }
+
+.wellness-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.1rem;margin:2rem 0}.module-card{padding:1.25rem 1.35rem}.module-card__head{display:flex;align-items:flex-start;justify-content:space-between;gap:.8rem;margin-bottom:1rem}.module-card__head h3{margin:0}.module-card__head p{font-size:.78rem;margin:.15rem 0 0}.module-stat{display:flex;align-items:center;justify-content:space-between;padding:.65rem .75rem;border:1px solid var(--line-soft);border-radius:12px;background:var(--ground);margin-bottom:.55rem}.module-stat span{font-size:.8rem;color:var(--ink-2)}.check-row{display:flex;align-items:center;gap:.65rem;padding:.55rem .65rem;border:1px solid var(--line-soft);border-radius:12px;margin-bottom:.5rem}.check-row input{width:17px;height:17px;accent-color:var(--coral)}.check-row label{flex:1;font-size:.88rem}.small-input{width:100%;padding:.58rem .7rem;border:1px solid var(--line);border-radius:11px;font:inherit;color:var(--ink);background:var(--surface)}.form-row-3{display:grid;grid-template-columns:repeat(3,1fr);gap:.55rem}.fruit-card{display:flex;align-items:center;gap:1rem;padding:1rem;background:var(--coral-tint);border:1px solid var(--line);border-radius:16px;margin-bottom:.8rem}.fruit-emoji{font-size:2.6rem;line-height:1}.fruit-card strong{font-size:1.05rem}.fruit-card small{display:block;color:var(--ink-2);margin-top:.2rem}.contraction-display{text-align:center;padding:.5rem 0 1rem}.contraction-time{font-family:var(--display);font-size:2.5rem;font-weight:600}.contraction-actions{display:flex;justify-content:center;gap:.6rem;flex-wrap:wrap}.contraction-log{max-height:160px;overflow:auto;margin-top:.8rem}.contraction-item{display:flex;justify-content:space-between;font-size:.8rem;padding:.5rem 0;border-bottom:1px solid var(--line-soft)}.sos-card{margin:1.2rem 0 2rem;padding:1.1rem 1.25rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;border:1px solid #f5c6c1;background:#fff;border-radius:18px}.sos-card h3{margin-bottom:.15rem;color:var(--coral-deep)}.sos-card p{margin:0;font-size:.8rem}.btn--sos{background:var(--coral-deep);color:#fff}.modal-box--wide{width:min(620px,100%)}.sos-status{padding:1rem;border-radius:14px;background:var(--coral-soft);color:var(--coral-deep);font-weight:600;margin-bottom:1rem}.growth-table{width:100%;border-collapse:collapse;font-size:.8rem;margin-top:.8rem}.growth-table th,.growth-table td{padding:.55rem .4rem;text-align:left;border-bottom:1px solid var(--line-soft)}.growth-empty{font-size:.8rem;color:var(--ink-3);padding:.7rem 0}@media(max-width:850px){.wellness-grid{grid-template-columns:1fr}}@media(max-width:560px){.form-row-3{grid-template-columns:1fr}}
+.five-one-one-alert{display:flex;align-items:flex-start;gap:.7rem;background:var(--coral-soft);border:1.5px solid var(--coral);color:var(--coral-deep);border-radius:14px;padding:.85rem 1rem;margin:.7rem 0;font-size:.85rem;font-weight:600}
+.five-one-one-alert svg{width:20px;height:20px;flex:none;margin-top:.1rem}
+.guest-banner{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;background:var(--lilac);border:1px solid #ddd3f7;color:var(--violet);border-radius:14px;padding:.8rem 1.1rem;margin-bottom:1.25rem;font-size:.85rem;font-weight:600}
+.guest-banner a{color:var(--violet);text-decoration:underline}
+.wellness-doctor{margin-top:1.1rem;padding-top:1.1rem;border-top:1px solid var(--line-soft)}
+.wellness-doctor h4{font-size:.82rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-3);margin-bottom:.7rem}
+.wellness-doctor .module-stat{margin-bottom:.5rem}
+/* ---- Chatbot ------------------------------------------------------- */
+.chat-fab{position:fixed;right:1.25rem;bottom:1.25rem;z-index:80;width:56px;height:56px;border-radius:999px;border:none;background:var(--coral);color:#fff;box-shadow:var(--shadow-coral);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.4rem}
+.chat-panel{position:fixed;right:1.25rem;bottom:5.25rem;z-index:80;width:min(340px,calc(100vw - 2.5rem));max-height:min(480px,70vh);display:none;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow-md);overflow:hidden}
+.chat-panel.is-open{display:flex}
+.chat-panel__head{display:flex;align-items:center;justify-content:space-between;padding:.9rem 1rem;background:var(--ink);color:#fff}
+.chat-panel__head h3{margin:0;font-size:.92rem;color:#fff}
+.chat-panel__head button{background:none;border:none;color:#fff;cursor:pointer;opacity:.8}
+.chat-panel__body{flex:1;overflow-y:auto;padding:.9rem;display:flex;flex-direction:column;gap:.55rem;background:var(--ground)}
+.chat-msg{max-width:85%;padding:.55rem .75rem;border-radius:14px;font-size:.84rem;line-height:1.42}
+.chat-msg--bot{align-self:flex-start;background:var(--surface);border:1px solid var(--line);border-bottom-left-radius:4px}
+.chat-msg--user{align-self:flex-end;background:var(--coral);color:#fff;border-bottom-right-radius:4px}
+.chat-chips{display:flex;flex-wrap:wrap;gap:.4rem;padding:0 .9rem .7rem}
+.chat-chips button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:.35rem .7rem;font-size:.76rem;cursor:pointer;color:var(--ink-2)}
+.chat-panel__input{display:flex;gap:.5rem;padding:.7rem;border-top:1px solid var(--line);background:var(--surface)}
+.chat-panel__input input{flex:1;border:1px solid var(--line);border-radius:999px;padding:.5rem .9rem;font:inherit;font-size:.84rem}
+.chat-panel__input button{border:none;background:var(--coral);color:#fff;border-radius:999px;width:36px;height:36px;flex:none;cursor:pointer}
+/* Shared healthcare theme pass */
+:root {
+  --coral: #ef6f5e;
+  --coral-deep: #dc5c4c;
+  --coral-soft: #fde9e4;
+  --coral-tint: #fff6f3;
+  --green: #33735b;
+  --mint: #e7f2ed;
+  --mint-deep: #c7ddd3;
+  --violet: #7a2559;
+  --lilac: #f6e8f0;
+  --amber: #9b6b2d;
+  --amber-soft: #fff3dc;
+  --ink: #241c25;
+  --ink-2: #5f5660;
+  --ink-3: #8b828b;
+  --surface: #ffffff;
+  --ground: #fff9f5;
+  --line: #eee1dc;
+  --line-soft: #f5ebe7;
+  --display: var(--sans);
+  --sans: "Inter Tight", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+body { background: var(--ground); font-family: var(--sans); }
+h1, h2, h3, h4 { font-family: var(--sans); font-weight: 750; letter-spacing: -.02em; }
+.brand__name { font-family: var(--sans); font-weight: 800; letter-spacing: .02em; }
+.appbar { background: rgba(255,255,255,.96); }
+.btn--primary, .btn--sos, .chat-fab, .chat-panel__input button {
+  background: var(--coral);
+  box-shadow: 0 12px 30px -14px rgba(220,92,76,.65);
+}
+.btn--primary:hover, .btn--sos:hover { background: var(--coral-deep); }
+.segmented button.is-active, .interface-switch a.is-active { background: var(--violet); color: #fff; }
+.fv-header__intro .eyebrow, .tag--due { color: var(--violet); background: var(--lilac); }
+.progress-fill { background: var(--coral); }
+.card, .patient-panel, .detail-panel, .appt-card, .module-card { border-color: var(--line); }
+.sos-card { background: #fff; border-color: var(--coral-soft); }
+.patient-actionbar {
+  width: min(1180px, 100%);
+  margin: 1.15rem auto 0;
+  padding-inline: clamp(1rem, 3.5vw, 2.25rem);
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: .85rem;
+}
+.patient-action {
+  min-height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--surface);
+  color: var(--ink);
+  text-decoration: none;
+  box-shadow: var(--shadow-sm);
+}
+.patient-action b { display: block; font-size: .95rem; }
+.patient-action span { display: block; margin-top: .12rem; color: var(--ink-3); font-size: .78rem; }
+.patient-action i {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: var(--coral-soft);
+  color: var(--violet);
+  font-style: normal;
+  font-weight: 800;
+}
+.patient-action:hover { border-color: var(--coral); background: var(--coral-tint); }
+.guest-banner {
+  background: var(--lilac);
+  border-color: #ead4e3;
+  color: var(--violet);
+}
+.guest-banner span::first-letter { color: transparent; }
+@media (max-width: 900px) {
+  .patient-actionbar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 560px) {
+  .patient-actionbar { grid-template-columns: 1fr; }
+}
+</style>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ======================= Shared icon sprite ======================= -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="i-check-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 2.5 2.5L16 9.5"/></symbol>
+    <symbol id="i-alert-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4.5M12 16v.5"/></symbol>
+    <symbol id="i-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="8" stroke-dasharray="3 3"/></symbol>
+    <symbol id="i-tick" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="currentColor" opacity=".13"/><path d="m8 12.4 2.6 2.6L16 9.6" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h15"/><path d="m13 6 6 6-6 6"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+    <symbol id="i-heart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.4-7-9.3A4.1 4.1 0 0 1 12 8a4.1 4.1 0 0 1 7 2.7C19 15.6 12 20 12 20Z"/></symbol>
+    <symbol id="i-alert-tri" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.9 18a2 2 0 0 0 1.7 3h16.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></symbol>
+    <symbol id="i-lightbulb" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4M12 2a6 6 0 0 0-4 10.5c.6.6 1 1.4 1 2.3V15h6v-.2c0-.9.4-1.7 1-2.3A6 6 0 0 0 12 2Z"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+    <symbol id="i-stage-baby" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M6 21v-2a6 6 0 0 1 12 0v2"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-stethoscope" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 3v6a4.5 4.5 0 0 0 9 0V3"/><path d="M9 15.5V18a4 4 0 0 0 8 0v-1.3a3.5 3.5 0 1 0-2 0"/><circle cx="19" cy="9" r="1.6"/></symbol>
+  </defs>
+</svg>
+
+<!-- ============================ App bar ============================ -->
+<header class="appbar">
+  <div class="wrap appbar__inner">
+    <a class="brand" href="index.html" aria-label="DAI">
+      <img class="brand__mark" src="assets/logo.jpeg" width="48" height="48" alt="">
+      <span><span class="brand__name">DAI</span><span class="brand__tag">Hospital Workflow</span></span>
+    </a>
+
+    <nav class="site-nav" aria-label="Primary navigation">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="index.html#modules">Features</a>
+      <a href="index.html#why">About</a>
+    </nav>
+
+    <div class="header-actions">
+      <nav class="interface-switch" aria-label="Switch DAI interface">
+        <a class="is-active" href="dashboard.html">Mother / caregiver</a>
+        <a href="hospital.html">Hospital team</a>
+      </nav>
+      <span class="avatar-pill" id="whoami"><span class="dot">...</span> Loading...</span>
+      <a href="mailto:hello@dai.health" class="contact-link">Contact</a>
+      <button id="logoutBtn" class="btn btn--ghost btn--sm">Logout</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="patient-actionbar" aria-label="Mother dashboard quick actions">
+    <a class="patient-action" href="#appointments"><span><b>Book appointment</b><span>Request a doctor visit</span></span><i>→</i></a>
+    <a class="patient-action" href="#familyTimeline"><span><b>Care timeline</b><span>Review milestones</span></span><i>✓</i></a>
+    <a class="patient-action" href="#wellnessModules"><span><b>Daily tracking</b><span>Nutrition, supplements, growth</span></span><i>+</i></a>
+    <a class="patient-action" href="hospital.html"><span><b>Hospital console</b><span>Switch to care-team view</span></span><i>↗</i></a>
+  </div>
+
+  <!-- ============================= FAMILY VIEW ============================= -->
+  <section id="viewFamily" class="view is-active">
+    <div class="wrap">
+
+      <div class="guest-banner" id="guestBanner" hidden>
+        <span>Demo mode — this data stays on this device only, and your doctor cannot see it.</span>
+        <a href="auth.html">Create an account to sync it</a>
+      </div>
+
+      <div class="fv-header">
+        <div class="card fv-header__intro">
+          <span class="eyebrow"><svg width="14" height="14" aria-hidden="true"><use href="#i-heart"/></svg>Third trimester</span>
+          <h1>Ananya's care dashboard</h1>
+          <p>You're <strong>30 weeks</strong> along. Estimated due date <strong>14 Nov 2026</strong>. Here's what's done, what's next, and what needs attention.</p>
+        </div>
+        <div class="card progress-card">
+          <div class="progress-card__top"><b>Week 30</b><span>of 40</span></div>
+          <div class="progress-track"><div class="progress-fill" style="width:75%"></div></div>
+          <div class="progress-labels"><span>Registration</span><span>Delivery</span></div>
+        </div>
+      </div>
+
+      <div class="gap-section">
+        <div class="gap-section__head">
+          <h2>Care gap alerts <span class="gap-count" id="famGapCount">0</span></h2>
+        </div>
+        <div id="famGapList"></div>
+      </div>
+
+      <h2 style="margin-bottom:1rem;">Your care timeline</h2>
+      <div class="stage-stepper" id="stageStepper"></div>
+      <div id="familyTimeline"></div>
+
+      <div class="sos-card"><div><h3>Need urgent help?</h3><p>Open emergency options. This prototype does not automatically dispatch help.</p></div><button class="btn btn--sos" data-action="open-sos">Emergency SOS</button></div>
+      <div class="wellness-grid" id="wellnessModules">
+        <div class="card module-card"><div class="module-card__head"><div><h3>Nutrition tracker</h3><p>Log meals and hydration.</p></div><span class="tag tag--ok" id="nutritionScore">0 meals</span></div><div id="nutritionList"></div><div style="display:grid;grid-template-columns:1fr auto;gap:.55rem;margin-top:.75rem"><input class="small-input" id="nutritionInput" placeholder="e.g. Dal, roti & vegetables"><button class="btn btn--primary btn--sm" data-action="add-nutrition">Add meal</button></div><div class="module-stat" style="margin-top:.7rem"><span>Water</span><b id="waterCount">0 / 8 glasses</b></div><button class="btn btn--ghost btn--sm" data-action="add-water">+ Add glass</button></div>
+        <div class="card module-card"><div class="module-card__head"><div><h3>Supplement tracker</h3><p>Daily adherence — only for supplements prescribed/recommended by a clinician.</p></div><span class="tag tag--next" id="supplementScore">0 / 3</span></div><div class="check-row"><input type="checkbox" id="supIron" data-supplement="Iron"><label for="supIron"><b>Iron</b></label></div><div class="check-row"><input type="checkbox" id="supFolate" data-supplement="Folic acid"><label for="supFolate"><b>Folic acid</b></label></div><div class="check-row"><input type="checkbox" id="supCalcium" data-supplement="Calcium"><label for="supCalcium"><b>Calcium</b></label></div></div>
+        <div class="card module-card"><div class="module-card__head"><div><h3>Pregnancy week and size guide</h3><p>Approximate size analogy for easy visual understanding.</p></div></div><div class="fruit-card"><div class="fruit-emoji" id="fruitEmoji">Size</div><div><strong id="fruitName">Avocado</strong><small id="fruitMeta">Around week 16</small></div></div><div class="module-stat"><span>Pregnancy progress</span><b id="pregnancyWeekStat">Week 0 of 40</b></div><p style="font-size:.72rem;margin:0">Size comparisons are approximate and are not a clinical measurement.</p></div>
+        <div class="card module-card"><div class="module-card__head"><div><h3>Child growth tracker</h3><p>Record height and weight after birth.</p></div></div><div class="form-row-3"><input class="small-input" id="growthDate" type="date"><input class="small-input" id="growthWeight" type="number" step="0.1" placeholder="Weight kg"><input class="small-input" id="growthHeight" type="number" step="0.1" placeholder="Height cm"></div><button class="btn btn--primary btn--sm" data-action="add-growth" style="margin-top:.65rem">Save measurement</button><div id="growthList"></div></div>
+        <div class="card module-card"><div class="module-card__head"><div><h3>Contraction timer</h3><p>Tracks the gap between contractions, not just how long each one lasts.</p></div><span class="tag tag--next" id="contractionCount">0 today</span></div><div class="contraction-display"><div class="contraction-time" id="contractionTimer">00:00</div><div style="font-size:.78rem;color:var(--ink-3)" id="contractionStatus">Ready to start</div><div style="font-size:.78rem;color:var(--ink-3);margin-top:.2rem" id="contractionGap"></div></div><div class="contraction-actions"><button class="btn btn--primary" data-action="contraction-start" id="contractionStart">Start contraction</button><button class="btn btn--ghost" data-action="contraction-stop" id="contractionStop" disabled>Stop & log</button></div><div id="fiveOneOneAlert" class="five-one-one-alert" hidden><svg aria-hidden="true"><use href="#i-alert-tri"/></svg><div><strong>5-1-1 reached.</strong> Contractions about 5 min apart, lasting about a minute, for the last hour. Call your doctor or hospital now.</div></div><div class="contraction-log" id="contractionLog"></div><p style="font-size:.72rem;margin:.65rem 0 0">Tracking only. For urgent symptoms or suspected labor, contact your healthcare professional or emergency services.</p></div>
+      </div>
+
+      <div class="appt-section" id="appointments"><h2 style="margin-bottom:1rem;">Appointments</h2>
+        <div class="appt-grid">
+          <div class="card">
+            <h3 style="margin-bottom:1rem;">Request an appointment</h3>
+            <form id="appointmentForm">
+              <div class="form-group">
+                <label for="apptDoctor">Doctor</label>
+                <select id="apptDoctor" required>
+                  <option value="" disabled selected>Choose a doctor</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="apptDate">Preferred date</label>
+                <input type="date" id="apptDate" required>
+              </div>
+              <div class="form-group">
+                <label for="apptReason">Reason (optional)</label>
+                <textarea id="apptReason" placeholder="e.g. Follow-up on last scan"></textarea>
+              </div>
+              <button type="submit" class="btn btn--primary" id="apptSubmit">Request appointment</button>
+            </form>
+          </div>
+          <div class="card">
+            <h3 style="margin-bottom:1rem;">Your requests</h3>
+            <div class="appt-list" id="motherApptList"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============================ DOCTOR DASHBOARD ============================ -->
+  <section id="viewDoctor" class="view">
+    <div class="wrap">
+      <div class="dv-header">
+        <span class="eyebrow" style="display:inline-flex;align-items:center;gap:.5rem;font-size:.78rem;font-weight:600;color:var(--violet);background:var(--lilac);border-radius:999px;padding:.28rem .75rem;margin-bottom:.7rem;">
+          <svg width="14" height="14" aria-hidden="true"><use href="#i-users"/></svg>Dr. Kavita Menon · Antenatal clinic
+        </span>
+        <h1>Doctor dashboard</h1>
+        <p style="max-width:52ch">Every patient's care timeline and open care gaps in one view — validate what's due, and see who needs a nudge first.</p>
+      </div>
+
+      <div class="stat-strip" id="doctorStats"></div>
+
+      <div class="team-section">
+        <div class="team-section__head">
+          <h2 style="margin:0;display:flex;align-items:center;gap:.55rem;"><svg width="18" height="18" aria-hidden="true"><use href="#i-users"/></svg>Your care team</h2>
+          <button class="btn btn--primary btn--sm" data-action="open-add-doctor">
+            <svg width="15" height="15" aria-hidden="true"><use href="#i-plus"/></svg>Add doctor
+          </button>
+        </div>
+        <div class="team-grid" id="teamGrid"></div>
+      </div>
+
+      <div class="dv-grid">
+        <div class="patient-panel">
+          <div class="patient-panel__controls">
+            <input class="search-input" id="patientSearch" type="search" placeholder="Search patients…">
+            <div class="chips" id="filterChips">
+              <button class="chip is-active" data-filter="all">All patients</button>
+              <button class="chip" data-filter="gap">Has care gap</button>
+              <button class="chip" data-filter="risk">High risk</button>
+            </div>
+          </div>
+          <div class="patient-list" id="patientList"></div>
+        </div>
+
+        <div class="detail-panel" id="detailPanel"></div>
+      </div>
+
+      <div class="appt-section">
+        <h2 style="margin-bottom:1rem;">Appointment requests</h2>
+        <div class="card">
+          <div class="appt-list" id="doctorApptList"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="footer-grid">
+    <div>
+      <h3>DAI</h3>
+      <p>Assistive healthcare workflow infrastructure for continuity of care, operations and reviewed patient communication.</p>
+    </div>
+    <div>
+      <h4>Modules</h4>
+      <ul class="footer-links">
+        <li><a href="index.html#modules">Follow-Up Engine</a></li>
+        <li><a href="index.html#modules">Pre-Consult Brief</a></li>
+        <li><a href="index.html#modules">Patient Registry</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Resources</h4>
+      <ul class="footer-links">
+        <li><a href="index.html#why">Safety model</a></li>
+        <li><a href="auth.html">Sign in</a></li>
+        <li><a href="hospital.html">Hospital console</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Contact</h4>
+      <ul class="footer-links">
+        <li><a href="mailto:hello@dai.health">hello@dai.health</a></li>
+        <li><a href="auth.html">Book a demo</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">Copyright © 2026 DAI. Demo content only.</div>
+</footer>
+
+<div class="modal-backdrop" id="sosModal" aria-hidden="true"><div class="modal-box modal-box--wide" role="dialog" aria-modal="true"><div class="modal-box__head"><div><h2 style="margin-bottom:.2rem;color:var(--coral-deep)">Emergency SOS</h2><p style="margin:0;font-size:.86rem">Choose an emergency action.</p></div><button class="modal-close" data-action="close-sos">✕</button></div><div class="sos-status">SOS screen opened. In a real deployment, this would securely share consented emergency information with configured contacts/facilities.</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem"><a class="btn btn--sos" href="tel:112" style="text-decoration:none">Call 112</a><button class="btn btn--ghost" data-action="call-emergency-contact">Call emergency contact</button></div><p style="font-size:.72rem;margin:.9rem 0 0">This prototype does not dispatch help or share live location automatically.</p></div></div>
+<div class="toast" id="toast"><svg aria-hidden="true"><use href="#i-tick"/></svg><span id="toastMsg"></span></div>
+
+<!-- ======================= Add doctor modal ======================= -->
+<div class="modal-backdrop" id="addDoctorModal" aria-hidden="true">
+  <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="addDoctorTitle">
+    <div class="modal-box__head">
+      <div>
+        <h2 id="addDoctorTitle" style="margin-bottom:.2rem;">Add a doctor</h2>
+        <p style="margin:0;font-size:.86rem;">Creates a separate login for a colleague joining this practice.</p>
+      </div>
+      <button class="modal-close" type="button" data-action="close-modal" aria-label="Close"><svg aria-hidden="true"><use href="#i-x"/></svg></button>
+    </div>
+    <form id="addDoctorForm">
+      <div class="form-group">
+        <label for="docFullName">Full name</label>
+        <input type="text" id="docFullName" required placeholder="Dr. Arjun Nair">
+      </div>
+      <div class="field-row">
+        <div class="form-group">
+          <label for="docEmail">Email</label>
+          <input type="email" id="docEmail" required placeholder="arjun@clinic.com">
+        </div>
+        <div class="form-group">
+          <label for="docPassword">Temporary password</label>
+          <input type="password" id="docPassword" required minlength="8" placeholder="At least 8 characters">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="form-group">
+          <label for="docSpecialization">Specialization</label>
+          <input type="text" id="docSpecialization" required placeholder="Obstetrics">
+        </div>
+        <div class="form-group">
+          <label for="docLicense">Medical license no.</label>
+          <input type="text" id="docLicense" required placeholder="MCI-000000">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="form-group">
+          <label for="docPhone">Phone (optional)</label>
+          <input type="tel" id="docPhone" placeholder="+91 90000 00000">
+        </div>
+        <div class="form-group">
+          <label for="docFacility">Facility</label>
+          <input type="text" id="docFacility" placeholder="Same clinic as you">
+        </div>
+      </div>
+      <button type="submit" class="btn btn--primary" id="addDoctorSubmit" style="width:100%;">
+        <svg aria-hidden="true"><use href="#i-plus"/></svg>Add doctor
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- ======================= Care assistant (chatbot) ======================= -->
+<button class="chat-fab" id="chatFab" aria-label="Open care assistant" title="Care assistant" hidden>💬</button>
+<div class="chat-panel" id="chatPanel" role="dialog" aria-label="DAI care assistant" aria-hidden="true">
+  <div class="chat-panel__head">
+    <h3>DAI care assistant</h3>
+    <button id="chatClose" aria-label="Close">✕</button>
+  </div>
+  <div class="chat-panel__body" id="chatBody"></div>
+  <div class="chat-chips" id="chatChips"></div>
+  <form class="chat-panel__input" id="chatForm">
+    <input type="text" id="chatInput" placeholder="Ask a question…" autocomplete="off">
+    <button type="submit" aria-label="Send">➤</button>
+  </form>
+</div>
+
+<script>
+(function () {
+"use strict";
+
+const API_BASE = 'http://localhost:3001/api';
+
+/* ======================================================================
+   API HELPERS
+   ====================================================================== */
+
+async function apiRequest(path, options) {
+  options = options || {};
+  var opts = Object.assign({ credentials: 'include' }, options);
+  if (opts.body) {
+    opts.headers = Object.assign({ 'Content-Type': 'application/json' }, opts.headers || {});
+  }
+  var response;
+  try {
+    response = await fetch(API_BASE + path, opts);
+  } catch (error) {
+    console.error('Network error:', error);
+    showToast('Network error — please try again');
+    return null;
+  }
+
+  if (response.status === 401) {
+    window.location.href = 'auth.html';
+    return null;
+  }
+
+  var data = null;
+  try { data = await response.json(); } catch (e) { data = {}; }
+
+  if (!response.ok) {
+    showToast((data && data.error) || 'Something went wrong');
+    return null;
+  }
+  return data;
+}
+
+async function fetchCurrentUser() {
+  var data = await apiRequest('/auth/me');
+  return data ? data.user : null;
+}
+
+/* ======================================================================
+   SHARED HELPERS
+   ====================================================================== */
+
+var STAGES = ["Trimester 1", "Trimester 2", "Trimester 3", "Delivery", "Postpartum", "Child (0\u20131y)"];
+var DAY_MS = 24 * 60 * 60 * 1000;
+var FALLBACK_GUIDANCE = "Book this with your doctor or nearest facility as soon as you can.";
+
+// Local calendar date (YYYY-MM-DD), using the device's own timezone —
+// NOT Date#toISOString(), which is UTC and rolls "today" over at 5:30am
+// IST, mid-way through a night labour for anyone in India.
+function localDateStr(d) {
+  d = d || new Date();
+  var y = d.getFullYear(), m = String(d.getMonth() + 1).padStart(2, '0'), day = String(d.getDate()).padStart(2, '0');
+  return y + '-' + m + '-' + day;
+}
+function localTimeStr(d) {
+  return (d instanceof Date ? d : new Date(d)).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
+function stageIndex(stageName) { return STAGES.indexOf(stageName); }
+
+function initials(name) {
+  return (name || "").split(" ").filter(Boolean).map(function (n) { return n[0]; }).join("").slice(0, 2).toUpperCase();
+}
+
+function fmtDate(dateStr) {
+  if (!dateStr) return "";
+  var d = new Date(dateStr);
+  if (isNaN(d.getTime())) return dateStr;
+  return d.toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
+}
+
+function iconFor(status) {
+  if (status === "done") return "i-check-circle";
+  if (status === "missed") return "i-alert-circle";
+  return "i-circle";
+}
+function classFor(status) {
+  if (status === "done") return "ok";
+  if (status === "missed") return "due";
+  return "next";
+}
+
+function showToast(msg) {
+  var t = document.getElementById("toast");
+  document.getElementById("toastMsg").textContent = msg;
+  t.classList.add("is-shown");
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(function () { t.classList.remove("is-shown"); }, 2600);
+}
+
+// Map a DB milestone (status: completed | overdue | upcoming) plus whether it
+// is the single nearest not-yet-completed item, onto the same done/missed/
+// current/upcoming vocabulary the timeline UI already renders.
+function displayStatus(m, nearestId) {
+  if (m.status === "completed") return "done";
+  if (m.status === "overdue") return "missed";
+  if (nearestId != null && m.id === nearestId) return "current";
+  return "upcoming";
+}
+
+function nearestActive(milestones) {
+  var active = milestones.filter(function (m) { return m.status !== "completed"; })
+    .slice()
+    .sort(function (a, b) { return new Date(a.due_date) - new Date(b.due_date); });
+  return active.length ? active[0] : null;
+}
+
+function currentStageIdx(milestones) {
+  var near = nearestActive(milestones);
+  if (near) return stageIndex(near.stage);
+  var doneStages = milestones.filter(function (m) { return m.status === "completed"; }).map(function (m) { return stageIndex(m.stage); });
+  return doneStages.length ? Math.max.apply(null, doneStages) : 0;
+}
+
+/* ======================================================================
+   TIMELINE RENDERING (shared markup between the mother's own timeline and
+   the read-only view a doctor sees for one of their patients)
+   ====================================================================== */
+
+function renderStageStepper(containerId, milestones) {
+  var curStage = currentStageIdx(milestones);
+  document.getElementById(containerId).innerHTML = STAGES.map(function (label, i) {
+    var cls = i < curStage ? "is-done" : (i === curStage ? "is-current" : "");
+    var inner = i < curStage
+      ? '<svg aria-hidden="true"><use href="#i-check-circle"/></svg>'
+      : (i + 1);
+    var line = i < STAGES.length - 1 ? '<span class="stage-step__line"></span>' : "";
+    return '<div class="stage-step ' + cls + '"><span class="stage-step__dot">' + inner + '</span><span class="stage-step__label">' + label + '</span>' + line + '</div>';
+  }).join("");
+}
+
+function renderTimelineGroups(containerId, milestones, editable) {
+  var container = document.getElementById(containerId);
+  var curStage = currentStageIdx(milestones);
+  var near = nearestActive(milestones);
+
+  container.innerHTML = STAGES.map(function (stageLabel, sIdx) {
+    var items = milestones.filter(function (m) { return stageIndex(m.stage) === sIdx; });
+    if (!items.length) return "";
+    var doneCount = items.filter(function (m) { return m.status === "completed"; }).length;
+    var missedCount = items.filter(function (m) { return m.status === "overdue"; }).length;
+    var summary = missedCount ? (missedCount + " overdue") : (doneCount + " of " + items.length + " done");
+    var openByDefault = sIdx === curStage;
+
+    var rows = items.map(function (m) {
+      var status = displayStatus(m, near ? near.id : null);
+      var actionRow = "";
+      if (status === "missed" || status === "current") {
+        actionRow =
+          '<div class="milestone__detail">' +
+            '<p class="gap-alert__action" style="margin:0;"><svg aria-hidden="true"><use href="#i-lightbulb"/></svg><span>' + (m.guidance || FALLBACK_GUIDANCE) + '</span></p>' +
+          '</div>';
+      }
+      var rightControl = status === "done"
+        ? '<span class="tag tag--ok"><svg aria-hidden="true"><use href="#i-tick"/></svg>Done</span>'
+        : (status === "missed" && editable)
+          ? '<button class="btn btn--sm btn--primary" data-action="resolve" data-id="' + m.id + '">Mark done</button>'
+          : (status === "current" && editable)
+            ? '<button class="btn btn--sm btn--ghost" data-action="resolve" data-id="' + m.id + '">Mark done</button>'
+            : (status === "missed")
+              ? '<span class="tag tag--due">Overdue</span>'
+              : '<span class="tag tag--next">Upcoming</span>';
+
+      return (
+        '<div class="milestone">' +
+          '<span class="milestone__icon ' + classFor(status) + '"><svg aria-hidden="true"><use href="#' + iconFor(status) + '"/></svg></span>' +
+          '<span><span class="milestone__title">' + m.title + '</span><br><span class="milestone__when">' + fmtDate(m.due_date) + '</span></span>' +
+          '<span class="milestone__right">' + rightControl + '</span>' +
+        '</div>' + actionRow
+      );
+    }).join("");
+
+    return (
+      '<div class="timeline-group ' + (openByDefault ? "is-open" : "") + '" data-stage="' + sIdx + '">' +
+        '<button class="timeline-group__head" data-action="toggle-group">' +
+          '<b>' + stageLabel + '</b><span class="stage-summary">' + summary + '</span>' +
+          '<svg class="chev" aria-hidden="true"><use href="#i-chevron"/></svg>' +
+        '</button>' +
+        '<div class="timeline-group__body">' + rows + '</div>' +
+      '</div>'
+    );
+  }).join("");
+}
+
+/* ======================================================================
+   FAMILY VIEW (mother only) — Care Timeline + Care Gap Alerts + Appointments
+   ====================================================================== */
+
+var motherMilestones = [];
+var motherAppointments = [];
+var doctorsList = [];
+
+function renderFamilyHeader() {
+  var careStart = currentUser.care_start_date ? new Date(currentUser.care_start_date) : null;
+  var greetingElement = document.querySelector('.fv-header__intro h1');
+  var displayName = (currentUser.full_name || currentUser.email).split(' ')[0];
+  if (greetingElement) greetingElement.textContent = 'Hi ' + displayName + ' \uD83D\uDC4B';
+
+  if (!careStart || isNaN(careStart.getTime())) return;
+
+  var daysAlong = Math.max(0, Math.floor((Date.now() - careStart.getTime()) / DAY_MS));
+  var weeksAlong = Math.min(40, Math.floor(daysAlong / 7));
+  var dueDate = new Date(careStart.getTime() + 280 * DAY_MS);
+
+  var stageLabel = weeksAlong < 13 ? "First trimester" : weeksAlong < 27 ? "Second trimester" : weeksAlong <= 40 ? "Third trimester" : "Postpartum & child care";
+
+  var eyebrow = document.querySelector('.fv-header__intro .eyebrow');
+  if (eyebrow) eyebrow.lastChild.textContent = stageLabel;
+
+  var introP = document.querySelector('.fv-header__intro p');
+  if (introP) {
+    introP.innerHTML = "You're <strong>" + weeksAlong + " weeks</strong> along. Estimated due date <strong>" + fmtDate(dueDate) + "</strong>. Here's what's done, what's next, and what needs attention.";
+  }
+
+  var progTop = document.querySelector('.progress-card__top b');
+  if (progTop) progTop.textContent = 'Week ' + weeksAlong;
+  var fill = document.querySelector('.progress-fill');
+  if (fill) fill.style.width = Math.round((weeksAlong / 40) * 100) + '%';
+}
+
+function renderGapAlerts() {
+  var list = document.getElementById("famGapList");
+  var gaps = motherMilestones.filter(function (m) { return m.status === "overdue"; });
+  document.getElementById("famGapCount").textContent = gaps.length;
+
+  if (!gaps.length) {
+    list.innerHTML = '<div class="gap-empty"><svg aria-hidden="true"><use href="#i-check-circle"/></svg>No overdue care right now \u2014 you\'re all caught up.</div>';
+    return;
+  }
+
+  list.innerHTML = gaps.map(function (m) {
+    return (
+      '<div class="gap-alert" data-id="' + m.id + '">' +
+        '<div class="gap-alert__icon"><svg aria-hidden="true"><use href="#i-alert-tri"/></svg></div>' +
+        '<div class="gap-alert__body">' +
+          '<h3>' + m.title + ' is overdue</h3>' +
+          '<div class="gap-alert__meta"><span class="tag tag--due">' + m.stage + '</span><span>Was due ' + fmtDate(m.due_date) + '</span></div>' +
+          '<p class="gap-alert__action"><svg aria-hidden="true"><use href="#i-lightbulb"/></svg><span>' + (m.guidance || FALLBACK_GUIDANCE) + '</span></p>' +
+        '</div>' +
+        '<div class="gap-alert__buttons">' +
+          '<button class="btn btn--primary btn--sm" data-action="resolve" data-id="' + m.id + '"><svg aria-hidden="true"><use href="#i-check-circle"/></svg>Mark as done</button>' +
+          '<button class="btn btn--ghost btn--sm" data-action="remind" data-id="' + m.id + '">Remind me later</button>' +
+        '</div>' +
+      '</div>'
+    );
+  }).join("");
+}
+
+function renderFamilyView() {
+  var doneCount = motherMilestones.filter(function (m) { return m.status === "completed"; }).length;
+  renderFamilyHeader();
+  renderGapAlerts();
+  renderStageStepper("stageStepper", motherMilestones);
+  renderTimelineGroups("familyTimeline", motherMilestones, true);
+}
+
+async function loadFamilyView() {
+  var data = await apiRequest('/timeline');
+  if (!data) return;
+  motherMilestones = data.milestones;
+  renderFamilyView();
+}
+
+async function resolveMilestone(id) {
+  var data = await apiRequest('/timeline/' + id + '/complete', { method: 'PATCH' });
+  if (!data) return;
+  var m = motherMilestones.filter(function (x) { return x.id === id; })[0];
+  if (m) {
+    m.status = 'completed';
+    m.completed_at = data.milestone.completed_at;
+  }
+  renderFamilyView();
+  showToast("Marked complete \u2014 timeline updated");
+}
+
+/* ---- Appointments: mother side ---------------------------------------- */
+
+function apptStatusTag(status) {
+  var label = status.charAt(0).toUpperCase() + status.slice(1);
+  return '<span class="tag tag--' + status + '">' + label + '</span>';
+}
+
+function renderMotherAppointments() {
+  var list = document.getElementById('motherApptList');
+  if (!motherAppointments.length) {
+    list.innerHTML = '<div class="empty-state">No appointment requests yet.</div>';
+    return;
+  }
+  list.innerHTML = motherAppointments.map(function (a) {
+    return (
+      '<div class="appt-card">' +
+        '<div class="appt-card__top"><span class="appt-card__who">' + a.doctor_name + '</span>' + apptStatusTag(a.status) + '</div>' +
+        '<div class="appt-card__meta">' + (a.specialization || '') + ' \u00B7 Requested for ' + fmtDate(a.requested_date) + '</div>' +
+        (a.reason ? '<div class="appt-card__reason">' + a.reason + '</div>' : '') +
+        (a.doctor_notes ? '<div class="appt-card__reason"><b>Doctor note:</b> ' + a.doctor_notes + '</div>' : '') +
+      '</div>'
+    );
+  }).join("");
+}
+
+async function loadDoctorsForBooking() {
+  var data = await apiRequest('/doctors');
+  if (!data) return;
+  doctorsList = data.doctors;
+  var select = document.getElementById('apptDoctor');
+  select.innerHTML = '<option value="" disabled selected>Choose a doctor</option>' +
+    doctorsList.map(function (d) {
+      return '<option value="' + d.id + '">' + d.full_name + (d.specialization ? ' \u2014 ' + d.specialization : '') + '</option>';
+    }).join("");
+}
+
+async function loadMotherAppointments() {
+  var data = await apiRequest('/appointments');
+  if (!data) return;
+  motherAppointments = data.appointments;
+  renderMotherAppointments();
+}
+
+document.getElementById('appointmentForm').addEventListener('submit', async function (e) {
+  e.preventDefault();
+  var doctorId = document.getElementById('apptDoctor').value;
+  var date = document.getElementById('apptDate').value;
+  var reason = document.getElementById('apptReason').value.trim();
+  if (!doctorId || !date) return;
+
+  var submitBtn = document.getElementById('apptSubmit');
+  submitBtn.disabled = true;
+  var data = await apiRequest('/appointments', {
+    method: 'POST',
+    body: JSON.stringify({ doctor_id: Number(doctorId), requested_date: date, reason: reason || undefined })
+  });
+  submitBtn.disabled = false;
+  if (!data) return;
+
+  showToast('Appointment requested');
+  document.getElementById('appointmentForm').reset();
+  loadMotherAppointments();
+});
+
+/* MATERNAL WELLNESS MODULES
+   Nutrition/water/supplements are scoped to WELLNESS_DATE (the device's own
+   local calendar date — see localDateStr above), so they reset when the
+   local day rolls over, not when UTC does. For a signed-in mother this data
+   lives in the database (so a cleared browser or a doctor's dashboard can
+   both see it); for a guest it lives in localStorage only, under a single
+   'dai_guest_wellness' key, day-bucketed the same way. */
+
+var WELLNESS_DATE = localDateStr();
+var nutritionLogs = [], waterGlasses = 0, supplements = { Iron: false, 'Folic acid': false, Calcium: false };
+var growthLogs = [], contractionLogs = []; // contractionLogs: {time, durationMs, gapMs, startedAtMs}[]
+var contractionStartedAt = null, contractionInterval = null;
+var fiveOneOneFlag = false;
+var FIVE_ONE_ONE = { maxGapMs: 6 * 60 * 1000, minDurationMs: 40 * 1000, minSpanMs: 55 * 60 * 1000 };
+
+function guestWellnessRaw() {
+  try { return Object.assign({ days: {}, growth: [], contractions: [] }, JSON.parse(localStorage.getItem('dai_guest_wellness') || '{}')); }
+  catch (e) { return { days: {}, growth: [], contractions: [] }; }
+}
+function saveGuestWellness(raw) { localStorage.setItem('dai_guest_wellness', JSON.stringify(raw)); }
+function escapeHtml(v) { return String(v == null ? '' : v).replace(/[&<>'"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[c]; }); }
+
+async function loadWellnessState() {
+  WELLNESS_DATE = localDateStr();
+  if (currentUser && currentUser.guest) {
+    var raw = guestWellnessRaw();
+    var today = raw.days[WELLNESS_DATE] || {};
+    nutritionLogs = today.nutrition || [];
+    waterGlasses = today.water || 0;
+    supplements = Object.assign({ Iron: false, 'Folic acid': false, Calcium: false }, today.supplements || {});
+    growthLogs = raw.growth || [];
+    contractionLogs = raw.contractions || [];
+    return;
+  }
+  var data = await apiRequest('/wellness?date=' + WELLNESS_DATE);
+  if (!data) return;
+  nutritionLogs = (data.nutrition || []).map(function (n) { return { text: n.text, time: localTimeStr(n.logged_at) }; });
+  waterGlasses = data.water_glasses || 0;
+  supplements = Object.assign({ Iron: false, 'Folic acid': false, Calcium: false }, data.supplements || {});
+  growthLogs = (data.growth || []).map(function (g) { return { date: g.log_date, weight: Number(g.weight_kg), height: Number(g.height_cm) }; });
+  contractionLogs = (data.contractions || []).map(function (c) {
+    return { time: localTimeStr(c.started_at), durationMs: c.duration_ms, gapMs: c.gap_ms, startedAtMs: new Date(c.started_at).getTime() };
+  });
+}
+
+function renderWellness() {
+  var nl = document.getElementById('nutritionList');
+  if (nl) nl.innerHTML = nutritionLogs.slice().reverse().map(function (x) { return '<div class="module-stat"><span>\ud83c\udf7d\ufe0f ' + escapeHtml(x.text) + '</span><b>' + x.time + '</b></div>'; }).join('') || '<div class="growth-empty">No meals logged today.</div>';
+  var ns = document.getElementById('nutritionScore'); if (ns) ns.textContent = nutritionLogs.length + ' meals';
+  var wc = document.getElementById('waterCount'); if (wc) wc.textContent = Math.min(waterGlasses, 8) + ' / 8 glasses';
+  Object.keys(supplements).forEach(function (n) { var id = n === 'Iron' ? 'supIron' : n === 'Folic acid' ? 'supFolate' : 'supCalcium', e = document.getElementById(id); if (e) e.checked = !!supplements[n]; });
+  var done = Object.keys(supplements).filter(function (n) { return supplements[n]; }).length, ss = document.getElementById('supplementScore'); if (ss) ss.textContent = done + ' / 3';
+  renderGrowth();
+  renderContractions();
+}
+
+async function addNutrition() {
+  var e = document.getElementById('nutritionInput'), t = e.value.trim();
+  if (!t) return;
+  e.value = '';
+  if (currentUser && currentUser.guest) {
+    var raw = guestWellnessRaw();
+    raw.days[WELLNESS_DATE] = raw.days[WELLNESS_DATE] || {};
+    raw.days[WELLNESS_DATE].nutrition = raw.days[WELLNESS_DATE].nutrition || [];
+    raw.days[WELLNESS_DATE].nutrition.push({ text: t, time: localTimeStr(new Date()) });
+    saveGuestWellness(raw);
+    nutritionLogs = raw.days[WELLNESS_DATE].nutrition;
+  } else {
+    var data = await apiRequest('/wellness/nutrition', { method: 'POST', body: JSON.stringify({ date: WELLNESS_DATE, text: t }) });
+    if (!data) return;
+    nutritionLogs.push({ text: data.meal.text, time: localTimeStr(data.meal.logged_at) });
+  }
+  renderWellness();
+  showToast('Meal added');
+}
+
+async function addWater() {
+  if (waterGlasses >= 8) return;
+  if (currentUser && currentUser.guest) {
+    var raw = guestWellnessRaw();
+    raw.days[WELLNESS_DATE] = raw.days[WELLNESS_DATE] || {};
+    waterGlasses = Math.min((raw.days[WELLNESS_DATE].water || 0) + 1, 8);
+    raw.days[WELLNESS_DATE].water = waterGlasses;
+    saveGuestWellness(raw);
+  } else {
+    var data = await apiRequest('/wellness/water', { method: 'POST', body: JSON.stringify({ date: WELLNESS_DATE }) });
+    if (!data) return;
+    waterGlasses = data.water_glasses;
+  }
+  renderWellness();
+}
+
+async function setSupplement(name, taken) {
+  supplements[name] = taken;
+  if (currentUser && currentUser.guest) {
+    var raw = guestWellnessRaw();
+    raw.days[WELLNESS_DATE] = raw.days[WELLNESS_DATE] || {};
+    raw.days[WELLNESS_DATE].supplements = Object.assign({}, raw.days[WELLNESS_DATE].supplements, supplements);
+    saveGuestWellness(raw);
+  } else {
+    await apiRequest('/wellness/supplements', { method: 'PUT', body: JSON.stringify({ date: WELLNESS_DATE, supplement: name, taken: taken }) });
+  }
+  renderWellness();
+}
+
+function renderGrowth() {
+  var e = document.getElementById('growthList'); if (!e) return;
+  if (!growthLogs.length) { e.innerHTML = '<div class="growth-empty">No measurements yet.</div>'; return; }
+  e.innerHTML = '<table class="growth-table"><tr><th>Date</th><th>Weight</th><th>Height</th></tr>' + growthLogs.slice().reverse().slice(0, 6).map(function (g) { return '<tr><td>' + g.date + '</td><td>' + g.weight + ' kg</td><td>' + g.height + ' cm</td></tr>'; }).join('') + '</table>';
+}
+
+async function addGrowth() {
+  var d = document.getElementById('growthDate').value || localDateStr(), w = document.getElementById('growthWeight').value, h = document.getElementById('growthHeight').value;
+  if (!w || !h) { showToast('Enter weight and height'); return; }
+  if (currentUser && currentUser.guest) {
+    var raw = guestWellnessRaw();
+    raw.growth = raw.growth || [];
+    raw.growth.push({ date: d, weight: Number(w), height: Number(h) });
+    saveGuestWellness(raw);
+    growthLogs = raw.growth;
+  } else {
+    var data = await apiRequest('/wellness/growth', { method: 'POST', body: JSON.stringify({ date: d, weight: Number(w), height: Number(h) }) });
+    if (!data) return;
+    growthLogs.push({ date: data.measurement.log_date, weight: Number(data.measurement.weight_kg), height: Number(data.measurement.height_cm) });
+  }
+  renderWellness();
+  document.getElementById('growthWeight').value = '';
+  document.getElementById('growthHeight').value = '';
+  showToast('Growth measurement saved');
+}
+
+var fruitSizes = [[8, 'Size', 'Bean'], [10, 'Size', 'Strawberry'], [12, 'Size', 'Lime'], [14, 'Size', 'Lemon'], [16, 'Size', 'Avocado'], [18, 'Size', 'Tomato'], [20, 'Size', 'Mango'], [22, 'Size', 'Banana'], [24, 'Size', 'Corn'], [26, 'Size', 'Lettuce'], [28, 'Size', 'Cauliflower'], [30, 'Size', 'Coconut'], [32, 'Size', 'Pineapple'], [34, 'Size', 'Cantaloupe'], [36, 'Size', 'Honeydew melon'], [38, 'Size', 'Watermelon'], [40, 'Size', 'Watermelon']];
+function updatePregnancyInfo() { var cs = currentUser && currentUser.care_start_date ? new Date(currentUser.care_start_date) : null; if (!cs || isNaN(cs.getTime())) return; var days = Math.max(0, Math.floor((Date.now() - cs.getTime()) / DAY_MS)), week = Math.min(40, Math.floor(days / 7)), chosen = fruitSizes[0]; fruitSizes.forEach(function (x) { if (week >= x[0]) chosen = x; }); document.getElementById('pregnancyWeekStat').textContent = 'Week ' + week + ' of 40'; document.getElementById('fruitName').textContent = chosen[2]; document.getElementById('fruitEmoji').textContent = chosen[1]; document.getElementById('fruitMeta').textContent = 'Around week ' + chosen[0]; }
+function formatTimer(ms) { var t = Math.floor(ms / 1000), m = Math.floor(t / 60), s = t % 60; return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0'); }
+
+// The 5-1-1 rule: contractions about 5 minutes apart (gap), each lasting
+// about a minute (duration), sustained for about an hour. A contraction
+// "matches" if its gap is <=6min and duration is >=40s; we then need a
+// run of matching contractions spanning >=55 minutes.
+function computeFiveOneOne(ascList) {
+  var runStart = null;
+  for (var i = 0; i < ascList.length; i++) {
+    var r = ascList[i];
+    var matches = r.durationMs >= FIVE_ONE_ONE.minDurationMs && (r.gapMs == null || r.gapMs <= FIVE_ONE_ONE.maxGapMs);
+    if (!matches) { runStart = null; continue; }
+    if (runStart === null) runStart = r.startedAtMs;
+    if (r.startedAtMs - runStart >= FIVE_ONE_ONE.minSpanMs) return true;
+  }
+  return false;
+}
+
+function renderContractions() {
+  var todays = contractionLogs.filter(function (x) { return localDateStr(new Date(x.startedAtMs)) === WELLNESS_DATE; });
+  var c = document.getElementById('contractionCount'); if (c) c.textContent = todays.length + ' today';
+  var e = document.getElementById('contractionLog');
+  if (e) e.innerHTML = todays.slice().reverse().slice(0, 8).map(function (x) {
+    var gapLabel = x.gapMs != null ? ' \u00b7 gap ' + formatTimer(x.gapMs) : ' \u00b7 first today';
+    return '<div class="contraction-item"><span>' + x.time + gapLabel + '</span><b>' + formatTimer(x.durationMs) + '</b></div>';
+  }).join('') || '<div class="growth-empty">No contractions logged today.</div>';
+
+  var gapEl = document.getElementById('contractionGap');
+  if (gapEl) {
+    var last = todays[todays.length - 1];
+    gapEl.textContent = last ? (last.gapMs != null ? 'Last gap: ' + formatTimer(last.gapMs) + ' \u00b7 lasted ' + formatTimer(last.durationMs) : 'First contraction logged today') : '';
+  }
+
+  var cutoff = Date.now() - 2 * 60 * 60 * 1000;
+  var recent = contractionLogs.filter(function (x) { return x.startedAtMs >= cutoff; }).sort(function (a, b) { return a.startedAtMs - b.startedAtMs; });
+  var alertEl = document.getElementById('fiveOneOneAlert');
+  if (alertEl) alertEl.hidden = !(fiveOneOneFlag || computeFiveOneOne(recent));
+}
+
+function startContraction() {
+  if (contractionStartedAt) return;
+  contractionStartedAt = Date.now();
+  document.getElementById('contractionStart').disabled = true;
+  document.getElementById('contractionStop').disabled = false;
+  document.getElementById('contractionStatus').textContent = 'Contraction in progress';
+  contractionInterval = setInterval(function () { document.getElementById('contractionTimer').textContent = formatTimer(Date.now() - contractionStartedAt); }, 250);
+}
+
+async function stopContraction() {
+  if (!contractionStartedAt) return;
+  var startedAtMs = contractionStartedAt, duration = Date.now() - startedAtMs;
+  clearInterval(contractionInterval); contractionInterval = null;
+
+  // Gap = time from the start of the previous contraction to the start of
+  // this one — the number the 5-1-1 rule actually cares about, not how
+  // long each contraction itself lasts.
+  var prev = contractionLogs.slice().sort(function (a, b) { return a.startedAtMs - b.startedAtMs; }).pop();
+  var gapMs = prev ? (startedAtMs - prev.startedAtMs) : null;
+  var entry = { time: localTimeStr(new Date(startedAtMs)), durationMs: duration, gapMs: gapMs, startedAtMs: startedAtMs };
+
+  contractionStartedAt = null;
+  document.getElementById('contractionStart').disabled = false;
+  document.getElementById('contractionStop').disabled = true;
+  document.getElementById('contractionTimer').textContent = '00:00';
+  document.getElementById('contractionStatus').textContent = 'Logged \u2014 ready for the next one';
+
+  if (currentUser && currentUser.guest) {
+    var raw = guestWellnessRaw();
+    raw.contractions = raw.contractions || [];
+    raw.contractions.push(entry);
+    saveGuestWellness(raw);
+    contractionLogs = raw.contractions;
+    var cutoff = Date.now() - 2 * 60 * 60 * 1000;
+    var recent = contractionLogs.filter(function (x) { return x.startedAtMs >= cutoff; }).sort(function (a, b) { return a.startedAtMs - b.startedAtMs; });
+    if (computeFiveOneOne(recent)) fiveOneOneFlag = true;
+  } else {
+    contractionLogs.push(entry);
+    var data = await apiRequest('/wellness/contractions', {
+      method: 'POST',
+      body: JSON.stringify({ date: localDateStr(new Date(startedAtMs)), started_at: new Date(startedAtMs).toISOString(), duration_ms: duration, gap_ms: gapMs })
+    });
+    if (data && data.five_one_one) fiveOneOneFlag = true;
+  }
+
+  renderContractions();
+}
+
+function openSos() { document.getElementById('sosModal').classList.add('is-open'); }
+function closeSos() { document.getElementById('sosModal').classList.remove('is-open'); }
+function callEmergencyContact() { var p = currentUser && currentUser.emergency_contact_phone; if (p) location.href = 'tel:' + p; else showToast('No emergency contact number is saved'); }
+
+async function initWellness() {
+  await loadWellnessState();
+  renderWellness();
+  updatePregnancyInfo();
+  document.querySelectorAll('[data-supplement]').forEach(function (e) {
+    e.addEventListener('change', function () { setSupplement(e.dataset.supplement, e.checked); });
+  });
+  document.getElementById('growthDate').value = localDateStr();
+
+  // If the local calendar date rolls over while the tab stays open (e.g.
+  // an overnight labour), pick up the new day's nutrition/water/supplement
+  // state without needing a reload.
+  setInterval(function () {
+    var nowDate = localDateStr();
+    if (nowDate !== WELLNESS_DATE) loadWellnessState().then(renderWellness);
+  }, 5 * 60 * 1000);
+}
+
+/* ======================================================================
+   DOCTOR DASHBOARD (doctor only)
+   ====================================================================== */
+
+var doctorPatients = [];
+var doctorAppointments = [];
+var selectedPatientId = null;
+var patientTimelineCache = {};
+var activeFilter = "all";
+var searchTerm = "";
+
+// Risk is derived from a patient's live overdue-milestone count so the
+// "High risk" filter reflects real data, not a placeholder.
+function riskLevel(p) {
+  var gc = Number(p.gap_count);
+  if (gc >= 2) return "high";
+  if (gc === 1) return "medium";
+  return "low";
+}
+function riskTag(p) {
+  var level = riskLevel(p);
+  if (level === "high") return '<span class="tag tag--risk-high"><svg aria-hidden="true"><use href="#i-alert-tri"/></svg>High risk</span>';
+  if (level === "medium") return '<span class="tag tag--risk-medium">Medium risk</span>';
+  return '<span class="tag tag--risk-low"><svg aria-hidden="true"><use href="#i-tick"/></svg>On track</span>';
+}
+
+function renderDoctorStats() {
+  var totalGaps = doctorPatients.reduce(function (sum, p) { return sum + Number(p.gap_count); }, 0);
+  var highRisk = doctorPatients.filter(function (p) { return riskLevel(p) === "high"; }).length;
+  var pending = doctorAppointments.filter(function (a) { return a.status === "pending"; }).length;
+  document.getElementById("doctorStats").innerHTML =
+    '<div class="stat-cell"><b>' + doctorPatients.length + '</b><span>Total patients</span></div>' +
+    '<div class="stat-cell is-alert"><b>' + totalGaps + '</b><span>Active care gaps</span></div>' +
+    '<div class="stat-cell is-alert"><b>' + highRisk + '</b><span>High risk patients</span></div>' +
+    '<div class="stat-cell"><b>' + pending + '</b><span>Pending requests</span></div>';
+}
+
+function patientWeekLabel(p) {
+  if (!p.care_start_date) return "";
+  var days = Math.max(0, Math.floor((Date.now() - new Date(p.care_start_date).getTime()) / DAY_MS));
+  var weeks = Math.floor(days / 7);
+  return weeks <= 40 ? ("Wk " + weeks) : "Postpartum / child care";
+}
+
+function filteredPatients() {
+  return doctorPatients.filter(function (p) {
+    if (activeFilter === "gap" && Number(p.gap_count) === 0) return false;
+    if (activeFilter === "risk" && riskLevel(p) !== "high") return false;
+    if (searchTerm && p.full_name.toLowerCase().indexOf(searchTerm) === -1) return false;
+    return true;
+  });
+}
+
+function renderPatientList() {
+  var list = filteredPatients();
+  var container = document.getElementById("patientList");
+
+  if (!list.length) {
+    container.innerHTML = '<div class="empty-state">No patients match this filter.</div>';
+    return;
+  }
+
+  container.innerHTML = list.map(function (p) {
+    return (
+      '<button class="patient-card ' + (p.id === selectedPatientId ? "is-selected" : "") + '" data-action="select-patient" data-pid="' + p.id + '">' +
+        '<span class="patient-card__avatar">' + initials(p.full_name) + '</span>' +
+        '<span class="patient-card__body">' +
+          '<span class="patient-card__name">' + p.full_name + '</span>' +
+          '<span class="patient-card__meta">' + patientWeekLabel(p) + '</span>' +
+        '</span>' +
+        '<span class="patient-card__gap">' + riskTag(p) + '</span>' +
+      '</button>'
+    );
+  }).join("");
+}
+
+function renderWellnessSection(wellness) {
+  if (!wellness) return '<div class="wellness-doctor"><h4>Tracking data</h4><p style="font-size:.82rem;margin:0">Loading\u2026</p></div>';
+
+  var adherence = wellness.supplement_adherence_pct;
+  var adherenceLabel = adherence == null ? 'No supplement logs yet' : adherence + '% over ' + wellness.supplement_days_tracked + ' tracked day' + (wellness.supplement_days_tracked === 1 ? '' : 's');
+
+  var contractions = wellness.recent_contractions || [];
+  var contractionsHtml = contractions.length
+    ? contractions.slice(0, 6).map(function (c) {
+        var gap = c.gap_ms != null ? ' \u00b7 gap ' + formatTimer(c.gap_ms) : '';
+        return '<div class="module-stat"><span>' + fmtDate(c.started_at) + ' ' + localTimeStr(c.started_at) + gap + '</span><b>' + formatTimer(c.duration_ms) + '</b></div>';
+      }).join('')
+    : '<p style="font-size:.82rem;margin:0">No contractions logged.</p>';
+
+  var flagHtml = wellness.five_one_one_flag
+    ? '<div class="five-one-one-alert" style="margin-bottom:.7rem"><svg aria-hidden="true"><use href="#i-alert-tri"/></svg><div><strong>5-1-1 pattern flagged</strong> in the last 2 hours of logged contractions.</div></div>'
+    : '';
+
+  return (
+    '<div class="wellness-doctor">' +
+      '<h4>Tracking data</h4>' +
+      flagHtml +
+      '<div class="module-stat"><span>Supplement adherence</span><b>' + adherenceLabel + '</b></div>' +
+      '<p style="font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-3);margin:.9rem 0 .5rem">Recent contractions</p>' +
+      contractionsHtml +
+    '</div>'
+  );
+}
+
+function renderDetailPanel(pid, cached) {
+  var panel = document.getElementById("detailPanel");
+  var p = doctorPatients.filter(function (x) { return x.id === pid; })[0];
+  if (!p || !cached) { panel.innerHTML = '<div class="empty-state">Select a patient to see their care timeline.</div>'; return; }
+
+  var milestones = cached.milestones;
+  var gaps = milestones.filter(function (m) { return m.status === "overdue"; });
+  var gapsHtml = gaps.length
+    ? gaps.map(function (m) {
+        return (
+          '<div class="dgap">' +
+            '<div><div class="dgap__title">' + m.title + '</div><p class="dgap__note">' + m.stage + ' \u00B7 was due ' + fmtDate(m.due_date) + '</p></div>' +
+          '</div>'
+        );
+      }).join("")
+    : '<div class="gap-empty"><svg aria-hidden="true"><use href="#i-check-circle"/></svg>No active care gaps for this patient.</div>';
+
+  var near = nearestActive(milestones);
+  var visible = milestones.filter(function (m) {
+    return m.status !== "upcoming" || (near && Math.abs(m.id - near.id) <= 2);
+  });
+
+  var timelineHtml = visible.map(function (m) {
+    var status = displayStatus(m, near ? near.id : null);
+    return (
+      '<div class="mini-milestone">' +
+        '<span class="milestone__icon ' + classFor(status) + '"><svg aria-hidden="true"><use href="#' + iconFor(status) + '"/></svg></span>' +
+        '<span>' + m.title + '</span>' +
+        '<span class="mini-milestone__stage">' + m.stage + '</span>' +
+        '<span class="milestone__when">' + fmtDate(m.due_date) + '</span>' +
+      '</div>'
+    );
+  }).join("");
+
+  panel.innerHTML =
+    '<div class="detail-head">' +
+      '<div class="detail-head__id">' +
+        '<span class="detail-head__avatar">' + initials(p.full_name) + '</span>' +
+        '<div><h2 style="margin-bottom:.15rem;">' + p.full_name + '</h2><span style="font-size:.85rem;color:var(--ink-3);">' + patientWeekLabel(p) + '</span>' +
+          '<div class="detail-head__tags">' + riskTag(p) + (gaps.length ? '<span class="tag tag--due">' + gaps.length + ' active gap' + (gaps.length > 1 ? "s" : "") + '</span>' : '') + '</div>' +
+        '</div>' +
+      '</div>' +
+    '</div>' +
+    '<div class="detail-gaps"><h4>Active care gaps</h4>' + gapsHtml + '</div>' +
+    '<div><h4 style="font-size:.82rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-3);margin-bottom:.7rem;">Care timeline (nearby milestones)</h4><div class="mini-timeline">' + timelineHtml + '</div></div>' +
+    renderWellnessSection(patientWellnessCache[pid]);
+}
+
+var patientWellnessCache = {};
+
+async function selectPatient(pid) {
+  selectedPatientId = pid;
+  renderPatientList();
+  if (!patientTimelineCache[pid]) {
+    var data = await apiRequest('/doctor/patients/' + pid + '/timeline');
+    if (!data) return;
+    patientTimelineCache[pid] = data;
+  }
+  renderDetailPanel(pid, patientTimelineCache[pid]);
+
+  if (!patientWellnessCache[pid]) {
+    var wellness = await apiRequest('/doctor/patients/' + pid + '/wellness');
+    if (wellness) {
+      patientWellnessCache[pid] = wellness;
+      // Only re-render if this patient is still the one selected.
+      if (selectedPatientId === pid) renderDetailPanel(pid, patientTimelineCache[pid]);
+    }
+  }
+}
+
+document.getElementById("patientSearch").addEventListener("input", function (e) {
+  searchTerm = e.target.value.trim().toLowerCase();
+  renderPatientList();
+});
+
+document.getElementById("filterChips").addEventListener("click", function (e) {
+  var chip = e.target.closest(".chip");
+  if (!chip) return;
+  document.querySelectorAll("#filterChips .chip").forEach(function (c) { c.classList.remove("is-active"); });
+  chip.classList.add("is-active");
+  activeFilter = chip.getAttribute("data-filter");
+  renderPatientList();
+});
+
+async function loadDoctorDashboard() {
+  var data = await apiRequest('/doctor/patients');
+  if (!data) return;
+  doctorPatients = data.patients;
+  renderDoctorStats();
+  renderPatientList();
+  if (doctorPatients.length) {
+    selectPatient(selectedPatientId || doctorPatients[0].id);
+  } else {
+    document.getElementById('detailPanel').innerHTML = '<div class="empty-state">No patients yet \u2014 they\'ll appear here once a mother requests an appointment with you.</div>';
+  }
+}
+
+/* ---- Appointments: doctor side ---------------------------------------- */
+
+var APPT_STATUSES = ["pending", "confirmed", "completed", "cancelled"];
+
+function renderDoctorAppointments() {
+  var list = document.getElementById('doctorApptList');
+  if (!doctorAppointments.length) {
+    list.innerHTML = '<div class="empty-state">No appointment requests yet.</div>';
+    return;
+  }
+  list.innerHTML = doctorAppointments.map(function (a) {
+    var options = APPT_STATUSES.map(function (s) {
+      return '<option value="' + s + '"' + (s === a.status ? ' selected' : '') + '>' + s.charAt(0).toUpperCase() + s.slice(1) + '</option>';
+    }).join("");
+    return (
+      '<div class="appt-card">' +
+        '<div class="appt-card__top"><span class="appt-card__who">' + a.mother_name + '</span>' + apptStatusTag(a.status) + '</div>' +
+        '<div class="appt-card__meta">Requested for ' + fmtDate(a.requested_date) + '</div>' +
+        (a.reason ? '<div class="appt-card__reason">' + a.reason + '</div>' : '') +
+        '<div class="appt-card__actions">' +
+          '<select data-action="appt-status" data-id="' + a.id + '">' + options + '</select>' +
+        '</div>' +
+      '</div>'
+    );
+  }).join("");
+}
+
+async function loadDoctorAppointments() {
+  var data = await apiRequest('/appointments');
+  if (!data) return;
+  doctorAppointments = data.appointments;
+  renderDoctorAppointments();
+  renderDoctorStats();
+}
+
+document.getElementById('doctorApptList').addEventListener('change', async function (e) {
+  var select = e.target.closest('[data-action="appt-status"]');
+  if (!select) return;
+  var id = select.getAttribute('data-id');
+  var status = select.value;
+  var data = await apiRequest('/appointments/' + id + '/status', {
+    method: 'PATCH',
+    body: JSON.stringify({ status: status })
+  });
+  if (!data) return;
+  var a = doctorAppointments.filter(function (x) { return String(x.id) === String(id); })[0];
+  if (a) a.status = status;
+  renderDoctorAppointments();
+  // A confirmed/completed patient may now have (or clear) care gaps in the
+  // patient list stats, so refresh the roster alongside the appointment list.
+  loadDoctorDashboard();
+  showToast('Appointment updated');
+});
+
+/* ---- Care team: colleague doctors -------------------------------------- */
+
+var doctorColleagues = [];
+
+function renderColleagues() {
+  var grid = document.getElementById('teamGrid');
+  if (!doctorColleagues.length) {
+    grid.innerHTML = '<div class="empty-state team-empty">No colleagues added yet — use "Add doctor" to bring one onto the platform.</div>';
+    return;
+  }
+  grid.innerHTML = doctorColleagues.map(function (d) {
+    var meta = [d.specialization, d.facility_name].filter(Boolean).join(' \u00B7 ');
+    return (
+      '<div class="team-card">' +
+        '<span class="team-card__avatar">' + initials(d.full_name) + '</span>' +
+        '<span class="team-card__body">' +
+          '<span class="team-card__name">' + d.full_name + '</span>' +
+          '<span class="team-card__meta">' + (meta || 'Doctor') + '</span>' +
+        '</span>' +
+      '</div>'
+    );
+  }).join("");
+}
+
+async function loadDoctorColleagues() {
+  var data = await apiRequest('/doctor/colleagues');
+  if (!data) return;
+  doctorColleagues = data.colleagues;
+  renderColleagues();
+}
+
+function openAddDoctorModal() {
+  document.getElementById('addDoctorModal').classList.add('is-open');
+  document.getElementById('addDoctorModal').setAttribute('aria-hidden', 'false');
+  document.getElementById('docFullName').focus();
+}
+function closeAddDoctorModal() {
+  document.getElementById('addDoctorModal').classList.remove('is-open');
+  document.getElementById('addDoctorModal').setAttribute('aria-hidden', 'true');
+}
+
+document.getElementById('addDoctorModal').addEventListener('click', function (e) {
+  if (e.target === this) closeAddDoctorModal();
+});
+
+document.getElementById('addDoctorForm').addEventListener('submit', async function (e) {
+  e.preventDefault();
+  var payload = {
+    full_name: document.getElementById('docFullName').value.trim(),
+    email: document.getElementById('docEmail').value.trim(),
+    password: document.getElementById('docPassword').value,
+    specialization: document.getElementById('docSpecialization').value.trim(),
+    medical_license_number: document.getElementById('docLicense').value.trim(),
+    phone: document.getElementById('docPhone').value.trim() || undefined,
+    facility_name: document.getElementById('docFacility').value.trim() || undefined
+  };
+
+  var submitBtn = document.getElementById('addDoctorSubmit');
+  submitBtn.disabled = true;
+  var data = await apiRequest('/doctor/colleagues', { method: 'POST', body: JSON.stringify(payload) });
+  submitBtn.disabled = false;
+  if (!data) return;
+
+  showToast(payload.full_name + ' added to your care team');
+  document.getElementById('addDoctorForm').reset();
+  closeAddDoctorModal();
+  loadDoctorColleagues();
+});
+
+/* ======================================================================
+   SHARED INTERACTIONS (mark-done / gap alert / accordion toggles)
+   ====================================================================== */
+
+document.addEventListener("click", function (e) {
+  var target = e.target.closest("[data-action]");
+  if (!target) return;
+  var action = target.getAttribute("data-action");
+
+  if (action === "add-nutrition") { addNutrition();
+  } else if (action === "add-water") { addWater();
+  } else if (action === "add-growth") { addGrowth();
+  } else if (action === "contraction-start") { startContraction();
+  } else if (action === "contraction-stop") { stopContraction();
+  } else if (action === "open-sos") { openSos();
+  } else if (action === "close-sos") { closeSos();
+  } else if (action === "call-emergency-contact") { callEmergencyContact();
+  } else if (action === "resolve") {
+    resolveMilestone(Number(target.getAttribute("data-id")));
+  } else if (action === "remind") {
+    showToast("We'll remind you again tomorrow");
+  } else if (action === "toggle-group") {
+    target.closest(".timeline-group").classList.toggle("is-open");
+  } else if (action === "select-patient") {
+    selectPatient(Number(target.getAttribute("data-pid")));
+  } else if (action === "open-add-doctor") {
+    openAddDoctorModal();
+  } else if (action === "close-modal") {
+    closeAddDoctorModal();
+  }
+});
+
+document.addEventListener("keydown", function (e) {
+  if (e.key === "Escape" && document.getElementById('addDoctorModal').classList.contains('is-open')) {
+    closeAddDoctorModal();
+  }
+});
+
+/* ======================================================================
+   AUTH / ROLE GATING
+   ====================================================================== */
+
+var currentUser = null;
+
+function updateUserUI(user) {
+  var whoami = document.getElementById('whoami');
+  var userInitials = (user.full_name || user.email).split(' ').map(function (n) { return n[0]; }).join('').toUpperCase().slice(0, 2);
+  var displayName = user.full_name || user.email.split('@')[0];
+  whoami.innerHTML = '<span class="dot">' + userInitials + '</span> ' + displayName;
+
+  // Each account only ever renders its own dashboard \u2014 there is no control
+  // that lets a signed-in user switch into the other role's view.
+  document.body.setAttribute('data-role', user.role);
+  if (user.role === 'mother') {
+    document.getElementById('viewFamily').classList.add('is-active');
+    document.getElementById('viewDoctor').classList.remove('is-active');
+  } else {
+    document.getElementById('viewDoctor').classList.add('is-active');
+    document.getElementById('viewFamily').classList.remove('is-active');
+  }
+}
+
+var IS_GUEST = localStorage.getItem('dai_guest') === '1';
+
+// A guest never has a session cookie, so calling any /api/* route would hit
+// a 401 and bounce straight to auth.html. Guest mode has to stay entirely
+// off the network — this is the synthetic user object it renders instead.
+function guestUser() {
+  var careStart = localStorage.getItem('dai_guest_care_start');
+  if (!careStart) {
+    careStart = new Date(Date.now() - 30 * 7 * DAY_MS).toISOString(); // demo: ~30 weeks along
+    localStorage.setItem('dai_guest_care_start', careStart);
+  }
+  return { id: 0, full_name: 'Guest', email: 'guest@dai.demo', role: 'mother', care_start_date: careStart, guest: true };
+}
+
+document.getElementById('logoutBtn').addEventListener('click', async function () {
+  if (IS_GUEST) {
+    localStorage.removeItem('dai_guest');
+  } else {
+    try {
+      await fetch(API_BASE + '/auth/logout', { method: 'POST', credentials: 'include' });
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  }
+  window.location.href = 'index.html';
+});
+
+function startMotherView() {
+  document.getElementById('guestBanner').hidden = !IS_GUEST;
+  initWellness();
+  initChatbot();
+  if (IS_GUEST) {
+    // No account, so no timeline/appointments to fetch \u2014 point the mother
+    // at creating one instead of showing a broken/empty API-backed section.
+    document.getElementById('famGapList').innerHTML = '';
+    document.getElementById('famGapCount').textContent = '0';
+    document.getElementById('stageStepper').innerHTML = '';
+    document.getElementById('familyTimeline').innerHTML = '<div class="empty-state">Your care timeline needs an account so it can be seen by your doctor too. <a href="auth.html">Create one</a> \u2014 it takes a minute.</div>';
+    document.querySelector('.appt-section').style.display = 'none';
+  } else {
+    loadFamilyView();
+    loadDoctorsForBooking();
+    loadMotherAppointments();
+  }
+}
+
+if (IS_GUEST) {
+  currentUser = guestUser();
+  updateUserUI(currentUser);
+  startMotherView();
+} else {
+  fetchCurrentUser().then(function (user) {
+    if (!user) return;
+    currentUser = user;
+    updateUserUI(user);
+
+    if (user.role === 'mother') {
+      startMotherView();
+    } else if (user.role === 'doctor') {
+      loadDoctorDashboard();
+      loadDoctorAppointments();
+      loadDoctorColleagues();
+    }
+  });
+}
+
+/* ======================================================================
+   CARE ASSISTANT (rule-based chatbot, mother/guest only)
+   Answers a fixed set of common questions from canned, clinician-reviewed
+   copy. It never diagnoses and always defers urgent symptoms to the SOS
+   flow or a real clinician \u2014 see the safety note baked into every reply.
+   ====================================================================== */
+
+var CHAT_TOPICS = [
+  {
+    key: 'danger', chip: '\ud83d\udea8 Warning signs',
+    match: ['danger', 'warning', 'emergency', 'urgent', 'bleeding', 'pain'],
+    reply: "Contact your doctor or go to the nearest facility right away for: heavy vaginal bleeding, severe headache with blurred vision, severe abdominal pain, high fever, reduced baby movement, fluid leaking, or fits/convulsions. If any of these are happening now, use the Emergency SOS button instead of chatting."
+  },
+  {
+    key: 'contractions', chip: '\u23f1\ufe0f Contractions & 5-1-1',
+    match: ['contraction', '5-1-1', '511', 'labor', 'labour'],
+    reply: "The 5-1-1 rule is a common guide: contractions about 5 minutes apart, each lasting about a minute, for at least an hour. Log each one with the Contraction timer above \u2014 it tracks the gap for you and will flag it once that pattern shows up. When it does, call your doctor or hospital."
+  },
+  {
+    key: 'nutrition', chip: '\ud83e\udd57 Diet & nutrition',
+    match: ['eat', 'food', 'diet', 'nutrition', 'meal'],
+    reply: "A simple everyday guide: include a protein (dal, eggs, milk, paneer), an iron-rich food (leafy greens, jaggery), a fruit, and plenty of water at most meals. Your doctor's specific advice always takes priority over general guidance like this."
+  },
+  {
+    key: 'supplements', chip: '\ud83d\udc8a Supplements',
+    match: ['supplement', 'iron', 'folic', 'calcium', 'tablet', 'medicine'],
+    reply: "Iron, folic acid and calcium are commonly recommended in pregnancy, but only take what your own doctor has prescribed, at the dose they've given you. Use the Supplement tracker above to keep a daily record you can show them."
+  },
+  {
+    key: 'movement', chip: '\ud83d\udc76 Baby movement',
+    match: ['kick', 'movement', 'moving', 'move'],
+    reply: "Babies usually settle into a noticeable movement pattern by the third trimester. If movement feels clearly reduced or has stopped compared to what's normal for your baby, contact your doctor promptly \u2014 don't wait it out."
+  },
+  {
+    key: 'appointments', chip: '\ud83d\udcc5 Appointments',
+    match: ['appointment', 'visit', 'checkup', 'check-up', 'book'],
+    reply: "You can request an appointment with any doctor on DAI from the Appointments section below \u2014 pick a doctor, a preferred date, and an optional reason, and they'll confirm it."
+  }
+];
+var CHAT_FALLBACK = "I can help with general pregnancy questions \u2014 try asking about warning signs, contractions, nutrition, supplements, baby movement, or appointments. For anything specific to your own health, please check with your doctor, and use Emergency SOS for anything urgent right now.";
+var CHAT_INTRO = "Hi! I'm the DAI care assistant. I can answer general questions \u2014 I don't diagnose or replace your doctor. What would you like to know?";
+
+var chatInitialized = false;
+function initChatbot() {
+  document.getElementById('chatFab').hidden = false;
+  if (chatInitialized) return;
+  chatInitialized = true;
+
+  var fab = document.getElementById('chatFab'), panel = document.getElementById('chatPanel'),
+      body = document.getElementById('chatBody'), chips = document.getElementById('chatChips'),
+      form = document.getElementById('chatForm'), input = document.getElementById('chatInput');
+
+  function addMsg(text, who) {
+    var d = document.createElement('div');
+    d.className = 'chat-msg chat-msg--' + who;
+    d.textContent = text;
+    body.appendChild(d);
+    body.scrollTop = body.scrollHeight;
+  }
+
+  function renderChips() {
+    chips.innerHTML = '';
+    CHAT_TOPICS.forEach(function (t) {
+      var b = document.createElement('button');
+      b.type = 'button'; b.textContent = t.chip;
+      b.addEventListener('click', function () { addMsg(t.chip, 'user'); addMsg(t.reply, 'bot'); });
+      chips.appendChild(b);
+    });
+  }
+
+  function answer(text) {
+    var lower = text.toLowerCase();
+    var topic = CHAT_TOPICS.filter(function (t) { return t.match.some(function (k) { return lower.indexOf(k) !== -1; }); })[0];
+    addMsg(topic ? topic.reply : CHAT_FALLBACK, 'bot');
+  }
+
+  fab.addEventListener('click', function () {
+    var open = panel.classList.toggle('is-open');
+    panel.setAttribute('aria-hidden', String(!open));
+    if (open && !body.childElementCount) { addMsg(CHAT_INTRO, 'bot'); renderChips(); }
+  });
+  document.getElementById('chatClose').addEventListener('click', function () {
+    panel.classList.remove('is-open');
+    panel.setAttribute('aria-hidden', 'true');
+  });
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var t = input.value.trim();
+    if (!t) return;
+    addMsg(t, 'user');
+    input.value = '';
+    setTimeout(function () { answer(t); }, 300);
+  });
+}
+
+})();
+</script>
+</body>
+</html>
