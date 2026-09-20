@@ -1,1 +1,4 @@
 backend/.env
+
+# Local hospital demo state
+backend/data/hospital-demo-state.json

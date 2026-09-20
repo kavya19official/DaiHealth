@@ -533,3 +533,20 @@ body[data-role="mother"] #viewDoctor, body[data-role="doctor"] #viewFamily { dis
   .mini-milestone, .milestone { grid-template-columns: 24px 1fr; }
   .milestone__right { grid-column: 2; }
 }
+
+/* Shared dashboard typography scale */
+body.doctor-page .doctor-hero {
+  padding-block: clamp(1.5rem, 3vw, 2.25rem);
+}
+body.doctor-page .doctor-hero h1 {
+  font-size: clamp(1.7rem, 2.5vw, 2.1rem);
+}
+body.doctor-page h2 {
+  font-size: clamp(1.25rem, 1.8vw, 1.45rem);
+}
+body.doctor-page h3 {
+  font-size: 1.05rem;
+}
+body.doctor-page .doctor-hero p {
+  font-size: 0.95rem;
+}

@@ -844,19 +844,111 @@ h1, h2, h3, h4 { font-family: var(--sans); font-weight: 820; letter-spacing: -.0
 .hospital-action i { background: var(--coral-soft); color: var(--violet); }
 .hospital-action:hover { border-color: var(--coral); background: var(--coral-tint); }
 .metric b { color: var(--violet); font-family: var(--sans); font-weight: 800; }
+/* Shared dashboard header and content alignment */
+.sidebar {
+  min-height: 76px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 1.25rem;
+  padding: .5rem max(20px, calc((100vw - 1180px) / 2));
+}
+.sidebar .brand { flex: 0 0 auto; }
+.sidebar .primary-nav { margin-inline: auto; }
+.sidebar .surface-switch { flex: 0 0 auto; }
+.modulebar {
+  position: sticky;
+  top: 76px;
+  z-index: 45;
+  padding: .55rem max(20px, calc((100vw - 1180px) / 2));
+  border-bottom: 1px solid var(--line);
+  background: rgba(255,255,255,.96);
+  backdrop-filter: blur(14px);
+}
+.modulebar .nav {
+  width: fit-content;
+  max-width: 100%;
+  overflow-x: auto;
+}
+.topbar, .hospital-actionbar, .content {
+  width: min(1180px, calc(100% - 40px));
+  padding-left: 0;
+  padding-right: 0;
+}
+.topbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
+  align-items: start;
+  gap: 1.25rem;
+}
+.topbar-meta {
+  display: grid;
+  justify-items: end;
+  gap: .65rem;
+}
+.topbar-meta .guardrail {
+  width: 100%;
+  max-width: 360px;
+  margin: 0;
+}
+@media (max-width: 1100px) {
+  .sidebar { flex-wrap: wrap; padding-block: .8rem; }
+  .sidebar .primary-nav { order: 3; width: 100%; justify-content: flex-start; overflow-x: auto; }
+  .sidebar .surface-switch { max-width: 100%; overflow-x: auto; }
+  .modulebar { position: static; padding-block: .55rem; }
+  .topbar { grid-template-columns: 1fr; }
+  .topbar-meta { width: 100%; justify-items: start; }
+  .topbar-meta .guardrail { max-width: none; }
+}
+@media (max-width: 640px) {
+  .sidebar, .modulebar { padding-inline: 14px; }
+  .topbar, .hospital-actionbar, .content { width: min(100% - 28px, 1180px); }
+}
+
+/* Full hospital workflow components */
+.role-control { display:flex; align-items:center; gap:.55rem; }
+.role-control select { width:auto; min-width:135px; padding:.45rem .65rem; border-radius:999px; font-size:.78rem; }
+.form-strip { display:flex; flex-wrap:wrap; align-items:end; gap:.7rem; padding:1rem; margin-bottom:1rem; }
+.form-strip .control { flex:1 1 150px; min-width:140px; }
+.form-strip .btn { flex:0 0 auto; }
+.form-stack { display:grid; gap:.75rem; margin-top:.75rem; }
+.consent-line { display:flex; align-items:flex-start; gap:.55rem; color:var(--ink-2); font-size:.8rem; }
+.consent-line input { width:auto; margin-top:.15rem; }
+.timeline-list { display:grid; gap:.55rem; }
+.timeline-item { display:grid; grid-template-columns:16px minmax(0,1fr) auto; gap:.65rem; align-items:start; padding:.65rem 0; border-top:1px solid var(--line-soft); }
+.timeline-item:first-child { border-top:0; }
+.timeline-item p { margin:.2rem 0 0; font-size:.76rem; }
+.timeline-dot { width:11px; height:11px; margin-top:.25rem; border-radius:50%; background:var(--ink-3); box-shadow:0 0 0 4px var(--line-soft); }
+.timeline-dot.completed, .timeline-dot.resolved { background:#2f8b63; }
+.timeline-dot.overdue { background:var(--coral); }
+.compact-actions { margin-top:.65rem; }
+.inline-controls { display:flex; flex-wrap:wrap; gap:.45rem; margin-top:.65rem; }
+.inline-controls select { width:auto; min-width:130px; padding:.45rem .6rem; font-size:.78rem; }
+.check-row { display:flex; justify-content:space-between; align-items:center; gap:.75rem; padding:.55rem 0; border-top:1px solid var(--line-soft); font-size:.82rem; }
+.check-row:first-of-type { margin-top:.55rem; }
+.draft-editor { min-height:130px; margin-top:.55rem; font-size:.82rem; line-height:1.5; }
+.mini-label { display:block; margin-top:.65rem; color:var(--ink-3); font-size:.7rem; font-weight:700; }
+.fact.is-rejected { opacity:.65; background:#fff0f2; }
+.btn-small { padding:.36rem .55rem; font-size:.72rem; }
+.audit-filters { margin-bottom:.75rem; }
+#modalFields { display:grid; gap:.75rem; }
+@media (max-width:640px) {
+  .role-control { width:100%; justify-content:space-between; }
+  .role-control select { min-width:0; flex:1; }
+  .timeline-item { grid-template-columns:14px minmax(0,1fr); }
+  .timeline-item > .tag { grid-column:2; width:max-content; }
+}
 </style>
 </head>
 <body>
 <div class="app">
-  <aside class="sidebar">
+  <header class="sidebar">
     <div class="brand">
       <img class="brand-mark" src="assets/logo.jpeg" width="48" height="48" alt="">
       <div><span class="brand-name">DAI</span><small>Hospital console</small></div>
     </div>
     <nav class="primary-nav" aria-label="Primary navigation">
-      <a href="dashboard.html">Mother / Patient</a>
-      <a href="doctor.html">Doctor</a>
-      <a href="hospital.html">Hospital Team</a>
+      <a href="dashboard.html">Dashboard</a>
       <a href="index.html#modules">Features</a>
       <a href="index.html#why">About</a>
     </nav>
@@ -865,6 +957,9 @@ h1, h2, h3, h4 { font-family: var(--sans); font-weight: 820; letter-spacing: -.0
       <a href="doctor.html">Doctor</a>
       <a class="is-active" href="hospital.html">Hospital team</a>
     </nav>
+  </header>
+
+  <div class="modulebar">
     <nav class="nav" aria-label="Hospital modules">
       <a class="is-active" href="#overview">Overview</a>
       <a href="#registry">Registry</a>
@@ -872,13 +967,10 @@ h1, h2, h3, h4 { font-family: var(--sans); font-weight: 820; letter-spacing: -.0
       <a href="#clinic">Clinic flow</a>
       <a href="#facility">Facility</a>
       <a href="#drafts">Drafts</a>
+      <a href="#pathways">Pathways</a>
       <a href="#audit">Audit</a>
     </nav>
-    <div class="guardrail">
-      <b>Assistive-only guardrails</b>
-      No diagnosis, treatment recommendation, clinical risk score, or autonomous clinical action is modeled here. Every automated output is reviewable and audited.
-    </div>
-  </aside>
+  </div>
 
   <main class="main">
     <header class="topbar">
@@ -886,7 +978,13 @@ h1, h2, h3, h4 { font-family: var(--sans); font-weight: 820; letter-spacing: -.0
         <h1>Hospital-side continuity workspace</h1>
         <p>Module A and C first: care gaps, panel registry, provenance, review states, and auditability.</p>
       </div>
-      <div class="user-pill"><span class="avatar">SK</span> Dr. S. Kumar</div>
+      <div class="topbar-meta">
+        <div class="user-pill role-control"><span class="avatar">SK</span><span>Dr. S. Kumar</span><select id="currentRole" aria-label="Hospital role"><option value="admin">Administrator</option><option value="doctor">Doctor</option><option value="care_team">Care team</option><option value="front_desk">Front desk</option></select></div>
+        <div class="guardrail">
+          <b>Assistive-only guardrails</b>
+          No diagnosis, treatment recommendation, clinical risk score, or autonomous clinical action is modeled here. Every automated output is reviewable and audited.
+        </div>
+      </div>
     </header>
 
     <div class="hospital-actionbar" aria-label="Hospital quick actions">
@@ -900,7 +998,7 @@ h1, h2, h3, h4 { font-family: var(--sans); font-weight: 820; letter-spacing: -.0
       <section id="overview" class="section">
         <div class="banner">
           <b>Demo slice</b>
-          This page uses deterministic rules and local demo data. It is built to show the hospital-side workflow and safety architecture before connecting the real database/API.
+          The dashboard keeps follow-up, consultations, clinic operations, facility readiness and emergency response in one auditable workspace. Every clinical decision remains with qualified staff.
         </div>
         <div class="grid grid-4" id="metrics"></div>
       </section>
@@ -920,6 +1018,10 @@ h1, h2, h3, h4 { font-family: var(--sans); font-weight: 820; letter-spacing: -.0
           <div class="control">
             <label for="providerFilter">Provider</label>
             <select id="providerFilter"></select>
+          </div>
+          <div class="control">
+            <label for="assignedFilter">Assigned staff</label>
+            <select id="assignedFilter"></select>
           </div>
           <div class="control">
             <label for="overdueFilter">Days overdue</label>
@@ -963,10 +1065,15 @@ h1, h2, h3, h4 { font-family: var(--sans); font-weight: 820; letter-spacing: -.0
           </div>
           <div class="status-line">
             <span class="tag tag-violet" id="briefStatus">Pending review</span>
-            <button class="btn btn-ok" data-action="review-brief">Mark reviewed</button>
-            <button class="btn btn-danger" data-action="reject-brief">Reject extracted item</button>
+            <button class="btn btn-ok" data-action="review-brief" data-permission="brief_review">Mark reviewed</button>
           </div>
         </div>
+        <form class="panel form-strip" id="documentForm">
+          <div class="control"><label for="documentPatient">Patient</label><select id="documentPatient"></select></div>
+          <div class="control"><label for="documentType">Document type</label><select id="documentType"><option value="lab_result">Lab result</option><option value="scan_report">Scan report</option><option value="referral_letter">Referral letter</option><option value="discharge_summary">Discharge summary</option></select></div>
+          <div class="control"><label for="documentInput">Upload document</label><input id="documentInput" type="file" accept=".pdf,.png,.jpg,.jpeg"></div>
+          <button class="btn btn-primary" data-permission="document_ingest" type="submit">Upload and extract facts</button>
+        </form>
         <div class="grid grid-2">
           <div class="panel detail-block">
             <h4>Extracted facts</h4>
@@ -1004,40 +1111,41 @@ h1, h2, h3, h4 { font-family: var(--sans); font-weight: 820; letter-spacing: -.0
             <h2>Doctor productivity and education drafts</h2>
             <p>Draft generation and send/publish are separate states. Nothing can be published without approval.</p>
           </div>
-          <button class="btn btn-primary" data-action="new-draft">Generate draft</button>
+          <button class="btn btn-primary" data-action="new-draft" data-permission="draft_edit">Generate draft</button>
         </div>
         <div class="grid grid-3" id="draftCards"></div>
       </section>
 
       <section id="facility" class="section">
         <div class="section-head">
-          <div>
-            <h2>Facility readiness and SOS intake</h2>
-            <p>Hospital/admin placeholders for expected cases, staff availability, equipment readiness and verified emergency intake. Status is coordinated around human-set urgency only.</p>
+          <div><h2>Facility readiness and SOS intake</h2><p>Readiness is coordinated around clinician-set priorities. Emergency requests require consent, verification and a recorded human response.</p></div>
+        </div>
+        <div class="grid grid-2">
+          <div class="panel detail-block"><h4>Case readiness checklist</h4><div class="detail-list" id="facilityCases"></div></div>
+          <div class="panel detail-block">
+            <h4>Create verified SOS intake</h4>
+            <form class="form-stack" id="sosForm">
+              <div class="control"><label for="sosPatient">Patient</label><select id="sosPatient"></select></div>
+              <div class="control"><label for="sosLocation">Location shared with consent</label><input id="sosLocation" placeholder="Facility, ward or shared location"></div>
+              <label class="consent-line"><input id="sosConsent" type="checkbox"> Consent or authorised emergency protocol confirmed</label>
+              <button class="btn btn-primary" type="submit">Create SOS request</button>
+            </form>
+            <div class="detail-list" id="sosRows" style="margin-top:1rem"></div>
           </div>
         </div>
-        <div class="grid grid-3">
-          <div class="panel detail-block">
-            <h4>Expected high-acuity cases</h4>
-            <div class="detail-list">
-              <div class="queue-card"><strong>Meera Joshi · 09:30 OPD</strong><p>Doctor-set high-priority follow-up. Room and care team review pending.</p><span class="tag tag-violet">manual flag</span></div>
-              <div class="queue-card"><strong>No AI-generated urgency</strong><p>Cases appear here only after clinician or staff action.</p><span class="tag tag-gray">guardrail</span></div>
-            </div>
-          </div>
-          <div class="panel detail-block">
-            <h4>Equipment readiness</h4>
-            <div class="detail-list">
-              <div class="queue-card"><strong>Delivery kit</strong><p>Checked by front desk at 08:50.</p><span class="tag tag-green">ready</span></div>
-              <div class="queue-card"><strong>Ambulance bay</strong><p>Needs manual confirmation before SOS routing.</p><span class="tag tag-amber">confirm</span></div>
-            </div>
-          </div>
-          <div class="panel detail-block">
-            <h4>SOS intake</h4>
-            <div class="detail-list">
-              <div class="queue-card"><strong>No active emergency request</strong><p>Authenticated request, anti-abuse check and human confirmation will be required before facility notification.</p><span class="tag tag-gray">standby</span></div>
-            </div>
-          </div>
-        </div>
+      </section>
+
+      <section id="pathways" class="section">
+        <div class="section-head"><div><h2>Care pathway configuration</h2><p>Administrators can add expected events without changing application code. These events drive deterministic care-gap detection.</p></div></div>
+        <form class="panel form-strip" id="pathwayForm" data-permission="pathway_manage">
+          <div class="control"><label for="pathwayProgram">Program</label><select id="pathwayProgram"></select></div>
+          <div class="control"><label for="pathwayEvent">Expected event</label><input id="pathwayEvent" placeholder="e.g. Follow-up visit"></div>
+          <div class="control"><label for="pathwayStage">Stage</label><input id="pathwayStage" placeholder="e.g. Trimester 3"></div>
+          <div class="control"><label for="pathwayOffset">Due after days</label><input id="pathwayOffset" type="number" min="1" placeholder="210"></div>
+          <div class="control"><label for="pathwayDocs">Required documents</label><input id="pathwayDocs" placeholder="visit_note, lab_result"></div>
+          <button class="btn btn-primary" type="submit">Add pathway event</button>
+        </form>
+        <div class="grid grid-3" id="pathwayCards"></div>
       </section>
 
       <section id="audit" class="section">
@@ -1046,6 +1154,12 @@ h1, h2, h3, h4 { font-family: var(--sans); font-weight: 820; letter-spacing: -.0
             <h2>Audit log</h2>
             <p>Every important read, flag, draft, approval, override, schedule change, and resolution is captured as an append-only event.</p>
           </div>
+        </div>
+        <div class="panel form-strip audit-filters">
+          <div class="control"><label for="auditActor">Actor</label><input id="auditActor" placeholder="Name or user"></div>
+          <div class="control"><label for="auditAction">Action</label><input id="auditAction" placeholder="resolve, upload, approve"></div>
+          <div class="control"><label for="auditEntity">Patient or record</label><input id="auditEntity" placeholder="P-1002 or document ID"></div>
+          <div class="control"><label for="auditDate">Date</label><input id="auditDate" type="date"></div>
         </div>
         <div class="panel detail-block">
           <h4>Recent events</h4>
@@ -1064,10 +1178,7 @@ h1, h2, h3, h4 { font-family: var(--sans); font-weight: 820; letter-spacing: -.0
     </header>
     <div class="modal-body">
       <div id="modalCopy" class="subtle"></div>
-      <div class="control">
-        <label for="modalNotes">Notes</label>
-        <textarea id="modalNotes" placeholder="Add the reason or next step."></textarea>
-      </div>
+      <div id="modalFields"></div>
       <div class="btn-row">
         <button class="btn btn-primary" data-action="confirm-modal">Confirm and audit</button>
         <button class="btn" data-action="close-modal">Cancel</button>
@@ -1077,499 +1188,6 @@ h1, h2, h3, h4 { font-family: var(--sans); font-weight: 820; letter-spacing: -.0
 </div>
 <div class="toast" id="toast"></div>
 
-<script>
-(function () {
-  "use strict";
-
-  var DAY_MS = 24 * 60 * 60 * 1000;
-  var today = new Date("2026-09-20T09:00:00+05:30");
-  var selectedPatientId = "P-1002";
-  var pendingAction = null;
-  var API_BASE = "http://localhost:3001/api";
-  var apiAvailable = false;
-
-  var pathways = {
-    maternal: {
-      name: "Maternal continuity",
-      events: [
-        { id: "anc-12", stage: "Trimester 1", type: "ANC visit", offset: 84, requiredDocs: ["visit_note"] },
-        { id: "anomaly-scan", stage: "Trimester 2", type: "Anomaly scan", offset: 140, requiredDocs: ["scan_report"] },
-        { id: "gtt", stage: "Trimester 2", type: "Glucose tolerance test", offset: 168, requiredDocs: ["lab_result"] },
-        { id: "birth-plan", stage: "Trimester 3", type: "Birth plan readiness", offset: 252, requiredDocs: ["care_plan"] }
-      ]
-    },
-    oncology: {
-      name: "Oncology follow-up",
-      events: [
-        { id: "cycle-review", stage: "Cycle review", type: "Post-cycle review", offset: 21, requiredDocs: ["visit_note"] },
-        { id: "cbc", stage: "Investigation", type: "CBC lab upload", offset: 28, requiredDocs: ["lab_result"] },
-        { id: "scan-review", stage: "Follow-up imaging", type: "Follow-up scan filed", offset: 90, requiredDocs: ["imaging_report"] }
-      ]
-    },
-    diabetes: {
-      name: "Diabetes clinic",
-      events: [
-        { id: "hba1c", stage: "Quarterly labs", type: "HbA1c result upload", offset: 90, requiredDocs: ["lab_result"] },
-        { id: "foot-check", stage: "Annual review", type: "Foot check recorded", offset: 180, requiredDocs: ["visit_note"] },
-        { id: "eye-referral", stage: "Annual review", type: "Eye referral letter", offset: 210, requiredDocs: ["referral_letter"] }
-      ]
-    }
-  };
-
-  var patients = [
-    { id: "P-1001", name: "Asha Nair", age: 31, program: "maternal", provider: "Dr. S. Kumar", stage: "Trimester 2", pathwayStart: "2026-04-07", lastTouch: "2026-08-28", noShows: 1, phone: "+91 90000 11111" },
-    { id: "P-1002", name: "Meera Joshi", age: 28, program: "maternal", provider: "Dr. S. Kumar", stage: "Trimester 3", pathwayStart: "2025-12-10", lastTouch: "2026-08-02", noShows: 3, phone: "+91 90000 22222" },
-    { id: "P-2030", name: "Farhan Ali", age: 54, program: "diabetes", provider: "Dr. N. Rao", stage: "Quarterly labs", pathwayStart: "2026-02-08", lastTouch: "2026-08-14", noShows: 2, phone: "+91 90000 33333" },
-    { id: "P-3091", name: "Leela Menon", age: 47, program: "oncology", provider: "Dr. A. Shah", stage: "Follow-up imaging", pathwayStart: "2026-05-14", lastTouch: "2026-09-17", noShows: 0, phone: "+91 90000 44444" },
-    { id: "P-3094", name: "Ritika Sen", age: 39, program: "oncology", provider: "Dr. A. Shah", stage: "Investigation", pathwayStart: "2026-06-01", lastTouch: "2026-07-24", noShows: 2, phone: "+91 90000 55555" }
-  ];
-
-  var careEvents = [
-    { patientId: "P-1001", type: "ANC visit", recordedAt: "2026-07-01", source: "EMR", documentRef: "visit-4401" },
-    { patientId: "P-1001", type: "Anomaly scan", recordedAt: "2026-08-25", source: "Radiology", documentRef: "scan-8840" },
-    { patientId: "P-1002", type: "ANC visit", recordedAt: "2026-03-10", source: "EMR", documentRef: "visit-4204" },
-    { patientId: "P-1002", type: "Anomaly scan", recordedAt: "2026-05-01", source: "Radiology", documentRef: "scan-8322" },
-    { patientId: "P-2030", type: "Foot check recorded", recordedAt: "2026-08-08", source: "EMR", documentRef: "visit-5180" },
-    { patientId: "P-3091", type: "Post-cycle review", recordedAt: "2026-06-06", source: "EMR", documentRef: "visit-7731" },
-    { patientId: "P-3091", type: "CBC lab upload", recordedAt: "2026-06-15", source: "Lab system", documentRef: "lab-9018" },
-    { patientId: "P-3094", type: "Post-cycle review", recordedAt: "2026-06-25", source: "EMR", documentRef: "visit-7852" }
-  ];
-
-  var resolvedGapIds = {};
-  var consultationBrief = {
-    patientId: "P-1002",
-    appointmentId: "A-902",
-    status: "pending_review",
-    facts: [
-      { label: "Last ANC visit", value: "2026-03-10", source: "EMR visit-4204", confidence: "typed/coded" },
-      { label: "Anomaly scan document", value: "Uploaded 2026-05-01", source: "Radiology scan-8322", confidence: "typed/coded" },
-      { label: "Referral letter", value: "Mentions scan planned after 2026-08-15", source: "OCR doc-ref-192", confidence: "0.82" }
-    ],
-    flags: [
-      { type: "missing_info", text: "No glucose tolerance test result found after expected date.", source: "Gap engine, pathway event gtt" },
-      { type: "inconsistent_info", text: "Referral letter references a scan not present in document store.", source: "OCR doc-ref-192" }
-    ]
-  };
-
-  var queue = [
-    { slot: "09:30", patientId: "P-1002", status: "checked in", waitMins: 18, urgency: "Staff-set: high-priority follow-up" },
-    { slot: "09:45", patientId: "P-3091", status: "waiting", waitMins: 11, urgency: "" },
-    { slot: "10:00", patientId: "P-2030", status: "delayed labs", waitMins: 8, urgency: "" },
-    { slot: "10:15", patientId: "P-1001", status: "cancelled", waitMins: 0, urgency: "" }
-  ];
-
-  var drafts = [
-    { id: "D-501", type: "referral letter", patientId: "P-1002", status: "pending_review", body: "Draft referral letter assembled from reviewed demographics, recent appointment history, and listed document references. Clinician must edit and approve before filing." },
-    { id: "D-502", type: "patient handout", patientId: null, status: "draft", body: "Draft multilingual clinic handout based on the hospital-approved antenatal visit schedule knowledge base." },
-    { id: "D-503", type: "department report", patientId: null, status: "approved", body: "Operational report draft: open follow-up gaps by program, outreach workload, and slot utilization. No clinical inference included." }
-  ];
-
-  var audit = [
-    event("system", "gap_engine_run", "CareGap", "all", "Deterministic expected-versus-recorded diff completed."),
-    event("Dr. S. Kumar", "record_accessed", "Patient", "P-1002", "Opened hospital registry detail panel.")
-  ];
-
-  function byId(id) { return document.getElementById(id); }
-  function fmtDate(value) {
-    return new Date(value).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
-  }
-  function daysBetween(a, b) {
-    return Math.floor((new Date(a).setHours(0, 0, 0, 0) - new Date(b).setHours(0, 0, 0, 0)) / DAY_MS);
-  }
-  function addDays(value, days) {
-    return new Date(new Date(value).getTime() + days * DAY_MS);
-  }
-  function patient(id) { return patients.filter(function (p) { return p.id === id; })[0]; }
-  function html(value) {
-    return String(value == null ? "" : value).replace(/[&<>"']/g, function (c) {
-      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
-    });
-  }
-  function event(actor, action, entityType, entityId, detail) {
-    return {
-      id: "AUD-" + Math.random().toString(16).slice(2, 8).toUpperCase(),
-      actor: actor,
-      action: action,
-      entityType: entityType,
-      entityId: entityId,
-      detail: detail,
-      timestamp: new Date().toISOString()
-    };
-  }
-  function auditEvent(actor, action, entityType, entityId, detail) {
-    audit.unshift(event(actor, action, entityType, entityId, detail));
-    renderAudit();
-  }
-  function showToast(text) {
-    var el = byId("toast");
-    el.textContent = text;
-    el.classList.add("is-visible");
-    window.clearTimeout(showToast.t);
-    showToast.t = window.setTimeout(function () { el.classList.remove("is-visible"); }, 2600);
-  }
-  async function hospitalApi(path, options) {
-    var res = await fetch(API_BASE + "/hospital" + path, Object.assign({
-      headers: { "Content-Type": "application/json" }
-    }, options || {}));
-    var data = await res.json().catch(function () { return {}; });
-    if (!res.ok) throw new Error(data.error || "Hospital API request failed");
-    return data;
-  }
-  function applyHospitalState(data) {
-    today = new Date(data.today || today);
-    pathways = data.pathways || pathways;
-    patients = data.patients || patients;
-    careEvents = data.careEvents || careEvents;
-    resolvedGapIds = data.resolvedGapIds || resolvedGapIds;
-    consultationBrief = data.consultationBrief || consultationBrief;
-    queue = data.queue || queue;
-    drafts = data.drafts || drafts;
-    audit = data.audit || audit;
-    if (!patient(selectedPatientId) && patients.length) selectedPatientId = patients[0].id;
-  }
-  async function loadHospitalState(showStatus) {
-    try {
-      var data = await hospitalApi("/state");
-      applyHospitalState(data);
-      apiAvailable = true;
-      if (showStatus) showToast("Hospital backend connected.");
-      return true;
-    } catch (error) {
-      apiAvailable = false;
-      if (showStatus) showToast("Using local demo data until backend starts.");
-      return false;
-    }
-  }
-  async function postHospital(path, payload) {
-    if (!apiAvailable) return null;
-    try {
-      var result = await hospitalApi(path, {
-        method: "POST",
-        body: JSON.stringify(payload || {})
-      });
-      if (result.state) applyHospitalState(result.state);
-      return result;
-    } catch (error) {
-      apiAvailable = false;
-      showToast(error.message || "Backend action failed; using local fallback.");
-      return null;
-    }
-  }
-
-  function computeGaps() {
-    var gaps = [];
-    patients.forEach(function (p) {
-      var template = pathways[p.program];
-      template.events.forEach(function (expected) {
-        var dueDate = addDays(p.pathwayStart, expected.offset);
-        var daysOverdue = daysBetween(today, dueDate);
-        var actual = careEvents.filter(function (e) {
-          return e.patientId === p.id && e.type === expected.type && new Date(e.recordedAt) <= today;
-        })[0];
-        var id = p.id + ":" + expected.id;
-        if (!actual && daysOverdue > 0 && !resolvedGapIds[id]) {
-          gaps.push({
-            id: id,
-            patientId: p.id,
-            patientName: p.name,
-            program: p.program,
-            provider: p.provider,
-            stage: expected.stage,
-            expectedType: expected.type,
-            dueDate: dueDate.toISOString().slice(0, 10),
-            daysOverdue: daysOverdue,
-            requiredDocs: expected.requiredDocs,
-            assignedTo: p.provider,
-            operationalPriority: daysOverdue + p.noShows * 7,
-            provenance: "Expected event " + expected.id + " from " + template.name + "; no matching recorded care event found in EMR/lab/document sources."
-          });
-        }
-      });
-    });
-    return gaps.sort(function (a, b) { return b.operationalPriority - a.operationalPriority; });
-  }
-
-  function patientGapSummary(id) {
-    return computeGaps().filter(function (g) { return g.patientId === id; });
-  }
-
-  function renderMetrics() {
-    var gaps = computeGaps();
-    var touchedThisWeek = patients.filter(function (p) { return daysBetween(today, p.lastTouch) <= 7; }).length;
-    byId("metrics").innerHTML = [
-      ["Open care gaps", gaps.length, "Assignable outreach tasks"],
-      ["Patients in panel", patients.length, "Across 3 programs"],
-      ["Pending reviews", drafts.filter(function (d) { return d.status !== "approved" && d.status !== "published"; }).length + 1, "Drafts and extracted facts"],
-      ["Touched this week", touchedThisWeek, "Operational continuity only"]
-    ].map(function (m) {
-      return '<div class="panel metric"><span>' + m[0] + '</span><b>' + m[1] + '</b><em>' + m[2] + '</em></div>';
-    }).join("");
-  }
-
-  function populateFilters() {
-    var programs = Object.keys(pathways);
-    var providers = Array.from(new Set(patients.map(function (p) { return p.provider; })));
-    byId("programFilter").innerHTML = '<option value="">All programs</option>' + programs.map(function (k) {
-      return '<option value="' + k + '">' + pathways[k].name + '</option>';
-    }).join("");
-    byId("providerFilter").innerHTML = '<option value="">All providers</option>' + providers.map(function (p) {
-      return '<option value="' + html(p) + '">' + html(p) + '</option>';
-    }).join("");
-  }
-
-  function filteredPatients() {
-    var program = byId("programFilter").value;
-    var provider = byId("providerFilter").value;
-    var overdue = Number(byId("overdueFilter").value);
-    var search = byId("searchInput").value.trim().toLowerCase();
-    return patients.filter(function (p) {
-      var gaps = patientGapSummary(p.id).filter(function (g) { return g.daysOverdue > overdue; });
-      if (program && p.program !== program) return false;
-      if (provider && p.provider !== provider) return false;
-      if (overdue && !gaps.length) return false;
-      if (search && (p.name + " " + p.id).toLowerCase().indexOf(search) === -1) return false;
-      return true;
-    });
-  }
-
-  function renderRegistry() {
-    var rows = filteredPatients();
-    byId("registryRows").innerHTML = rows.map(function (p) {
-      var gaps = patientGapSummary(p.id);
-      var score = gaps.reduce(function (sum, g) { return sum + g.operationalPriority; }, 0);
-      return '<tr class="' + (p.id === selectedPatientId ? 'is-selected' : '') + '" data-patient="' + p.id + '">' +
-        '<td><div class="patient-name">' + html(p.name) + '</div><div class="subtle">' + p.id + ' · Age ' + p.age + '</div></td>' +
-        '<td>' + html(pathways[p.program].name) + '</td>' +
-        '<td>' + html(p.stage) + '</td>' +
-        '<td>' + (gaps.length ? '<span class="tag tag-red">' + gaps.length + ' open</span>' : '<span class="tag tag-green">none</span>') + '</td>' +
-        '<td>' + fmtDate(p.lastTouch) + '</td>' +
-        '<td><span class="tag tag-amber">' + score + '</span><div class="subtle">days overdue + no-show weight</div></td>' +
-      '</tr>';
-    }).join("") || '<tr><td colspan="6"><div class="empty">No patients match these filters.</div></td></tr>';
-    renderPatientDetail();
-  }
-
-  function renderPatientDetail() {
-    var p = patient(selectedPatientId) || patients[0];
-    var gaps = patientGapSummary(p.id);
-    byId("patientDetail").innerHTML =
-      '<div><h3>' + html(p.name) + '</h3><div class="subtle">' + p.id + ' · ' + html(pathways[p.program].name) + ' · ' + html(p.provider) + '</div></div>' +
-      '<div class="status-line">' +
-        '<span class="tag tag-blue">' + html(p.stage) + '</span>' +
-        '<span class="tag tag-gray">Last touch ' + fmtDate(p.lastTouch) + '</span>' +
-      '</div>' +
-      '<div class="detail-block"><h4>Open gaps with provenance</h4><div class="detail-list">' +
-        (gaps.length ? gaps.map(function (g) {
-          return '<div class="gap-card">' +
-            '<strong>' + html(g.expectedType) + '</strong>' +
-            '<p>Due ' + fmtDate(g.dueDate) + ' · ' + g.daysOverdue + ' days overdue · assigned to ' + html(g.assignedTo) + '</p>' +
-            '<p>Provenance: ' + html(g.provenance) + '</p>' +
-            '<div class="btn-row" style="margin-top:10px">' +
-              '<button class="btn btn-primary" data-action="contact" data-gap="' + g.id + '">Contact patient</button>' +
-              '<button class="btn" data-action="reassign" data-gap="' + g.id + '">Reassign</button>' +
-              '<button class="btn btn-ok" data-action="resolve" data-gap="' + g.id + '">Mark resolved</button>' +
-            '</div>' +
-          '</div>';
-        }).join("") : '<div class="empty">No open gaps for this patient.</div>') +
-      '</div></div>';
-  }
-
-  function renderBrief() {
-    byId("briefStatus").textContent = consultationBrief.status.replace("_", " ");
-    byId("briefStatus").className = "tag " + (consultationBrief.status === "reviewed" ? "tag-green" : consultationBrief.status === "rejected_item" ? "tag-red" : "tag-violet");
-    byId("briefFacts").innerHTML = consultationBrief.facts.map(function (f) {
-      return '<div class="fact"><strong>' + html(f.label) + ': ' + html(f.value) + '</strong><p>Source: ' + html(f.source) + ' · Confidence: ' + html(f.confidence) + '</p></div>';
-    }).join("");
-    byId("briefFlags").innerHTML = consultationBrief.flags.map(function (f) {
-      return '<div class="fact"><strong>' + html(f.type.replace("_", " ")) + '</strong><p>' + html(f.text) + '</p><p>Source: ' + html(f.source) + '</p></div>';
-    }).join("");
-  }
-
-  function renderClinic() {
-    byId("queueList").innerHTML = queue.map(function (q) {
-      var p = patient(q.patientId);
-      return '<div class="queue-card"><strong>' + q.slot + ' · ' + html(p.name) + '</strong>' +
-        '<p>Status: ' + html(q.status) + ' · waiting ' + q.waitMins + ' min</p>' +
-        (q.urgency ? '<p><span class="tag tag-red">' + html(q.urgency) + '</span></p>' : '<p><span class="tag tag-gray">No manual urgency flag</span></p>') +
-      '</div>';
-    }).join("");
-    var cancelled = queue.filter(function (q) { return q.status === "cancelled"; })[0];
-    var topGaps = computeGaps().slice(0, 3);
-    byId("slotSuggestions").innerHTML = topGaps.map(function (g) {
-      return '<div class="queue-card"><strong>' + (cancelled ? cancelled.slot : "Next open slot") + ' suggestion: ' + html(g.patientName) + '</strong>' +
-        '<p>Reason: open operational follow-up task, ' + g.daysOverdue + ' days overdue. This is not an automatic booking.</p>' +
-        '<button class="btn btn-primary" data-action="approve-slot" data-gap="' + g.id + '">Front desk approve</button>' +
-      '</div>';
-    }).join("") || '<div class="empty">No outreach suggestions right now.</div>';
-  }
-
-  function renderDrafts() {
-    byId("draftCards").innerHTML = drafts.map(function (d) {
-      var canApprove = d.status === "draft" || d.status === "pending_review";
-      var canPublish = d.status === "approved";
-      return '<div class="panel draft-card">' +
-        '<div class="status-line"><span class="tag tag-blue">' + html(d.type) + '</span><span class="tag ' + statusClass(d.status) + '">' + html(d.status.replace("_", " ")) + '</span></div>' +
-        '<p>' + html(d.body) + '</p>' +
-        '<div class="btn-row" style="margin-top:12px">' +
-          (canApprove ? '<button class="btn btn-ok" data-action="approve-draft" data-draft="' + d.id + '">Approve</button>' : '') +
-          (canPublish ? '<button class="btn btn-primary" data-action="publish-draft" data-draft="' + d.id + '">Publish/file</button>' : '') +
-          '<button class="btn btn-danger" data-action="reject-draft" data-draft="' + d.id + '">Reject</button>' +
-        '</div>' +
-      '</div>';
-    }).join("");
-  }
-
-  function statusClass(status) {
-    if (status === "approved" || status === "published") return "tag-green";
-    if (status === "rejected") return "tag-red";
-    if (status === "pending_review") return "tag-violet";
-    return "tag-gray";
-  }
-
-  function renderAudit() {
-    byId("auditRows").innerHTML = audit.slice(0, 14).map(function (a) {
-      return '<div class="audit-row"><strong>' + html(a.actor) + ' · ' + html(a.action) + '</strong>' +
-        '<p>' + html(a.entityType) + ' ' + html(a.entityId) + ' · ' + new Date(a.timestamp).toLocaleString("en-IN") + '</p>' +
-        '<p>' + html(a.detail) + '</p></div>';
-    }).join("");
-  }
-
-  function openModal(title, copy, confirm) {
-    pendingAction = confirm;
-    byId("modalTitle").textContent = title;
-    byId("modalCopy").textContent = copy;
-    byId("modalNotes").value = "";
-    byId("actionModal").classList.add("is-open");
-  }
-  function closeModal() {
-    byId("actionModal").classList.remove("is-open");
-    pendingAction = null;
-  }
-  function rerenderAll() {
-    renderMetrics();
-    renderRegistry();
-    renderBrief();
-    renderClinic();
-    renderDrafts();
-    renderAudit();
-  }
-
-  function handleGapAction(action, gapId) {
-    var gap = computeGaps().filter(function (g) { return g.id === gapId; })[0];
-    if (!gap) return;
-    var titles = {
-      contact: "Contact patient",
-      reassign: "Reassign gap",
-      resolve: "Resolve gap",
-      "approve-slot": "Approve slot suggestion"
-    };
-    openModal(titles[action], gap.patientName + " · " + gap.expectedType + ". Add notes before this human action is recorded.", async function (notes) {
-      var path = action === "approve-slot"
-        ? "/clinic/slots/" + encodeURIComponent(gap.id) + "/reassign"
-        : "/gaps/" + encodeURIComponent(gap.id) + "/" + action;
-      var synced = await postHospital(path, { actor: "Dr. S. Kumar", notes: notes || (titles[action] + " confirmed by user.") });
-      if (!synced) {
-        if (action === "resolve") resolvedGapIds[gap.id] = true;
-        auditEvent("Dr. S. Kumar", action, "CareGap", gap.id, notes || (titles[action] + " confirmed by user."));
-      }
-      showToast(titles[action] + " recorded and audited.");
-      rerenderAll();
-    });
-  }
-
-  function handleDraftAction(action, draftId) {
-    var d = drafts.filter(function (x) { return x.id === draftId; })[0];
-    if (!d) return;
-    if (action === "publish-draft" && d.status !== "approved") {
-      showToast("Publishing is blocked until a clinician approves the draft.");
-      return;
-    }
-    var next = action === "approve-draft" ? "approved" : action === "publish-draft" ? "published" : "rejected";
-    openModal(next === "published" ? "Publish/file approved content" : "Review draft", d.id + " will move to " + next + ".", async function (notes) {
-      var apiAction = action === "approve-draft" ? "approve" : action === "publish-draft" ? "publish" : "reject";
-      var synced = await postHospital("/content/" + encodeURIComponent(d.id) + "/" + apiAction, { actor: "Dr. S. Kumar", notes: notes || ("Draft status changed to " + next + ".") });
-      if (!synced) {
-        d.status = next;
-        auditEvent("Dr. S. Kumar", action, "ContentDraft", d.id, notes || ("Draft status changed to " + next + "."));
-      }
-      showToast("Draft status updated.");
-      rerenderAll();
-    });
-  }
-
-  document.addEventListener("click", function (e) {
-    var row = e.target.closest("tr[data-patient]");
-    if (row) {
-      selectedPatientId = row.dataset.patient;
-      auditEvent("Dr. S. Kumar", "record_accessed", "Patient", selectedPatientId, "Selected patient in registry.");
-      renderRegistry();
-      return;
-    }
-    var btn = e.target.closest("[data-action]");
-    if (!btn) return;
-    var action = btn.dataset.action;
-    if (action === "close-modal") closeModal();
-    if (action === "confirm-modal" && pendingAction) {
-      var notes = byId("modalNotes").value.trim();
-      var run = pendingAction;
-      closeModal();
-      run(notes);
-    }
-    if (btn.dataset.gap) handleGapAction(action, btn.dataset.gap);
-    if (btn.dataset.draft) handleDraftAction(action, btn.dataset.draft);
-    if (action === "review-brief") {
-      postHospital("/consultations/" + encodeURIComponent(consultationBrief.appointmentId) + "/brief/review", { actor: "Dr. S. Kumar" }).then(function (synced) {
-        if (!synced) {
-          consultationBrief.status = "reviewed";
-          auditEvent("Dr. S. Kumar", "brief_reviewed", "ConsultationBrief", consultationBrief.appointmentId, "Fact-only brief reviewed by clinician.");
-        }
-        renderBrief();
-      });
-      showToast("Brief marked reviewed.");
-    }
-    if (action === "reject-brief") {
-      postHospital("/consultations/" + encodeURIComponent(consultationBrief.appointmentId) + "/brief/reject", { actor: "Dr. S. Kumar" }).then(function (synced) {
-        if (!synced) {
-          consultationBrief.status = "rejected_item";
-          auditEvent("Dr. S. Kumar", "brief_item_rejected", "ConsultationBrief", consultationBrief.appointmentId, "Clinician rejected an extracted item for correction.");
-        }
-        renderBrief();
-      });
-      showToast("Extracted item rejection recorded.");
-    }
-    if (action === "new-draft") {
-      postHospital("/content/draft", {
-        type: "patient handout",
-        body: "New draft created from approved hospital source material. Review and edit required before publication."
-      }).then(function (synced) {
-        if (!synced) {
-          var id = "D-" + Math.floor(600 + Math.random() * 300);
-          drafts.unshift({ id: id, type: "patient handout", patientId: null, status: "draft", body: "New draft created from approved hospital source material. Review and edit required before publication." });
-          auditEvent("drafting-agent", "draft_generated", "ContentDraft", id, "Draft generated; no send/file action performed.");
-        }
-        showToast("Draft generated and held for review.");
-        rerenderAll();
-      });
-    }
-  });
-
-  ["programFilter", "providerFilter", "overdueFilter", "searchInput"].forEach(function (id) {
-    byId(id).addEventListener("input", renderRegistry);
-    byId(id).addEventListener("change", renderRegistry);
-  });
-
-  document.querySelectorAll(".nav a").forEach(function (a) {
-    a.addEventListener("click", function () {
-      document.querySelectorAll(".nav a").forEach(function (x) { x.classList.remove("is-active"); });
-      a.classList.add("is-active");
-    });
-  });
-
-  loadHospitalState(true).then(function () {
-    populateFilters();
-    rerenderAll();
-  });
-})();
-</script>
+<script src="hospital.js"></script>
 </body>
 </html>

@@ -489,7 +489,6 @@ h1, h2, h3, h4 { font-family: var(--sans); font-weight: 750; letter-spacing: -.0
   border-color: #ead4e3;
   color: var(--violet);
 }
-.guest-banner span::first-letter { color: transparent; }
 @media (max-width: 900px) {
   .patient-actionbar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
@@ -498,8 +497,14 @@ h1, h2, h3, h4 { font-family: var(--sans); font-weight: 750; letter-spacing: -.0
 }
 </style>
 <link rel="stylesheet" href="styles.css">
+<style>
+/* Compact dashboard type scale with the shared doctor-portal alignment. */
+body.patient-page h1 { font-size: clamp(1.7rem, 2.5vw, 2.1rem); }
+body.patient-page h2 { font-size: clamp(1.25rem, 1.8vw, 1.45rem); }
+body.patient-page h3 { font-size: 1.05rem; }
+</style>
 </head>
-<body>
+<body class="patient-page">
 
 <!-- ======================= Shared icon sprite ======================= -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
@@ -526,13 +531,11 @@ h1, h2, h3, h4 { font-family: var(--sans); font-weight: 750; letter-spacing: -.0
   <div class="wrap appbar__inner">
     <a class="brand" href="index.html" aria-label="DAI">
       <img class="brand__mark" src="assets/logo.jpeg" width="48" height="48" alt="">
-      <span><span class="brand__name">DAI</span><span class="brand__tag">Hospital Workflow</span></span>
+      <span><span class="brand__name">DAI</span><span class="brand__tag">Mother / Patient</span></span>
     </a>
 
     <nav class="site-nav" aria-label="Primary navigation">
-      <a href="dashboard.html">Mother / Patient</a>
-      <a href="doctor.html">Doctor</a>
-      <a href="hospital.html">Hospital Team</a>
+      <a href="dashboard.html">Dashboard</a>
       <a href="index.html#modules">Features</a>
       <a href="index.html#why">About</a>
     </nav>
@@ -544,7 +547,6 @@ h1, h2, h3, h4 { font-family: var(--sans); font-weight: 750; letter-spacing: -.0
         <a href="hospital.html">Hospital Team</a>
       </nav>
       <span class="avatar-pill" id="whoami"><span class="dot">...</span> Loading...</span>
-      <a href="mailto:hello@dai.health" class="contact-link">Contact</a>
       <button id="logoutBtn" class="btn btn--ghost btn--sm">Logout</button>
     </div>
   </div>
