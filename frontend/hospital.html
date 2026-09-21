@@ -6,31 +6,30 @@
 <title>DAI Hospital Console</title>
 <meta name="description" content="DAI hospital-side console for continuity, registry, pre-consult briefs, clinic flow, draft review, and audit trails.">
 <meta name="theme-color" content="#c23a76">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..700&family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" href="assets/logo.jpeg">
+<link rel="stylesheet" href="styles.css">
 <style>
 :root {
-  --bg: #f5f7f9;
+  --bg: #fff8fb;
   --panel: #ffffff;
-  --panel-2: #f9fbfc;
-  --ink: #10212b;
-  --muted: #687783;
-  --line: #dce4e9;
-  --line-soft: #edf2f5;
-  --blue: #2563eb;
-  --blue-soft: #eaf1ff;
-  --green: #138052;
-  --green-soft: #e6f4ee;
+  --panel-2: #fff6fa;
+  --ink: #261526;
+  --muted: #625062;
+  --line: #eedbe7;
+  --line-soft: #f7edf3;
+  --blue: #c23a76;
+  --blue-soft: #fbe7f0;
+  --green: #d84b8b;
+  --green-soft: #fdeaf3;
   --amber: #9a6500;
   --amber-soft: #fff5d8;
   --red: #ba2f2f;
   --red-soft: #fdeaea;
-  --violet: #635bff;
-  --violet-soft: #f0efff;
-  --shadow: 0 18px 50px -34px rgba(16, 33, 43, .35);
-  --radius: 8px;
-  --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --violet: #c23a76;
+  --violet-soft: #fbe7f0;
+  --shadow: 0 1px 2px rgba(38, 21, 38, .06), 0 22px 48px -30px rgba(123, 35, 93, .34);
+  --radius: 16px;
+  --sans: "Inter", "Aptos", "Avenir Next", "Helvetica Neue", Arial, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 * { box-sizing: border-box; }
@@ -44,21 +43,21 @@ body {
 }
 button, input, select, textarea { font: inherit; }
 button { cursor: pointer; }
-.app {
-  min-height: 100vh;
-  display: grid;
-  grid-template-columns: 260px minmax(0, 1fr);
-}
+.app { min-height: 100vh; display: block; }
 .sidebar {
   position: sticky;
   top: 0;
-  height: 100vh;
-  padding: 20px 16px;
-  border-right: 1px solid var(--line);
-  background: #fff;
+  z-index: 70;
+  min-height: 76px;
+  padding: .55rem max(20px, calc((100vw - 1180px) / 2));
+  border-right: 0;
+  border-bottom: 1px solid var(--line);
+  background: rgba(255,255,255,.94);
+  backdrop-filter: blur(16px) saturate(180%);
   display: flex;
-  flex-direction: column;
-  gap: 18px;
+  flex-direction: row;
+  align-items: center;
+  gap: 1.25rem;
 }
 .brand {
   display: flex;
@@ -77,7 +76,7 @@ button { cursor: pointer; }
   display: block;
 }
 .brand small { display: block; color: var(--muted); font-weight: 600; font-size: 12px; margin-top: 1px; }
-.nav { display: grid; gap: 6px; }
+.nav { display: flex; gap: 6px; }
 .nav a {
   color: var(--ink);
   text-decoration: none;
@@ -86,7 +85,7 @@ button { cursor: pointer; }
   font-size: 14px;
   font-weight: 700;
 }
-.nav a:hover, .nav a.is-active { background: var(--blue-soft); color: #174fbd; }
+.nav a:hover, .nav a.is-active { background: var(--blue-soft); color: var(--violet); }
 .guardrail {
   margin-top: auto;
   padding: 12px;
@@ -97,21 +96,22 @@ button { cursor: pointer; }
   color: var(--muted);
 }
 .guardrail b { color: var(--ink); display: block; margin-bottom: 4px; }
-.main { min-width: 0; }
+.main { min-width: 0; width: min(1180px, calc(100% - 40px)); margin: 0 auto; }
 .topbar {
-  position: sticky;
-  top: 0;
+  position: static;
   z-index: 5;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 14px 24px;
-  background: rgba(245, 247, 249, .88);
-  backdrop-filter: blur(14px);
-  border-bottom: 1px solid var(--line);
+  margin-top: 1rem;
+  padding: 1.25rem;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  box-shadow: var(--shadow);
 }
-.topbar h1 { margin: 0; font-size: 20px; letter-spacing: 0; }
+.topbar h1 { margin: 0; font-size: clamp(1.65rem, 2.8vw, 2.35rem); letter-spacing: 0; font-weight: 860; }
 .topbar p { margin: 2px 0 0; color: var(--muted); font-size: 13px; }
 .user-pill {
   display: flex;
@@ -134,7 +134,7 @@ button { cursor: pointer; }
   place-items: center;
   font-weight: 900;
 }
-.content { padding: 24px; display: grid; gap: 24px; }
+.content { padding: 1rem 0 4rem; display: grid; gap: 24px; }
 .section { scroll-margin-top: 84px; }
 .section-head {
   display: flex;
@@ -143,7 +143,7 @@ button { cursor: pointer; }
   gap: 18px;
   margin-bottom: 12px;
 }
-.section-head h2 { margin: 0; font-size: 18px; letter-spacing: 0; }
+.section-head h2 { margin: 0; font-size: 1.35rem; letter-spacing: 0; font-weight: 850; }
 .section-head p { margin: 4px 0 0; color: var(--muted); max-width: 70ch; font-size: 13px; }
 .grid { display: grid; gap: 16px; }
 .grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
@@ -352,19 +352,19 @@ tr.is-selected { background: #f8fbff; }
 /* --------------------------------------------------------------------------
    DAI alignment layer
    This page started as a standalone console. These overrides intentionally
-   reuse the visual system from index/auth/dashboard: Fraunces headings,
-   coral/mint/lilac status colors, pill navigation, and soft rounded cards.
+   reuse the visual system from index/auth/dashboard: professional sans
+   typography, pink/white status colors, pill navigation, and soft rounded cards.
    -------------------------------------------------------------------------- */
 :root {
   --coral:       #c23a76;
   --coral-deep:  #7b235d;
   --coral-soft:  #fbe7f0;
   --coral-tint:  #fff6fa;
-  --green:       #8b3fb6;
-  --mint:        #f2e7fb;
+  --green:       #d84b8b;
+  --mint:        #fdeaf3;
   --mint-deep:   #e1c5ee;
-  --violet:      #8b3fb6;
-  --lilac:       #f2e7fb;
+  --violet:      #c23a76;
+  --lilac:       #fbe7f0;
   --amber:       #B8790A;
   --amber-soft:  #FBF0DD;
   --ink:         #261526;
@@ -374,8 +374,8 @@ tr.is-selected { background: #f8fbff; }
   --ground:      #fff8fb;
   --line:        #eedbe7;
   --line-soft:   #f7edf3;
-  --display: "Fraunces", Georgia, serif;
-  --sans: "Inter Tight", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --display: var(--sans);
+  --sans: "Inter", "Aptos", "Avenir Next", "Helvetica Neue", Arial, system-ui, -apple-system, "Segoe UI", sans-serif;
   --r-sm: 10px;
   --r-md: 16px;
   --r-lg: 22px;
@@ -393,14 +393,14 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 h1, h2, h3, h4 {
-  font-family: var(--display);
-  font-weight: 500;
+  font-family: var(--sans);
+  font-weight: 820;
   line-height: 1.15;
-  letter-spacing: -.015em;
+  letter-spacing: 0;
 }
 h1 { font-size: clamp(1.55rem, 1.3rem + 1.1vw, 2.1rem); font-variation-settings: "opsz" 90; }
 h2 { font-size: clamp(1.2rem, 1.08rem + .5vw, 1.45rem); font-variation-settings: "opsz" 60; }
-h3 { font-family: var(--sans); font-size: 1.05rem; font-weight: 600; letter-spacing: -.005em; }
+h3 { font-family: var(--sans); font-size: 1.05rem; font-weight: 760; letter-spacing: 0; }
 p { color: var(--ink-2); }
 :focus-visible { outline: 2.5px solid var(--coral); outline-offset: 2px; border-radius: 6px; }
 
@@ -438,7 +438,7 @@ p { color: var(--ink-2); }
 }
 .brand-name {
   display: block;
-  font-family: var(--display);
+  font-family: var(--sans);
   font-size: 1.22rem;
   line-height: 1;
   letter-spacing: 0;
@@ -596,7 +596,7 @@ p { color: var(--ink-2); }
   height: 30px;
   background: var(--lilac);
   color: var(--violet);
-  font-family: var(--display);
+  font-family: var(--sans);
   font-weight: 700;
 }
 .content {
@@ -626,10 +626,10 @@ p { color: var(--ink-2); }
 }
 .metric b {
   margin-top: .15rem;
-  font-family: var(--display);
+  font-family: var(--sans);
   font-size: 1.7rem;
   font-weight: 600;
-  letter-spacing: -.015em;
+  letter-spacing: 0;
 }
 .metric em { color: var(--ink-3); font-size: .78rem; }
 .banner {
@@ -801,17 +801,17 @@ tr.is-selected { background: var(--coral-tint); }
   .nav a { flex: 1 1 auto; text-align: center; }
   .hospital-actionbar { grid-template-columns: 1fr; padding-inline: 1rem; }
 }
-/* Shared DAI pink/purple hospital theme pass */
+/* Shared DAI pink/white hospital theme pass */
 :root {
   --coral: #c23a76;
   --coral-deep: #7b235d;
   --coral-soft: #fbe7f0;
   --coral-tint: #fff6fa;
-  --green: #8b3fb6;
-  --mint: #f2e7fb;
-  --mint-deep: #e1c5ee;
-  --violet: #8b3fb6;
-  --lilac: #f2e7fb;
+  --green: #d84b8b;
+  --mint: #fdeaf3;
+  --mint-deep: #f4c8dc;
+  --violet: #c23a76;
+  --lilac: #fbe7f0;
   --amber: #9b6b2d;
   --amber-soft: #fff3dc;
   --ink: #261526;
@@ -822,10 +822,10 @@ tr.is-selected { background: var(--coral-tint); }
   --line: #eedbe7;
   --line-soft: #f7edf3;
   --display: var(--sans);
-  --sans: "Inter Tight", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --sans: "Inter", "Aptos", "Avenir Next", "Helvetica Neue", Arial, system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 body { background: var(--ground); font-family: var(--sans); }
-h1, h2, h3, h4 { font-family: var(--sans); font-weight: 820; letter-spacing: -.01em; }
+h1, h2, h3, h4 { font-family: var(--sans); font-weight: 850; letter-spacing: 0; }
 .topbar h1, .section-head h2, .detail h3, .detail-block h4, .metric b {
   font-weight: 850;
 }
@@ -844,6 +844,105 @@ h1, h2, h3, h4 { font-family: var(--sans); font-weight: 820; letter-spacing: -.0
 .hospital-action i { background: var(--coral-soft); color: var(--violet); }
 .hospital-action:hover { border-color: var(--coral); background: var(--coral-tint); }
 .metric b { color: var(--violet); font-family: var(--sans); font-weight: 800; }
+.app { background: var(--ground); }
+.sidebar {
+  position: sticky;
+  top: 0;
+  z-index: 70;
+  border-bottom: 1px solid var(--line);
+  box-shadow: 0 1px 0 rgba(123,35,93,.02);
+  backdrop-filter: blur(16px) saturate(180%);
+}
+.brand-mark {
+  background: #fff;
+  box-shadow: var(--shadow-sm);
+}
+.brand-name {
+  color: var(--coral-deep);
+  font-size: 1.35rem;
+  font-weight: 850;
+}
+.primary-nav a,
+.surface-switch a,
+.nav a {
+  font-weight: 760;
+}
+.modulebar {
+  box-shadow: 0 1px 0 rgba(123,35,93,.02);
+}
+.modulebar .nav {
+  background: #fff;
+}
+.main {
+  width: min(1180px, calc(100% - 40px));
+  margin: 0 auto;
+}
+.topbar {
+  width: 100%;
+  margin: 1rem auto 0;
+  padding: clamp(1.25rem, 3vw, 1.8rem);
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: #fff;
+  box-shadow: var(--shadow-sm);
+}
+.topbar h1 {
+  font-size: clamp(1.7rem, 2.5vw, 2.25rem);
+  font-weight: 880;
+}
+.topbar p {
+  max-width: 760px;
+  font-size: .95rem;
+}
+.hospital-actionbar,
+.content {
+  width: 100%;
+}
+.hospital-actionbar {
+  margin: 1rem 0 0;
+}
+.hospital-action,
+.panel,
+.banner,
+.modal-card {
+  border-radius: 18px;
+  box-shadow: var(--shadow-sm);
+}
+.metric {
+  border-radius: 18px;
+}
+.metric span,
+.section-head p,
+.subtle {
+  color: var(--ink-3);
+}
+.metric b,
+.detail h3,
+.detail-block h4 {
+  color: var(--coral-deep);
+}
+.tag-blue,
+.tag-violet,
+.tag-green {
+  background: var(--lilac);
+  color: var(--coral-deep);
+}
+.avatar,
+.hospital-action i {
+  background: var(--coral-soft);
+  color: var(--coral-deep);
+}
+.btn-primary,
+.btn-mini.is-primary {
+  background: var(--coral);
+  border-color: var(--coral);
+  color: #fff;
+}
+.btn-primary:hover,
+.btn-mini.is-primary:hover {
+  background: var(--coral-deep);
+  border-color: var(--coral-deep);
+}
 /* Shared dashboard header and content alignment */
 .sidebar {
   min-height: 76px;

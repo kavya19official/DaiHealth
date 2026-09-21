@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>DAI — Care Dashboard</title>
 <meta name="theme-color" content="#c23a76">
+<link rel="icon" href="assets/logo.jpeg">
 
 <style>
 /* ==========================================================================
@@ -19,12 +20,12 @@
   --coral-soft:  #fbe7f0;
   --coral-tint:  #fff6fa;
 
-  --green:       #8b3fb6;
-  --mint:        #f2e7fb;
-  --mint-deep:   #e1c5ee;
+  --green:       #d84b8b;
+  --mint:        #fdeaf3;
+  --mint-deep:   #f4c8dc;
 
-  --violet:      #8b3fb6;
-  --lilac:       #f2e7fb;
+  --violet:      #c23a76;
+  --lilac:       #fbe7f0;
 
   --amber:       #B8790A;
   --amber-soft:  #FBF0DD;
@@ -39,8 +40,8 @@
   --line:        #eedbe7;
   --line-soft:   #f7edf3;
 
-  --display: "Fraunces", Georgia, serif;
-  --sans:    "Inter Tight", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --display: "Inter", "Aptos", "Avenir Next", "Helvetica Neue", Arial, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --sans:    "Inter", "Aptos", "Avenir Next", "Helvetica Neue", Arial, system-ui, -apple-system, "Segoe UI", sans-serif;
 
   --r-sm: 10px; --r-md: 16px; --r-lg: 22px; --r-xl: 30px;
 
@@ -58,12 +59,12 @@ body {
 }
 svg { display: block; }
 h1, h2, h3, h4 {
-  font-family: var(--display); font-weight: 500; line-height: 1.15;
-  letter-spacing: -0.015em; margin: 0 0 .4em;
+  font-family: var(--display); font-weight: 820; line-height: 1.12;
+  letter-spacing: 0; margin: 0 0 .4em;
 }
 h1 { font-size: clamp(1.55rem, 1.3rem + 1.1vw, 2.1rem); font-variation-settings: "opsz" 90; }
 h2 { font-size: clamp(1.2rem, 1.08rem + .5vw, 1.45rem); font-variation-settings: "opsz" 60; }
-h3 { font-size: 1.05rem; font-weight: 600; letter-spacing: -.005em; font-family: var(--sans); }
+h3 { font-size: 1.05rem; font-weight: 760; letter-spacing: 0; font-family: var(--sans); }
 p { margin: 0 0 .8rem; color: var(--ink-2); }
 button { font-family: inherit; }
 :focus-visible { outline: 2.5px solid var(--coral); outline-offset: 2px; border-radius: 6px; }
@@ -92,7 +93,7 @@ button { font-family: inherit; }
   display: inline-flex; align-items: center; gap: .45rem; transition: background .2s ease, color .2s ease;
 }
 .segmented button svg { width: 16px; height: 16px; }
-.segmented button.is-active { background: var(--ink); color: #fff; }
+.segmented button.is-active { background: var(--coral); color: #fff; }
 .segmented button:not(.is-active):hover { color: var(--ink); }
 .interface-switch {
   display: inline-flex; background: var(--ground); border: 1px solid var(--line);
@@ -102,7 +103,7 @@ button { font-family: inherit; }
   text-decoration: none; color: var(--ink-2); padding: .55rem 1.05rem; border-radius: 999px;
   font-size: .87rem; font-weight: 600; white-space: nowrap;
 }
-.interface-switch a.is-active { background: var(--ink); color: #fff; }
+.interface-switch a.is-active { background: var(--coral); color: #fff; }
 .interface-switch a:not(.is-active):hover { color: var(--ink); }
 
 .avatar-pill {
@@ -413,37 +414,37 @@ body[data-role="doctor"] #viewFamily { display: none !important; }
 .chat-panel__input button{border:none;background:var(--coral);color:#fff;border-radius:999px;width:36px;height:36px;flex:none;cursor:pointer}
 /* Shared healthcare theme pass */
 :root {
-  --coral: #ef6f5e;
-  --coral-deep: #dc5c4c;
-  --coral-soft: #fde9e4;
-  --coral-tint: #fff6f3;
-  --green: #33735b;
-  --mint: #e7f2ed;
-  --mint-deep: #c7ddd3;
-  --violet: #7a2559;
-  --lilac: #f6e8f0;
+  --coral: #c23a76;
+  --coral-deep: #7b235d;
+  --coral-soft: #fbe7f0;
+  --coral-tint: #fff6fa;
+  --green: #d84b8b;
+  --mint: #fdeaf3;
+  --mint-deep: #f4c8dc;
+  --violet: #c23a76;
+  --lilac: #fbe7f0;
   --amber: #9b6b2d;
   --amber-soft: #fff3dc;
   --ink: #241c25;
   --ink-2: #5f5660;
   --ink-3: #8b828b;
   --surface: #ffffff;
-  --ground: #fff9f5;
-  --line: #eee1dc;
-  --line-soft: #f5ebe7;
+  --ground: #fff8fb;
+  --line: #eedbe7;
+  --line-soft: #f7edf3;
   --display: var(--sans);
-  --sans: "Inter Tight", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --sans: "Inter", "Aptos", "Avenir Next", "Helvetica Neue", Arial, system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 body { background: var(--ground); font-family: var(--sans); }
-h1, h2, h3, h4 { font-family: var(--sans); font-weight: 750; letter-spacing: -.02em; }
+h1, h2, h3, h4 { font-family: var(--sans); font-weight: 840; letter-spacing: 0; }
 .brand__name { font-family: var(--sans); font-weight: 800; letter-spacing: .02em; }
 .appbar { background: rgba(255,255,255,.96); }
 .btn--primary, .btn--sos, .chat-fab, .chat-panel__input button {
   background: var(--coral);
-  box-shadow: 0 12px 30px -14px rgba(220,92,76,.65);
+  box-shadow: 0 12px 30px -14px rgba(123,35,93,.55);
 }
 .btn--primary:hover, .btn--sos:hover { background: var(--coral-deep); }
-.segmented button.is-active, .interface-switch a.is-active { background: var(--violet); color: #fff; }
+.segmented button.is-active, .interface-switch a.is-active { background: var(--coral); color: #fff; }
 .fv-header__intro .eyebrow, .tag--due { color: var(--violet); background: var(--lilac); }
 .progress-fill { background: var(--coral); }
 .card, .patient-panel, .detail-panel, .appt-card, .module-card { border-color: var(--line); }
