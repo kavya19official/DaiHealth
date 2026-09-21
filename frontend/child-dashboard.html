@@ -56,14 +56,14 @@ button { font-family: inherit; cursor: pointer; }
 img, svg { display: block; }
 button, input { font: inherit; }
 
-/* ── Layout shell ─────────────────────────────────────── */
+/*  Layout shell  */
 .app {
   display: grid;
   grid-template-columns: var(--sidebar-w) 1fr;
   min-height: 100vh;
 }
 
-/* ── Sidebar ──────────────────────────────────────────── */
+/*  Sidebar  */
 .sidebar {
   position: sticky;
   top: 0;
@@ -148,7 +148,7 @@ button, input { font: inherit; }
 }
 .sidebar__tagline svg { flex-shrink: 0; margin-top: 0.1rem; color: var(--brand-mid); }
 
-/* ── Main column ──────────────────────────────────────── */
+/*  Main column  */
 .main {
   display: flex;
   flex-direction: column;
@@ -984,7 +984,7 @@ button, input { font: inherit; }
           </div>
           <div>
             <div class="status-card__label">Growth &amp; Development</div>
-            <div class="status-card__value"><span class="ok">✓</span> On track for age</div>
+            <div class="status-card__value"><span class="ok"></span> On track for age</div>
           </div>
           <span class="status-card__chevron">›</span>
         </a>
@@ -994,7 +994,7 @@ button, input { font: inherit; }
           </div>
           <div>
             <div class="status-card__label">Health Status</div>
-            <div class="status-card__value"><span class="ok">✓</span> No concerns</div>
+            <div class="status-card__value"><span class="ok"></span> No concerns</div>
           </div>
           <span class="status-card__chevron">›</span>
         </a>
@@ -1004,7 +1004,7 @@ button, input { font: inherit; }
           </div>
           <div>
             <div class="status-card__label">Upcoming Appointment</div>
-            <div class="status-card__value">📅 1 scheduled</div>
+            <div class="status-card__value"> 1 scheduled</div>
           </div>
           <span class="status-card__chevron">›</span>
         </a>
@@ -1103,34 +1103,34 @@ button, input { font: inherit; }
           <div class="card milestones-card">
             <div class="milestones-card__head">
               <div class="growth-card__title">
-                <span style="background:#fef3c7;color:#d97706">★</span>
+                <span style="background:#fef3c7;color:#d97706"></span>
                 Milestones
               </div>
               <button class="link-btn" type="button">View All ›</button>
             </div>
             <div class="milestones-track">
               <div class="milestone is-done">
-                <div class="milestone__icon">😊<span class="milestone__check">✓</span></div>
+                <div class="milestone__icon"><span class="milestone__check"></span></div>
                 <div class="milestone__name">Smiles</div>
                 <div class="milestone__range">(0–2 mo)</div>
               </div>
               <div class="milestone is-done">
-                <div class="milestone__icon">🧸<span class="milestone__check">✓</span></div>
+                <div class="milestone__icon"><span class="milestone__check"></span></div>
                 <div class="milestone__name">Head control</div>
                 <div class="milestone__range">(2–4 mo)</div>
               </div>
               <div class="milestone is-done">
-                <div class="milestone__icon">🔄<span class="milestone__check">✓</span></div>
+                <div class="milestone__icon"><span class="milestone__check"></span></div>
                 <div class="milestone__name">Rolls over</div>
                 <div class="milestone__range">(4–6 mo)</div>
               </div>
               <div class="milestone is-current">
-                <div class="milestone__icon">👶</div>
+                <div class="milestone__icon"></div>
                 <div class="milestone__name">Sits without support</div>
                 <div class="milestone__range">(6–8 mo)</div>
               </div>
               <div class="milestone is-locked">
-                <div class="milestone__icon">🔒</div>
+                <div class="milestone__icon"></div>
                 <div class="milestone__name">Crawls</div>
                 <div class="milestone__range">(8–10 mo)</div>
               </div>
@@ -1181,7 +1181,7 @@ button, input { font: inherit; }
             </div>
             <div class="feed-list">
               <div class="feed-item">
-                <div class="feed-item__icon feed-item__icon--amber">📅</div>
+                <div class="feed-item__icon feed-item__icon--amber"></div>
                 <div class="feed-item__body">
                   <div class="feed-item__title">Vaccination scheduled</div>
                   <div class="feed-item__sub">Hepatitis B (2nd dose) · 12 days left</div>
@@ -1189,7 +1189,7 @@ button, input { font: inherit; }
                 <div class="feed-item__date">Sep 10</div>
               </div>
               <div class="feed-item">
-                <div class="feed-item__icon feed-item__icon--blue">📈</div>
+                <div class="feed-item__icon feed-item__icon--blue"></div>
                 <div class="feed-item__body">
                   <div class="feed-item__title">Growth checkup</div>
                   <div class="feed-item__sub">Weight &amp; height recorded</div>
@@ -1197,7 +1197,7 @@ button, input { font: inherit; }
                 <div class="feed-item__date">Sep 5</div>
               </div>
               <div class="feed-item">
-                <div class="feed-item__icon feed-item__icon--purple">🛡️</div>
+                <div class="feed-item__icon feed-item__icon--purple"></div>
                 <div class="feed-item__body">
                   <div class="feed-item__title">Doctor visit</div>
                   <div class="feed-item__sub">Pediatrician consultation</div>
@@ -1205,7 +1205,7 @@ button, input { font: inherit; }
                 <div class="feed-item__date">Aug 20</div>
               </div>
               <div class="feed-item">
-                <div class="feed-item__icon feed-item__icon--green">📝</div>
+                <div class="feed-item__icon feed-item__icon--green"></div>
                 <div class="feed-item__body">
                   <div class="feed-item__title">Health note</div>
                   <div class="feed-item__sub">No concerns, all parameters normal</div>
@@ -1288,11 +1288,11 @@ function render() {
     var found = false;
     track.innerHTML = milestones.slice(0, 5).map(function (m) {
       var cls, icon;
-      if (m.status === 'completed') { cls = 'is-done'; icon = '✓'; }
-      else if (!found) { cls = 'is-current'; icon = '●'; found = true; }
-      else { cls = 'is-locked'; icon = '🔒'; }
+      if (m.status === 'completed') { cls = 'is-done'; icon = ''; }
+      else if (!found) { cls = 'is-current'; icon = ''; found = true; }
+      else { cls = 'is-locked'; icon = ''; }
       return '<div class="milestone ' + cls + '"><div class="milestone__icon">' + icon +
-        (m.status === 'completed' ? '<span class="milestone__check">✓</span>' : '') +
+        (m.status === 'completed' ? '<span class="milestone__check"></span>' : '') +
         '</div><div class="milestone__name">' + m.title + '</div><div class="milestone__range">' +
         api.fmtDate(m.due_date) + '</div></div>';
     }).join('');
