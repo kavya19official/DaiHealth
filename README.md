@@ -1,58 +1,46 @@
-# health-a-thon
+# DaiHealth (दाई)
+
+Connected maternal and paediatric care — mother, doctor and hospital workflows on one continuous record.
+
+## Architecture
+
+- **Backend**: Express + PostgreSQL + JWT (HTTP-only cookie). Serves the frontend statically from `frontend/`.
+- **Frontend**: Plain HTML/CSS/JS under `frontend/`. Shared client: `frontend/js/dai-api.js`.
+- **Auth**: Register/login as mother or doctor → cookie JWT → role-based dashboards.
+- **API base**: On localhost uses same-origin `/api`. In production uses `https://daihealth.onrender.com/api` (override with `window.DAI_API_BASE`).
 
 ## Database setup
 
-`backend/server.js` implements the Care Timeline and Appointments features
-(milestone seeding, timeline read/complete, appointment request/list/status
-routes) against two tables — `care_milestones` and `appointments` — that
-depend on the existing `users` table from the authentication system. Apply
-them with:
-
-```bash
-psql "$DATABASE_URL" -f backend/db/care_timeline_and_appointments.sql
-```
-
-The script is idempotent (`CREATE TABLE IF NOT EXISTS` / `CREATE INDEX IF
-NOT EXISTS`), so it's safe to re-run.
-
-## Mother dashboard
-
-`dashboard.html` renders one of two dashboards depending on the signed-in role
-(or the guest flag). The mother dashboard is a single-page shell — sidebar plus
-nine sections, routed with `#/overview`, `#/timeline`, `#/tracking/kicks`, … —
-and keeps guest mode (localStorage only, no network), the care assistant and
-the 5-1-1 alert.
-
-Apply, in this order (all scripts are idempotent):
+Apply in order (idempotent):
 
 ```bash
 psql "$DATABASE_URL" -f backend/db/auth_and_wellness.sql
 psql "$DATABASE_URL" -f backend/db/care_timeline_and_appointments.sql
 psql "$DATABASE_URL" -f backend/db/mother_dashboard.sql
+psql "$DATABASE_URL" -f backend/db/hospital_platform.sql
 ```
 
-`backend/motherDashboard.js` (hooked in from `server.js`) adds only what the
-existing API lacked. Meals, water, supplements, contractions and baby growth
-are still written through `/api/wellness/*`, and the doctor's continuity view
-reads the same tables.
+## Run locally
 
-| Route (mother-only, own rows only) | Purpose |
-| --- | --- |
-| `GET/PATCH /api/profile/pregnancy` | read / set LMP or due date (re-times open milestones) |
-| `PATCH /api/profile/contact` | phone + emergency contact |
-| `GET /api/wellness/history?from=&to=` | multi-day view of the wellness tables |
-| `DELETE /api/wellness/:kind/:id` | remove a nutrition / growth / contraction entry |
-| `GET/POST /api/medications`, `DELETE /api/medications/:id` | medication *names*; "taken" is still `PUT /api/wellness/supplements` |
-| `GET/POST /api/health-logs`, `DELETE /api/health-logs/:id` | blood pressure, weight, glucose, kick sessions |
-| `GET/POST /api/reports`, `DELETE /api/reports/:id` | test / scan results |
+```bash
+cd backend
+cp .env.example .env   # set DB_* and JWT_SECRET
+npm install
+npm start              # http://localhost:3001
+```
 
-`care_start_date` is the gestational day-0 anchor for the whole timeline
-(milestones are LMP + N days), but registration defaults it to *today*. The
-dashboard therefore asks a new mother to confirm her due date and records that
-in `mother_profiles.pregnancy_confirmed_at`.
+Open http://localhost:3001 — homepage, auth, mother dashboard (`dashboard.html`), doctor dashboard (`doctor.html`).
 
-Known limitation: `contraction_logs.started_at` is a `TIMESTAMP` without a time
-zone that holds the UTC clock time the client sends. `GET /api/wellness` and the
-server-side 5-1-1 window (`NOW() - INTERVAL '2 hours'`) in `server.js` misread it
-when the server/database time zone is not UTC. `GET /api/wellness/history`
-reads it correctly; the existing routes have not been changed
+## Flow
+
+1. Homepage → Sign in / register (`auth.html`).
+2. Auth issues JWT cookie; redirects by role.
+3. Mother dashboard loads timeline, appointments, wellness, profile from authenticated APIs only (guest mode is localStorage-only, no network writes required for viewing).
+4. Doctor dashboard loads patients and appointments from `/api/doctor/*` and `/api/appointments`.
+5. Unauthenticated access to protected API routes returns 401; client redirects to `auth.html`.
+
+## Notes
+
+- Hospital console (`hospital.html` + `backend/hospitalPlatform.js`) currently uses an in-memory / file-backed demo state for continuity workflows. Core mother and doctor paths use PostgreSQL only.
+- No mock patient/doctor/appointment data is rendered in mother or doctor dashboards after login; initial HTML placeholders are replaced by API data.
+- Illustrations on mother and doctor welcome cards use project assets (`frontend/assets/mother-illustration.jpeg`, `doctor-illustration.jpeg`).
