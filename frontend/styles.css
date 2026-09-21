@@ -205,18 +205,44 @@ p { margin: 0 0 1rem; color: var(--ink-2); }
 }
 
 .hero {
-  background: var(--surface);
-  padding-block: clamp(1.35rem, 3.8vw, 3.2rem) 1.4rem;
+  position: relative;
+  overflow: hidden;
+  min-height: clamp(620px, calc(100vh - 76px), 820px);
+  display: grid;
+  align-items: center;
+  background: var(--surface) url("assets/hospital-care.jpg") center / cover no-repeat;
+  padding-block: clamp(4rem, 8vw, 7rem) 2rem;
+}
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 248, 251, .72);
+}
+.hero > * {
+  position: relative;
 }
 .hero__grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.02fr) minmax(320px, .82fr);
-  gap: clamp(1.5rem, 4vw, 3rem);
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
   align-items: center;
+  justify-items: center;
+  text-align: center;
 }
-.hero__copy p { max-width: 650px; font-size: clamp(1.05rem, 1.7vw, 1.3rem); }
-.hero__actions { display: flex; flex-wrap: wrap; gap: .85rem; margin-top: 1.2rem; }
+.hero__copy {
+  width: min(860px, 100%);
+  padding: clamp(1rem, 3vw, 1.5rem);
+  border: 1px solid rgba(238, 219, 231, .75);
+  border-radius: 28px;
+  background: rgba(255,255,255,.72);
+  box-shadow: var(--shadow-sm);
+}
+.hero__copy .eyebrow { margin-inline: auto; }
+.hero__copy p { max-width: 710px; margin-inline: auto; font-size: clamp(1.05rem, 1.7vw, 1.3rem); }
+.hero__actions { display: flex; flex-wrap: wrap; justify-content: center; gap: .85rem; margin-top: 1.2rem; }
 .hero-art {
+  display: none;
   min-height: 0;
   padding: .85rem;
   border: 1px solid var(--line);
@@ -263,7 +289,7 @@ p { margin: 0 0 1rem; color: var(--ink-2); }
 .hero-brief__line:nth-child(3) { width: 68%; }
 .hero-brief__line:nth-child(4) { width: 48%; }
 .hero .hero-brief { display: none; }
-.trust-strip { width: var(--wrap); margin: clamp(1rem, 2.8vw, 1.6rem) auto 0; display: flex; flex-wrap: wrap; gap: .7rem; }
+.trust-strip { width: var(--wrap); margin: clamp(1rem, 2.8vw, 1.6rem) auto 0; display: flex; flex-wrap: wrap; justify-content: center; gap: .7rem; }
 .trust-pill { display: inline-flex; align-items: center; gap: .45rem; padding: .55rem .8rem; border: 1px solid var(--line); border-radius: 999px; background: #fff; color: var(--ink-2); font-size: .88rem; font-weight: 760; }
 .trust-pill svg { color: var(--brand); }
 
@@ -470,7 +496,7 @@ p { margin: 0 0 1rem; color: var(--ink-2); }
   content: "";
   position: absolute;
   inset: 0;
-  background: rgba(255, 248, 251, .78);
+  background: rgba(255, 248, 251, .26);
 }
 .story-backdrop__content {
   position: relative;
