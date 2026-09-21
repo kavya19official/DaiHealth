@@ -190,7 +190,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
   <div class="search" role="search"><svg width="16" height="16"><use href="#i-search"/></svg><input type="search" id="globalSearch" placeholder="Search anything..." aria-label="Search"></div>
   <div class="topbar__right">
     <button class="icon-btn" type="button" aria-label="Notifications" id="notifBtn"><svg width="18" height="18"><use href="#i-bell"/></svg><span class="badge">2</span></button>
-    <div class="user-chip"><img src="assets/logo-circle.png" alt="" width="34" height="34" onerror="this.src='assets/logo.jpeg'"><div><div class="user-chip__name" id="userName">Priya Sharma</div><div class="user-chip__role">Mother / Patient</div></div></div>
+    <div class="user-chip"><img src="assets/logo-circle.png" alt="" width="34" height="34" onerror="this.src='assets/logo.jpeg'"><div><div class="user-chip__name" id="userName">—</div><div class="user-chip__role">Mother / Patient</div></div></div>
   </div>
 </header>
 
@@ -200,29 +200,23 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
   <div class="welcome-row">
     <div class="welcome-card">
       <div class="welcome-card__art" aria-hidden="true">
-        <svg viewBox="0 0 120 130" fill="none"><ellipse cx="60" cy="122" rx="40" ry="6" fill="#e9d5ff" opacity=".5"/>
-        <ellipse cx="60" cy="85" rx="32" ry="38" fill="#c4b5fd"/><path d="M28 70c0-28 14-48 32-48s32 20 32 48" fill="#f5d0c0"/>
-        <circle cx="60" cy="48" r="28" fill="#f5d0c0"/><path d="M38 40c4-16 20-24 36-16 4 8 4 18 0 24-10-6-24-6-36-8z" fill="#3b2f2f"/>
-        <ellipse cx="50" cy="50" rx="3" ry="3.5" fill="#2d1f1f"/><ellipse cx="70" cy="50" rx="3" ry="3.5" fill="#2d1f1f"/>
-        <path d="M54 62c2 4 10 4 12 0" stroke="#c4786a" stroke-width="1.5" stroke-linecap="round"/>
-        <ellipse cx="60" cy="95" rx="22" ry="28" fill="#a78bfa"/><circle cx="60" cy="100" r="14" fill="#f5d0c0" opacity=".35"/>
-        </svg>
+        <img src="assets/mother-illustration.jpeg" alt="" width="100" height="110" style="width:100%;height:100%;object-fit:contain;border-radius:12px">
       </div>
       <div>
-        <div class="welcome-card__hello">Hello, <span id="greetName">Priya</span>! 👋</div>
+        <div class="welcome-card__hello">Hello, <span id="greetName">Mother</span></div>
         <div class="welcome-card__title">You're doing great!</div>
         <div class="welcome-card__sub">Your health and your baby's health matter.</div>
         <div class="pills">
-          <span class="pill">💜 Second trimester · <span id="weekLabel">18 weeks</span></span>
-          <span class="pill">📅 EDD: <span id="eddLabel">12 Mar 2027</span></span>
+          <span class="pill">Second trimester · <span id="weekLabel">—</span></span>
+          <span class="pill">EDD: <span id="eddLabel">—</span></span>
         </div>
       </div>
     </div>
     <div class="card appt-card">
       <div>
         <div class="appt-card__label">Next Appointment</div>
-        <div class="appt-card__title" id="nextApptTitle">Obstetrician Consultation</div>
-        <div class="appt-card__meta" id="nextApptMeta">Dr. Neha Sharma<br>10:30 AM · 25 Sep 2026</div>
+        <div class="appt-card__title" id="nextApptTitle">No upcoming appointment</div>
+        <div class="appt-card__meta" id="nextApptMeta">—</div>
       </div>
       <button type="button" class="btn btn--primary btn--full" data-go="appointments">View Schedule <svg width="15" height="15"><use href="#i-arrow"/></svg></button>
     </div>
@@ -230,20 +224,20 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 
   <div class="status-row">
     <button type="button" class="status-card" data-go="records">
-      <div class="status-card__icon status-card__icon--purple">👤</div>
-      <div><div class="status-card__label">Current Health Status</div><div class="status-card__value"><span class="ok">✓</span> Stable</div><div class="status-card__sub">No major concerns</div></div>
+      <div class="status-card__icon status-card__icon--purple"></div>
+      <div><div class="status-card__label">Current Health Status</div><div class="status-card__value"><span class="ok"></span> Stable</div><div class="status-card__sub">No major concerns</div></div>
     </button>
     <button type="button" class="status-card" data-go="records">
-      <div class="status-card__icon status-card__icon--green">💗</div>
-      <div><div class="status-card__label">Vitals</div><div class="status-card__value"><span class="ok">✓</span> All normal</div><div class="status-card__sub">Last updated: today</div></div>
+      <div class="status-card__icon status-card__icon--green"></div>
+      <div><div class="status-card__label">Vitals</div><div class="status-card__value"><span class="ok"></span> All normal</div><div class="status-card__sub">Last updated: today</div></div>
     </button>
     <button type="button" class="status-card" data-go="records">
-      <div class="status-card__icon status-card__icon--blue">💊</div>
-      <div><div class="status-card__label">Medications</div><div class="status-card__value"><span class="ok">✓</span> On schedule</div><div class="status-card__sub" id="medCount">1 supplement</div></div>
+      <div class="status-card__icon status-card__icon--blue"></div>
+      <div><div class="status-card__label">Medications</div><div class="status-card__value"><span class="ok"></span> On schedule</div><div class="status-card__sub" id="medCount">1 supplement</div></div>
     </button>
     <button type="button" class="status-card" data-go="appointments">
-      <div class="status-card__icon status-card__icon--purple">📅</div>
-      <div><div class="status-card__label">Upcoming Appointments</div><div class="status-card__value">📅 <span id="apptCount">1</span> scheduled</div></div>
+      <div class="status-card__icon status-card__icon--purple"></div>
+      <div><div class="status-card__label">Upcoming Appointments</div><div class="status-card__value"> <span id="apptCount">1</span> scheduled</div></div>
     </button>
   </div>
 
@@ -251,7 +245,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
     <div>
       <div class="card section-card">
         <div class="section-head">
-          <div class="section-title"><span>📈</span> Health Overview</div>
+          <div class="section-title"><span></span> Health Overview</div>
           <button type="button" class="link-btn" data-go="records">View All →</button>
         </div>
         <div class="tabs" role="tablist">
@@ -282,36 +276,36 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 
       <div class="card section-card">
         <div class="section-head">
-          <div class="section-title"><span style="background:#fef3c7;color:#d97706">★</span> Milestones</div>
+          <div class="section-title"><span style="background:#fef3c7;color:#d97706"></span> Milestones</div>
           <button type="button" class="link-btn" data-go="timeline">View All →</button>
         </div>
         <div class="milestones-track" id="milestoneTrack">
-          <div class="milestone is-done"><div class="milestone__icon">😊<span class="milestone__check">✓</span></div><div class="milestone__name">12 weeks</div><div class="milestone__range">Baby's organs forming</div></div>
-          <div class="milestone is-done"><div class="milestone__icon">👶<span class="milestone__check">✓</span></div><div class="milestone__name">16 weeks</div><div class="milestone__range">Gender (optional)</div></div>
-          <div class="milestone is-current"><div class="milestone__icon">📋</div><div class="milestone__name">20 weeks</div><div class="milestone__range">Anomaly scan</div></div>
+          <div class="milestone is-done"><div class="milestone__icon"><span class="milestone__check"></span></div><div class="milestone__name">12 weeks</div><div class="milestone__range">Baby's organs forming</div></div>
+          <div class="milestone is-done"><div class="milestone__icon"><span class="milestone__check"></span></div><div class="milestone__name">16 weeks</div><div class="milestone__range">Gender (optional)</div></div>
+          <div class="milestone is-current"><div class="milestone__icon"></div><div class="milestone__name">20 weeks</div><div class="milestone__range">Anomaly scan</div></div>
           <div class="milestone is-locked"><div class="milestone__icon">🩸</div><div class="milestone__name">24 weeks</div><div class="milestone__range">Glucose test</div></div>
-          <div class="milestone is-locked"><div class="milestone__icon">📈</div><div class="milestone__name">28 weeks</div><div class="milestone__range">Growth scan</div></div>
+          <div class="milestone is-locked"><div class="milestone__icon"></div><div class="milestone__name">28 weeks</div><div class="milestone__range">Growth scan</div></div>
         </div>
       </div>
     </div>
 
     <div class="side-stack">
       <div class="card section-card">
-        <div class="section-title" style="margin-bottom:.85rem"><span>⚡</span> Quick Actions</div>
+        <div class="section-title" style="margin-bottom:.85rem"><span></span> Quick Actions</div>
         <div class="qa-grid">
-          <button type="button" class="qa-item" data-go="appointments"><div class="qa-item__icon qa-item__icon--blue">📅</div><div class="qa-item__title">Book Appointment <span>›</span></div><div class="qa-item__sub">See a doctor</div></button>
-          <button type="button" class="qa-item" data-go="records"><div class="qa-item__icon qa-item__icon--purple">📄</div><div class="qa-item__title">View Test Reports <span>›</span></div><div class="qa-item__sub">Lab results &amp; reports</div></button>
-          <button type="button" class="qa-item" data-go="records"><div class="qa-item__icon qa-item__icon--green">📈</div><div class="qa-item__title">Track Health <span>›</span></div><div class="qa-item__sub">Weight, vitals &amp; more</div></button>
-          <button type="button" class="qa-item" data-go="timeline"><div class="qa-item__icon qa-item__icon--amber">🕐</div><div class="qa-item__title">View Care Timeline <span>›</span></div><div class="qa-item__sub">Your pregnancy journey</div></button>
+          <button type="button" class="qa-item" data-go="appointments"><div class="qa-item__icon qa-item__icon--blue"></div><div class="qa-item__title">Book Appointment <span>›</span></div><div class="qa-item__sub">See a doctor</div></button>
+          <button type="button" class="qa-item" data-go="records"><div class="qa-item__icon qa-item__icon--purple"></div><div class="qa-item__title">View Test Reports <span>›</span></div><div class="qa-item__sub">Lab results &amp; reports</div></button>
+          <button type="button" class="qa-item" data-go="records"><div class="qa-item__icon qa-item__icon--green"></div><div class="qa-item__title">Track Health <span>›</span></div><div class="qa-item__sub">Weight, vitals &amp; more</div></button>
+          <button type="button" class="qa-item" data-go="timeline"><div class="qa-item__icon qa-item__icon--amber"></div><div class="qa-item__title">View Care Timeline <span>›</span></div><div class="qa-item__sub">Your pregnancy journey</div></button>
         </div>
       </div>
       <div class="card section-card">
-        <div class="section-head"><div class="section-title"><span>🕐</span> Recent Updates</div><button type="button" class="link-btn">View All →</button></div>
+        <div class="section-head"><div class="section-title"><span></span> Recent Updates</div><button type="button" class="link-btn">View All →</button></div>
         <div class="feed-list" id="recentFeed">
-          <div class="feed-item"><div class="feed-item__icon feed-item__icon--amber">📅</div><div><div class="feed-item__title">Vaccination scheduled</div><div class="feed-item__sub">Tdap (2nd dose) · 25 Sep 2026</div></div><div class="feed-item__date">Sep 10</div></div>
-          <div class="feed-item"><div class="feed-item__icon feed-item__icon--green">🧪</div><div><div class="feed-item__title">Test report available</div><div class="feed-item__sub">Blood test · All parameters normal</div></div><div class="feed-item__date">Sep 8</div></div>
-          <div class="feed-item"><div class="feed-item__icon feed-item__icon--purple">📈</div><div><div class="feed-item__title">Growth checkup</div><div class="feed-item__sub">Weight &amp; BP recorded</div></div><div class="feed-item__date">Sep 5</div></div>
-          <div class="feed-item"><div class="feed-item__icon feed-item__icon--blue">📅</div><div><div class="feed-item__title">Next appointment</div><div class="feed-item__sub">Obstetrician · 25 Sep 2026</div></div><div class="feed-item__date">Sep 1</div></div>
+          <div class="feed-item"><div class="feed-item__icon feed-item__icon--amber"></div><div><div class="feed-item__title">Care updates</div><div class="feed-item__sub">No items yet</div></div><div class="feed-item__date">—</div></div>
+          <div class="feed-item"><div class="feed-item__icon feed-item__icon--green"></div><div><div class="feed-item__title">Test report available</div><div class="feed-item__sub">Blood test · All parameters normal</div></div><div class="feed-item__date">Sep 8</div></div>
+          <div class="feed-item"><div class="feed-item__icon feed-item__icon--purple"></div><div><div class="feed-item__title">Growth checkup</div><div class="feed-item__sub">Weight &amp; BP recorded</div></div><div class="feed-item__date">Sep 5</div></div>
+          <div class="feed-item"><div class="feed-item__icon feed-item__icon--blue"></div><div><div class="feed-item__title">Next appointment</div><div class="feed-item__sub">—</div></div><div class="feed-item__date">—</div></div>
         </div>
       </div>
     </div>
@@ -326,13 +320,13 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 <!-- PROFILE -->
 <div class="panel" id="panel-profile">
   <div class="card section-card" style="max-width:560px">
-    <div class="section-title" style="margin-bottom:1rem"><span>👤</span> Mother / Patient Profile</div>
+    <div class="section-title" style="margin-bottom:1rem"><span></span> Mother / Patient Profile</div>
     <form class="form-grid" id="profileForm">
-      <div class="form-group"><label for="pfName">Full name</label><input id="pfName" value="Priya Sharma" required></div>
+      <div class="form-group"><label for="pfName">Full name</label><input id="pfName" value="" required></div>
       <div class="form-group"><label for="pfPhone">Phone</label><input id="pfPhone" type="tel" value="+91 98765 43210"></div>
       <div class="form-group"><label for="pfLmp">Last menstrual period (LMP)</label><input id="pfLmp" type="date" value="2026-05-08"></div>
       <div class="form-group"><label for="pfEdd">Expected due date</label><input id="pfEdd" type="date" value="2027-03-12"></div>
-      <div class="form-group"><label for="pfEmergency">Emergency contact</label><input id="pfEmergency" value="Rahul Sharma · +91 98765 00000"></div>
+      <div class="form-group"><label for="pfEmergency">Emergency contact</label><input id="pfEmergency" value=""></div>
       <button type="submit" class="btn btn--primary">Save profile</button>
     </form>
   </div>
@@ -342,7 +336,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 <div class="panel" id="panel-appointments">
   <div class="main-grid">
     <div class="card section-card">
-      <div class="section-title" style="margin-bottom:1rem"><span>📅</span> Request appointment</div>
+      <div class="section-title" style="margin-bottom:1rem"><span></span> Request appointment</div>
       <form class="form-grid" id="apptForm">
         <div class="form-group"><label for="apptType">Type / reason</label>
           <select id="apptType"><option>Obstetrician Consultation</option><option>Ultrasound / Scan</option><option>Lab / Blood test</option><option>Vaccination</option><option>General checkup</option></select>
@@ -357,7 +351,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
       </form>
     </div>
     <div class="card list-card">
-      <div class="section-card" style="border:0;box-shadow:none;padding-bottom:.5rem"><div class="section-title"><span>📋</span> Your requests</div></div>
+      <div class="section-card" style="border:0;box-shadow:none;padding-bottom:.5rem"><div class="section-title"><span></span> Your requests</div></div>
       <div id="apptList"></div>
     </div>
   </div>
@@ -366,7 +360,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 <!-- TIMELINE -->
 <div class="panel" id="panel-timeline">
   <div class="card section-card">
-    <div class="section-head"><div class="section-title"><span>🕐</span> Care Timeline</div></div>
+    <div class="section-head"><div class="section-title"><span></span> Care Timeline</div></div>
     <div id="timelineList"></div>
   </div>
 </div>
@@ -375,7 +369,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 <div class="panel" id="panel-records">
   <div class="main-grid">
     <div class="card section-card">
-      <div class="section-title" style="margin-bottom:1rem"><span>📈</span> Log vitals</div>
+      <div class="section-title" style="margin-bottom:1rem"><span></span> Log vitals</div>
       <form class="form-grid" id="vitalsForm">
         <div class="form-group"><label for="vWeight">Weight (kg)</label><input id="vWeight" type="number" step="0.1" placeholder="68"></div>
         <div class="form-group"><label for="vBp">Blood pressure</label><input id="vBp" placeholder="120/80"></div>
@@ -383,13 +377,13 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
         <button type="submit" class="btn btn--primary">Save entry</button>
       </form>
       <div style="margin-top:1.25rem">
-        <div class="section-title" style="margin-bottom:.75rem;font-size:.95rem"><span>💊</span> Supplements today</div>
+        <div class="section-title" style="margin-bottom:.75rem;font-size:.95rem"><span></span> Supplements today</div>
         <label style="display:flex;align-items:center;gap:.6rem;padding:.6rem .75rem;border:1px solid var(--line);border-radius:12px;margin-bottom:.4rem"><input type="checkbox" id="supIron"> Iron / folic acid</label>
         <label style="display:flex;align-items:center;gap:.6rem;padding:.6rem .75rem;border:1px solid var(--line);border-radius:12px"><input type="checkbox" id="supCalcium"> Calcium</label>
       </div>
     </div>
     <div class="card list-card">
-      <div class="section-card" style="border:0;box-shadow:none;padding-bottom:.5rem"><div class="section-title"><span>📄</span> Health log</div></div>
+      <div class="section-card" style="border:0;box-shadow:none;padding-bottom:.5rem"><div class="section-title"><span></span> Health log</div></div>
       <div id="vitalsList"></div>
     </div>
   </div>
@@ -398,10 +392,10 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 <!-- MESSAGES -->
 <div class="panel" id="panel-messages">
   <div class="card list-card">
-    <div class="section-card" style="border:0;box-shadow:none"><div class="section-title"><span>💬</span> Messages</div></div>
+    <div class="section-card" style="border:0;box-shadow:none"><div class="section-title"><span></span> Messages</div></div>
     <div id="msgList">
-      <div class="list-row"><div class="feed-item__icon feed-item__icon--purple">👩‍⚕️</div><div class="list-row__meta"><div class="list-row__title">Dr. Neha Sharma</div><div class="list-row__sub">Your anomaly scan is scheduled for week 20. Please arrive 15 min early.</div></div><span class="feed-item__date">2h ago</span></div>
-      <div class="list-row"><div class="feed-item__icon feed-item__icon--blue">🏥</div><div class="list-row__meta"><div class="list-row__title">Clinic front desk</div><div class="list-row__sub">Reminder: Obstetrician consultation on 25 Sep at 10:30 AM.</div></div><span class="feed-item__date">1d ago</span></div>
+      <div class="list-row" id="feedEmpty"><div class="list-row__meta"><div class="list-row__title">No recent updates</div><div class="list-row__sub">Updates from your care team will appear here.</div></div></div>
+      <div class="list-row"><div class="feed-item__icon feed-item__icon--blue"></div><div class="list-row__meta"><div class="list-row__title">Clinic front desk</div><div class="list-row__sub">Reminder: Obstetrician consultation on 25 Sep at 10:30 AM.</div></div><span class="feed-item__date">1d ago</span></div>
     </div>
   </div>
 </div>
@@ -409,7 +403,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 <!-- SETTINGS -->
 <div class="panel" id="panel-settings">
   <div class="card section-card" style="max-width:520px">
-    <div class="section-title" style="margin-bottom:1rem"><span>⚙️</span> Settings</div>
+    <div class="section-title" style="margin-bottom:1rem"><span></span> Settings</div>
     <form class="form-grid" id="settingsForm">
       <div class="form-group"><label for="setLang">Language</label><select id="setLang"><option>English</option><option>Hindi</option></select></div>
       <div class="form-group"><label><input type="checkbox" id="setNotif" checked> Appointment reminders</label></div>
@@ -477,7 +471,7 @@ function renderHeader() {
   // Update trimester text in first pill if present
   var pill0 = document.querySelector('.pills .pill');
   if (pill0 && weeks != null) {
-    pill0.innerHTML = '💜 ' + tri + ' · <span id="weekLabel">' + weeks + ' weeks</span>';
+    pill0.innerHTML = tri + ' · <span id="weekLabel">' + weeks + ' weeks</span>';
   }
 }
 
@@ -564,11 +558,11 @@ function renderTimeline() {
     var foundCurrent = false;
     track.innerHTML = slice.map(function (m) {
       var cls, icon;
-      if (m.status === 'completed') { cls = 'is-done'; icon = '✓'; }
-      else if (!foundCurrent) { cls = 'is-current'; icon = '●'; foundCurrent = true; }
-      else { cls = 'is-locked'; icon = '○'; }
+      if (m.status === 'completed') { cls = 'is-done'; icon = ''; }
+      else if (!foundCurrent) { cls = 'is-current'; icon = ''; foundCurrent = true; }
+      else { cls = 'is-locked'; icon = ''; }
       return '<div class="milestone ' + cls + '"><div class="milestone__icon">' + icon +
-        (m.status === 'completed' ? '<span class="milestone__check">✓</span>' : '') +
+        (m.status === 'completed' ? '<span class="milestone__check"></span>' : '') +
         '</div><div class="milestone__name">' + m.title + '</div><div class="milestone__range">' +
         api.fmtDate(m.due_date) + '</div></div>';
     }).join('');
