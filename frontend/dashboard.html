@@ -17,15 +17,15 @@
 :root {
   --coral:       #8f6bb8;
   --coral-deep:  #5e3a87;
-  --coral-soft:  #eee7fb;
-  --coral-tint:  #fbf9ff;
+  --coral-soft:  #f7f4fc;
+  --coral-tint:  #ffffff;
 
   --green:       #a78bfa;
-  --mint:        #f1ecff;
-  --mint-deep:   #d8c8f3;
+  --mint:        #faf8ff;
+  --mint-deep:   #e7ddf5;
 
   --violet:      #8f6bb8;
-  --lilac:       #eee7fb;
+  --lilac:       #f7f4fc;
 
   --amber:       #B8790A;
   --amber-soft:  #FBF0DD;
@@ -35,10 +35,10 @@
   --ink-3:       #8b7c8b;
 
   --surface:     #FFFFFF;
-  --ground:      #fbf9ff;
+  --ground:      #ffffff;
   --deep:        #261526;
-  --line:        #e5dcf4;
-  --line-soft:   #f3eefb;
+  --line:        #eee8f6;
+  --line-soft:   #f8f5fc;
 
   --display: "Times New Roman", Times, Georgia, serif;
   --sans:    "Times New Roman", Times, Georgia, serif;
@@ -416,22 +416,22 @@ body[data-role="doctor"] #viewFamily { display: none !important; }
 :root {
   --coral: #8f6bb8;
   --coral-deep: #5e3a87;
-  --coral-soft: #eee7fb;
-  --coral-tint: #fbf9ff;
+  --coral-soft: #f7f4fc;
+  --coral-tint: #ffffff;
   --green: #a78bfa;
-  --mint: #f1ecff;
-  --mint-deep: #d8c8f3;
+  --mint: #faf8ff;
+  --mint-deep: #e7ddf5;
   --violet: #8f6bb8;
-  --lilac: #eee7fb;
+  --lilac: #f7f4fc;
   --amber: #9b6b2d;
   --amber-soft: #fff3dc;
   --ink: #241c25;
   --ink-2: #5f5660;
   --ink-3: #8b828b;
   --surface: #ffffff;
-  --ground: #fbf9ff;
-  --line: #e5dcf4;
-  --line-soft: #f3eefb;
+  --ground: #ffffff;
+  --line: #eee8f6;
+  --line-soft: #f8f5fc;
   --display: var(--sans);
   --sans: "Times New Roman", Times, Georgia, serif;
 }
@@ -503,6 +503,27 @@ h1, h2, h3, h4 { font-family: var(--sans); font-weight: 900; letter-spacing: 0; 
 body.patient-page h1 { font-size: clamp(1.7rem, 2.5vw, 2.1rem); }
 body.patient-page h2 { font-size: clamp(1.25rem, 1.8vw, 1.45rem); }
 body.patient-page h3 { font-size: 1.05rem; }
+body.patient-page { background: #fff; }
+body.patient-page .view,
+body.patient-page .fv-header__intro,
+body.patient-page .progress-card,
+body.patient-page .detail-panel,
+body.patient-page .patient-panel,
+body.patient-page .team-section,
+body.patient-page .module-card,
+body.patient-page .appt-section .card {
+  background: #fff;
+}
+body.patient-page .module-stat,
+body.patient-page .check-row,
+body.patient-page .dgap,
+body.patient-page .appt-card {
+  background: #fff;
+}
+body.patient-page .patient-card:hover,
+body.patient-page .patient-card.is-selected {
+  background: #faf8ff;
+}
 </style>
 </head>
 <body class="patient-page">

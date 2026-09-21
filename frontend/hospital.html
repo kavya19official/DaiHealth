@@ -10,23 +10,23 @@
 <link rel="stylesheet" href="styles.css">
 <style>
 :root {
-  --bg: #fbf9ff;
+  --bg: #ffffff;
   --panel: #ffffff;
-  --panel-2: #fbf9ff;
+  --panel-2: #ffffff;
   --ink: #261526;
   --muted: #625062;
-  --line: #e5dcf4;
-  --line-soft: #f3eefb;
+  --line: #eee8f6;
+  --line-soft: #f8f5fc;
   --blue: #8f6bb8;
-  --blue-soft: #eee7fb;
+  --blue-soft: #f7f4fc;
   --green: #a78bfa;
-  --green-soft: #f1ecff;
+  --green-soft: #faf8ff;
   --amber: #9a6500;
   --amber-soft: #fff5d8;
   --red: #ba2f2f;
   --red-soft: #fdeaea;
   --violet: #8f6bb8;
-  --violet-soft: #eee7fb;
+  --violet-soft: #f7f4fc;
   --shadow: 0 1px 2px rgba(38, 21, 38, .06), 0 22px 48px -30px rgba(94, 58, 135, .34);
   --radius: 16px;
   --sans: "Times New Roman", Times, Georgia, serif;
@@ -358,22 +358,22 @@ tr.is-selected { background: #f8fbff; }
 :root {
   --coral:       #8f6bb8;
   --coral-deep:  #5e3a87;
-  --coral-soft:  #eee7fb;
-  --coral-tint:  #fbf9ff;
+  --coral-soft:  #f7f4fc;
+  --coral-tint:  #ffffff;
   --green:       #a78bfa;
-  --mint:        #f1ecff;
-  --mint-deep:   #d8c8f3;
+  --mint:        #faf8ff;
+  --mint-deep:   #e7ddf5;
   --violet:      #8f6bb8;
-  --lilac:       #eee7fb;
+  --lilac:       #f7f4fc;
   --amber:       #B8790A;
   --amber-soft:  #FBF0DD;
   --ink:         #261526;
   --ink-2:       #625062;
   --ink-3:       #8b7c8b;
   --surface:     #FFFFFF;
-  --ground:      #fbf9ff;
-  --line:        #e5dcf4;
-  --line-soft:   #f3eefb;
+  --ground:      #ffffff;
+  --line:        #eee8f6;
+  --line-soft:   #f8f5fc;
   --display: var(--sans);
   --sans: "Times New Roman", Times, Georgia, serif;
   --r-sm: 10px;
@@ -805,22 +805,22 @@ tr.is-selected { background: var(--coral-tint); }
 :root {
   --coral: #8f6bb8;
   --coral-deep: #5e3a87;
-  --coral-soft: #eee7fb;
-  --coral-tint: #fbf9ff;
+  --coral-soft: #f7f4fc;
+  --coral-tint: #ffffff;
   --green: #a78bfa;
-  --mint: #f1ecff;
-  --mint-deep: #d8c8f3;
+  --mint: #faf8ff;
+  --mint-deep: #e7ddf5;
   --violet: #8f6bb8;
-  --lilac: #eee7fb;
+  --lilac: #f7f4fc;
   --amber: #9b6b2d;
   --amber-soft: #fff3dc;
   --ink: #261526;
   --ink-2: #625062;
   --ink-3: #8b7c8b;
   --surface: #ffffff;
-  --ground: #fbf9ff;
-  --line: #e5dcf4;
-  --line-soft: #f3eefb;
+  --ground: #ffffff;
+  --line: #eee8f6;
+  --line-soft: #f8f5fc;
   --display: var(--sans);
   --sans: "Times New Roman", Times, Georgia, serif;
 }
@@ -942,6 +942,31 @@ h1, h2, h3, h4 { font-family: var(--sans); font-weight: 900; letter-spacing: 0; 
 .btn-mini.is-primary:hover {
   background: var(--coral-deep);
   border-color: var(--coral-deep);
+}
+.app,
+.main,
+.content {
+  background: #fff;
+}
+.panel,
+.metric,
+.detail,
+.topbar,
+.hospital-action,
+.modal-card,
+.queue-card,
+.draft-card,
+.facility-card {
+  background: #fff;
+}
+.banner,
+.guardrail,
+.gap-card {
+  background: #fcfbff;
+}
+tr.is-selected,
+tbody tr:hover {
+  background: #faf8ff;
 }
 /* Shared dashboard header and content alignment */
 .sidebar {

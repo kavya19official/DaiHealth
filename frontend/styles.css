@@ -1,28 +1,28 @@
 :root {
   --brand: #8f6bb8;
   --brand-strong: #5e3a87;
-  --brand-soft: #eee7fb;
-  --brand-pale: #f8f5ff;
+  --brand-soft: #f7f4fc;
+  --brand-pale: #fbfaff;
   --accent: #a78bfa;
-  --accent-soft: #f1ecff;
+  --accent-soft: #faf8ff;
   --coral: var(--brand);
   --coral-deep: var(--brand-strong);
   --coral-soft: var(--brand-soft);
-  --coral-tint: #fbf9ff;
+  --coral-tint: #ffffff;
   --violet: var(--accent);
   --lilac: var(--accent-soft);
   --green: var(--accent);
   --mint: var(--accent-soft);
-  --mint-deep: #d8c8f3;
+  --mint-deep: #e7ddf5;
   --amber: var(--warning);
   --amber-soft: var(--warning-soft);
   --ink: #261526;
   --ink-2: #625062;
   --ink-3: #8b7c8b;
   --surface: #ffffff;
-  --ground: #fbf9ff;
-  --line: #e5dcf4;
-  --line-soft: #f3eefb;
+  --ground: #ffffff;
+  --line: #eee8f6;
+  --line-soft: #f8f5fc;
   --warning: #a76109;
   --warning-soft: #fff3dc;
   --danger: #b72f3a;
@@ -804,4 +804,19 @@ body.doctor-page h3 {
 }
 body.doctor-page .doctor-hero p {
   font-size: 0.95rem;
+}
+body.doctor-page {
+  background: #fff;
+}
+body.doctor-page .doctor-shell,
+body.doctor-page .doctor-workspace {
+  background: #fff;
+}
+body.doctor-page .doctor-item,
+body.doctor-page .doctor-draft {
+  background: #fff;
+}
+body.doctor-page .doctor-patient:hover,
+body.doctor-page .doctor-patient.is-selected {
+  background: #faf8ff;
 }
