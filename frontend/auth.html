@@ -189,7 +189,9 @@
 <script>
 (function () {
 "use strict";
-const API_BASE = 'https://daihealth.onrender.com/api';
+var API_BASE = /^(localhost|127\.0\.0\.1)$/.test(location.hostname)
+      ? '/api'
+      : (window.DAI_API_BASE || 'https://daihealth.onrender.com/api');
 
 var errorBox = document.getElementById('errorBox');
 function showError(msg) { errorBox.textContent = msg; errorBox.classList.add('is-visible'); }
