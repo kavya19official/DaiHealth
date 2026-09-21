@@ -1,5 +1,6 @@
 require('dotenv').config();
 const express = require('express');
+const path = require('path');
 const { Pool } = require('pg');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
@@ -14,7 +15,12 @@ const PORT = process.env.PORT || 3001;
 
 app.use(cors({
   origin(origin, callback) {
-    if (!origin || /^http:\/\/(localhost|127\.0\.0\.1):\d+$/.test(origin)) {
+    if (
+      !origin ||
+      /^http:\/\/(localhost|127\.0\.0\.1):\d+$/.test(origin) ||
+      origin === 'https://daihealth.onrender.com' ||
+      /^https:\/\/[a-z0-9-]+\.vercel\.app$/i.test(origin)
+    ) {
       return callback(null, true);
     }
     return callback(new Error('Not allowed by CORS'));
@@ -920,6 +926,14 @@ require('./hospitalPlatform')(app);
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+// Serve the plain HTML frontend from the same Render service.
+const frontendPath = path.join(__dirname, '..', 'frontend');
+app.use('/frontend', express.static(frontendPath));
+app.use(express.static(frontendPath));
+app.get('/', (req, res) => {
+  res.sendFile(path.join(frontendPath, 'index.html'));
 });
 
 // Start server
