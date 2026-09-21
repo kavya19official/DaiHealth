@@ -77,7 +77,7 @@ p { margin: 0 0 1rem; color: var(--ink-muted); }
 }
 .skip-link:focus { top: 0; }
 
-/* ── Header ─────────────────────────────────────────── */
+/*  Header  */
 .site-header,
 .appbar {
   position: sticky;
@@ -163,7 +163,7 @@ p { margin: 0 0 1rem; color: var(--ink-muted); }
 }
 .contact-link:hover { color: var(--brand); }
 
-/* ── Buttons ────────────────────────────────────────── */
+/*  Buttons  */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -227,7 +227,7 @@ p { margin: 0 0 1rem; color: var(--ink-muted); }
   letter-spacing: .08em;
 }
 
-/* ── Hero (matches screenshot) ──────────────────────── */
+/*  Hero (matches screenshot)  */
 .hero {
   position: relative;
   overflow: hidden;
