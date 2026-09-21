@@ -5,29 +5,29 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>दाई Hospital Console</title>
 <meta name="description" content="दाई hospital-side console for continuity, registry, pre-consult briefs, clinic flow, draft review, and audit trails.">
-<meta name="theme-color" content="#c23a76">
+<meta name="theme-color" content="#8f6bb8">
 <link rel="icon" href="assets/logo.jpeg">
 <link rel="stylesheet" href="styles.css">
 <style>
 :root {
-  --bg: #fff8fb;
+  --bg: #fbf9ff;
   --panel: #ffffff;
-  --panel-2: #fff6fa;
+  --panel-2: #fbf9ff;
   --ink: #261526;
   --muted: #625062;
-  --line: #eedbe7;
-  --line-soft: #f7edf3;
-  --blue: #c23a76;
-  --blue-soft: #fbe7f0;
-  --green: #d84b8b;
-  --green-soft: #fdeaf3;
+  --line: #e5dcf4;
+  --line-soft: #f3eefb;
+  --blue: #8f6bb8;
+  --blue-soft: #eee7fb;
+  --green: #a78bfa;
+  --green-soft: #f1ecff;
   --amber: #9a6500;
   --amber-soft: #fff5d8;
   --red: #ba2f2f;
   --red-soft: #fdeaea;
-  --violet: #c23a76;
-  --violet-soft: #fbe7f0;
-  --shadow: 0 1px 2px rgba(38, 21, 38, .06), 0 22px 48px -30px rgba(123, 35, 93, .34);
+  --violet: #8f6bb8;
+  --violet-soft: #eee7fb;
+  --shadow: 0 1px 2px rgba(38, 21, 38, .06), 0 22px 48px -30px rgba(94, 58, 135, .34);
   --radius: 16px;
   --sans: "Times New Roman", Times, Georgia, serif;
 }
@@ -353,27 +353,27 @@ tr.is-selected { background: #f8fbff; }
    दाई alignment layer
    This page started as a standalone console. These overrides intentionally
    reuse the visual system from index/auth/dashboard: professional sans
-   typography, pink/white status colors, pill navigation, and soft rounded cards.
+   typography, lavender/white status colors, pill navigation, and soft rounded cards.
    -------------------------------------------------------------------------- */
 :root {
-  --coral:       #c23a76;
-  --coral-deep:  #7b235d;
-  --coral-soft:  #fbe7f0;
-  --coral-tint:  #fff6fa;
-  --green:       #d84b8b;
-  --mint:        #fdeaf3;
-  --mint-deep:   #e1c5ee;
-  --violet:      #c23a76;
-  --lilac:       #fbe7f0;
+  --coral:       #8f6bb8;
+  --coral-deep:  #5e3a87;
+  --coral-soft:  #eee7fb;
+  --coral-tint:  #fbf9ff;
+  --green:       #a78bfa;
+  --mint:        #f1ecff;
+  --mint-deep:   #d8c8f3;
+  --violet:      #8f6bb8;
+  --lilac:       #eee7fb;
   --amber:       #B8790A;
   --amber-soft:  #FBF0DD;
   --ink:         #261526;
   --ink-2:       #625062;
   --ink-3:       #8b7c8b;
   --surface:     #FFFFFF;
-  --ground:      #fff8fb;
-  --line:        #eedbe7;
-  --line-soft:   #f7edf3;
+  --ground:      #fbf9ff;
+  --line:        #e5dcf4;
+  --line-soft:   #f3eefb;
   --display: var(--sans);
   --sans: "Times New Roman", Times, Georgia, serif;
   --r-sm: 10px;
@@ -801,26 +801,26 @@ tr.is-selected { background: var(--coral-tint); }
   .nav a { flex: 1 1 auto; text-align: center; }
   .hospital-actionbar { grid-template-columns: 1fr; padding-inline: 1rem; }
 }
-/* Shared दाई pink/white hospital theme pass */
+/* Shared दाई lavender/white hospital theme pass */
 :root {
-  --coral: #c23a76;
-  --coral-deep: #7b235d;
-  --coral-soft: #fbe7f0;
-  --coral-tint: #fff6fa;
-  --green: #d84b8b;
-  --mint: #fdeaf3;
-  --mint-deep: #f4c8dc;
-  --violet: #c23a76;
-  --lilac: #fbe7f0;
+  --coral: #8f6bb8;
+  --coral-deep: #5e3a87;
+  --coral-soft: #eee7fb;
+  --coral-tint: #fbf9ff;
+  --green: #a78bfa;
+  --mint: #f1ecff;
+  --mint-deep: #d8c8f3;
+  --violet: #8f6bb8;
+  --lilac: #eee7fb;
   --amber: #9b6b2d;
   --amber-soft: #fff3dc;
   --ink: #261526;
   --ink-2: #625062;
   --ink-3: #8b7c8b;
   --surface: #ffffff;
-  --ground: #fff8fb;
-  --line: #eedbe7;
-  --line-soft: #f7edf3;
+  --ground: #fbf9ff;
+  --line: #e5dcf4;
+  --line-soft: #f3eefb;
   --display: var(--sans);
   --sans: "Times New Roman", Times, Georgia, serif;
 }
@@ -835,7 +835,7 @@ h1, h2, h3, h4 { font-family: var(--sans); font-weight: 900; letter-spacing: 0; 
 .btn-primary {
   background: var(--coral);
   border-color: var(--coral);
-  box-shadow: 0 12px 30px -14px rgba(123,35,93,.55);
+  box-shadow: 0 12px 30px -14px rgba(94,58,135,.55);
 }
 .btn-primary:hover { background: var(--coral-deep); border-color: var(--coral-deep); }
 .banner, .guardrail, .gap-card { background: var(--coral-tint); border-color: var(--coral-soft); }
@@ -850,7 +850,7 @@ h1, h2, h3, h4 { font-family: var(--sans); font-weight: 900; letter-spacing: 0; 
   top: 0;
   z-index: 70;
   border-bottom: 1px solid var(--line);
-  box-shadow: 0 1px 0 rgba(123,35,93,.02);
+  box-shadow: 0 1px 0 rgba(94,58,135,.02);
   backdrop-filter: blur(16px) saturate(180%);
 }
 .brand-mark {
@@ -868,7 +868,7 @@ h1, h2, h3, h4 { font-family: var(--sans); font-weight: 900; letter-spacing: 0; 
   font-weight: 760;
 }
 .modulebar {
-  box-shadow: 0 1px 0 rgba(123,35,93,.02);
+  box-shadow: 0 1px 0 rgba(94,58,135,.02);
 }
 .modulebar .nav {
   background: #fff;
