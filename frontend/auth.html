@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>DAI — Sign in</title>
+<title>दाई — Sign in</title>
 <meta name="theme-color" content="#c23a76">
 <link rel="icon" href="assets/logo.jpeg">
 <link rel="stylesheet" href="styles.css">
@@ -13,9 +13,9 @@
 
 <header class="site-header">
   <div class="site-header__inner">
-    <a class="brand" href="index.html" aria-label="DAI home">
+    <a class="brand" href="index.html" aria-label="दाई home">
       <img class="brand__mark" src="assets/logo.jpeg" width="48" height="48" alt="">
-      <span><span class="brand__name">DAI</span><span class="brand__tag">Hospital Workflow</span></span>
+      <span><span class="brand__name">दाई</span><span class="brand__tag">Hospital Workflow</span></span>
     </a>
     <nav class="site-nav" aria-label="Primary navigation">
       <a href="dashboard.html">Mother / Patient</a>
@@ -34,7 +34,7 @@
 <main class="auth-main" id="main">
   <section class="auth-intro" aria-labelledby="authTitle">
     <span class="eyebrow">Secure workspace</span>
-    <h1 id="authTitle">Access DAI care workflows.</h1>
+    <h1 id="authTitle">Access दाई care workflows.</h1>
     <p>Log in to continue care timelines, appointment requests and hospital-side follow-up workflows. Demo mode stays local to this device.</p>
     <div class="trust-strip" style="width:auto;margin:1.5rem 0 0">
       <span class="trust-pill">Human-reviewed outputs</span>
@@ -155,7 +155,7 @@
 <footer class="site-footer">
   <div class="footer-grid">
     <div>
-      <h3>DAI</h3>
+      <h3>दाई</h3>
       <p>Assistive healthcare workflow infrastructure for continuity of care, operations and reviewed patient communication.</p>
     </div>
     <div>
@@ -183,7 +183,7 @@
       </ul>
     </div>
   </div>
-  <div class="footer-bottom">Copyright © 2026 DAI. Demo content only.</div>
+  <div class="footer-bottom">Copyright © 2026 दाई. Demo content only.</div>
 </footer>
 
 <script>
@@ -219,7 +219,7 @@ async function submitAuth(path, payload, btn) {
     localStorage.removeItem('dai_guest');
     window.location.href = redirectForUser(data && data.user);
   } catch (err) {
-    showError('Network error \u2014 is the DAI server running?');
+    showError('Network error \u2014 is the दाई server running?');
   } finally {
     btn.disabled = false;
   }

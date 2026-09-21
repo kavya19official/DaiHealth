@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>DAI — Care Dashboard</title>
+<title>दाई — Care Dashboard</title>
 <meta name="theme-color" content="#c23a76">
 <link rel="icon" href="assets/logo.jpeg">
 
 <style>
 /* ==========================================================================
-   DAI — Care Dashboard (Timeline · Care Gap Alerts · Doctor Dashboard)
+   दाई — Care Dashboard (Timeline · Care Gap Alerts · Doctor Dashboard)
    Tokens carried over 1:1 from the marketing site so the app reads as the
    same product, not a bolt-on demo.
    ========================================================================== */
@@ -40,8 +40,8 @@
   --line:        #eedbe7;
   --line-soft:   #f7edf3;
 
-  --display: "Inter", "Aptos", "Avenir Next", "Helvetica Neue", Arial, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --sans:    "Inter", "Aptos", "Avenir Next", "Helvetica Neue", Arial, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --display: "Times New Roman", Times, Georgia, serif;
+  --sans:    "Times New Roman", Times, Georgia, serif;
 
   --r-sm: 10px; --r-md: 16px; --r-lg: 22px; --r-xl: 30px;
 
@@ -59,12 +59,12 @@ body {
 }
 svg { display: block; }
 h1, h2, h3, h4 {
-  font-family: var(--display); font-weight: 820; line-height: 1.12;
+  font-family: var(--display); font-weight: 900; line-height: 1.08;
   letter-spacing: 0; margin: 0 0 .4em;
 }
 h1 { font-size: clamp(1.55rem, 1.3rem + 1.1vw, 2.1rem); font-variation-settings: "opsz" 90; }
 h2 { font-size: clamp(1.2rem, 1.08rem + .5vw, 1.45rem); font-variation-settings: "opsz" 60; }
-h3 { font-size: 1.05rem; font-weight: 760; letter-spacing: 0; font-family: var(--sans); }
+h3 { font-size: 1.05rem; font-weight: 900; letter-spacing: 0; font-family: var(--sans); }
 p { margin: 0 0 .8rem; color: var(--ink-2); }
 button { font-family: inherit; }
 :focus-visible { outline: 2.5px solid var(--coral); outline-offset: 2px; border-radius: 6px; }
@@ -80,7 +80,7 @@ button { font-family: inherit; }
 .appbar__inner { display: flex; align-items: center; gap: 1.25rem; min-height: 4.25rem; flex-wrap: wrap; padding-block: .5rem; }
 .brand { display: flex; align-items: center; gap: .6rem; text-decoration: none; color: var(--ink); margin-right: auto; }
 .brand__mark { width: 48px; height: 48px; flex: none; border-radius: 12px; object-fit: contain; }
-.brand__name { font-family: var(--display); font-weight: 700; font-size: 1.22rem; letter-spacing: 0; text-transform: uppercase; }
+.brand__name { font-family: var(--display); font-weight: 900; font-size: 1.45rem; letter-spacing: 0; }
 .brand__tag { display: block; font-size: .56rem; font-weight: 600; letter-spacing: .17em; color: var(--ink-3); }
 
 .segmented {
@@ -433,11 +433,11 @@ body[data-role="doctor"] #viewFamily { display: none !important; }
   --line: #eedbe7;
   --line-soft: #f7edf3;
   --display: var(--sans);
-  --sans: "Inter", "Aptos", "Avenir Next", "Helvetica Neue", Arial, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --sans: "Times New Roman", Times, Georgia, serif;
 }
 body { background: var(--ground); font-family: var(--sans); }
-h1, h2, h3, h4 { font-family: var(--sans); font-weight: 840; letter-spacing: 0; }
-.brand__name { font-family: var(--sans); font-weight: 800; letter-spacing: .02em; }
+h1, h2, h3, h4 { font-family: var(--sans); font-weight: 900; letter-spacing: 0; }
+.brand__name { font-family: var(--sans); font-weight: 900; letter-spacing: 0; }
 .appbar { background: rgba(255,255,255,.96); }
 .btn--primary, .btn--sos, .chat-fab, .chat-panel__input button {
   background: var(--coral);
@@ -530,9 +530,9 @@ body.patient-page h3 { font-size: 1.05rem; }
 <!-- ============================ App bar ============================ -->
 <header class="appbar">
   <div class="wrap appbar__inner">
-    <a class="brand" href="index.html" aria-label="DAI">
+    <a class="brand" href="index.html" aria-label="दाई">
       <img class="brand__mark" src="assets/logo.jpeg" width="48" height="48" alt="">
-      <span><span class="brand__name">DAI</span><span class="brand__tag">Mother / Patient</span></span>
+      <span><span class="brand__name">दाई</span><span class="brand__tag">Mother / Patient</span></span>
     </a>
 
     <nav class="site-nav" aria-label="Primary navigation">
@@ -542,7 +542,7 @@ body.patient-page h3 { font-size: 1.05rem; }
     </nav>
 
     <div class="header-actions">
-      <nav class="interface-switch" aria-label="Switch DAI interface">
+      <nav class="interface-switch" aria-label="Switch दाई interface">
         <a class="is-active" href="dashboard.html">Mother / Patient</a>
         <a href="doctor.html">Doctor</a>
         <a href="hospital.html">Hospital Team</a>
@@ -688,7 +688,7 @@ body.patient-page h3 { font-size: 1.05rem; }
 <footer class="site-footer">
   <div class="footer-grid">
     <div>
-      <h3>DAI</h3>
+      <h3>दाई</h3>
       <p>Assistive healthcare workflow infrastructure for continuity of care, operations and reviewed patient communication.</p>
     </div>
     <div>
@@ -716,7 +716,7 @@ body.patient-page h3 { font-size: 1.05rem; }
       </ul>
     </div>
   </div>
-  <div class="footer-bottom">Copyright © 2026 DAI. Demo content only.</div>
+  <div class="footer-bottom">Copyright © 2026 दाई. Demo content only.</div>
 </footer>
 
 <div class="modal-backdrop" id="sosModal" aria-hidden="true"><div class="modal-box modal-box--wide" role="dialog" aria-modal="true"><div class="modal-box__head"><div><h2 style="margin-bottom:.2rem;color:var(--coral-deep)">Emergency SOS</h2><p style="margin:0;font-size:.86rem">Choose an emergency action.</p></div><button class="modal-close" data-action="close-sos">✕</button></div><div class="sos-status">SOS screen opened. In a real deployment, this would securely share consented emergency information with configured contacts/facilities.</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem"><a class="btn btn--sos" href="tel:112" style="text-decoration:none">Call 112</a><button class="btn btn--ghost" data-action="call-emergency-contact">Call emergency contact</button></div><p style="font-size:.72rem;margin:.9rem 0 0">This prototype does not dispatch help or share live location automatically.</p></div></div>
@@ -776,9 +776,9 @@ body.patient-page h3 { font-size: 1.05rem; }
 
 <!-- ======================= Care assistant (chatbot) ======================= -->
 <button class="chat-fab" id="chatFab" aria-label="Open care assistant" title="Care assistant" hidden>💬</button>
-<div class="chat-panel" id="chatPanel" role="dialog" aria-label="DAI care assistant" aria-hidden="true">
+<div class="chat-panel" id="chatPanel" role="dialog" aria-label="दाई care assistant" aria-hidden="true">
   <div class="chat-panel__head">
-    <h3>DAI care assistant</h3>
+    <h3>दाई care assistant</h3>
     <button id="chatClose" aria-label="Close">✕</button>
   </div>
   <div class="chat-panel__body" id="chatBody"></div>
@@ -1866,11 +1866,11 @@ var CHAT_TOPICS = [
   {
     key: 'appointments', chip: '\ud83d\udcc5 Appointments',
     match: ['appointment', 'visit', 'checkup', 'check-up', 'book'],
-    reply: "You can request an appointment with any doctor on DAI from the Appointments section below \u2014 pick a doctor, a preferred date, and an optional reason, and they'll confirm it."
+    reply: "You can request an appointment with any doctor on दाई from the Appointments section below \u2014 pick a doctor, a preferred date, and an optional reason, and they'll confirm it."
   }
 ];
 var CHAT_FALLBACK = "I can help with general pregnancy questions \u2014 try asking about warning signs, contractions, nutrition, supplements, baby movement, or appointments. For anything specific to your own health, please check with your doctor, and use Emergency SOS for anything urgent right now.";
-var CHAT_INTRO = "Hi! I'm the DAI care assistant. I can answer general questions \u2014 I don't diagnose or replace your doctor. What would you like to know?";
+var CHAT_INTRO = "Hi! I'm the दाई care assistant. I can answer general questions \u2014 I don't diagnose or replace your doctor. What would you like to know?";
 
 var chatInitialized = false;
 function initChatbot() {

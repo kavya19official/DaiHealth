@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>DAI Hospital Console</title>
-<meta name="description" content="DAI hospital-side console for continuity, registry, pre-consult briefs, clinic flow, draft review, and audit trails.">
+<title>दाई Hospital Console</title>
+<meta name="description" content="दाई hospital-side console for continuity, registry, pre-consult briefs, clinic flow, draft review, and audit trails.">
 <meta name="theme-color" content="#c23a76">
 <link rel="icon" href="assets/logo.jpeg">
 <link rel="stylesheet" href="styles.css">
@@ -29,7 +29,7 @@
   --violet-soft: #fbe7f0;
   --shadow: 0 1px 2px rgba(38, 21, 38, .06), 0 22px 48px -30px rgba(123, 35, 93, .34);
   --radius: 16px;
-  --sans: "Inter", "Aptos", "Avenir Next", "Helvetica Neue", Arial, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --sans: "Times New Roman", Times, Georgia, serif;
 }
 
 * { box-sizing: border-box; }
@@ -350,7 +350,7 @@ tr.is-selected { background: #f8fbff; }
 }
 
 /* --------------------------------------------------------------------------
-   DAI alignment layer
+   दाई alignment layer
    This page started as a standalone console. These overrides intentionally
    reuse the visual system from index/auth/dashboard: professional sans
    typography, pink/white status colors, pill navigation, and soft rounded cards.
@@ -375,7 +375,7 @@ tr.is-selected { background: #f8fbff; }
   --line:        #eedbe7;
   --line-soft:   #f7edf3;
   --display: var(--sans);
-  --sans: "Inter", "Aptos", "Avenir Next", "Helvetica Neue", Arial, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --sans: "Times New Roman", Times, Georgia, serif;
   --r-sm: 10px;
   --r-md: 16px;
   --r-lg: 22px;
@@ -394,13 +394,13 @@ body {
 }
 h1, h2, h3, h4 {
   font-family: var(--sans);
-  font-weight: 820;
+  font-weight: 900;
   line-height: 1.15;
   letter-spacing: 0;
 }
 h1 { font-size: clamp(1.55rem, 1.3rem + 1.1vw, 2.1rem); font-variation-settings: "opsz" 90; }
 h2 { font-size: clamp(1.2rem, 1.08rem + .5vw, 1.45rem); font-variation-settings: "opsz" 60; }
-h3 { font-family: var(--sans); font-size: 1.05rem; font-weight: 760; letter-spacing: 0; }
+h3 { font-family: var(--sans); font-size: 1.05rem; font-weight: 900; letter-spacing: 0; }
 p { color: var(--ink-2); }
 :focus-visible { outline: 2.5px solid var(--coral); outline-offset: 2px; border-radius: 6px; }
 
@@ -801,7 +801,7 @@ tr.is-selected { background: var(--coral-tint); }
   .nav a { flex: 1 1 auto; text-align: center; }
   .hospital-actionbar { grid-template-columns: 1fr; padding-inline: 1rem; }
 }
-/* Shared DAI pink/white hospital theme pass */
+/* Shared दाई pink/white hospital theme pass */
 :root {
   --coral: #c23a76;
   --coral-deep: #7b235d;
@@ -822,14 +822,14 @@ tr.is-selected { background: var(--coral-tint); }
   --line: #eedbe7;
   --line-soft: #f7edf3;
   --display: var(--sans);
-  --sans: "Inter", "Aptos", "Avenir Next", "Helvetica Neue", Arial, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --sans: "Times New Roman", Times, Georgia, serif;
 }
 body { background: var(--ground); font-family: var(--sans); }
-h1, h2, h3, h4 { font-family: var(--sans); font-weight: 850; letter-spacing: 0; }
+h1, h2, h3, h4 { font-family: var(--sans); font-weight: 900; letter-spacing: 0; }
 .topbar h1, .section-head h2, .detail h3, .detail-block h4, .metric b {
   font-weight: 850;
 }
-.brand-name { font-family: var(--sans); font-weight: 800; letter-spacing: .02em; }
+.brand-name { font-family: var(--sans); font-weight: 900; letter-spacing: 0; }
 .sidebar { background: rgba(255,255,255,.96); }
 .nav a.is-active, .surface-switch a.is-active { background: var(--violet); color: #fff; }
 .btn-primary {
@@ -860,7 +860,7 @@ h1, h2, h3, h4 { font-family: var(--sans); font-weight: 850; letter-spacing: 0; 
 .brand-name {
   color: var(--coral-deep);
   font-size: 1.35rem;
-  font-weight: 850;
+  font-weight: 900;
 }
 .primary-nav a,
 .surface-switch a,
@@ -1044,14 +1044,14 @@ h1, h2, h3, h4 { font-family: var(--sans); font-weight: 850; letter-spacing: 0; 
   <header class="sidebar">
     <div class="brand">
       <img class="brand-mark" src="assets/logo.jpeg" width="48" height="48" alt="">
-      <div><span class="brand-name">DAI</span><small>Hospital console</small></div>
+      <div><span class="brand-name">दाई</span><small>Hospital console</small></div>
     </div>
     <nav class="primary-nav" aria-label="Primary navigation">
       <a href="dashboard.html">Dashboard</a>
       <a href="index.html#modules">Features</a>
       <a href="index.html#why">About</a>
     </nav>
-    <nav class="surface-switch" aria-label="Switch DAI interface">
+    <nav class="surface-switch" aria-label="Switch दाई interface">
       <a href="dashboard.html">Mother / Patient</a>
       <a href="doctor.html">Doctor</a>
       <a class="is-active" href="hospital.html">Hospital team</a>

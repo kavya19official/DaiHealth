@@ -32,7 +32,7 @@
   --shadow-sm: 0 1px 2px rgba(38, 21, 38, .05), 0 8px 20px -16px rgba(123, 35, 93, .28);
   --shadow: 0 1px 2px rgba(38, 21, 38, .06), 0 22px 48px -30px rgba(123, 35, 93, .34);
   --wrap: min(1180px, calc(100% - 40px));
-  --font: "Inter", "Aptos", "Avenir Next", "Helvetica Neue", Arial, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font: "Times New Roman", Times, Georgia, serif;
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -60,9 +60,9 @@ h1, h2, h3, h4 {
   letter-spacing: 0;
   color: var(--ink);
 }
-h1 { font-size: clamp(2.15rem, 4.4vw, 4.15rem); font-weight: 800; }
-h2 { font-size: clamp(1.65rem, 3vw, 2.55rem); font-weight: 760; }
-h3 { font-size: clamp(1.05rem, 1.4vw, 1.25rem); font-weight: 740; }
+h1 { font-size: clamp(2.35rem, 4.7vw, 4.5rem); font-weight: 900; }
+h2 { font-size: clamp(1.75rem, 3.1vw, 2.75rem); font-weight: 900; }
+h3 { font-size: clamp(1.1rem, 1.5vw, 1.35rem); font-weight: 900; }
 p { margin: 0 0 1rem; color: var(--ink-2); }
 
 .wrap { width: var(--wrap); margin-inline: auto; }
@@ -117,10 +117,9 @@ p { margin: 0 0 1rem; color: var(--ink-2); }
 .brand__name {
   display: block;
   color: var(--brand-strong);
-  font-size: 1.35rem;
-  font-weight: 850;
+  font-size: 1.55rem;
+  font-weight: 900;
   line-height: 1;
-  text-transform: uppercase;
 }
 .brand__tag {
   display: block;
@@ -303,7 +302,7 @@ p { margin: 0 0 1rem; color: var(--ink-2); }
 .journey-copy h3 {
   max-width: 760px;
   font-size: clamp(1.25rem, 2.1vw, 1.75rem);
-  font-weight: 860;
+  font-weight: 900;
 }
 .journey-steps {
   display: grid;
@@ -456,26 +455,34 @@ p { margin: 0 0 1rem; color: var(--ink-2); }
   color: var(--brand);
   font-weight: 900;
 }
-.story-panels {
+.story-backdrop {
+  position: relative;
+  min-height: clamp(360px, 46vw, 540px);
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1rem;
-}
-.story-panel {
+  align-items: end;
   overflow: hidden;
   border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
-  background: #fff;
+  border-radius: 30px;
+  background: #fff url("assets/care-team.jpg") center / cover no-repeat;
+  box-shadow: var(--shadow);
+}
+.story-backdrop::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 248, 251, .78);
+}
+.story-backdrop__content {
+  position: relative;
+  width: min(620px, calc(100% - 2rem));
+  margin: 1rem;
+  padding: clamp(1rem, 3vw, 1.6rem);
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: rgba(255,255,255,.92);
   box-shadow: var(--shadow-sm);
 }
-.story-panel img {
-  width: 100%;
-  height: 220px;
-  object-fit: cover;
-  border-bottom: 1px solid var(--line);
-}
-.story-panel__body { padding: 1.05rem; }
-.story-panel__body p { margin-bottom: 0; font-size: .94rem; }
+.story-backdrop__content p { margin-bottom: 0; font-size: 1rem; }
 @keyframes story-drift {
   from { transform: translateX(0); }
   to { transform: translateX(-50%); }
@@ -733,7 +740,7 @@ body[data-role="mother"] #viewDoctor, body[data-role="doctor"] #viewFamily { dis
   .hero__grid, .workflow-row, .auth-main, .fv-header, .appt-grid, .dv-grid, .doctor-hero__grid, .doctor-layout, .doctor-grid, .doctor-brief-grid { grid-template-columns: 1fr; }
   .workflow-row:nth-child(even) .workflow-mock { order: 0; }
   .module-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .why-grid, .story-panels, .patient-actionbar, .wellness-grid, .team-grid, .doctor-metrics, .doctor-draft-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .why-grid, .patient-actionbar, .wellness-grid, .team-grid, .doctor-metrics, .doctor-draft-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .scroll-story__head, .journey-stage { grid-template-columns: 1fr; }
   .journey-steps { grid-template-columns: 1fr; }
   .footer-grid { grid-template-columns: repeat(2, 1fr); }
@@ -743,7 +750,7 @@ body[data-role="mother"] #viewDoctor, body[data-role="doctor"] #viewFamily { dis
   .header-actions { width: 100%; justify-content: space-between; flex-wrap: wrap; }
   .contact-link { display: none; }
   .hero-art { min-height: 0; }
-  .module-grid, .why-grid, .story-panels, .patient-actionbar, .wellness-grid, .team-grid, .field-row, .form-row-3, .footer-grid, .stat-strip, .doctor-metrics, .doctor-draft-grid { grid-template-columns: 1fr; }
+  .module-grid, .why-grid, .patient-actionbar, .wellness-grid, .team-grid, .field-row, .form-row-3, .footer-grid, .stat-strip, .doctor-metrics, .doctor-draft-grid { grid-template-columns: 1fr; }
   .role-toggle, .contraction-actions { grid-template-columns: 1fr; flex-direction: column; }
   .gap-alert { grid-template-columns: 1fr; }
   .mini-milestone, .milestone { grid-template-columns: 24px 1fr; }
