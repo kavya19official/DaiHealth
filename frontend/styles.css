@@ -286,6 +286,129 @@ p { margin: 0 0 1rem; color: var(--ink-2); }
   margin-bottom: 0;
   font-size: 1.05rem;
 }
+.journey-stage {
+  display: grid;
+  grid-template-columns: minmax(0, .92fr) minmax(320px, .68fr);
+  gap: clamp(1rem, 4vw, 2rem);
+  align-items: center;
+  margin-bottom: clamp(1.5rem, 4vw, 2.4rem);
+}
+.journey-copy {
+  padding: clamp(1rem, 3vw, 1.35rem);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: #fff;
+  box-shadow: var(--shadow-sm);
+}
+.journey-copy h3 {
+  max-width: 760px;
+  font-size: clamp(1.25rem, 2.1vw, 1.75rem);
+  font-weight: 860;
+}
+.journey-steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: .7rem;
+  margin-top: 1rem;
+}
+.journey-steps span {
+  min-height: 74px;
+  padding: .78rem;
+  border: 1px solid var(--line-soft);
+  border-radius: 16px;
+  background: var(--ground);
+  color: var(--ink-2);
+  font-size: .86rem;
+  font-weight: 720;
+}
+.journey-steps b {
+  display: block;
+  margin-bottom: .25rem;
+  color: var(--brand);
+  font-size: .78rem;
+  letter-spacing: .04em;
+}
+.journey-orb {
+  position: relative;
+  min-height: 310px;
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  background: #fff;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.journey-orb::before {
+  content: "";
+  position: absolute;
+  inset: 18px;
+  border: 1px solid var(--line-soft);
+  border-radius: 22px;
+}
+.orbit,
+.core-dot,
+.orbit-label {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+}
+.orbit {
+  width: 210px;
+  height: 86px;
+  margin: -43px 0 0 -105px;
+  border: 3px solid var(--brand-strong);
+  border-radius: 999px;
+  opacity: .72;
+  animation: orbit-spin 16s linear infinite;
+}
+.orbit--two {
+  width: 232px;
+  height: 94px;
+  margin: -47px 0 0 -116px;
+  border-color: var(--brand);
+  transform: rotate(62deg);
+  animation-duration: 20s;
+  animation-direction: reverse;
+}
+.orbit--three {
+  width: 184px;
+  height: 78px;
+  margin: -39px 0 0 -92px;
+  border-color: var(--accent);
+  transform: rotate(-42deg);
+  animation-duration: 24s;
+}
+.core-dot {
+  width: 110px;
+  height: 110px;
+  margin: -55px 0 0 -55px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--brand-soft);
+  color: var(--brand-strong);
+  font-weight: 900;
+  box-shadow: inset 0 0 0 1px var(--line), 0 18px 42px -28px rgba(123, 35, 93, .7);
+}
+.orbit-label {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: .35rem .7rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--ink-2);
+  font-size: .78rem;
+  font-weight: 820;
+  box-shadow: var(--shadow-sm);
+}
+.orbit-label--mother { transform: translate(-156px, -116px); }
+.orbit-label--doctor { transform: translate(54px, -92px); }
+.orbit-label--hospital { transform: translate(-44px, 92px); }
+@keyframes orbit-spin {
+  from { rotate: 0deg; }
+  to { rotate: 360deg; }
+}
 .story-rail {
   display: grid;
   gap: .85rem;
@@ -611,7 +734,8 @@ body[data-role="mother"] #viewDoctor, body[data-role="doctor"] #viewFamily { dis
   .workflow-row:nth-child(even) .workflow-mock { order: 0; }
   .module-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .why-grid, .story-panels, .patient-actionbar, .wellness-grid, .team-grid, .doctor-metrics, .doctor-draft-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .scroll-story__head { grid-template-columns: 1fr; }
+  .scroll-story__head, .journey-stage { grid-template-columns: 1fr; }
+  .journey-steps { grid-template-columns: 1fr; }
   .footer-grid { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 640px) {
@@ -629,6 +753,7 @@ body[data-role="mother"] #viewDoctor, body[data-role="doctor"] #viewFamily { dis
 @media (prefers-reduced-motion: reduce) {
   .story-lane { animation: none; transform: none; width: 100%; flex-wrap: wrap; justify-content: center; }
   .story-lane--two { transform: none; }
+  .orbit { animation: none; }
 }
 
 /* Shared dashboard typography scale */
