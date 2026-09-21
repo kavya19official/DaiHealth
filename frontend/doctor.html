@@ -3,382 +3,601 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>दाई — Doctor Portal</title>
-<meta name="description" content="दाई doctor portal for patient panels, care gaps, pre-consult briefs, appointments, reviewed drafts and manual priority flags.">
-<meta name="theme-color" content="#8f6bb8">
+<title>दाई — Doctor Dashboard</title>
+<meta name="theme-color" content="#7c3aed">
 <link rel="icon" href="assets/logo.jpeg">
-<link rel="stylesheet" href="styles.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--brand:#7c3aed;--brand-strong:#5b21b6;--brand-soft:#f3e8ff;--brand-pale:#faf5ff;--ink:#1e1b4b;--ink-2:#5b5675;--ink-muted:#6b7280;--ink-3:#9ca3af;--surface:#fff;--ground:#f8f5ff;--line:#ede9fe;--line-soft:#f5f3ff;--green:#10b981;--green-soft:#ecfdf5;--amber:#f59e0b;--amber-soft:#fffbeb;--rose:#f43f5e;--blue:#3b82f6;--blue-soft:#eff6ff;--radius:16px;--radius-lg:20px;--shadow-sm:0 1px 2px rgba(91,33,182,.05),0 4px 12px -6px rgba(124,58,237,.12);--shadow:0 4px 6px rgba(91,33,182,.04),0 14px 32px -14px rgba(124,58,237,.2);--sidebar-w:240px;--font:"Inter",system-ui,sans-serif;--display:"Plus Jakarta Sans","Inter",system-ui,sans-serif}
+*,*::before,*::after{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:var(--font);font-size:14px;line-height:1.5;color:var(--ink);background:var(--ground);-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}img,svg{display:block}button,input,select,textarea{font:inherit}
+.app{display:grid;grid-template-columns:var(--sidebar-w) 1fr;min-height:100vh}
+.sidebar{position:sticky;top:0;height:100vh;display:flex;flex-direction:column;background:linear-gradient(180deg,#faf5ff,#f5f0ff);border-right:1px solid var(--line);padding:1.1rem .85rem 1.25rem;overflow-y:auto}
+.sidebar__brand{display:flex;align-items:center;gap:.65rem;padding:.35rem .55rem 1.25rem}
+.sidebar__brand img{width:40px;height:40px;border-radius:50%;object-fit:cover;box-shadow:0 0 0 2px #fff,0 2px 8px rgba(124,58,237,.15)}
+.sidebar__brand-name{font-family:var(--display);font-weight:800;font-size:1.2rem;color:var(--brand);line-height:1}
+.sidebar__brand-tag{display:block;margin-top:.2rem;font-size:.58rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+.sidebar__nav{display:flex;flex-direction:column;gap:.2rem;flex:1}
+.nav-item{display:flex;align-items:center;gap:.7rem;padding:.65rem .85rem;border-radius:12px;color:var(--ink-2);font-size:.9rem;font-weight:500;border:0;background:transparent;width:100%;text-align:left}
+.nav-item:hover{background:rgba(124,58,237,.06);color:var(--brand-strong)}
+.nav-item.is-active{background:var(--brand);color:#fff;font-weight:600;box-shadow:0 6px 16px -6px rgba(124,58,237,.5)}
+.nav-item .badge{margin-left:auto;background:var(--rose);color:#fff;font-size:.65rem;font-weight:700;padding:.15rem .4rem;border-radius:999px}
+.sidebar__footer{margin-top:auto;padding:1rem .6rem .25rem;border-top:1px solid var(--line);font-size:.78rem;font-weight:600;color:var(--brand);line-height:1.35}
+.main{display:flex;flex-direction:column;min-width:0}
+.topbar{position:sticky;top:0;z-index:40;display:flex;align-items:center;gap:1rem;min-height:64px;padding:.65rem 1.5rem;background:rgba(255,255,255,.92);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.search{flex:1;max-width:480px;display:flex;align-items:center;gap:.55rem;padding:.55rem 1rem;border-radius:999px;background:var(--ground);border:1px solid var(--line);color:var(--ink-3)}
+.search input{flex:1;border:0;background:transparent;outline:none;color:var(--ink);font-size:.9rem}
+.topbar__right{margin-left:auto;display:flex;align-items:center;gap:.75rem}
+.icon-btn{position:relative;width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:#fff;display:grid;place-items:center}
+.icon-btn .badge{position:absolute;top:4px;right:4px;width:16px;height:16px;border-radius:50%;background:var(--rose);color:#fff;font-size:.62rem;font-weight:700;display:grid;place-items:center}
+.user-chip{display:flex;align-items:center;gap:.6rem;padding:.3rem .65rem .3rem .3rem;border-radius:999px;border:1px solid var(--line);background:#fff}
+.user-chip img{width:34px;height:34px;border-radius:50%;object-fit:cover}
+.user-chip__name{font-size:.85rem;font-weight:600}.user-chip__role{font-size:.7rem;color:var(--ink-3)}
+.content{padding:1.25rem 1.5rem 2rem}
+.panel{display:none}.panel.is-active{display:block}
+.card{background:#fff;border:1px solid var(--line);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm)}
+.welcome-row{display:grid;grid-template-columns:1fr minmax(240px,290px);gap:1rem;margin-bottom:1rem}
+.welcome-card{display:flex;align-items:center;gap:1.1rem;padding:1.1rem 1.25rem;background:linear-gradient(135deg,#faf5ff,#f3e8ff 55%,#ede9fe);border:1px solid var(--line);border-radius:var(--radius-lg)}
+.welcome-card__art{width:90px;height:100px;flex-shrink:0}
+.welcome-card__hello{font-size:.85rem;color:var(--ink-2);margin-bottom:.15rem}
+.welcome-card__title{font-family:var(--display);font-size:1.45rem;font-weight:800;letter-spacing:-.02em;margin-bottom:.2rem}
+.welcome-card__sub{font-size:.85rem;color:var(--ink-muted);margin-bottom:.65rem}
+.mini-stats{display:flex;flex-wrap:wrap;gap:.45rem}
+.mini-stat{padding:.4rem .7rem;border-radius:12px;background:rgba(255,255,255,.85);border:1px solid rgba(196,181,253,.5);font-size:.75rem;font-weight:600;color:var(--brand)}
+.mini-stat b{display:block;font-size:1.05rem;color:var(--ink);font-family:var(--display)}
+.next-card{padding:1.1rem 1.15rem}
+.next-card__label{font-size:.75rem;font-weight:600;color:var(--ink-muted);text-transform:uppercase;letter-spacing:.04em;display:flex;justify-content:space-between}
+.next-card__name{font-size:1.05rem;font-weight:700;margin-top:.5rem}
+.next-card__meta{font-size:.82rem;color:var(--ink-muted);margin:.2rem 0 .85rem}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;min-height:38px;padding:.5rem 1rem;border-radius:999px;border:1.5px solid transparent;font-size:.85rem;font-weight:600}
+.btn--primary{background:var(--brand);color:#fff;box-shadow:0 8px 20px -8px rgba(124,58,237,.5)}.btn--primary:hover{background:var(--brand-strong)}
+.btn--ghost{background:#fff;border-color:var(--line);color:var(--brand-strong)}.btn--sm{min-height:32px;padding:.35rem .7rem;font-size:.78rem}.btn--full{width:100%}
+.action-row{display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem;margin-bottom:1rem}
+.action-tile{padding:.9rem 1rem;border-radius:var(--radius);border:1px solid var(--line);background:#fff;text-align:left;transition:border-color .15s}
+.action-tile:hover{border-color:#c4b5fd}
+.action-tile__icon{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;margin-bottom:.45rem;background:var(--brand-soft);color:var(--brand);font-size:1rem}
+.action-tile__title{font-size:.88rem;font-weight:650}.action-tile__sub{font-size:.72rem;color:var(--ink-3);margin-top:.15rem}
+.grid-3{display:grid;grid-template-columns:1.2fr .9fr .75fr;gap:1rem;align-items:start}
+.section-card{padding:1.05rem 1.15rem 1.15rem;margin-bottom:0}
+.section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:.85rem}
+.section-title{font-family:var(--display);font-size:1rem;font-weight:700;display:flex;align-items:center;gap:.45rem}
+.link-btn{border:0;background:transparent;color:var(--brand);font-size:.8rem;font-weight:600}
+.table{width:100%;border-collapse:collapse;font-size:.82rem}
+.table th{text-align:left;font-size:.72rem;font-weight:600;color:var(--ink-3);text-transform:uppercase;letter-spacing:.03em;padding:.4rem .5rem;border-bottom:1px solid var(--line)}
+.table td{padding:.65rem .5rem;border-bottom:1px solid var(--line-soft);vertical-align:middle}
+.table tr:last-child td{border-bottom:0}
+.table tr{cursor:pointer}.table tr:hover td{background:var(--brand-pale)}
+.avatar{width:28px;height:28px;border-radius:50%;background:var(--brand-soft);color:var(--brand);display:inline-grid;place-items:center;font-size:.7rem;font-weight:700;margin-right:.4rem}
+.tag{display:inline-flex;padding:.18rem .5rem;border-radius:999px;font-size:.68rem;font-weight:600}
+.tag--ok{background:var(--green-soft);color:var(--green)}.tag--info{background:var(--brand-soft);color:var(--brand)}.tag--pending{background:var(--amber-soft);color:#b45309}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:.55rem}
+.stat-box{padding:.75rem;border-radius:12px;background:var(--brand-pale);border:1px solid var(--line)}
+.stat-box__label{font-size:.7rem;color:var(--ink-muted);font-weight:500}.stat-box__value{font-family:var(--display);font-size:1.25rem;font-weight:800;margin-top:.1rem}
+.stat-box__delta{font-size:.68rem;color:var(--green);font-weight:600}
+.qa-list{display:flex;flex-direction:column;gap:.35rem}
+.qa-row{display:flex;align-items:center;gap:.65rem;padding:.55rem .65rem;border-radius:12px;border:1px solid var(--line);background:#fff;text-align:left;width:100%}
+.qa-row:hover{border-color:#c4b5fd}
+.qa-row__icon{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;background:var(--brand-soft);font-size:.85rem}
+.qa-row__title{flex:1;font-size:.82rem;font-weight:600}.qa-row span{color:var(--ink-3)}
+.feed{display:flex;flex-direction:column;gap:.45rem}
+.feed-item{display:flex;gap:.6rem;align-items:flex-start;padding:.4rem 0;border-bottom:1px solid var(--line-soft);font-size:.8rem}
+.feed-item:last-child{border-bottom:0}
+.feed-item__dot{width:8px;height:8px;border-radius:50%;margin-top:.4rem;flex-shrink:0}
+.feed-item__title{font-weight:600}.feed-item__sub{color:var(--ink-muted);font-size:.75rem}
+.feed-item__date{margin-left:auto;color:var(--ink-3);font-size:.7rem;white-space:nowrap}
+.chart-mini{height:140px;border-radius:12px;background:linear-gradient(180deg,#faf5ff,#fff);border:1px solid var(--line-soft);padding:.5rem}
+.form-grid{display:grid;gap:.75rem;max-width:480px}
+.form-group label{display:block;font-size:.78rem;font-weight:600;margin-bottom:.3rem;color:var(--ink-2)}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:.6rem .8rem;border:1px solid var(--line);border-radius:12px}
+.toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(120%);background:var(--ink);color:#fff;padding:.7rem 1.2rem;border-radius:999px;font-size:.88rem;z-index:100;transition:transform .25s}
+.toast.is-show{transform:translateX(-50%) translateY(0)}
+.empty{padding:1.5rem;text-align:center;color:var(--ink-muted)}
+.list-row{display:flex;align-items:center;gap:.75rem;padding:.8rem 1rem;border-bottom:1px solid var(--line-soft)}
+.footer-bar{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.85rem 1.15rem;border-radius:var(--radius-lg);background:linear-gradient(90deg,#faf5ff,#f5f3ff);border:1px solid var(--line);margin-top:1rem;font-size:.85rem;color:var(--ink-2)}
+@media(max-width:1200px){.grid-3{grid-template-columns:1fr 1fr}.action-row{grid-template-columns:1fr 1fr}}
+@media(max-width:900px){.app{grid-template-columns:1fr}.sidebar{display:none}.welcome-row,.grid-3{grid-template-columns:1fr}.action-row{grid-template-columns:1fr}}
+</style>
+<script src="js/dai-api.js"></script>
 </head>
-<body class="doctor-page">
-<a class="skip-link" href="#main">Skip to content</a>
+<body>
+<div class="app">
+<aside class="sidebar">
+  <a class="sidebar__brand" href="index.html">
+    <img src="assets/logo-circle.png" alt="" width="40" height="40" onerror="this.src='assets/logo.jpeg'">
+    <span><span class="sidebar__brand-name">दाई</span><span class="sidebar__brand-tag">Hospital Workflow</span></span>
+  </a>
+  <nav class="sidebar__nav">
+    <button type="button" class="nav-item is-active" data-panel="dashboard">🏠 Dashboard</button>
+    <button type="button" class="nav-item" data-panel="patients">👥 Patients</button>
+    <button type="button" class="nav-item" data-panel="appointments">📅 Appointments</button>
+    <button type="button" class="nav-item" data-panel="timeline">🕐 Care Timeline</button>
+    <button type="button" class="nav-item" data-panel="records">📄 Records</button>
+    <button type="button" class="nav-item" data-panel="messages">💬 Messages <span class="badge">3</span></button>
+    <button type="button" class="nav-item" data-panel="settings">⚙️ Settings</button>
+  </nav>
+  <div class="sidebar__footer">💜 Better care.<br>Healthier tomorrows.</div>
+</aside>
 
-<header class="appbar">
-  <div class="wrap appbar__inner">
-    <a class="brand" href="index.html" aria-label="दाई home">
-      <img class="brand__mark" src="assets/logo.jpeg" width="48" height="48" alt="">
-      <span><span class="brand__name">दाई</span><span class="brand__tag">Doctor Portal</span></span>
-    </a>
-    <nav class="site-nav" aria-label="Primary navigation">
-      <a href="dashboard.html">Dashboard</a>
-      <a href="index.html#modules">Features</a>
-      <a href="index.html#why">About</a>
-    </nav>
-    <div class="header-actions">
-      <nav class="interface-switch" aria-label="Switch दाई interface">
-        <a href="dashboard.html">Mother / Patient</a>
-        <a class="is-active" href="doctor.html">Doctor</a>
-        <a href="hospital.html">Hospital Team</a>
-      </nav>
-      <span class="avatar-pill"><span class="dot">SK</span> Dr. S. Kumar</span>
+<div class="main">
+<header class="topbar">
+  <div class="search"><span>🔍</span><input type="search" id="searchInput" placeholder="Search patients, appointments, or records..."></div>
+  <div class="topbar__right">
+    <button class="icon-btn" type="button">🔔<span class="badge">3</span></button>
+    <div class="user-chip">
+      <img src="assets/logo-circle.png" alt="" width="34" height="34" onerror="this.src='assets/logo.jpeg'">
+      <div><div class="user-chip__name">Dr. Neha Sharma</div><div class="user-chip__role">Pediatrician</div></div>
     </div>
   </div>
 </header>
 
-<main id="main" class="doctor-shell">
-  <section class="doctor-hero">
-    <div class="wrap doctor-hero__grid">
+<div class="content">
+<!-- DASHBOARD -->
+<div class="panel is-active" id="panel-dashboard">
+  <div class="welcome-row">
+    <div class="welcome-card">
+      <div class="welcome-card__art" aria-hidden="true">
+        <svg viewBox="0 0 100 110" fill="none"><ellipse cx="50" cy="105" rx="35" ry="5" fill="#e9d5ff" opacity=".5"/>
+        <rect x="28" y="55" width="44" height="48" rx="8" fill="#e0e7ff"/><circle cx="50" cy="40" r="24" fill="#f5d0c0"/>
+        <path d="M32 35c4-14 16-20 30-14 2 8 0 16-4 20-8-4-18-4-26-6z" fill="#2d1f1f"/>
+        <ellipse cx="42" cy="40" rx="2.5" ry="3" fill="#2d1f1f"/><ellipse cx="58" cy="40" rx="2.5" ry="3" fill="#2d1f1f"/>
+        <path d="M44 50c2 3 8 3 10 0" stroke="#c4786a" stroke-width="1.3" stroke-linecap="round"/>
+        <path d="M35 58c-8 4-12 14-8 22h46c4-8 0-18-8-22" fill="#c7d2fe"/>
+        <rect x="55" y="70" width="18" height="22" rx="3" fill="#a78bfa"/>
+        </svg>
+      </div>
       <div>
-        <span class="eyebrow">Daily clinical workspace</span>
-        <h1>Today’s patients, gaps and consult context.</h1>
-        <p>The doctor portal is focused on what you need before and during consultations: your panel, open operational gaps, upcoming appointments, fact-only briefs and reviewable drafts.</p>
-      </div>
-      <div class="doctor-safety card">
-        <h2>Assistive-only controls</h2>
-        <p>No diagnosis, treatment recommendation or clinical risk score is generated here. Priority flags are doctor-set only.</p>
-        <div class="doctor-status-row">
-          <span class="tag tag--ok">Human review required</span>
-          <span class="tag tag--next">Audit enabled</span>
+        <div class="welcome-card__hello">☀️ Good morning, Dr. Neha!</div>
+        <div class="welcome-card__title">Here to make a healthier tomorrow</div>
+        <div class="welcome-card__sub">Small steps in care create big changes in health.</div>
+        <div class="mini-stats">
+          <div class="mini-stat"><b id="statToday">12</b> Today's Appointments</div>
+          <div class="mini-stat"><b id="statPending">8</b> Pending Follow-ups</div>
+          <div class="mini-stat"><b id="statPatients">186</b> Total Patients</div>
         </div>
       </div>
     </div>
-  </section>
-
-  <section class="wrap doctor-workspace">
-    <div class="doctor-metrics" id="doctorMetrics"></div>
-
-    <div class="doctor-layout">
-      <aside class="doctor-panel card">
-        <div class="doctor-panel__head">
-          <div>
-            <h2>My patients</h2>
-            <p>Sorted for daily follow-up work.</p>
-          </div>
-          <input id="doctorSearch" class="search-input" type="search" placeholder="Search name or ID">
+    <div class="card next-card">
+      <div class="next-card__label">Next Appointment <button type="button" class="link-btn" data-go="appointments">View All →</button></div>
+      <div style="display:flex;align-items:center;gap:.65rem;margin-top:.65rem">
+        <span class="avatar" style="width:40px;height:40px;font-size:.85rem">SP</span>
+        <div>
+          <div class="next-card__name" style="margin:0" id="nextPatient">Sanya Patel</div>
+          <div class="next-card__meta" style="margin:0" id="nextMeta">6 months · Follow-up<br>09:30 AM – 10:00 AM</div>
         </div>
-        <div id="doctorPatientList" class="doctor-list"></div>
-      </aside>
-
-      <section class="doctor-detail card" id="doctorDetail"></section>
-    </div>
-
-    <div class="doctor-grid">
-      <section class="card doctor-card">
-        <div class="doctor-card__head">
-          <div>
-            <h2>Pre-consult brief</h2>
-            <p>Facts, dates and flags only. No clinical interpretation.</p>
-          </div>
-          <span class="tag" id="briefState">pending review</span>
-        </div>
-        <div class="doctor-brief-grid">
-          <div>
-            <h3>Extracted facts</h3>
-            <div id="briefFacts" class="doctor-stack"></div>
-          </div>
-          <div>
-            <h3>Missing or inconsistent info</h3>
-            <div id="briefFlags" class="doctor-stack"></div>
-          </div>
-        </div>
-        <div class="doctor-actions">
-          <button class="btn btn--primary" data-action="review-brief">Mark reviewed</button>
-          <button class="btn btn--ghost" data-action="reject-brief">Reject extracted item</button>
-        </div>
-      </section>
-
-      <section class="card doctor-card">
-        <div class="doctor-card__head">
-          <div>
-            <h2>Upcoming appointments</h2>
-            <p>Queue context for patients under your care.</p>
-          </div>
-        </div>
-        <div id="doctorAppointments" class="doctor-stack"></div>
-      </section>
-    </div>
-
-    <div class="doctor-grid">
-      <section class="card doctor-card">
-        <div class="doctor-card__head">
-          <div>
-            <h2>Drafting assistant</h2>
-            <p>Draft generation and finalization stay separate.</p>
-          </div>
-          <button class="btn btn--primary btn--sm" data-action="new-draft">Generate draft</button>
-        </div>
-        <div id="doctorDrafts" class="doctor-draft-grid"></div>
-      </section>
-
-      <section class="card doctor-card">
-        <div class="doctor-card__head">
-          <div>
-            <h2>Recent audit</h2>
-            <p>Actions from doctor, hospital and agent workflows.</p>
-          </div>
-        </div>
-        <div id="doctorAudit" class="doctor-stack"></div>
-      </section>
-    </div>
-  </section>
-</main>
-
-<div class="modal-backdrop" id="doctorModal" aria-hidden="true">
-  <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="doctorModalTitle">
-    <div class="modal-box__head">
-      <div>
-        <h2 id="doctorModalTitle">Review action</h2>
-        <p id="doctorModalCopy">Add notes before this action is audited.</p>
       </div>
-      <button class="modal-close" data-action="close-modal">x</button>
+      <button type="button" class="btn btn--primary btn--full" style="margin-top:.85rem" data-go="appointments">View Details →</button>
     </div>
-    <div class="form-group">
-      <label for="doctorModalNotes">Notes</label>
-      <textarea id="doctorModalNotes" placeholder="Reason, correction or next step"></textarea>
+  </div>
+
+  <div class="action-row">
+    <button type="button" class="action-tile" data-go="appointments"><div class="action-tile__icon">📅</div><div class="action-tile__title">Book Appointment</div><div class="action-tile__sub">Schedule a new visit</div></button>
+    <button type="button" class="action-tile" data-go="records"><div class="action-tile__icon">📄</div><div class="action-tile__title">View Patient Records</div><div class="action-tile__sub">Access medical history</div></button>
+    <button type="button" class="action-tile" data-go="timeline"><div class="action-tile__icon">🕐</div><div class="action-tile__title">Update Care Timeline</div><div class="action-tile__sub">Add notes &amp; progress</div></button>
+    <button type="button" class="action-tile" id="teleBtn"><div class="action-tile__icon">📹</div><div class="action-tile__title">Teleconsultation</div><div class="action-tile__sub">Start online consultation</div></button>
+  </div>
+
+  <div class="grid-3">
+    <div class="card section-card">
+      <div class="section-head"><div class="section-title">📅 Today's Appointments</div><button type="button" class="link-btn" data-go="appointments">View All →</button></div>
+      <table class="table" id="todayTable">
+        <thead><tr><th>Time</th><th>Patient</th><th>Age / Gender</th><th>Reason</th><th>Status</th></tr></thead>
+        <tbody></tbody>
+      </table>
     </div>
-    <button class="btn btn--primary" data-action="confirm-modal">Confirm and audit</button>
+
+    <div>
+      <div class="card section-card" style="margin-bottom:1rem">
+        <div class="section-head"><div class="section-title">👤 Patient Overview</div><button type="button" class="link-btn" data-go="patients">View All →</button></div>
+        <div class="stat-grid">
+          <div class="stat-box"><div class="stat-box__label">Total Patients</div><div class="stat-box__value">186</div><div class="stat-box__delta">↑ 12%</div></div>
+          <div class="stat-box"><div class="stat-box__label">Today's Visits</div><div class="stat-box__value">12</div><div class="stat-box__delta">↑ 20%</div></div>
+          <div class="stat-box"><div class="stat-box__label">Pending Follow-ups</div><div class="stat-box__value">8</div><div class="stat-box__delta">↑ 11%</div></div>
+          <div class="stat-box"><div class="stat-box__label">New Patients</div><div class="stat-box__value">4</div><div class="stat-box__delta">↑ 33%</div></div>
+        </div>
+      </div>
+      <div class="card section-card">
+        <div class="section-head"><div class="section-title">📄 Recent Patient Records</div><button type="button" class="link-btn" data-go="records">View All →</button></div>
+        <div class="feed" id="recentRecords"></div>
+      </div>
+    </div>
+
+    <div class="side-stack" style="display:flex;flex-direction:column;gap:1rem">
+      <div class="card section-card">
+        <div class="section-title" style="margin-bottom:.75rem">⚡ Quick Actions</div>
+        <div class="qa-list">
+          <button type="button" class="qa-row" data-go="patients"><span class="qa-row__icon">👤</span><span class="qa-row__title">Add New Patient</span><span>›</span></button>
+          <button type="button" class="qa-row" data-go="records"><span class="qa-row__icon">📄</span><span class="qa-row__title">View Test Reports</span><span>›</span></button>
+          <button type="button" class="qa-row" id="rxBtn"><span class="qa-row__icon">💊</span><span class="qa-row__title">Send Prescription</span><span>›</span></button>
+          <button type="button" class="qa-row" data-go="records"><span class="qa-row__icon">📝</span><span class="qa-row__title">Update Records</span><span>›</span></button>
+          <button type="button" class="qa-row" data-go="timeline"><span class="qa-row__icon">💉</span><span class="qa-row__title">View Vaccination Schedule</span><span>›</span></button>
+        </div>
+      </div>
+      <div class="card section-card">
+        <div class="section-head"><div class="section-title">💉 Upcoming Vaccinations</div><button type="button" class="link-btn">View All →</button></div>
+        <div class="feed" id="vaxList"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-3" style="margin-top:1rem">
+    <div class="card section-card">
+      <div class="section-head"><div class="section-title">📈 Growth &amp; Development</div><button type="button" class="link-btn">View Chart →</button></div>
+      <div class="chart-mini">
+        <svg width="100%" height="100%" viewBox="0 0 360 120" preserveAspectRatio="none">
+          <g stroke="#ede9fe"><line x1="0" y1="20" x2="360" y2="20"/><line x1="0" y1="50" x2="360" y2="50"/><line x1="0" y1="80" x2="360" y2="80"/><line x1="0" y1="110" x2="360" y2="110"/></g>
+          <path d="M20 95 L90 80 L160 68 L230 55 L300 40" fill="none" stroke="#7c3aed" stroke-width="2.5" stroke-linecap="round"/>
+          <circle cx="300" cy="40" r="5" fill="#fff" stroke="#7c3aed" stroke-width="2.5"/>
+          <g fill="#9ca3af" font-size="9" font-family="Inter" text-anchor="middle"><text x="20" y="118">Birth</text><text x="90" y="118">2 mo</text><text x="160" y="118">4 mo</text><text x="230" y="118">6 mo</text><text x="300" y="118">7 mo</text></g>
+        </svg>
+      </div>
+      <div style="display:flex;gap:1rem;margin-top:.75rem;font-size:.8rem">
+        <div><div style="color:var(--ink-3)">Current Weight</div><b>8.2 kg</b> <span style="color:var(--ink-3)">(7 mo)</span></div>
+        <div><div style="color:var(--ink-3)">Height</div><b>68 cm</b></div>
+        <div><div style="color:var(--ink-3)">Head</div><b>44 cm</b></div>
+      </div>
+    </div>
+    <div class="card section-card">
+      <div class="section-head"><div class="section-title">💬 Recent Messages</div><button type="button" class="link-btn" data-go="messages">View All →</button></div>
+      <div class="feed" id="msgFeed"></div>
+    </div>
+    <div class="card section-card">
+      <div class="section-head"><div class="section-title">🕐 Care Timeline (Recent)</div><button type="button" class="link-btn" data-go="timeline">View All →</button></div>
+      <div class="feed" id="careFeed"></div>
+    </div>
+  </div>
+
+  <div class="footer-bar">
+    <span>💜 Need assistance? Reach out to the support team for any technical or patient-related queries.</span>
+    <button type="button" class="btn btn--primary" id="teleBtn2">Start Teleconsultation →</button>
   </div>
 </div>
 
-<div class="toast" id="doctorToast"><span id="doctorToastMsg"></span></div>
+<!-- PATIENTS -->
+<div class="panel" id="panel-patients">
+  <div class="card section-card" style="margin-bottom:1rem">
+    <div class="section-head"><div class="section-title">👥 Patients</div>
+      <button type="button" class="btn btn--primary btn--sm" id="addPatientBtn">+ Add patient</button>
+    </div>
+    <div style="margin-bottom:.75rem"><input type="search" id="patientFilter" placeholder="Filter patients…" style="width:100%;max-width:320px;padding:.55rem .85rem;border:1px solid var(--line);border-radius:999px"></div>
+    <table class="table" id="patientTable"><thead><tr><th>Patient</th><th>Age</th><th>Last visit</th><th>Status</th><th></th></tr></thead><tbody></tbody></table>
+  </div>
+  <div class="card section-card" id="addPatientForm" hidden>
+    <div class="section-title" style="margin-bottom:1rem">Add new patient</div>
+    <form class="form-grid" id="newPatientForm">
+      <div class="form-group"><label>Full name</label><input id="npName" required></div>
+      <div class="form-group"><label>Age / DOB note</label><input id="npAge" placeholder="e.g. 6 months · F"></div>
+      <div class="form-group"><label>Parent / guardian</label><input id="npParent"></div>
+      <div class="form-group"><label>Phone</label><input id="npPhone" type="tel"></div>
+      <button type="submit" class="btn btn--primary">Save patient</button>
+    </form>
+  </div>
+</div>
+
+<!-- APPOINTMENTS -->
+<div class="panel" id="panel-appointments">
+  <div class="main-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+    <div class="card section-card">
+      <div class="section-title" style="margin-bottom:1rem">📅 Schedule appointment</div>
+      <form class="form-grid" id="docApptForm">
+        <div class="form-group"><label>Patient</label><select id="daPatient"></select></div>
+        <div class="form-group"><label>Reason</label><select id="daReason"><option>Follow-up</option><option>Vaccination</option><option>Sick visit</option><option>Growth check</option><option>Consultation</option></select></div>
+        <div class="form-group"><label>Date</label><input type="date" id="daDate" required></div>
+        <div class="form-group"><label>Time</label><input type="time" id="daTime" value="09:30"></div>
+        <button type="submit" class="btn btn--primary">Book</button>
+      </form>
+    </div>
+    <div class="card section-card">
+      <div class="section-title" style="margin-bottom:.75rem">All appointments</div>
+      <div id="allAppts"></div>
+    </div>
+  </div>
+</div>
+
+<!-- TIMELINE -->
+<div class="panel" id="panel-timeline">
+  <div class="card section-card">
+    <div class="section-title" style="margin-bottom:1rem">🕐 Care Timeline</div>
+    <div id="docTimeline"></div>
+  </div>
+</div>
+
+<!-- RECORDS -->
+<div class="panel" id="panel-records">
+  <div class="card section-card">
+    <div class="section-head"><div class="section-title">📄 Patient Records</div></div>
+    <div id="docRecords"></div>
+  </div>
+</div>
+
+<!-- MESSAGES -->
+<div class="panel" id="panel-messages">
+  <div class="card section-card">
+    <div class="section-title" style="margin-bottom:1rem">💬 Messages</div>
+    <div id="docMessages"></div>
+  </div>
+</div>
+
+<!-- SETTINGS -->
+<div class="panel" id="panel-settings">
+  <div class="card section-card" style="max-width:480px">
+    <div class="section-title" style="margin-bottom:1rem">⚙️ Settings</div>
+    <form class="form-grid" id="docSettings">
+      <div class="form-group"><label>Display name</label><input value="Dr. Neha Sharma"></div>
+      <div class="form-group"><label>Specialty</label><input value="Pediatrician"></div>
+      <div class="form-group"><label><input type="checkbox" checked> Email notifications</label></div>
+      <button type="submit" class="btn btn--primary">Save</button>
+      <button type="button" class="btn btn--ghost" id="docLogout">Log out</button>
+    </form>
+  </div>
+</div>
+
+</div></div></div>
+<div class="toast" id="toast"></div>
 
 <script>
 (function () {
-  "use strict";
+"use strict";
+var api = window.DaiAPI;
+var currentUser = null;
+var patients = [];
+var appointments = [];
 
-  var API_BASE = "https://daihealth.onrender.com/api";
-  var state = null;
-  var selectedPatientId = null;
-  var pendingAction = null;
+function $(id) { return document.getElementById(id); }
 
-  function byId(id) { return document.getElementById(id); }
-  function html(value) {
-    return String(value == null ? "" : value).replace(/[&<>"']/g, function (c) {
-      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+function showPanel(id) {
+  document.querySelectorAll('.panel').forEach(function (p) { p.classList.remove('is-active'); });
+  document.querySelectorAll('.nav-item[data-panel]').forEach(function (n) { n.classList.remove('is-active'); });
+  var p = $('panel-' + id); if (p) p.classList.add('is-active');
+  var n = document.querySelector('.nav-item[data-panel="' + id + '"]'); if (n) n.classList.add('is-active');
+  try { history.replaceState(null, '', '#' + id); } catch (e) {}
+}
+
+document.querySelectorAll('.nav-item[data-panel]').forEach(function (b) {
+  b.addEventListener('click', function () { showPanel(b.getAttribute('data-panel')); });
+});
+document.querySelectorAll('[data-go]').forEach(function (el) {
+  el.addEventListener('click', function () { showPanel(el.getAttribute('data-go')); });
+});
+
+function renderTodayTable() {
+  var tb = document.querySelector('#todayTable tbody');
+  if (!tb) return;
+  var today = api.localDateStr();
+  var rows = appointments.filter(function (a) {
+    return String(a.requested_date).slice(0, 10) === today || a.status === 'confirmed' || a.status === 'pending';
+  }).slice(0, 12);
+  if (!rows.length) {
+    tb.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--ink-muted);padding:1.2rem">No appointments yet</td></tr>';
+    return;
+  }
+  tb.innerHTML = rows.map(function (a) {
+    var name = a.mother_name || 'Patient';
+    var ini = api.initials(name);
+    var st = a.status === 'confirmed' || a.status === 'completed' ? 'ok' : 'pending';
+    return '<tr data-aid="' + a.id + '"><td>' + api.fmtDate(a.requested_date) + '</td><td><span class="avatar">' + ini +
+      '</span>' + name + '</td><td>—</td><td>' + (a.reason || 'Visit') + '</td><td><span class="tag tag--' + st + '">' +
+      a.status + '</span></td></tr>';
+  }).join('');
+}
+
+function renderPatients() {
+  var q = (($('patientFilter') && $('patientFilter').value) || '').toLowerCase();
+  var list = patients.filter(function (p) {
+    return !q || (p.full_name || '').toLowerCase().indexOf(q) >= 0;
+  });
+  var tb = document.querySelector('#patientTable tbody');
+  if (tb) {
+    tb.innerHTML = list.map(function (p) {
+      var name = p.full_name || 'Patient';
+      return '<tr><td><span class="avatar">' + api.initials(name) + '</span>' + name +
+        '</td><td>' + (p.gap_count != null ? p.gap_count + ' open gaps' : '—') +
+        '</td><td>' + (p.last_appointment ? api.fmtDate(p.last_appointment) : '—') +
+        '</td><td><span class="tag tag--info">Active</span></td>' +
+        '<td><button type="button" class="btn btn--sm btn--ghost" data-pid="' + p.user_id + '">Open</button></td></tr>';
+    }).join('') || '<tr><td colspan="5" style="text-align:center;padding:1rem;color:var(--ink-muted)">No assigned patients yet</td></tr>';
+    tb.querySelectorAll('[data-pid]').forEach(function (b) {
+      b.addEventListener('click', function () { openPatient(Number(b.getAttribute('data-pid'))); });
     });
   }
-  function statusClass(status) {
-    if (status === "approved" || status === "published" || status === "reviewed") return "tag--ok";
-    if (status === "pending_review" || status === "draft") return "tag--pending";
-    if (status === "rejected" || status === "rejected_item") return "tag--due";
-    return "tag--next";
+  var sel = $('daPatient');
+  if (sel) {
+    sel.innerHTML = patients.map(function (p) {
+      return '<option value="' + p.user_id + '">' + (p.full_name || 'Patient') + '</option>';
+    }).join('') || '<option value="">No patients</option>';
   }
-  function patientName(id) {
-    var p = (state.patients || []).filter(function (x) { return x.id === id; })[0];
-    return p ? p.name : id;
+  var sp = $('statPatients');
+  if (sp) sp.textContent = String(patients.length);
+  var pending = appointments.filter(function (a) { return a.status === 'pending'; }).length;
+  var st = $('statPending'); if (st) st.textContent = String(pending);
+  var stoday = $('statToday');
+  if (stoday) {
+    var today = api.localDateStr();
+    stoday.textContent = String(appointments.filter(function (a) {
+      return String(a.requested_date).slice(0, 10) === today;
+    }).length || appointments.filter(function (a) { return a.status === 'confirmed'; }).length);
   }
-  function showToast(message) {
-    byId("doctorToastMsg").textContent = message;
-    byId("doctorToast").classList.add("is-shown");
-    clearTimeout(showToast.t);
-    showToast.t = setTimeout(function () { byId("doctorToast").classList.remove("is-shown"); }, 2400);
-  }
-  async function api(path, options) {
-    var res = await fetch(API_BASE + path, Object.assign({
-      headers: { "Content-Type": "application/json" }
-    }, options || {}));
-    var data = await res.json().catch(function () { return {}; });
-    if (!res.ok) throw new Error(data.error || "Request failed");
-    return data;
-  }
-  async function loadState() {
-    try {
-      state = await api("/doctor-portal/state");
-    } catch (error) {
-      var hospital = await api("/hospital/state");
-      state = {
-        doctor: { name: "Dr. S. Kumar", specialty: "Maternal continuity and OPD follow-up" },
-        patients: hospital.patients.filter(function (p) { return p.provider === "Dr. S. Kumar"; }).map(function (p) {
-          var gaps = hospital.gaps.filter(function (g) { return g.patientId === p.id; });
-          return Object.assign({}, p, { openGaps: gaps, openGapCount: gaps.length, doctorPriorityFlag: hospital.doctorPriorityFlags && hospital.doctorPriorityFlags[p.id] && hospital.doctorPriorityFlags[p.id].active ? hospital.doctorPriorityFlags[p.id] : null });
-        }),
-        consultationBrief: hospital.consultationBrief,
-        appointments: hospital.queue.filter(function (q) { return q.patientId === "P-1002" || q.patientId === "P-1001"; }).map(function (q) { return Object.assign({}, q, { patient: hospital.patients.filter(function (p) { return p.id === q.patientId; })[0] }); }),
-        drafts: hospital.drafts,
-        audit: hospital.audit
-      };
-    }
-    if (!selectedPatientId && state.patients.length) selectedPatientId = state.patients[0].id;
-    renderAll();
-  }
-  async function post(path, payload) {
-    var result = await api(path, {
-      method: "POST",
-      body: JSON.stringify(Object.assign({ actor: state.doctor.name }, payload || {}))
-    });
-    if (result.state) state = result.state;
-    renderAll();
-    return result;
-  }
-  function selectedPatient() {
-    return state.patients.filter(function (p) { return p.id === selectedPatientId; })[0] || state.patients[0];
-  }
-  function renderMetrics() {
-    var gaps = state.patients.reduce(function (sum, p) { return sum + p.openGapCount; }, 0);
-    var flags = state.patients.filter(function (p) { return p.doctorPriorityFlag; }).length;
-    var reviews = state.drafts.filter(function (d) { return d.status === "draft" || d.status === "pending_review"; }).length + (state.consultationBrief.status === "pending_review" ? 1 : 0);
-    byId("doctorMetrics").innerHTML = [
-      ["My patients", state.patients.length, "Under current doctor"],
-      ["Open care gaps", gaps, "Operational follow-up"],
-      ["Manual priority flags", flags, "Doctor-set only"],
-      ["Needs review", reviews, "Briefs and drafts"]
-    ].map(function (m) {
-      return '<div class="card doctor-metric"><span>' + m[0] + '</span><b>' + m[1] + '</b><em>' + m[2] + '</em></div>';
-    }).join("");
-  }
-  function renderPatients() {
-    var search = byId("doctorSearch").value.trim().toLowerCase();
-    var patients = state.patients.filter(function (p) { return !search || (p.name + " " + p.id).toLowerCase().indexOf(search) !== -1; });
-    byId("doctorPatientList").innerHTML = patients.map(function (p) {
-      return '<button class="doctor-patient ' + (p.id === selectedPatientId ? 'is-selected' : '') + '" data-patient="' + p.id + '">' +
-        '<span class="doctor-avatar">' + html(p.name.split(" ").map(function (x) { return x[0]; }).join("").slice(0, 2)) + '</span>' +
-        '<span><b>' + html(p.name) + '</b><small>' + html(p.id) + ' · ' + html(p.stage) + '</small></span>' +
-        '<span class="tag ' + (p.openGapCount ? 'tag--due' : 'tag--ok') + '">' + p.openGapCount + ' gaps</span>' +
-      '</button>';
-    }).join("") || '<div class="empty-state">No patients match this search.</div>';
-  }
-  function renderDetail() {
-    var p = selectedPatient();
-    if (!p) {
-      byId("doctorDetail").innerHTML = '<div class="empty-state">No patients available.</div>';
-      return;
-    }
-    byId("doctorDetail").innerHTML =
-      '<div class="doctor-detail__head">' +
-        '<div><span class="eyebrow">Selected patient</span><h2>' + html(p.name) + '</h2><p>' + html(p.id) + ' · Age ' + html(p.age) + ' · ' + html(p.stage) + '</p></div>' +
-        '<span class="tag ' + (p.doctorPriorityFlag ? 'tag--due' : 'tag--next') + '">' + (p.doctorPriorityFlag ? 'doctor-set priority' : 'no manual priority') + '</span>' +
-      '</div>' +
-      '<div class="doctor-actions">' +
-        '<button class="btn btn--primary" data-action="set-priority" data-patient="' + p.id + '">Set manual priority</button>' +
-        '<button class="btn btn--ghost" data-action="clear-priority" data-patient="' + p.id + '">Clear priority</button>' +
-      '</div>' +
-      '<h3>Open care gaps</h3>' +
-      '<div class="doctor-stack">' +
-        (p.openGaps && p.openGaps.length ? p.openGaps.map(function (g) {
-          return '<div class="doctor-item"><b>' + html(g.expectedType) + '</b><p>Due ' + html(g.dueDate) + ' · ' + g.daysOverdue + ' days overdue</p><p>' + html(g.provenance) + '</p></div>';
-        }).join("") : '<div class="empty-state">No open gaps for this patient.</div>') +
-      '</div>';
-  }
-  function renderBrief() {
-    var brief = state.consultationBrief;
-    byId("briefState").className = "tag " + statusClass(brief.status);
-    byId("briefState").textContent = brief.status.replace("_", " ");
-    byId("briefFacts").innerHTML = brief.facts.map(function (f) {
-      return '<div class="doctor-item"><b>' + html(f.label) + ': ' + html(f.value) + '</b><p>Source: ' + html(f.source) + ' · Confidence: ' + html(f.confidence) + '</p></div>';
-    }).join("");
-    byId("briefFlags").innerHTML = brief.flags.map(function (f) {
-      return '<div class="doctor-item"><b>' + html(f.type.replace("_", " ")) + '</b><p>' + html(f.text) + '</p><p>Source: ' + html(f.source) + '</p></div>';
-    }).join("");
-  }
-  function renderAppointments() {
-    byId("doctorAppointments").innerHTML = state.appointments.map(function (a) {
-      return '<div class="doctor-item"><b>' + html(a.slot) + ' · ' + html(a.patient ? a.patient.name : patientName(a.patientId)) + '</b><p>Status: ' + html(a.status) + ' · waiting ' + html(a.waitMins) + ' min</p><p>' + (a.urgency ? html(a.urgency) : 'No manual urgency flag') + '</p></div>';
-    }).join("") || '<div class="empty-state">No appointments in the current queue.</div>';
-  }
-  function renderDrafts() {
-    byId("doctorDrafts").innerHTML = state.drafts.map(function (d) {
-      var canApprove = d.status === "draft" || d.status === "pending_review";
-      var canFinalize = d.status === "approved";
-      return '<article class="doctor-draft">' +
-        '<div class="doctor-status-row"><span class="tag tag--next">' + html(d.type) + '</span><span class="tag ' + statusClass(d.status) + '">' + html(d.status.replace("_", " ")) + '</span></div>' +
-        '<p>' + html(d.body) + '</p>' +
-        '<div class="doctor-actions">' +
-          (canApprove ? '<button class="btn btn--primary btn--sm" data-action="approve-draft" data-draft="' + d.id + '">Approve</button>' : '') +
-          (canFinalize ? '<button class="btn btn--primary btn--sm" data-action="finalize-draft" data-draft="' + d.id + '">Finalize</button>' : '') +
-          '<button class="btn btn--ghost btn--sm" data-action="reject-draft" data-draft="' + d.id + '">Reject</button>' +
-        '</div>' +
-      '</article>';
-    }).join("");
-  }
-  function renderAudit() {
-    byId("doctorAudit").innerHTML = state.audit.slice(0, 10).map(function (a) {
-      return '<div class="doctor-item"><b>' + html(a.actor) + ' · ' + html(a.action) + '</b><p>' + html(a.entityType) + ' ' + html(a.entityId) + ' · ' + new Date(a.timestamp).toLocaleString("en-IN") + '</p><p>' + html(a.detail) + '</p></div>';
-    }).join("");
-  }
-  function renderAll() {
-    renderMetrics();
-    renderPatients();
-    renderDetail();
-    renderBrief();
-    renderAppointments();
-    renderDrafts();
-    renderAudit();
-  }
-  function openModal(title, copy, callback) {
-    pendingAction = callback;
-    byId("doctorModalTitle").textContent = title;
-    byId("doctorModalCopy").textContent = copy;
-    byId("doctorModalNotes").value = "";
-    byId("doctorModal").classList.add("is-open");
-    byId("doctorModal").setAttribute("aria-hidden", "false");
-  }
-  function closeModal() {
-    byId("doctorModal").classList.remove("is-open");
-    byId("doctorModal").setAttribute("aria-hidden", "true");
-    pendingAction = null;
-  }
+}
 
-  document.addEventListener("click", function (event) {
-    var patientBtn = event.target.closest("[data-patient]");
-    if (patientBtn && patientBtn.classList.contains("doctor-patient")) {
-      selectedPatientId = patientBtn.dataset.patient;
-      renderPatients();
-      renderDetail();
-      return;
+function renderAllAppts() {
+  var el = $('allAppts');
+  if (!el) return;
+  if (!appointments.length) {
+    el.innerHTML = '<div class="empty">No appointments</div>';
+    return;
+  }
+  el.innerHTML = appointments.map(function (a) {
+    var st = a.status === 'confirmed' || a.status === 'completed' ? 'ok' : 'pending';
+    var actions = '';
+    if (a.status === 'pending') {
+      actions = '<button type="button" class="btn btn--sm btn--primary" data-confirm="' + a.id + '">Confirm</button>';
+    } else if (a.status === 'confirmed') {
+      actions = '<button type="button" class="btn btn--sm btn--ghost" data-complete="' + a.id + '">Complete</button>';
     }
-    var btn = event.target.closest("[data-action]");
-    if (!btn) return;
-    var action = btn.dataset.action;
-    if (action === "close-modal") closeModal();
-    if (action === "confirm-modal" && pendingAction) {
-      var run = pendingAction;
-      var notes = byId("doctorModalNotes").value.trim();
-      closeModal();
-      run(notes);
-    }
-    if (action === "set-priority" || action === "clear-priority") {
-      var pid = btn.dataset.patient;
-      openModal(action === "set-priority" ? "Set doctor priority" : "Clear doctor priority", "This manual flag is set only by the doctor and is audited.", function (notes) {
-        post("/doctor-portal/patients/" + encodeURIComponent(pid) + "/priority", { active: action === "set-priority", notes: notes }).then(function () {
-          showToast("Manual priority updated.");
-        }).catch(function (err) { showToast(err.message); });
-      });
-    }
-    if (action === "review-brief" || action === "reject-brief") {
-      var briefAction = action === "review-brief" ? "review" : "reject";
-      post("/doctor-portal/consultations/" + encodeURIComponent(state.consultationBrief.appointmentId) + "/brief/" + briefAction, {}).then(function () {
-        showToast("Brief review state updated.");
-      }).catch(function (err) { showToast(err.message); });
-    }
-    if (action === "new-draft") {
-      var p = selectedPatient();
-      post("/doctor-portal/drafts", { patientId: p && p.id }).then(function () {
-        showToast("Draft generated for review.");
-      }).catch(function (err) { showToast(err.message); });
-    }
-    if (btn.dataset.draft) {
-      var draftAction = action === "approve-draft" ? "approve" : action === "finalize-draft" ? "finalize" : "reject";
-      openModal("Review draft", "Draft action: " + draftAction + ". Finalize is blocked until approved.", function (notes) {
-        post("/doctor-portal/drafts/" + encodeURIComponent(btn.dataset.draft) + "/" + draftAction, { notes: notes }).then(function () {
-          showToast("Draft state updated.");
-        }).catch(function (err) { showToast(err.message); });
-      });
+    return '<div class="list-row"><div style="flex:1"><b>' + (a.mother_name || 'Patient') + '</b>' +
+      '<div style="font-size:.78rem;color:var(--ink-muted)">' + api.fmtDate(a.requested_date) + ' · ' + (a.reason || '') +
+      '</div></div><span class="tag tag--' + st + '">' + a.status + '</span> ' + actions + '</div>';
+  }).join('');
+  el.querySelectorAll('[data-confirm]').forEach(function (b) {
+    b.addEventListener('click', function () { setApptStatus(b.getAttribute('data-confirm'), 'confirmed'); });
+  });
+  el.querySelectorAll('[data-complete]').forEach(function (b) {
+    b.addEventListener('click', function () { setApptStatus(b.getAttribute('data-complete'), 'completed'); });
+  });
+}
+
+async function setApptStatus(id, status) {
+  var data = await api.apiRequest('/appointments/' + id + '/status', {
+    method: 'PATCH',
+    body: { status: status }
+  });
+  if (data) {
+    api.toast('Appointment ' + status);
+    await loadAppointments();
+  }
+}
+
+async function openPatient(motherId) {
+  showPanel('timeline');
+  var el = $('docTimeline');
+  if (el) el.innerHTML = '<div class="empty">Loading timeline…</div>';
+  var data = await api.apiRequest('/doctor/patients/' + motherId + '/timeline');
+  var ms = (data && data.milestones) || [];
+  if (!el) return;
+  if (!ms.length) {
+    el.innerHTML = '<div class="empty">No timeline for this patient</div>';
+    return;
+  }
+  el.innerHTML = ms.map(function (m) {
+    var tag = m.status === 'completed' ? 'ok' : (m.status === 'overdue' ? 'pending' : 'info');
+    return '<div class="list-row"><div style="flex:1"><div class="feed-item__title">' + m.title +
+      '</div><div class="feed-item__sub">' + (m.stage || '') + ' · ' + api.fmtDate(m.due_date) +
+      '</div></div><span class="tag tag--' + tag + '">' + m.status + '</span></div>';
+  }).join('');
+}
+
+function renderNextAppt() {
+  var next = appointments.filter(function (a) {
+    return a.status === 'pending' || a.status === 'confirmed';
+  }).sort(function (a, b) {
+    return String(a.requested_date).localeCompare(String(b.requested_date));
+  })[0];
+  if (!next) return;
+  var np = $('nextPatient');
+  if (np) np.textContent = next.mother_name || 'Patient';
+  var nm = $('nextMeta');
+  if (nm) nm.innerHTML = (next.reason || 'Visit') + '<br>' + api.fmtDate(next.requested_date);
+}
+
+async function loadPatients() {
+  var data = await api.apiRequest('/doctor/patients');
+  patients = (data && data.patients) || [];
+  // API returns user_id as "id" from mother_profiles.user_id
+  patients = patients.map(function (p) {
+    p.user_id = p.user_id != null ? p.user_id : p.id;
+    return p;
+  });
+  renderPatients();
+}
+
+async function loadAppointments() {
+  var data = await api.apiRequest('/appointments');
+  appointments = (data && data.appointments) || [];
+  renderTodayTable();
+  renderAllAppts();
+  renderNextAppt();
+  renderPatients(); // refresh stats
+}
+
+// Add patient form is registration-side; doctors don't create user accounts here.
+// Hide or repurpose: show message that patients appear after appointment requests.
+var addBtn = $('addPatientBtn');
+if (addBtn) {
+  addBtn.addEventListener('click', function () {
+    api.toast('Patients appear when they book an appointment with you');
+    showPanel('appointments');
+  });
+}
+var addForm = $('addPatientForm');
+if (addForm) addForm.hidden = true;
+
+var docApptForm = $('docApptForm');
+if (docApptForm) {
+  // Doctor booking on behalf is not in API — mothers request appointments.
+  // Convert form to status management helper messaging.
+  docApptForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    api.toast('Patients request appointments from their portal. Confirm them in the list.');
+  });
+}
+
+var pf = $('patientFilter');
+if (pf) pf.addEventListener('input', renderPatients);
+
+['teleBtn', 'teleBtn2'].forEach(function (id) {
+  var el = $(id);
+  if (el) el.addEventListener('click', function () {
+    api.toast('Teleconsultation is assistive — connect via your hospital channel');
+  });
+});
+var rx = $('rxBtn');
+if (rx) rx.addEventListener('click', function () { api.toast('Send prescriptions via your clinical workflow'); });
+
+var settings = $('docSettings');
+if (settings) {
+  settings.addEventListener('submit', function (e) {
+    e.preventDefault();
+    api.toast('Profile is managed at registration; contact admin for changes');
+  });
+}
+var logout = $('docLogout');
+if (logout) {
+  logout.addEventListener('click', async function () {
+    await api.apiRequest('/auth/logout', { method: 'POST' });
+    window.location.href = 'auth.html';
+  });
+}
+
+var search = $('searchInput');
+if (search) {
+  search.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') {
+      showPanel('patients');
+      if ($('patientFilter')) {
+        $('patientFilter').value = search.value;
+        renderPatients();
+      }
     }
   });
+}
 
-  byId("doctorSearch").addEventListener("input", renderPatients);
-  loadState().catch(function (error) {
-    byId("doctorDetail").innerHTML = '<div class="empty-state">Start the backend server to load the doctor portal API. ' + html(error.message) + '</div>';
-  });
+async function boot() {
+  currentUser = await api.fetchCurrentUser();
+  if (!currentUser) return;
+  if (currentUser.role === 'mother') {
+    window.location.href = 'dashboard.html';
+    return;
+  }
+  var chip = document.querySelector('.user-chip__name');
+  if (chip) chip.textContent = currentUser.full_name || 'Doctor';
+  var role = document.querySelector('.user-chip__role');
+  if (role && currentUser.specialization) role.textContent = currentUser.specialization;
+
+  await Promise.all([loadPatients(), loadAppointments()]);
+
+  // Optional feeds from appointments
+  var rr = $('recentRecords');
+  if (rr && patients.length) {
+    rr.innerHTML = patients.slice(0, 5).map(function (p) {
+      return '<div class="feed-item"><div style="flex:1"><div class="feed-item__title">' + (p.full_name || '') +
+        '</div><div class="feed-item__sub">' + (p.gap_count ? p.gap_count + ' open care gaps' : 'On track') +
+        '</div></div></div>';
+    }).join('');
+  }
+}
+
+boot();
 })();
 </script>
 </body>

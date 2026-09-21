@@ -3,1949 +3,885 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>दाई — Care Dashboard</title>
-<meta name="theme-color" content="#8f6bb8">
+<title>दाई — Mother Dashboard</title>
+<meta name="theme-color" content="#7c3aed">
 <link rel="icon" href="assets/logo.jpeg">
-
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
 <style>
-/* ==========================================================================
-   दाई — Care Dashboard (Timeline · Care Gap Alerts · Doctor Dashboard)
-   Tokens carried over 1:1 from the marketing site so the app reads as the
-   same product, not a bolt-on demo.
-   ========================================================================== */
-
 :root {
-  --coral:       #8f6bb8;
-  --coral-deep:  #5e3a87;
-  --coral-soft:  #f7f4fc;
-  --coral-tint:  #ffffff;
-
-  --green:       #a78bfa;
-  --mint:        #faf8ff;
-  --mint-deep:   #e7ddf5;
-
-  --violet:      #8f6bb8;
-  --lilac:       #f7f4fc;
-
-  --amber:       #B8790A;
-  --amber-soft:  #FBF0DD;
-
-  --ink:         #261526;
-  --ink-2:       #625062;
-  --ink-3:       #8b7c8b;
-
-  --surface:     #FFFFFF;
-  --ground:      #ffffff;
-  --deep:        #261526;
-  --line:        #eee8f6;
-  --line-soft:   #f8f5fc;
-
-  --display: "Times New Roman", Times, Georgia, serif;
-  --sans:    "Times New Roman", Times, Georgia, serif;
-
-  --r-sm: 10px; --r-md: 16px; --r-lg: 22px; --r-xl: 30px;
-
-  --shadow-sm: 0 1px 2px rgba(15,31,41,.05), 0 4px 12px -6px rgba(15,31,41,.09);
-  --shadow-md: 0 1px 2px rgba(15,31,41,.04), 0 14px 34px -16px rgba(15,31,41,.18);
-  --shadow-coral: 0 10px 26px -12px rgba(201,57,44,.5);
+  --brand:#7c3aed;--brand-strong:#5b21b6;--brand-soft:#f3e8ff;--brand-pale:#faf5ff;--brand-mid:#8b5cf6;
+  --ink:#1e1b4b;--ink-2:#5b5675;--ink-muted:#6b7280;--ink-3:#9ca3af;
+  --surface:#fff;--ground:#f8f5ff;--line:#ede9fe;--line-soft:#f5f3ff;
+  --green:#10b981;--green-soft:#ecfdf5;--amber:#f59e0b;--amber-soft:#fffbeb;--rose:#f43f5e;
+  --blue:#3b82f6;--blue-soft:#eff6ff;
+  --radius:16px;--radius-lg:20px;
+  --shadow-sm:0 1px 2px rgba(91,33,182,.05),0 4px 12px -6px rgba(124,58,237,.12);
+  --shadow:0 4px 6px rgba(91,33,182,.04),0 14px 32px -14px rgba(124,58,237,.2);
+  --sidebar-w:240px;
+  --font:"Inter",system-ui,sans-serif;--display:"Plus Jakarta Sans","Inter",system-ui,sans-serif;
 }
-
-*, *::before, *::after { box-sizing: border-box; }
-html { -webkit-text-size-adjust: 100%; }
-body {
-  margin: 0; background: var(--ground); color: var(--ink);
-  font-family: var(--sans); font-size: 1rem; line-height: 1.55;
-  -webkit-font-smoothing: antialiased;
-}
-svg { display: block; }
-h1, h2, h3, h4 {
-  font-family: var(--display); font-weight: 900; line-height: 1.08;
-  letter-spacing: 0; margin: 0 0 .4em;
-}
-h1 { font-size: clamp(1.55rem, 1.3rem + 1.1vw, 2.1rem); font-variation-settings: "opsz" 90; }
-h2 { font-size: clamp(1.2rem, 1.08rem + .5vw, 1.45rem); font-variation-settings: "opsz" 60; }
-h3 { font-size: 1.05rem; font-weight: 900; letter-spacing: 0; font-family: var(--sans); }
-p { margin: 0 0 .8rem; color: var(--ink-2); }
-button { font-family: inherit; }
-:focus-visible { outline: 2.5px solid var(--coral); outline-offset: 2px; border-radius: 6px; }
-
-.wrap { width: min(1180px, 100%); margin-inline: auto; padding-inline: clamp(1rem, 3.5vw, 2.25rem); }
-
-/* ---- Top app bar --------------------------------------------------- */
-.appbar {
-  position: sticky; top: 0; z-index: 50;
-  background: rgba(255,255,255,.92); backdrop-filter: saturate(180%) blur(14px);
-  border-bottom: 1px solid var(--line);
-}
-.appbar__inner { display: flex; align-items: center; gap: 1.25rem; min-height: 4.25rem; flex-wrap: wrap; padding-block: .5rem; }
-.brand { display: flex; align-items: center; gap: .6rem; text-decoration: none; color: var(--ink); margin-right: auto; }
-.brand__mark { width: 48px; height: 48px; flex: none; border-radius: 12px; object-fit: contain; }
-.brand__name { font-family: var(--display); font-weight: 900; font-size: 1.45rem; letter-spacing: 0; }
-.brand__tag { display: block; font-size: .56rem; font-weight: 600; letter-spacing: .17em; color: var(--ink-3); }
-
-.segmented {
-  display: inline-flex; background: var(--ground); border: 1px solid var(--line);
-  border-radius: 999px; padding: 3px; gap: 2px;
-}
-.segmented button {
-  border: none; background: transparent; padding: .55rem 1.05rem; border-radius: 999px;
-  font-size: .87rem; font-weight: 600; color: var(--ink-2); cursor: pointer;
-  display: inline-flex; align-items: center; gap: .45rem; transition: background .2s ease, color .2s ease;
-}
-.segmented button svg { width: 16px; height: 16px; }
-.segmented button.is-active { background: var(--coral); color: #fff; }
-.segmented button:not(.is-active):hover { color: var(--ink); }
-.interface-switch {
-  display: inline-flex; background: var(--ground); border: 1px solid var(--line);
-  border-radius: 999px; padding: 3px; gap: 2px;
-}
-.interface-switch a {
-  text-decoration: none; color: var(--ink-2); padding: .55rem 1.05rem; border-radius: 999px;
-  font-size: .87rem; font-weight: 600; white-space: nowrap;
-}
-.interface-switch a.is-active { background: var(--coral); color: #fff; }
-.interface-switch a:not(.is-active):hover { color: var(--ink); }
-
-.avatar-pill {
-  display: inline-flex; align-items: center; gap: .55rem; padding: .35rem .8rem .35rem .35rem;
-  border: 1px solid var(--line); border-radius: 999px; font-size: .84rem; font-weight: 600;
-}
-.avatar-pill .dot { width: 30px; height: 30px; border-radius: 999px; background: var(--coral-soft); color: var(--coral-deep);
-  display: grid; place-items: center; font-size: .78rem; font-weight: 700; font-family: var(--display); }
-
-/* ---- Views ----------------------------------------------------------- */
-.view { display: none; padding-block: clamp(1.5rem, 3.5vw, 2.5rem) 4rem; }
-.view.is-active { display: block; }
-/* Each dashboard only ever renders for its own role. There is no UI control
-   that switches a signed-in user into the other role's view — access is also
-   enforced server-side on every /api/timeline, /api/doctor/* and
-   /api/appointments call. */
-body[data-role="mother"] #viewDoctor,
-body[data-role="doctor"] #viewFamily { display: none !important; }
-
-/* ---- Badges / tags ----------------------------------------------------- */
-.tag { display: inline-flex; align-items: center; gap: .35rem; font-size: .72rem; font-weight: 700;
-  letter-spacing: .01em; padding: .22rem .62rem; border-radius: 999px; white-space: nowrap; }
-.tag svg { width: 12px; height: 12px; }
-.tag--ok    { background: var(--mint); color: var(--green); }
-.tag--due   { background: var(--coral-soft); color: var(--coral-deep); }
-.tag--next  { background: var(--line-soft); color: var(--ink-3); }
-.tag--risk-low    { background: var(--mint); color: var(--green); }
-.tag--risk-medium { background: var(--amber-soft); color: var(--amber); }
-.tag--risk-high   { background: var(--coral-soft); color: var(--coral-deep); }
-
-/* ---- Buttons ------------------------------------------------------- */
-.btn {
-  display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
-  font-size: .87rem; font-weight: 600; padding: .62rem 1.1rem; border-radius: 999px;
-  border: 1.5px solid transparent; cursor: pointer; white-space: nowrap;
-  transition: background-color .18s ease, border-color .18s ease, box-shadow .18s ease, opacity .18s ease;
-}
-.btn svg { width: 15px; height: 15px; flex: none; }
-.btn--primary { background: var(--coral); color: #fff; box-shadow: var(--shadow-coral); }
-.btn--primary:hover { background: var(--coral-deep); }
-.btn--ghost { background: var(--surface); color: var(--ink); border-color: var(--line); }
-.btn--ghost:hover { border-color: var(--ink-3); }
-.btn--sm { padding: .46rem .85rem; font-size: .8rem; }
-.btn:disabled { opacity: .55; cursor: default; }
-.btn--done { background: var(--mint); color: var(--green); border-color: var(--mint-deep); }
-
-/* ---- Cards ----------------------------------------------------------- */
-.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); box-shadow: var(--shadow-sm); }
-
-/* ---- Family view: header --------------------------------------------- */
-.fv-header {
-  display: grid; grid-template-columns: minmax(0,1.1fr) minmax(0,.9fr); gap: 1.5rem;
-  align-items: stretch; margin-bottom: 1.75rem;
-}
-.fv-header__intro { padding: 1.6rem 1.8rem; display: flex; flex-direction: column; justify-content: center; }
-.fv-header__intro .eyebrow {
-  display: inline-flex; align-items: center; gap: .5rem; font-size: .78rem; font-weight: 600;
-  color: var(--coral-deep); background: var(--coral-soft); border-radius: 999px; padding: .28rem .75rem; margin-bottom: .8rem; width: fit-content;
-}
-.fv-header__intro p { margin: 0; font-size: .95rem; }
-.fv-header__intro strong { color: var(--ink); }
-
-.progress-card { padding: 1.6rem 1.8rem; display: flex; flex-direction: column; justify-content: center; gap: .9rem; }
-.progress-card__top { display: flex; justify-content: space-between; align-items: baseline; }
-.progress-card__top b { font-family: var(--display); font-size: 1.4rem; font-weight: 600; }
-.progress-card__top span { font-size: .8rem; color: var(--ink-3); }
-.progress-track { position: relative; height: 10px; border-radius: 999px; background: var(--line-soft); overflow: hidden; }
-.progress-fill { position: absolute; inset: 0 auto 0 0; border-radius: 999px; background: var(--coral); transition: width .5s ease; }
-.progress-labels { display: flex; justify-content: space-between; font-size: .74rem; color: var(--ink-3); }
-
-/* ---- Care gap alerts --------------------------------------------------- */
-.gap-section { margin-bottom: 2rem; }
-.gap-section__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: .9rem; gap: 1rem; flex-wrap: wrap; }
-.gap-section__head h2 { margin: 0; display: flex; align-items: center; gap: .55rem; }
-.gap-count { display: inline-flex; align-items: center; justify-content: center; min-width: 1.5rem; height: 1.5rem; padding-inline: .4rem;
-  border-radius: 999px; background: var(--coral); color: #fff; font-family: var(--sans); font-size: .8rem; font-weight: 700; }
-.gap-empty { display: flex; align-items: center; gap: .8rem; padding: 1.1rem 1.3rem; background: var(--mint); border: 1px solid var(--mint-deep); border-radius: var(--r-md); color: var(--green); font-weight: 600; font-size: .92rem; }
-.gap-empty svg { width: 20px; height: 20px; flex: none; }
-
-.gap-alert {
-  display: grid; grid-template-columns: 46px minmax(0,1fr) auto; gap: 1.1rem; align-items: start;
-  padding: 1.25rem 1.4rem; border-radius: var(--r-lg); border: 1px solid var(--coral-soft);
-  background: var(--surface);
-  margin-bottom: .9rem;
-}
-.gap-alert__icon { width: 46px; height: 46px; border-radius: 13px; background: var(--coral-soft); color: var(--coral-deep); display: grid; place-items: center; flex: none; }
-.gap-alert__icon svg { width: 23px; height: 23px; }
-.gap-alert__body h3 { margin-bottom: .2rem; }
-.gap-alert__meta { display: flex; gap: .6rem; align-items: center; flex-wrap: wrap; margin-bottom: .5rem; font-size: .78rem; color: var(--ink-3); }
-.gap-alert__action {
-  display: flex; gap: .55rem; align-items: flex-start; background: var(--surface); border: 1px dashed var(--line);
-  border-radius: var(--r-sm); padding: .7rem .85rem; font-size: .84rem; color: var(--ink-2); margin: 0;
-}
-.gap-alert__action svg { width: 16px; height: 16px; color: var(--violet); flex: none; margin-top: 1px; }
-.gap-alert__buttons { display: flex; flex-direction: column; gap: .5rem; align-items: stretch; }
-.gap-alert.is-resolved { opacity: 0; max-height: 0; padding-block: 0; margin: 0; border-width: 0; overflow: hidden; transition: opacity .3s ease, max-height .4s ease .1s, padding .4s ease .1s, margin .4s ease .1s; }
-
-/* ---- Stage stepper ------------------------------------------------- */
-.stage-stepper { display: flex; align-items: center; margin-bottom: 2rem; overflow-x: auto; padding-bottom: .4rem; }
-.stage-step { display: flex; align-items: center; flex: 1 1 0; min-width: 118px; }
-.stage-step__dot {
-  width: 30px; height: 30px; border-radius: 999px; background: var(--surface); border: 2px solid var(--line);
-  color: var(--ink-3); display: grid; place-items: center; flex: none; font-size: .78rem; font-weight: 700;
-}
-.stage-step__dot svg { width: 15px; height: 15px; }
-.stage-step__label { margin-left: .6rem; font-size: .78rem; font-weight: 600; color: var(--ink-3); white-space: nowrap; }
-.stage-step__line { flex: 1 1 auto; height: 2px; background: var(--line); margin-inline: .5rem; }
-.stage-step.is-done .stage-step__dot { background: var(--mint); border-color: var(--mint-deep); color: var(--green); }
-.stage-step.is-done .stage-step__label { color: var(--ink); }
-.stage-step.is-done + .stage-step .stage-step__line, .stage-step.is-done .stage-step__line { background: var(--mint-deep); }
-.stage-step.is-current .stage-step__dot { background: var(--coral); border-color: var(--coral); color: #fff; box-shadow: 0 0 0 4px var(--coral-soft); }
-.stage-step.is-current .stage-step__label { color: var(--ink); }
-
-/* ---- Timeline accordion --------------------------------------------- */
-.timeline-group { border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--surface); margin-bottom: .9rem; overflow: hidden; }
-.timeline-group__head {
-  width: 100%; display: flex; align-items: center; gap: .9rem; padding: 1.05rem 1.3rem; background: none; border: none; cursor: pointer; text-align: left;
-}
-.timeline-group__head b { flex: 1 1 auto; font-family: var(--display); font-size: 1.02rem; font-weight: 600; }
-.timeline-group__head .stage-summary { font-size: .78rem; color: var(--ink-3); }
-.timeline-group__head svg.chev { width: 18px; height: 18px; color: var(--ink-3); transition: transform .2s ease; flex: none; }
-.timeline-group.is-open .chev { transform: rotate(180deg); }
-.timeline-group__body { display: none; border-top: 1px solid var(--line-soft); padding: .4rem 1.3rem 1.1rem; }
-.timeline-group.is-open .timeline-group__body { display: block; }
-
-.milestone { display: grid; grid-template-columns: 22px minmax(0,1fr) auto; gap: .8rem; align-items: center; padding: .75rem 0; border-bottom: 1px solid var(--line-soft); }
-.milestone:last-child { border-bottom: none; }
-.milestone__icon svg { width: 20px; height: 20px; }
-.milestone__icon.ok { color: var(--green); }
-.milestone__icon.due { color: var(--coral); }
-.milestone__icon.next { color: var(--ink-3); }
-.milestone__title { font-size: .92rem; font-weight: 600; color: var(--ink); }
-.milestone__when { font-size: .78rem; color: var(--ink-3); }
-.milestone__right { display: flex; align-items: center; gap: .6rem; }
-.milestone__detail { grid-column: 1 / -1; margin: -.2rem 0 .6rem 2.85rem; }
-
-/* ---- Toast -------------------------------------------------------------- */
-.toast {
-  position: fixed; left: 50%; bottom: 1.6rem; transform: translate(-50%, 12px); z-index: 200;
-  background: var(--ink); color: #fff; padding: .75rem 1.15rem; border-radius: 999px; font-size: .86rem; font-weight: 600;
-  display: flex; align-items: center; gap: .55rem; box-shadow: var(--shadow-md); opacity: 0; pointer-events: none;
-  transition: opacity .25s ease, transform .25s ease;
-}
-.toast.is-shown { opacity: 1; transform: translate(-50%, 0); }
-.toast svg { width: 16px; height: 16px; color: var(--mint-deep); }
-
-/* ---- Doctor dashboard ---------------------------------------------- */
-.dv-header { margin-bottom: 1.5rem; }
-.stat-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--r-lg); overflow: hidden; margin-bottom: 1.75rem; }
-.stat-cell { background: var(--surface); padding: 1.2rem 1.3rem; }
-.stat-cell b { display: block; font-family: var(--display); font-size: 1.7rem; font-weight: 600; }
-.stat-cell span { font-size: .8rem; color: var(--ink-3); }
-.stat-cell.is-alert b { color: var(--coral-deep); }
-
-.dv-grid { display: grid; grid-template-columns: minmax(280px, 360px) minmax(0,1fr); gap: 1.5rem; align-items: start; }
-
-.patient-panel { border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--surface); overflow: hidden; }
-.patient-panel__controls { padding: 1rem 1.1rem .3rem; border-bottom: 1px solid var(--line-soft); }
-.search-input { width: 100%; padding: .62rem .9rem; border: 1px solid var(--line); border-radius: var(--r-sm); font-size: .87rem; font-family: inherit; margin-bottom: .8rem; }
-.chips { display: flex; gap: .45rem; flex-wrap: wrap; margin-bottom: .9rem; }
-.chip {
-  border: 1px solid var(--line); background: var(--surface); color: var(--ink-2); font-size: .78rem; font-weight: 600;
-  padding: .38rem .8rem; border-radius: 999px; cursor: pointer;
-}
-.chip.is-active { background: var(--ink); color: #fff; border-color: var(--ink); }
-
-.patient-list { max-height: 640px; overflow-y: auto; }
-.patient-card {
-  width: 100%; display: flex; align-items: center; gap: .8rem; padding: .95rem 1.1rem; background: none; border: none;
-  border-bottom: 1px solid var(--line-soft); cursor: pointer; text-align: left;
-}
-.patient-card:hover { background: var(--ground); }
-.patient-card.is-selected { background: var(--coral-tint); }
-.patient-card__avatar {
-  width: 40px; height: 40px; border-radius: 999px; background: var(--lilac); color: var(--violet);
-  display: grid; place-items: center; font-family: var(--display); font-weight: 700; font-size: .88rem; flex: none;
-}
-.patient-card__body { flex: 1 1 auto; min-width: 0; }
-.patient-card__name { font-size: .92rem; font-weight: 600; color: var(--ink); display: flex; align-items: center; gap: .4rem; }
-.patient-card__meta { font-size: .78rem; color: var(--ink-3); margin-top: .1rem; }
-.patient-card__gap { flex: none; }
-
-.detail-panel { border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--surface); padding: 1.6rem 1.7rem; min-height: 300px; }
-.detail-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.4rem; padding-bottom: 1.3rem; border-bottom: 1px solid var(--line-soft); }
-.detail-head__id { display: flex; align-items: center; gap: .9rem; }
-.detail-head__avatar { width: 52px; height: 52px; border-radius: 999px; background: var(--lilac); color: var(--violet); display: grid; place-items: center; font-family: var(--display); font-weight: 700; font-size: 1.1rem; }
-.detail-head__tags { display: flex; gap: .5rem; margin-top: .4rem; flex-wrap: wrap; }
-
-.detail-gaps { margin-bottom: 1.6rem; }
-.detail-gaps h4 { font-size: .82rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--ink-3); margin-bottom: .7rem; }
-.dgap { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 1rem; align-items: center; padding: .85rem 1rem; border: 1px solid var(--coral-soft); background: var(--coral-tint); border-radius: var(--r-md); margin-bottom: .6rem; }
-.dgap__title { font-size: .88rem; font-weight: 600; }
-.dgap__note { font-size: .8rem; color: var(--ink-2); margin: .2rem 0 0; }
-.dgap.is-reviewed { border-color: var(--line); background: var(--ground); }
-.dgap.is-reviewed .dgap__title { color: var(--ink-3); }
-
-.mini-timeline { display: grid; gap: 0; }
-.mini-milestone { display: grid; grid-template-columns: 20px 1fr auto auto; gap: .7rem; align-items: center; padding: .6rem 0; border-bottom: 1px solid var(--line-soft); font-size: .86rem; }
-.mini-milestone:last-child { border-bottom: none; }
-.mini-milestone__stage { font-size: .72rem; color: var(--ink-3); }
-
-.empty-state { text-align: center; padding: 3rem 1rem; color: var(--ink-3); }
-
-@media (max-width: 900px) {
-  .fv-header { grid-template-columns: 1fr; }
-  .dv-grid { grid-template-columns: 1fr; }
-  .stat-strip { grid-template-columns: repeat(2, 1fr); }
-  .gap-alert { grid-template-columns: 40px 1fr; }
-  .gap-alert__buttons { grid-column: 1 / -1; flex-direction: row; margin-top: .4rem; }
-}
-@media (max-width: 560px) {
-  .stat-strip { grid-template-columns: 1fr; }
-  .milestone { grid-template-columns: 20px 1fr; }
-  .milestone__right { grid-column: 1 / -1; padding-left: 2.85rem; }
-}
-
-/* ---- Appointments ------------------------------------------------- */
-.appt-section { margin-top: 2.5rem; }
-.appt-grid { display: grid; grid-template-columns: 1.1fr 1.4fr; gap: 1.25rem; align-items: start; }
-@media (max-width: 860px) { .appt-grid { grid-template-columns: 1fr; } }
-
-.form-group { margin-bottom: 1.1rem; }
-.form-group label { display: block; font-weight: 500; margin-bottom: .4rem; color: var(--ink); font-size: .88rem; }
-.form-group input,
-.form-group select,
-.form-group textarea {
-  width: 100%; padding: .68rem .9rem; border: 1px solid var(--line); border-radius: var(--r-md);
-  font-family: inherit; font-size: .95rem; color: var(--ink); background: var(--surface);
-  transition: border-color .2s ease;
-}
-.form-group textarea { resize: vertical; min-height: 5rem; }
-.form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: var(--coral); }
-
-.appt-list { display: flex; flex-direction: column; gap: .75rem; }
-.appt-card {
-  border: 1px solid var(--line); border-radius: var(--r-md); padding: .9rem 1.05rem;
-  display: flex; flex-direction: column; gap: .35rem; background: var(--surface);
-}
-.appt-card__top { display: flex; align-items: center; justify-content: space-between; gap: .6rem; flex-wrap: wrap; }
-.appt-card__who { font-weight: 600; font-size: .92rem; }
-.appt-card__meta { font-size: .82rem; color: var(--ink-3); }
-.appt-card__reason { font-size: .88rem; color: var(--ink-2); }
-.appt-card__actions { display: flex; gap: .5rem; align-items: center; flex-wrap: wrap; margin-top: .3rem; }
-.appt-card__actions select { width: auto; padding: .4rem .6rem; font-size: .82rem; }
-.tag--pending   { background: var(--amber-soft); color: var(--amber); }
-.tag--confirmed { background: var(--lilac); color: var(--violet); }
-.tag--completed { background: var(--mint); color: var(--green); }
-.tag--cancelled { background: var(--line-soft); color: var(--ink-3); }
-
-/* ---- Care team (colleague doctors) --------------------------------- */
-.team-section { margin-bottom: 2rem; }
-.team-section__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: .9rem; gap: 1rem; flex-wrap: wrap; }
-.team-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: .9rem; }
-.team-card {
-  display: flex; align-items: center; gap: .8rem; padding: 1rem 1.1rem;
-  border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--surface);
-}
-.team-card__avatar { width: 42px; height: 42px; border-radius: 999px; background: var(--lilac); color: var(--violet);
-  display: grid; place-items: center; font-family: var(--display); font-weight: 700; font-size: .92rem; flex: none; }
-.team-card__body { min-width: 0; }
-.team-card__name { font-size: .92rem; font-weight: 600; color: var(--ink); }
-.team-card__meta { font-size: .78rem; color: var(--ink-3); margin-top: .1rem; }
-.team-empty { grid-column: 1 / -1; }
-
-/* ---- Modal ------------------------------------------------------------ */
-.modal-backdrop {
-  position: fixed; inset: 0; background: rgba(15,31,41,.5); z-index: 300;
-  display: flex; align-items: center; justify-content: center; padding: 1.25rem;
-  opacity: 0; pointer-events: none; transition: opacity .18s ease;
-}
-.modal-backdrop.is-open { opacity: 1; pointer-events: auto; }
-.modal-box {
-  width: min(480px, 100%); max-height: 90vh; overflow-y: auto;
-  background: var(--surface); border-radius: var(--r-xl); box-shadow: var(--shadow-md);
-  padding: 1.8rem 1.9rem; transform: translateY(10px); transition: transform .18s ease;
-}
-.modal-backdrop.is-open .modal-box { transform: translateY(0); }
-.modal-box__head { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: .3rem; }
-.modal-close { background: none; border: none; cursor: pointer; color: var(--ink-3); padding: .3rem; border-radius: 999px; flex: none; }
-.modal-close:hover { color: var(--ink); background: var(--ground); }
-.modal-close svg { width: 18px; height: 18px; }
-.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-@media (max-width: 480px) { .field-row { grid-template-columns: 1fr; } }
-
-.wellness-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.1rem;margin:2rem 0}.module-card{padding:1.25rem 1.35rem}.module-card__head{display:flex;align-items:flex-start;justify-content:space-between;gap:.8rem;margin-bottom:1rem}.module-card__head h3{margin:0}.module-card__head p{font-size:.78rem;margin:.15rem 0 0}.module-stat{display:flex;align-items:center;justify-content:space-between;padding:.65rem .75rem;border:1px solid var(--line-soft);border-radius:12px;background:var(--ground);margin-bottom:.55rem}.module-stat span{font-size:.8rem;color:var(--ink-2)}.check-row{display:flex;align-items:center;gap:.65rem;padding:.55rem .65rem;border:1px solid var(--line-soft);border-radius:12px;margin-bottom:.5rem}.check-row input{width:17px;height:17px;accent-color:var(--coral)}.check-row label{flex:1;font-size:.88rem}.small-input{width:100%;padding:.58rem .7rem;border:1px solid var(--line);border-radius:11px;font:inherit;color:var(--ink);background:var(--surface)}.form-row-3{display:grid;grid-template-columns:repeat(3,1fr);gap:.55rem}.fruit-card{display:flex;align-items:center;gap:1rem;padding:1rem;background:var(--coral-tint);border:1px solid var(--line);border-radius:16px;margin-bottom:.8rem}.fruit-emoji{font-size:2.6rem;line-height:1}.fruit-card strong{font-size:1.05rem}.fruit-card small{display:block;color:var(--ink-2);margin-top:.2rem}.contraction-display{text-align:center;padding:.5rem 0 1rem}.contraction-time{font-family:var(--display);font-size:2.5rem;font-weight:600}.contraction-actions{display:flex;justify-content:center;gap:.6rem;flex-wrap:wrap}.contraction-log{max-height:160px;overflow:auto;margin-top:.8rem}.contraction-item{display:flex;justify-content:space-between;font-size:.8rem;padding:.5rem 0;border-bottom:1px solid var(--line-soft)}.sos-card{margin:1.2rem 0 2rem;padding:1.1rem 1.25rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;border:1px solid #f5c6c1;background:#fff;border-radius:18px}.sos-card h3{margin-bottom:.15rem;color:var(--coral-deep)}.sos-card p{margin:0;font-size:.8rem}.btn--sos{background:var(--coral-deep);color:#fff}.modal-box--wide{width:min(620px,100%)}.sos-status{padding:1rem;border-radius:14px;background:var(--coral-soft);color:var(--coral-deep);font-weight:600;margin-bottom:1rem}.growth-table{width:100%;border-collapse:collapse;font-size:.8rem;margin-top:.8rem}.growth-table th,.growth-table td{padding:.55rem .4rem;text-align:left;border-bottom:1px solid var(--line-soft)}.growth-empty{font-size:.8rem;color:var(--ink-3);padding:.7rem 0}@media(max-width:850px){.wellness-grid{grid-template-columns:1fr}}@media(max-width:560px){.form-row-3{grid-template-columns:1fr}}
-.five-one-one-alert{display:flex;align-items:flex-start;gap:.7rem;background:var(--coral-soft);border:1.5px solid var(--coral);color:var(--coral-deep);border-radius:14px;padding:.85rem 1rem;margin:.7rem 0;font-size:.85rem;font-weight:600}
-.five-one-one-alert svg{width:20px;height:20px;flex:none;margin-top:.1rem}
-.guest-banner{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;background:var(--lilac);border:1px solid #ddd3f7;color:var(--violet);border-radius:14px;padding:.8rem 1.1rem;margin-bottom:1.25rem;font-size:.85rem;font-weight:600}
-.guest-banner a{color:var(--violet);text-decoration:underline}
-.wellness-doctor{margin-top:1.1rem;padding-top:1.1rem;border-top:1px solid var(--line-soft)}
-.wellness-doctor h4{font-size:.82rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-3);margin-bottom:.7rem}
-.wellness-doctor .module-stat{margin-bottom:.5rem}
-/* ---- Chatbot ------------------------------------------------------- */
-.chat-fab{position:fixed;right:1.25rem;bottom:1.25rem;z-index:80;width:56px;height:56px;border-radius:999px;border:none;background:var(--coral);color:#fff;box-shadow:var(--shadow-coral);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.4rem}
-.chat-panel{position:fixed;right:1.25rem;bottom:5.25rem;z-index:80;width:min(340px,calc(100vw - 2.5rem));max-height:min(480px,70vh);display:none;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow-md);overflow:hidden}
-.chat-panel.is-open{display:flex}
-.chat-panel__head{display:flex;align-items:center;justify-content:space-between;padding:.9rem 1rem;background:var(--ink);color:#fff}
-.chat-panel__head h3{margin:0;font-size:.92rem;color:#fff}
-.chat-panel__head button{background:none;border:none;color:#fff;cursor:pointer;opacity:.8}
-.chat-panel__body{flex:1;overflow-y:auto;padding:.9rem;display:flex;flex-direction:column;gap:.55rem;background:var(--ground)}
-.chat-msg{max-width:85%;padding:.55rem .75rem;border-radius:14px;font-size:.84rem;line-height:1.42}
-.chat-msg--bot{align-self:flex-start;background:var(--surface);border:1px solid var(--line);border-bottom-left-radius:4px}
-.chat-msg--user{align-self:flex-end;background:var(--coral);color:#fff;border-bottom-right-radius:4px}
-.chat-chips{display:flex;flex-wrap:wrap;gap:.4rem;padding:0 .9rem .7rem}
-.chat-chips button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:.35rem .7rem;font-size:.76rem;cursor:pointer;color:var(--ink-2)}
-.chat-panel__input{display:flex;gap:.5rem;padding:.7rem;border-top:1px solid var(--line);background:var(--surface)}
-.chat-panel__input input{flex:1;border:1px solid var(--line);border-radius:999px;padding:.5rem .9rem;font:inherit;font-size:.84rem}
-.chat-panel__input button{border:none;background:var(--coral);color:#fff;border-radius:999px;width:36px;height:36px;flex:none;cursor:pointer}
-/* Shared healthcare theme pass */
-:root {
-  --coral: #8f6bb8;
-  --coral-deep: #5e3a87;
-  --coral-soft: #f7f4fc;
-  --coral-tint: #ffffff;
-  --green: #a78bfa;
-  --mint: #faf8ff;
-  --mint-deep: #e7ddf5;
-  --violet: #8f6bb8;
-  --lilac: #f7f4fc;
-  --amber: #9b6b2d;
-  --amber-soft: #fff3dc;
-  --ink: #241c25;
-  --ink-2: #5f5660;
-  --ink-3: #8b828b;
-  --surface: #ffffff;
-  --ground: #ffffff;
-  --line: #eee8f6;
-  --line-soft: #f8f5fc;
-  --display: var(--sans);
-  --sans: "Times New Roman", Times, Georgia, serif;
-}
-body { background: var(--ground); font-family: var(--sans); }
-h1, h2, h3, h4 { font-family: var(--sans); font-weight: 900; letter-spacing: 0; }
-.brand__name { font-family: var(--sans); font-weight: 900; letter-spacing: 0; }
-.appbar { background: rgba(255,255,255,.96); }
-.btn--primary, .btn--sos, .chat-fab, .chat-panel__input button {
-  background: var(--coral);
-  box-shadow: 0 12px 30px -14px rgba(94,58,135,.55);
-}
-.btn--primary:hover, .btn--sos:hover { background: var(--coral-deep); }
-.segmented button.is-active, .interface-switch a.is-active { background: var(--coral); color: #fff; }
-.fv-header__intro .eyebrow, .tag--due { color: var(--violet); background: var(--lilac); }
-.progress-fill { background: var(--coral); }
-.card, .patient-panel, .detail-panel, .appt-card, .module-card { border-color: var(--line); }
-.sos-card { background: #fff; border-color: var(--coral-soft); }
-.patient-actionbar {
-  width: min(1180px, 100%);
-  margin: 1.15rem auto 0;
-  padding-inline: clamp(1rem, 3.5vw, 2.25rem);
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: .85rem;
-}
-.patient-action {
-  min-height: 72px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: .75rem;
-  padding: 1rem 1.1rem;
-  border: 1px solid var(--line);
-  border-radius: 18px;
-  background: var(--surface);
-  color: var(--ink);
-  text-decoration: none;
-  box-shadow: var(--shadow-sm);
-}
-.patient-action b { display: block; font-size: .95rem; }
-.patient-action span { display: block; margin-top: .12rem; color: var(--ink-3); font-size: .78rem; }
-.patient-action i {
-  width: 34px;
-  height: 34px;
-  border-radius: 999px;
-  display: grid;
-  place-items: center;
-  background: var(--coral-soft);
-  color: var(--violet);
-  font-style: normal;
-  font-weight: 800;
-}
-.patient-action:hover { border-color: var(--coral); background: var(--coral-tint); }
-.guest-banner {
-  background: var(--lilac);
-  border-color: #ead4e3;
-  color: var(--violet);
-}
-@media (max-width: 900px) {
-  .patient-actionbar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
-@media (max-width: 560px) {
-  .patient-actionbar { grid-template-columns: 1fr; }
-}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;min-height:100vh;font-family:var(--font);font-size:14.5px;line-height:1.5;color:var(--ink);background:var(--ground);-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}img,svg{display:block}button,input,select,textarea{font:inherit}
+.app{display:grid;grid-template-columns:var(--sidebar-w) 1fr;min-height:100vh}
+.sidebar{position:sticky;top:0;height:100vh;display:flex;flex-direction:column;background:linear-gradient(180deg,#faf5ff,#f5f0ff);border-right:1px solid var(--line);padding:1.1rem .85rem 1.25rem;overflow-y:auto}
+.sidebar__brand{display:flex;align-items:center;gap:.65rem;padding:.35rem .55rem 1.25rem;color:var(--ink)}
+.sidebar__brand img{width:40px;height:40px;border-radius:50%;object-fit:cover;box-shadow:0 0 0 2px #fff,0 2px 8px rgba(124,58,237,.15)}
+.sidebar__brand-name{font-family:var(--display);font-weight:800;font-size:1.2rem;color:var(--brand);line-height:1}
+.sidebar__brand-tag{display:block;margin-top:.2rem;font-size:.58rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+.sidebar__nav{display:flex;flex-direction:column;gap:.2rem;flex:1}
+.nav-item{display:flex;align-items:center;gap:.7rem;padding:.65rem .85rem;border-radius:12px;color:var(--ink-2);font-size:.9rem;font-weight:500;border:0;background:transparent;width:100%;text-align:left;transition:background .15s,color .15s}
+.nav-item svg{width:18px;height:18px;flex-shrink:0;opacity:.75}
+.nav-item:hover{background:rgba(124,58,237,.06);color:var(--brand-strong)}
+.nav-item.is-active{background:var(--brand);color:#fff;font-weight:600;box-shadow:0 6px 16px -6px rgba(124,58,237,.5)}
+.nav-item.is-active svg{opacity:1}
+.sidebar__footer{margin-top:auto;padding:1rem .6rem .25rem;border-top:1px solid var(--line)}
+.sidebar__tagline{display:flex;align-items:flex-start;gap:.5rem;font-size:.78rem;font-weight:600;color:var(--brand);line-height:1.35}
+.main{display:flex;flex-direction:column;min-width:0}
+.topbar{position:sticky;top:0;z-index:40;display:flex;align-items:center;gap:1rem;min-height:64px;padding:.65rem 1.5rem;background:rgba(255,255,255,.92);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.search{flex:1;max-width:420px;display:flex;align-items:center;gap:.55rem;padding:.55rem 1rem;border-radius:999px;background:var(--ground);border:1px solid var(--line);color:var(--ink-3)}
+.search input{flex:1;border:0;background:transparent;outline:none;color:var(--ink);font-size:.9rem}
+.topbar__right{margin-left:auto;display:flex;align-items:center;gap:.75rem}
+.icon-btn{position:relative;width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:#fff;display:grid;place-items:center;color:var(--ink-2)}
+.icon-btn .badge{position:absolute;top:4px;right:4px;width:16px;height:16px;border-radius:50%;background:var(--rose);color:#fff;font-size:.62rem;font-weight:700;display:grid;place-items:center}
+.user-chip{display:flex;align-items:center;gap:.6rem;padding:.3rem .65rem .3rem .3rem;border-radius:999px;border:1px solid var(--line);background:#fff}
+.user-chip img{width:34px;height:34px;border-radius:50%;object-fit:cover;background:var(--brand-soft)}
+.user-chip__name{font-size:.85rem;font-weight:600}.user-chip__role{font-size:.7rem;color:var(--ink-3);font-weight:500}
+.content{padding:1.35rem 1.5rem 2rem}
+.panel{display:none}.panel.is-active{display:block}
+.card{background:#fff;border:1px solid var(--line);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm)}
+.welcome-row{display:grid;grid-template-columns:1fr minmax(240px,300px);gap:1rem;margin-bottom:1.15rem}
+.welcome-card{display:flex;align-items:center;gap:1.25rem;padding:1.15rem 1.35rem;background:linear-gradient(135deg,#faf5ff,#f3e8ff 50%,#ede9fe);border:1px solid var(--line);border-radius:var(--radius-lg);overflow:hidden}
+.welcome-card__art{flex-shrink:0;width:100px;height:110px}
+.welcome-card__art svg{width:100%;height:100%}
+.welcome-card__hello{font-size:.88rem;font-weight:500;color:var(--ink-2);margin-bottom:.15rem}
+.welcome-card__title{font-family:var(--display);font-size:1.65rem;font-weight:800;color:var(--ink);letter-spacing:-.03em;margin-bottom:.2rem}
+.welcome-card__sub{font-size:.88rem;color:var(--ink-muted);margin-bottom:.65rem}
+.pills{display:flex;flex-wrap:wrap;gap:.4rem}
+.pill{display:inline-flex;align-items:center;gap:.35rem;padding:.32rem .7rem;border-radius:999px;background:rgba(255,255,255,.8);border:1px solid rgba(196,181,253,.55);font-size:.75rem;font-weight:500;color:var(--brand)}
+.appt-card{padding:1.15rem 1.25rem;display:flex;flex-direction:column;gap:.85rem}
+.appt-card__label{font-size:.78rem;font-weight:600;color:var(--ink-muted);text-transform:uppercase;letter-spacing:.04em}
+.appt-card__title{font-size:1rem;font-weight:700;margin-top:.15rem}
+.appt-card__meta{font-size:.82rem;color:var(--ink-muted);margin-top:.15rem}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;min-height:40px;padding:.55rem 1.1rem;border-radius:999px;border:1.5px solid transparent;font-size:.88rem;font-weight:600;text-decoration:none;transition:transform .15s,box-shadow .15s,background .15s}
+.btn:hover{transform:translateY(-1px)}.btn--primary{background:var(--brand);color:#fff;box-shadow:0 8px 20px -8px rgba(124,58,237,.55)}.btn--primary:hover{background:var(--brand-strong)}
+.btn--full{width:100%}.btn--ghost{background:#fff;border-color:var(--line);color:var(--brand-strong)}.btn--sm{min-height:34px;padding:.4rem .85rem;font-size:.8rem}
+.status-row{display:grid;grid-template-columns:repeat(4,1fr);gap:.85rem;margin-bottom:1.15rem}
+.status-card{display:flex;align-items:flex-start;gap:.75rem;padding:.95rem 1rem;background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-sm);transition:border-color .15s}
+.status-card:hover{border-color:#c4b5fd}
+.status-card__icon{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;flex-shrink:0}
+.status-card__icon--purple{background:var(--brand-soft);color:var(--brand)}
+.status-card__icon--green{background:var(--green-soft);color:var(--green)}
+.status-card__icon--blue{background:var(--blue-soft);color:var(--blue)}
+.status-card__label{font-size:.75rem;font-weight:600;color:var(--ink-muted)}
+.status-card__value{font-size:.9rem;font-weight:600;color:var(--ink);margin-top:.1rem;display:flex;align-items:center;gap:.3rem}
+.status-card__value .ok{color:var(--green);font-size:.85rem}
+.status-card__sub{font-size:.72rem;color:var(--ink-3);margin-top:.1rem}
+.main-grid{display:grid;grid-template-columns:1fr minmax(260px,300px);gap:1rem;align-items:start}
+.section-card{padding:1.15rem 1.25rem 1.25rem;margin-bottom:1rem}
+.section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:.9rem;gap:.75rem}
+.section-title{display:flex;align-items:center;gap:.5rem;font-family:var(--display);font-size:1.05rem;font-weight:700}
+.section-title span{width:28px;height:28px;border-radius:8px;background:var(--brand-soft);color:var(--brand);display:grid;place-items:center;font-size:.85rem}
+.link-btn{border:0;background:transparent;color:var(--brand);font-size:.82rem;font-weight:600;display:inline-flex;align-items:center;gap:.25rem;padding:.25rem .4rem;border-radius:8px}
+.link-btn:hover{background:var(--brand-soft)}
+.tabs{display:inline-flex;gap:.3rem;margin-bottom:1rem;background:var(--ground);padding:.25rem;border-radius:999px;border:1px solid var(--line)}
+.tabs button{border:0;background:transparent;padding:.4rem .9rem;border-radius:999px;font-size:.8rem;font-weight:600;color:var(--ink-muted)}
+.tabs button.is-active{background:var(--brand);color:#fff;box-shadow:0 4px 12px -4px rgba(124,58,237,.45)}
+.growth-body{display:grid;grid-template-columns:1fr 140px;gap:1rem}
+.chart-wrap{position:relative;height:190px;border-radius:12px;background:linear-gradient(180deg,#faf5ff,#fff);border:1px solid var(--line-soft);padding:.5rem .4rem .4rem 2rem}
+.chart-y{position:absolute;left:.3rem;top:50%;transform:rotate(-90deg) translateX(50%);transform-origin:left center;font-size:.68rem;font-weight:600;color:var(--ink-3);white-space:nowrap}
+.chart-svg{width:100%;height:100%}
+.stats-panel{display:flex;flex-direction:column;gap:.55rem;padding:.7rem;border-radius:14px;background:var(--brand-pale);border:1px solid var(--line)}
+.stat-label{font-size:.7rem;font-weight:500;color:var(--ink-muted)}
+.stat-value{font-family:var(--display);font-size:1.25rem;font-weight:800;letter-spacing:-.02em;line-height:1.15}
+.stat-sub{font-size:.68rem;color:var(--ink-3)}
+.milestones-track{display:flex;align-items:flex-start;justify-content:space-between;gap:.3rem;position:relative}
+.milestones-track::before{content:"";position:absolute;top:22px;left:8%;right:8%;height:3px;background:linear-gradient(90deg,#a7f3d0 0%,#a7f3d0 35%,#e9d5ff 35%,#e9d5ff 100%);border-radius:99px;z-index:0}
+.milestone{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:.4rem;flex:1;text-align:center;max-width:88px}
+.milestone__icon{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:#fff;border:2px solid var(--line);font-size:1.1rem;position:relative}
+.milestone.is-done .milestone__icon{border-color:#6ee7b7;background:var(--green-soft)}
+.milestone.is-current .milestone__icon{border-color:var(--brand);background:var(--brand-soft);box-shadow:0 0 0 4px rgba(124,58,237,.12)}
+.milestone.is-locked .milestone__icon{opacity:.65}
+.milestone__check{position:absolute;bottom:-2px;right:-2px;width:16px;height:16px;border-radius:50%;background:var(--green);color:#fff;font-size:.55rem;display:grid;place-items:center;border:2px solid #fff}
+.milestone__name{font-size:.72rem;font-weight:600;line-height:1.25}
+.milestone__range{font-size:.65rem;color:var(--ink-3)}
+.side-stack{display:flex;flex-direction:column;gap:1rem}
+.qa-grid{display:grid;grid-template-columns:1fr 1fr;gap:.65rem}
+.qa-item{display:flex;flex-direction:column;gap:.3rem;padding:.8rem .75rem;border-radius:14px;border:1px solid var(--line);background:#fff;transition:border-color .15s}
+.qa-item:hover{border-color:#c4b5fd}
+.qa-item__icon{width:30px;height:30px;border-radius:10px;display:grid;place-items:center;margin-bottom:.1rem}
+.qa-item__icon--blue{background:var(--blue-soft);color:var(--blue)}
+.qa-item__icon--purple{background:var(--brand-soft);color:var(--brand)}
+.qa-item__icon--green{background:var(--green-soft);color:var(--green)}
+.qa-item__icon--amber{background:var(--amber-soft);color:var(--amber)}
+.qa-item__title{font-size:.8rem;font-weight:650;display:flex;justify-content:space-between}
+.qa-item__sub{font-size:.7rem;color:var(--ink-3)}
+.feed-list{display:flex;flex-direction:column;gap:.5rem}
+.feed-item{display:flex;align-items:flex-start;gap:.65rem;padding:.5rem 0;border-bottom:1px solid var(--line-soft)}
+.feed-item:last-child{border-bottom:0}
+.feed-item__icon{width:32px;height:32px;border-radius:10px;display:grid;place-items:center;flex-shrink:0;font-size:.8rem}
+.feed-item__icon--amber{background:#fef3c7}.feed-item__icon--blue{background:#dbeafe}.feed-item__icon--purple{background:var(--brand-soft)}.feed-item__icon--green{background:#d1fae5}
+.feed-item__title{font-size:.84rem;font-weight:600}.feed-item__sub{font-size:.72rem;color:var(--ink-muted);margin-top:.08rem}
+.feed-item__date{font-size:.7rem;color:var(--ink-3);white-space:nowrap;margin-left:auto}
+.sos-bar{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.85rem 1.15rem;border-radius:var(--radius-lg);background:linear-gradient(90deg,#faf5ff,#fdf2f8);border:1px solid var(--line);margin-top:1rem}
+.sos-bar__left{display:flex;align-items:center;gap:.7rem;font-size:.85rem;color:var(--ink-2)}
+.sos-bar__left strong{color:var(--ink)}
+.sos-bar__icon{width:36px;height:36px;border-radius:50%;background:#fce7f3;color:#db2777;display:grid;place-items:center;flex-shrink:0}
+.btn--sos{background:var(--rose);color:#fff;border-radius:999px;min-height:40px;padding:.5rem 1.15rem;font-weight:700;font-size:.88rem;border:0;box-shadow:0 8px 20px -8px rgba(244,63,94,.5);display:inline-flex;align-items:center;gap:.4rem}
+.btn--sos:hover{background:#e11d48}
+.form-grid{display:grid;gap:.85rem;max-width:520px}
+.form-group label{display:block;font-size:.8rem;font-weight:600;margin-bottom:.35rem;color:var(--ink-2)}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:.65rem .85rem;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink)}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{outline:2px solid rgba(124,58,237,.3);border-color:var(--brand)}
+.list-card{padding:0}.list-row{display:flex;align-items:center;gap:.85rem;padding:.9rem 1.15rem;border-bottom:1px solid var(--line-soft)}
+.list-row:last-child{border-bottom:0}
+.list-row__meta{flex:1;min-width:0}.list-row__title{font-weight:600;font-size:.9rem}.list-row__sub{font-size:.78rem;color:var(--ink-muted)}
+.tag{display:inline-flex;padding:.2rem .55rem;border-radius:999px;font-size:.7rem;font-weight:600}
+.tag--ok{background:var(--green-soft);color:var(--green)}.tag--pending{background:var(--amber-soft);color:#b45309}.tag--info{background:var(--brand-soft);color:var(--brand)}
+.toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(120%);background:var(--ink);color:#fff;padding:.7rem 1.2rem;border-radius:999px;font-size:.88rem;font-weight:500;z-index:100;transition:transform .25s;box-shadow:var(--shadow)}
+.toast.is-show{transform:translateX(-50%) translateY(0)}
+.empty{padding:2rem;text-align:center;color:var(--ink-muted);font-size:.9rem}
+@media(max-width:1100px){.main-grid{grid-template-columns:1fr}.welcome-row{grid-template-columns:1fr}.status-row{grid-template-columns:1fr 1fr}}
+@media(max-width:860px){.app{grid-template-columns:1fr}.sidebar{position:fixed;inset:0 auto 0 0;width:min(260px,86vw);z-index:60;transform:translateX(-105%);transition:transform .25s;box-shadow:var(--shadow)}.sidebar.is-open{transform:translateX(0)}.content{padding:1rem}.growth-body{grid-template-columns:1fr}.status-row{grid-template-columns:1fr}}
 </style>
-<link rel="stylesheet" href="styles.css">
-<style>
-/* Compact dashboard type scale with the shared doctor-portal alignment. */
-body.patient-page h1 { font-size: clamp(1.7rem, 2.5vw, 2.1rem); }
-body.patient-page h2 { font-size: clamp(1.25rem, 1.8vw, 1.45rem); }
-body.patient-page h3 { font-size: 1.05rem; }
-body.patient-page { background: #fff; }
-body.patient-page .view,
-body.patient-page .fv-header__intro,
-body.patient-page .progress-card,
-body.patient-page .detail-panel,
-body.patient-page .patient-panel,
-body.patient-page .team-section,
-body.patient-page .module-card,
-body.patient-page .appt-section .card {
-  background: #fff;
-}
-body.patient-page .module-stat,
-body.patient-page .check-row,
-body.patient-page .dgap,
-body.patient-page .appt-card {
-  background: #fff;
-}
-body.patient-page .patient-card:hover,
-body.patient-page .patient-card.is-selected {
-  background: #faf8ff;
-}
-</style>
+<script src="js/dai-api.js"></script>
 </head>
-<body class="patient-page">
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="i-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></symbol>
+<symbol id="i-user" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
+<symbol id="i-baby" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9 12h.01M15 12h.01M10 16c.5.3 1.2.5 2 .5s1.5-.2 2-.5"/></symbol>
+<symbol id="i-cal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
+<symbol id="i-file" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></symbol>
+<symbol id="i-msg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></symbol>
+<symbol id="i-set" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></symbol>
+<symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
+<symbol id="i-bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></symbol>
+<symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></symbol>
+<symbol id="i-heart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></symbol>
+<symbol id="i-phone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></symbol>
+</defs></svg>
 
-<!-- ======================= Shared icon sprite ======================= -->
-<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
-  <defs>
-    <symbol id="i-check-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 2.5 2.5L16 9.5"/></symbol>
-    <symbol id="i-alert-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4.5M12 16v.5"/></symbol>
-    <symbol id="i-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="8" stroke-dasharray="3 3"/></symbol>
-    <symbol id="i-tick" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="currentColor" opacity=".13"/><path d="m8 12.4 2.6 2.6L16 9.6" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></symbol>
-    <symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h15"/><path d="m13 6 6 6-6 6"/></symbol>
-    <symbol id="i-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></symbol>
-    <symbol id="i-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
-    <symbol id="i-heart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.4-7-9.3A4.1 4.1 0 0 1 12 8a4.1 4.1 0 0 1 7 2.7C19 15.6 12 20 12 20Z"/></symbol>
-    <symbol id="i-alert-tri" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.9 18a2 2 0 0 0 1.7 3h16.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></symbol>
-    <symbol id="i-lightbulb" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4M12 2a6 6 0 0 0-4 10.5c.6.6 1 1.4 1 2.3V15h6v-.2c0-.9.4-1.7 1-2.3A6 6 0 0 0 12 2Z"/></symbol>
-    <symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6 6 18"/></symbol>
-    <symbol id="i-stage-baby" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M6 21v-2a6 6 0 0 1 12 0v2"/></symbol>
-    <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></symbol>
-    <symbol id="i-stethoscope" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 3v6a4.5 4.5 0 0 0 9 0V3"/><path d="M9 15.5V18a4 4 0 0 0 8 0v-1.3a3.5 3.5 0 1 0-2 0"/><circle cx="19" cy="9" r="1.6"/></symbol>
-  </defs>
-</svg>
+<div class="app">
+<aside class="sidebar" id="sidebar">
+  <a class="sidebar__brand" href="index.html">
+    <img src="assets/logo-circle.png" alt="" width="40" height="40" onerror="this.src='assets/logo.jpeg'">
+    <span><span class="sidebar__brand-name">दाई</span><span class="sidebar__brand-tag">Hospital Workflow</span></span>
+  </a>
+  <nav class="sidebar__nav" aria-label="Mother navigation">
+    <button type="button" class="nav-item is-active" data-panel="dashboard"><svg width="18" height="18"><use href="#i-home"/></svg> Dashboard</button>
+    <button type="button" class="nav-item" data-panel="profile"><svg width="18" height="18"><use href="#i-user"/></svg> Mother / Patient</button>
+    <a class="nav-item" href="child-dashboard.html"><svg width="18" height="18"><use href="#i-baby"/></svg> Child</a>
+    <button type="button" class="nav-item" data-panel="appointments"><svg width="18" height="18"><use href="#i-cal"/></svg> Appointments</button>
+    <button type="button" class="nav-item" data-panel="timeline"><svg width="18" height="18"><use href="#i-clock"/></svg> Care Timeline</button>
+    <button type="button" class="nav-item" data-panel="records"><svg width="18" height="18"><use href="#i-file"/></svg> Records</button>
+    <button type="button" class="nav-item" data-panel="messages"><svg width="18" height="18"><use href="#i-msg"/></svg> Messages</button>
+    <button type="button" class="nav-item" data-panel="settings"><svg width="18" height="18"><use href="#i-set"/></svg> Settings</button>
+  </nav>
+  <div class="sidebar__footer"><div class="sidebar__tagline"><svg width="18" height="18"><use href="#i-heart"/></svg><span>Healthier mothers.<br>Brighter futures.</span></div></div>
+</aside>
 
-<!-- ============================ App bar ============================ -->
-<header class="appbar">
-  <div class="wrap appbar__inner">
-    <a class="brand" href="index.html" aria-label="दाई">
-      <img class="brand__mark" src="assets/logo.jpeg" width="48" height="48" alt="">
-      <span><span class="brand__name">दाई</span><span class="brand__tag">Mother / Patient</span></span>
-    </a>
-
-    <nav class="site-nav" aria-label="Primary navigation">
-      <a href="dashboard.html">Dashboard</a>
-      <a href="index.html#modules">Features</a>
-      <a href="index.html#why">About</a>
-    </nav>
-
-    <div class="header-actions">
-      <nav class="interface-switch" aria-label="Switch दाई interface">
-        <a class="is-active" href="dashboard.html">Mother / Patient</a>
-        <a href="doctor.html">Doctor</a>
-        <a href="hospital.html">Hospital Team</a>
-      </nav>
-      <span class="avatar-pill" id="whoami"><span class="dot">...</span> Loading...</span>
-      <button id="logoutBtn" class="btn btn--ghost btn--sm">Logout</button>
-    </div>
+<div class="main">
+<header class="topbar">
+  <div class="search" role="search"><svg width="16" height="16"><use href="#i-search"/></svg><input type="search" id="globalSearch" placeholder="Search anything..." aria-label="Search"></div>
+  <div class="topbar__right">
+    <button class="icon-btn" type="button" aria-label="Notifications" id="notifBtn"><svg width="18" height="18"><use href="#i-bell"/></svg><span class="badge">2</span></button>
+    <div class="user-chip"><img src="assets/logo-circle.png" alt="" width="34" height="34" onerror="this.src='assets/logo.jpeg'"><div><div class="user-chip__name" id="userName">Priya Sharma</div><div class="user-chip__role">Mother / Patient</div></div></div>
   </div>
 </header>
 
-<main>
-  <div class="patient-actionbar" aria-label="Mother dashboard quick actions">
-    <a class="patient-action" href="#appointments"><span><b>Book appointment</b><span>Request a doctor visit</span></span><i>→</i></a>
-    <a class="patient-action" href="#familyTimeline"><span><b>Care timeline</b><span>Review milestones</span></span><i>✓</i></a>
-    <a class="patient-action" href="#wellnessModules"><span><b>Daily tracking</b><span>Nutrition, supplements, growth</span></span><i>+</i></a>
-    <a class="patient-action" href="doctor.html"><span><b>Doctor portal</b><span>Switch to clinician view</span></span><i>↗</i></a>
-  </div>
-
-  <!-- ============================= FAMILY VIEW ============================= -->
-  <section id="viewFamily" class="view is-active">
-    <div class="wrap">
-
-      <div class="guest-banner" id="guestBanner" hidden>
-        <span>Demo mode — this data stays on this device only, and your doctor cannot see it.</span>
-        <a href="auth.html">Create an account to sync it</a>
+<div class="content">
+<!-- DASHBOARD -->
+<div class="panel is-active" id="panel-dashboard">
+  <div class="welcome-row">
+    <div class="welcome-card">
+      <div class="welcome-card__art" aria-hidden="true">
+        <svg viewBox="0 0 120 130" fill="none"><ellipse cx="60" cy="122" rx="40" ry="6" fill="#e9d5ff" opacity=".5"/>
+        <ellipse cx="60" cy="85" rx="32" ry="38" fill="#c4b5fd"/><path d="M28 70c0-28 14-48 32-48s32 20 32 48" fill="#f5d0c0"/>
+        <circle cx="60" cy="48" r="28" fill="#f5d0c0"/><path d="M38 40c4-16 20-24 36-16 4 8 4 18 0 24-10-6-24-6-36-8z" fill="#3b2f2f"/>
+        <ellipse cx="50" cy="50" rx="3" ry="3.5" fill="#2d1f1f"/><ellipse cx="70" cy="50" rx="3" ry="3.5" fill="#2d1f1f"/>
+        <path d="M54 62c2 4 10 4 12 0" stroke="#c4786a" stroke-width="1.5" stroke-linecap="round"/>
+        <ellipse cx="60" cy="95" rx="22" ry="28" fill="#a78bfa"/><circle cx="60" cy="100" r="14" fill="#f5d0c0" opacity=".35"/>
+        </svg>
       </div>
-
-      <div class="fv-header">
-        <div class="card fv-header__intro">
-          <span class="eyebrow"><svg width="14" height="14" aria-hidden="true"><use href="#i-heart"/></svg>Third trimester</span>
-          <h1>Ananya's care dashboard</h1>
-          <p>You're <strong>30 weeks</strong> along. Estimated due date <strong>14 Nov 2026</strong>. Here's what's done, what's next, and what needs attention.</p>
-        </div>
-        <div class="card progress-card">
-          <div class="progress-card__top"><b>Week 30</b><span>of 40</span></div>
-          <div class="progress-track"><div class="progress-fill" style="width:75%"></div></div>
-          <div class="progress-labels"><span>Registration</span><span>Delivery</span></div>
-        </div>
-      </div>
-
-      <div class="gap-section">
-        <div class="gap-section__head">
-          <h2>Care gap alerts <span class="gap-count" id="famGapCount">0</span></h2>
-        </div>
-        <div id="famGapList"></div>
-      </div>
-
-      <h2 style="margin-bottom:1rem;">Your care timeline</h2>
-      <div class="stage-stepper" id="stageStepper"></div>
-      <div id="familyTimeline"></div>
-
-      <div class="sos-card"><div><h3>Need urgent help?</h3><p>Open emergency options. This prototype does not automatically dispatch help.</p></div><button class="btn btn--sos" data-action="open-sos">Emergency SOS</button></div>
-      <div class="wellness-grid" id="wellnessModules">
-        <div class="card module-card"><div class="module-card__head"><div><h3>Nutrition tracker</h3><p>Log meals and hydration.</p></div><span class="tag tag--ok" id="nutritionScore">0 meals</span></div><div id="nutritionList"></div><div style="display:grid;grid-template-columns:1fr auto;gap:.55rem;margin-top:.75rem"><input class="small-input" id="nutritionInput" placeholder="e.g. Dal, roti & vegetables"><button class="btn btn--primary btn--sm" data-action="add-nutrition">Add meal</button></div><div class="module-stat" style="margin-top:.7rem"><span>Water</span><b id="waterCount">0 / 8 glasses</b></div><button class="btn btn--ghost btn--sm" data-action="add-water">+ Add glass</button></div>
-        <div class="card module-card"><div class="module-card__head"><div><h3>Supplement tracker</h3><p>Daily adherence — only for supplements prescribed/recommended by a clinician.</p></div><span class="tag tag--next" id="supplementScore">0 / 3</span></div><div class="check-row"><input type="checkbox" id="supIron" data-supplement="Iron"><label for="supIron"><b>Iron</b></label></div><div class="check-row"><input type="checkbox" id="supFolate" data-supplement="Folic acid"><label for="supFolate"><b>Folic acid</b></label></div><div class="check-row"><input type="checkbox" id="supCalcium" data-supplement="Calcium"><label for="supCalcium"><b>Calcium</b></label></div></div>
-        <div class="card module-card"><div class="module-card__head"><div><h3>Pregnancy week and size guide</h3><p>Approximate size analogy for easy visual understanding.</p></div></div><div class="fruit-card"><div class="fruit-emoji" id="fruitEmoji">Size</div><div><strong id="fruitName">Avocado</strong><small id="fruitMeta">Around week 16</small></div></div><div class="module-stat"><span>Pregnancy progress</span><b id="pregnancyWeekStat">Week 0 of 40</b></div><p style="font-size:.72rem;margin:0">Size comparisons are approximate and are not a clinical measurement.</p></div>
-        <div class="card module-card"><div class="module-card__head"><div><h3>Child growth tracker</h3><p>Record height and weight after birth.</p></div></div><div class="form-row-3"><input class="small-input" id="growthDate" type="date"><input class="small-input" id="growthWeight" type="number" step="0.1" placeholder="Weight kg"><input class="small-input" id="growthHeight" type="number" step="0.1" placeholder="Height cm"></div><button class="btn btn--primary btn--sm" data-action="add-growth" style="margin-top:.65rem">Save measurement</button><div id="growthList"></div></div>
-        <div class="card module-card"><div class="module-card__head"><div><h3>Contraction timer</h3><p>Tracks the gap between contractions, not just how long each one lasts.</p></div><span class="tag tag--next" id="contractionCount">0 today</span></div><div class="contraction-display"><div class="contraction-time" id="contractionTimer">00:00</div><div style="font-size:.78rem;color:var(--ink-3)" id="contractionStatus">Ready to start</div><div style="font-size:.78rem;color:var(--ink-3);margin-top:.2rem" id="contractionGap"></div></div><div class="contraction-actions"><button class="btn btn--primary" data-action="contraction-start" id="contractionStart">Start contraction</button><button class="btn btn--ghost" data-action="contraction-stop" id="contractionStop" disabled>Stop & log</button></div><div id="fiveOneOneAlert" class="five-one-one-alert" hidden><svg aria-hidden="true"><use href="#i-alert-tri"/></svg><div><strong>5-1-1 reached.</strong> Contractions about 5 min apart, lasting about a minute, for the last hour. Call your doctor or hospital now.</div></div><div class="contraction-log" id="contractionLog"></div><p style="font-size:.72rem;margin:.65rem 0 0">Tracking only. For urgent symptoms or suspected labor, contact your healthcare professional or emergency services.</p></div>
-      </div>
-
-      <div class="appt-section" id="appointments"><h2 style="margin-bottom:1rem;">Appointments</h2>
-        <div class="appt-grid">
-          <div class="card">
-            <h3 style="margin-bottom:1rem;">Request an appointment</h3>
-            <form id="appointmentForm">
-              <div class="form-group">
-                <label for="apptDoctor">Doctor</label>
-                <select id="apptDoctor" required>
-                  <option value="" disabled selected>Choose a doctor</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label for="apptDate">Preferred date</label>
-                <input type="date" id="apptDate" required>
-              </div>
-              <div class="form-group">
-                <label for="apptReason">Reason (optional)</label>
-                <textarea id="apptReason" placeholder="e.g. Follow-up on last scan"></textarea>
-              </div>
-              <button type="submit" class="btn btn--primary" id="apptSubmit">Request appointment</button>
-            </form>
-          </div>
-          <div class="card">
-            <h3 style="margin-bottom:1rem;">Your requests</h3>
-            <div class="appt-list" id="motherApptList"></div>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- ============================ DOCTOR DASHBOARD ============================ -->
-  <section id="viewDoctor" class="view">
-    <div class="wrap">
-      <div class="dv-header">
-        <span class="eyebrow" style="display:inline-flex;align-items:center;gap:.5rem;font-size:.78rem;font-weight:600;color:var(--violet);background:var(--lilac);border-radius:999px;padding:.28rem .75rem;margin-bottom:.7rem;">
-          <svg width="14" height="14" aria-hidden="true"><use href="#i-users"/></svg>Dr. Kavita Menon · Antenatal clinic
-        </span>
-        <h1>Doctor dashboard</h1>
-        <p style="max-width:52ch">Every patient's care timeline and open care gaps in one view — validate what's due, and see who needs a nudge first.</p>
-      </div>
-
-      <div class="stat-strip" id="doctorStats"></div>
-
-      <div class="team-section">
-        <div class="team-section__head">
-          <h2 style="margin:0;display:flex;align-items:center;gap:.55rem;"><svg width="18" height="18" aria-hidden="true"><use href="#i-users"/></svg>Your care team</h2>
-          <button class="btn btn--primary btn--sm" data-action="open-add-doctor">
-            <svg width="15" height="15" aria-hidden="true"><use href="#i-plus"/></svg>Add doctor
-          </button>
-        </div>
-        <div class="team-grid" id="teamGrid"></div>
-      </div>
-
-      <div class="dv-grid">
-        <div class="patient-panel">
-          <div class="patient-panel__controls">
-            <input class="search-input" id="patientSearch" type="search" placeholder="Search patients…">
-            <div class="chips" id="filterChips">
-              <button class="chip is-active" data-filter="all">All patients</button>
-              <button class="chip" data-filter="gap">Has care gap</button>
-              <button class="chip" data-filter="risk">High risk</button>
-            </div>
-          </div>
-          <div class="patient-list" id="patientList"></div>
-        </div>
-
-        <div class="detail-panel" id="detailPanel"></div>
-      </div>
-
-      <div class="appt-section">
-        <h2 style="margin-bottom:1rem;">Appointment requests</h2>
-        <div class="card">
-          <div class="appt-list" id="doctorApptList"></div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-</main>
-
-<footer class="site-footer">
-  <div class="footer-grid">
-    <div>
-      <h3>दाई</h3>
-      <p>Assistive healthcare workflow infrastructure for continuity of care, operations and reviewed patient communication.</p>
-    </div>
-    <div>
-      <h4>Modules</h4>
-      <ul class="footer-links">
-        <li><a href="index.html#modules">Follow-Up Engine</a></li>
-        <li><a href="index.html#modules">Pre-Consult Brief</a></li>
-        <li><a href="index.html#modules">Patient Registry</a></li>
-      </ul>
-    </div>
-    <div>
-      <h4>Resources</h4>
-      <ul class="footer-links">
-        <li><a href="index.html#why">Safety model</a></li>
-        <li><a href="auth.html">Sign in</a></li>
-        <li><a href="doctor.html">Doctor portal</a></li>
-        <li><a href="hospital.html">Hospital console</a></li>
-      </ul>
-    </div>
-    <div>
-      <h4>Contact</h4>
-      <ul class="footer-links">
-        <li><a href="mailto:hello@dai.health">hello@dai.health</a></li>
-        <li><a href="auth.html">Book a demo</a></li>
-      </ul>
-    </div>
-  </div>
-  <div class="footer-bottom">Copyright © 2026 दाई. Demo content only.</div>
-</footer>
-
-<div class="modal-backdrop" id="sosModal" aria-hidden="true"><div class="modal-box modal-box--wide" role="dialog" aria-modal="true"><div class="modal-box__head"><div><h2 style="margin-bottom:.2rem;color:var(--coral-deep)">Emergency SOS</h2><p style="margin:0;font-size:.86rem">Choose an emergency action.</p></div><button class="modal-close" data-action="close-sos">✕</button></div><div class="sos-status">SOS screen opened. In a real deployment, this would securely share consented emergency information with configured contacts/facilities.</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem"><a class="btn btn--sos" href="tel:112" style="text-decoration:none">Call 112</a><button class="btn btn--ghost" data-action="call-emergency-contact">Call emergency contact</button></div><p style="font-size:.72rem;margin:.9rem 0 0">This prototype does not dispatch help or share live location automatically.</p></div></div>
-<div class="toast" id="toast"><svg aria-hidden="true"><use href="#i-tick"/></svg><span id="toastMsg"></span></div>
-
-<!-- ======================= Add doctor modal ======================= -->
-<div class="modal-backdrop" id="addDoctorModal" aria-hidden="true">
-  <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="addDoctorTitle">
-    <div class="modal-box__head">
       <div>
-        <h2 id="addDoctorTitle" style="margin-bottom:.2rem;">Add a doctor</h2>
-        <p style="margin:0;font-size:.86rem;">Creates a separate login for a colleague joining this practice.</p>
+        <div class="welcome-card__hello">Hello, <span id="greetName">Priya</span>! 👋</div>
+        <div class="welcome-card__title">You're doing great!</div>
+        <div class="welcome-card__sub">Your health and your baby's health matter.</div>
+        <div class="pills">
+          <span class="pill">💜 Second trimester · <span id="weekLabel">18 weeks</span></span>
+          <span class="pill">📅 EDD: <span id="eddLabel">12 Mar 2027</span></span>
+        </div>
       </div>
-      <button class="modal-close" type="button" data-action="close-modal" aria-label="Close"><svg aria-hidden="true"><use href="#i-x"/></svg></button>
     </div>
-    <form id="addDoctorForm">
-      <div class="form-group">
-        <label for="docFullName">Full name</label>
-        <input type="text" id="docFullName" required placeholder="Dr. Arjun Nair">
+    <div class="card appt-card">
+      <div>
+        <div class="appt-card__label">Next Appointment</div>
+        <div class="appt-card__title" id="nextApptTitle">Obstetrician Consultation</div>
+        <div class="appt-card__meta" id="nextApptMeta">Dr. Neha Sharma<br>10:30 AM · 25 Sep 2026</div>
       </div>
-      <div class="field-row">
-        <div class="form-group">
-          <label for="docEmail">Email</label>
-          <input type="email" id="docEmail" required placeholder="arjun@clinic.com">
+      <button type="button" class="btn btn--primary btn--full" data-go="appointments">View Schedule <svg width="15" height="15"><use href="#i-arrow"/></svg></button>
+    </div>
+  </div>
+
+  <div class="status-row">
+    <button type="button" class="status-card" data-go="records">
+      <div class="status-card__icon status-card__icon--purple">👤</div>
+      <div><div class="status-card__label">Current Health Status</div><div class="status-card__value"><span class="ok">✓</span> Stable</div><div class="status-card__sub">No major concerns</div></div>
+    </button>
+    <button type="button" class="status-card" data-go="records">
+      <div class="status-card__icon status-card__icon--green">💗</div>
+      <div><div class="status-card__label">Vitals</div><div class="status-card__value"><span class="ok">✓</span> All normal</div><div class="status-card__sub">Last updated: today</div></div>
+    </button>
+    <button type="button" class="status-card" data-go="records">
+      <div class="status-card__icon status-card__icon--blue">💊</div>
+      <div><div class="status-card__label">Medications</div><div class="status-card__value"><span class="ok">✓</span> On schedule</div><div class="status-card__sub" id="medCount">1 supplement</div></div>
+    </button>
+    <button type="button" class="status-card" data-go="appointments">
+      <div class="status-card__icon status-card__icon--purple">📅</div>
+      <div><div class="status-card__label">Upcoming Appointments</div><div class="status-card__value">📅 <span id="apptCount">1</span> scheduled</div></div>
+    </button>
+  </div>
+
+  <div class="main-grid">
+    <div>
+      <div class="card section-card">
+        <div class="section-head">
+          <div class="section-title"><span>📈</span> Health Overview</div>
+          <button type="button" class="link-btn" data-go="records">View All →</button>
         </div>
-        <div class="form-group">
-          <label for="docPassword">Temporary password</label>
-          <input type="password" id="docPassword" required minlength="8" placeholder="At least 8 characters">
+        <div class="tabs" role="tablist">
+          <button type="button" class="is-active" data-metric="weight">Weight</button>
+          <button type="button" data-metric="bp">Blood Pressure</button>
+          <button type="button" data-metric="temp">Temperature</button>
+          <button type="button" data-metric="other">Others</button>
+        </div>
+        <div class="growth-body">
+          <div class="chart-wrap">
+            <span class="chart-y">Weight (kg)</span>
+            <svg class="chart-svg" viewBox="0 0 400 170" preserveAspectRatio="none" id="weightChart">
+              <g stroke="#ede9fe" stroke-width="1"><line x1="0" y1="15" x2="400" y2="15"/><line x1="0" y1="50" x2="400" y2="50"/><line x1="0" y1="85" x2="400" y2="85"/><line x1="0" y1="120" x2="400" y2="120"/><line x1="0" y1="155" x2="400" y2="155"/></g>
+              <g fill="#9ca3af" font-size="10" font-family="Inter,sans-serif"><text x="2" y="18">80</text><text x="2" y="53">70</text><text x="2" y="88">60</text><text x="2" y="123">50</text><text x="2" y="158">40</text></g>
+              <path d="M30 130 L80 120 L130 110 L180 100 L230 95 L280 88 L330 78 L370 70" fill="none" stroke="#7c3aed" stroke-width="2.5" stroke-linecap="round"/>
+              <g fill="#7c3aed"><circle cx="30" cy="130" r="3.5"/><circle cx="80" cy="120" r="3.5"/><circle cx="130" cy="110" r="3.5"/><circle cx="180" cy="100" r="3.5"/><circle cx="230" cy="95" r="3.5"/><circle cx="280" cy="88" r="3.5"/><circle cx="330" cy="78" r="3.5"/><circle cx="370" cy="70" r="5" fill="#fff" stroke="#7c3aed" stroke-width="2.5"/></g>
+              <g transform="translate(340,40)"><rect width="48" height="20" rx="8" fill="#7c3aed"/><text x="24" y="14" text-anchor="middle" fill="#fff" font-size="10" font-weight="700">68 kg</text></g>
+              <g fill="#9ca3af" font-size="9" font-family="Inter,sans-serif" text-anchor="middle"><text x="30" y="168">1 Aug</text><text x="130" y="168">15 Aug</text><text x="230" y="168">29 Aug</text><text x="330" y="168">12 Sep</text></g>
+            </svg>
+          </div>
+          <div class="stats-panel">
+            <div><div class="stat-label">Current Weight</div><div class="stat-value" id="curWeight">68 kg</div><div class="stat-sub">(at 18 weeks)</div></div>
+            <div><div class="stat-label">Starting Weight</div><div class="stat-value" id="startWeight">62 kg</div><div class="stat-sub">(at 12 weeks)</div></div>
+            <div><div class="stat-label">BMI</div><div class="stat-value" id="bmiVal">24.8</div><div class="stat-sub">(normal range)</div></div>
+          </div>
         </div>
       </div>
-      <div class="field-row">
-        <div class="form-group">
-          <label for="docSpecialization">Specialization</label>
-          <input type="text" id="docSpecialization" required placeholder="Obstetrics">
+
+      <div class="card section-card">
+        <div class="section-head">
+          <div class="section-title"><span style="background:#fef3c7;color:#d97706">★</span> Milestones</div>
+          <button type="button" class="link-btn" data-go="timeline">View All →</button>
         </div>
-        <div class="form-group">
-          <label for="docLicense">Medical license no.</label>
-          <input type="text" id="docLicense" required placeholder="MCI-000000">
-        </div>
-      </div>
-      <div class="field-row">
-        <div class="form-group">
-          <label for="docPhone">Phone (optional)</label>
-          <input type="tel" id="docPhone" placeholder="+91 90000 00000">
-        </div>
-        <div class="form-group">
-          <label for="docFacility">Facility</label>
-          <input type="text" id="docFacility" placeholder="Same clinic as you">
+        <div class="milestones-track" id="milestoneTrack">
+          <div class="milestone is-done"><div class="milestone__icon">😊<span class="milestone__check">✓</span></div><div class="milestone__name">12 weeks</div><div class="milestone__range">Baby's organs forming</div></div>
+          <div class="milestone is-done"><div class="milestone__icon">👶<span class="milestone__check">✓</span></div><div class="milestone__name">16 weeks</div><div class="milestone__range">Gender (optional)</div></div>
+          <div class="milestone is-current"><div class="milestone__icon">📋</div><div class="milestone__name">20 weeks</div><div class="milestone__range">Anomaly scan</div></div>
+          <div class="milestone is-locked"><div class="milestone__icon">🩸</div><div class="milestone__name">24 weeks</div><div class="milestone__range">Glucose test</div></div>
+          <div class="milestone is-locked"><div class="milestone__icon">📈</div><div class="milestone__name">28 weeks</div><div class="milestone__range">Growth scan</div></div>
         </div>
       </div>
-      <button type="submit" class="btn btn--primary" id="addDoctorSubmit" style="width:100%;">
-        <svg aria-hidden="true"><use href="#i-plus"/></svg>Add doctor
-      </button>
+    </div>
+
+    <div class="side-stack">
+      <div class="card section-card">
+        <div class="section-title" style="margin-bottom:.85rem"><span>⚡</span> Quick Actions</div>
+        <div class="qa-grid">
+          <button type="button" class="qa-item" data-go="appointments"><div class="qa-item__icon qa-item__icon--blue">📅</div><div class="qa-item__title">Book Appointment <span>›</span></div><div class="qa-item__sub">See a doctor</div></button>
+          <button type="button" class="qa-item" data-go="records"><div class="qa-item__icon qa-item__icon--purple">📄</div><div class="qa-item__title">View Test Reports <span>›</span></div><div class="qa-item__sub">Lab results &amp; reports</div></button>
+          <button type="button" class="qa-item" data-go="records"><div class="qa-item__icon qa-item__icon--green">📈</div><div class="qa-item__title">Track Health <span>›</span></div><div class="qa-item__sub">Weight, vitals &amp; more</div></button>
+          <button type="button" class="qa-item" data-go="timeline"><div class="qa-item__icon qa-item__icon--amber">🕐</div><div class="qa-item__title">View Care Timeline <span>›</span></div><div class="qa-item__sub">Your pregnancy journey</div></button>
+        </div>
+      </div>
+      <div class="card section-card">
+        <div class="section-head"><div class="section-title"><span>🕐</span> Recent Updates</div><button type="button" class="link-btn">View All →</button></div>
+        <div class="feed-list" id="recentFeed">
+          <div class="feed-item"><div class="feed-item__icon feed-item__icon--amber">📅</div><div><div class="feed-item__title">Vaccination scheduled</div><div class="feed-item__sub">Tdap (2nd dose) · 25 Sep 2026</div></div><div class="feed-item__date">Sep 10</div></div>
+          <div class="feed-item"><div class="feed-item__icon feed-item__icon--green">🧪</div><div><div class="feed-item__title">Test report available</div><div class="feed-item__sub">Blood test · All parameters normal</div></div><div class="feed-item__date">Sep 8</div></div>
+          <div class="feed-item"><div class="feed-item__icon feed-item__icon--purple">📈</div><div><div class="feed-item__title">Growth checkup</div><div class="feed-item__sub">Weight &amp; BP recorded</div></div><div class="feed-item__date">Sep 5</div></div>
+          <div class="feed-item"><div class="feed-item__icon feed-item__icon--blue">📅</div><div><div class="feed-item__title">Next appointment</div><div class="feed-item__sub">Obstetrician · 25 Sep 2026</div></div><div class="feed-item__date">Sep 1</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sos-bar">
+    <div class="sos-bar__left"><div class="sos-bar__icon"><svg width="16" height="16"><use href="#i-heart"/></svg></div><div><strong>Need medical advice?</strong> Chat with your doctor for non-urgent queries. For emergencies, use the emergency button.</div></div>
+    <button class="btn--sos" type="button" id="sosBtn"><svg width="14" height="14"><use href="#i-phone"/></svg> Emergency SOS</button>
+  </div>
+</div>
+
+<!-- PROFILE -->
+<div class="panel" id="panel-profile">
+  <div class="card section-card" style="max-width:560px">
+    <div class="section-title" style="margin-bottom:1rem"><span>👤</span> Mother / Patient Profile</div>
+    <form class="form-grid" id="profileForm">
+      <div class="form-group"><label for="pfName">Full name</label><input id="pfName" value="Priya Sharma" required></div>
+      <div class="form-group"><label for="pfPhone">Phone</label><input id="pfPhone" type="tel" value="+91 98765 43210"></div>
+      <div class="form-group"><label for="pfLmp">Last menstrual period (LMP)</label><input id="pfLmp" type="date" value="2026-05-08"></div>
+      <div class="form-group"><label for="pfEdd">Expected due date</label><input id="pfEdd" type="date" value="2027-03-12"></div>
+      <div class="form-group"><label for="pfEmergency">Emergency contact</label><input id="pfEmergency" value="Rahul Sharma · +91 98765 00000"></div>
+      <button type="submit" class="btn btn--primary">Save profile</button>
     </form>
   </div>
 </div>
 
-<!-- ======================= Care assistant (chatbot) ======================= -->
-<button class="chat-fab" id="chatFab" aria-label="Open care assistant" title="Care assistant" hidden>💬</button>
-<div class="chat-panel" id="chatPanel" role="dialog" aria-label="दाई care assistant" aria-hidden="true">
-  <div class="chat-panel__head">
-    <h3>दाई care assistant</h3>
-    <button id="chatClose" aria-label="Close">✕</button>
+<!-- APPOINTMENTS -->
+<div class="panel" id="panel-appointments">
+  <div class="main-grid">
+    <div class="card section-card">
+      <div class="section-title" style="margin-bottom:1rem"><span>📅</span> Request appointment</div>
+      <form class="form-grid" id="apptForm">
+        <div class="form-group"><label for="apptType">Type / reason</label>
+          <select id="apptType"><option>Obstetrician Consultation</option><option>Ultrasound / Scan</option><option>Lab / Blood test</option><option>Vaccination</option><option>General checkup</option></select>
+        </div>
+        <div class="form-group"><label for="apptDoctor">Doctor</label>
+          <select id="apptDoctor" required><option value="">Loading doctors…</option></select>
+        </div>
+        <div class="form-group"><label for="apptDate">Preferred date</label><input id="apptDate" type="date" required></div>
+        <div class="form-group"><label for="apptTime">Preferred time</label><input id="apptTime" type="time" value="10:30"></div>
+        <div class="form-group"><label for="apptNotes">Notes</label><textarea id="apptNotes" rows="2" placeholder="Any symptoms or requests…"></textarea></div>
+        <button type="submit" class="btn btn--primary">Request appointment</button>
+      </form>
+    </div>
+    <div class="card list-card">
+      <div class="section-card" style="border:0;box-shadow:none;padding-bottom:.5rem"><div class="section-title"><span>📋</span> Your requests</div></div>
+      <div id="apptList"></div>
+    </div>
   </div>
-  <div class="chat-panel__body" id="chatBody"></div>
-  <div class="chat-chips" id="chatChips"></div>
-  <form class="chat-panel__input" id="chatForm">
-    <input type="text" id="chatInput" placeholder="Ask a question…" autocomplete="off">
-    <button type="submit" aria-label="Send">➤</button>
-  </form>
 </div>
+
+<!-- TIMELINE -->
+<div class="panel" id="panel-timeline">
+  <div class="card section-card">
+    <div class="section-head"><div class="section-title"><span>🕐</span> Care Timeline</div></div>
+    <div id="timelineList"></div>
+  </div>
+</div>
+
+<!-- RECORDS -->
+<div class="panel" id="panel-records">
+  <div class="main-grid">
+    <div class="card section-card">
+      <div class="section-title" style="margin-bottom:1rem"><span>📈</span> Log vitals</div>
+      <form class="form-grid" id="vitalsForm">
+        <div class="form-group"><label for="vWeight">Weight (kg)</label><input id="vWeight" type="number" step="0.1" placeholder="68"></div>
+        <div class="form-group"><label for="vBp">Blood pressure</label><input id="vBp" placeholder="120/80"></div>
+        <div class="form-group"><label for="vNotes">Notes</label><input id="vNotes" placeholder="Optional"></div>
+        <button type="submit" class="btn btn--primary">Save entry</button>
+      </form>
+      <div style="margin-top:1.25rem">
+        <div class="section-title" style="margin-bottom:.75rem;font-size:.95rem"><span>💊</span> Supplements today</div>
+        <label style="display:flex;align-items:center;gap:.6rem;padding:.6rem .75rem;border:1px solid var(--line);border-radius:12px;margin-bottom:.4rem"><input type="checkbox" id="supIron"> Iron / folic acid</label>
+        <label style="display:flex;align-items:center;gap:.6rem;padding:.6rem .75rem;border:1px solid var(--line);border-radius:12px"><input type="checkbox" id="supCalcium"> Calcium</label>
+      </div>
+    </div>
+    <div class="card list-card">
+      <div class="section-card" style="border:0;box-shadow:none;padding-bottom:.5rem"><div class="section-title"><span>📄</span> Health log</div></div>
+      <div id="vitalsList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MESSAGES -->
+<div class="panel" id="panel-messages">
+  <div class="card list-card">
+    <div class="section-card" style="border:0;box-shadow:none"><div class="section-title"><span>💬</span> Messages</div></div>
+    <div id="msgList">
+      <div class="list-row"><div class="feed-item__icon feed-item__icon--purple">👩‍⚕️</div><div class="list-row__meta"><div class="list-row__title">Dr. Neha Sharma</div><div class="list-row__sub">Your anomaly scan is scheduled for week 20. Please arrive 15 min early.</div></div><span class="feed-item__date">2h ago</span></div>
+      <div class="list-row"><div class="feed-item__icon feed-item__icon--blue">🏥</div><div class="list-row__meta"><div class="list-row__title">Clinic front desk</div><div class="list-row__sub">Reminder: Obstetrician consultation on 25 Sep at 10:30 AM.</div></div><span class="feed-item__date">1d ago</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- SETTINGS -->
+<div class="panel" id="panel-settings">
+  <div class="card section-card" style="max-width:520px">
+    <div class="section-title" style="margin-bottom:1rem"><span>⚙️</span> Settings</div>
+    <form class="form-grid" id="settingsForm">
+      <div class="form-group"><label for="setLang">Language</label><select id="setLang"><option>English</option><option>Hindi</option></select></div>
+      <div class="form-group"><label><input type="checkbox" id="setNotif" checked> Appointment reminders</label></div>
+      <div class="form-group"><label><input type="checkbox" id="setSms" checked> SMS alerts</label></div>
+      <button type="submit" class="btn btn--primary">Save settings</button>
+      <button type="button" class="btn btn--ghost" id="logoutBtn">Log out</button>
+    </form>
+  </div>
+</div>
+
+</div></div></div>
+<div class="toast" id="toast" role="status"></div>
 
 <script>
 (function () {
 "use strict";
-
-const API_BASE = 'https://daihealth.onrender.com/api';
-
-/* ======================================================================
-   API HELPERS
-   ====================================================================== */
-
-async function apiRequest(path, options) {
-  options = options || {};
-  var opts = Object.assign({ credentials: 'include' }, options);
-  if (opts.body) {
-    opts.headers = Object.assign({ 'Content-Type': 'application/json' }, opts.headers || {});
-  }
-  var response;
-  try {
-    response = await fetch(API_BASE + path, opts);
-  } catch (error) {
-    console.error('Network error:', error);
-    showToast('Network error — please try again');
-    return null;
-  }
-
-  if (response.status === 401) {
-    window.location.href = 'auth.html';
-    return null;
-  }
-
-  var data = null;
-  try { data = await response.json(); } catch (e) { data = {}; }
-
-  if (!response.ok) {
-    showToast((data && data.error) || 'Something went wrong');
-    return null;
-  }
-  return data;
-}
-
-async function fetchCurrentUser() {
-  var data = await apiRequest('/auth/me');
-  return data ? data.user : null;
-}
-
-/* ======================================================================
-   SHARED HELPERS
-   ====================================================================== */
-
-var STAGES = ["Trimester 1", "Trimester 2", "Trimester 3", "Delivery", "Postpartum", "Child (0\u20131y)"];
-var DAY_MS = 24 * 60 * 60 * 1000;
-var FALLBACK_GUIDANCE = "Book this with your doctor or nearest facility as soon as you can.";
-
-// Local calendar date (YYYY-MM-DD), using the device's own timezone —
-// NOT Date#toISOString(), which is UTC and rolls "today" over at 5:30am
-// IST, mid-way through a night labour for anyone in India.
-function localDateStr(d) {
-  d = d || new Date();
-  var y = d.getFullYear(), m = String(d.getMonth() + 1).padStart(2, '0'), day = String(d.getDate()).padStart(2, '0');
-  return y + '-' + m + '-' + day;
-}
-function localTimeStr(d) {
-  return (d instanceof Date ? d : new Date(d)).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-}
-
-function stageIndex(stageName) { return STAGES.indexOf(stageName); }
-
-function initials(name) {
-  return (name || "").split(" ").filter(Boolean).map(function (n) { return n[0]; }).join("").slice(0, 2).toUpperCase();
-}
-
-function fmtDate(dateStr) {
-  if (!dateStr) return "";
-  var d = new Date(dateStr);
-  if (isNaN(d.getTime())) return dateStr;
-  return d.toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
-}
-
-function iconFor(status) {
-  if (status === "done") return "i-check-circle";
-  if (status === "missed") return "i-alert-circle";
-  return "i-circle";
-}
-function classFor(status) {
-  if (status === "done") return "ok";
-  if (status === "missed") return "due";
-  return "next";
-}
-
-function showToast(msg) {
-  var t = document.getElementById("toast");
-  document.getElementById("toastMsg").textContent = msg;
-  t.classList.add("is-shown");
-  clearTimeout(showToast._t);
-  showToast._t = setTimeout(function () { t.classList.remove("is-shown"); }, 2600);
-}
-
-// Map a DB milestone (status: completed | overdue | upcoming) plus whether it
-// is the single nearest not-yet-completed item, onto the same done/missed/
-// current/upcoming vocabulary the timeline UI already renders.
-function displayStatus(m, nearestId) {
-  if (m.status === "completed") return "done";
-  if (m.status === "overdue") return "missed";
-  if (nearestId != null && m.id === nearestId) return "current";
-  return "upcoming";
-}
-
-function nearestActive(milestones) {
-  var active = milestones.filter(function (m) { return m.status !== "completed"; })
-    .slice()
-    .sort(function (a, b) { return new Date(a.due_date) - new Date(b.due_date); });
-  return active.length ? active[0] : null;
-}
-
-function currentStageIdx(milestones) {
-  var near = nearestActive(milestones);
-  if (near) return stageIndex(near.stage);
-  var doneStages = milestones.filter(function (m) { return m.status === "completed"; }).map(function (m) { return stageIndex(m.stage); });
-  return doneStages.length ? Math.max.apply(null, doneStages) : 0;
-}
-
-/* ======================================================================
-   TIMELINE RENDERING (shared markup between the mother's own timeline and
-   the read-only view a doctor sees for one of their patients)
-   ====================================================================== */
-
-function renderStageStepper(containerId, milestones) {
-  var curStage = currentStageIdx(milestones);
-  document.getElementById(containerId).innerHTML = STAGES.map(function (label, i) {
-    var cls = i < curStage ? "is-done" : (i === curStage ? "is-current" : "");
-    var inner = i < curStage
-      ? '<svg aria-hidden="true"><use href="#i-check-circle"/></svg>'
-      : (i + 1);
-    var line = i < STAGES.length - 1 ? '<span class="stage-step__line"></span>' : "";
-    return '<div class="stage-step ' + cls + '"><span class="stage-step__dot">' + inner + '</span><span class="stage-step__label">' + label + '</span>' + line + '</div>';
-  }).join("");
-}
-
-function renderTimelineGroups(containerId, milestones, editable) {
-  var container = document.getElementById(containerId);
-  var curStage = currentStageIdx(milestones);
-  var near = nearestActive(milestones);
-
-  container.innerHTML = STAGES.map(function (stageLabel, sIdx) {
-    var items = milestones.filter(function (m) { return stageIndex(m.stage) === sIdx; });
-    if (!items.length) return "";
-    var doneCount = items.filter(function (m) { return m.status === "completed"; }).length;
-    var missedCount = items.filter(function (m) { return m.status === "overdue"; }).length;
-    var summary = missedCount ? (missedCount + " overdue") : (doneCount + " of " + items.length + " done");
-    var openByDefault = sIdx === curStage;
-
-    var rows = items.map(function (m) {
-      var status = displayStatus(m, near ? near.id : null);
-      var actionRow = "";
-      if (status === "missed" || status === "current") {
-        actionRow =
-          '<div class="milestone__detail">' +
-            '<p class="gap-alert__action" style="margin:0;"><svg aria-hidden="true"><use href="#i-lightbulb"/></svg><span>' + (m.guidance || FALLBACK_GUIDANCE) + '</span></p>' +
-          '</div>';
-      }
-      var rightControl = status === "done"
-        ? '<span class="tag tag--ok"><svg aria-hidden="true"><use href="#i-tick"/></svg>Done</span>'
-        : (status === "missed" && editable)
-          ? '<button class="btn btn--sm btn--primary" data-action="resolve" data-id="' + m.id + '">Mark done</button>'
-          : (status === "current" && editable)
-            ? '<button class="btn btn--sm btn--ghost" data-action="resolve" data-id="' + m.id + '">Mark done</button>'
-            : (status === "missed")
-              ? '<span class="tag tag--due">Overdue</span>'
-              : '<span class="tag tag--next">Upcoming</span>';
-
-      return (
-        '<div class="milestone">' +
-          '<span class="milestone__icon ' + classFor(status) + '"><svg aria-hidden="true"><use href="#' + iconFor(status) + '"/></svg></span>' +
-          '<span><span class="milestone__title">' + m.title + '</span><br><span class="milestone__when">' + fmtDate(m.due_date) + '</span></span>' +
-          '<span class="milestone__right">' + rightControl + '</span>' +
-        '</div>' + actionRow
-      );
-    }).join("");
-
-    return (
-      '<div class="timeline-group ' + (openByDefault ? "is-open" : "") + '" data-stage="' + sIdx + '">' +
-        '<button class="timeline-group__head" data-action="toggle-group">' +
-          '<b>' + stageLabel + '</b><span class="stage-summary">' + summary + '</span>' +
-          '<svg class="chev" aria-hidden="true"><use href="#i-chevron"/></svg>' +
-        '</button>' +
-        '<div class="timeline-group__body">' + rows + '</div>' +
-      '</div>'
-    );
-  }).join("");
-}
-
-/* ======================================================================
-   FAMILY VIEW (mother only) — Care Timeline + Care Gap Alerts + Appointments
-   ====================================================================== */
-
-var motherMilestones = [];
-var motherAppointments = [];
-var doctorsList = [];
-
-function renderFamilyHeader() {
-  var careStart = currentUser.care_start_date ? new Date(currentUser.care_start_date) : null;
-  var greetingElement = document.querySelector('.fv-header__intro h1');
-  var displayName = (currentUser.full_name || currentUser.email).split(' ')[0];
-  if (greetingElement) greetingElement.textContent = 'Hi ' + displayName + ' \uD83D\uDC4B';
-
-  if (!careStart || isNaN(careStart.getTime())) return;
-
-  var daysAlong = Math.max(0, Math.floor((Date.now() - careStart.getTime()) / DAY_MS));
-  var weeksAlong = Math.min(40, Math.floor(daysAlong / 7));
-  var dueDate = new Date(careStart.getTime() + 280 * DAY_MS);
-
-  var stageLabel = weeksAlong < 13 ? "First trimester" : weeksAlong < 27 ? "Second trimester" : weeksAlong <= 40 ? "Third trimester" : "Postpartum & child care";
-
-  var eyebrow = document.querySelector('.fv-header__intro .eyebrow');
-  if (eyebrow) eyebrow.lastChild.textContent = stageLabel;
-
-  var introP = document.querySelector('.fv-header__intro p');
-  if (introP) {
-    introP.innerHTML = "You're <strong>" + weeksAlong + " weeks</strong> along. Estimated due date <strong>" + fmtDate(dueDate) + "</strong>. Here's what's done, what's next, and what needs attention.";
-  }
-
-  var progTop = document.querySelector('.progress-card__top b');
-  if (progTop) progTop.textContent = 'Week ' + weeksAlong;
-  var fill = document.querySelector('.progress-fill');
-  if (fill) fill.style.width = Math.round((weeksAlong / 40) * 100) + '%';
-}
-
-function renderGapAlerts() {
-  var list = document.getElementById("famGapList");
-  var gaps = motherMilestones.filter(function (m) { return m.status === "overdue"; });
-  document.getElementById("famGapCount").textContent = gaps.length;
-
-  if (!gaps.length) {
-    list.innerHTML = '<div class="gap-empty"><svg aria-hidden="true"><use href="#i-check-circle"/></svg>No overdue care right now \u2014 you\'re all caught up.</div>';
-    return;
-  }
-
-  list.innerHTML = gaps.map(function (m) {
-    return (
-      '<div class="gap-alert" data-id="' + m.id + '">' +
-        '<div class="gap-alert__icon"><svg aria-hidden="true"><use href="#i-alert-tri"/></svg></div>' +
-        '<div class="gap-alert__body">' +
-          '<h3>' + m.title + ' is overdue</h3>' +
-          '<div class="gap-alert__meta"><span class="tag tag--due">' + m.stage + '</span><span>Was due ' + fmtDate(m.due_date) + '</span></div>' +
-          '<p class="gap-alert__action"><svg aria-hidden="true"><use href="#i-lightbulb"/></svg><span>' + (m.guidance || FALLBACK_GUIDANCE) + '</span></p>' +
-        '</div>' +
-        '<div class="gap-alert__buttons">' +
-          '<button class="btn btn--primary btn--sm" data-action="resolve" data-id="' + m.id + '"><svg aria-hidden="true"><use href="#i-check-circle"/></svg>Mark as done</button>' +
-          '<button class="btn btn--ghost btn--sm" data-action="remind" data-id="' + m.id + '">Remind me later</button>' +
-        '</div>' +
-      '</div>'
-    );
-  }).join("");
-}
-
-function renderFamilyView() {
-  var doneCount = motherMilestones.filter(function (m) { return m.status === "completed"; }).length;
-  renderFamilyHeader();
-  renderGapAlerts();
-  renderStageStepper("stageStepper", motherMilestones);
-  renderTimelineGroups("familyTimeline", motherMilestones, true);
-}
-
-async function loadFamilyView() {
-  var data = await apiRequest('/timeline');
-  if (!data) return;
-  motherMilestones = data.milestones;
-  renderFamilyView();
-}
-
-async function resolveMilestone(id) {
-  var data = await apiRequest('/timeline/' + id + '/complete', { method: 'PATCH' });
-  if (!data) return;
-  var m = motherMilestones.filter(function (x) { return x.id === id; })[0];
-  if (m) {
-    m.status = 'completed';
-    m.completed_at = data.milestone.completed_at;
-  }
-  renderFamilyView();
-  showToast("Marked complete \u2014 timeline updated");
-}
-
-/* ---- Appointments: mother side ---------------------------------------- */
-
-function apptStatusTag(status) {
-  var label = status.charAt(0).toUpperCase() + status.slice(1);
-  return '<span class="tag tag--' + status + '">' + label + '</span>';
-}
-
-function renderMotherAppointments() {
-  var list = document.getElementById('motherApptList');
-  if (!motherAppointments.length) {
-    list.innerHTML = '<div class="empty-state">No appointment requests yet.</div>';
-    return;
-  }
-  list.innerHTML = motherAppointments.map(function (a) {
-    return (
-      '<div class="appt-card">' +
-        '<div class="appt-card__top"><span class="appt-card__who">' + a.doctor_name + '</span>' + apptStatusTag(a.status) + '</div>' +
-        '<div class="appt-card__meta">' + (a.specialization || '') + ' \u00B7 Requested for ' + fmtDate(a.requested_date) + '</div>' +
-        (a.reason ? '<div class="appt-card__reason">' + a.reason + '</div>' : '') +
-        (a.doctor_notes ? '<div class="appt-card__reason"><b>Doctor note:</b> ' + a.doctor_notes + '</div>' : '') +
-      '</div>'
-    );
-  }).join("");
-}
-
-async function loadDoctorsForBooking() {
-  var data = await apiRequest('/doctors');
-  if (!data) return;
-  doctorsList = data.doctors;
-  var select = document.getElementById('apptDoctor');
-  select.innerHTML = '<option value="" disabled selected>Choose a doctor</option>' +
-    doctorsList.map(function (d) {
-      return '<option value="' + d.id + '">' + d.full_name + (d.specialization ? ' \u2014 ' + d.specialization : '') + '</option>';
-    }).join("");
-}
-
-async function loadMotherAppointments() {
-  var data = await apiRequest('/appointments');
-  if (!data) return;
-  motherAppointments = data.appointments;
-  renderMotherAppointments();
-}
-
-document.getElementById('appointmentForm').addEventListener('submit', async function (e) {
-  e.preventDefault();
-  var doctorId = document.getElementById('apptDoctor').value;
-  var date = document.getElementById('apptDate').value;
-  var reason = document.getElementById('apptReason').value.trim();
-  if (!doctorId || !date) return;
-
-  var submitBtn = document.getElementById('apptSubmit');
-  submitBtn.disabled = true;
-  var data = await apiRequest('/appointments', {
-    method: 'POST',
-    body: JSON.stringify({ doctor_id: Number(doctorId), requested_date: date, reason: reason || undefined })
-  });
-  submitBtn.disabled = false;
-  if (!data) return;
-
-  showToast('Appointment requested');
-  document.getElementById('appointmentForm').reset();
-  loadMotherAppointments();
-});
-
-/* MATERNAL WELLNESS MODULES
-   Nutrition/water/supplements are scoped to WELLNESS_DATE (the device's own
-   local calendar date — see localDateStr above), so they reset when the
-   local day rolls over, not when UTC does. For a signed-in mother this data
-   lives in the database (so a cleared browser or a doctor's dashboard can
-   both see it); for a guest it lives in localStorage only, under a single
-   'dai_guest_wellness' key, day-bucketed the same way. */
-
-var WELLNESS_DATE = localDateStr();
-var nutritionLogs = [], waterGlasses = 0, supplements = { Iron: false, 'Folic acid': false, Calcium: false };
-var growthLogs = [], contractionLogs = []; // contractionLogs: {time, durationMs, gapMs, startedAtMs}[]
-var contractionStartedAt = null, contractionInterval = null;
-var fiveOneOneFlag = false;
-var FIVE_ONE_ONE = { maxGapMs: 6 * 60 * 1000, minDurationMs: 40 * 1000, minSpanMs: 55 * 60 * 1000 };
-
-function guestWellnessRaw() {
-  try { return Object.assign({ days: {}, growth: [], contractions: [] }, JSON.parse(localStorage.getItem('dai_guest_wellness') || '{}')); }
-  catch (e) { return { days: {}, growth: [], contractions: [] }; }
-}
-function saveGuestWellness(raw) { localStorage.setItem('dai_guest_wellness', JSON.stringify(raw)); }
-function escapeHtml(v) { return String(v == null ? '' : v).replace(/[&<>'"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[c]; }); }
-
-async function loadWellnessState() {
-  WELLNESS_DATE = localDateStr();
-  if (currentUser && currentUser.guest) {
-    var raw = guestWellnessRaw();
-    var today = raw.days[WELLNESS_DATE] || {};
-    nutritionLogs = today.nutrition || [];
-    waterGlasses = today.water || 0;
-    supplements = Object.assign({ Iron: false, 'Folic acid': false, Calcium: false }, today.supplements || {});
-    growthLogs = raw.growth || [];
-    contractionLogs = raw.contractions || [];
-    return;
-  }
-  var data = await apiRequest('/wellness?date=' + WELLNESS_DATE);
-  if (!data) return;
-  nutritionLogs = (data.nutrition || []).map(function (n) { return { text: n.text, time: localTimeStr(n.logged_at) }; });
-  waterGlasses = data.water_glasses || 0;
-  supplements = Object.assign({ Iron: false, 'Folic acid': false, Calcium: false }, data.supplements || {});
-  growthLogs = (data.growth || []).map(function (g) { return { date: g.log_date, weight: Number(g.weight_kg), height: Number(g.height_cm) }; });
-  contractionLogs = (data.contractions || []).map(function (c) {
-    return { time: localTimeStr(c.started_at), durationMs: c.duration_ms, gapMs: c.gap_ms, startedAtMs: new Date(c.started_at).getTime() };
-  });
-}
-
-function renderWellness() {
-  var nl = document.getElementById('nutritionList');
-  if (nl) nl.innerHTML = nutritionLogs.slice().reverse().map(function (x) { return '<div class="module-stat"><span>\ud83c\udf7d\ufe0f ' + escapeHtml(x.text) + '</span><b>' + x.time + '</b></div>'; }).join('') || '<div class="growth-empty">No meals logged today.</div>';
-  var ns = document.getElementById('nutritionScore'); if (ns) ns.textContent = nutritionLogs.length + ' meals';
-  var wc = document.getElementById('waterCount'); if (wc) wc.textContent = Math.min(waterGlasses, 8) + ' / 8 glasses';
-  Object.keys(supplements).forEach(function (n) { var id = n === 'Iron' ? 'supIron' : n === 'Folic acid' ? 'supFolate' : 'supCalcium', e = document.getElementById(id); if (e) e.checked = !!supplements[n]; });
-  var done = Object.keys(supplements).filter(function (n) { return supplements[n]; }).length, ss = document.getElementById('supplementScore'); if (ss) ss.textContent = done + ' / 3';
-  renderGrowth();
-  renderContractions();
-}
-
-async function addNutrition() {
-  var e = document.getElementById('nutritionInput'), t = e.value.trim();
-  if (!t) return;
-  e.value = '';
-  if (currentUser && currentUser.guest) {
-    var raw = guestWellnessRaw();
-    raw.days[WELLNESS_DATE] = raw.days[WELLNESS_DATE] || {};
-    raw.days[WELLNESS_DATE].nutrition = raw.days[WELLNESS_DATE].nutrition || [];
-    raw.days[WELLNESS_DATE].nutrition.push({ text: t, time: localTimeStr(new Date()) });
-    saveGuestWellness(raw);
-    nutritionLogs = raw.days[WELLNESS_DATE].nutrition;
-  } else {
-    var data = await apiRequest('/wellness/nutrition', { method: 'POST', body: JSON.stringify({ date: WELLNESS_DATE, text: t }) });
-    if (!data) return;
-    nutritionLogs.push({ text: data.meal.text, time: localTimeStr(data.meal.logged_at) });
-  }
-  renderWellness();
-  showToast('Meal added');
-}
-
-async function addWater() {
-  if (waterGlasses >= 8) return;
-  if (currentUser && currentUser.guest) {
-    var raw = guestWellnessRaw();
-    raw.days[WELLNESS_DATE] = raw.days[WELLNESS_DATE] || {};
-    waterGlasses = Math.min((raw.days[WELLNESS_DATE].water || 0) + 1, 8);
-    raw.days[WELLNESS_DATE].water = waterGlasses;
-    saveGuestWellness(raw);
-  } else {
-    var data = await apiRequest('/wellness/water', { method: 'POST', body: JSON.stringify({ date: WELLNESS_DATE }) });
-    if (!data) return;
-    waterGlasses = data.water_glasses;
-  }
-  renderWellness();
-}
-
-async function setSupplement(name, taken) {
-  supplements[name] = taken;
-  if (currentUser && currentUser.guest) {
-    var raw = guestWellnessRaw();
-    raw.days[WELLNESS_DATE] = raw.days[WELLNESS_DATE] || {};
-    raw.days[WELLNESS_DATE].supplements = Object.assign({}, raw.days[WELLNESS_DATE].supplements, supplements);
-    saveGuestWellness(raw);
-  } else {
-    await apiRequest('/wellness/supplements', { method: 'PUT', body: JSON.stringify({ date: WELLNESS_DATE, supplement: name, taken: taken }) });
-  }
-  renderWellness();
-}
-
-function renderGrowth() {
-  var e = document.getElementById('growthList'); if (!e) return;
-  if (!growthLogs.length) { e.innerHTML = '<div class="growth-empty">No measurements yet.</div>'; return; }
-  e.innerHTML = '<table class="growth-table"><tr><th>Date</th><th>Weight</th><th>Height</th></tr>' + growthLogs.slice().reverse().slice(0, 6).map(function (g) { return '<tr><td>' + g.date + '</td><td>' + g.weight + ' kg</td><td>' + g.height + ' cm</td></tr>'; }).join('') + '</table>';
-}
-
-async function addGrowth() {
-  var d = document.getElementById('growthDate').value || localDateStr(), w = document.getElementById('growthWeight').value, h = document.getElementById('growthHeight').value;
-  if (!w || !h) { showToast('Enter weight and height'); return; }
-  if (currentUser && currentUser.guest) {
-    var raw = guestWellnessRaw();
-    raw.growth = raw.growth || [];
-    raw.growth.push({ date: d, weight: Number(w), height: Number(h) });
-    saveGuestWellness(raw);
-    growthLogs = raw.growth;
-  } else {
-    var data = await apiRequest('/wellness/growth', { method: 'POST', body: JSON.stringify({ date: d, weight: Number(w), height: Number(h) }) });
-    if (!data) return;
-    growthLogs.push({ date: data.measurement.log_date, weight: Number(data.measurement.weight_kg), height: Number(data.measurement.height_cm) });
-  }
-  renderWellness();
-  document.getElementById('growthWeight').value = '';
-  document.getElementById('growthHeight').value = '';
-  showToast('Growth measurement saved');
-}
-
-var fruitSizes = [[8, 'Size', 'Bean'], [10, 'Size', 'Strawberry'], [12, 'Size', 'Lime'], [14, 'Size', 'Lemon'], [16, 'Size', 'Avocado'], [18, 'Size', 'Tomato'], [20, 'Size', 'Mango'], [22, 'Size', 'Banana'], [24, 'Size', 'Corn'], [26, 'Size', 'Lettuce'], [28, 'Size', 'Cauliflower'], [30, 'Size', 'Coconut'], [32, 'Size', 'Pineapple'], [34, 'Size', 'Cantaloupe'], [36, 'Size', 'Honeydew melon'], [38, 'Size', 'Watermelon'], [40, 'Size', 'Watermelon']];
-function updatePregnancyInfo() { var cs = currentUser && currentUser.care_start_date ? new Date(currentUser.care_start_date) : null; if (!cs || isNaN(cs.getTime())) return; var days = Math.max(0, Math.floor((Date.now() - cs.getTime()) / DAY_MS)), week = Math.min(40, Math.floor(days / 7)), chosen = fruitSizes[0]; fruitSizes.forEach(function (x) { if (week >= x[0]) chosen = x; }); document.getElementById('pregnancyWeekStat').textContent = 'Week ' + week + ' of 40'; document.getElementById('fruitName').textContent = chosen[2]; document.getElementById('fruitEmoji').textContent = chosen[1]; document.getElementById('fruitMeta').textContent = 'Around week ' + chosen[0]; }
-function formatTimer(ms) { var t = Math.floor(ms / 1000), m = Math.floor(t / 60), s = t % 60; return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0'); }
-
-// The 5-1-1 rule: contractions about 5 minutes apart (gap), each lasting
-// about a minute (duration), sustained for about an hour. A contraction
-// "matches" if its gap is <=6min and duration is >=40s; we then need a
-// run of matching contractions spanning >=55 minutes.
-function computeFiveOneOne(ascList) {
-  var runStart = null;
-  for (var i = 0; i < ascList.length; i++) {
-    var r = ascList[i];
-    var matches = r.durationMs >= FIVE_ONE_ONE.minDurationMs && (r.gapMs == null || r.gapMs <= FIVE_ONE_ONE.maxGapMs);
-    if (!matches) { runStart = null; continue; }
-    if (runStart === null) runStart = r.startedAtMs;
-    if (r.startedAtMs - runStart >= FIVE_ONE_ONE.minSpanMs) return true;
-  }
-  return false;
-}
-
-function renderContractions() {
-  var todays = contractionLogs.filter(function (x) { return localDateStr(new Date(x.startedAtMs)) === WELLNESS_DATE; });
-  var c = document.getElementById('contractionCount'); if (c) c.textContent = todays.length + ' today';
-  var e = document.getElementById('contractionLog');
-  if (e) e.innerHTML = todays.slice().reverse().slice(0, 8).map(function (x) {
-    var gapLabel = x.gapMs != null ? ' \u00b7 gap ' + formatTimer(x.gapMs) : ' \u00b7 first today';
-    return '<div class="contraction-item"><span>' + x.time + gapLabel + '</span><b>' + formatTimer(x.durationMs) + '</b></div>';
-  }).join('') || '<div class="growth-empty">No contractions logged today.</div>';
-
-  var gapEl = document.getElementById('contractionGap');
-  if (gapEl) {
-    var last = todays[todays.length - 1];
-    gapEl.textContent = last ? (last.gapMs != null ? 'Last gap: ' + formatTimer(last.gapMs) + ' \u00b7 lasted ' + formatTimer(last.durationMs) : 'First contraction logged today') : '';
-  }
-
-  var cutoff = Date.now() - 2 * 60 * 60 * 1000;
-  var recent = contractionLogs.filter(function (x) { return x.startedAtMs >= cutoff; }).sort(function (a, b) { return a.startedAtMs - b.startedAtMs; });
-  var alertEl = document.getElementById('fiveOneOneAlert');
-  if (alertEl) alertEl.hidden = !(fiveOneOneFlag || computeFiveOneOne(recent));
-}
-
-function startContraction() {
-  if (contractionStartedAt) return;
-  contractionStartedAt = Date.now();
-  document.getElementById('contractionStart').disabled = true;
-  document.getElementById('contractionStop').disabled = false;
-  document.getElementById('contractionStatus').textContent = 'Contraction in progress';
-  contractionInterval = setInterval(function () { document.getElementById('contractionTimer').textContent = formatTimer(Date.now() - contractionStartedAt); }, 250);
-}
-
-async function stopContraction() {
-  if (!contractionStartedAt) return;
-  var startedAtMs = contractionStartedAt, duration = Date.now() - startedAtMs;
-  clearInterval(contractionInterval); contractionInterval = null;
-
-  // Gap = time from the start of the previous contraction to the start of
-  // this one — the number the 5-1-1 rule actually cares about, not how
-  // long each contraction itself lasts.
-  var prev = contractionLogs.slice().sort(function (a, b) { return a.startedAtMs - b.startedAtMs; }).pop();
-  var gapMs = prev ? (startedAtMs - prev.startedAtMs) : null;
-  var entry = { time: localTimeStr(new Date(startedAtMs)), durationMs: duration, gapMs: gapMs, startedAtMs: startedAtMs };
-
-  contractionStartedAt = null;
-  document.getElementById('contractionStart').disabled = false;
-  document.getElementById('contractionStop').disabled = true;
-  document.getElementById('contractionTimer').textContent = '00:00';
-  document.getElementById('contractionStatus').textContent = 'Logged \u2014 ready for the next one';
-
-  if (currentUser && currentUser.guest) {
-    var raw = guestWellnessRaw();
-    raw.contractions = raw.contractions || [];
-    raw.contractions.push(entry);
-    saveGuestWellness(raw);
-    contractionLogs = raw.contractions;
-    var cutoff = Date.now() - 2 * 60 * 60 * 1000;
-    var recent = contractionLogs.filter(function (x) { return x.startedAtMs >= cutoff; }).sort(function (a, b) { return a.startedAtMs - b.startedAtMs; });
-    if (computeFiveOneOne(recent)) fiveOneOneFlag = true;
-  } else {
-    contractionLogs.push(entry);
-    var data = await apiRequest('/wellness/contractions', {
-      method: 'POST',
-      body: JSON.stringify({ date: localDateStr(new Date(startedAtMs)), started_at: new Date(startedAtMs).toISOString(), duration_ms: duration, gap_ms: gapMs })
-    });
-    if (data && data.five_one_one) fiveOneOneFlag = true;
-  }
-
-  renderContractions();
-}
-
-function openSos() { document.getElementById('sosModal').classList.add('is-open'); }
-function closeSos() { document.getElementById('sosModal').classList.remove('is-open'); }
-function callEmergencyContact() { var p = currentUser && currentUser.emergency_contact_phone; if (p) location.href = 'tel:' + p; else showToast('No emergency contact number is saved'); }
-
-async function initWellness() {
-  await loadWellnessState();
-  renderWellness();
-  updatePregnancyInfo();
-  document.querySelectorAll('[data-supplement]').forEach(function (e) {
-    e.addEventListener('change', function () { setSupplement(e.dataset.supplement, e.checked); });
-  });
-  document.getElementById('growthDate').value = localDateStr();
-
-  // If the local calendar date rolls over while the tab stays open (e.g.
-  // an overnight labour), pick up the new day's nutrition/water/supplement
-  // state without needing a reload.
-  setInterval(function () {
-    var nowDate = localDateStr();
-    if (nowDate !== WELLNESS_DATE) loadWellnessState().then(renderWellness);
-  }, 5 * 60 * 1000);
-}
-
-/* ======================================================================
-   DOCTOR DASHBOARD (doctor only)
-   ====================================================================== */
-
-var doctorPatients = [];
-var doctorAppointments = [];
-var selectedPatientId = null;
-var patientTimelineCache = {};
-var activeFilter = "all";
-var searchTerm = "";
-
-// Risk is derived from a patient's live overdue-milestone count so the
-// "High risk" filter reflects real data, not a placeholder.
-function riskLevel(p) {
-  var gc = Number(p.gap_count);
-  if (gc >= 2) return "high";
-  if (gc === 1) return "medium";
-  return "low";
-}
-function riskTag(p) {
-  var level = riskLevel(p);
-  if (level === "high") return '<span class="tag tag--risk-high"><svg aria-hidden="true"><use href="#i-alert-tri"/></svg>High risk</span>';
-  if (level === "medium") return '<span class="tag tag--risk-medium">Medium risk</span>';
-  return '<span class="tag tag--risk-low"><svg aria-hidden="true"><use href="#i-tick"/></svg>On track</span>';
-}
-
-function renderDoctorStats() {
-  var totalGaps = doctorPatients.reduce(function (sum, p) { return sum + Number(p.gap_count); }, 0);
-  var highRisk = doctorPatients.filter(function (p) { return riskLevel(p) === "high"; }).length;
-  var pending = doctorAppointments.filter(function (a) { return a.status === "pending"; }).length;
-  document.getElementById("doctorStats").innerHTML =
-    '<div class="stat-cell"><b>' + doctorPatients.length + '</b><span>Total patients</span></div>' +
-    '<div class="stat-cell is-alert"><b>' + totalGaps + '</b><span>Active care gaps</span></div>' +
-    '<div class="stat-cell is-alert"><b>' + highRisk + '</b><span>High risk patients</span></div>' +
-    '<div class="stat-cell"><b>' + pending + '</b><span>Pending requests</span></div>';
-}
-
-function patientWeekLabel(p) {
-  if (!p.care_start_date) return "";
-  var days = Math.max(0, Math.floor((Date.now() - new Date(p.care_start_date).getTime()) / DAY_MS));
-  var weeks = Math.floor(days / 7);
-  return weeks <= 40 ? ("Wk " + weeks) : "Postpartum / child care";
-}
-
-function filteredPatients() {
-  return doctorPatients.filter(function (p) {
-    if (activeFilter === "gap" && Number(p.gap_count) === 0) return false;
-    if (activeFilter === "risk" && riskLevel(p) !== "high") return false;
-    if (searchTerm && p.full_name.toLowerCase().indexOf(searchTerm) === -1) return false;
-    return true;
-  });
-}
-
-function renderPatientList() {
-  var list = filteredPatients();
-  var container = document.getElementById("patientList");
-
-  if (!list.length) {
-    container.innerHTML = '<div class="empty-state">No patients match this filter.</div>';
-    return;
-  }
-
-  container.innerHTML = list.map(function (p) {
-    return (
-      '<button class="patient-card ' + (p.id === selectedPatientId ? "is-selected" : "") + '" data-action="select-patient" data-pid="' + p.id + '">' +
-        '<span class="patient-card__avatar">' + initials(p.full_name) + '</span>' +
-        '<span class="patient-card__body">' +
-          '<span class="patient-card__name">' + p.full_name + '</span>' +
-          '<span class="patient-card__meta">' + patientWeekLabel(p) + '</span>' +
-        '</span>' +
-        '<span class="patient-card__gap">' + riskTag(p) + '</span>' +
-      '</button>'
-    );
-  }).join("");
-}
-
-function renderWellnessSection(wellness) {
-  if (!wellness) return '<div class="wellness-doctor"><h4>Tracking data</h4><p style="font-size:.82rem;margin:0">Loading\u2026</p></div>';
-
-  var adherence = wellness.supplement_adherence_pct;
-  var adherenceLabel = adherence == null ? 'No supplement logs yet' : adherence + '% over ' + wellness.supplement_days_tracked + ' tracked day' + (wellness.supplement_days_tracked === 1 ? '' : 's');
-
-  var contractions = wellness.recent_contractions || [];
-  var contractionsHtml = contractions.length
-    ? contractions.slice(0, 6).map(function (c) {
-        var gap = c.gap_ms != null ? ' \u00b7 gap ' + formatTimer(c.gap_ms) : '';
-        return '<div class="module-stat"><span>' + fmtDate(c.started_at) + ' ' + localTimeStr(c.started_at) + gap + '</span><b>' + formatTimer(c.duration_ms) + '</b></div>';
-      }).join('')
-    : '<p style="font-size:.82rem;margin:0">No contractions logged.</p>';
-
-  var flagHtml = wellness.five_one_one_flag
-    ? '<div class="five-one-one-alert" style="margin-bottom:.7rem"><svg aria-hidden="true"><use href="#i-alert-tri"/></svg><div><strong>5-1-1 pattern flagged</strong> in the last 2 hours of logged contractions.</div></div>'
-    : '';
-
-  return (
-    '<div class="wellness-doctor">' +
-      '<h4>Tracking data</h4>' +
-      flagHtml +
-      '<div class="module-stat"><span>Supplement adherence</span><b>' + adherenceLabel + '</b></div>' +
-      '<p style="font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-3);margin:.9rem 0 .5rem">Recent contractions</p>' +
-      contractionsHtml +
-    '</div>'
-  );
-}
-
-function renderDetailPanel(pid, cached) {
-  var panel = document.getElementById("detailPanel");
-  var p = doctorPatients.filter(function (x) { return x.id === pid; })[0];
-  if (!p || !cached) { panel.innerHTML = '<div class="empty-state">Select a patient to see their care timeline.</div>'; return; }
-
-  var milestones = cached.milestones;
-  var gaps = milestones.filter(function (m) { return m.status === "overdue"; });
-  var gapsHtml = gaps.length
-    ? gaps.map(function (m) {
-        return (
-          '<div class="dgap">' +
-            '<div><div class="dgap__title">' + m.title + '</div><p class="dgap__note">' + m.stage + ' \u00B7 was due ' + fmtDate(m.due_date) + '</p></div>' +
-          '</div>'
-        );
-      }).join("")
-    : '<div class="gap-empty"><svg aria-hidden="true"><use href="#i-check-circle"/></svg>No active care gaps for this patient.</div>';
-
-  var near = nearestActive(milestones);
-  var visible = milestones.filter(function (m) {
-    return m.status !== "upcoming" || (near && Math.abs(m.id - near.id) <= 2);
-  });
-
-  var timelineHtml = visible.map(function (m) {
-    var status = displayStatus(m, near ? near.id : null);
-    return (
-      '<div class="mini-milestone">' +
-        '<span class="milestone__icon ' + classFor(status) + '"><svg aria-hidden="true"><use href="#' + iconFor(status) + '"/></svg></span>' +
-        '<span>' + m.title + '</span>' +
-        '<span class="mini-milestone__stage">' + m.stage + '</span>' +
-        '<span class="milestone__when">' + fmtDate(m.due_date) + '</span>' +
-      '</div>'
-    );
-  }).join("");
-
-  panel.innerHTML =
-    '<div class="detail-head">' +
-      '<div class="detail-head__id">' +
-        '<span class="detail-head__avatar">' + initials(p.full_name) + '</span>' +
-        '<div><h2 style="margin-bottom:.15rem;">' + p.full_name + '</h2><span style="font-size:.85rem;color:var(--ink-3);">' + patientWeekLabel(p) + '</span>' +
-          '<div class="detail-head__tags">' + riskTag(p) + (gaps.length ? '<span class="tag tag--due">' + gaps.length + ' active gap' + (gaps.length > 1 ? "s" : "") + '</span>' : '') + '</div>' +
-        '</div>' +
-      '</div>' +
-    '</div>' +
-    '<div class="detail-gaps"><h4>Active care gaps</h4>' + gapsHtml + '</div>' +
-    '<div><h4 style="font-size:.82rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-3);margin-bottom:.7rem;">Care timeline (nearby milestones)</h4><div class="mini-timeline">' + timelineHtml + '</div></div>' +
-    renderWellnessSection(patientWellnessCache[pid]);
-}
-
-var patientWellnessCache = {};
-
-async function selectPatient(pid) {
-  selectedPatientId = pid;
-  renderPatientList();
-  if (!patientTimelineCache[pid]) {
-    var data = await apiRequest('/doctor/patients/' + pid + '/timeline');
-    if (!data) return;
-    patientTimelineCache[pid] = data;
-  }
-  renderDetailPanel(pid, patientTimelineCache[pid]);
-
-  if (!patientWellnessCache[pid]) {
-    var wellness = await apiRequest('/doctor/patients/' + pid + '/wellness');
-    if (wellness) {
-      patientWellnessCache[pid] = wellness;
-      // Only re-render if this patient is still the one selected.
-      if (selectedPatientId === pid) renderDetailPanel(pid, patientTimelineCache[pid]);
-    }
-  }
-}
-
-document.getElementById("patientSearch").addEventListener("input", function (e) {
-  searchTerm = e.target.value.trim().toLowerCase();
-  renderPatientList();
-});
-
-document.getElementById("filterChips").addEventListener("click", function (e) {
-  var chip = e.target.closest(".chip");
-  if (!chip) return;
-  document.querySelectorAll("#filterChips .chip").forEach(function (c) { c.classList.remove("is-active"); });
-  chip.classList.add("is-active");
-  activeFilter = chip.getAttribute("data-filter");
-  renderPatientList();
-});
-
-async function loadDoctorDashboard() {
-  var data = await apiRequest('/doctor/patients');
-  if (!data) return;
-  doctorPatients = data.patients;
-  renderDoctorStats();
-  renderPatientList();
-  if (doctorPatients.length) {
-    selectPatient(selectedPatientId || doctorPatients[0].id);
-  } else {
-    document.getElementById('detailPanel').innerHTML = '<div class="empty-state">No patients yet \u2014 they\'ll appear here once a mother requests an appointment with you.</div>';
-  }
-}
-
-/* ---- Appointments: doctor side ---------------------------------------- */
-
-var APPT_STATUSES = ["pending", "confirmed", "completed", "cancelled"];
-
-function renderDoctorAppointments() {
-  var list = document.getElementById('doctorApptList');
-  if (!doctorAppointments.length) {
-    list.innerHTML = '<div class="empty-state">No appointment requests yet.</div>';
-    return;
-  }
-  list.innerHTML = doctorAppointments.map(function (a) {
-    var options = APPT_STATUSES.map(function (s) {
-      return '<option value="' + s + '"' + (s === a.status ? ' selected' : '') + '>' + s.charAt(0).toUpperCase() + s.slice(1) + '</option>';
-    }).join("");
-    return (
-      '<div class="appt-card">' +
-        '<div class="appt-card__top"><span class="appt-card__who">' + a.mother_name + '</span>' + apptStatusTag(a.status) + '</div>' +
-        '<div class="appt-card__meta">Requested for ' + fmtDate(a.requested_date) + '</div>' +
-        (a.reason ? '<div class="appt-card__reason">' + a.reason + '</div>' : '') +
-        '<div class="appt-card__actions">' +
-          '<select data-action="appt-status" data-id="' + a.id + '">' + options + '</select>' +
-        '</div>' +
-      '</div>'
-    );
-  }).join("");
-}
-
-async function loadDoctorAppointments() {
-  var data = await apiRequest('/appointments');
-  if (!data) return;
-  doctorAppointments = data.appointments;
-  renderDoctorAppointments();
-  renderDoctorStats();
-}
-
-document.getElementById('doctorApptList').addEventListener('change', async function (e) {
-  var select = e.target.closest('[data-action="appt-status"]');
-  if (!select) return;
-  var id = select.getAttribute('data-id');
-  var status = select.value;
-  var data = await apiRequest('/appointments/' + id + '/status', {
-    method: 'PATCH',
-    body: JSON.stringify({ status: status })
-  });
-  if (!data) return;
-  var a = doctorAppointments.filter(function (x) { return String(x.id) === String(id); })[0];
-  if (a) a.status = status;
-  renderDoctorAppointments();
-  // A confirmed/completed patient may now have (or clear) care gaps in the
-  // patient list stats, so refresh the roster alongside the appointment list.
-  loadDoctorDashboard();
-  showToast('Appointment updated');
-});
-
-/* ---- Care team: colleague doctors -------------------------------------- */
-
-var doctorColleagues = [];
-
-function renderColleagues() {
-  var grid = document.getElementById('teamGrid');
-  if (!doctorColleagues.length) {
-    grid.innerHTML = '<div class="empty-state team-empty">No colleagues added yet — use "Add doctor" to bring one onto the platform.</div>';
-    return;
-  }
-  grid.innerHTML = doctorColleagues.map(function (d) {
-    var meta = [d.specialization, d.facility_name].filter(Boolean).join(' \u00B7 ');
-    return (
-      '<div class="team-card">' +
-        '<span class="team-card__avatar">' + initials(d.full_name) + '</span>' +
-        '<span class="team-card__body">' +
-          '<span class="team-card__name">' + d.full_name + '</span>' +
-          '<span class="team-card__meta">' + (meta || 'Doctor') + '</span>' +
-        '</span>' +
-      '</div>'
-    );
-  }).join("");
-}
-
-async function loadDoctorColleagues() {
-  var data = await apiRequest('/doctor/colleagues');
-  if (!data) return;
-  doctorColleagues = data.colleagues;
-  renderColleagues();
-}
-
-function openAddDoctorModal() {
-  document.getElementById('addDoctorModal').classList.add('is-open');
-  document.getElementById('addDoctorModal').setAttribute('aria-hidden', 'false');
-  document.getElementById('docFullName').focus();
-}
-function closeAddDoctorModal() {
-  document.getElementById('addDoctorModal').classList.remove('is-open');
-  document.getElementById('addDoctorModal').setAttribute('aria-hidden', 'true');
-}
-
-document.getElementById('addDoctorModal').addEventListener('click', function (e) {
-  if (e.target === this) closeAddDoctorModal();
-});
-
-document.getElementById('addDoctorForm').addEventListener('submit', async function (e) {
-  e.preventDefault();
-  var payload = {
-    full_name: document.getElementById('docFullName').value.trim(),
-    email: document.getElementById('docEmail').value.trim(),
-    password: document.getElementById('docPassword').value,
-    specialization: document.getElementById('docSpecialization').value.trim(),
-    medical_license_number: document.getElementById('docLicense').value.trim(),
-    phone: document.getElementById('docPhone').value.trim() || undefined,
-    facility_name: document.getElementById('docFacility').value.trim() || undefined
-  };
-
-  var submitBtn = document.getElementById('addDoctorSubmit');
-  submitBtn.disabled = true;
-  var data = await apiRequest('/doctor/colleagues', { method: 'POST', body: JSON.stringify(payload) });
-  submitBtn.disabled = false;
-  if (!data) return;
-
-  showToast(payload.full_name + ' added to your care team');
-  document.getElementById('addDoctorForm').reset();
-  closeAddDoctorModal();
-  loadDoctorColleagues();
-});
-
-/* ======================================================================
-   SHARED INTERACTIONS (mark-done / gap alert / accordion toggles)
-   ====================================================================== */
-
-document.addEventListener("click", function (e) {
-  var target = e.target.closest("[data-action]");
-  if (!target) return;
-  var action = target.getAttribute("data-action");
-
-  if (action === "add-nutrition") { addNutrition();
-  } else if (action === "add-water") { addWater();
-  } else if (action === "add-growth") { addGrowth();
-  } else if (action === "contraction-start") { startContraction();
-  } else if (action === "contraction-stop") { stopContraction();
-  } else if (action === "open-sos") { openSos();
-  } else if (action === "close-sos") { closeSos();
-  } else if (action === "call-emergency-contact") { callEmergencyContact();
-  } else if (action === "resolve") {
-    resolveMilestone(Number(target.getAttribute("data-id")));
-  } else if (action === "remind") {
-    showToast("We'll remind you again tomorrow");
-  } else if (action === "toggle-group") {
-    target.closest(".timeline-group").classList.toggle("is-open");
-  } else if (action === "select-patient") {
-    selectPatient(Number(target.getAttribute("data-pid")));
-  } else if (action === "open-add-doctor") {
-    openAddDoctorModal();
-  } else if (action === "close-modal") {
-    closeAddDoctorModal();
-  }
-});
-
-document.addEventListener("keydown", function (e) {
-  if (e.key === "Escape" && document.getElementById('addDoctorModal').classList.contains('is-open')) {
-    closeAddDoctorModal();
-  }
-});
-
-/* ======================================================================
-   AUTH / ROLE GATING
-   ====================================================================== */
-
-var currentUser = null;
-
-function updateUserUI(user) {
-  var whoami = document.getElementById('whoami');
-  var userInitials = (user.full_name || user.email).split(' ').map(function (n) { return n[0]; }).join('').toUpperCase().slice(0, 2);
-  var displayName = user.full_name || user.email.split('@')[0];
-  whoami.innerHTML = '<span class="dot">' + userInitials + '</span> ' + displayName;
-
-  // Each account only ever renders its own dashboard \u2014 there is no control
-  // that lets a signed-in user switch into the other role's view.
-  document.body.setAttribute('data-role', user.role);
-  if (user.role === 'mother') {
-    document.getElementById('viewFamily').classList.add('is-active');
-    document.getElementById('viewDoctor').classList.remove('is-active');
-  } else {
-    document.getElementById('viewDoctor').classList.add('is-active');
-    document.getElementById('viewFamily').classList.remove('is-active');
-  }
-}
-
+var api = window.DaiAPI;
 var IS_GUEST = localStorage.getItem('dai_guest') === '1';
+var currentUser = null;
+var motherMilestones = [];
+var appointments = [];
+var doctorsList = [];
+var healthLogs = [];
+var medications = [];
 
-// A guest never has a session cookie, so calling any /api/* route would hit
-// a 401 and bounce straight to auth.html. Guest mode has to stay entirely
-// off the network — this is the synthetic user object it renders instead.
-function guestUser() {
-  var careStart = localStorage.getItem('dai_guest_care_start');
-  if (!careStart) {
-    careStart = new Date(Date.now() - 30 * 7 * DAY_MS).toISOString(); // demo: ~30 weeks along
-    localStorage.setItem('dai_guest_care_start', careStart);
-  }
-  return { id: 0, full_name: 'Guest', email: 'guest@dai.demo', role: 'mother', care_start_date: careStart, guest: true };
+function $(id) { return document.getElementById(id); }
+
+function showPanel(id) {
+  document.querySelectorAll('.panel').forEach(function (p) { p.classList.remove('is-active'); });
+  document.querySelectorAll('.nav-item[data-panel]').forEach(function (n) { n.classList.remove('is-active'); });
+  var panel = $('panel-' + id);
+  if (panel) panel.classList.add('is-active');
+  var nav = document.querySelector('.nav-item[data-panel="' + id + '"]');
+  if (nav) nav.classList.add('is-active');
+  try { history.replaceState(null, '', '#' + id); } catch (e) {}
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-document.getElementById('logoutBtn').addEventListener('click', async function () {
-  if (IS_GUEST) {
-    localStorage.removeItem('dai_guest');
-  } else {
-    try {
-      await fetch(API_BASE + '/auth/logout', { method: 'POST', credentials: 'include' });
-    } catch (error) {
-      console.error('Logout failed:', error);
-    }
-  }
-  window.location.href = 'index.html';
+document.querySelectorAll('.nav-item[data-panel]').forEach(function (btn) {
+  btn.addEventListener('click', function () { showPanel(btn.getAttribute('data-panel')); });
+});
+document.querySelectorAll('[data-go]').forEach(function (el) {
+  el.addEventListener('click', function () { showPanel(el.getAttribute('data-go')); });
 });
 
-function startMotherView() {
-  document.getElementById('guestBanner').hidden = !IS_GUEST;
-  initWellness();
-  initChatbot();
-  if (IS_GUEST) {
-    // No account, so no timeline/appointments to fetch \u2014 point the mother
-    // at creating one instead of showing a broken/empty API-backed section.
-    document.getElementById('famGapList').innerHTML = '';
-    document.getElementById('famGapCount').textContent = '0';
-    document.getElementById('stageStepper').innerHTML = '';
-    document.getElementById('familyTimeline').innerHTML = '<div class="empty-state">Your care timeline needs an account so it can be seen by your doctor too. <a href="auth.html">Create one</a> \u2014 it takes a minute.</div>';
-    document.querySelector('.appt-section').style.display = 'none';
-  } else {
-    loadFamilyView();
-    loadDoctorsForBooking();
-    loadMotherAppointments();
+function weeksAlong() {
+  return api.gestationalWeeks(currentUser && currentUser.care_start_date);
+}
+
+function renderHeader() {
+  if (!currentUser) return;
+  var name = currentUser.full_name || currentUser.email || 'Mother';
+  var first = name.split(/\s+/)[0];
+  var un = $('userName'); if (un) un.textContent = name;
+  var gn = $('greetName'); if (gn) gn.textContent = first;
+  var weeks = weeksAlong();
+  var wl = $('weekLabel');
+  if (wl) wl.textContent = weeks != null ? (weeks + ' weeks') : '—';
+  var tri = api.trimesterLabel(weeks);
+  var pills = document.querySelectorAll('.pill');
+  // first pill contains trimester
+  var edd = api.eddFromCareStart(currentUser.care_start_date);
+  var eddEl = $('eddLabel');
+  if (eddEl) eddEl.textContent = edd ? api.fmtDate(edd) : '—';
+  // Update trimester text in first pill if present
+  var pill0 = document.querySelector('.pills .pill');
+  if (pill0 && weeks != null) {
+    pill0.innerHTML = '💜 ' + tri + ' · <span id="weekLabel">' + weeks + ' weeks</span>';
   }
 }
 
-if (IS_GUEST) {
-  currentUser = guestUser();
-  updateUserUI(currentUser);
-  startMotherView();
-} else {
-  fetchCurrentUser().then(function (user) {
-    if (!user) return;
-    currentUser = user;
-    updateUserUI(user);
+function renderAppointments() {
+  var list = $('apptList');
+  var upcoming = appointments.filter(function (a) {
+    return a.status === 'pending' || a.status === 'confirmed';
+  });
+  var countEl = $('apptCount');
+  if (countEl) countEl.textContent = String(upcoming.length);
 
-    if (user.role === 'mother') {
-      startMotherView();
-    } else if (user.role === 'doctor') {
-      loadDoctorDashboard();
-      loadDoctorAppointments();
-      loadDoctorColleagues();
+  var next = upcoming.slice().sort(function (a, b) {
+    return String(a.requested_date).localeCompare(String(b.requested_date));
+  })[0];
+  if (next) {
+    var title = $('nextApptTitle');
+    if (title) title.textContent = next.reason || 'Consultation';
+    var meta = $('nextApptMeta');
+    if (meta) {
+      meta.innerHTML = (next.doctor_name ? next.doctor_name : 'Doctor') +
+        (next.specialization ? ' · ' + next.specialization : '') +
+        '<br>' + api.fmtDate(next.requested_date) +
+        ' · <span class="tag tag--' + (next.status === 'confirmed' ? 'ok' : 'pending') + '">' + next.status + '</span>';
+    }
+  } else {
+    var title2 = $('nextApptTitle'); if (title2) title2.textContent = 'No upcoming appointment';
+    var meta2 = $('nextApptMeta'); if (meta2) meta2.textContent = 'Request one from Appointments';
+  }
+
+  if (!list) return;
+  if (!appointments.length) {
+    list.innerHTML = '<div class="empty">No appointment requests yet.</div>';
+    return;
+  }
+  list.innerHTML = appointments.map(function (a) {
+    return '<div class="list-row"><div class="list-row__meta"><div class="list-row__title">' +
+      (a.reason || 'Appointment') + '</div><div class="list-row__sub">' +
+      api.fmtDate(a.requested_date) + (a.doctor_name ? ' · ' + a.doctor_name : '') +
+      '</div></div><span class="tag tag--' + (a.status === 'confirmed' || a.status === 'completed' ? 'ok' : 'pending') + '">' +
+      a.status + '</span></div>';
+  }).join('');
+}
+
+function renderTimeline() {
+  var el = $('timelineList');
+  if (!el) return;
+  var preg = motherMilestones.filter(function (m) { return m.category !== 'child'; });
+  if (!preg.length) {
+    el.innerHTML = '<div class="empty">No care milestones yet. Confirm your due date in profile to seed your timeline.</div>';
+    return;
+  }
+  el.innerHTML = preg.map(function (m) {
+    var tag = m.status === 'completed' ? 'ok' : (m.status === 'overdue' ? 'pending' : 'info');
+    var label = m.status === 'completed' ? 'Done' : (m.status === 'overdue' ? 'Overdue' : 'Upcoming');
+    var btn = m.status !== 'completed'
+      ? '<button type="button" class="btn btn--sm btn--primary" data-complete="' + m.id + '">Mark done</button>'
+      : '';
+    return '<div class="list-row"><div class="list-row__meta"><div class="list-row__title">' +
+      m.title + '</div><div class="list-row__sub">' + (m.stage || '') + ' · due ' + api.fmtDate(m.due_date) +
+      (m.guidance ? ' · ' + m.guidance : '') + '</div></div><span class="tag tag--' + tag + '">' + label +
+      '</span>' + btn + '</div>';
+  }).join('');
+
+  el.querySelectorAll('[data-complete]').forEach(function (b) {
+    b.addEventListener('click', async function () {
+      var id = b.getAttribute('data-complete');
+      var data = await api.apiRequest('/timeline/' + id + '/complete', { method: 'PATCH' });
+      if (data) {
+        api.toast('Milestone marked done');
+        await loadTimeline();
+      }
+    });
+  });
+
+  // Dashboard milestone strip — first 5 pregnancy milestones
+  var track = $('milestoneTrack');
+  if (track) {
+    var slice = preg.slice(0, 5);
+    track.innerHTML = slice.map(function (m, i) {
+      var cls = m.status === 'completed' ? 'is-done' : (m.status === 'overdue' || (m.status === 'upcoming' && !slice.slice(0, i).some(function (x) { return x.status !== 'completed'; })) ? 'is-current' : 'is-locked');
+      // simplify: first non-completed is current
+      return cls;
+    });
+    var foundCurrent = false;
+    track.innerHTML = slice.map(function (m) {
+      var cls, icon;
+      if (m.status === 'completed') { cls = 'is-done'; icon = '✓'; }
+      else if (!foundCurrent) { cls = 'is-current'; icon = '●'; foundCurrent = true; }
+      else { cls = 'is-locked'; icon = '○'; }
+      return '<div class="milestone ' + cls + '"><div class="milestone__icon">' + icon +
+        (m.status === 'completed' ? '<span class="milestone__check">✓</span>' : '') +
+        '</div><div class="milestone__name">' + m.title + '</div><div class="milestone__range">' +
+        api.fmtDate(m.due_date) + '</div></div>';
+    }).join('');
+  }
+}
+
+function renderVitals() {
+  var el = $('vitalsList');
+  var weights = healthLogs.filter(function (l) { return l.log_type === 'weight'; });
+  var bps = healthLogs.filter(function (l) { return l.log_type === 'blood_pressure'; });
+  if (weights[0] && weights[0].data && weights[0].data.kg != null) {
+    var cw = $('curWeight');
+    if (cw) cw.textContent = weights[0].data.kg + ' kg';
+  }
+  if (!el) return;
+  if (!healthLogs.length) {
+    el.innerHTML = '<div class="empty">No health log entries yet.</div>';
+    return;
+  }
+  el.innerHTML = healthLogs.slice(0, 20).map(function (l) {
+    var summary = l.log_type;
+    if (l.log_type === 'weight' && l.data) summary = l.data.kg + ' kg';
+    if (l.log_type === 'blood_pressure' && l.data) summary = l.data.systolic + '/' + l.data.diastolic + (l.data.pulse ? ' · pulse ' + l.data.pulse : '');
+    if (l.log_type === 'blood_glucose' && l.data) summary = l.data.mg_dl + ' mg/dL';
+    if (l.log_type === 'kick_session' && l.data) summary = l.data.kicks + ' kicks';
+    return '<div class="list-row"><div class="list-row__meta"><div class="list-row__title">' + summary +
+      '</div><div class="list-row__sub">' + l.log_type.replace(/_/g, ' ') + ' · ' + api.fmtDate(l.logged_at) +
+      '</div></div></div>';
+  }).join('');
+}
+
+function renderMeds() {
+  var active = medications.filter(function (m) { return m.active !== false; });
+  var mc = $('medCount');
+  if (mc) mc.textContent = active.length ? (active.length + ' active') : 'None logged';
+}
+
+function renderDoctorsSelect() {
+  var sel = $('apptDoctor');
+  if (!sel) return;
+  if (!doctorsList.length) {
+    sel.innerHTML = '<option value="">No doctors available</option>';
+    return;
+  }
+  sel.innerHTML = doctorsList.map(function (d) {
+    var id = d.id != null ? d.id : d.user_id;
+    return '<option value="' + id + '">' + d.full_name + (d.specialization ? ' · ' + d.specialization : '') + '</option>';
+  }).join('');
+}
+
+async function loadTimeline() {
+  if (IS_GUEST) {
+    motherMilestones = [];
+    renderTimeline();
+    return;
+  }
+  var data = await api.apiRequest('/timeline');
+  motherMilestones = (data && data.milestones) || [];
+  renderTimeline();
+}
+
+async function loadAppointments() {
+  if (IS_GUEST) {
+    appointments = [];
+    renderAppointments();
+    return;
+  }
+  var data = await api.apiRequest('/appointments');
+  appointments = (data && data.appointments) || [];
+  renderAppointments();
+}
+
+async function loadDoctors() {
+  if (IS_GUEST) return;
+  var data = await api.apiRequest('/doctors');
+  doctorsList = (data && data.doctors) || [];
+  renderDoctorsSelect();
+}
+
+async function loadHealthLogs() {
+  if (IS_GUEST) {
+    healthLogs = [];
+    renderVitals();
+    return;
+  }
+  var data = await api.apiRequest('/health-logs');
+  healthLogs = (data && data.logs) || [];
+  renderVitals();
+}
+
+async function loadMedications() {
+  if (IS_GUEST) {
+    medications = [];
+    renderMeds();
+    return;
+  }
+  var data = await api.apiRequest('/medications');
+  medications = (data && data.medications) || [];
+  renderMeds();
+}
+
+async function loadPregnancyIntoForm() {
+  if (IS_GUEST) return;
+  var data = await api.apiRequest('/profile/pregnancy');
+  var p = data && data.pregnancy;
+  if (!p) return;
+  if (p.care_start_date && $('pfLmp')) {
+    // care_start is LMP-based anchor
+    $('pfLmp').value = String(p.care_start_date).slice(0, 10);
+  }
+  if (currentUser && currentUser.care_start_date) {
+    var edd = api.eddFromCareStart(currentUser.care_start_date);
+    if (edd && $('pfEdd')) $('pfEdd').value = edd.toISOString().slice(0, 10);
+  }
+  if ($('pfName') && currentUser.full_name) $('pfName').value = currentUser.full_name;
+  if ($('pfPhone') && currentUser.phone) $('pfPhone').value = currentUser.phone;
+  if ($('pfEmergency')) {
+    var en = currentUser.emergency_contact_name || '';
+    var ep = currentUser.emergency_contact_phone || '';
+    $('pfEmergency').value = [en, ep].filter(Boolean).join(' · ');
+  }
+}
+
+// Profile form → PATCH pregnancy + contact
+var profileForm = $('profileForm');
+if (profileForm) {
+  profileForm.addEventListener('submit', async function (e) {
+    e.preventDefault();
+    if (IS_GUEST) { api.toast('Sign in to save your profile'); return; }
+    var edd = $('pfEdd') && $('pfEdd').value;
+    var lmp = $('pfLmp') && $('pfLmp').value;
+    if (edd || lmp) {
+      var body = edd ? { edd_date: edd } : { lmp_date: lmp };
+      var preg = await api.apiRequest('/profile/pregnancy', { method: 'PATCH', body: body });
+      if (preg) api.toast('Pregnancy dates updated');
+    }
+    var contactBody = { phone: $('pfPhone') ? $('pfPhone').value : undefined };
+    var em = $('pfEmergency') ? $('pfEmergency').value.trim() : '';
+    if (em) {
+      // Accept "Name · phone" or a single phone
+      var parts = em.split(/[·|]/);
+      if (parts.length >= 2) {
+        contactBody.emergency_contact_name = parts[0].trim();
+        contactBody.emergency_contact_phone = parts.slice(1).join(' ').trim();
+      } else if (/\d/.test(em)) {
+        contactBody.emergency_contact_phone = em;
+      } else {
+        contactBody.emergency_contact_name = em;
+      }
+    }
+    var contact = await api.apiRequest('/profile/contact', {
+      method: 'PATCH',
+      body: contactBody
+    });
+    if (contact) api.toast('Contact saved');
+    currentUser = await api.fetchCurrentUser() || currentUser;
+    renderHeader();
+    await loadTimeline();
+  });
+}
+
+// Appointments form
+var apptForm = $('apptForm');
+if (apptForm) {
+  // Ensure doctor select exists — inject if design only had type/date
+  if (!$('apptDoctor')) {
+    var typeGroup = $('apptType') && $('apptType').closest('.form-group');
+    if (typeGroup && typeGroup.parentNode) {
+      var div = document.createElement('div');
+      div.className = 'form-group';
+      div.innerHTML = '<label for="apptDoctor">Doctor</label><select id="apptDoctor" required></select>';
+      typeGroup.parentNode.insertBefore(div, typeGroup.nextSibling);
+    }
+  }
+  apptForm.addEventListener('submit', async function (e) {
+    e.preventDefault();
+    if (IS_GUEST) { api.toast('Sign in to request appointments'); return; }
+    var doctorId = $('apptDoctor') && $('apptDoctor').value;
+    var date = $('apptDate') && $('apptDate').value;
+    var reason = ($('apptType') && $('apptType').value) || ($('apptNotes') && $('apptNotes').value) || 'Consultation';
+    if (!doctorId || !date) { api.toast('Select a doctor and date'); return; }
+    var data = await api.apiRequest('/appointments', {
+      method: 'POST',
+      body: { doctor_id: Number(doctorId), requested_date: date, reason: reason }
+    });
+    if (data) {
+      api.toast('Appointment requested');
+      apptForm.reset();
+      await loadAppointments();
     }
   });
 }
 
-/* ======================================================================
-   CARE ASSISTANT (rule-based chatbot, mother/guest only)
-   Answers a fixed set of common questions from canned, clinician-reviewed
-   copy. It never diagnoses and always defers urgent symptoms to the SOS
-   flow or a real clinician \u2014 see the safety note baked into every reply.
-   ====================================================================== */
-
-var CHAT_TOPICS = [
-  {
-    key: 'danger', chip: '\ud83d\udea8 Warning signs',
-    match: ['danger', 'warning', 'emergency', 'urgent', 'bleeding', 'pain'],
-    reply: "Contact your doctor or go to the nearest facility right away for: heavy vaginal bleeding, severe headache with blurred vision, severe abdominal pain, high fever, reduced baby movement, fluid leaking, or fits/convulsions. If any of these are happening now, use the Emergency SOS button instead of chatting."
-  },
-  {
-    key: 'contractions', chip: '\u23f1\ufe0f Contractions & 5-1-1',
-    match: ['contraction', '5-1-1', '511', 'labor', 'labour'],
-    reply: "The 5-1-1 rule is a common guide: contractions about 5 minutes apart, each lasting about a minute, for at least an hour. Log each one with the Contraction timer above \u2014 it tracks the gap for you and will flag it once that pattern shows up. When it does, call your doctor or hospital."
-  },
-  {
-    key: 'nutrition', chip: '\ud83e\udd57 Diet & nutrition',
-    match: ['eat', 'food', 'diet', 'nutrition', 'meal'],
-    reply: "A simple everyday guide: include a protein (dal, eggs, milk, paneer), an iron-rich food (leafy greens, jaggery), a fruit, and plenty of water at most meals. Your doctor's specific advice always takes priority over general guidance like this."
-  },
-  {
-    key: 'supplements', chip: '\ud83d\udc8a Supplements',
-    match: ['supplement', 'iron', 'folic', 'calcium', 'tablet', 'medicine'],
-    reply: "Iron, folic acid and calcium are commonly recommended in pregnancy, but only take what your own doctor has prescribed, at the dose they've given you. Use the Supplement tracker above to keep a daily record you can show them."
-  },
-  {
-    key: 'movement', chip: '\ud83d\udc76 Baby movement',
-    match: ['kick', 'movement', 'moving', 'move'],
-    reply: "Babies usually settle into a noticeable movement pattern by the third trimester. If movement feels clearly reduced or has stopped compared to what's normal for your baby, contact your doctor promptly \u2014 don't wait it out."
-  },
-  {
-    key: 'appointments', chip: '\ud83d\udcc5 Appointments',
-    match: ['appointment', 'visit', 'checkup', 'check-up', 'book'],
-    reply: "You can request an appointment with any doctor on दाई from the Appointments section below \u2014 pick a doctor, a preferred date, and an optional reason, and they'll confirm it."
-  }
-];
-var CHAT_FALLBACK = "I can help with general pregnancy questions \u2014 try asking about warning signs, contractions, nutrition, supplements, baby movement, or appointments. For anything specific to your own health, please check with your doctor, and use Emergency SOS for anything urgent right now.";
-var CHAT_INTRO = "Hi! I'm the दाई care assistant. I can answer general questions \u2014 I don't diagnose or replace your doctor. What would you like to know?";
-
-var chatInitialized = false;
-function initChatbot() {
-  document.getElementById('chatFab').hidden = false;
-  if (chatInitialized) return;
-  chatInitialized = true;
-
-  var fab = document.getElementById('chatFab'), panel = document.getElementById('chatPanel'),
-      body = document.getElementById('chatBody'), chips = document.getElementById('chatChips'),
-      form = document.getElementById('chatForm'), input = document.getElementById('chatInput');
-
-  function addMsg(text, who) {
-    var d = document.createElement('div');
-    d.className = 'chat-msg chat-msg--' + who;
-    d.textContent = text;
-    body.appendChild(d);
-    body.scrollTop = body.scrollHeight;
-  }
-
-  function renderChips() {
-    chips.innerHTML = '';
-    CHAT_TOPICS.forEach(function (t) {
-      var b = document.createElement('button');
-      b.type = 'button'; b.textContent = t.chip;
-      b.addEventListener('click', function () { addMsg(t.chip, 'user'); addMsg(t.reply, 'bot'); });
-      chips.appendChild(b);
-    });
-  }
-
-  function answer(text) {
-    var lower = text.toLowerCase();
-    var topic = CHAT_TOPICS.filter(function (t) { return t.match.some(function (k) { return lower.indexOf(k) !== -1; }); })[0];
-    addMsg(topic ? topic.reply : CHAT_FALLBACK, 'bot');
-  }
-
-  fab.addEventListener('click', function () {
-    var open = panel.classList.toggle('is-open');
-    panel.setAttribute('aria-hidden', String(!open));
-    if (open && !body.childElementCount) { addMsg(CHAT_INTRO, 'bot'); renderChips(); }
-  });
-  document.getElementById('chatClose').addEventListener('click', function () {
-    panel.classList.remove('is-open');
-    panel.setAttribute('aria-hidden', 'true');
-  });
-  form.addEventListener('submit', function (e) {
+// Vitals form
+var vitalsForm = $('vitalsForm');
+if (vitalsForm) {
+  vitalsForm.addEventListener('submit', async function (e) {
     e.preventDefault();
-    var t = input.value.trim();
-    if (!t) return;
-    addMsg(t, 'user');
-    input.value = '';
-    setTimeout(function () { answer(t); }, 300);
+    if (IS_GUEST) { api.toast('Sign in to log vitals'); return; }
+    var w = $('vWeight') && $('vWeight').value;
+    var bp = $('vBp') && $('vBp').value;
+    var ok = false;
+    if (w) {
+      var r = await api.apiRequest('/health-logs', {
+        method: 'POST',
+        body: { log_type: 'weight', data: { kg: Number(w) } }
+      });
+      if (r) ok = true;
+    }
+    if (bp && bp.indexOf('/') !== -1) {
+      var parts = bp.split('/');
+      var r2 = await api.apiRequest('/health-logs', {
+        method: 'POST',
+        body: { log_type: 'blood_pressure', data: { systolic: Number(parts[0]), diastolic: Number(parts[1]) } }
+      });
+      if (r2) ok = true;
+    }
+    if (ok) {
+      api.toast('Vitals saved');
+      vitalsForm.reset();
+      await loadHealthLogs();
+    } else if (!w && !bp) {
+      api.toast('Enter weight or blood pressure');
+    }
   });
 }
 
+// Supplements → wellness API
+['supIron', 'supCalcium'].forEach(function (id) {
+  var el = $(id);
+  if (!el) return;
+  el.addEventListener('change', async function () {
+    if (IS_GUEST) { api.toast('Sign in to track supplements'); el.checked = !el.checked; return; }
+    var name = id === 'supIron' ? 'iron' : 'calcium';
+    await api.apiRequest('/wellness/supplements', {
+      method: 'PUT',
+      body: { date: api.localDateStr(), supplement: name, taken: el.checked }
+    });
+    api.toast(el.checked ? 'Marked taken' : 'Updated');
+  });
+});
+
+var sosBtn = $('sosBtn');
+if (sosBtn) {
+  sosBtn.addEventListener('click', function () {
+    api.toast('Emergency: call your hospital or local emergency number (e.g. 108)');
+  });
+}
+var logoutBtn = $('logoutBtn');
+if (logoutBtn) {
+  logoutBtn.addEventListener('click', async function () {
+    if (IS_GUEST) {
+      localStorage.removeItem('dai_guest');
+      window.location.href = 'auth.html';
+      return;
+    }
+    await api.apiRequest('/auth/logout', { method: 'POST' });
+    window.location.href = 'auth.html';
+  });
+}
+
+document.querySelectorAll('.tabs button').forEach(function (b) {
+  b.addEventListener('click', function () {
+    document.querySelectorAll('.tabs button').forEach(function (x) { x.classList.remove('is-active'); });
+    b.classList.add('is-active');
+  });
+});
+
+function route() {
+  var h = (location.hash || '#dashboard').replace('#', '') || 'dashboard';
+  if ($('panel-' + h)) showPanel(h);
+}
+
+async function boot() {
+  if (IS_GUEST) {
+    currentUser = {
+      id: 0,
+      full_name: 'Guest',
+      email: 'guest@dai.demo',
+      role: 'mother',
+      care_start_date: api.localDateStr(),
+      guest: true
+    };
+    renderHeader();
+    renderAppointments();
+    renderTimeline();
+    renderVitals();
+    route();
+    api.toast('Guest mode — data stays on this device until you sign in');
+    return;
+  }
+
+  currentUser = await api.fetchCurrentUser();
+  if (!currentUser) return;
+  if (currentUser.role === 'doctor') {
+    window.location.href = 'doctor.html';
+    return;
+  }
+
+  renderHeader();
+  await Promise.all([
+    loadTimeline(),
+    loadAppointments(),
+    loadDoctors(),
+    loadHealthLogs(),
+    loadMedications(),
+    loadPregnancyIntoForm()
+  ]);
+  route();
+}
+
+window.addEventListener('hashchange', route);
+boot();
 })();
 </script>
 </body>
