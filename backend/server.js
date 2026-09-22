@@ -179,6 +179,13 @@ const cleanupInt = (v, min, max) => {
   const n = cleanupNum(v, min, max);
   return n === null ? null : Math.round(n);
 };
+
+const escapeSsml = (value) => String(value || '')
+  .replace(/&/g, '&amp;')
+  .replace(/</g, '&lt;')
+  .replace(/>/g, '&gt;')
+  .replace(/"/g, '&quot;')
+  .replace(/'/g, '&apos;');
 const BLOOD_GROUPS_RE = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 const cleanupBloodGroup = (v) => (typeof v === 'string' && BLOOD_GROUPS_RE.includes(v.trim().toUpperCase()) ? v.trim().toUpperCase() : null);
 const PREGNANCY_STATUSES = ['pregnant', 'delivered', 'planning'];
@@ -1124,6 +1131,61 @@ require('./notifications')(app, { pool, authenticateToken });
 
 // Hospital, doctor, and patient continuity workflows
 require('./hospitalPlatform')(app);
+
+// Microsoft Azure Speech TTS for the care chatbot.
+// Keeps the Azure key server-side; the frontend receives only generated audio.
+app.post('/api/tts', async (req, res) => {
+  const key = process.env.AZURE_SPEECH_KEY || process.env.AZURE_TTS_KEY || process.env.SPEECH_KEY;
+  const region = process.env.AZURE_SPEECH_REGION || process.env.AZURE_TTS_REGION || process.env.SPEECH_REGION;
+  const voice = process.env.AZURE_TTS_VOICE || 'en-IN-PrabhatNeural';
+  const text = cleanupStr(req.body && req.body.text, 900);
+
+  if (!text) {
+    return res.status(400).json({ error: 'Text is required' });
+  }
+
+  if (!key || !region) {
+    return res.status(503).json({ error: 'Microsoft TTS is not configured' });
+  }
+
+  const ssml = [
+    '<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="en-IN">',
+    `<voice name="${escapeSsml(voice)}">`,
+    `<prosody rate="-8%" pitch="-2%">${escapeSsml(text)}</prosody>`,
+    '</voice>',
+    '</speak>'
+  ].join('');
+
+  try {
+    const azureRes = await fetch(`https://${region}.tts.speech.microsoft.com/cognitiveservices/v1`, {
+      method: 'POST',
+      headers: {
+        'Ocp-Apim-Subscription-Key': key,
+        'Content-Type': 'application/ssml+xml',
+        'X-Microsoft-OutputFormat': 'audio-24khz-48kbitrate-mono-mp3',
+        'User-Agent': 'DAI-Care-Chatbot'
+      },
+      body: ssml
+    });
+
+    if (!azureRes.ok) {
+      const detail = await azureRes.text().catch(() => '');
+      console.error('Azure TTS error:', azureRes.status, detail.slice(0, 300));
+      return res.status(502).json({ error: 'Microsoft TTS failed' });
+    }
+
+    const audio = Buffer.from(await azureRes.arrayBuffer());
+    res.set({
+      'Content-Type': 'audio/mpeg',
+      'Content-Length': audio.length,
+      'Cache-Control': 'no-store'
+    });
+    return res.send(audio);
+  } catch (error) {
+    console.error('TTS proxy error:', error);
+    return res.status(502).json({ error: 'Microsoft TTS failed' });
+  }
+});
 
 // Health check
 app.get('/api/health', (req, res) => {

@@ -2,6 +2,7 @@
   if (document.getElementById('daiCareChatbot')) return;
 
   var voiceOn = false;
+  var currentAudio = null;
   var messages = [];
   var safeReplies = [
     {
@@ -55,25 +56,73 @@
     return node;
   }
 
-  function chooseVoice() {
+  function getApiBase() {
+    if (window.DaiAPI && window.DaiAPI.API_BASE) return window.DaiAPI.API_BASE;
+    var isLocal = /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+    var isBackendOrigin = isLocal && location.port === '3001';
+    var isRenderOrigin = /\.onrender\.com$/.test(location.hostname);
+    if (isBackendOrigin || isRenderOrigin) return '/api';
+    if (isLocal) return location.protocol + '//' + location.hostname + ':3001/api';
+    return 'https://daihealth.onrender.com/api';
+  }
+
+  function chooseBrowserVoice() {
     var voices = window.speechSynthesis ? speechSynthesis.getVoices() : [];
     return voices.find(function (voice) {
-      return /en/i.test(voice.lang || '') && /microsoft|natural|aria|jenny|sonia|emma|ava|ana/i.test(voice.name || '');
+      return /en-IN/i.test(voice.lang || '') && /male|ravi|prabhat|microsoft|natural/i.test(voice.name || '');
+    }) || voices.find(function (voice) {
+      return /en/i.test(voice.lang || '') && /male|guy|ravi|prabhat|microsoft|natural/i.test(voice.name || '');
     }) || voices.find(function (voice) {
       return /en/i.test(voice.lang || '');
     }) || null;
   }
 
-  function speak(text) {
-    if (!voiceOn || !window.speechSynthesis) return;
+  function stopSpeech() {
+    if (currentAudio) {
+      if (currentAudio.dataset && currentAudio.dataset.objectUrl) {
+        URL.revokeObjectURL(currentAudio.dataset.objectUrl);
+      }
+      currentAudio.pause();
+      currentAudio.src = '';
+      currentAudio = null;
+    }
+    if (window.speechSynthesis) speechSynthesis.cancel();
+  }
+
+  function speakWithBrowserVoice(text) {
+    if (!window.speechSynthesis) return;
     speechSynthesis.cancel();
     var utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'en-US';
-    utterance.rate = 0.92;
-    utterance.pitch = 1;
-    var voice = chooseVoice();
+    utterance.lang = 'en-IN';
+    utterance.rate = 0.88;
+    utterance.pitch = 0.92;
+    var voice = chooseBrowserVoice();
     if (voice) utterance.voice = voice;
     speechSynthesis.speak(utterance);
+  }
+
+  async function speak(text) {
+    if (!voiceOn) return;
+    stopSpeech();
+    try {
+      var response = await fetch(getApiBase() + '/tts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: text })
+      });
+      if (!response.ok) throw new Error('TTS unavailable');
+      var blob = await response.blob();
+      var audioUrl = URL.createObjectURL(blob);
+      currentAudio = new Audio(audioUrl);
+      currentAudio.dataset.objectUrl = audioUrl;
+      currentAudio.onended = function () {
+        URL.revokeObjectURL(audioUrl);
+        currentAudio = null;
+      };
+      await currentAudio.play();
+    } catch (error) {
+      speakWithBrowserVoice(text);
+    }
   }
 
   function getReply(text) {
@@ -121,7 +170,7 @@
       '<input type="text" aria-label="Ask Dr. Daya" placeholder="Ask about DAI..." autocomplete="off">' +
       '<button type="submit">Send</button>' +
       '</form>' +
-      '<button type="button" class="care-chatbot__voice">English voice off</button>';
+      '<button type="button" class="care-chatbot__voice">Indian English voice off</button>';
 
     root.appendChild(launcher);
     root.appendChild(panel);
@@ -145,7 +194,7 @@
     function closePanel() {
       panel.hidden = true;
       launcher.setAttribute('aria-expanded', 'false');
-      if (window.speechSynthesis) speechSynthesis.cancel();
+      stopSpeech();
       launcher.focus();
     }
 
@@ -173,8 +222,8 @@
     });
     voiceButton.addEventListener('click', function () {
       voiceOn = !voiceOn;
-      voiceButton.textContent = voiceOn ? 'English voice on' : 'English voice off';
-      if (!voiceOn && window.speechSynthesis) speechSynthesis.cancel();
+      voiceButton.textContent = voiceOn ? 'Indian English voice on' : 'Indian English voice off';
+      if (!voiceOn) stopSpeech();
     });
   }
 
