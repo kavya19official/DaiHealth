@@ -3,6 +3,9 @@
 
   var voiceOn = true;
   var currentAudio = null;
+  var currentUtterance = null;
+  var speechRequestId = 0;
+  var lastBotReply = '';
   var messages = [];
   var safeReplies = [
     {
@@ -87,51 +90,138 @@
     return 'https://daihealth.onrender.com/api';
   }
 
+  function setVoiceStatus(label) {
+    var voiceButton = document.querySelector('.care-chatbot__voice');
+    if (voiceButton) voiceButton.textContent = label;
+  }
+
   function stopSpeech() {
+    speechRequestId += 1;
     if (currentAudio) {
-      if (currentAudio.dataset && currentAudio.dataset.objectUrl) {
-        URL.revokeObjectURL(currentAudio.dataset.objectUrl);
-      }
+      currentAudio.onplaying = null;
+      currentAudio.onended = null;
+      currentAudio.onerror = null;
+      var objectUrl = currentAudio.dataset && currentAudio.dataset.objectUrl;
       currentAudio.pause();
-      currentAudio.src = '';
+      currentAudio.removeAttribute('src');
+      currentAudio.load();
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
       currentAudio = null;
     }
-    if (window.speechSynthesis) speechSynthesis.cancel();
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
+    currentUtterance = null;
+  }
+
+  function pickBrowserVoice() {
+    if (!window.speechSynthesis) return null;
+    var voices = window.speechSynthesis.getVoices() || [];
+    var preferredNames = /ravi|aaron|daniel|google uk english male|microsoft.*(ravi|prabhat|david)/i;
+    return voices.find(function (voice) {
+      return /^en[-_]IN$/i.test(voice.lang) && preferredNames.test(voice.name);
+    }) || voices.find(function (voice) {
+      return /^en[-_]IN$/i.test(voice.lang);
+    }) || voices.find(function (voice) {
+      return /^en([-_]|$)/i.test(voice.lang) && preferredNames.test(voice.name);
+    }) || voices.find(function (voice) {
+      return /^en([-_]|$)/i.test(voice.lang);
+    }) || null;
+  }
+
+  function speakWithBrowser(text) {
+    if (!voiceOn || !window.speechSynthesis || !window.SpeechSynthesisUtterance) return false;
+    var utterance = new SpeechSynthesisUtterance(text);
+    var selectedVoice = pickBrowserVoice();
+    if (selectedVoice) {
+      utterance.voice = selectedVoice;
+      utterance.lang = selectedVoice.lang;
+    } else {
+      utterance.lang = 'en-IN';
+    }
+    utterance.rate = 0.95;
+    utterance.pitch = 1;
+    utterance.onstart = function () {
+      if (voiceOn) setVoiceStatus('Voice playing');
+    };
+    utterance.onend = function () {
+      if (currentUtterance === utterance) currentUtterance = null;
+      if (voiceOn) setVoiceStatus('Voice: On');
+    };
+    utterance.onerror = function (event) {
+      if (currentUtterance === utterance) currentUtterance = null;
+      if (!voiceOn || (event && event.error === 'canceled')) return;
+      setVoiceStatus('Voice unavailable');
+    };
+    currentUtterance = utterance;
+    // A short delay after cancel avoids a Chrome/WebKit race that can swallow speech.
+    setTimeout(function () {
+      if (voiceOn && currentUtterance === utterance) window.speechSynthesis.speak(utterance);
+    }, 40);
+    return true;
+  }
+
+  function showVoiceUnavailable(error) {
+    console.error('Chatbot TTS failed:', error);
+    setVoiceStatus('Voice unavailable');
+    var feed = document.querySelector('.care-chatbot__feed');
+    if (feed && !feed.querySelector('[data-voice-error]')) {
+      var row = el('div', {
+        class: 'care-chatbot__message care-chatbot__message--bot',
+        'data-voice-error': 'true'
+      });
+      row.textContent = 'Voice is unavailable in this browser. You can still read my replies here.';
+      feed.appendChild(row);
+      feed.scrollTop = feed.scrollHeight;
+    }
   }
 
   async function speak(text) {
-    if (!voiceOn) return;
+    if (!voiceOn || !text) return;
     stopSpeech();
-    var voiceButton = document.querySelector('.care-chatbot__voice');
-    if (voiceButton) voiceButton.textContent = 'Charon voice loading...';
+    var requestId = speechRequestId;
+    setVoiceStatus('Voice loading...');
+
+    var controller = window.AbortController ? new AbortController() : null;
+    var timeout = controller ? setTimeout(function () { controller.abort(); }, 6000) : null;
     try {
       var response = await fetch(getApiBase() + '/tts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: text })
+        body: JSON.stringify({ text: text }),
+        signal: controller ? controller.signal : undefined
       });
-      if (!response.ok) throw new Error('TTS unavailable: HTTP ' + response.status);
+      if (timeout) clearTimeout(timeout);
+      if (!response.ok) throw new Error('Cloud voice unavailable: HTTP ' + response.status);
+      if (!voiceOn || requestId !== speechRequestId) return;
+
       var blob = await response.blob();
+      if (!blob.size || !/^audio\//i.test(blob.type || '')) throw new Error('Cloud voice returned no audio');
       var audioUrl = URL.createObjectURL(blob);
-      currentAudio = new Audio(audioUrl);
-      currentAudio.dataset.objectUrl = audioUrl;
-      currentAudio.onended = function () {
+      var audio = new Audio(audioUrl);
+      var fellBack = false;
+      currentAudio = audio;
+      audio.dataset.objectUrl = audioUrl;
+      audio.onplaying = function () {
+        if (voiceOn) setVoiceStatus('Charon voice playing');
+      };
+      audio.onended = function () {
         URL.revokeObjectURL(audioUrl);
-        currentAudio = null;
-        if (voiceOn && voiceButton) voiceButton.textContent = 'Charon voice on';
+        if (currentAudio === audio) currentAudio = null;
+        if (voiceOn) setVoiceStatus('Voice: On');
       };
-      currentAudio.onerror = function () {
-        if (voiceButton) voiceButton.textContent = 'Charon voice error';
+      audio.onerror = function () {
+        if (fellBack || !voiceOn || requestId !== speechRequestId) return;
+        fellBack = true;
+        URL.revokeObjectURL(audioUrl);
+        if (currentAudio === audio) currentAudio = null;
+        if (!speakWithBrowser(text)) showVoiceUnavailable(new Error('Audio playback failed'));
       };
-      await currentAudio.play();
-      if (voiceOn && voiceButton) voiceButton.textContent = 'Charon voice playing';
+      await audio.play();
     } catch (error) {
-      console.error('Gemini Charon TTS failed:', error);
-      if (voiceButton) voiceButton.textContent = 'Charon voice error';
-      var feed = document.querySelector('.care-chatbot__feed');
-      if (feed) {
-        renderMessage(feed, 'bot', 'Charon voice is unavailable right now: ' + error.message);
-      }
+      if (timeout) clearTimeout(timeout);
+      if (!voiceOn || requestId !== speechRequestId) return;
+      // Local demos and deployments without a Gemini key still speak using the
+      // browser's installed English voice.
+      if (!speakWithBrowser(text)) showVoiceUnavailable(error);
     }
   }
 
@@ -181,7 +271,7 @@
       '<input type="text" aria-label="Ask Dr. Daya" placeholder="Ask about DAI..." autocomplete="off">' +
       '<button type="submit">Send</button>' +
       '</form>' +
-      '<button type="button" class="care-chatbot__voice">Charon voice on</button>';
+      '<button type="button" class="care-chatbot__voice" aria-pressed="true">Voice: On</button>';
 
     root.appendChild(launcher);
     root.appendChild(panel);
@@ -197,7 +287,8 @@
       launcher.setAttribute('aria-expanded', 'true');
       if (!messages.length) {
         messages.push('intro');
-        renderMessage(feed, 'bot', 'Hi, I am Dr. Daya. Ask me about DAI, appointments, portals, documents, or safety boundaries.');
+        lastBotReply = 'Hi, I am Dr. Daya. Ask me about DAI, appointments, portals, documents, or safety boundaries.';
+        renderMessage(feed, 'bot', lastBotReply);
       }
       setTimeout(function () { input.focus(); }, 0);
     }
@@ -215,6 +306,7 @@
       renderMessage(feed, 'user', clean);
       input.value = '';
       var reply = getReply(clean);
+      lastBotReply = reply;
       renderMessage(feed, 'bot', reply);
       speak(reply);
     }
@@ -233,8 +325,10 @@
     });
     voiceButton.addEventListener('click', function () {
       voiceOn = !voiceOn;
-      voiceButton.textContent = voiceOn ? 'Charon voice on' : 'Charon voice off';
+      voiceButton.setAttribute('aria-pressed', String(voiceOn));
+      voiceButton.textContent = voiceOn ? 'Voice: On' : 'Voice: Off';
       if (!voiceOn) stopSpeech();
+      else if (lastBotReply) speak(lastBotReply);
     });
   }
 
