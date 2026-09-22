@@ -78,31 +78,147 @@
       <form id="registerMotherForm" class="panel is-active">
         <div class="form-group">
           <label for="mFullName">Full name</label>
-          <input type="text" id="mFullName" required placeholder="Ananya Sharma">
+          <input type="text" id="mFullName" required autocomplete="name">
         </div>
         <div class="field-row">
           <div class="form-group">
             <label for="mEmail">Email</label>
-            <input type="email" id="mEmail" required>
+            <input type="email" id="mEmail" required autocomplete="email">
           </div>
           <div class="form-group">
             <label for="mPassword">Password</label>
-            <input type="password" id="mPassword" required minlength="8" placeholder="At least 8 characters">
+            <input type="password" id="mPassword" required minlength="8" autocomplete="new-password" placeholder="At least 8 characters">
           </div>
         </div>
         <div class="field-row">
           <div class="form-group">
-            <label for="mPhone">Phone (optional)</label>
-            <input type="tel" id="mPhone" placeholder="+91 90000 00000">
+            <label for="mDob">Date of birth</label>
+            <input type="date" id="mDob">
           </div>
           <div class="form-group">
-            <label for="mEmergencyPhone">Emergency contact phone</label>
-            <input type="tel" id="mEmergencyPhone" placeholder="+91 90000 00000">
+            <label for="mPhone">Phone</label>
+            <input type="tel" id="mPhone" placeholder="+91 ...">
           </div>
         </div>
         <div class="form-group">
-          <label for="mEmergencyName">Emergency contact name (optional)</label>
-          <input type="text" id="mEmergencyName" placeholder="e.g. Husband, mother, neighbour">
+          <label for="mAddress">Address</label>
+          <input type="text" id="mAddress" placeholder="City, district">
+        </div>
+        <div class="field-row">
+          <div class="form-group">
+            <label for="mBlood">Blood group</label>
+            <select id="mBlood">
+              <option value="">Unknown</option>
+              <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
+              <option>AB+</option><option>AB-</option><option>O+</option><option>O-</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="mStatus">Pregnancy status</label>
+            <select id="mStatus" required>
+              <option value="pregnant">Currently pregnant</option>
+              <option value="delivered">Already delivered</option>
+              <option value="planning">Planning pregnancy</option>
+            </select>
+          </div>
+        </div>
+        <div id="mPregnantFields">
+          <div class="field-row">
+            <div class="form-group">
+              <label for="mLmp">Last menstrual period (LMP)</label>
+              <input type="date" id="mLmp">
+            </div>
+            <div class="form-group">
+              <label for="mEdd">Expected due date (EDD)</label>
+              <input type="date" id="mEdd">
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="form-group">
+              <label for="mGravida">Gravida (total pregnancies)</label>
+              <input type="number" id="mGravida" min="1" max="20" placeholder="1">
+            </div>
+            <div class="form-group">
+              <label for="mParity">Parity (births ≥20 weeks)</label>
+              <input type="number" id="mParity" min="0" max="20" placeholder="0">
+            </div>
+          </div>
+        </div>
+        <div id="mChildFields" style="display:none">
+          <p style="font-size:.85rem;color:var(--ink-muted);margin:0 0 .5rem">Child details (linked to your account)</p>
+          <div class="field-row">
+            <div class="form-group">
+              <label for="mChildName">Child full name</label>
+              <input type="text" id="mChildName">
+            </div>
+            <div class="form-group">
+              <label for="mChildDob">Child date of birth</label>
+              <input type="date" id="mChildDob">
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="form-group">
+              <label for="mChildGender">Child gender</label>
+              <input type="text" id="mChildGender" placeholder="Optional">
+            </div>
+            <div class="form-group">
+              <label for="mChildBlood">Child blood group</label>
+              <input type="text" id="mChildBlood" placeholder="Optional">
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="mPrevComp">Previous pregnancy complications</label>
+          <input type="text" id="mPrevComp" placeholder="e.g. preeclampsia, preterm labour — or leave blank">
+        </div>
+        <div class="form-group">
+          <label for="mConditions">Medical conditions</label>
+          <input type="text" id="mConditions" placeholder="e.g. diabetes, hypertension, thyroid">
+        </div>
+        <div class="field-row">
+          <div class="form-group">
+            <label for="mAllergies">Allergies</label>
+            <input type="text" id="mAllergies" placeholder="Optional">
+          </div>
+          <div class="form-group">
+            <label for="mMeds">Current medications</label>
+            <input type="text" id="mMeds" placeholder="Optional">
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="form-group">
+            <label for="mHeight">Height (cm)</label>
+            <input type="number" id="mHeight" step="0.1" min="120" max="220">
+          </div>
+          <div class="form-group">
+            <label for="mWeight">Pre-pregnancy weight (kg)</label>
+            <input type="number" id="mWeight" step="0.1" min="30" max="200">
+          </div>
+        </div>
+        <p style="font-size:.85rem;color:var(--ink-muted);margin:0 0 .5rem">Optional vitals for high-risk screening (from Maternal Health Risk dataset model)</p>
+        <div class="field-row">
+          <div class="form-group">
+            <label for="mSys">Systolic BP</label>
+            <input type="number" id="mSys" min="70" max="200" placeholder="mmHg">
+          </div>
+          <div class="form-group">
+            <label for="mDia">Diastolic BP</label>
+            <input type="number" id="mDia" min="40" max="130" placeholder="mmHg">
+          </div>
+          <div class="form-group">
+            <label for="mBs">Blood sugar (mmol/L)</label>
+            <input type="number" id="mBs" step="0.1" min="4" max="25" placeholder="Optional">
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="form-group">
+            <label for="mEmergencyName">Emergency contact name</label>
+            <input type="text" id="mEmergencyName">
+          </div>
+          <div class="form-group">
+            <label for="mEmergencyPhone">Emergency contact phone</label>
+            <input type="tel" id="mEmergencyPhone">
+          </div>
         </div>
         <button type="submit" class="btn btn--primary" id="mSubmit">Create account</button>
       </form>
@@ -199,6 +315,7 @@ function clearError() { errorBox.classList.remove('is-visible'); }
 
 function redirectForUser(user) {
   if (user && user.role === 'doctor') return 'doctor.html';
+  if (user && user.pregnancy_status === 'delivered' && user.has_child) return 'child-dashboard.html';
   return 'dashboard.html';
 }
 
@@ -255,16 +372,49 @@ document.getElementById('loginForm').addEventListener('submit', function (e) {
   }, document.getElementById('loginSubmit'));
 });
 
+document.getElementById('mStatus').addEventListener('change', function () {
+  var delivered = this.value === 'delivered';
+  document.getElementById('mChildFields').style.display = delivered ? '' : 'none';
+  document.getElementById('mPregnantFields').style.display = this.value === 'planning' ? 'none' : '';
+  document.getElementById('mChildName').required = delivered;
+  document.getElementById('mChildDob').required = delivered;
+});
+
 document.getElementById('registerMotherForm').addEventListener('submit', function (e) {
   e.preventDefault();
-  submitAuth('/auth/register/mother', {
+  var status = document.getElementById('mStatus').value;
+  var payload = {
     full_name: document.getElementById('mFullName').value.trim(),
     email: document.getElementById('mEmail').value.trim(),
     password: document.getElementById('mPassword').value,
     phone: document.getElementById('mPhone').value.trim() || undefined,
+    date_of_birth: document.getElementById('mDob').value || undefined,
+    address: document.getElementById('mAddress').value.trim() || undefined,
+    blood_group: document.getElementById('mBlood').value || undefined,
+    pregnancy_status: status,
+    lmp_date: document.getElementById('mLmp').value || undefined,
+    edd_date: document.getElementById('mEdd').value || undefined,
+    gravida: document.getElementById('mGravida').value || undefined,
+    parity: document.getElementById('mParity').value || undefined,
+    previous_complications: document.getElementById('mPrevComp').value.trim() || undefined,
+    medical_conditions: document.getElementById('mConditions').value.trim() || undefined,
+    allergies: document.getElementById('mAllergies').value.trim() || undefined,
+    current_medications: document.getElementById('mMeds').value.trim() || undefined,
+    height_cm: document.getElementById('mHeight').value || undefined,
+    pre_pregnancy_weight_kg: document.getElementById('mWeight').value || undefined,
+    systolic: document.getElementById('mSys').value || undefined,
+    diastolic: document.getElementById('mDia').value || undefined,
+    blood_sugar: document.getElementById('mBs').value || undefined,
     emergency_contact_name: document.getElementById('mEmergencyName').value.trim() || undefined,
     emergency_contact_phone: document.getElementById('mEmergencyPhone').value.trim() || undefined
-  }, document.getElementById('mSubmit'));
+  };
+  if (status === 'delivered') {
+    payload.child_full_name = document.getElementById('mChildName').value.trim();
+    payload.child_date_of_birth = document.getElementById('mChildDob').value;
+    payload.child_gender = document.getElementById('mChildGender').value.trim() || undefined;
+    payload.child_blood_group = document.getElementById('mChildBlood').value.trim() || undefined;
+  }
+  submitAuth('/auth/register/mother', payload, document.getElementById('mSubmit'));
 });
 
 document.getElementById('registerDoctorForm').addEventListener('submit', function (e) {
