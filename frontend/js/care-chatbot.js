@@ -1,7 +1,7 @@
 (function () {
   if (document.getElementById('daiCareChatbot')) return;
 
-  var voiceOn = false;
+  var voiceOn = true;
   var currentAudio = null;
   var messages = [];
   var safeReplies = [
@@ -102,13 +102,15 @@
   async function speak(text) {
     if (!voiceOn) return;
     stopSpeech();
+    var voiceButton = document.querySelector('.care-chatbot__voice');
+    if (voiceButton) voiceButton.textContent = 'Charon voice loading...';
     try {
       var response = await fetch(getApiBase() + '/tts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: text })
       });
-      if (!response.ok) throw new Error('TTS unavailable');
+      if (!response.ok) throw new Error('TTS unavailable: HTTP ' + response.status);
       var blob = await response.blob();
       var audioUrl = URL.createObjectURL(blob);
       currentAudio = new Audio(audioUrl);
@@ -116,13 +118,19 @@
       currentAudio.onended = function () {
         URL.revokeObjectURL(audioUrl);
         currentAudio = null;
+        if (voiceOn && voiceButton) voiceButton.textContent = 'Charon voice on';
+      };
+      currentAudio.onerror = function () {
+        if (voiceButton) voiceButton.textContent = 'Charon voice error';
       };
       await currentAudio.play();
+      if (voiceOn && voiceButton) voiceButton.textContent = 'Charon voice playing';
     } catch (error) {
       console.error('Gemini Charon TTS failed:', error);
+      if (voiceButton) voiceButton.textContent = 'Charon voice error';
       var feed = document.querySelector('.care-chatbot__feed');
       if (feed) {
-        renderMessage(feed, 'bot', 'Voice is unavailable right now. Please check GEMINI_API_KEY and redeploy.');
+        renderMessage(feed, 'bot', 'Charon voice is unavailable right now: ' + error.message);
       }
     }
   }
@@ -173,7 +181,7 @@
       '<input type="text" aria-label="Ask Dr. Daya" placeholder="Ask about DAI..." autocomplete="off">' +
       '<button type="submit">Send</button>' +
       '</form>' +
-      '<button type="button" class="care-chatbot__voice">Gemini voice off</button>';
+      '<button type="button" class="care-chatbot__voice">Charon voice on</button>';
 
     root.appendChild(launcher);
     root.appendChild(panel);
@@ -225,7 +233,7 @@
     });
     voiceButton.addEventListener('click', function () {
       voiceOn = !voiceOn;
-      voiceButton.textContent = voiceOn ? 'Gemini voice on' : 'Gemini voice off';
+      voiceButton.textContent = voiceOn ? 'Charon voice on' : 'Charon voice off';
       if (!voiceOn) stopSpeech();
     });
   }
