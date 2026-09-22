@@ -38,23 +38,51 @@ app.use((req, res, next) => {
 app.use(express.json());
 app.use(cookieParser());
 
-// Database connection
-const pool = new Pool({
-  host: process.env.DB_HOST || 'localhost',
-  port: process.env.DB_PORT || 5432,
-  database: process.env.DB_NAME || 'anvaya',
-  user: process.env.DB_USER || 'postgres',
-  password: process.env.DB_PASSWORD || '',
-});
+// Database connection. Render Postgres exposes a DATABASE_URL; local development
+// can still use DB_* values from backend/.env.
+const hasDatabaseUrl = !!process.env.DATABASE_URL;
+const hasDbParts = !!(process.env.DB_HOST && process.env.DB_NAME && process.env.DB_USER);
+const shouldUseSsl = process.env.DB_SSL === 'true'
+  || (process.env.DB_SSL !== 'false' && process.env.NODE_ENV === 'production');
+const dbConfig = hasDatabaseUrl
+  ? {
+      connectionString: process.env.DATABASE_URL,
+      ssl: shouldUseSsl ? { rejectUnauthorized: false } : false
+    }
+  : hasDbParts
+    ? {
+        host: process.env.DB_HOST,
+        port: process.env.DB_PORT || 5432,
+        database: process.env.DB_NAME,
+        user: process.env.DB_USER,
+        password: process.env.DB_PASSWORD || '',
+        ssl: shouldUseSsl ? { rejectUnauthorized: false } : false
+      }
+    : null;
 
-// Test database connection
-pool.query('SELECT NOW()', (err, res) => {
-  if (err) {
-    console.error('Database connection error:', err);
-  } else {
-    console.log('Database connected successfully at:', res.rows[0].now);
-  }
-});
+const pool = dbConfig
+  ? new Pool(dbConfig)
+  : {
+      query() {
+        return Promise.reject(new Error('Database is not configured. Set DATABASE_URL or DB_HOST/DB_NAME/DB_USER.'));
+      },
+      connect() {
+        return Promise.reject(new Error('Database is not configured. Set DATABASE_URL or DB_HOST/DB_NAME/DB_USER.'));
+      }
+    };
+
+// Test database connection only when a database has actually been configured.
+if (dbConfig) {
+  pool.query('SELECT NOW()', (err, dbRes) => {
+    if (err) {
+      console.error('Database connection error:', err.message);
+    } else {
+      console.log('Database connected successfully at:', dbRes.rows[0].now);
+    }
+  });
+} else {
+  console.warn('Database not configured. Set DATABASE_URL on Render for login, dashboards, and patient data APIs.');
+}
 
 // JWT configuration
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';

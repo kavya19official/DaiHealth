@@ -23,6 +23,18 @@ psql "$DATABASE_URL" -f backend/db/child_dashboard_v2.sql
 psql "$DATABASE_URL" -f backend/db/hospital_platform.sql
 ```
 
+For Render, create/connect a Render PostgreSQL database and add its **Internal
+Database URL** to the web service as:
+
+```bash
+DATABASE_URL=postgresql://...
+JWT_SECRET=replace-with-a-long-random-secret
+GEMINI_API_KEY=your-gemini-api-key
+```
+
+The backend also supports local `DB_HOST`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`
+values, but production should use `DATABASE_URL`.
+
 `child_dashboard.sql` and `child_dashboard_v2.sql` (vaccination certificates +
 the Notification Center's `notifications` table) were previously missing from
 this list — every deployment that only ran the earlier five files was missing
