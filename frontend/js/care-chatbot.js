@@ -56,6 +56,27 @@
     return node;
   }
 
+  function ensureStyles() {
+    if (document.getElementById('daiCareChatbotStyles')) return;
+    var style = el('style', { id: 'daiCareChatbotStyles' });
+    style.textContent = [
+      '.care-chatbot{position:fixed;right:1.25rem;bottom:1.25rem;z-index:2147483000;font-family:inherit}',
+      '.care-chatbot__launcher{border:1px solid rgba(132,63,117,.18);border-radius:999px;background:#fff;color:#6f2b63;box-shadow:0 18px 45px rgba(70,29,63,.16);cursor:pointer;font-weight:800;padding:.9rem 1.2rem}',
+      '.care-chatbot__panel{width:min(380px,calc(100vw - 2rem));max-height:min(620px,calc(100vh - 2rem));display:flex;flex-direction:column;overflow:hidden;border:1px solid rgba(132,63,117,.16);border-radius:24px;background:#fff;box-shadow:0 22px 60px rgba(70,29,63,.18)}',
+      '.care-chatbot__panel[hidden]{display:none}',
+      '.care-chatbot__header{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:1rem 1rem .85rem;border-bottom:1px solid #f0dce9}',
+      '.care-chatbot__header strong{display:block;color:#371331;font-size:1.05rem}.care-chatbot__header span{display:block;color:#8a7484;font-size:.86rem;margin-top:.15rem}',
+      '.care-chatbot__close{width:2rem;height:2rem;border:0;border-radius:50%;background:#f8edf4;color:#6f2b63;cursor:pointer;font-size:1rem}',
+      '.care-chatbot__notice{margin:.9rem 1rem 0;border-left:3px solid #c63f83;border-radius:12px;background:#fbf2f7;color:#6f2b63;font-size:.84rem;line-height:1.45;padding:.75rem .85rem}',
+      '.care-chatbot__feed{display:flex;flex:1;flex-direction:column;gap:.7rem;min-height:220px;overflow:auto;padding:1rem}',
+      '.care-chatbot__message{max-width:88%;border-radius:18px;font-size:.94rem;line-height:1.45;padding:.75rem .9rem}.care-chatbot__message--bot{align-self:flex-start;background:#f8edf4;color:#422039}.care-chatbot__message--user{align-self:flex-end;background:#c63f83;color:#fff}',
+      '.care-chatbot__chips{display:flex;gap:.5rem;overflow-x:auto;padding:0 1rem .85rem}.care-chatbot__chips button,.care-chatbot__voice{border:1px solid #ead4e3;border-radius:999px;background:#fff;color:#6f2b63;cursor:pointer;font-weight:700;white-space:nowrap;padding:.55rem .8rem}',
+      '.care-chatbot__form{display:flex;gap:.55rem;border-top:1px solid #f0dce9;padding:.85rem 1rem}.care-chatbot__form input{flex:1;min-width:0;border:1px solid #ead4e3;border-radius:999px;color:#371331;font:inherit;padding:.75rem .9rem}.care-chatbot__form button{border:0;border-radius:999px;background:#c63f83;color:#fff;cursor:pointer;font-weight:800;padding:.75rem 1rem}.care-chatbot__voice{align-self:flex-start;margin:0 1rem 1rem}',
+      '@media(max-width:520px){.care-chatbot{right:.75rem;bottom:.75rem}}'
+    ].join('');
+    document.head.appendChild(style);
+  }
+
   function getApiBase() {
     if (window.DaiAPI && window.DaiAPI.API_BASE) return window.DaiAPI.API_BASE;
     var isLocal = /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
@@ -141,6 +162,7 @@
   }
 
   function init() {
+    ensureStyles();
     var root = el('div', { class: 'care-chatbot', id: 'daiCareChatbot' });
     var launcher = el('button', {
       class: 'care-chatbot__launcher',

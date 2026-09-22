@@ -1180,7 +1180,7 @@ require('./hospitalPlatform')(app);
 app.post('/api/tts', async (req, res) => {
   const key = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
   const model = process.env.GEMINI_TTS_MODEL || 'gemini-3.1-flash-tts-preview';
-  const voice = process.env.GEMINI_TTS_VOICE || 'Charon';
+  const voiceName = process.env.GEMINI_TTS_VOICE || 'Charon';
   const text = cleanupStr(req.body && req.body.text, 900);
 
   if (!text) {
@@ -1214,7 +1214,13 @@ app.post('/api/tts', async (req, res) => {
         input: ttsPrompt,
         response_format: { type: 'audio' },
         generation_config: {
-          speech_config: [{ voice }]
+          speech_config: {
+            voice_config: {
+              prebuilt_voice_config: {
+                voice_name: voiceName
+              }
+            }
+          }
         }
       })
     });

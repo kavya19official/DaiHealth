@@ -878,7 +878,7 @@ body.doctor-page .doctor-patient.is-selected {
   position: fixed;
   right: 1.25rem;
   bottom: 1.25rem;
-  z-index: 1000;
+  z-index: 2147483000;
   font-family: inherit;
 }
 
