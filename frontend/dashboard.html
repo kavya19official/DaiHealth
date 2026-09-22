@@ -47,6 +47,1055 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 .topbar__right{margin-left:auto;display:flex;align-items:center;gap:.75rem}
 .icon-btn{position:relative;width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:#fff;display:grid;place-items:center;color:var(--ink-2)}
 .icon-btn .badge{position:absolute;top:4px;right:4px;width:16px;height:16px;border-radius:50%;background:var(--rose);color:#fff;font-size:.62rem;font-weight:700;display:grid;place-items:center}
+.notif-pop{position:absolute;top:calc(100% + 10px);right:0;width:min(360px,88vw);max-height:70vh;overflow-y:auto;background:#fff;border:1px solid var(--line);border-radius:var(--radius-lg);box-shadow:var(--shadow);z-index:120;display:none;padding:.4rem}
+.notif-pop.is-open{display:block}
+.notif-pop__head{display:flex;align-items:center;justify-content:space-between;padding:.6rem .7rem .5rem;font-size:.85rem;font-weight:700;color:var(--ink)}
+.notif-pop__head button{background:none;border:none;color:var(--brand);font-size:.76rem;font-weight:700;cursor:pointer;padding:0}
+.notif-row{display:flex;gap:.6rem;align-items:flex-start;padding:.6rem .7rem;border-radius:12px;cursor:pointer}
+.notif-row:hover{background:var(--ground)}
+.notif-row.is-unread{background:var(--brand-pale)}
+.notif-row__dot{width:8px;height:8px;border-radius:50%;margin-top:.4rem;flex:none;background:var(--ink-3)}
+.notif-row.sev-warn .notif-row__dot{background:var(--amber)}
+.notif-row.sev-danger .notif-row__dot{background:var(--rose)}
+.notif-row__body{flex:1;min-width:0}
+.notif-row__title{font-size:.83rem;font-weight:600;color:var(--ink)}
+.notif-row__sub{font-size:.75rem;color:var(--ink-muted);margin-top:.1rem}
+.notif-row__x{background:none;border:none;color:var(--ink-3);cursor:pointer;padding:.15rem;flex:none}
+.notif-empty{padding:1.4rem .8rem;text-align:center;color:var(--ink-muted);font-size:.83rem}
+.user-chip{display:flex;align-items:center;gap:.6rem;padding:.3rem .65rem .3rem .3rem;border-radius:999px;border:1px solid var(--line);background:#fff}
+.user-chip img{width:34px;height:34px;border-radius:50%;object-fit:cover;background:var(--brand-soft)}
+.user-chip__name{font-size:.85rem;font-weight:600}.user-chip__role{font-size:.7rem;color:var(--ink-3);font-weight:500}
+.content{padding:1.35rem 1.5rem 2rem}
+.panel{display:none}.panel.is-active{display:block}
+.card{background:#fff;border:1px solid var(--line);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm)}
+.welcome-row{display:grid;grid-template-columns:1fr minmax(240px,300px);gap:1rem;margin-bottom:1.15rem}
+.welcome-card{display:flex;align-items:center;gap:1.25rem;padding:1.15rem 1.35rem;background:linear-gradient(135deg,#faf5ff,#f3e8ff 50%,#ede9fe);border:1px solid var(--line);border-radius:var(--radius-lg);overflow:hidden}
+.welcome-card__art{flex-shrink:0;width:100px;height:110px}
+.welcome-card__art svg{width:100%;height:100%}
+.welcome-card__hello{font-size:.88rem;font-weight:500;color:var(--ink-2);margin-bottom:.15rem}
+.welcome-card__title{font-family:var(--display);font-size:1.65rem;font-weight:800;color:var(--ink);letter-spacing:-.03em;margin-bottom:.2rem}
+.welcome-card__sub{font-size:.88rem;color:var(--ink-muted);margin-bottom:.65rem}
+.pills{display:flex;flex-wrap:wrap;gap:.4rem}
+.pill{display:inline-flex;align-items:center;gap:.35rem;padding:.32rem .7rem;border-radius:999px;background:rgba(255,255,255,.8);border:1px solid rgba(196,181,253,.55);font-size:.75rem;font-weight:500;color:var(--brand)}
+.appt-card{padding:1.15rem 1.25rem;display:flex;flex-direction:column;gap:.85rem}
+.appt-card__label{font-size:.78rem;font-weight:600;color:var(--ink-muted);text-transform:uppercase;letter-spacing:.04em}
+.appt-card__title{font-size:1rem;font-weight:700;margin-top:.15rem}
+.appt-card__meta{font-size:.82rem;color:var(--ink-muted);margin-top:.15rem}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;min-height:40px;padding:.55rem 1.1rem;border-radius:999px;border:1.5px solid transparent;font-size:.88rem;font-weight:600;text-decoration:none;transition:transform .15s,box-shadow .15s,background .15s}
+.btn:hover{transform:translateY(-1px)}.btn--primary{background:var(--brand);color:#fff;box-shadow:0 8px 20px -8px rgba(124,58,237,.55)}.btn--primary:hover{background:var(--brand-strong)}
+.btn--full{width:100%}.btn--ghost{background:#fff;border-color:var(--line);color:var(--brand-strong)}.btn--sm{min-height:34px;padding:.4rem .85rem;font-size:.8rem}
+.status-row{display:grid;grid-template-columns:repeat(4,1fr);gap:.85rem;margin-bottom:1.15rem}
+.status-card{display:flex;align-items:flex-start;gap:.75rem;padding:.95rem 1rem;background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-sm);transition:border-color .15s}
+.status-card:hover{border-color:#c4b5fd}
+.status-card__icon{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;flex-shrink:0}
+.status-card__icon--purple{background:var(--brand-soft);color:var(--brand)}
+.status-card__icon--green{background:var(--green-soft);color:var(--green)}
+.status-card__icon--blue{background:var(--blue-soft);color:var(--blue)}
+.status-card__label{font-size:.75rem;font-weight:600;color:var(--ink-muted)}
+.status-card__value{font-size:.9rem;font-weight:600;color:var(--ink);margin-top:.1rem;display:flex;align-items:center;gap:.3rem}
+.status-card__value .ok{color:var(--green);font-size:.85rem}
+.status-card__sub{font-size:.72rem;color:var(--ink-3);margin-top:.1rem}
+.main-grid{display:grid;grid-template-columns:1fr minmax(260px,300px);gap:1rem;align-items:start}
+.section-card{padding:1.15rem 1.25rem 1.25rem;margin-bottom:1rem}
+.section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:.9rem;gap:.75rem}
+.section-title{display:flex;align-items:center;gap:.5rem;font-family:var(--display);font-size:1.05rem;font-weight:700}
+.section-title span{width:28px;height:28px;border-radius:8px;background:var(--brand-soft);color:var(--brand);display:grid;place-items:center;font-size:.85rem}
+.link-btn{border:0;background:transparent;color:var(--brand);font-size:.82rem;font-weight:600;display:inline-flex;align-items:center;gap:.25rem;padding:.25rem .4rem;border-radius:8px}
+.link-btn:hover{background:var(--brand-soft)}
+.tabs{display:inline-flex;gap:.3rem;margin-bottom:1rem;background:var(--ground);padding:.25rem;border-radius:999px;border:1px solid var(--line)}
+.tabs button{border:0;background:transparent;padding:.4rem .9rem;border-radius:999px;font-size:.8rem;font-weight:600;color:var(--ink-muted)}
+.tabs button.is-active{background:var(--brand);color:#fff;box-shadow:0 4px 12px -4px rgba(124,58,237,.45)}
+.growth-body{display:grid;grid-template-columns:1fr 140px;gap:1rem}
+.chart-wrap{position:relative;height:190px;border-radius:12px;background:linear-gradient(180deg,#faf5ff,#fff);border:1px solid var(--line-soft);padding:.5rem .4rem .4rem 2rem}
+.chart-y{position:absolute;left:.3rem;top:50%;transform:rotate(-90deg) translateX(50%);transform-origin:left center;font-size:.68rem;font-weight:600;color:var(--ink-3);white-space:nowrap}
+.chart-svg{width:100%;height:100%}
+.stats-panel{display:flex;flex-direction:column;gap:.55rem;padding:.7rem;border-radius:14px;background:var(--brand-pale);border:1px solid var(--line)}
+.stat-label{font-size:.7rem;font-weight:500;color:var(--ink-muted)}
+.stat-value{font-family:var(--display);font-size:1.25rem;font-weight:800;letter-spacing:-.02em;line-height:1.15}
+.stat-sub{font-size:.68rem;color:var(--ink-3)}
+.milestones-track{display:flex;align-items:flex-start;justify-content:space-between;gap:.3rem;position:relative}
+.milestones-track::before{content:"";position:absolute;top:22px;left:8%;right:8%;height:3px;background:linear-gradient(90deg,#a7f3d0 0%,#a7f3d0 35%,#e9d5ff 35%,#e9d5ff 100%);border-radius:99px;z-index:0}
+.milestone{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:.4rem;flex:1;text-align:center;max-width:88px}
+.milestone__icon{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:#fff;border:2px solid var(--line);font-size:1.1rem;position:relative}
+.milestone.is-done .milestone__icon{border-color:#6ee7b7;background:var(--green-soft)}
+.milestone.is-current .milestone__icon{border-color:var(--brand);background:var(--brand-soft);box-shadow:0 0 0 4px rgba(124,58,237,.12)}
+.milestone.is-locked .milestone__icon{opacity:.65}
+.milestone__check{position:absolute;bottom:-2px;right:-2px;width:16px;height:16px;border-radius:50%;background:var(--green);color:#fff;font-size:.55rem;display:grid;place-items:center;border:2px solid #fff}
+.milestone__name{font-size:.72rem;font-weight:600;line-height:1.25}
+.milestone__range{font-size:.65rem;color:var(--ink-3)}
+.side-stack{display:flex;flex-direction:column;gap:1rem}
+.qa-grid{display:grid;grid-template-columns:1fr 1fr;gap:.65rem}
+.qa-item{display:flex;flex-direction:column;gap:.3rem;padding:.8rem .75rem;border-radius:14px;border:1px solid var(--line);background:#fff;transition:border-color .15s}
+.qa-item:hover{border-color:#c4b5fd}
+.qa-item__icon{width:30px;height:30px;border-radius:10px;display:grid;place-items:center;margin-bottom:.1rem}
+.qa-item__icon--blue{background:var(--blue-soft);color:var(--blue)}
+.qa-item__icon--purple{background:var(--brand-soft);color:var(--brand)}
+.qa-item__icon--green{background:var(--green-soft);color:var(--green)}
+.qa-item__icon--amber{background:var(--amber-soft);color:var(--amber)}
+.qa-item__title{font-size:.8rem;font-weight:650;display:flex;justify-content:space-between}
+.qa-item__sub{font-size:.7rem;color:var(--ink-3)}
+.feed-list{display:flex;flex-direction:column;gap:.5rem}
+.feed-item{display:flex;align-items:flex-start;gap:.65rem;padding:.5rem 0;border-bottom:1px solid var(--line-soft)}
+.feed-item:last-child{border-bottom:0}
+.feed-item__icon{width:32px;height:32px;border-radius:10px;display:grid;place-items:center;flex-shrink:0;font-size:.8rem}
+.feed-item__icon--amber{background:#fef3c7}.feed-item__icon--blue{background:#dbeafe}.feed-item__icon--purple{background:var(--brand-soft)}.feed-item__icon--green{background:#d1fae5}
+.feed-item__title{font-size:.84rem;font-weight:600}.feed-item__sub{font-size:.72rem;color:var(--ink-muted);margin-top:.08rem}
+.feed-item__date{font-size:.7rem;color:var(--ink-3);white-space:nowrap;margin-left:auto}
+.sos-bar{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.85rem 1.15rem;border-radius:var(--radius-lg);background:linear-gradient(90deg,#faf5ff,#fdf2f8);border:1px solid var(--line);margin-top:1rem}
+.sos-bar__left{display:flex;align-items:center;gap:.7rem;font-size:.85rem;color:var(--ink-2)}
+.sos-bar__left strong{color:var(--ink)}
+.sos-bar__icon{width:36px;height:36px;border-radius:50%;background:#fce7f3;color:#db2777;display:grid;place-items:center;flex-shrink:0}
+.btn--sos{background:var(--rose);color:#fff;border-radius:999px;min-height:40px;padding:.5rem 1.15rem;font-weight:700;font-size:.88rem;border:0;box-shadow:0 8px 20px -8px rgba(244,63,94,.5);display:inline-flex;align-items:center;gap:.4rem}
+.btn--sos:hover{background:#e11d48}
+.form-grid{display:grid;gap:.85rem;max-width:520px}
+.form-group label{display:block;font-size:.8rem;font-weight:600;margin-bottom:.35rem;color:var(--ink-2)}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:.65rem .85rem;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink)}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{outline:2px solid rgba(124,58,237,.3);border-color:var(--brand)}
+.list-card{padding:0}.list-row{display:flex;align-items:center;gap:.85rem;padding:.9rem 1.15rem;border-bottom:1px solid var(--line-soft)}
+.list-row:last-child{border-bottom:0}
+.list-row__meta{flex:1;min-width:0}.list-row__title{font-weight:600;font-size:.9rem}.list-row__sub{font-size:.78rem;color:var(--ink-muted)}
+.tag{display:inline-flex;padding:.2rem .55rem;border-radius:999px;font-size:.7rem;font-weight:600}
+.tag--ok{background:var(--green-soft);color:var(--green)}.tag--pending{background:var(--amber-soft);color:#b45309}.tag--info{background:var(--brand-soft);color:var(--brand)}
+.toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(120%);background:var(--ink);color:#fff;padding:.7rem 1.2rem;border-radius:999px;font-size:.88rem;font-weight:500;z-index:100;transition:transform .25s;box-shadow:var(--shadow)}
+.toast.is-show{transform:translateX(-50%) translateY(0)}
+.empty{padding:2rem;text-align:center;color:var(--ink-muted);font-size:.9rem}
+@media(max-width:1100px){.main-grid{grid-template-columns:1fr}.welcome-row{grid-template-columns:1fr}.status-row{grid-template-columns:1fr 1fr}}
+@media(max-width:860px){.app{grid-template-columns:1fr}.sidebar{position:fixed;inset:0 auto 0 0;width:min(260px,86vw);z-index:60;transform:translateX(-105%);transition:transform .25s;box-shadow:var(--shadow)}.sidebar.is-open{transform:translateX(0)}.content{padding:1rem}.growth-body{grid-template-columns:1fr}.status-row{grid-template-columns:1fr}}
+</style>
+<script src="js/dai-api.js"></script>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="i-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></symbol>
+<symbol id="i-user" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
+<symbol id="i-baby" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9 12h.01M15 12h.01M10 16c.5.3 1.2.5 2 .5s1.5-.2 2-.5"/></symbol>
+<symbol id="i-cal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
+<symbol id="i-file" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></symbol>
+<symbol id="i-msg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></symbol>
+<symbol id="i-set" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></symbol>
+<symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
+<symbol id="i-bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></symbol>
+<symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></symbol>
+<symbol id="i-heart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></symbol>
+<symbol id="i-phone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></symbol>
+</defs></svg>
+
+<div class="app">
+<aside class="sidebar" id="sidebar">
+  <a class="sidebar__brand" href="index.html">
+    <img src="assets/logo-circle.png" alt="" width="40" height="40" onerror="this.src='assets/logo.jpeg'">
+    <span><span class="sidebar__brand-name">दाई</span><span class="sidebar__brand-tag">Hospital Workflow</span></span>
+  </a>
+  <nav class="sidebar__nav" aria-label="Mother navigation">
+    <button type="button" class="nav-item is-active" data-panel="dashboard"><svg width="18" height="18"><use href="#i-home"/></svg> Dashboard</button>
+    <button type="button" class="nav-item" data-panel="profile"><svg width="18" height="18"><use href="#i-user"/></svg> Mother / Patient</button>
+    <a class="nav-item" href="child-dashboard.html"><svg width="18" height="18"><use href="#i-baby"/></svg> Child</a>
+    <button type="button" class="nav-item" data-panel="appointments"><svg width="18" height="18"><use href="#i-cal"/></svg> Appointments</button>
+    <button type="button" class="nav-item" data-panel="timeline"><svg width="18" height="18"><use href="#i-clock"/></svg> Care Timeline</button>
+    <button type="button" class="nav-item" data-panel="records"><svg width="18" height="18"><use href="#i-file"/></svg> Records</button>
+    <button type="button" class="nav-item" data-panel="messages"><svg width="18" height="18"><use href="#i-msg"/></svg> Messages</button>
+    <button type="button" class="nav-item" data-panel="settings"><svg width="18" height="18"><use href="#i-set"/></svg> Settings</button>
+  </nav>
+  <div class="sidebar__footer"><div class="sidebar__tagline"><svg width="18" height="18"><use href="#i-heart"/></svg><span>Healthier mothers.<br>Brighter futures.</span></div></div>
+</aside>
+
+<div class="main">
+<header class="topbar">
+  <div class="search" role="search"><svg width="16" height="16"><use href="#i-search"/></svg><input type="search" id="globalSearch" placeholder="Search anything..." aria-label="Search"></div>
+  <div class="topbar__right">
+    <div style="position:relative">
+<button class="icon-btn" type="button" aria-label="Notifications" id="notifBtn"><svg width="18" height="18"><use href="#i-bell"/></svg><span class="badge" id="notifCount" style="display:none">0</span></button>
+<div class="notif-pop" id="notifPop" role="dialog" aria-label="Notifications">
+  <div class="notif-pop__head"><span>Notifications</span><button type="button" id="notifReadAll">Mark all read</button></div>
+  <div id="notifList"></div>
+</div>
+</div>
+    <div class="user-chip"><img src="assets/logo-circle.png" alt="" width="34" height="34" onerror="this.src='assets/logo.jpeg'"><div><div class="user-chip__name" id="userName">—</div><div class="user-chip__role">Mother / Patient</div></div></div>
+  </div>
+</header>
+
+<div class="content">
+<!-- DASHBOARD -->
+<div class="panel is-active" id="panel-dashboard">
+  <div class="welcome-row">
+    <div class="welcome-card">
+      <div class="welcome-card__art" aria-hidden="true">
+        <img src="assets/mother-illustration.jpeg" alt="" width="100" height="110" style="width:100%;height:100%;object-fit:contain;border-radius:12px">
+      </div>
+      <div>
+        <div class="welcome-card__hello">Hello, <span id="greetName">Mother</span></div>
+        <div class="welcome-card__title">You're doing great!</div>
+        <div class="welcome-card__sub">Your health and your baby's health matter.</div>
+        <div class="pills">
+          <span class="pill">Second trimester · <span id="weekLabel">—</span></span>
+          <span class="pill">EDD: <span id="eddLabel">—</span></span>
+        </div>
+      </div>
+    </div>
+    <div class="card appt-card">
+      <div>
+        <div class="appt-card__label">Next Appointment</div>
+        <div class="appt-card__title" id="nextApptTitle">No upcoming appointment</div>
+        <div class="appt-card__meta" id="nextApptMeta">—</div>
+      </div>
+      <button type="button" class="btn btn--primary btn--full" data-go="appointments">View Schedule <svg width="15" height="15"><use href="#i-arrow"/></svg></button>
+    </div>
+  </div>
+
+  
+  <div class="card" id="riskCard" style="padding:1.1rem 1.25rem;margin-bottom:1rem;border-left:4px solid var(--brand)">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;flex-wrap:wrap">
+      <div>
+        <div class="section-title" style="margin:0 0 .35rem">Pregnancy risk assessment</div>
+        <div style="font-size:.85rem;color:var(--ink-muted);margin-bottom:.5rem">Based on the Maternal Health Risk dataset (Age, BP, blood sugar, temperature, heart rate) plus your clinical history.</div>
+        <div id="riskLevelLabel" style="font-family:var(--display);font-weight:800;font-size:1.15rem;text-transform:capitalize">—</div>
+        <ul id="riskFactorList" style="margin:.5rem 0 0;padding-left:1.1rem;color:var(--ink-2);font-size:.88rem"></ul>
+        <div id="riskMeta" style="font-size:.75rem;color:var(--ink-3);margin-top:.5rem"></div>
+      </div>
+      <button type="button" class="btn btn--primary" id="reassessRiskBtn">Reassess risk</button>
+    </div>
+  </div>
+<div class="status-row">
+    <button type="button" class="status-card" data-go="records">
+      <div class="status-card__icon status-card__icon--purple"></div>
+      <div><div class="status-card__label">Current Health Status</div><div class="status-card__value"><span class="ok"></span> Stable</div><div class="status-card__sub">No major concerns</div></div>
+    </button>
+    <button type="button" class="status-card" data-go="records">
+      <div class="status-card__icon status-card__icon--green"></div>
+      <div><div class="status-card__label">Vitals</div><div class="status-card__value"><span class="ok"></span> All normal</div><div class="status-card__sub">Last updated: today</div></div>
+    </button>
+    <button type="button" class="status-card" data-go="records">
+      <div class="status-card__icon status-card__icon--blue"></div>
+      <div><div class="status-card__label">Medications</div><div class="status-card__value"><span class="ok"></span> On schedule</div><div class="status-card__sub" id="medCount">1 supplement</div></div>
+    </button>
+    <button type="button" class="status-card" data-go="appointments">
+      <div class="status-card__icon status-card__icon--purple"></div>
+      <div><div class="status-card__label">Upcoming Appointments</div><div class="status-card__value"> <span id="apptCount">1</span> scheduled</div></div>
+    </button>
+  </div>
+
+  <div class="main-grid">
+    <div>
+      <div class="card section-card">
+        <div class="section-head">
+          <div class="section-title"><span></span> Health Overview</div>
+          <button type="button" class="link-btn" data-go="records">View All →</button>
+        </div>
+        <div class="tabs" role="tablist">
+          <button type="button" class="is-active" data-metric="weight">Weight</button>
+          <button type="button" data-metric="bp">Blood Pressure</button>
+          <button type="button" data-metric="temp">Temperature</button>
+          <button type="button" data-metric="other">Others</button>
+        </div>
+        <div class="growth-body">
+          <div class="chart-wrap">
+            <span class="chart-y">Weight (kg)</span>
+            <svg class="chart-svg" viewBox="0 0 400 170" preserveAspectRatio="none" id="weightChart">
+              <g stroke="#ede9fe" stroke-width="1"><line x1="0" y1="15" x2="400" y2="15"/><line x1="0" y1="50" x2="400" y2="50"/><line x1="0" y1="85" x2="400" y2="85"/><line x1="0" y1="120" x2="400" y2="120"/><line x1="0" y1="155" x2="400" y2="155"/></g>
+              <g fill="#9ca3af" font-size="10" font-family="Inter,sans-serif"><text x="2" y="18">80</text><text x="2" y="53">70</text><text x="2" y="88">60</text><text x="2" y="123">50</text><text x="2" y="158">40</text></g>
+              <path d="M30 130 L80 120 L130 110 L180 100 L230 95 L280 88 L330 78 L370 70" fill="none" stroke="#7c3aed" stroke-width="2.5" stroke-linecap="round"/>
+              <g fill="#7c3aed"><circle cx="30" cy="130" r="3.5"/><circle cx="80" cy="120" r="3.5"/><circle cx="130" cy="110" r="3.5"/><circle cx="180" cy="100" r="3.5"/><circle cx="230" cy="95" r="3.5"/><circle cx="280" cy="88" r="3.5"/><circle cx="330" cy="78" r="3.5"/><circle cx="370" cy="70" r="5" fill="#fff" stroke="#7c3aed" stroke-width="2.5"/></g>
+              <g transform="translate(340,40)"><rect width="48" height="20" rx="8" fill="#7c3aed"/><text x="24" y="14" text-anchor="middle" fill="#fff" font-size="10" font-weight="700">68 kg</text></g>
+              <g fill="#9ca3af" font-size="9" font-family="Inter,sans-serif" text-anchor="middle"><text x="30" y="168">1 Aug</text><text x="130" y="168">15 Aug</text><text x="230" y="168">29 Aug</text><text x="330" y="168">12 Sep</text></g>
+            </svg>
+          </div>
+          <div class="stats-panel">
+            <div><div class="stat-label">Current Weight</div><div class="stat-value" id="curWeight">68 kg</div><div class="stat-sub">(at 18 weeks)</div></div>
+            <div><div class="stat-label">Starting Weight</div><div class="stat-value" id="startWeight">62 kg</div><div class="stat-sub">(at 12 weeks)</div></div>
+            <div><div class="stat-label">BMI</div><div class="stat-value" id="bmiVal">24.8</div><div class="stat-sub">(normal range)</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card section-card">
+        <div class="section-head">
+          <div class="section-title"><span style="background:#fef3c7;color:#d97706"></span> Milestones</div>
+          <button type="button" class="link-btn" data-go="timeline">View All →</button>
+        </div>
+        <div class="milestones-track" id="milestoneTrack">
+          <div class="milestone is-done"><div class="milestone__icon"><span class="milestone__check"></span></div><div class="milestone__name">12 weeks</div><div class="milestone__range">Baby's organs forming</div></div>
+          <div class="milestone is-done"><div class="milestone__icon"><span class="milestone__check"></span></div><div class="milestone__name">16 weeks</div><div class="milestone__range">Gender (optional)</div></div>
+          <div class="milestone is-current"><div class="milestone__icon"></div><div class="milestone__name">20 weeks</div><div class="milestone__range">Anomaly scan</div></div>
+          <div class="milestone is-locked"><div class="milestone__icon">🩸</div><div class="milestone__name">24 weeks</div><div class="milestone__range">Glucose test</div></div>
+          <div class="milestone is-locked"><div class="milestone__icon"></div><div class="milestone__name">28 weeks</div><div class="milestone__range">Growth scan</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-stack">
+      <div class="card section-card">
+        <div class="section-title" style="margin-bottom:.85rem"><span></span> Quick Actions</div>
+        <div class="qa-grid">
+          <button type="button" class="qa-item" data-go="appointments"><div class="qa-item__icon qa-item__icon--blue"></div><div class="qa-item__title">Book Appointment <span>›</span></div><div class="qa-item__sub">See a doctor</div></button>
+          <button type="button" class="qa-item" data-go="records"><div class="qa-item__icon qa-item__icon--purple"></div><div class="qa-item__title">View Test Reports <span>›</span></div><div class="qa-item__sub">Lab results &amp; reports</div></button>
+          <button type="button" class="qa-item" data-go="records"><div class="qa-item__icon qa-item__icon--green"></div><div class="qa-item__title">Track Health <span>›</span></div><div class="qa-item__sub">Weight, vitals &amp; more</div></button>
+          <button type="button" class="qa-item" data-go="timeline"><div class="qa-item__icon qa-item__icon--amber"></div><div class="qa-item__title">View Care Timeline <span>›</span></div><div class="qa-item__sub">Your pregnancy journey</div></button>
+        </div>
+      </div>
+      <div class="card section-card">
+        <div class="section-head"><div class="section-title"><span></span> Recent Updates</div><button type="button" class="link-btn">View All →</button></div>
+        <div class="feed-list" id="recentFeed">
+          <div class="feed-item"><div class="feed-item__icon feed-item__icon--amber"></div><div><div class="feed-item__title">Care updates</div><div class="feed-item__sub">No items yet</div></div><div class="feed-item__date">—</div></div>
+          <div class="feed-item"><div class="feed-item__icon feed-item__icon--green"></div><div><div class="feed-item__title">Test report available</div><div class="feed-item__sub">Blood test · All parameters normal</div></div><div class="feed-item__date">Sep 8</div></div>
+          <div class="feed-item"><div class="feed-item__icon feed-item__icon--purple"></div><div><div class="feed-item__title">Growth checkup</div><div class="feed-item__sub">Weight &amp; BP recorded</div></div><div class="feed-item__date">Sep 5</div></div>
+          <div class="feed-item"><div class="feed-item__icon feed-item__icon--blue"></div><div><div class="feed-item__title">Next appointment</div><div class="feed-item__sub">—</div></div><div class="feed-item__date">—</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sos-bar">
+    <div class="sos-bar__left"><div class="sos-bar__icon"><svg width="16" height="16"><use href="#i-heart"/></svg></div><div><strong>Need medical advice?</strong> Chat with your doctor for non-urgent queries. For emergencies, use the emergency button.</div></div>
+    <button class="btn--sos" type="button" id="sosBtn"><svg width="14" height="14"><use href="#i-phone"/></svg> Emergency SOS</button>
+  </div>
+</div>
+
+<!-- PROFILE -->
+<div class="panel" id="panel-profile">
+  <div class="card section-card" style="max-width:560px">
+    <div class="section-title" style="margin-bottom:1rem"><span></span> Mother / Patient Profile</div>
+    <form class="form-grid" id="profileForm">
+      <div class="form-group"><label for="pfName">Full name</label><input id="pfName" value="" required></div>
+      <div class="form-group"><label for="pfPhone">Phone</label><input id="pfPhone" type="tel" value="+91 98765 43210"></div>
+      <div class="form-group"><label for="pfLmp">Last menstrual period (LMP)</label><input id="pfLmp" type="date" value="2026-05-08"></div>
+      <div class="form-group"><label for="pfEdd">Expected due date</label><input id="pfEdd" type="date" value="2027-03-12"></div>
+      <div class="form-group"><label for="pfEmergency">Emergency contact</label><input id="pfEmergency" value=""></div>
+      <button type="submit" class="btn btn--primary">Save profile</button>
+    </form>
+  </div>
+</div>
+
+<!-- APPOINTMENTS -->
+<div class="panel" id="panel-appointments">
+  <div class="main-grid">
+    <div class="card section-card">
+      <div class="section-title" style="margin-bottom:1rem"><span></span> Request appointment</div>
+      <form class="form-grid" id="apptForm">
+        <div class="form-group"><label for="apptType">Type / reason</label>
+          <select id="apptType"><option>Obstetrician Consultation</option><option>Ultrasound / Scan</option><option>Lab / Blood test</option><option>Vaccination</option><option>General checkup</option></select>
+        </div>
+        <div class="form-group"><label for="apptDoctor">Doctor</label>
+          <select id="apptDoctor" required><option value="">Loading doctors…</option></select>
+        </div>
+        <div class="form-group"><label for="apptDate">Preferred date</label><input id="apptDate" type="date" required></div>
+        <div class="form-group"><label for="apptTime">Preferred time</label><input id="apptTime" type="time" value="10:30"></div>
+        <div class="form-group"><label for="apptNotes">Notes</label><textarea id="apptNotes" rows="2" placeholder="Any symptoms or requests…"></textarea></div>
+        <button type="submit" class="btn btn--primary">Request appointment</button>
+      </form>
+    </div>
+    <div class="card list-card">
+      <div class="section-card" style="border:0;box-shadow:none;padding-bottom:.5rem"><div class="section-title"><span></span> Your requests</div></div>
+      <div id="apptList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- TIMELINE -->
+<div class="panel" id="panel-timeline">
+  <div class="card section-card">
+    <div class="section-head"><div class="section-title"><span></span> Care Timeline</div></div>
+    <div id="timelineList"></div>
+  </div>
+</div>
+
+<!-- RECORDS -->
+<div class="panel" id="panel-records">
+  <div class="main-grid">
+    <div class="card section-card">
+      <div class="section-title" style="margin-bottom:1rem"><span></span> Log vitals</div>
+      <form class="form-grid" id="vitalsForm">
+        <div class="form-group"><label for="vWeight">Weight (kg)</label><input id="vWeight" type="number" step="0.1" placeholder="68"></div>
+        <div class="form-group"><label for="vBp">Blood pressure</label><input id="vBp" placeholder="120/80"></div>
+        <div class="form-group"><label for="vNotes">Notes</label><input id="vNotes" placeholder="Optional"></div>
+        <button type="submit" class="btn btn--primary">Save entry</button>
+      </form>
+      <div style="margin-top:1.25rem">
+        <div class="section-title" style="margin-bottom:.75rem;font-size:.95rem"><span></span> Supplements today</div>
+        <label style="display:flex;align-items:center;gap:.6rem;padding:.6rem .75rem;border:1px solid var(--line);border-radius:12px;margin-bottom:.4rem"><input type="checkbox" id="supIron"> Iron / folic acid</label>
+        <label style="display:flex;align-items:center;gap:.6rem;padding:.6rem .75rem;border:1px solid var(--line);border-radius:12px"><input type="checkbox" id="supCalcium"> Calcium</label>
+      </div>
+    </div>
+    <div class="card list-card">
+      <div class="section-card" style="border:0;box-shadow:none;padding-bottom:.5rem"><div class="section-title"><span></span> Health log</div></div>
+      <div id="vitalsList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MESSAGES -->
+<div class="panel" id="panel-messages">
+  <div class="card list-card">
+    <div class="section-card" style="border:0;box-shadow:none"><div class="section-title"><span></span> Messages</div></div>
+    <div id="msgList">
+      <div class="list-row" id="feedEmpty"><div class="list-row__meta"><div class="list-row__title">No recent updates</div><div class="list-row__sub">Updates from your care team will appear here.</div></div></div>
+
+    </div>
+  </div>
+</div>
+
+<!-- SETTINGS -->
+<div class="panel" id="panel-settings">
+  <div class="card section-card" style="max-width:520px">
+    <div class="section-title" style="margin-bottom:1rem"><span></span> Settings</div>
+    <form class="form-grid" id="settingsForm">
+      <div class="form-group"><label for="setLang">Language</label><select id="setLang"><option>English</option><option>Hindi</option></select></div>
+      <div class="form-group"><label><input type="checkbox" id="setNotif" checked> Appointment reminders</label></div>
+      <div class="form-group"><label><input type="checkbox" id="setSms" checked> SMS alerts</label></div>
+      <button type="submit" class="btn btn--primary">Save settings</button>
+      <button type="button" class="btn btn--ghost" id="logoutBtn">Log out</button>
+    </form>
+  </div>
+</div>
+
+</div></div></div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(function () {
+"use strict";
+var api = window.DaiAPI;
+var IS_GUEST = localStorage.getItem('dai_guest') === '1';
+var currentUser = null;
+var motherMilestones = [];
+var appointments = [];
+var doctorsList = [];
+var healthLogs = [];
+var medications = [];
+
+function $(id) { return document.getElementById(id); }
+
+function showPanel(id) {
+  document.querySelectorAll('.panel').forEach(function (p) { p.classList.remove('is-active'); });
+  document.querySelectorAll('.nav-item[data-panel]').forEach(function (n) { n.classList.remove('is-active'); });
+  var panel = $('panel-' + id);
+  if (panel) panel.classList.add('is-active');
+  var nav = document.querySelector('.nav-item[data-panel="' + id + '"]');
+  if (nav) nav.classList.add('is-active');
+  try { history.replaceState(null, '', '#' + id); } catch (e) {}
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+document.querySelectorAll('.nav-item[data-panel]').forEach(function (btn) {
+  btn.addEventListener('click', function () { showPanel(btn.getAttribute('data-panel')); });
+});
+document.querySelectorAll('[data-go]').forEach(function (el) {
+  el.addEventListener('click', function () { showPanel(el.getAttribute('data-go')); });
+});
+
+function weeksAlong() {
+  return api.gestationalWeeks(currentUser && currentUser.care_start_date);
+}
+
+function renderHeader() {
+  if (!currentUser) return;
+  var name = currentUser.full_name || currentUser.email || 'Mother';
+  var first = name.split(/\s+/)[0];
+  var un = $('userName'); if (un) un.textContent = name;
+  var gn = $('greetName'); if (gn) gn.textContent = first;
+  var weeks = weeksAlong();
+  var wl = $('weekLabel');
+  if (wl) wl.textContent = weeks != null ? (weeks + ' weeks') : '—';
+  var tri = api.trimesterLabel(weeks);
+  var pills = document.querySelectorAll('.pill');
+  // first pill contains trimester
+  var edd = api.eddFromCareStart(currentUser.care_start_date);
+  var eddEl = $('eddLabel');
+  if (eddEl) eddEl.textContent = edd ? api.fmtDate(edd) : '—';
+  // Update trimester text in first pill if present
+  var pill0 = document.querySelector('.pills .pill');
+  if (pill0 && weeks != null) {
+    pill0.innerHTML = tri + ' · <span id="weekLabel">' + weeks + ' weeks</span>';
+  }
+}
+
+function renderAppointments() {
+  var list = $('apptList');
+  var upcoming = appointments.filter(function (a) {
+    return a.status === 'pending' || a.status === 'confirmed';
+  });
+  var countEl = $('apptCount');
+  if (countEl) countEl.textContent = String(upcoming.length);
+
+  var next = upcoming.slice().sort(function (a, b) {
+    return String(a.requested_date).localeCompare(String(b.requested_date));
+  })[0];
+  if (next) {
+    var title = $('nextApptTitle');
+    if (title) title.textContent = next.reason || 'Consultation';
+    var meta = $('nextApptMeta');
+    if (meta) {
+      meta.innerHTML = (next.doctor_name ? next.doctor_name : 'Doctor') +
+        (next.specialization ? ' · ' + next.specialization : '') +
+        '<br>' + api.fmtDate(next.requested_date) +
+        ' · <span class="tag tag--' + (next.status === 'confirmed' ? 'ok' : 'pending') + '">' + next.status + '</span>';
+    }
+  } else {
+    var title2 = $('nextApptTitle'); if (title2) title2.textContent = 'No upcoming appointment';
+    var meta2 = $('nextApptMeta'); if (meta2) meta2.textContent = 'Request one from Appointments';
+  }
+
+  if (!list) return;
+  if (!appointments.length) {
+    list.innerHTML = '<div class="empty">No appointment requests yet.</div>';
+    return;
+  }
+  list.innerHTML = appointments.map(function (a) {
+    return '<div class="list-row"><div class="list-row__meta"><div class="list-row__title">' +
+      (a.reason || 'Appointment') + '</div><div class="list-row__sub">' +
+      api.fmtDate(a.requested_date) + (a.doctor_name ? ' · ' + a.doctor_name : '') +
+      '</div></div><span class="tag tag--' + (a.status === 'confirmed' || a.status === 'completed' ? 'ok' : 'pending') + '">' +
+      a.status + '</span></div>';
+  }).join('');
+}
+
+function renderTimeline() {
+  var el = $('timelineList');
+  if (!el) return;
+  var preg = motherMilestones.filter(function (m) { return m.category !== 'child'; });
+  if (!preg.length) {
+    el.innerHTML = '<div class="empty">No care milestones yet. Confirm your due date in profile to seed your timeline.</div>';
+    return;
+  }
+  el.innerHTML = preg.map(function (m) {
+    var tag = m.status === 'completed' ? 'ok' : (m.status === 'overdue' ? 'pending' : 'info');
+    var label = m.status === 'completed' ? 'Done' : (m.status === 'overdue' ? 'Overdue' : 'Upcoming');
+    var btn = m.status !== 'completed'
+      ? '<button type="button" class="btn btn--sm btn--primary" data-complete="' + m.id + '">Mark done</button>'
+      : '';
+    return '<div class="list-row"><div class="list-row__meta"><div class="list-row__title">' +
+      m.title + '</div><div class="list-row__sub">' + (m.stage || '') + ' · due ' + api.fmtDate(m.due_date) +
+      (m.guidance ? ' · ' + m.guidance : '') + '</div></div><span class="tag tag--' + tag + '">' + label +
+      '</span>' + btn + '</div>';
+  }).join('');
+
+  el.querySelectorAll('[data-complete]').forEach(function (b) {
+    b.addEventListener('click', async function () {
+      var id = b.getAttribute('data-complete');
+      var data = await api.apiRequest('/timeline/' + id + '/complete', { method: 'PATCH' });
+      if (data) {
+        api.toast('Milestone marked done');
+        await loadTimeline();
+      }
+    });
+  });
+
+  // Dashboard milestone strip — first 5 pregnancy milestones
+  var track = $('milestoneTrack');
+  if (track) {
+    var slice = preg.slice(0, 5);
+    track.innerHTML = slice.map(function (m, i) {
+      var cls = m.status === 'completed' ? 'is-done' : (m.status === 'overdue' || (m.status === 'upcoming' && !slice.slice(0, i).some(function (x) { return x.status !== 'completed'; })) ? 'is-current' : 'is-locked');
+      // simplify: first non-completed is current
+      return cls;
+    });
+    var foundCurrent = false;
+    track.innerHTML = slice.map(function (m) {
+      var cls, icon;
+      if (m.status === 'completed') { cls = 'is-done'; icon = ''; }
+      else if (!foundCurrent) { cls = 'is-current'; icon = ''; foundCurrent = true; }
+      else { cls = 'is-locked'; icon = ''; }
+      return '<div class="milestone ' + cls + '"><div class="milestone__icon">' + icon +
+        (m.status === 'completed' ? '<span class="milestone__check"></span>' : '') +
+        '</div><div class="milestone__name">' + m.title + '</div><div class="milestone__range">' +
+        api.fmtDate(m.due_date) + '</div></div>';
+    }).join('');
+  }
+}
+
+function renderVitals() {
+  var el = $('vitalsList');
+  var weights = healthLogs.filter(function (l) { return l.log_type === 'weight'; });
+  var bps = healthLogs.filter(function (l) { return l.log_type === 'blood_pressure'; });
+  if (weights[0] && weights[0].data && weights[0].data.kg != null) {
+    var cw = $('curWeight');
+    if (cw) cw.textContent = weights[0].data.kg + ' kg';
+  }
+  if (!el) return;
+  if (!healthLogs.length) {
+    el.innerHTML = '<div class="empty">No health log entries yet.</div>';
+    return;
+  }
+  el.innerHTML = healthLogs.slice(0, 20).map(function (l) {
+    var summary = l.log_type;
+    if (l.log_type === 'weight' && l.data) summary = l.data.kg + ' kg';
+    if (l.log_type === 'blood_pressure' && l.data) summary = l.data.systolic + '/' + l.data.diastolic + (l.data.pulse ? ' · pulse ' + l.data.pulse : '');
+    if (l.log_type === 'blood_glucose' && l.data) summary = l.data.mg_dl + ' mg/dL';
+    if (l.log_type === 'kick_session' && l.data) summary = l.data.kicks + ' kicks';
+    return '<div class="list-row"><div class="list-row__meta"><div class="list-row__title">' + summary +
+      '</div><div class="list-row__sub">' + l.log_type.replace(/_/g, ' ') + ' · ' + api.fmtDate(l.logged_at) +
+      '</div></div></div>';
+  }).join('');
+}
+
+function renderMeds() {
+  var active = medications.filter(function (m) { return m.active !== false; });
+  var mc = $('medCount');
+  if (mc) mc.textContent = active.length ? (active.length + ' active') : 'None logged';
+}
+
+function renderDoctorsSelect() {
+  var sel = $('apptDoctor');
+  if (!sel) return;
+  if (!doctorsList.length) {
+    sel.innerHTML = '<option value="">No doctors available</option>';
+    return;
+  }
+  sel.innerHTML = doctorsList.map(function (d) {
+    var id = d.id != null ? d.id : d.user_id;
+    return '<option value="' + id + '">' + d.full_name + (d.specialization ? ' · ' + d.specialization : '') + '</option>';
+  }).join('');
+}
+
+async function loadTimeline() {
+  if (IS_GUEST) {
+    motherMilestones = [];
+    renderTimeline();
+    return;
+  }
+  var data = await api.apiRequest('/timeline');
+  motherMilestones = (data && data.milestones) || [];
+  renderTimeline();
+}
+
+async function loadAppointments() {
+  if (IS_GUEST) {
+    appointments = [];
+    renderAppointments();
+    return;
+  }
+  var data = await api.apiRequest('/appointments');
+  appointments = (data && data.appointments) || [];
+  renderAppointments();
+}
+
+async function loadDoctors() {
+  if (IS_GUEST) return;
+  var data = await api.apiRequest('/doctors');
+  doctorsList = (data && data.doctors) || [];
+  renderDoctorsSelect();
+}
+
+async function loadHealthLogs() {
+  if (IS_GUEST) {
+    healthLogs = [];
+    renderVitals();
+    return;
+  }
+  var data = await api.apiRequest('/health-logs');
+  healthLogs = (data && data.logs) || [];
+  renderVitals();
+}
+
+async function loadMedications() {
+  if (IS_GUEST) {
+    medications = [];
+    renderMeds();
+    return;
+  }
+  var data = await api.apiRequest('/medications');
+  medications = (data && data.medications) || [];
+  renderMeds();
+}
+
+async function loadPregnancyIntoForm() {
+  if (IS_GUEST) return;
+  var data = await api.apiRequest('/profile/pregnancy');
+  var p = data && data.pregnancy;
+  if (!p) return;
+  if (p.care_start_date && $('pfLmp')) {
+    // care_start is LMP-based anchor
+    $('pfLmp').value = String(p.care_start_date).slice(0, 10);
+  }
+  if (currentUser && currentUser.care_start_date) {
+    var edd = api.eddFromCareStart(currentUser.care_start_date);
+    if (edd && $('pfEdd')) $('pfEdd').value = edd.toISOString().slice(0, 10);
+  }
+  if ($('pfName') && currentUser.full_name) $('pfName').value = currentUser.full_name;
+  if ($('pfPhone') && currentUser.phone) $('pfPhone').value = currentUser.phone;
+  if ($('pfEmergency')) {
+    var en = currentUser.emergency_contact_name || '';
+    var ep = currentUser.emergency_contact_phone || '';
+    $('pfEmergency').value = [en, ep].filter(Boolean).join(' · ');
+  }
+}
+
+// Profile form → PATCH pregnancy + contact
+var profileForm = $('profileForm');
+if (profileForm) {
+  profileForm.addEventListener('submit', async function (e) {
+    e.preventDefault();
+    if (IS_GUEST) { api.toast('Sign in to save your profile'); return; }
+    var edd = $('pfEdd') && $('pfEdd').value;
+    var lmp = $('pfLmp') && $('pfLmp').value;
+    if (edd || lmp) {
+      var body = edd ? { edd_date: edd } : { lmp_date: lmp };
+      var preg = await api.apiRequest('/profile/pregnancy', { method: 'PATCH', body: body });
+      if (preg) api.toast('Pregnancy dates updated');
+    }
+    var contactBody = { phone: $('pfPhone') ? $('pfPhone').value : undefined };
+    var em = $('pfEmergency') ? $('pfEmergency').value.trim() : '';
+    if (em) {
+      // Accept "Name · phone" or a single phone
+      var parts = em.split(/[·|]/);
+      if (parts.length >= 2) {
+        contactBody.emergency_contact_name = parts[0].trim();
+        contactBody.emergency_contact_phone = parts.slice(1).join(' ').trim();
+      } else if (/\d/.test(em)) {
+        contactBody.emergency_contact_phone = em;
+      } else {
+        contactBody.emergency_contact_name = em;
+      }
+    }
+    var contact = await api.apiRequest('/profile/contact', {
+      method: 'PATCH',
+      body: contactBody
+    });
+    if (contact) api.toast('Contact saved');
+    currentUser = await api.fetchCurrentUser() || currentUser;
+    renderHeader();
+    await loadTimeline();
+  });
+}
+
+// Appointments form
+var apptForm = $('apptForm');
+if (apptForm) {
+  // Ensure doctor select exists — inject if design only had type/date
+  if (!$('apptDoctor')) {
+    var typeGroup = $('apptType') && $('apptType').closest('.form-group');
+    if (typeGroup && typeGroup.parentNode) {
+      var div = document.createElement('div');
+      div.className = 'form-group';
+      div.innerHTML = '<label for="apptDoctor">Doctor</label><select id="apptDoctor" required></select>';
+      typeGroup.parentNode.insertBefore(div, typeGroup.nextSibling);
+    }
+  }
+  apptForm.addEventListener('submit', async function (e) {
+    e.preventDefault();
+    if (IS_GUEST) { api.toast('Sign in to request appointments'); return; }
+    var doctorId = $('apptDoctor') && $('apptDoctor').value;
+    var date = $('apptDate') && $('apptDate').value;
+    var reason = ($('apptType') && $('apptType').value) || ($('apptNotes') && $('apptNotes').value) || 'Consultation';
+    if (!doctorId || !date) { api.toast('Select a doctor and date'); return; }
+    var data = await api.apiRequest('/appointments', {
+      method: 'POST',
+      body: { doctor_id: Number(doctorId), requested_date: date, reason: reason }
+    });
+    if (data) {
+      api.toast('Appointment requested');
+      apptForm.reset();
+      await loadAppointments();
+    }
+  });
+}
+
+// Vitals form
+var vitalsForm = $('vitalsForm');
+if (vitalsForm) {
+  vitalsForm.addEventListener('submit', async function (e) {
+    e.preventDefault();
+    if (IS_GUEST) { api.toast('Sign in to log vitals'); return; }
+    var w = $('vWeight') && $('vWeight').value;
+    var bp = $('vBp') && $('vBp').value;
+    var ok = false;
+    if (w) {
+      var r = await api.apiRequest('/health-logs', {
+        method: 'POST',
+        body: { log_type: 'weight', data: { kg: Number(w) } }
+      });
+      if (r) ok = true;
+    }
+    if (bp && bp.indexOf('/') !== -1) {
+      var parts = bp.split('/');
+      var r2 = await api.apiRequest('/health-logs', {
+        method: 'POST',
+        body: { log_type: 'blood_pressure', data: { systolic: Number(parts[0]), diastolic: Number(parts[1]) } }
+      });
+      if (r2) ok = true;
+    }
+    if (ok) {
+      api.toast('Vitals saved');
+      vitalsForm.reset();
+      await loadHealthLogs();
+    } else if (!w && !bp) {
+      api.toast('Enter weight or blood pressure');
+    }
+  });
+}
+
+// Supplements → wellness API
+['supIron', 'supCalcium'].forEach(function (id) {
+  var el = $(id);
+  if (!el) return;
+  el.addEventListener('change', async function () {
+    if (IS_GUEST) { api.toast('Sign in to track supplements'); el.checked = !el.checked; return; }
+    var name = id === 'supIron' ? 'iron' : 'calcium';
+    await api.apiRequest('/wellness/supplements', {
+      method: 'PUT',
+      body: { date: api.localDateStr(), supplement: name, taken: el.checked }
+    });
+    api.toast(el.checked ? 'Marked taken' : 'Updated');
+  });
+});
+
+var sosBtn = $('sosBtn');
+if (sosBtn) {
+  sosBtn.addEventListener('click', function () {
+    api.toast('Emergency: call your hospital or local emergency number (e.g. 108)');
+  });
+}
+var logoutBtn = $('logoutBtn');
+if (logoutBtn) {
+  logoutBtn.addEventListener('click', async function () {
+    if (IS_GUEST) {
+      localStorage.removeItem('dai_guest');
+      window.location.href = 'auth.html';
+      return;
+    }
+    await api.apiRequest('/auth/logout', { method: 'POST' });
+    window.location.href = 'auth.html';
+  });
+}
+
+document.querySelectorAll('.tabs button').forEach(function (b) {
+  b.addEventListener('click', function () {
+    document.querySelectorAll('.tabs button').forEach(function (x) { x.classList.remove('is-active'); });
+    b.classList.add('is-active');
+  });
+});
+
+function route() {
+  var h = (location.hash || '#dashboard').replace('#', '') || 'dashboard';
+  if ($('panel-' + h)) showPanel(h);
+}
+
+
+async function loadRisk() {
+  if (IS_GUEST) return;
+  var data = await api.apiRequest('/risk');
+  renderRisk(data);
+}
+
+function renderRisk(data) {
+  var levelEl = $('riskLevelLabel');
+  var listEl = $('riskFactorList');
+  var metaEl = $('riskMeta');
+  if (!levelEl) return;
+  if (!data || !data.risk_level) {
+    levelEl.textContent = 'Not assessed yet';
+    levelEl.style.color = 'var(--ink-muted)';
+    if (listEl) listEl.innerHTML = '<li>Log blood pressure (and optionally glucose) then tap Reassess risk.</li>';
+    if (metaEl) metaEl.textContent = '';
+    return;
+  }
+  var level = data.risk_level;
+  levelEl.textContent = level;
+  levelEl.style.color = level.indexOf('high') >= 0 ? 'var(--rose)' : (level.indexOf('mid') >= 0 ? 'var(--amber)' : 'var(--green)');
+  var factors = data.risk_factors || [];
+  if (listEl) {
+    if (!factors.length) listEl.innerHTML = '<li>No additional clinical risk factors flagged.</li>';
+    else listEl.innerHTML = factors.map(function (f) {
+      var label = typeof f === 'string' ? f : (f.label || f.code || '');
+      return '<li>' + label + '</li>';
+    }).join('');
+  }
+  if (metaEl) {
+    metaEl.textContent = data.risk_assessed_at ? ('Assessed ' + api.fmtDate(data.risk_assessed_at)) : '';
+  }
+}
+
+var reassessBtn = $('reassessRiskBtn');
+if (reassessBtn) {
+  reassessBtn.addEventListener('click', async function () {
+    if (IS_GUEST) { api.toast('Sign in to assess risk'); return; }
+    reassessBtn.disabled = true;
+    var data = await api.apiRequest('/risk/assess', { method: 'POST', body: {} });
+    reassessBtn.disabled = false;
+    if (data && data.assessment) {
+      api.toast('Risk updated: ' + data.assessment.risk_level);
+      renderRisk({
+        risk_level: data.assessment.risk_level,
+        risk_factors: data.assessment.factors,
+        risk_assessed_at: new Date().toISOString()
+      });
+    }
+  });
+}
+
+
+/* ---- Notifications ------------------------------------------------------- */
+var notifications = [];
+function renderNotifPop() {
+  var list = $('notifList');
+  var count = $('notifCount');
+  if (!list) return;
+  var unread = notifications.filter(function (n) { return !n.read_at; }).length;
+  if (count) {
+    if (unread) { count.style.display = ''; count.textContent = String(Math.min(9, unread)); }
+    else count.style.display = 'none';
+  }
+  if (!notifications.length) {
+    list.innerHTML = '<div class="notif-empty">You\u2019re all caught up \u2014 nothing needs attention.</div>';
+    return;
+  }
+  list.innerHTML = notifications.map(function (n) {
+    return '<div class="notif-row sev-' + n.severity + (n.read_at ? '' : ' is-unread') + '" data-nid="' + n.id + '" data-route="' + (n.route || '') + '" data-sub="' + (n.route_sub || '') + '">' +
+      '<span class="notif-row__dot"></span>' +
+      '<span class="notif-row__body"><span class="notif-row__title">' + n.title + '</span>' +
+      (n.body ? '<span class="notif-row__sub">' + n.body + '</span>' : '') + '</span>' +
+      '<button type="button" class="notif-row__x" data-dismiss="' + n.id + '" aria-label="Dismiss">\u2715</button></div>';
+  }).join('');
+  list.querySelectorAll('[data-dismiss]').forEach(function (btn) {
+    btn.addEventListener('click', async function (e) {
+      e.stopPropagation();
+      var id = btn.getAttribute('data-dismiss');
+      var ok = await api.apiRequest('/notifications/' + id, { method: 'DELETE' });
+      if (ok) { notifications = notifications.filter(function (n) { return String(n.id) !== id; }); renderNotifPop(); }
+    });
+  });
+  list.querySelectorAll('.notif-row').forEach(function (row) {
+    row.addEventListener('click', async function () {
+      var id = row.getAttribute('data-nid');
+      await api.apiRequest('/notifications/' + id + '/read', { method: 'PATCH' });
+      var n = notifications.find(function (x) { return String(x.id) === id; });
+      if (n) n.read_at = n.read_at || new Date().toISOString();
+      renderNotifPop();
+      var route = row.getAttribute('data-route');
+      if (route === 'child') window.location.href = 'child-dashboard.html';
+      else if (route) showPanel(route);
+      $('notifPop').classList.remove('is-open');
+    });
+  });
+}
+async function loadNotifications() {
+  if (IS_GUEST) { notifications = []; renderNotifPop(); return; }
+  var data = await api.apiRequest('/notifications');
+  notifications = (data && data.notifications) || [];
+  renderNotifPop();
+}
+var notifBtn = $('notifBtn');
+if (notifBtn) {
+  notifBtn.addEventListener('click', function (e) {
+    e.stopPropagation();
+    $('notifPop').classList.toggle('is-open');
+  });
+  document.addEventListener('click', function (e) {
+    var pop = $('notifPop');
+    if (pop && pop.classList.contains('is-open') && !pop.contains(e.target) && e.target !== notifBtn) pop.classList.remove('is-open');
+  });
+}
+var notifReadAllBtn = $('notifReadAll');
+if (notifReadAllBtn) {
+  notifReadAllBtn.addEventListener('click', async function () {
+    if (IS_GUEST) return;
+    var ok = await api.apiRequest('/notifications/read-all', { method: 'POST' });
+    if (ok) { notifications.forEach(function (n) { n.read_at = n.read_at || new Date().toISOString(); }); renderNotifPop(); }
+  });
+}
+
+async function boot() {
+  if (IS_GUEST) {
+    currentUser = {
+      id: 0,
+      full_name: 'Guest',
+      email: 'guest@dai.demo',
+      role: 'mother',
+      care_start_date: api.localDateStr(),
+      guest: true
+    };
+    renderHeader();
+    renderAppointments();
+    renderTimeline();
+    renderVitals();
+    route();
+    api.toast('Guest mode — data stays on this device until you sign in');
+    return;
+  }
+
+  currentUser = await api.fetchCurrentUser();
+  if (!currentUser) return;
+  if (currentUser.role === 'doctor') {
+    window.location.href = 'doctor.html';
+    return;
+  }
+
+  renderHeader();
+  await Promise.all([
+    loadTimeline(),
+    loadAppointments(),
+    loadDoctors(),
+    loadHealthLogs(),
+    loadMedications(),
+    loadPregnancyIntoForm(),
+    loadRisk(),
+    loadNotifications()
+  ]);
+  route();
+  clearInterval(boot._notifPoll);
+  boot._notifPoll = setInterval(loadNotifications, 60000);
+}
+
+
+var settingsForm = $('settingsForm');
+if (settingsForm) {
+  // Restore local prefs
+  try {
+    var prefs = JSON.parse(localStorage.getItem('dai_prefs') || '{}');
+    if ($('setLang') && prefs.lang) $('setLang').value = prefs.lang;
+    if ($('setNotif') && prefs.notif != null) $('setNotif').checked = !!prefs.notif;
+    if ($('setSms') && prefs.sms != null) $('setSms').checked = !!prefs.sms;
+  } catch (e) {}
+  settingsForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var prefs = {
+      lang: $('setLang') ? $('setLang').value : 'English',
+      notif: $('setNotif') ? $('setNotif').checked : true,
+      sms: $('setSms') ? $('setSms').checked : true
+    };
+    localStorage.setItem('dai_prefs', JSON.stringify(prefs));
+    api.toast('Settings saved on this device');
+  });
+}
+
+// Feed messages from real appointments
+async function renderMessagesFromAppts() {
+  var list = $('msgList');
+  if (!list || IS_GUEST) return;
+  var data = await api.apiRequest('/appointments');
+  var appts = (data && data.appointments) || [];
+  if (!appts.length) {
+    list.innerHTML = '<div class="list-row"><div class="list-row__meta"><div class="list-row__title">No messages yet</div><div class="list-row__sub">Appointment updates from your care team will appear here.</div></div></div>';
+    return;
+  }
+  list.innerHTML = appts.slice(0, 15).map(function (a) {
+    return '<div class="list-row"><div class="list-row__meta"><div class="list-row__title">' +
+      (a.doctor_name || 'Doctor') + ' · ' + (a.status || '') +
+      '</div><div class="list-row__sub">' + (a.reason || 'Appointment') + ' · ' + api.fmtDate(a.requested_date) +
+      (a.doctor_notes ? (' — ' + a.doctor_notes) : '') +
+      '</div></div><span class="feed-item__date">' + api.fmtDate(a.created_at || a.requested_date) + '</span></div>';
+  }).join('');
+}
+
+window.addEventListener('hashchange', route);
+boot().then(function () { return renderMessagesFromAppts(); });
+})();
+</script>
+</body>
+</html>
+.nav-item svg{width:18px;height:18px;flex-shrink:0;opacity:.75}
+.nav-item:hover{background:rgba(124,58,237,.06);color:var(--brand-strong)}
+.nav-item.is-active{background:var(--brand);color:#fff;font-weight:600;box-shadow:0 6px 16px -6px rgba(124,58,237,.5)}
+.nav-item.is-active svg{opacity:1}
+.sidebar__footer{margin-top:auto;padding:1rem .6rem .25rem;border-top:1px solid var(--line)}
+.sidebar__tagline{display:flex;align-items:flex-start;gap:.5rem;font-size:.78rem;font-weight:600;color:var(--brand);line-height:1.35}
+.main{display:flex;flex-direction:column;min-width:0}
+.topbar{position:sticky;top:0;z-index:40;display:flex;align-items:center;gap:1rem;min-height:64px;padding:.65rem 1.5rem;background:rgba(255,255,255,.92);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.search{flex:1;max-width:420px;display:flex;align-items:center;gap:.55rem;padding:.55rem 1rem;border-radius:999px;background:var(--ground);border:1px solid var(--line);color:var(--ink-3)}
+.search input{flex:1;border:0;background:transparent;outline:none;color:var(--ink);font-size:.9rem}
+.topbar__right{margin-left:auto;display:flex;align-items:center;gap:.75rem}
+.icon-btn{position:relative;width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:#fff;display:grid;place-items:center;color:var(--ink-2)}
+.icon-btn .badge{position:absolute;top:4px;right:4px;width:16px;height:16px;border-radius:50%;background:var(--rose);color:#fff;font-size:.62rem;font-weight:700;display:grid;place-items:center}
 .user-chip{display:flex;align-items:center;gap:.6rem;padding:.3rem .65rem .3rem .3rem;border-radius:999px;border:1px solid var(--line);background:#fff}
 .user-chip img{width:34px;height:34px;border-radius:50%;object-fit:cover;background:var(--brand-soft)}
 .user-chip__name{font-size:.85rem;font-weight:600}.user-chip__role{font-size:.7rem;color:var(--ink-3);font-weight:500}
