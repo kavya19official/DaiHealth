@@ -873,8 +873,8 @@ body.doctor-page .doctor-patient.is-selected {
   background: #faf8ff;
 }
 
-/* दाई AI Care Companion */
-.vr-companion {
+/* दाई Care Companion chatbot */
+.care-companion {
   position: fixed;
   right: clamp(1rem, 2vw, 1.6rem);
   bottom: clamp(1rem, 2vw, 1.6rem);
@@ -882,7 +882,7 @@ body.doctor-page .doctor-patient.is-selected {
   color: var(--ink);
   font-family: "Times New Roman", Georgia, serif;
 }
-.vr-orb {
+.care-launcher {
   position: relative;
   min-width: 238px;
   height: 72px;
@@ -901,8 +901,8 @@ body.doctor-page .doctor-patient.is-selected {
   isolation: isolate;
   border: 1px solid rgba(151, 89, 152, .18);
 }
-.vr-orb__avatar,
-.vr-head-avatar {
+.care-launcher__avatar,
+.care-panel__avatar {
   width: 56px;
   height: 56px;
   flex: 0 0 auto;
@@ -915,38 +915,38 @@ body.doctor-page .doctor-patient.is-selected {
   font-size: 1.5rem;
   box-shadow: 0 9px 24px rgba(91, 62, 120, .12);
 }
-.vr-orb__copy {
+.care-launcher__copy {
   display: grid;
   gap: .08rem;
   text-align: left;
   line-height: 1.05;
 }
-.vr-orb__copy strong {
+.care-launcher__copy strong {
   font-size: 1.02rem;
 }
-.vr-orb__copy small {
+.care-launcher__copy small {
   color: #7b677e;
   font-size: .82rem;
   font-weight: 700;
 }
-.vr-orb__chev {
+.care-launcher__chev {
   margin-left: auto;
   color: #7b677e;
   font-size: 1.2rem;
 }
-.vr-companion.is-thinking .vr-orb__avatar,
-.vr-companion.is-speaking .vr-orb__avatar {
+.care-companion.is-thinking .care-launcher__avatar,
+.care-companion.is-speaking .care-launcher__avatar {
   animation: vrPulse 1.2s ease-in-out infinite;
 }
-.vr-panel {
+.care-panel {
   position: absolute;
   right: 0;
   bottom: 88px;
-  width: min(1280px, calc(100vw - 42px));
-  height: min(720px, calc(100vh - 132px));
+  width: min(440px, calc(100vw - 28px));
+  max-height: min(680px, calc(100vh - 124px));
   overflow: hidden;
   display: grid;
-  grid-template-columns: minmax(420px, 1fr) minmax(420px, .86fr);
+  grid-template-rows: auto auto minmax(220px, 1fr) auto auto;
   border-radius: 24px;
   border: 1px solid rgba(151, 89, 152, .18);
   background: #ffffff;
@@ -956,78 +956,33 @@ body.doctor-page .doctor-patient.is-selected {
   pointer-events: none;
   transition: opacity .2s ease, transform .2s ease;
 }
-.vr-companion.is-open .vr-panel {
+.care-companion.is-open .care-panel {
   opacity: 1;
   transform: translateY(0) scale(1);
   pointer-events: auto;
 }
-.vr-stage-pane {
-  min-width: 0;
-  position: relative;
-  background: #ebe1ef;
-  border-right: 1px solid rgba(151, 89, 152, .14);
-  display: grid;
-  grid-template-rows: auto 1fr auto;
-}
-.vr-stage-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1rem;
-  padding: 1.4rem 1.5rem .7rem;
-  color: #59335d;
-  font-weight: 900;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  font-size: .86rem;
-}
-.vr-stage-top span {
-  display: inline-flex;
-  align-items: center;
-  gap: .45rem;
-}
-.vr-stage-top i {
-  width: .64rem;
-  height: .64rem;
-  border-radius: 999px;
-  display: inline-block;
-  background: var(--brand);
-  box-shadow: 0 0 0 5px rgba(151, 89, 152, .13);
-}
-.vr-stage-top b {
-  letter-spacing: 0;
-  text-transform: none;
-  color: #6f5d73;
-  font-size: .95rem;
-}
-.vr-chat-pane {
-  min-width: 0;
-  background: #ffffff;
-  display: grid;
-  grid-template-rows: auto auto 1fr auto auto;
-}
-.vr-panel__head {
+.care-panel__head {
   display: flex;
   align-items: center;
   gap: 1rem;
   padding: 1.35rem 1.45rem;
   border-bottom: 1px solid rgba(151, 89, 152, .12);
 }
-.vr-panel__head > div {
+.care-panel__head > div {
   min-width: 0;
   flex: 1;
 }
-.vr-panel__head h2 {
+.care-panel__head h2 {
   margin: 0;
   font-size: 1.75rem;
   line-height: 1;
 }
-.vr-panel__head p {
+.care-panel__head p {
   margin: .28rem 0 0;
   color: var(--muted);
   font-size: .98rem;
 }
-.vr-close {
+.care-close {
   width: 42px;
   height: 42px;
   border-radius: 999px;
@@ -1037,91 +992,7 @@ body.doctor-page .doctor-patient.is-selected {
   font-size: 1.2rem;
   cursor: pointer;
 }
-.vr-character {
-  position: relative;
-  margin: 0 1.45rem;
-  min-height: 0;
-  height: 100%;
-  overflow: hidden;
-  border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, .42);
-  background: #f8f2f9;
-  transition: box-shadow .2s ease, transform .2s ease;
-}
-.vr-canvas {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  display: grid;
-  place-items: center;
-  background: #eee4f1;
-}
-.vr-canvas canvas {
-  width: 100%;
-  height: 100%;
-  display: block;
-}
-.vr-canvas span {
-  position: absolute;
-  inset: auto 1rem 1rem;
-  z-index: 1;
-  text-align: center;
-  color: #7d6681;
-  font-size: .86rem;
-  pointer-events: none;
-}
-.vr-canvas canvas + span,
-.vr-canvas span:empty {
-  display: none;
-}
-.vr-canvas.has-vr-error {
-  background: #fbf6fc;
-}
-.vr-talk-meter {
-  position: absolute;
-  left: 50%;
-  bottom: 1rem;
-  transform: translateX(-50%) translateY(10px);
-  display: flex;
-  align-items: center;
-  gap: .3rem;
-  min-width: 104px;
-  justify-content: center;
-  padding: .52rem .75rem;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, .9);
-  border: 1px solid rgba(151, 89, 152, .18);
-  box-shadow: 0 12px 32px rgba(70, 43, 83, .15);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity .18s ease, transform .18s ease;
-}
-.vr-talk-meter span {
-  display: block;
-  width: .28rem;
-  height: .72rem;
-  border-radius: 999px;
-  background: var(--brand);
-  transform-origin: center bottom;
-  opacity: .78;
-}
-.vr-talk-meter span:nth-child(2) { height: 1rem; }
-.vr-talk-meter span:nth-child(3) { height: .86rem; }
-.vr-talk-meter span:nth-child(4) { height: 1.15rem; }
-.vr-companion.is-speaking .vr-character {
-  box-shadow: inset 0 0 0 999px rgba(255, 255, 255, .03), 0 18px 36px rgba(151, 89, 152, .16);
-}
-.vr-companion.is-speaking .vr-talk-meter {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
-}
-.vr-companion.is-speaking .vr-talk-meter span {
-  animation: vrTalk .62s ease-in-out infinite;
-}
-.vr-companion.is-speaking .vr-talk-meter span:nth-child(2) { animation-delay: .08s; }
-.vr-companion.is-speaking .vr-talk-meter span:nth-child(3) { animation-delay: .16s; }
-.vr-companion.is-speaking .vr-talk-meter span:nth-child(4) { animation-delay: .24s; }
-.vr-safety {
+.care-safety {
   margin: 1.1rem 1.45rem .9rem;
   padding: .72rem .9rem;
   border-radius: 16px;
@@ -1130,17 +1001,17 @@ body.doctor-page .doctor-patient.is-selected {
   font-size: .84rem;
   border: 1px solid rgba(151, 89, 152, .12);
 }
-.vr-feed {
+.care-feed {
   overflow-y: auto;
   padding: .1rem 1.45rem 1rem;
   display: flex;
   flex-direction: column;
   gap: .55rem;
 }
-.vr-message {
+.care-message {
   display: flex;
 }
-.vr-message > div {
+.care-message > div {
   max-width: 88%;
   border-radius: 18px;
   padding: .82rem .95rem;
@@ -1148,25 +1019,25 @@ body.doctor-page .doctor-patient.is-selected {
   line-height: 1.35;
   border: 1px solid rgba(151, 89, 152, .12);
 }
-.vr-message--assistant > div {
+.care-message--assistant > div {
   background: #fbf6fc;
   color: #342033;
 }
-.vr-message--user {
+.care-message--user {
   justify-content: flex-end;
 }
-.vr-message--user > div {
+.care-message--user > div {
   background: var(--brand);
   color: #fff;
   border-color: var(--brand);
 }
-.vr-chips {
+.care-chips {
   display: flex;
   gap: .45rem;
   overflow-x: auto;
   padding: 0 1.45rem .85rem;
 }
-.vr-chips button {
+.care-chips button {
   white-space: nowrap;
   border: 1px solid rgba(151, 89, 152, .16);
   background: #fff;
@@ -1178,14 +1049,14 @@ body.doctor-page .doctor-patient.is-selected {
   font-weight: 700;
   cursor: pointer;
 }
-.vr-form {
+.care-form {
   display: grid;
   grid-template-columns: 1fr auto;
   gap: .55rem;
   padding: 1rem 1.45rem;
   border-top: 1px solid rgba(151, 89, 152, .12);
 }
-.vr-form input {
+.care-form input {
   min-width: 0;
   border: 1px solid rgba(151, 89, 152, .2);
   border-radius: 14px;
@@ -1193,8 +1064,8 @@ body.doctor-page .doctor-patient.is-selected {
   font: inherit;
   background: #fff;
 }
-.vr-form button,
-.vr-voice {
+.care-form button,
+.care-voice {
   border: 0;
   border-radius: 14px;
   background: var(--brand);
@@ -1204,11 +1075,11 @@ body.doctor-page .doctor-patient.is-selected {
   font-weight: 900;
   cursor: pointer;
 }
-.vr-form button:disabled {
+.care-form button:disabled {
   opacity: .7;
   cursor: wait;
 }
-.vr-voice {
+.care-voice {
   margin: 0 1.45rem 1.15rem;
   width: calc(100% - 2.9rem);
   background: #fbf6fc;
@@ -1216,92 +1087,53 @@ body.doctor-page .doctor-patient.is-selected {
   border: 1px solid rgba(151, 89, 152, .16);
   text-align: left;
 }
-.vr-stage-footer {
-  margin: .85rem 1.45rem 1.35rem;
-  padding: .9rem 1rem;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, .72);
-  border: 1px solid rgba(255, 255, 255, .55);
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  color: #66556c;
-  font-weight: 800;
-}
-.vr-stage-dot {
-  color: var(--brand);
-}
 @keyframes vrPulse {
   0%, 100% { transform: scale(1); opacity: .55; }
   50% { transform: scale(1.12); opacity: .95; }
 }
-@keyframes vrTalk {
-  0%, 100% { transform: scaleY(.45); opacity: .58; }
-  50% { transform: scaleY(1.18); opacity: .95; }
-}
 @media (max-width: 640px) {
-  .vr-companion {
+  .care-companion {
     right: .75rem;
     bottom: .75rem;
     left: .75rem;
   }
-  .vr-orb {
+  .care-launcher {
     width: 100%;
     min-width: 0;
     height: 66px;
   }
-  .vr-panel {
+  .care-panel {
     right: 0;
     left: 0;
     bottom: 78px;
     width: 100%;
     height: calc(100vh - 104px);
-    grid-template-columns: 1fr;
-    grid-template-rows: minmax(240px, 38vh) 1fr;
+    max-height: none;
   }
-  .vr-stage-pane {
-    border-right: 0;
-    border-bottom: 1px solid rgba(151, 89, 152, .14);
-  }
-  .vr-stage-top {
-    padding: .85rem 1rem .45rem;
-    font-size: .75rem;
-  }
-  .vr-stage-top b {
-    display: none;
-  }
-  .vr-character {
-    margin: 0 1rem;
-  }
-  .vr-stage-footer {
-    margin: .6rem 1rem .85rem;
-    padding: .65rem .8rem;
-  }
-  .vr-panel__head {
+  .care-panel__head {
     padding: 1rem;
   }
-  .vr-safety {
+  .care-safety {
     margin: .8rem 1rem .6rem;
   }
-  .vr-feed {
+  .care-feed {
     padding: .1rem 1rem .8rem;
   }
-  .vr-chips {
+  .care-chips {
     padding: 0 1rem .75rem;
   }
-  .vr-form {
+  .care-form {
     padding: .85rem 1rem;
   }
-  .vr-voice {
+  .care-voice {
     margin: 0 1rem 1rem;
     width: calc(100% - 2rem);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .vr-companion.is-thinking .vr-orb__avatar,
-  .vr-companion.is-speaking .vr-orb__avatar,
-  .vr-companion.is-speaking .vr-talk-meter span {
+  .care-companion.is-thinking .care-launcher__avatar,
+  .care-companion.is-speaking .care-launcher__avatar {
     animation: none;
   }
 }
