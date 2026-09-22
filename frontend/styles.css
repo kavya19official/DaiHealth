@@ -873,267 +873,170 @@ body.doctor-page .doctor-patient.is-selected {
   background: #faf8ff;
 }
 
-/* दाई Care Companion chatbot */
-.care-companion {
+/* Simple care chatbot */
+.care-chatbot {
   position: fixed;
-  right: clamp(1rem, 2vw, 1.6rem);
-  bottom: clamp(1rem, 2vw, 1.6rem);
-  z-index: 1800;
-  color: var(--ink);
-  font-family: "Times New Roman", Georgia, serif;
-}
-.care-launcher {
-  position: relative;
-  min-width: 238px;
-  height: 72px;
-  border: 0;
-  border-radius: 999px;
-  background: #ffffff;
-  color: #4c2d4f;
-  box-shadow: 0 18px 45px rgba(91, 62, 120, .18);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: .78rem;
-  padding: .55rem .72rem .55rem .6rem;
-  font-weight: 900;
-  font-size: 1rem;
-  isolation: isolate;
-  border: 1px solid rgba(151, 89, 152, .18);
-}
-.care-launcher__avatar,
-.care-panel__avatar {
-  width: 56px;
-  height: 56px;
-  flex: 0 0 auto;
-  border-radius: 999px;
-  display: grid;
-  place-items: center;
-  background: #fbf5fb;
-  border: 1px solid rgba(151, 89, 152, .2);
-  color: var(--brand);
-  font-size: 1.5rem;
-  box-shadow: 0 9px 24px rgba(91, 62, 120, .12);
-}
-.care-launcher__copy {
-  display: grid;
-  gap: .08rem;
-  text-align: left;
-  line-height: 1.05;
-}
-.care-launcher__copy strong {
-  font-size: 1.02rem;
-}
-.care-launcher__copy small {
-  color: #7b677e;
-  font-size: .82rem;
-  font-weight: 700;
-}
-.care-launcher__chev {
-  margin-left: auto;
-  color: #7b677e;
-  font-size: 1.2rem;
-}
-.care-companion.is-thinking .care-launcher__avatar,
-.care-companion.is-speaking .care-launcher__avatar {
-  animation: vrPulse 1.2s ease-in-out infinite;
-}
-.care-panel {
-  position: absolute;
-  right: 0;
-  bottom: 88px;
-  width: min(440px, calc(100vw - 28px));
-  max-height: min(680px, calc(100vh - 124px));
-  overflow: hidden;
-  display: grid;
-  grid-template-rows: auto auto minmax(220px, 1fr) auto auto;
-  border-radius: 24px;
-  border: 1px solid rgba(151, 89, 152, .18);
-  background: #ffffff;
-  box-shadow: 0 24px 80px rgba(70, 43, 83, .18);
-  transform: translateY(12px) scale(.96);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity .2s ease, transform .2s ease;
-}
-.care-companion.is-open .care-panel {
-  opacity: 1;
-  transform: translateY(0) scale(1);
-  pointer-events: auto;
-}
-.care-panel__head {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 1.35rem 1.45rem;
-  border-bottom: 1px solid rgba(151, 89, 152, .12);
-}
-.care-panel__head > div {
-  min-width: 0;
-  flex: 1;
-}
-.care-panel__head h2 {
-  margin: 0;
-  font-size: 1.75rem;
-  line-height: 1;
-}
-.care-panel__head p {
-  margin: .28rem 0 0;
-  color: var(--muted);
-  font-size: .98rem;
-}
-.care-close {
-  width: 42px;
-  height: 42px;
-  border-radius: 999px;
-  border: 1px solid rgba(151, 89, 152, .18);
-  background: #fff;
-  color: var(--ink);
-  font-size: 1.2rem;
-  cursor: pointer;
-}
-.care-safety {
-  margin: 1.1rem 1.45rem .9rem;
-  padding: .72rem .9rem;
-  border-radius: 16px;
-  background: #fbf6fc;
-  color: #6c5572;
-  font-size: .84rem;
-  border: 1px solid rgba(151, 89, 152, .12);
-}
-.care-feed {
-  overflow-y: auto;
-  padding: .1rem 1.45rem 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: .55rem;
-}
-.care-message {
-  display: flex;
-}
-.care-message > div {
-  max-width: 88%;
-  border-radius: 18px;
-  padding: .82rem .95rem;
-  font-size: 1rem;
-  line-height: 1.35;
-  border: 1px solid rgba(151, 89, 152, .12);
-}
-.care-message--assistant > div {
-  background: #fbf6fc;
-  color: #342033;
-}
-.care-message--user {
-  justify-content: flex-end;
-}
-.care-message--user > div {
-  background: var(--brand);
-  color: #fff;
-  border-color: var(--brand);
-}
-.care-chips {
-  display: flex;
-  gap: .45rem;
-  overflow-x: auto;
-  padding: 0 1.45rem .85rem;
-}
-.care-chips button {
-  white-space: nowrap;
-  border: 1px solid rgba(151, 89, 152, .16);
-  background: #fff;
-  color: #6f3d71;
-  border-radius: 999px;
-  padding: .56rem .78rem;
-  font: inherit;
-  font-size: .9rem;
-  font-weight: 700;
-  cursor: pointer;
-}
-.care-form {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: .55rem;
-  padding: 1rem 1.45rem;
-  border-top: 1px solid rgba(151, 89, 152, .12);
-}
-.care-form input {
-  min-width: 0;
-  border: 1px solid rgba(151, 89, 152, .2);
-  border-radius: 14px;
-  padding: .9rem 1rem;
-  font: inherit;
-  background: #fff;
-}
-.care-form button,
-.care-voice {
-  border: 0;
-  border-radius: 14px;
-  background: var(--brand);
-  color: #fff;
-  padding: .9rem 1.05rem;
-  font: inherit;
-  font-weight: 900;
-  cursor: pointer;
-}
-.care-form button:disabled {
-  opacity: .7;
-  cursor: wait;
-}
-.care-voice {
-  margin: 0 1.45rem 1.15rem;
-  width: calc(100% - 2.9rem);
-  background: #fbf6fc;
-  color: var(--brand);
-  border: 1px solid rgba(151, 89, 152, .16);
-  text-align: left;
-}
-@keyframes vrPulse {
-  0%, 100% { transform: scale(1); opacity: .55; }
-  50% { transform: scale(1.12); opacity: .95; }
-}
-@media (max-width: 640px) {
-  .care-companion {
-    right: .75rem;
-    bottom: .75rem;
-    left: .75rem;
-  }
-  .care-launcher {
-    width: 100%;
-    min-width: 0;
-    height: 66px;
-  }
-  .care-panel {
-    right: 0;
-    left: 0;
-    bottom: 78px;
-    width: 100%;
-    height: calc(100vh - 104px);
-    max-height: none;
-  }
-  .care-panel__head {
-    padding: 1rem;
-  }
-  .care-safety {
-    margin: .8rem 1rem .6rem;
-  }
-  .care-feed {
-    padding: .1rem 1rem .8rem;
-  }
-  .care-chips {
-    padding: 0 1rem .75rem;
-  }
-  .care-form {
-    padding: .85rem 1rem;
-  }
-  .care-voice {
-    margin: 0 1rem 1rem;
-    width: calc(100% - 2rem);
-  }
+  right: 1.25rem;
+  bottom: 1.25rem;
+  z-index: 1000;
+  font-family: inherit;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .care-companion.is-thinking .care-launcher__avatar,
-  .care-companion.is-speaking .care-launcher__avatar {
-    animation: none;
+.care-chatbot__launcher {
+  border: 1px solid rgba(132, 63, 117, 0.18);
+  border-radius: 999px;
+  background: #fff;
+  color: #6f2b63;
+  box-shadow: 0 18px 45px rgba(70, 29, 63, 0.16);
+  cursor: pointer;
+  font-weight: 800;
+  padding: 0.9rem 1.2rem;
+}
+
+.care-chatbot__panel {
+  width: min(380px, calc(100vw - 2rem));
+  max-height: min(620px, calc(100vh - 2rem));
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid rgba(132, 63, 117, 0.16);
+  border-radius: 24px;
+  background: #fff;
+  box-shadow: 0 22px 60px rgba(70, 29, 63, 0.18);
+}
+
+.care-chatbot__panel[hidden] {
+  display: none;
+}
+
+.care-chatbot__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1rem 0.85rem;
+  border-bottom: 1px solid #f0dce9;
+}
+
+.care-chatbot__header strong {
+  display: block;
+  color: #371331;
+  font-size: 1.05rem;
+}
+
+.care-chatbot__header span {
+  display: block;
+  color: #8a7484;
+  font-size: 0.86rem;
+  margin-top: 0.15rem;
+}
+
+.care-chatbot__close {
+  width: 2rem;
+  height: 2rem;
+  border: 0;
+  border-radius: 50%;
+  background: #f8edf4;
+  color: #6f2b63;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.care-chatbot__notice {
+  margin: 0.9rem 1rem 0;
+  border-left: 3px solid #c63f83;
+  border-radius: 12px;
+  background: #fbf2f7;
+  color: #6f2b63;
+  font-size: 0.84rem;
+  line-height: 1.45;
+  padding: 0.75rem 0.85rem;
+}
+
+.care-chatbot__feed {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.7rem;
+  min-height: 220px;
+  overflow: auto;
+  padding: 1rem;
+}
+
+.care-chatbot__message {
+  max-width: 88%;
+  border-radius: 18px;
+  font-size: 0.94rem;
+  line-height: 1.45;
+  padding: 0.75rem 0.9rem;
+}
+
+.care-chatbot__message--bot {
+  align-self: flex-start;
+  background: #f8edf4;
+  color: #422039;
+}
+
+.care-chatbot__message--user {
+  align-self: flex-end;
+  background: #c63f83;
+  color: #fff;
+}
+
+.care-chatbot__chips {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding: 0 1rem 0.85rem;
+}
+
+.care-chatbot__chips button,
+.care-chatbot__voice {
+  border: 1px solid #ead4e3;
+  border-radius: 999px;
+  background: #fff;
+  color: #6f2b63;
+  cursor: pointer;
+  font-weight: 700;
+  white-space: nowrap;
+  padding: 0.55rem 0.8rem;
+}
+
+.care-chatbot__form {
+  display: flex;
+  gap: 0.55rem;
+  border-top: 1px solid #f0dce9;
+  padding: 0.85rem 1rem;
+}
+
+.care-chatbot__form input {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid #ead4e3;
+  border-radius: 999px;
+  color: #371331;
+  font: inherit;
+  padding: 0.75rem 0.9rem;
+}
+
+.care-chatbot__form button {
+  border: 0;
+  border-radius: 999px;
+  background: #c63f83;
+  color: #fff;
+  cursor: pointer;
+  font-weight: 800;
+  padding: 0.75rem 1rem;
+}
+
+.care-chatbot__voice {
+  align-self: flex-start;
+  margin: 0 1rem 1rem;
+}
+
+@media (max-width: 520px) {
+  .care-chatbot {
+    right: 0.75rem;
+    bottom: 0.75rem;
   }
 }
