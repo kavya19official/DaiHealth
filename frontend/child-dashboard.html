@@ -221,6 +221,1953 @@ button, input { font: inherit; }
   display: grid;
   place-items: center;
 }
+.notif-pop{position:absolute;top:calc(100% + 10px);right:0;width:min(360px,88vw);max-height:70vh;overflow-y:auto;background:#fff;border:1px solid var(--line);border-radius:var(--radius-lg);box-shadow:var(--shadow);z-index:120;display:none;padding:.4rem}
+.notif-pop.is-open{display:block}
+.notif-pop__head{display:flex;align-items:center;justify-content:space-between;padding:.6rem .7rem .5rem;font-size:.85rem;font-weight:700;color:var(--ink)}
+.notif-pop__head button{background:none;border:none;color:var(--brand);font-size:.76rem;font-weight:700;cursor:pointer;padding:0}
+.notif-row{display:flex;gap:.6rem;align-items:flex-start;padding:.6rem .7rem;border-radius:12px;cursor:pointer}
+.notif-row:hover{background:var(--ground)}
+.notif-row.is-unread{background:var(--brand-pale)}
+.notif-row__dot{width:8px;height:8px;border-radius:50%;margin-top:.4rem;flex:none;background:var(--ink-3)}
+.notif-row.sev-warn .notif-row__dot{background:var(--amber)}
+.notif-row.sev-danger .notif-row__dot{background:var(--rose)}
+.notif-row__body{flex:1;min-width:0}
+.notif-row__title{font-size:.83rem;font-weight:600;color:var(--ink)}
+.notif-row__sub{font-size:.75rem;color:var(--ink-muted);margin-top:.1rem}
+.notif-row__x{background:none;border:none;color:var(--ink-3);cursor:pointer;padding:.15rem;flex:none}
+.notif-empty{padding:1.4rem .8rem;text-align:center;color:var(--ink-muted);font-size:.83rem}
+
+/* Child switcher */
+.child-tabs{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;margin-bottom:1rem}
+.child-tab{display:inline-flex;align-items:center;gap:.5rem;padding:.4rem .8rem .4rem .4rem;border-radius:999px;border:1px solid var(--line);background:#fff;cursor:pointer;font-size:.83rem;font-weight:600;color:var(--ink-2)}
+.child-tab img,.child-tab .avatar-fallback{width:26px;height:26px;border-radius:50%;object-fit:cover;background:var(--brand-soft);color:var(--brand-strong);display:grid;place-items:center;font-size:.7rem;font-weight:700}
+.child-tab.is-active{border-color:var(--brand);background:var(--brand-pale);color:var(--brand-strong)}
+.child-tab--add{color:var(--brand);border-style:dashed}
+
+/* Photo upload */
+.welcome-card__art{position:relative;cursor:pointer}
+.welcome-card__art img{width:100%;height:100%;object-fit:cover;border-radius:12px}
+.welcome-card__art .avatar-fallback{width:100%;height:100%;display:grid;place-items:center;font-size:2rem;font-weight:800;color:var(--brand-strong);background:var(--brand-soft);border-radius:12px}
+.welcome-card__art__overlay{position:absolute;inset:0;border-radius:12px;background:rgba(30,27,75,.55);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;opacity:0;transition:opacity .15s}
+.welcome-card__art:hover .welcome-card__art__overlay{opacity:1}
+
+/* Vaccinations */
+.vax-list{display:flex;flex-direction:column}
+.vax-row{display:flex;align-items:center;gap:.75rem;padding:.65rem 0;border-bottom:1px solid var(--line-soft)}
+.vax-row:last-child{border-bottom:0;padding-bottom:0}
+.vax-row__dot{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;flex:none;font-size:.85rem}
+.vax-row__dot--done{background:#d1fae5;color:#059669}
+.vax-row__dot--due{background:#fffbeb;color:#d97706}
+.vax-row__dot--overdue{background:#fee2e2;color:#dc2626}
+.vax-row__dot--upcoming{background:var(--ground);color:var(--ink-3)}
+.vax-row__body{flex:1;min-width:0}
+.vax-row__title{font-size:.86rem;font-weight:600;color:var(--ink)}
+.vax-row__sub{font-size:.75rem;color:var(--ink-muted);margin-top:.1rem}
+.vax-row__actions{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;justify-content:flex-end}
+.vax-row__actions input[type=date]{padding:.35rem .5rem;border:1px solid var(--line);border-radius:8px;font-size:.78rem;font-family:inherit}
+.vax-tag{font-size:.68rem;font-weight:700;padding:.15rem .55rem;border-radius:999px}
+.vax-tag--done{background:#d1fae5;color:#059669}
+.vax-tag--due{background:#fffbeb;color:#d97706}
+.vax-tag--overdue{background:#fee2e2;color:#dc2626}
+.vax-tag--upcoming{background:var(--ground);color:var(--ink-3)}
+.mini-btn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:.3rem .55rem;font-size:.75rem;font-weight:600;color:var(--ink-2);cursor:pointer}
+.mini-btn:hover{border-color:var(--brand)}
+
+.user-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.3rem 0.65rem 0.3rem 0.3rem;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: #fff;
+}
+.user-chip img {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--brand-soft);
+}
+.user-chip__meta { line-height: 1.2; }
+.user-chip__name { font-size: 0.85rem; font-weight: 600; color: var(--ink); }
+.user-chip__role { font-size: 0.7rem; color: var(--ink-3); font-weight: 500; }
+
+/* Content */
+.content {
+  padding: 1.35rem 1.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+}
+
+/* Cards */
+.card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Welcome row */
+.welcome-row {
+  display: grid;
+  grid-template-columns: 1fr minmax(240px, 300px);
+  gap: 1rem;
+}
+.welcome-card {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 1.15rem 1.35rem;
+  background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 50%, #ede9fe 100%);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  position: relative;
+  overflow: hidden;
+}
+.welcome-card__art {
+  flex-shrink: 0;
+  width: 110px;
+  height: 100px;
+}
+.welcome-card__art svg { width: 100%; height: 100%; }
+.welcome-card__body { min-width: 0; }
+.welcome-card__hello {
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--ink-2);
+  margin-bottom: 0.15rem;
+}
+.welcome-card__name {
+  font-family: var(--display);
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: var(--ink);
+  letter-spacing: -0.03em;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.25rem;
+}
+.welcome-card__name button {
+  border: 0;
+  background: transparent;
+  color: var(--ink-3);
+  padding: 0.15rem;
+  border-radius: 6px;
+}
+.welcome-card__name button:hover { color: var(--brand); background: rgba(124,58,237,0.08); }
+.welcome-card__meta {
+  font-size: 0.82rem;
+  color: var(--ink-muted);
+  margin-bottom: 0.65rem;
+}
+.welcome-card__meta span { margin: 0 0.25rem; color: var(--ink-3); }
+.welcome-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.75);
+  border: 1px solid rgba(196,181,253,0.6);
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--brand);
+}
+.vax-card {
+  padding: 1.15rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+.vax-card__head {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+.vax-card__icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: var(--brand-soft);
+  color: var(--brand);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+.vax-card__label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ink-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.vax-card__title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin-top: 0.1rem;
+}
+.vax-card__due {
+  font-size: 0.82rem;
+  color: var(--ink-muted);
+  margin-top: 0.15rem;
+}
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  min-height: 40px;
+  padding: 0.55rem 1.1rem;
+  border-radius: 999px;
+  border: 1.5px solid transparent;
+  font-size: 0.88rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
+}
+.btn:hover { transform: translateY(-1px); }
+.btn--primary {
+  background: var(--brand);
+  color: #fff;
+  box-shadow: 0 8px 20px -8px rgba(124,58,237,0.55);
+}
+.btn--primary:hover { background: var(--brand-strong); }
+.btn--full { width: 100%; }
+
+/* Status strip */
+.status-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.85rem;
+}
+.status-card {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.95rem 1.1rem;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.status-card:hover { border-color: #c4b5fd; box-shadow: var(--shadow); }
+.status-card__icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+.status-card__icon--purple { background: var(--brand-soft); color: var(--brand); }
+.status-card__icon--green { background: var(--green-soft); color: var(--green); }
+.status-card__icon--blue { background: var(--blue-soft); color: var(--blue); }
+.status-card__label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ink-muted);
+}
+.status-card__value {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-top: 0.1rem;
+}
+.status-card__value .ok { color: var(--green); }
+.status-card__chevron {
+  margin-left: auto;
+  color: var(--ink-3);
+}
+
+/* Main grid */
+.main-grid {
+  display: grid;
+  grid-template-columns: 1fr minmax(260px, 300px);
+  gap: 1rem;
+  align-items: start;
+}
+
+/* Growth tracker */
+.growth-card { padding: 1.15rem 1.25rem 1.25rem; }
+.growth-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.9rem;
+  gap: 0.75rem;
+}
+.growth-card__title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+.growth-card__title span {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: var(--brand-soft);
+  color: var(--brand);
+  display: grid;
+  place-items: center;
+}
+.link-btn {
+  border: 0;
+  background: transparent;
+  color: var(--brand);
+  font-size: 0.82rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.4rem;
+  border-radius: 8px;
+}
+.link-btn:hover { background: var(--brand-soft); }
+.growth-tabs {
+  display: inline-flex;
+  gap: 0.3rem;
+  margin-bottom: 1rem;
+  background: var(--ground);
+  padding: 0.25rem;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+}
+.growth-tabs button {
+  border: 0;
+  background: transparent;
+  padding: 0.4rem 0.9rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--ink-muted);
+}
+.growth-tabs button.is-active {
+  background: var(--brand);
+  color: #fff;
+  box-shadow: 0 4px 12px -4px rgba(124,58,237,0.45);
+}
+.growth-body {
+  display: grid;
+  grid-template-columns: 1fr 150px;
+  gap: 1rem;
+  align-items: stretch;
+}
+.chart-wrap {
+  position: relative;
+  height: 200px;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #faf5ff 0%, #fff 100%);
+  border: 1px solid var(--line-soft);
+  padding: 0.75rem 0.5rem 0.5rem 2.25rem;
+}
+.chart-y-label {
+  position: absolute;
+  left: 0.35rem;
+  top: 50%;
+  transform: rotate(-90deg) translateX(50%);
+  transform-origin: left center;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--ink-3);
+  white-space: nowrap;
+}
+.chart-svg { width: 100%; height: 100%; }
+.stats-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  padding: 0.75rem;
+  border-radius: 14px;
+  background: var(--brand-pale);
+  border: 1px solid var(--line);
+}
+.stat-item__label {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--ink-muted);
+}
+.stat-item__value {
+  font-family: var(--display);
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--ink);
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+.stat-item__sub {
+  font-size: 0.7rem;
+  color: var(--ink-3);
+}
+
+/* Milestones */
+.milestones-card { padding: 1.1rem 1.25rem 1.2rem; margin-top: 1rem; }
+.milestones-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+.milestones-track {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.35rem;
+  position: relative;
+}
+.milestones-track::before {
+  content: "";
+  position: absolute;
+  top: 22px;
+  left: 8%;
+  right: 8%;
+  height: 3px;
+  background: linear-gradient(90deg, #a7f3d0 0%, #a7f3d0 55%, #e9d5ff 55%, #e9d5ff 100%);
+  border-radius: 99px;
+  z-index: 0;
+}
+.milestone {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.45rem;
+  flex: 1;
+  text-align: center;
+  max-width: 90px;
+}
+.milestone__icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #fff;
+  border: 2px solid var(--line);
+  font-size: 1.15rem;
+  position: relative;
+}
+.milestone.is-done .milestone__icon {
+  border-color: #6ee7b7;
+  background: var(--green-soft);
+}
+.milestone.is-current .milestone__icon {
+  border-color: var(--brand);
+  background: var(--brand-soft);
+  box-shadow: 0 0 0 4px rgba(124,58,237,0.12);
+}
+.milestone.is-locked .milestone__icon {
+  border-color: var(--line);
+  background: var(--ground);
+  color: var(--ink-3);
+  opacity: 0.7;
+}
+.milestone__check {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--green);
+  color: #fff;
+  font-size: 0.55rem;
+  display: grid;
+  place-items: center;
+  border: 2px solid #fff;
+}
+.milestone__name {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.25;
+}
+.milestone__range {
+  font-size: 0.68rem;
+  color: var(--ink-3);
+}
+
+/* Right column */
+.side-stack { display: flex; flex-direction: column; gap: 1rem; }
+.panel { padding: 1.05rem 1.15rem; }
+.panel__title {
+  font-family: var(--display);
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.panel__title a {
+  font-family: var(--font);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--brand);
+}
+.qa-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.65rem;
+}
+.qa-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.85rem 0.8rem;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: #fff;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.qa-item:hover { border-color: #c4b5fd; box-shadow: var(--shadow-sm); }
+.qa-item__icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 0.15rem;
+}
+.qa-item__icon--blue { background: var(--blue-soft); color: var(--blue); }
+.qa-item__icon--purple { background: var(--brand-soft); color: var(--brand); }
+.qa-item__icon--green { background: var(--green-soft); color: var(--green); }
+.qa-item__icon--amber { background: var(--amber-soft); color: var(--amber); }
+.qa-item__title {
+  font-size: 0.82rem;
+  font-weight: 650;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.qa-item__title span { color: var(--ink-3); font-weight: 500; }
+.qa-item__sub {
+  font-size: 0.72rem;
+  color: var(--ink-3);
+}
+
+.feed-list { display: flex; flex-direction: column; gap: 0.55rem; }
+.feed-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid var(--line-soft);
+}
+.feed-item:last-child { border-bottom: 0; padding-bottom: 0; }
+.feed-item__icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  font-size: 0.85rem;
+}
+.feed-item__icon--amber { background: #fef3c7; }
+.feed-item__icon--blue { background: #dbeafe; }
+.feed-item__icon--purple { background: var(--brand-soft); }
+.feed-item__icon--green { background: #d1fae5; }
+.feed-item__body { flex: 1; min-width: 0; }
+.feed-item__title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+.feed-item__sub {
+  font-size: 0.75rem;
+  color: var(--ink-muted);
+  margin-top: 0.1rem;
+}
+.feed-item__date {
+  font-size: 0.72rem;
+  color: var(--ink-3);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Emergency bar */
+.sos-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem 1.15rem;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(90deg, #faf5ff, #fdf2f8);
+  border: 1px solid var(--line);
+}
+.sos-bar__left {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  font-size: 0.85rem;
+  color: var(--ink-2);
+}
+.sos-bar__left strong { color: var(--ink); }
+.sos-bar__icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #fce7f3;
+  color: #db2777;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+.btn--sos {
+  background: var(--rose);
+  color: #fff;
+  border-radius: 999px;
+  min-height: 40px;
+  padding: 0.5rem 1.15rem;
+  font-weight: 700;
+  font-size: 0.88rem;
+  border: 0;
+  box-shadow: 0 8px 20px -8px rgba(244,63,94,0.5);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.btn--sos:hover { background: #e11d48; }
+
+/* Responsive */
+@media (max-width: 1100px) {
+  .main-grid { grid-template-columns: 1fr; }
+  .welcome-row { grid-template-columns: 1fr; }
+  .status-row { grid-template-columns: 1fr; }
+}
+@media (max-width: 860px) {
+  .app { grid-template-columns: 1fr; }
+  .sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    width: min(260px, 86vw);
+    z-index: 60;
+    transform: translateX(-105%);
+    transition: transform 0.25s ease;
+    box-shadow: var(--shadow);
+  }
+  .sidebar.is-open { transform: translateX(0); }
+  .content { padding: 1rem; }
+  .growth-body { grid-template-columns: 1fr; }
+  .stats-panel { flex-direction: row; flex-wrap: wrap; }
+  .stat-item { flex: 1; min-width: 100px; }
+}
+</style>
+<script src="/shared/child-reference.js"></script>
+<script src="js/dai-api.js"></script>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="i-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
+    <symbol id="i-baby" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12h.01M15 12h.01M10 16c.5.3 1.2.5 2 .5s1.5-.2 2-.5"/><circle cx="12" cy="12" r="10"/><path d="M8 9.5c.5-1 1.5-1.5 2.5-1.5M13.5 8c1 0 2 .5 2.5 1.5"/></symbol>
+    <symbol id="i-calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></symbol>
+    <symbol id="i-msg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></symbol>
+    <symbol id="i-settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/></symbol>
+    <symbol id="i-heart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></symbol>
+    <symbol id="i-syringe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m18 2 4 4"/><path d="m17 7 3-3"/><path d="M19 9 8.7 19.3c-1 1-2.5 1-3.4 0l-.6-.6c-1-1-1-2.5 0-3.4L15 5"/><path d="m9 11 4 4"/><path d="m5 19-3 3"/><path d="m14 4 6 6"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></symbol>
+    <symbol id="i-phone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></symbol>
+    <symbol id="i-edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></symbol>
+  </defs>
+</svg>
+
+<div class="app">
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <a class="sidebar__brand" href="index.html">
+      <img src="assets/logo-circle.png" alt="" width="40" height="40">
+      <span>
+        <span class="sidebar__brand-name">दाई</span>
+        <span class="sidebar__brand-tag">Hospital Workflow</span>
+      </span>
+    </a>
+    <nav class="sidebar__nav" aria-label="Child dashboard">
+      <a class="nav-item" href="dashboard.html">
+        <svg width="18" height="18"><use href="#i-home"/></svg> Dashboard
+      </a>
+      <a class="nav-item" href="dashboard.html">
+        <svg width="18" height="18"><use href="#i-user"/></svg> Mother / Patient
+      </a>
+      <a class="nav-item is-active" href="child-dashboard.html" aria-current="page">
+        <svg width="18" height="18"><use href="#i-baby"/></svg> Child
+      </a>
+      <a class="nav-item" href="dashboard.html#appointments">
+        <svg width="18" height="18"><use href="#i-calendar"/></svg> Appointments
+      </a>
+      <a class="nav-item" href="dashboard.html#timeline">
+        <svg width="18" height="18"><use href="#i-clock"/></svg> Care Timeline
+      </a>
+      <a class="nav-item" href="dashboard.html#vitals">
+        <svg width="18" height="18"><use href="#i-file"/></svg> Records
+      </a>
+      <a class="nav-item" href="dashboard.html#dashboard">
+        <svg width="18" height="18"><use href="#i-msg"/></svg> Messages
+      </a>
+      <a class="nav-item" href="dashboard.html#dashboard">
+        <svg width="18" height="18"><use href="#i-settings"/></svg> Settings
+      </a>
+    </nav>
+    <div class="sidebar__footer">
+      <div class="sidebar__tagline">
+        <svg width="18" height="18"><use href="#i-heart"/></svg>
+        <span>Healthier mothers.<br>Brighter futures.</span>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <!-- Top bar -->
+    <header class="topbar">
+      <div class="search" role="search">
+        <svg width="16" height="16" aria-hidden="true"><use href="#i-search"/></svg>
+        <input type="search" placeholder="Search anything..." aria-label="Search">
+      </div>
+      <div class="topbar__right">
+        <div style="position:relative">
+        <button class="icon-btn" type="button" aria-label="Notifications" id="notifBtn">
+          <svg width="18" height="18"><use href="#i-bell"/></svg>
+          <span class="badge" id="notifBadge" style="display:none">0</span>
+        </button>
+        <div class="notif-pop" id="notifPop" role="dialog" aria-label="Notifications">
+          <div class="notif-pop__head"><span>Notifications</span><button type="button" id="notifReadAll">Mark all read</button></div>
+          <div id="notifList"></div>
+        </div>
+        </div>
+        <div class="user-chip">
+          <img src="assets/logo-circle.png" alt="" width="34" height="34">
+          <div class="user-chip__meta">
+            <div class="user-chip__name">—</div>
+            <div class="user-chip__role">Mother / Patient</div>
+          </div>
+        </div>
+        <button class="icon-btn" type="button" aria-label="Log out" id="logoutBtn" title="Log out">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="content">
+      <div class="child-tabs" id="childTabs"></div>
+
+      <!-- Welcome + Next vax -->
+      <div class="welcome-row">
+        <div class="welcome-card">
+          <div class="welcome-card__art" id="childPhotoArt" title="Change photo">
+            <img id="childPhotoImg" alt="" width="120" height="110" style="display:none">
+            <div class="avatar-fallback" id="childPhotoFallback">—</div>
+            <div class="welcome-card__art__overlay">Change photo</div>
+            <input type="file" accept="image/jpeg,image/png" id="childPhotoInput" style="display:none">
+          </div>
+          <div>
+            <div class="welcome-card__hello">Hello, <span id="childGreet">Child</span></div>
+            <div class="welcome-card__title">Growing healthy, one milestone at a time</div>
+            <div class="welcome-card__sub"><span data-child-name>—</span> · <span data-child-age>—</span></div>
+          </div>
+        </div>
+        <div class="card appt-card">
+          <div>
+            <div class="vax-card__label">Next Vaccination</div>
+            <div class="vax-card__title" id="nextVaxTitle">—</div>
+            <div class="vax-card__due" id="nextVaxMeta">—</div>
+          </div>
+          <a class="btn btn--primary btn--full" href="dashboard.html#appointments" id="bookApptBtn">
+            View Schedule <svg width="15" height="15"><use href="#i-arrow"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Status cards -->
+      <div class="status-row">
+        <a class="status-card" href="#growth">
+          <div class="status-card__icon status-card__icon--purple">
+            <svg width="18" height="18"><use href="#i-baby"/></svg>
+          </div>
+          <div>
+            <div class="status-card__label">Growth &amp; Development</div>
+            <div class="status-card__value" id="statusGrowth">—</div>
+          </div>
+          <span class="status-card__chevron">›</span>
+        </a>
+        <a class="status-card" href="#growth">
+          <div class="status-card__icon status-card__icon--green">
+            <svg width="18" height="18"><use href="#i-shield"/></svg>
+          </div>
+          <div>
+            <div class="status-card__label">Health Status</div>
+            <div class="status-card__value" id="statusHealth">—</div>
+          </div>
+          <span class="status-card__chevron">›</span>
+        </a>
+        <a class="status-card" href="dashboard.html#appointments">
+          <div class="status-card__icon status-card__icon--blue">
+            <svg width="18" height="18"><use href="#i-calendar"/></svg>
+          </div>
+          <div>
+            <div class="status-card__label">Upcoming Appointment</div>
+            <div class="status-card__value" id="statusAppt">—</div>
+          </div>
+          <span class="status-card__chevron">›</span>
+        </a>
+      </div>
+
+      <!-- Growth + sidebar panels -->
+      <div class="main-grid">
+        <div>
+          <div class="card growth-card" id="growth">
+            <div class="growth-card__head">
+              <div class="growth-card__title">
+                <span><svg width="14" height="14"><use href="#i-chart"/></svg></span>
+                Growth Tracker
+              </div>
+              <button class="link-btn" type="button">View Full Growth Chart <svg width="14" height="14"><use href="#i-arrow"/></svg></button>
+            </div>
+            <div class="growth-tabs" role="tablist">
+              <button type="button" class="is-active" role="tab" aria-selected="true" data-metric="weight">Weight</button>
+              <button type="button" role="tab" aria-selected="false" data-metric="height">Height</button>
+              <button type="button" role="tab" aria-selected="false" data-metric="head">Head Circumference</button>
+            </div>
+            <div class="growth-body">
+              <div class="chart-wrap">
+                <span class="chart-y-label">Weight (kg)</span>
+                <svg class="chart-svg" viewBox="0 0 400 180" preserveAspectRatio="none" aria-hidden="true">
+                  <!-- grid -->
+                  <g stroke="#ede9fe" stroke-width="1">
+                    <line x1="0" y1="20" x2="400" y2="20"/>
+                    <line x1="0" y1="55" x2="400" y2="55"/>
+                    <line x1="0" y1="90" x2="400" y2="90"/>
+                    <line x1="0" y1="125" x2="400" y2="125"/>
+                    <line x1="0" y1="160" x2="400" y2="160"/>
+                  </g>
+                  <!-- y labels -->
+                  <g fill="#9ca3af" font-size="11" font-family="Inter, sans-serif">
+                    <text x="4" y="24">10</text>
+                    <text x="4" y="59">8</text>
+                    <text x="4" y="94">6</text>
+                    <text x="4" y="129">4</text>
+                    <text x="4" y="164">2</text>
+                  </g>
+                  <!-- line path: birth 3.2, 2mo 4.5, 4mo 5.8, 6mo 6.8, 7mo 8.2 -->
+                  <!-- map: kg 0-10 to y 170-10, x: 40,110,180,250,340 -->
+                  <path d="M40 130 L110 110 L180 88 L250 72 L340 48" fill="none" stroke="#7c3aed" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M40 130 L110 110 L180 88 L250 72 L340 48 L340 170 L40 170 Z" fill="url(#grad)" opacity=".15"/>
+                  <defs>
+                    <linearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stop-color="#7c3aed"/>
+                      <stop offset="100%" stop-color="#7c3aed" stop-opacity="0"/>
+                    </linearGradient>
+                  </defs>
+                  <!-- dots -->
+                  <g fill="#7c3aed">
+                    <circle cx="40" cy="130" r="4"/>
+                    <circle cx="110" cy="110" r="4"/>
+                    <circle cx="180" cy="88" r="4"/>
+                    <circle cx="250" cy="72" r="4"/>
+                    <circle cx="340" cy="48" r="5.5" fill="#fff" stroke="#7c3aed" stroke-width="2.5"/>
+                  </g>
+                  <!-- tooltip bubble -->
+                  <g transform="translate(310, 18)">
+                    <rect x="0" y="0" width="52" height="22" rx="8" fill="#7c3aed"/>
+                    <text x="26" y="15" text-anchor="middle" fill="#fff" font-size="11" font-weight="700" font-family="Inter, sans-serif" id="chartTip">—</text>
+                  </g>
+                  <!-- x labels -->
+                  <g fill="#9ca3af" font-size="10" font-family="Inter, sans-serif" text-anchor="middle">
+                    <text x="40" y="178">Birth</text>
+                    <text x="110" y="178">2 mo</text>
+                    <text x="180" y="178">4 mo</text>
+                    <text x="250" y="178">6 mo</text>
+                    <text x="340" y="178" id="chartLabelLast">—</text>
+                  </g>
+                </svg>
+              </div>
+              <div class="stats-panel">
+                <div class="stat-item">
+                  <div class="stat-item__label">Current Weight</div>
+                  <div class="stat-item__value" id="statWeight">—</div>
+                  <div class="stat-item__sub">(—)</div>
+                </div>
+                <div class="stat-item">
+                  <div class="stat-item__label">Height</div>
+                  <div class="stat-item__value" id="statHeight">—</div>
+                  <div class="stat-item__sub">(—)</div>
+                </div>
+                <div class="stat-item">
+                  <div class="stat-item__label">Head Circumference</div>
+                  <div class="stat-item__value" id="statHead">—</div>
+                  <div class="stat-item__sub">(—)</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Vaccinations -->
+          <div class="card milestones-card" id="vaxCard">
+            <div class="milestones-card__head">
+              <div class="growth-card__title">
+                <span style="background:#ede9fe;color:#7c3aed"><svg width="14" height="14"><use href="#i-syringe"/></svg></span>
+                Vaccinations
+              </div>
+              <span class="vax-tag" id="vaxSummary" style="display:none"></span>
+            </div>
+            <div class="vax-list" id="vaxList"></div>
+          </div>
+
+          <!-- Milestones -->
+          <div class="card milestones-card">
+            <div class="milestones-card__head">
+              <div class="growth-card__title">
+                <span style="background:#fef3c7;color:#d97706"></span>
+                Milestones
+              </div>
+              <button class="link-btn" type="button">View All ›</button>
+            </div>
+            <div class="milestones-track">
+              <div class="milestone is-done">
+                <div class="milestone__icon"><span class="milestone__check"></span></div>
+                <div class="milestone__name">Smiles</div>
+                <div class="milestone__range">(0–2 mo)</div>
+              </div>
+              <div class="milestone is-done">
+                <div class="milestone__icon"><span class="milestone__check"></span></div>
+                <div class="milestone__name">Head control</div>
+                <div class="milestone__range">(2–4 mo)</div>
+              </div>
+              <div class="milestone is-done">
+                <div class="milestone__icon"><span class="milestone__check"></span></div>
+                <div class="milestone__name">Rolls over</div>
+                <div class="milestone__range">(4–6 mo)</div>
+              </div>
+              <div class="milestone is-current">
+                <div class="milestone__icon"></div>
+                <div class="milestone__name">Sits without support</div>
+                <div class="milestone__range">(6–8 mo)</div>
+              </div>
+              <div class="milestone is-locked">
+                <div class="milestone__icon"></div>
+                <div class="milestone__name">Crawls</div>
+                <div class="milestone__range">(8–10 mo)</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right column -->
+        <div class="side-stack">
+          <div class="card panel">
+            <div class="panel__title">Quick Actions</div>
+            <div class="qa-grid">
+              <a class="qa-item" href="dashboard.html#appointments">
+                <div class="qa-item__icon qa-item__icon--blue">
+                  <svg width="16" height="16"><use href="#i-calendar"/></svg>
+                </div>
+                <div class="qa-item__title">Book Appointment <span>›</span></div>
+                <div class="qa-item__sub">See a doctor</div>
+              </a>
+              <a class="qa-item" href="#">
+                <div class="qa-item__icon qa-item__icon--purple">
+                  <svg width="16" height="16"><use href="#i-shield"/></svg>
+                </div>
+                <div class="qa-item__title">View Vaccination Schedule <span>›</span></div>
+                <div class="qa-item__sub">Immunization chart</div>
+              </a>
+              <a class="qa-item" href="#growth">
+                <div class="qa-item__icon qa-item__icon--green">
+                  <svg width="16" height="16"><use href="#i-chart"/></svg>
+                </div>
+                <div class="qa-item__title">Track Growth <span>›</span></div>
+                <div class="qa-item__sub">Weight, height, head size</div>
+              </a>
+              <a class="qa-item" href="#">
+                <div class="qa-item__icon qa-item__icon--amber">
+                  <svg width="16" height="16"><use href="#i-file"/></svg>
+                </div>
+                <div class="qa-item__title">View Health Records <span>›</span></div>
+                <div class="qa-item__sub">Reports &amp; history</div>
+              </a>
+            </div>
+          </div>
+
+          <div class="card panel">
+            <div class="panel__title">
+              Recent Care Updates
+              <a href="#">View All ›</a>
+            </div>
+            <div class="feed-list">
+              <div class="feed-item">
+                <div class="feed-item__icon feed-item__icon--amber"></div>
+                <div class="feed-item__body">
+                  <div class="feed-item__title">Vaccination scheduled</div>
+                  <div class="feed-item__sub">Hepatitis B (2nd dose) · 12 days left</div>
+                </div>
+                <div class="feed-item__date">Sep 10</div>
+              </div>
+              <div class="feed-item">
+                <div class="feed-item__icon feed-item__icon--blue"></div>
+                <div class="feed-item__body">
+                  <div class="feed-item__title">Growth checkup</div>
+                  <div class="feed-item__sub">Weight &amp; height recorded</div>
+                </div>
+                <div class="feed-item__date">Sep 5</div>
+              </div>
+              <div class="feed-item">
+                <div class="feed-item__icon feed-item__icon--purple"></div>
+                <div class="feed-item__body">
+                  <div class="feed-item__title">Doctor visit</div>
+                  <div class="feed-item__sub">Pediatrician consultation</div>
+                </div>
+                <div class="feed-item__date">Aug 20</div>
+              </div>
+              <div class="feed-item">
+                <div class="feed-item__icon feed-item__icon--green"></div>
+                <div class="feed-item__body">
+                  <div class="feed-item__title">Health note</div>
+                  <div class="feed-item__sub">No concerns, all parameters normal</div>
+                </div>
+                <div class="feed-item__date">Aug 20</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SOS -->
+      <div class="sos-bar">
+        <div class="sos-bar__left">
+          <div class="sos-bar__icon"><svg width="16" height="16"><use href="#i-heart"/></svg></div>
+          <div>
+            <strong>Need urgent help?</strong>
+            Open emergency options. This prototype does not automatically dispatch help.
+          </div>
+        </div>
+        <button class="btn--sos" type="button">
+          <svg width="14" height="14"><use href="#i-phone"/></svg>
+          Emergency SOS
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+"use strict";
+var api = window.DaiAPI;
+var Ref = window.AnvayaChild;
+var IS_GUEST = localStorage.getItem('dai_guest') === '1';
+var currentUser = null;
+var children = [];
+var activeChildId = null;
+var notifications = [];
+var appointments = [];
+var legacyGrowthCount = 0;
+var growthMetric = 'weight';
+
+function $(sel) { return document.querySelector(sel); }
+function $id(id) { return document.getElementById(id); }
+function $all(sel) { return Array.prototype.slice.call(document.querySelectorAll(sel)); }
+function esc(v) {
+  return String(v == null ? '' : v).replace(/[&<>"']/g, function (c) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+  });
+}
+function todayISO() { return api.localDateStr(); }
+function activeChild() { return children.find(function (c) { return c.id === activeChildId; }) || null; }
+
+// Raw (non-JSON) PUT for photo/certificate uploads — DaiAPI.apiRequest always JSON-encodes
+// plain objects, which a Blob/File would be mistaken for, so binary uploads go straight
+// through fetch with the same cookie-auth and 401 handling.
+async function rawPut(path, blob) {
+  var res;
+  try {
+    res = await fetch(api.API_BASE + path, {
+      method: 'PUT', credentials: 'include', body: blob,
+      headers: { 'Content-Type': blob.type || 'application/octet-stream' }
+    });
+  } catch (err) {
+    api.toast('Network error — please try again');
+    return null;
+  }
+  if (res.status === 401) { window.location.href = 'auth.html'; return null; }
+  var data = {};
+  try { data = await res.json(); } catch (e) {}
+  if (!res.ok) { api.toast((data && data.error) || 'Something went wrong'); return null; }
+  return data;
+}
+
+/* ======================================================================
+   Child switcher
+   ====================================================================== */
+function initialsOf(name) {
+  return (name || '').split(/\s+/).filter(Boolean).map(function (w) { return w[0]; }).join('').slice(0, 2).toUpperCase();
+}
+function childAvatarHTML(c, size) {
+  if (c && c.has_photo) {
+    return '<img src="' + api.API_BASE + '/children/' + c.id + '/photo?v=' + (c.photo_v || 0) + '" alt="" style="width:' + size + 'px;height:' + size + 'px">';
+  }
+  return '<span class="avatar-fallback" style="width:' + size + 'px;height:' + size + 'px;font-size:' + Math.round(size * 0.38) + 'px">' + esc(initialsOf(c ? c.name : '')) + '</span>';
+}
+function renderChildTabs() {
+  var host = $id('childTabs');
+  if (!host) return;
+  host.innerHTML = children.map(function (c) {
+    return '<button type="button" class="child-tab' + (c.id === activeChildId ? ' is-active' : '') + '" data-select-child="' + c.id + '">' +
+      childAvatarHTML(c, 26) + '<span>' + esc(c.name) + '</span></button>';
+  }).join('') + '<button type="button" class="child-tab child-tab--add" id="addChildTabBtn">+ Add child</button>';
+
+  host.querySelectorAll('[data-select-child]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      activeChildId = Number(btn.getAttribute('data-select-child'));
+      localStorage.setItem('dai_active_child', String(activeChildId));
+      renderAll();
+    });
+  });
+  var addBtn = $id('addChildTabBtn');
+  if (addBtn) addBtn.addEventListener('click', function () { openChildForm(null); });
+}
+
+/* ======================================================================
+   Add / edit child (a small inline form card, toggled from the tabs row)
+   ====================================================================== */
+var SEX_OPTIONS = [['female', 'Girl'], ['male', 'Boy'], ['other', 'Prefer not to say']];
+var BLOOD_GROUPS = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
+
+function ensureChildFormCard() {
+  if ($id('childFormCard')) return $id('childFormCard');
+  var host = $id('childTabs');
+  var card = document.createElement('div');
+  card.className = 'card';
+  card.id = 'childFormCard';
+  card.style.cssText = 'padding:1.1rem 1.25rem;margin-bottom:1rem;display:none';
+  card.innerHTML =
+    '<div class="section-title" style="margin-bottom:.75rem" id="childFormTitle">Add a child</div>' +
+    '<form id="childForm" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.75rem;align-items:end">' +
+    '<div class="form-group"><label for="cfName">Name</label><input id="cfName" required maxlength="120"></div>' +
+    '<div class="form-group"><label for="cfDob">Date of birth</label><input id="cfDob" type="date" required max="' + todayISO() + '"></div>' +
+    '<div class="form-group"><label for="cfSex">Sex</label><select id="cfSex">' + SEX_OPTIONS.map(function (o) { return '<option value="' + o[0] + '">' + o[1] + '</option>'; }).join('') + '</select></div>' +
+    '<div class="form-group"><label for="cfBlood">Blood group</label><select id="cfBlood"><option value="">Unknown</option>' + BLOOD_GROUPS.map(function (g) { return '<option>' + g + '</option>'; }).join('') + '</select></div>' +
+    '<div class="form-group"><label for="cfWeeks">Weeks at birth</label><input id="cfWeeks" type="number" min="22" max="44" placeholder="e.g. 39"></div>' +
+    '<div class="form-group"><label for="cfBirthWeight">Birth weight (kg)</label><input id="cfBirthWeight" type="number" step="0.01" min="0.4" max="7"></div>' +
+    '<div class="form-group"><label for="cfAllergies">Allergies</label><input id="cfAllergies" maxlength="300" placeholder="Optional"></div>' +
+    '<div style="display:flex;gap:.5rem"><button type="submit" class="btn btn--primary" id="cfSubmit">Add child</button>' +
+    '<button type="button" class="mini-btn" id="cfCancel">Cancel</button>' +
+    '<button type="button" class="mini-btn" id="cfDelete" style="display:none;color:#dc2626">Remove child</button></div>' +
+    '</form>';
+  host.parentNode.insertBefore(card, host);
+
+  $id('cfCancel').addEventListener('click', function () { card.style.display = 'none'; });
+  $id('cfDelete').addEventListener('click', async function () {
+    var id = card.getAttribute('data-edit-id');
+    if (!id || !confirm('Remove this child and everything recorded for them? This can\u2019t be undone.')) return;
+    var ok = await api.apiRequest('/children/' + id, { method: 'DELETE' });
+    if (ok) {
+      api.toast('Child removed');
+      card.style.display = 'none';
+      activeChildId = null;
+      await loadChildren();
+      renderAll();
+    }
+  });
+  $id('childForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    var body = {
+      name: $id('cfName').value.trim(),
+      date_of_birth: $id('cfDob').value,
+      sex: $id('cfSex').value,
+      blood_group: $id('cfBlood').value || undefined,
+      born_at_weeks: $id('cfWeeks').value || undefined,
+      birth_weight_kg: $id('cfBirthWeight').value || undefined,
+      allergies: $id('cfAllergies').value.trim() || undefined
+    };
+    var editing = card.getAttribute('data-edit-id');
+    var data = editing
+      ? await api.apiRequest('/children/' + editing, { method: 'PATCH', body: body })
+      : await api.apiRequest('/children', { method: 'POST', body: body });
+    if (data) {
+      api.toast(editing ? 'Child updated' : 'Child added');
+      card.style.display = 'none';
+      await loadChildren();
+      if (!editing && data.child) activeChildId = data.child.id;
+      localStorage.setItem('dai_active_child', String(activeChildId));
+      renderAll();
+    }
+  });
+  return card;
+}
+
+function openChildForm(child) {
+  var card = ensureChildFormCard();
+  card.style.display = '';
+  card.setAttribute('data-edit-id', child ? String(child.id) : '');
+  $id('childFormTitle').textContent = child ? 'Edit ' + child.name : 'Add a child';
+  $id('cfSubmit').textContent = child ? 'Save changes' : 'Add child';
+  $id('cfDelete').style.display = child ? '' : 'none';
+  $id('cfName').value = child ? child.name : '';
+  $id('cfDob').value = child ? child.date_of_birth : '';
+  $id('cfSex').value = child ? child.sex : 'female';
+  $id('cfBlood').value = (child && child.blood_group) || '';
+  $id('cfWeeks').value = (child && child.born_at_weeks) || '';
+  $id('cfBirthWeight').value = (child && child.birth_weight_kg) || '';
+  $id('cfAllergies').value = (child && child.allergies) || '';
+  card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+/* ======================================================================
+   Welcome card / photo / header
+   ====================================================================== */
+function renderChildHeader() {
+  var c = activeChild();
+  var greet = $id('childGreet');
+  if (greet) greet.textContent = c ? c.name.split(/\s+/)[0] : 'there';
+  $all('[data-child-name]').forEach(function (el) { el.textContent = c ? c.name : '\u2014'; });
+  $all('[data-child-age]').forEach(function (el) { el.textContent = c && Ref ? Ref.ageText(c.date_of_birth, todayISO()) : '\u2014'; });
+
+  var img = $id('childPhotoImg'), fallback = $id('childPhotoFallback');
+  if (c && c.has_photo) {
+    img.src = api.API_BASE + '/children/' + c.id + '/photo?v=' + (c.photo_v || 0);
+    img.style.display = '';
+    fallback.style.display = 'none';
+  } else if (img && fallback) {
+    img.style.display = 'none';
+    fallback.style.display = 'grid';
+    fallback.textContent = c ? initialsOf(c.name) : '\u2014';
+  }
+
+  var chip = $('.user-chip__name');
+  if (chip) chip.textContent = (currentUser && (currentUser.full_name || currentUser.email)) || 'Mother';
+}
+
+var photoArt = $id('childPhotoArt');
+if (photoArt) {
+  photoArt.addEventListener('click', function () {
+    if (IS_GUEST) { api.toast('Sign in to add a photo'); return; }
+    if (!activeChild()) { api.toast('Add a child first'); return; }
+    $id('childPhotoInput').click();
+  });
+}
+var photoInput = $id('childPhotoInput');
+if (photoInput) {
+  photoInput.addEventListener('change', async function () {
+    var file = photoInput.files && photoInput.files[0];
+    photoInput.value = '';
+    if (!file || !activeChild()) return;
+    var blob = await resizeImage(file, 480, 0.85);
+    if (!blob) { api.toast('Could not read that photo'); return; }
+    var data = await rawPut('/children/' + activeChildId + '/photo', blob);
+    if (data) {
+      var c = activeChild();
+      c.has_photo = data.has_photo; c.photo_v = data.photo_v;
+      renderChildHeader();
+      renderChildTabs();
+      api.toast('Photo saved');
+    }
+  });
+}
+function resizeImage(file, maxSize, quality) {
+  return new Promise(function (resolve) {
+    var img = new Image();
+    var reader = new FileReader();
+    reader.onload = function () {
+      img.onload = function () {
+        var scale = Math.min(1, maxSize / Math.max(img.width, img.height));
+        var w = Math.round(img.width * scale), h = Math.round(img.height * scale);
+        var canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        canvas.toBlob(function (blob) { resolve(blob); }, 'image/jpeg', quality);
+      };
+      img.onerror = function () { resolve(null); };
+      img.src = reader.result;
+    };
+    reader.onerror = function () { resolve(null); };
+    reader.readAsDataURL(file);
+  });
+}
+
+/* ======================================================================
+   Vaccinations
+   ====================================================================== */
+function vaxGivenMap(child) {
+  var m = {};
+  (child.vaccinations || []).forEach(function (v) { m[v.vaccine_code] = { given_on: v.given_on }; });
+  return m;
+}
+function renderVaccinations() {
+  var host = $id('vaxList'), summary = $id('vaxSummary');
+  var c = activeChild();
+  if (!host) return;
+  if (!c) {
+    host.innerHTML = '<p style="color:var(--ink-muted);padding:.5rem 0">Add a child to see their vaccination schedule.</p>';
+    if (summary) summary.style.display = 'none';
+    return;
+  }
+  var byCode = {};
+  (c.vaccinations || []).forEach(function (v) { byCode[v.vaccine_code] = v; });
+  var schedule = Ref.vaccineSchedule(c.date_of_birth, vaxGivenMap(c), todayISO());
+  var sum = Ref.summarizeSchedule(schedule);
+  if (summary) {
+    summary.style.display = '';
+    summary.className = 'vax-tag ' + (sum.missed.length ? 'vax-tag--overdue' : 'vax-tag--done');
+    summary.textContent = sum.completed + ' of ' + sum.total + ' given' + (sum.missed.length ? ' \u00b7 ' + sum.missed.length + ' overdue' : '');
+  }
+
+  host.innerHTML = schedule.map(function (v) {
+    var status = v.status; // completed | optional | missed | due | upcoming
+    var dotCls = status === 'completed' ? 'done' : status === 'missed' ? 'overdue' : status === 'due' ? 'due' : 'upcoming';
+    var tagCls = 'vax-tag--' + dotCls;
+    var tagText = status === 'completed' ? 'Given' : status === 'optional' ? 'Optional' : status === 'missed' ? 'Overdue' : status === 'due' ? 'Due' : 'Upcoming';
+    var meta = status === 'completed'
+      ? 'Given ' + api.fmtDate(v.givenOn)
+      : (v.stage + ' \u00b7 due ' + api.fmtDate(v.dueDate));
+    var cert = byCode[v.code] && byCode[v.code].has_certificate;
+    var actions = '';
+    if (status === 'completed') {
+      actions = '<button type="button" class="mini-btn" data-undo-vax="' + v.code + '">Undo</button>' +
+        (cert
+          ? '<button type="button" class="mini-btn" data-view-cert="' + v.code + '">View certificate</button><button type="button" class="mini-btn" data-remove-cert="' + v.code + '">Remove</button>'
+          : '<button type="button" class="mini-btn" data-upload-cert="' + v.code + '">Add certificate</button>');
+    } else {
+      actions = '<input type="date" data-vax-date="' + v.code + '" max="' + todayISO() + '" min="' + c.date_of_birth + '" value="' + todayISO() + '">' +
+        '<button type="button" class="mini-btn" data-mark-vax="' + v.code + '">Mark given</button>';
+    }
+    return '<div class="vax-row">' +
+      '<span class="vax-row__dot vax-row__dot--' + dotCls + '"><svg width="16" height="16"><use href="#i-syringe"/></svg></span>' +
+      '<span class="vax-row__body"><span class="vax-row__title">' + esc(v.name) + '</span><span class="vax-row__sub">' + esc(meta) + '</span></span>' +
+      '<span class="vax-tag ' + tagCls + '" style="flex:none">' + tagText + '</span>' +
+      '<span class="vax-row__actions">' + actions + '</span>' +
+      '<input type="file" accept="image/jpeg,image/png,application/pdf" data-cert-input="' + v.code + '" style="display:none">' +
+      '</div>';
+  }).join('');
+
+  host.querySelectorAll('[data-mark-vax]').forEach(function (btn) {
+    btn.addEventListener('click', async function () {
+      if (IS_GUEST) { api.toast('Sign in to record vaccinations'); return; }
+      var code = btn.getAttribute('data-mark-vax');
+      var dateInput = host.querySelector('[data-vax-date="' + code + '"]');
+      var data = await api.apiRequest('/children/' + c.id + '/vaccinations/' + code, { method: 'PUT', body: { given_on: dateInput.value } });
+      if (data) { api.toast('Recorded'); await loadChildren(); renderAll(); }
+    });
+  });
+  host.querySelectorAll('[data-undo-vax]').forEach(function (btn) {
+    btn.addEventListener('click', async function () {
+      var code = btn.getAttribute('data-undo-vax');
+      if (!confirm('Remove this dose from the record?')) return;
+      var ok = await api.apiRequest('/children/' + c.id + '/vaccinations/' + code, { method: 'DELETE' });
+      if (ok) { api.toast('Removed'); await loadChildren(); renderAll(); }
+    });
+  });
+  host.querySelectorAll('[data-upload-cert]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      host.querySelector('[data-cert-input="' + btn.getAttribute('data-upload-cert') + '"]').click();
+    });
+  });
+  host.querySelectorAll('[data-cert-input]').forEach(function (input) {
+    input.addEventListener('change', async function () {
+      var file = input.files && input.files[0];
+      input.value = '';
+      if (!file) return;
+      var code = input.getAttribute('data-cert-input');
+      var data = await rawPut('/children/' + c.id + '/vaccinations/' + code + '/certificate?filename=' + encodeURIComponent(file.name), file);
+      if (data) { api.toast('Certificate saved'); await loadChildren(); renderAll(); }
+    });
+  });
+  host.querySelectorAll('[data-view-cert]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      window.open(api.API_BASE + '/children/' + c.id + '/vaccinations/' + btn.getAttribute('data-view-cert') + '/certificate', '_blank');
+    });
+  });
+  host.querySelectorAll('[data-remove-cert]').forEach(function (btn) {
+    btn.addEventListener('click', async function () {
+      var code = btn.getAttribute('data-remove-cert');
+      if (!confirm('Remove this certificate?')) return;
+      var ok = await api.apiRequest('/children/' + c.id + '/vaccinations/' + code + '/certificate', { method: 'DELETE' });
+      if (ok) { api.toast('Certificate removed'); await loadChildren(); renderAll(); }
+    });
+  });
+}
+
+/* ======================================================================
+   Developmental milestones
+   ====================================================================== */
+function renderMilestones() {
+  var track = $('.milestones-track');
+  var c = activeChild();
+  if (!track) return;
+  if (!c) {
+    track.innerHTML = '<div class="milestone is-locked"><div class="milestone__icon"></div><div class="milestone__name">Add a child to see milestones</div></div>';
+    return;
+  }
+  var achieved = {};
+  (c.milestones || []).forEach(function (m) { achieved[m.milestone_code] = m.achieved_on; });
+  var dayAge = Ref.daysBetween(c.date_of_birth, todayISO());
+  var ageMonths = dayAge / 30.4375;
+  // Checkpoints up to the child's current age, plus the next one so there's always
+  // something to look forward to.
+  var idx = Ref.MILESTONES.findIndex(function (chk) { return chk.months > ageMonths; });
+  var visible = idx === -1 ? Ref.MILESTONES : Ref.MILESTONES.slice(0, idx + 1);
+  if (!visible.length) visible = [Ref.MILESTONES[0]];
+  var items = [];
+  visible.forEach(function (chk) { chk.items.forEach(function (i) { items.push({ code: i.code, text: i.text, months: chk.months }); }); });
+
+  var foundCurrent = false;
+  track.innerHTML = items.map(function (it) {
+    var done = !!achieved[it.code];
+    var cls = done ? 'is-done' : (!foundCurrent ? (foundCurrent = true, 'is-current') : 'is-locked');
+    return '<div class="milestone ' + cls + '" data-mcode="' + it.code + '" data-months="' + it.months + '" title="' + esc(it.text) + '">' +
+      '<div class="milestone__icon">' + (done ? '<span class="milestone__check"></span>' : '') + '</div>' +
+      '<div class="milestone__name">' + esc(it.text.length > 34 ? it.text.slice(0, 32) + '\u2026' : it.text) + '</div>' +
+      '<div class="milestone__range">(' + it.months + ' mo)</div></div>';
+  }).join('');
+
+  track.querySelectorAll('.milestone[data-mcode]').forEach(function (node) {
+    var code = node.getAttribute('data-mcode');
+    node.style.cursor = 'pointer';
+    node.addEventListener('click', async function () {
+      if (IS_GUEST) { api.toast('Sign in to track milestones'); return; }
+      var done = node.classList.contains('is-done');
+      if (done) {
+        var ok = await api.apiRequest('/children/' + c.id + '/milestones/' + code, { method: 'DELETE' });
+        if (ok) { await loadChildren(); renderAll(); }
+        return;
+      }
+      var data = await api.apiRequest('/children/' + c.id + '/milestones/' + code, { method: 'PUT', body: { achieved_on: todayISO() } });
+      if (data) { api.toast('Marked achieved'); await loadChildren(); renderAll(); }
+    });
+  });
+}
+
+/* ======================================================================
+   Growth
+   ====================================================================== */
+function metricLabel(m) { return m === 'weight' ? 'Weight (kg)' : m === 'height' ? 'Height (cm)' : 'Head circumference (cm)'; }
+function metricKey(m) { return m === 'weight' ? 'weight_kg' : m === 'height' ? 'height_cm' : 'head_cm'; }
+function metricUnit(m) { return m === 'weight' ? 'kg' : 'cm'; }
+
+function buildChartSVG(points, unit) {
+  var W = 400, H = 180, L = 30, R = 12, T = 14, B = 26;
+  if (!points.length) {
+    return '<svg class="chart-svg" viewBox="0 0 400 180" aria-hidden="true"><text x="200" y="95" text-anchor="middle" fill="#9ca3af" font-size="12" font-family="Inter,sans-serif">No measurements yet</text></svg>';
+  }
+  var vals = points.map(function (p) { return p.v; });
+  var vMin = Math.min.apply(null, vals), vMax = Math.max.apply(null, vals);
+  if (vMin === vMax) { vMin -= 1; vMax += 1; }
+  var pad = (vMax - vMin) * 0.15;
+  vMin -= pad; vMax += pad;
+  var tMin = points[0].t, tMax = points[points.length - 1].t;
+  if (tMin === tMax) { tMin -= 1; tMax += 1; }
+  var x = function (t) { return L + (t - tMin) / (tMax - tMin) * (W - L - R); };
+  var y = function (v) { return T + (1 - (v - vMin) / (vMax - vMin)) * (H - T - B); };
+  var path = points.map(function (p, i) { return (i ? 'L' : 'M') + x(p.t).toFixed(1) + ' ' + y(p.v).toFixed(1); }).join(' ');
+  var area = path + ' L' + x(tMax).toFixed(1) + ' ' + (H - B) + ' L' + x(tMin).toFixed(1) + ' ' + (H - B) + ' Z';
+  var dots = points.map(function (p, i) {
+    var last = i === points.length - 1;
+    return '<circle cx="' + x(p.t).toFixed(1) + '" cy="' + y(p.v).toFixed(1) + '" r="' + (last ? 5.5 : 3.5) + '" fill="' + (last ? '#7c3aed' : '#fff') + '" stroke="#7c3aed" stroke-width="2"><title>' + p.v + ' ' + unit + ' \u2014 ' + p.label + '</title></circle>';
+  }).join('');
+  var yTicks = [0, 0.25, 0.5, 0.75, 1].map(function (f) {
+    var v = vMin + (vMax - vMin) * (1 - f), yy = T + f * (H - T - B);
+    return '<line x1="0" y1="' + yy + '" x2="' + W + '" y2="' + yy + '" stroke="#ede9fe"/><text x="4" y="' + (yy + 4) + '" fill="#9ca3af" font-size="10" font-family="Inter,sans-serif">' + v.toFixed(1) + '</text>';
+  }).join('');
+  var xLabels = '<text x="' + x(tMin) + '" y="' + (H - 8) + '" fill="#9ca3af" font-size="10" font-family="Inter,sans-serif">' + points[0].label + '</text>' +
+    '<text x="' + x(tMax) + '" y="' + (H - 8) + '" text-anchor="end" fill="#9ca3af" font-size="10" font-family="Inter,sans-serif">' + points[points.length - 1].label + '</text>';
+  return '<svg class="chart-svg" viewBox="0 0 400 180" preserveAspectRatio="none" aria-hidden="true">' +
+    '<g>' + yTicks + '</g>' +
+    '<path d="' + area + '" fill="#7c3aed" opacity=".12"/>' +
+    '<path d="' + path + '" fill="none" stroke="#7c3aed" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>' +
+    '<g>' + dots + '</g>' + xLabels + '</svg>';
+}
+
+function renderGrowth() {
+  var c = activeChild();
+  var wrap = $('.chart-wrap');
+  var yLabel = $('.chart-y-label');
+  var entries = c ? (c.growth || []) : [];
+  var key = metricKey(growthMetric), unit = metricUnit(growthMetric);
+  var points = entries.filter(function (g) { return g[key] != null; }).map(function (g) {
+    return { t: Ref ? Ref.parseISO(g.measured_on) : new Date(g.measured_on).getTime(), v: Number(g[key]), label: api.fmtDate(g.measured_on) };
+  });
+  if (wrap) wrap.innerHTML = buildChartSVG(points, unit);
+  if (yLabel) yLabel.textContent = metricLabel(growthMetric);
+
+  var last = entries.length ? entries[entries.length - 1] : null;
+  var w = $id('statWeight'), h = $id('statHeight'), hd = $id('statHead');
+  if (w) w.textContent = last && last.weight_kg != null ? Number(last.weight_kg) + ' kg' : '\u2014';
+  if (h) h.textContent = last && last.height_cm != null ? Number(last.height_cm) + ' cm' : '\u2014';
+  if (hd) hd.textContent = last && last.head_cm != null ? Number(last.head_cm) + ' cm' : '\u2014';
+  $all('.stat-item__sub').forEach(function (el) { el.textContent = last ? 'on ' + api.fmtDate(last.measured_on) : '(no data yet)'; });
+
+  var list = $id('growthList');
+  if (list) {
+    if (!c) { list.innerHTML = ''; }
+    else if (!entries.length) {
+      list.innerHTML = legacyGrowthCount
+        ? '<p style="color:var(--ink-muted);padding:.5rem 0">No measurements for ' + esc(c.name) + ' yet. <button type="button" class="mini-btn" id="importLegacyBtn">Import ' + legacyGrowthCount + ' older measurement' + (legacyGrowthCount === 1 ? '' : 's') + '</button></p>'
+        : '<p style="color:var(--ink-muted);padding:.5rem 0">No growth entries yet. Add a measurement below.</p>';
+      var imp = $id('importLegacyBtn');
+      if (imp) imp.addEventListener('click', async function () {
+        var data = await api.apiRequest('/children/' + c.id + '/growth/import-legacy', { method: 'POST' });
+        if (data) { api.toast(data.imported + ' measurement' + (data.imported === 1 ? '' : 's') + ' imported'); await loadChildren(); renderAll(); }
+      });
+    } else {
+      list.innerHTML = entries.slice().reverse().slice(0, 12).map(function (g) {
+        var parts = [];
+        if (g.weight_kg != null) parts.push(g.weight_kg + ' kg');
+        if (g.height_cm != null) parts.push(g.height_cm + ' cm');
+        if (g.head_cm != null) parts.push('HC ' + g.head_cm + ' cm');
+        return '<div style="display:flex;justify-content:space-between;align-items:center;padding:.5rem 0;border-bottom:1px solid var(--line)">' +
+          '<span>' + api.fmtDate(g.measured_on) + '</span><span>' + parts.join(' \u00b7 ') + '</span>' +
+          '<button type="button" class="mini-btn" data-del-growth="' + g.id + '">Remove</button></div>';
+      }).join('');
+      list.querySelectorAll('[data-del-growth]').forEach(function (btn) {
+        btn.addEventListener('click', async function () {
+          var ok = await api.apiRequest('/children/' + c.id + '/growth/' + btn.getAttribute('data-del-growth'), { method: 'DELETE' });
+          if (ok) { api.toast('Entry removed'); await loadChildren(); renderAll(); }
+        });
+      });
+    }
+  }
+}
+
+function ensureGrowthForm() {
+  var host = $('.milestones-card') || $('.content');
+  if (!host || $id('childGrowthForm')) return;
+  var card = document.createElement('div');
+  card.className = 'card';
+  card.style.cssText = 'padding:1.1rem 1.25rem;margin-top:1rem';
+  card.innerHTML =
+    '<div class="section-title" style="margin-bottom:.75rem">Add a growth measurement</div>' +
+    '<form id="childGrowthForm" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:.75rem;align-items:end">' +
+    '<div class="form-group"><label for="cgDate">Date</label><input id="cgDate" type="date" required max="' + todayISO() + '"></div>' +
+    '<div class="form-group"><label for="cgWeight">Weight (kg)</label><input id="cgWeight" type="number" step="0.01" min="0.4" max="150"></div>' +
+    '<div class="form-group"><label for="cgHeight">Height (cm)</label><input id="cgHeight" type="number" step="0.1" min="20" max="220"></div>' +
+    '<div class="form-group"><label for="cgHead">Head (cm)</label><input id="cgHead" type="number" step="0.1" min="20" max="70"></div>' +
+    '<button type="submit" class="btn btn--primary">Save</button></form>';
+  host.parentNode.insertBefore(card, host.nextSibling);
+  $id('cgDate').value = todayISO();
+  $id('childGrowthForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    if (IS_GUEST) { api.toast('Sign in to save growth'); return; }
+    var c = activeChild();
+    if (!c) { api.toast('Add a child profile first'); return; }
+    var body = { measured_on: $id('cgDate').value };
+    var w = $id('cgWeight').value, h = $id('cgHeight').value, hd = $id('cgHead').value;
+    if (w) body.weight_kg = Number(w);
+    if (h) body.height_cm = Number(h);
+    if (hd) body.head_cm = Number(hd);
+    var data = await api.apiRequest('/children/' + c.id + '/growth', { method: 'POST', body: body });
+    if (data) {
+      api.toast('Growth saved');
+      e.target.reset();
+      $id('cgDate').value = todayISO();
+      await loadChildren();
+      renderAll();
+    }
+  });
+}
+
+/* ======================================================================
+   Status cards + next vaccination
+   ====================================================================== */
+function renderNextVax() {
+  var c = activeChild();
+  var title = $id('nextVaxTitle'), meta = $id('nextVaxMeta');
+  var sg = $id('statusGrowth'), sh = $id('statusHealth'), sa = $id('statusAppt');
+
+  if (!c) {
+    if (title) title.textContent = 'Add a child';
+    if (meta) meta.textContent = 'Vaccinations appear once a profile exists';
+    if (sg) sg.textContent = '\u2014';
+    if (sh) sh.textContent = '\u2014';
+  } else {
+    var schedule = Ref.vaccineSchedule(c.date_of_birth, vaxGivenMap(c), todayISO());
+    var sum = Ref.summarizeSchedule(schedule);
+    if (title) title.textContent = sum.next ? sum.next.name : 'All caught up';
+    if (meta) meta.textContent = sum.next ? (sum.missed.some(function (m) { return m.code === sum.next.code; }) ? 'Overdue \u2014 was due ' : 'Due ') + api.fmtDate(sum.next.dueDate) : 'No vaccinations due right now';
+    if (sg) sg.textContent = (c.growth || []).length ? (c.growth.length + ' measurement' + (c.growth.length === 1 ? '' : 's')) : 'No growth data yet';
+    if (sh) sh.textContent = sum.completed + ' of ' + sum.total + ' vaccines given' + (sum.missed.length ? ' \u00b7 ' + sum.missed.length + ' overdue' : '');
+  }
+  if (sa) {
+    var upcoming = appointments.filter(function (a) { return a.status === 'pending' || a.status === 'confirmed'; });
+    sa.textContent = upcoming.length ? (upcoming.length + ' scheduled') : 'None scheduled';
+  }
+}
+
+/* ======================================================================
+   Notifications
+   ====================================================================== */
+function renderNotifications() {
+  var list = $id('notifList'), badge = $id('notifBadge');
+  var unread = notifications.filter(function (n) { return !n.read_at; }).length;
+  if (badge) {
+    if (unread) { badge.style.display = ''; badge.textContent = String(Math.min(9, unread)); }
+    else badge.style.display = 'none';
+  }
+  if (!list) return;
+  if (!notifications.length) {
+    list.innerHTML = '<div class="notif-empty">You\u2019re all caught up \u2014 nothing needs attention.</div>';
+    return;
+  }
+  list.innerHTML = notifications.map(function (n) {
+    return '<div class="notif-row sev-' + n.severity + (n.read_at ? '' : ' is-unread') + '" data-nid="' + n.id + '" data-route="' + (n.route || '') + '" data-sub="' + (n.route_sub || '') + '" data-child-id="' + (n.child_id || '') + '">' +
+      '<span class="notif-row__dot"></span>' +
+      '<span class="notif-row__body"><span class="notif-row__title">' + esc(n.title) + '</span>' +
+      (n.body ? '<span class="notif-row__sub">' + esc(n.body) + '</span>' : '') + '</span>' +
+      '<button type="button" class="notif-row__x" data-dismiss="' + n.id + '" aria-label="Dismiss">\u2715</button></div>';
+  }).join('');
+  list.querySelectorAll('[data-dismiss]').forEach(function (btn) {
+    btn.addEventListener('click', async function (e) {
+      e.stopPropagation();
+      var id = btn.getAttribute('data-dismiss');
+      var ok = await api.apiRequest('/notifications/' + id, { method: 'DELETE' });
+      if (ok) { notifications = notifications.filter(function (n) { return String(n.id) !== id; }); renderNotifications(); }
+    });
+  });
+  list.querySelectorAll('.notif-row').forEach(function (row) {
+    row.addEventListener('click', async function () {
+      var id = row.getAttribute('data-nid');
+      await api.apiRequest('/notifications/' + id + '/read', { method: 'PATCH' });
+      var n = notifications.find(function (x) { return String(x.id) === id; });
+      if (n) n.read_at = n.read_at || new Date().toISOString();
+      renderNotifications();
+      var route = row.getAttribute('data-route'), sub = row.getAttribute('data-sub'), cid = row.getAttribute('data-child-id');
+      $id('notifPop').classList.remove('is-open');
+      if (route === 'child') {
+        if (cid && Number(cid) !== activeChildId) { activeChildId = Number(cid); renderAll(); }
+        var target = sub === 'growth' ? $id('growth') : $id('vaxCard');
+        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else if (route === 'appointments') {
+        window.location.href = 'dashboard.html#appointments';
+      } else if (route === 'dashboard') {
+        window.location.href = 'dashboard.html';
+      }
+    });
+  });
+}
+async function loadNotifications() {
+  if (IS_GUEST) { notifications = []; return; }
+  var data = await api.apiRequest('/notifications');
+  notifications = (data && data.notifications) || [];
+}
+var notifBtn = $id('notifBtn');
+if (notifBtn) {
+  notifBtn.addEventListener('click', function (e) {
+    e.stopPropagation();
+    $id('notifPop').classList.toggle('is-open');
+  });
+  document.addEventListener('click', function (e) {
+    var pop = $id('notifPop');
+    if (pop && pop.classList.contains('is-open') && !pop.contains(e.target) && e.target !== notifBtn) pop.classList.remove('is-open');
+  });
+}
+var notifReadAllBtn = $id('notifReadAll');
+if (notifReadAllBtn) {
+  notifReadAllBtn.addEventListener('click', async function () {
+    if (IS_GUEST) return;
+    var ok = await api.apiRequest('/notifications/read-all', { method: 'POST' });
+    if (ok) { notifications.forEach(function (n) { n.read_at = n.read_at || new Date().toISOString(); }); renderNotifications(); }
+  });
+}
+
+/* ======================================================================
+   Data loading + top-level render
+   ====================================================================== */
+async function loadChildren() {
+  if (IS_GUEST) { children = []; legacyGrowthCount = 0; return; }
+  var data = await api.apiRequest('/children');
+  children = (data && data.children) || [];
+  legacyGrowthCount = (data && data.legacy_growth_count) || 0;
+  if (!children.some(function (c) { return c.id === activeChildId; })) {
+    var saved = Number(localStorage.getItem('dai_active_child'));
+    activeChildId = children.some(function (c) { return c.id === saved; }) ? saved : (children[0] ? children[0].id : null);
+  }
+}
+async function loadAppointments() {
+  if (IS_GUEST) { appointments = []; return; }
+  var data = await api.apiRequest('/appointments');
+  appointments = (data && data.appointments) || [];
+}
+
+function renderAll() {
+  renderChildTabs();
+  renderChildHeader();
+  renderVaccinations();
+  renderMilestones();
+  renderGrowth();
+  renderNextVax();
+  renderNotifications();
+}
+
+// Growth metric tabs
+$all('.growth-tabs button').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    $all('.growth-tabs button').forEach(function (x) { x.classList.remove('is-active'); x.setAttribute('aria-selected', 'false'); });
+    btn.classList.add('is-active');
+    btn.setAttribute('aria-selected', 'true');
+    growthMetric = btn.getAttribute('data-metric');
+    renderGrowth();
+  });
+});
+
+// Edit-child affordance: clicking the child's name/age line opens the edit form
+var subLine = $('.welcome-card__sub');
+if (subLine) {
+  subLine.style.cursor = 'pointer';
+  subLine.title = 'Edit this child\u2019s profile';
+  subLine.addEventListener('click', function () { if (activeChild()) openChildForm(activeChild()); });
+}
+
+var sos = $('.btn--sos');
+if (sos) {
+  sos.addEventListener('click', function () {
+    api.toast('Emergency: call your hospital or local emergency number (e.g. 108)');
+  });
+}
+
+var logoutBtn = $id('logoutBtn') || $('[data-logout]');
+if (logoutBtn) {
+  logoutBtn.addEventListener('click', async function () {
+    if (IS_GUEST) { localStorage.removeItem('dai_guest'); window.location.href = 'auth.html'; return; }
+    await api.apiRequest('/auth/logout', { method: 'POST' });
+    window.location.href = 'auth.html';
+  });
+}
+
+async function boot() {
+  ensureGrowthForm();
+  ensureChildFormCard();
+
+  if (IS_GUEST) {
+    currentUser = { full_name: 'Guest', role: 'mother', guest: true };
+    children = [];
+    renderAll();
+    api.toast('Guest mode \u2014 sign in to manage children, vaccinations and growth');
+    return;
+  }
+
+  currentUser = await api.fetchCurrentUser();
+  if (!currentUser) return;
+  if (currentUser.role === 'doctor') { window.location.href = 'doctor.html'; return; }
+
+  await Promise.all([loadChildren(), loadAppointments(), loadNotifications()]);
+  renderAll();
+  if (!children.length) openChildForm(null);
+}
+
+boot();
+})();
+</script>
+
+</body>
+</html>
+  --shadow: 0 4px 6px rgba(91,33,182,.04), 0 14px 32px -14px rgba(124,58,237,.2);
+  --sidebar-w: 240px;
+  --font: "Inter", system-ui, -apple-system, sans-serif;
+  --display: "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--font);
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: var(--ink);
+  background: var(--ground);
+  -webkit-font-smoothing: antialiased;
+}
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; cursor: pointer; }
+img, svg { display: block; }
+button, input { font: inherit; }
+
+/*  Layout shell  */
+.app {
+  display: grid;
+  grid-template-columns: var(--sidebar-w) 1fr;
+  min-height: 100vh;
+}
+
+/*  Sidebar  */
+.sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(180deg, #faf5ff 0%, #f5f0ff 100%);
+  border-right: 1px solid var(--line);
+  padding: 1.1rem 0.85rem 1.25rem;
+  overflow-y: auto;
+}
+.sidebar__brand {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.35rem 0.55rem 1.25rem;
+  text-decoration: none;
+  color: var(--ink);
+}
+.sidebar__brand img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 0 0 2px #fff, 0 2px 8px rgba(124,58,237,.15);
+}
+.sidebar__brand-name {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: 1.2rem;
+  color: var(--brand);
+  line-height: 1;
+}
+.sidebar__brand-tag {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.58rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.sidebar__nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  flex: 1;
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: 12px;
+  color: var(--ink-2);
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: background 0.15s, color 0.15s;
+}
+.nav-item svg { width: 18px; height: 18px; flex-shrink: 0; opacity: 0.75; }
+.nav-item:hover { background: rgba(124,58,237,0.06); color: var(--brand-strong); }
+.nav-item.is-active {
+  background: var(--brand);
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 6px 16px -6px rgba(124,58,237,0.5);
+}
+.nav-item.is-active svg { opacity: 1; }
+.sidebar__footer {
+  margin-top: auto;
+  padding: 1rem 0.6rem 0.25rem;
+  border-top: 1px solid var(--line);
+}
+.sidebar__tagline {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--brand);
+  line-height: 1.35;
+}
+.sidebar__tagline svg { flex-shrink: 0; margin-top: 0.1rem; color: var(--brand-mid); }
+
+/*  Main column  */
+.main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* Top bar */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-height: 64px;
+  padding: 0.65rem 1.5rem;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--line);
+}
+.search {
+  flex: 1;
+  max-width: 420px;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.55rem 1rem;
+  border-radius: 999px;
+  background: var(--ground);
+  border: 1px solid var(--line);
+  color: var(--ink-3);
+}
+.search input {
+  flex: 1;
+  border: 0;
+  background: transparent;
+  outline: none;
+  color: var(--ink);
+  font-size: 0.9rem;
+}
+.search input::placeholder { color: var(--ink-3); }
+.topbar__right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.icon-btn {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: #fff;
+  display: grid;
+  place-items: center;
+  color: var(--ink-2);
+}
+.icon-btn .badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--rose);
+  color: #fff;
+  font-size: 0.62rem;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+}
 .user-chip {
   display: flex;
   align-items: center;
