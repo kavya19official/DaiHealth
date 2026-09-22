@@ -35,7 +35,9 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(express.json());
+// Hospital document ingestion accepts small base64 demo files. Keep a strict
+// ceiling so uploads work locally without allowing unbounded request bodies.
+app.use(express.json({ limit: '6mb' }));
 app.use(cookieParser());
 
 // Database connection. Render Postgres exposes a DATABASE_URL; local development
@@ -1173,7 +1175,7 @@ require('./childDashboard')(app, { pool, authenticateToken, authorizeRole });
 require('./notifications')(app, { pool, authenticateToken });
 
 // Hospital, doctor, and patient continuity workflows
-require('./hospitalPlatform')(app);
+require('./hospitalPlatform')(app, { authenticateToken });
 
 // Gemini TTS for the care chatbot.
 // Keeps the Gemini API key server-side; the frontend receives only generated audio.

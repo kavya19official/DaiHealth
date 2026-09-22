@@ -1087,6 +1087,9 @@ h1,h2,h3,h4{font-family:var(--display)}
 
 /* The shared landing-page .section class adds large marketing-page padding; dashboard modules stay compact. */
 .content>.section{padding-block:0}
+/* styles.css uses .panel for landing-page tab panels. Hospital cards are also
+   named panel, so keep them visible inside this dashboard. */
+.main .panel{display:block}
 </style>
 </head>
 <body>
@@ -1117,6 +1120,8 @@ h1,h2,h3,h4{font-family:var(--display)}
       <a href="#clinic">Clinic flow</a>
       <a href="#facility">Facility</a>
       <a href="#drafts">Drafts</a>
+      <a href="#knowledge">Knowledge & outreach</a>
+      <a href="#analytics">Analytics</a>
       <a href="#pathways">Pathways</a>
       <a href="#audit">Audit</a>
     </nav>
@@ -1126,7 +1131,7 @@ h1,h2,h3,h4{font-family:var(--display)}
     <header class="topbar">
       <div>
         <h1>Hospital-side continuity workspace</h1>
-        <p>Module A and C first: care gaps, panel registry, provenance, review states, and auditability.</p>
+        <p>Care continuity, consultation review, clinic operations, education, analytics, facility readiness, and audit in one workspace.</p>
       </div>
       <div class="topbar-meta">
         <div class="user-pill role-control"><span class="avatar">SK</span><span>Dr. S. Kumar</span><select id="currentRole" aria-label="Hospital role"><option value="admin">Administrator</option><option value="doctor">Doctor</option><option value="care_team">Care team</option><option value="front_desk">Front desk</option></select></div>
@@ -1140,7 +1145,7 @@ h1,h2,h3,h4{font-family:var(--display)}
     <div class="hospital-actionbar" aria-label="Hospital quick actions">
       <a class="hospital-action" href="#clinic"><span><b>Clinic queue</b><span>Review requests and open slots</span></span><i>→</i></a>
       <a class="hospital-action" href="#registry"><span><b>Find a patient</b><span>Search registry and programs</span></span><i>⌕</i></a>
-      <a class="hospital-action" href="#brief"><span><b>Pre-consult brief</b><span>Open fact-only context</span></span><i></i></a>
+      <a class="hospital-action" href="#brief"><span><b>Pre-consult brief</b><span>Open fact-only context</span></span><i>→</i></a>
       <a class="hospital-action" href="#audit"><span><b>Audit trail</b><span>Who touched what, when</span></span><i>↗</i></a>
     </div>
 
@@ -1239,6 +1244,23 @@ h1,h2,h3,h4{font-family:var(--display)}
             <div class="detail-list" id="briefFlags"></div>
           </div>
         </div>
+        <div class="grid grid-2" style="margin-top:1rem">
+          <div class="panel detail-block">
+            <h4>Document store</h4>
+            <div class="detail-list" id="documentRows"></div>
+          </div>
+          <div class="panel detail-block">
+            <h4>Record a completed care event</h4>
+            <form class="form-stack" id="careEventForm" data-permission="record_event">
+              <div class="control"><label for="careEventPatient">Patient</label><select id="careEventPatient"></select></div>
+              <div class="control"><label for="careEventType">Completed event</label><select id="careEventType"></select></div>
+              <div class="control"><label for="careEventDate">Recorded date</label><input id="careEventDate" type="date" required></div>
+              <div class="control"><label for="careEventSource">Source and evidence</label><input id="careEventSource" placeholder="EMR, lab or radiology" required></div>
+              <div class="control"><label for="careEventDocument">Document reference</label><input id="careEventDocument" placeholder="Report or visit ID"></div>
+              <button class="btn btn-primary" type="submit">Record event and recalculate gaps</button>
+            </form>
+          </div>
+        </div>
       </section>
 
       <section id="clinic" class="section">
@@ -1269,6 +1291,37 @@ h1,h2,h3,h4{font-family:var(--display)}
           <button class="btn btn-primary" data-action="new-draft" data-permission="draft_edit">Generate draft</button>
         </div>
         <div class="grid grid-3" id="draftCards"></div>
+      </section>
+
+      <section id="knowledge" class="section">
+        <div class="section-head"><div><h2>Approved knowledge and outreach</h2><p>Search governance-approved material, then schedule only clinician-approved content. This area provides reading and education support, not patient-specific recommendations.</p></div></div>
+        <div class="grid grid-2">
+          <div class="panel detail-block">
+            <h4>Approved knowledge library</h4>
+            <div class="control"><label for="knowledgeSearch">Search approved sources</label><input id="knowledgeSearch" type="search" placeholder="Maternal, diabetes, documents..."></div>
+            <div class="detail-list" id="knowledgeRows" style="margin-top:1rem"></div>
+          </div>
+          <div class="panel detail-block">
+            <h4>Education campaign calendar</h4>
+            <form class="form-stack" id="campaignForm" data-permission="campaign_manage">
+              <div class="control"><label for="campaignDraft">Approved draft</label><select id="campaignDraft"></select></div>
+              <div class="control"><label for="campaignAudience">Audience</label><input id="campaignAudience" placeholder="e.g. Maternal continuity cohort"></div>
+              <div class="control"><label for="campaignChannel">Channel</label><select id="campaignChannel"><option value="in_app">In-app</option><option value="SMS">SMS</option><option value="WhatsApp">WhatsApp</option><option value="email">Email</option></select></div>
+              <div class="control"><label for="campaignDate">Schedule</label><input id="campaignDate" type="datetime-local" required></div>
+              <button class="btn btn-primary" type="submit">Schedule approved content</button>
+            </form>
+            <div class="detail-list" id="campaignRows" style="margin-top:1rem"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="analytics" class="section">
+        <div class="section-head"><div><h2>Practice and service analytics</h2><p>Operational measures for follow-up workload, referrals, waiting time and slot use. No clinical outcome prediction is shown.</p></div></div>
+        <div class="grid grid-4" id="analyticsMetrics"></div>
+        <div class="grid grid-2" style="margin-top:1rem">
+          <div class="panel detail-block"><h4>Program workload</h4><div class="detail-list" id="programMetrics"></div></div>
+          <div class="panel detail-block"><h4>Referral sources</h4><div class="detail-list" id="referralMetrics"></div></div>
+        </div>
       </section>
 
       <section id="facility" class="section">

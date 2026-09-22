@@ -66,10 +66,18 @@ CREATE TABLE IF NOT EXISTS hospital_documents (
   document_type TEXT NOT NULL,
   file_name TEXT NOT NULL,
   storage_ref TEXT,
+  mime_type TEXT,
+  size_bytes INTEGER NOT NULL DEFAULT 0,
+  sha256 TEXT,
+  extraction_metadata JSONB NOT NULL DEFAULT '{"reviewRequired":true,"clinicalInterpretation":false}'::jsonb,
   extraction_status TEXT NOT NULL DEFAULT 'pending_review',
   uploaded_by INTEGER REFERENCES users(id),
   uploaded_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+ALTER TABLE hospital_documents ADD COLUMN IF NOT EXISTS mime_type TEXT;
+ALTER TABLE hospital_documents ADD COLUMN IF NOT EXISTS size_bytes INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE hospital_documents ADD COLUMN IF NOT EXISTS sha256 TEXT;
+ALTER TABLE hospital_documents ADD COLUMN IF NOT EXISTS extraction_metadata JSONB NOT NULL DEFAULT '{"reviewRequired":true,"clinicalInterpretation":false}'::jsonb;
 CREATE TABLE IF NOT EXISTS consultation_briefs (
   id BIGSERIAL PRIMARY KEY,
   patient_id TEXT NOT NULL REFERENCES hospital_patients(id) ON DELETE CASCADE,
@@ -113,6 +121,39 @@ CREATE TABLE IF NOT EXISTS content_drafts (
   approved_at TIMESTAMPTZ,
   published_at TIMESTAMPTZ
 );
+CREATE TABLE IF NOT EXISTS hospital_knowledge_base (
+  id TEXT PRIMARY KEY,
+  title TEXT NOT NULL,
+  category TEXT NOT NULL,
+  language TEXT NOT NULL DEFAULT 'English',
+  source_ref TEXT NOT NULL,
+  summary TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'pending_review' CHECK (status IN ('pending_review','approved','retired')),
+  reviewed_by INTEGER REFERENCES users(id),
+  reviewed_at TIMESTAMPTZ
+);
+CREATE TABLE IF NOT EXISTS education_campaigns (
+  id TEXT PRIMARY KEY,
+  draft_id TEXT NOT NULL REFERENCES content_drafts(id),
+  title TEXT NOT NULL,
+  audience TEXT NOT NULL,
+  channel TEXT NOT NULL,
+  scheduled_for TIMESTAMPTZ NOT NULL,
+  status TEXT NOT NULL DEFAULT 'scheduled' CHECK (status IN ('scheduled','sent','cancelled')),
+  created_by INTEGER REFERENCES users(id),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE TABLE IF NOT EXISTS hospital_notifications (
+  id TEXT PRIMARY KEY,
+  patient_id TEXT NOT NULL REFERENCES hospital_patients(id),
+  channel TEXT NOT NULL,
+  message TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'queued' CHECK (status IN ('queued','sent','failed','read')),
+  entity_id TEXT,
+  created_by INTEGER REFERENCES users(id),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ
+);
 CREATE TABLE IF NOT EXISTS facility_cases (
   id TEXT PRIMARY KEY,
   patient_id TEXT NOT NULL REFERENCES hospital_patients(id),
@@ -149,5 +190,20 @@ CREATE TABLE IF NOT EXISTS hospital_audit_log (
 CREATE INDEX IF NOT EXISTS idx_hospital_audit_entity ON hospital_audit_log(entity_type, entity_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_care_gaps_registry ON care_gaps(status, due_date, assigned_to);
 CREATE INDEX IF NOT EXISTS idx_hospital_appointments_slot ON hospital_appointments(slot, status);
+CREATE INDEX IF NOT EXISTS idx_hospital_notifications_patient ON hospital_notifications(patient_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_education_campaigns_schedule ON education_campaigns(scheduled_for, status);
+
+-- The audit trail is append-only. Corrections are represented by a new audit row.
+CREATE OR REPLACE FUNCTION prevent_hospital_audit_mutation()
+RETURNS trigger AS $$
+BEGIN
+  RAISE EXCEPTION 'hospital_audit_log is append-only';
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS hospital_audit_log_append_only ON hospital_audit_log;
+CREATE TRIGGER hospital_audit_log_append_only
+BEFORE UPDATE OR DELETE ON hospital_audit_log
+FOR EACH ROW EXECUTE FUNCTION prevent_hospital_audit_mutation();
 
 COMMIT;
