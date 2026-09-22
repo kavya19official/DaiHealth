@@ -87,17 +87,6 @@
     return 'https://daihealth.onrender.com/api';
   }
 
-  function chooseBrowserVoice() {
-    var voices = window.speechSynthesis ? speechSynthesis.getVoices() : [];
-    return voices.find(function (voice) {
-      return /en-IN/i.test(voice.lang || '') && /male|ravi|prabhat|microsoft|natural/i.test(voice.name || '');
-    }) || voices.find(function (voice) {
-      return /en/i.test(voice.lang || '') && /male|guy|ravi|prabhat|microsoft|natural/i.test(voice.name || '');
-    }) || voices.find(function (voice) {
-      return /en/i.test(voice.lang || '');
-    }) || null;
-  }
-
   function stopSpeech() {
     if (currentAudio) {
       if (currentAudio.dataset && currentAudio.dataset.objectUrl) {
@@ -108,18 +97,6 @@
       currentAudio = null;
     }
     if (window.speechSynthesis) speechSynthesis.cancel();
-  }
-
-  function speakWithBrowserVoice(text) {
-    if (!window.speechSynthesis) return;
-    speechSynthesis.cancel();
-    var utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'en-IN';
-    utterance.rate = 0.88;
-    utterance.pitch = 0.92;
-    var voice = chooseBrowserVoice();
-    if (voice) utterance.voice = voice;
-    speechSynthesis.speak(utterance);
   }
 
   async function speak(text) {
@@ -142,7 +119,11 @@
       };
       await currentAudio.play();
     } catch (error) {
-      speakWithBrowserVoice(text);
+      console.error('Gemini Charon TTS failed:', error);
+      var feed = document.querySelector('.care-chatbot__feed');
+      if (feed) {
+        renderMessage(feed, 'bot', 'Voice is unavailable right now. Please check GEMINI_API_KEY and redeploy.');
+      }
     }
   }
 

@@ -1179,8 +1179,8 @@ require('./hospitalPlatform')(app);
 // Keeps the Gemini API key server-side; the frontend receives only generated audio.
 app.post('/api/tts', async (req, res) => {
   const key = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
-  const model = process.env.GEMINI_TTS_MODEL || 'gemini-2.5-flash-preview-tts';
-  const voiceName = process.env.GEMINI_TTS_VOICE || 'Charon';
+  const model = 'gemini-3.1-flash-tts-preview';
+  const voiceName = 'Charon';
   const text = cleanupStr(req.body && req.body.text, 900);
 
   if (!text) {
@@ -1248,6 +1248,9 @@ app.post('/api/tts', async (req, res) => {
     res.set({
       'Content-Type': 'audio/wav',
       'Content-Length': audio.length,
+      'X-DAI-TTS-Provider': 'gemini',
+      'X-DAI-TTS-Voice': voiceName,
+      'X-DAI-TTS-Model': model,
       'Cache-Control': 'no-store'
     });
     return res.send(audio);
