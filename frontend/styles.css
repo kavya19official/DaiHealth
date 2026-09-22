@@ -980,12 +980,14 @@ body.doctor-page .doctor-patient.is-selected {
   cursor: pointer;
 }
 .vr-character {
+  position: relative;
   margin: .9rem 1rem .65rem;
   height: 190px;
   overflow: hidden;
   border-radius: 22px;
   border: 1px solid rgba(151, 89, 152, .14);
   background: #f8f2f9;
+  transition: box-shadow .2s ease, transform .2s ease;
 }
 .vr-character iframe {
   width: 100%;
@@ -993,6 +995,50 @@ body.doctor-page .doctor-patient.is-selected {
   border: 0;
   display: block;
 }
+.vr-talk-meter {
+  position: absolute;
+  left: 50%;
+  bottom: .75rem;
+  transform: translateX(-50%) translateY(10px);
+  display: flex;
+  align-items: center;
+  gap: .3rem;
+  min-width: 104px;
+  justify-content: center;
+  padding: .52rem .75rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .9);
+  border: 1px solid rgba(151, 89, 152, .18);
+  box-shadow: 0 12px 32px rgba(70, 43, 83, .15);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .18s ease, transform .18s ease;
+}
+.vr-talk-meter span {
+  display: block;
+  width: .28rem;
+  height: .72rem;
+  border-radius: 999px;
+  background: var(--brand);
+  transform-origin: center bottom;
+  opacity: .78;
+}
+.vr-talk-meter span:nth-child(2) { height: 1rem; }
+.vr-talk-meter span:nth-child(3) { height: .86rem; }
+.vr-talk-meter span:nth-child(4) { height: 1.15rem; }
+.vr-companion.is-speaking .vr-character {
+  box-shadow: inset 0 0 0 999px rgba(255, 255, 255, .03), 0 18px 36px rgba(151, 89, 152, .16);
+}
+.vr-companion.is-speaking .vr-talk-meter {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+.vr-companion.is-speaking .vr-talk-meter span {
+  animation: vrTalk .62s ease-in-out infinite;
+}
+.vr-companion.is-speaking .vr-talk-meter span:nth-child(2) { animation-delay: .08s; }
+.vr-companion.is-speaking .vr-talk-meter span:nth-child(3) { animation-delay: .16s; }
+.vr-companion.is-speaking .vr-talk-meter span:nth-child(4) { animation-delay: .24s; }
 .vr-safety {
   margin: 0 1rem .7rem;
   padding: .65rem .8rem;
@@ -1092,6 +1138,10 @@ body.doctor-page .doctor-patient.is-selected {
   0%, 100% { transform: scale(1); opacity: .55; }
   50% { transform: scale(1.12); opacity: .95; }
 }
+@keyframes vrTalk {
+  0%, 100% { transform: scaleY(.45); opacity: .58; }
+  50% { transform: scaleY(1.18); opacity: .95; }
+}
 @media (max-width: 640px) {
   .vr-orb { width: 66px; height: 66px; }
   .vr-panel {
@@ -1106,7 +1156,8 @@ body.doctor-page .doctor-patient.is-selected {
 
 @media (prefers-reduced-motion: reduce) {
   .vr-companion.is-thinking .vr-orb__rings::before,
-  .vr-companion.is-speaking .vr-orb__rings::before {
+  .vr-companion.is-speaking .vr-orb__rings::before,
+  .vr-companion.is-speaking .vr-talk-meter span {
     animation: none;
   }
 }

@@ -175,6 +175,7 @@
         '</header>' +
         '<div class="vr-character" aria-label="Interactive 3D doctor character">' +
           '<iframe title="Female doctor 36 by deep3dstudio on Sketchfab" src="' + SKETCHFAB_SRC + '" allow="autoplay; fullscreen; xr-spatial-tracking" allowfullscreen loading="lazy"></iframe>' +
+          '<div class="vr-talk-meter" aria-hidden="true"><span></span><span></span><span></span><span></span></div>' +
         '</div>' +
         '<div class="vr-safety">Assistive only. No diagnosis, medicine advice, or clinical risk scoring.</div>' +
         '<div class="vr-feed" id="vrCompanionFeed"></div>' +
