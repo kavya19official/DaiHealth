@@ -87,7 +87,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 .status-row{display:grid;grid-template-columns:repeat(4,1fr);gap:.85rem;margin-bottom:1.15rem}
 .status-card{display:flex;align-items:flex-start;gap:.75rem;padding:.95rem 1rem;background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-sm);transition:border-color .15s}
 .status-card:hover{border-color:#c4b5fd}
-.status-card__icon{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;flex-shrink:0}
+.status-card__icon{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;flex-shrink:0}.status-card__icon svg{width:19px;height:19px}
 .status-card__icon--purple{background:var(--brand-soft);color:var(--brand)}
 .status-card__icon--green{background:var(--green-soft);color:var(--green)}
 .status-card__icon--blue{background:var(--blue-soft);color:var(--blue)}
@@ -99,7 +99,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 .section-card{padding:1.15rem 1.25rem 1.25rem;margin-bottom:1rem}
 .section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:.9rem;gap:.75rem}
 .section-title{display:flex;align-items:center;gap:.5rem;font-family:var(--display);font-size:1.05rem;font-weight:700}
-.section-title span{width:28px;height:28px;border-radius:8px;background:var(--brand-soft);color:var(--brand);display:grid;place-items:center;font-size:.85rem}
+.section-title span{width:28px;height:28px;border-radius:8px;background:var(--brand-soft);color:var(--brand);display:grid;place-items:center;font-size:.85rem}.section-title span svg{width:15px;height:15px}
 .link-btn{border:0;background:transparent;color:var(--brand);font-size:.82rem;font-weight:600;display:inline-flex;align-items:center;gap:.25rem;padding:.25rem .4rem;border-radius:8px}
 .link-btn:hover{background:var(--brand-soft)}
 .tabs{display:inline-flex;gap:.3rem;margin-bottom:1rem;background:var(--ground);padding:.25rem;border-radius:999px;border:1px solid var(--line)}
@@ -116,7 +116,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 .milestones-track{display:flex;align-items:flex-start;justify-content:space-between;gap:.3rem;position:relative}
 .milestones-track::before{content:"";position:absolute;top:22px;left:8%;right:8%;height:3px;background:linear-gradient(90deg,#a7f3d0 0%,#a7f3d0 35%,#e9d5ff 35%,#e9d5ff 100%);border-radius:99px;z-index:0}
 .milestone{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:.4rem;flex:1;text-align:center;max-width:88px}
-.milestone__icon{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:#fff;border:2px solid var(--line);font-size:1.1rem;position:relative}
+.milestone__icon{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:#fff;border:2px solid var(--line);font-size:1.1rem;position:relative;color:var(--ink-3)}.milestone__icon svg{width:19px;height:19px}.milestone.is-done .milestone__icon{color:var(--green)}.milestone.is-current .milestone__icon{color:var(--brand)}
 .milestone.is-done .milestone__icon{border-color:#6ee7b7;background:var(--green-soft)}
 .milestone.is-current .milestone__icon{border-color:var(--brand);background:var(--brand-soft);box-shadow:0 0 0 4px rgba(124,58,237,.12)}
 .milestone.is-locked .milestone__icon{opacity:.65}
@@ -127,7 +127,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 .qa-grid{display:grid;grid-template-columns:1fr 1fr;gap:.65rem}
 .qa-item{display:flex;flex-direction:column;gap:.3rem;padding:.8rem .75rem;border-radius:14px;border:1px solid var(--line);background:#fff;transition:border-color .15s}
 .qa-item:hover{border-color:#c4b5fd}
-.qa-item__icon{width:30px;height:30px;border-radius:10px;display:grid;place-items:center;margin-bottom:.1rem}
+.qa-item__icon{width:30px;height:30px;border-radius:10px;display:grid;place-items:center;margin-bottom:.1rem}.qa-item__icon svg{width:16px;height:16px}
 .qa-item__icon--blue{background:var(--blue-soft);color:var(--blue)}
 .qa-item__icon--purple{background:var(--brand-soft);color:var(--brand)}
 .qa-item__icon--green{background:var(--green-soft);color:var(--green)}
@@ -137,8 +137,8 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 .feed-list{display:flex;flex-direction:column;gap:.5rem}
 .feed-item{display:flex;align-items:flex-start;gap:.65rem;padding:.5rem 0;border-bottom:1px solid var(--line-soft)}
 .feed-item:last-child{border-bottom:0}
-.feed-item__icon{width:32px;height:32px;border-radius:10px;display:grid;place-items:center;flex-shrink:0;font-size:.8rem}
-.feed-item__icon--amber{background:#fef3c7}.feed-item__icon--blue{background:#dbeafe}.feed-item__icon--purple{background:var(--brand-soft)}.feed-item__icon--green{background:#d1fae5}
+.feed-item__icon{width:32px;height:32px;border-radius:10px;display:grid;place-items:center;flex-shrink:0;font-size:.8rem}.feed-item__icon svg{width:16px;height:16px}
+.feed-item__icon--amber{background:#fef3c7;color:#b45309}.feed-item__icon--blue{background:#dbeafe;color:#2563eb}.feed-item__icon--purple{background:var(--brand-soft);color:var(--brand)}.feed-item__icon--green{background:#d1fae5;color:#059669}
 .feed-item__title{font-size:.84rem;font-weight:600}.feed-item__sub{font-size:.72rem;color:var(--ink-muted);margin-top:.08rem}
 .feed-item__date{font-size:.7rem;color:var(--ink-3);white-space:nowrap;margin-left:auto}
 .sos-bar{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.85rem 1.15rem;border-radius:var(--radius-lg);background:linear-gradient(90deg,#faf5ff,#fdf2f8);border:1px solid var(--line);margin-top:1rem}
@@ -179,6 +179,15 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 <symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></symbol>
 <symbol id="i-heart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></symbol>
 <symbol id="i-phone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></symbol>
+<symbol id="i-activity" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l3-7 4 14 3-7h4"/></symbol>
+<symbol id="i-pill" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m10.5 5.5 8 8a4.24 4.24 0 0 1-6 6l-8-8a4.24 4.24 0 0 1 6-6Z"/><path d="m8.5 15.5 7-7"/></symbol>
+<symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/></symbol>
+<symbol id="i-grid" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></symbol>
+<symbol id="i-flag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 22V4"/><path d="M5 4h11l-1.5 4L16 12H5"/></symbol>
+<symbol id="i-scan" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3"/><circle cx="12" cy="12" r="4"/><path d="M10.5 12h3"/></symbol>
+<symbol id="i-droplet" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5S5.5 10 5.5 15a6.5 6.5 0 0 0 13 0C18.5 10 12 2.5 12 2.5Z"/><path d="M9.5 16.5c.7 1 1.6 1.5 2.8 1.5"/></symbol>
+<symbol id="i-trend" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m3 17 6-6 4 4 8-9"/><path d="M15 6h6v6"/></symbol>
+<symbol id="i-clipboard" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="18" rx="2"/><path d="M9 4V2h6v2M8 10h8M8 14h8M8 18h5"/></symbol>
 </defs></svg>
 
 <div class="app">
@@ -258,19 +267,19 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
   </div>
 <div class="status-row">
     <button type="button" class="status-card" data-go="records">
-      <div class="status-card__icon status-card__icon--purple"></div>
+      <div class="status-card__icon status-card__icon--purple"><svg width="18" height="18" aria-hidden="true"><use href="#i-shield"/></svg></div>
       <div><div class="status-card__label">Current Health Status</div><div class="status-card__value"><span class="ok"></span> Stable</div><div class="status-card__sub">No major concerns</div></div>
     </button>
     <button type="button" class="status-card" data-go="records">
-      <div class="status-card__icon status-card__icon--green"></div>
+      <div class="status-card__icon status-card__icon--green"><svg width="18" height="18" aria-hidden="true"><use href="#i-activity"/></svg></div>
       <div><div class="status-card__label">Vitals</div><div class="status-card__value"><span class="ok"></span> All normal</div><div class="status-card__sub">Last updated: today</div></div>
     </button>
     <button type="button" class="status-card" data-go="records">
-      <div class="status-card__icon status-card__icon--blue"></div>
+      <div class="status-card__icon status-card__icon--blue"><svg width="18" height="18" aria-hidden="true"><use href="#i-pill"/></svg></div>
       <div><div class="status-card__label">Medications</div><div class="status-card__value"><span class="ok"></span> On schedule</div><div class="status-card__sub" id="medCount">1 supplement</div></div>
     </button>
     <button type="button" class="status-card" data-go="appointments">
-      <div class="status-card__icon status-card__icon--purple"></div>
+      <div class="status-card__icon status-card__icon--purple"><svg width="18" height="18" aria-hidden="true"><use href="#i-cal"/></svg></div>
       <div><div class="status-card__label">Upcoming Appointments</div><div class="status-card__value"> <span id="apptCount">1</span> scheduled</div></div>
     </button>
   </div>
@@ -279,7 +288,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
     <div>
       <div class="card section-card">
         <div class="section-head">
-          <div class="section-title"><span></span> Health Overview</div>
+          <div class="section-title"><span><svg width="15" height="15" aria-hidden="true"><use href="#i-activity"/></svg></span> Health Overview</div>
           <button type="button" class="link-btn" data-go="records">View All →</button>
         </div>
         <div class="tabs" role="tablist">
@@ -310,36 +319,36 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 
       <div class="card section-card">
         <div class="section-head">
-          <div class="section-title"><span style="background:#fef3c7;color:#d97706"></span> Milestones</div>
+          <div class="section-title"><span style="background:#fef3c7;color:#d97706"><svg width="15" height="15" aria-hidden="true"><use href="#i-flag"/></svg></span> Milestones</div>
           <button type="button" class="link-btn" data-go="timeline">View All →</button>
         </div>
         <div class="milestones-track" id="milestoneTrack">
-          <div class="milestone is-done"><div class="milestone__icon"><span class="milestone__check"></span></div><div class="milestone__name">12 weeks</div><div class="milestone__range">Baby's organs forming</div></div>
-          <div class="milestone is-done"><div class="milestone__icon"><span class="milestone__check"></span></div><div class="milestone__name">16 weeks</div><div class="milestone__range">Gender (optional)</div></div>
-          <div class="milestone is-current"><div class="milestone__icon"></div><div class="milestone__name">20 weeks</div><div class="milestone__range">Anomaly scan</div></div>
-          <div class="milestone is-locked"><div class="milestone__icon">🩸</div><div class="milestone__name">24 weeks</div><div class="milestone__range">Glucose test</div></div>
-          <div class="milestone is-locked"><div class="milestone__icon"></div><div class="milestone__name">28 weeks</div><div class="milestone__range">Growth scan</div></div>
+          <div class="milestone is-done"><div class="milestone__icon"><svg width="19" height="19" aria-hidden="true"><use href="#i-heart"/></svg><span class="milestone__check"></span></div><div class="milestone__name">12 weeks</div><div class="milestone__range">Baby's organs forming</div></div>
+          <div class="milestone is-done"><div class="milestone__icon"><svg width="19" height="19" aria-hidden="true"><use href="#i-baby"/></svg><span class="milestone__check"></span></div><div class="milestone__name">16 weeks</div><div class="milestone__range">Gender (optional)</div></div>
+          <div class="milestone is-current"><div class="milestone__icon"><svg width="19" height="19" aria-hidden="true"><use href="#i-scan"/></svg></div><div class="milestone__name">20 weeks</div><div class="milestone__range">Anomaly scan</div></div>
+          <div class="milestone is-locked"><div class="milestone__icon"><svg width="19" height="19" aria-hidden="true"><use href="#i-droplet"/></svg></div><div class="milestone__name">24 weeks</div><div class="milestone__range">Glucose test</div></div>
+          <div class="milestone is-locked"><div class="milestone__icon"><svg width="19" height="19" aria-hidden="true"><use href="#i-trend"/></svg></div><div class="milestone__name">28 weeks</div><div class="milestone__range">Growth scan</div></div>
         </div>
       </div>
     </div>
 
     <div class="side-stack">
       <div class="card section-card">
-        <div class="section-title" style="margin-bottom:.85rem"><span></span> Quick Actions</div>
+        <div class="section-title" style="margin-bottom:.85rem"><span><svg width="15" height="15" aria-hidden="true"><use href="#i-grid"/></svg></span> Quick Actions</div>
         <div class="qa-grid">
-          <button type="button" class="qa-item" data-go="appointments"><div class="qa-item__icon qa-item__icon--blue"></div><div class="qa-item__title">Book Appointment <span>›</span></div><div class="qa-item__sub">See a doctor</div></button>
-          <button type="button" class="qa-item" data-go="records"><div class="qa-item__icon qa-item__icon--purple"></div><div class="qa-item__title">View Test Reports <span>›</span></div><div class="qa-item__sub">Lab results &amp; reports</div></button>
-          <button type="button" class="qa-item" data-go="records"><div class="qa-item__icon qa-item__icon--green"></div><div class="qa-item__title">Track Health <span>›</span></div><div class="qa-item__sub">Weight, vitals &amp; more</div></button>
-          <button type="button" class="qa-item" data-go="timeline"><div class="qa-item__icon qa-item__icon--amber"></div><div class="qa-item__title">View Care Timeline <span>›</span></div><div class="qa-item__sub">Your pregnancy journey</div></button>
+          <button type="button" class="qa-item" data-go="appointments"><div class="qa-item__icon qa-item__icon--blue"><svg width="16" height="16" aria-hidden="true"><use href="#i-cal"/></svg></div><div class="qa-item__title">Book Appointment <span>›</span></div><div class="qa-item__sub">See a doctor</div></button>
+          <button type="button" class="qa-item" data-go="records"><div class="qa-item__icon qa-item__icon--purple"><svg width="16" height="16" aria-hidden="true"><use href="#i-file"/></svg></div><div class="qa-item__title">View Test Reports <span>›</span></div><div class="qa-item__sub">Lab results &amp; reports</div></button>
+          <button type="button" class="qa-item" data-go="records"><div class="qa-item__icon qa-item__icon--green"><svg width="16" height="16" aria-hidden="true"><use href="#i-activity"/></svg></div><div class="qa-item__title">Track Health <span>›</span></div><div class="qa-item__sub">Weight, vitals &amp; more</div></button>
+          <button type="button" class="qa-item" data-go="timeline"><div class="qa-item__icon qa-item__icon--amber"><svg width="16" height="16" aria-hidden="true"><use href="#i-clock"/></svg></div><div class="qa-item__title">View Care Timeline <span>›</span></div><div class="qa-item__sub">Your pregnancy journey</div></button>
         </div>
       </div>
       <div class="card section-card">
-        <div class="section-head"><div class="section-title"><span></span> Recent Updates</div><button type="button" class="link-btn">View All →</button></div>
+        <div class="section-head"><div class="section-title"><span><svg width="15" height="15" aria-hidden="true"><use href="#i-bell"/></svg></span> Recent Updates</div><button type="button" class="link-btn">View All →</button></div>
         <div class="feed-list" id="recentFeed">
-          <div class="feed-item"><div class="feed-item__icon feed-item__icon--amber"></div><div><div class="feed-item__title">Care updates</div><div class="feed-item__sub">No items yet</div></div><div class="feed-item__date">—</div></div>
-          <div class="feed-item"><div class="feed-item__icon feed-item__icon--green"></div><div><div class="feed-item__title">Test report available</div><div class="feed-item__sub">Blood test · All parameters normal</div></div><div class="feed-item__date">Sep 8</div></div>
-          <div class="feed-item"><div class="feed-item__icon feed-item__icon--purple"></div><div><div class="feed-item__title">Growth checkup</div><div class="feed-item__sub">Weight &amp; BP recorded</div></div><div class="feed-item__date">Sep 5</div></div>
-          <div class="feed-item"><div class="feed-item__icon feed-item__icon--blue"></div><div><div class="feed-item__title">Next appointment</div><div class="feed-item__sub">—</div></div><div class="feed-item__date">—</div></div>
+          <div class="feed-item"><div class="feed-item__icon feed-item__icon--amber"><svg width="16" height="16" aria-hidden="true"><use href="#i-bell"/></svg></div><div><div class="feed-item__title">Care updates</div><div class="feed-item__sub">No items yet</div></div><div class="feed-item__date">—</div></div>
+          <div class="feed-item"><div class="feed-item__icon feed-item__icon--green"><svg width="16" height="16" aria-hidden="true"><use href="#i-file"/></svg></div><div><div class="feed-item__title">Test report available</div><div class="feed-item__sub">Blood test · All parameters normal</div></div><div class="feed-item__date">Sep 8</div></div>
+          <div class="feed-item"><div class="feed-item__icon feed-item__icon--purple"><svg width="16" height="16" aria-hidden="true"><use href="#i-trend"/></svg></div><div><div class="feed-item__title">Growth checkup</div><div class="feed-item__sub">Weight &amp; BP recorded</div></div><div class="feed-item__date">Sep 5</div></div>
+          <div class="feed-item"><div class="feed-item__icon feed-item__icon--blue"><svg width="16" height="16" aria-hidden="true"><use href="#i-cal"/></svg></div><div><div class="feed-item__title">Next appointment</div><div class="feed-item__sub">—</div></div><div class="feed-item__date">—</div></div>
         </div>
       </div>
     </div>
@@ -354,7 +363,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 <!-- PROFILE -->
 <div class="panel" id="panel-profile">
   <div class="card section-card" style="max-width:560px">
-    <div class="section-title" style="margin-bottom:1rem"><span></span> Mother / Patient Profile</div>
+    <div class="section-title" style="margin-bottom:1rem"><span><svg width="15" height="15" aria-hidden="true"><use href="#i-user"/></svg></span> Mother / Patient Profile</div>
     <form class="form-grid" id="profileForm">
       <div class="form-group"><label for="pfName">Full name</label><input id="pfName" value="" required></div>
       <div class="form-group"><label for="pfPhone">Phone</label><input id="pfPhone" type="tel" value="+91 98765 43210"></div>
@@ -370,7 +379,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 <div class="panel" id="panel-appointments">
   <div class="main-grid">
     <div class="card section-card">
-      <div class="section-title" style="margin-bottom:1rem"><span></span> Request appointment</div>
+      <div class="section-title" style="margin-bottom:1rem"><span><svg width="15" height="15" aria-hidden="true"><use href="#i-cal"/></svg></span> Request appointment</div>
       <form class="form-grid" id="apptForm">
         <div class="form-group"><label for="apptType">Type / reason</label>
           <select id="apptType"><option>Obstetrician Consultation</option><option>Ultrasound / Scan</option><option>Lab / Blood test</option><option>Vaccination</option><option>General checkup</option></select>
@@ -385,7 +394,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
       </form>
     </div>
     <div class="card list-card">
-      <div class="section-card" style="border:0;box-shadow:none;padding-bottom:.5rem"><div class="section-title"><span></span> Your requests</div></div>
+      <div class="section-card" style="border:0;box-shadow:none;padding-bottom:.5rem"><div class="section-title"><span><svg width="15" height="15" aria-hidden="true"><use href="#i-clock"/></svg></span> Your requests</div></div>
       <div id="apptList"></div>
     </div>
   </div>
@@ -394,7 +403,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 <!-- TIMELINE -->
 <div class="panel" id="panel-timeline">
   <div class="card section-card">
-    <div class="section-head"><div class="section-title"><span></span> Care Timeline</div></div>
+    <div class="section-head"><div class="section-title"><span><svg width="15" height="15" aria-hidden="true"><use href="#i-clock"/></svg></span> Care Timeline</div></div>
     <div id="timelineList"></div>
   </div>
 </div>
@@ -403,7 +412,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 <div class="panel" id="panel-records">
   <div class="main-grid">
     <div class="card section-card">
-      <div class="section-title" style="margin-bottom:1rem"><span></span> Log vitals</div>
+      <div class="section-title" style="margin-bottom:1rem"><span><svg width="15" height="15" aria-hidden="true"><use href="#i-activity"/></svg></span> Log vitals</div>
       <form class="form-grid" id="vitalsForm">
         <div class="form-group"><label for="vWeight">Weight (kg)</label><input id="vWeight" type="number" step="0.1" placeholder="68"></div>
         <div class="form-group"><label for="vBp">Blood pressure</label><input id="vBp" placeholder="120/80"></div>
@@ -411,13 +420,13 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
         <button type="submit" class="btn btn--primary">Save entry</button>
       </form>
       <div style="margin-top:1.25rem">
-        <div class="section-title" style="margin-bottom:.75rem;font-size:.95rem"><span></span> Supplements today</div>
+        <div class="section-title" style="margin-bottom:.75rem;font-size:.95rem"><span><svg width="15" height="15" aria-hidden="true"><use href="#i-pill"/></svg></span> Supplements today</div>
         <label style="display:flex;align-items:center;gap:.6rem;padding:.6rem .75rem;border:1px solid var(--line);border-radius:12px;margin-bottom:.4rem"><input type="checkbox" id="supIron"> Iron / folic acid</label>
         <label style="display:flex;align-items:center;gap:.6rem;padding:.6rem .75rem;border:1px solid var(--line);border-radius:12px"><input type="checkbox" id="supCalcium"> Calcium</label>
       </div>
     </div>
     <div class="card list-card">
-      <div class="section-card" style="border:0;box-shadow:none;padding-bottom:.5rem"><div class="section-title"><span></span> Health log</div></div>
+      <div class="section-card" style="border:0;box-shadow:none;padding-bottom:.5rem"><div class="section-title"><span><svg width="15" height="15" aria-hidden="true"><use href="#i-file"/></svg></span> Health log</div></div>
       <div id="vitalsList"></div>
     </div>
   </div>
@@ -426,7 +435,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 <!-- MESSAGES -->
 <div class="panel" id="panel-messages">
   <div class="card list-card">
-    <div class="section-card" style="border:0;box-shadow:none"><div class="section-title"><span></span> Messages</div></div>
+    <div class="section-card" style="border:0;box-shadow:none"><div class="section-title"><span><svg width="15" height="15" aria-hidden="true"><use href="#i-msg"/></svg></span> Messages</div></div>
     <div id="msgList">
       <div class="list-row" id="feedEmpty"><div class="list-row__meta"><div class="list-row__title">No recent updates</div><div class="list-row__sub">Updates from your care team will appear here.</div></div></div>
 
@@ -437,7 +446,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 <!-- SETTINGS -->
 <div class="panel" id="panel-settings">
   <div class="card section-card" style="max-width:520px">
-    <div class="section-title" style="margin-bottom:1rem"><span></span> Settings</div>
+    <div class="section-title" style="margin-bottom:1rem"><span><svg width="15" height="15" aria-hidden="true"><use href="#i-set"/></svg></span> Settings</div>
     <form class="form-grid" id="settingsForm">
       <div class="form-group"><label for="setLang">Language</label><select id="setLang"><option>English</option><option>Hindi</option></select></div>
       <div class="form-group"><label><input type="checkbox" id="setNotif" checked> Appointment reminders</label></div>
@@ -592,9 +601,14 @@ function renderTimeline() {
     var foundCurrent = false;
     track.innerHTML = slice.map(function (m) {
       var cls, icon;
-      if (m.status === 'completed') { cls = 'is-done'; icon = ''; }
-      else if (!foundCurrent) { cls = 'is-current'; icon = ''; foundCurrent = true; }
-      else { cls = 'is-locked'; icon = ''; }
+      if (m.status === 'completed') { cls = 'is-done'; }
+      else if (!foundCurrent) { cls = 'is-current'; foundCurrent = true; }
+      else { cls = 'is-locked'; }
+      var iconId = /blood|glucose|haemoglobin/i.test(m.title) ? 'i-droplet' :
+        (/scan|ultrasound/i.test(m.title) ? 'i-scan' :
+        (/growth/i.test(m.title) ? 'i-trend' :
+        (/visit|check|antenatal/i.test(m.title) ? 'i-clipboard' : 'i-heart')));
+      icon = '<svg width="19" height="19" aria-hidden="true"><use href="#' + iconId + '"/></svg>';
       return '<div class="milestone ' + cls + '"><div class="milestone__icon">' + icon +
         (m.status === 'completed' ? '<span class="milestone__check"></span>' : '') +
         '</div><div class="milestone__name">' + m.title + '</div><div class="milestone__range">' +
