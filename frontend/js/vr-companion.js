@@ -3,10 +3,12 @@
 
   if (window.DAI_DISABLE_VR_COMPANION || document.getElementById('daiVrCompanion')) return;
 
-  var SKETCHFAB_SRC = 'https://sketchfab.com/models/b253da68cf714a53ae83c30224258ff4/embed?autostart=1&ui_infos=0&ui_watermark=0&ui_ar=0&ui_help=0';
   var api = window.DaiAPI || {};
   var speechEnabled = localStorage.getItem('dai_companion_voice') === '1';
   var voices = [];
+  var scriptBase = document.currentScript && document.currentScript.src
+    ? new URL('.', document.currentScript.src).href
+    : new URL('js/', location.href).href;
 
   function pageRole() {
     var path = location.pathname.toLowerCase();
@@ -121,8 +123,14 @@
     utterance.pitch = 0.96;
     utterance.volume = 0.9;
     var root = document.getElementById('daiVrCompanion');
-    utterance.onstart = function () { if (root) root.classList.add('is-speaking'); };
-    utterance.onend = utterance.onerror = function () { if (root) root.classList.remove('is-speaking'); };
+    utterance.onstart = function () {
+      if (root) root.classList.add('is-speaking');
+      window.dispatchEvent(new CustomEvent('dai-companion-speech-start'));
+    };
+    utterance.onend = utterance.onerror = function () {
+      if (root) root.classList.remove('is-speaking');
+      window.dispatchEvent(new CustomEvent('dai-companion-speech-end'));
+    };
     window.speechSynthesis.speak(utterance);
   }
 
@@ -174,7 +182,7 @@
           '<button class="vr-close" id="vrCompanionClose" type="button" aria-label="Close companion">×</button>' +
         '</header>' +
         '<div class="vr-character" aria-label="Interactive 3D doctor character">' +
-          '<iframe title="Female doctor 36 by deep3dstudio on Sketchfab" src="' + SKETCHFAB_SRC + '" allow="autoplay; fullscreen; xr-spatial-tracking" allowfullscreen loading="lazy"></iframe>' +
+          '<div class="vr-canvas" id="vrDoctorStage" data-vr-canvas><span data-vr-status>Loading 3D doctor…</span></div>' +
           '<div class="vr-talk-meter" aria-hidden="true"><span></span><span></span><span></span><span></span></div>' +
         '</div>' +
         '<div class="vr-safety">Assistive only. No diagnosis, medicine advice, or clinical risk scoring.</div>' +
@@ -217,6 +225,14 @@
     addMessage('assistant', role === 'guest'
       ? 'Hi, I am दाई. I can explain the platform and safe workflow boundaries.'
       : 'Hi, I am दाई. Ask me about timelines, appointments, documents, or how to use this portal.');
+    if ('noModule' in HTMLScriptElement.prototype) {
+      import(scriptBase + 'vr-doctor-viewer.js')
+        .then(function (viewer) { viewer.initDaiVrDoctor('#vrDoctorStage'); })
+        .catch(function () {
+          var stage = document.getElementById('vrDoctorStage');
+          if (stage) stage.innerHTML = '<span>3D doctor unavailable</span>';
+        });
+    }
   }
 
   if ('speechSynthesis' in window) {
