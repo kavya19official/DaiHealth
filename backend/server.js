@@ -6,6 +6,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
+const riskAssessment = require('./riskAssessment');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -152,76 +153,171 @@ const seedCareMilestones = async (client, motherId, careStartDate) => {
 // Auth Routes
 
 // Register Mother
+//
+// Collects the extended antenatal profile (backend/db/antenatal_profile.sql) that
+// frontend/auth.html's registration form already sends: DOB, address, blood group,
+// pregnancy status, LMP/EDD, gravida/parity, history, conditions, medications,
+// allergies, height/weight, and optional vitals. Everything beyond email/password/
+// full_name is optional and best-effort validated — a bad optional field is dropped,
+// never a reason to fail the whole registration.
+//
+// If pregnancy_status is 'delivered' and a child name + DOB are given, a children
+// row is created too (backend/db/child_dashboard.sql — same table childDashboard.js
+// and the Child dashboard use).
+//
+// If enough vitals are present (age from DOB, plus systolic/diastolic), an initial
+// maternal risk assessment runs and is stored on mother_profiles (riskAssessment.js).
+const DATE_ONLY_RE = /^\d{4}-\d{2}-\d{2}$/;
+const isPlainDate = (s) => typeof s === 'string' && DATE_ONLY_RE.test(s) && !Number.isNaN(new Date(`${s}T00:00:00Z`).getTime());
+const cleanupStr = (v, max) => (typeof v === 'string' && v.trim() ? v.trim().slice(0, max) : null);
+const cleanupNum = (v, min, max) => {
+  if (v === undefined || v === null || v === '') return null;
+  const n = typeof v === 'number' ? v : Number(v);
+  return Number.isFinite(n) && n >= min && n <= max ? n : null;
+};
+const cleanupInt = (v, min, max) => {
+  const n = cleanupNum(v, min, max);
+  return n === null ? null : Math.round(n);
+};
+const BLOOD_GROUPS_RE = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
+const cleanupBloodGroup = (v) => (typeof v === 'string' && BLOOD_GROUPS_RE.includes(v.trim().toUpperCase()) ? v.trim().toUpperCase() : null);
+const PREGNANCY_STATUSES = ['pregnant', 'delivered', 'planning'];
+// Registration's child-gender field is free text ("Optional" placeholder), so this is a
+// best-effort normalisation onto the children table's sex CHECK ('female' | 'male' | 'other').
+const normalizeChildSex = (v) => {
+  const s = String(v || '').trim().toLowerCase();
+  if (['female', 'girl', 'f'].includes(s)) return 'female';
+  if (['male', 'boy', 'm'].includes(s)) return 'male';
+  return 'other';
+};
+const ageFromDob = (dobStr) => {
+  const dob = new Date(`${dobStr}T00:00:00Z`);
+  const now = new Date();
+  let age = now.getUTCFullYear() - dob.getUTCFullYear();
+  const beforeBirthday = now.getUTCMonth() < dob.getUTCMonth()
+    || (now.getUTCMonth() === dob.getUTCMonth() && now.getUTCDate() < dob.getUTCDate());
+  if (beforeBirthday) age -= 1;
+  return age;
+};
+
 app.post('/api/auth/register/mother', async (req, res) => {
   try {
-    const { email, password, full_name, phone, emergency_contact_name, emergency_contact_phone } = req.body;
+    const b = req.body || {};
+    const { email, password, full_name, phone, emergency_contact_name, emergency_contact_phone } = b;
 
-    // Validation
     if (!email || !password || !full_name) {
       return res.status(400).json({ error: 'Email, password, and full name are required' });
     }
-
     if (password.length < 8) {
       return res.status(400).json({ error: 'Password must be at least 8 characters' });
     }
 
-    // Check if user already exists
     const existingUser = await pool.query('SELECT id FROM users WHERE email = $1', [email]);
     if (existingUser.rows.length > 0) {
       return res.status(400).json({ error: 'User with this email already exists' });
     }
 
-    // Hash password
+    // ---- Extended antenatal profile (all optional) --------------------------------
+    const dateOfBirth = isPlainDate(b.date_of_birth) ? b.date_of_birth : null;
+    const address = cleanupStr(b.address, 500);
+    const bloodGroup = cleanupBloodGroup(b.blood_group);
+    const pregnancyStatus = PREGNANCY_STATUSES.includes(b.pregnancy_status) ? b.pregnancy_status : 'pregnant';
+    const lmpDate = isPlainDate(b.lmp_date) ? b.lmp_date : null;
+    const eddDate = isPlainDate(b.edd_date) ? b.edd_date : null;
+    const gravida = cleanupInt(b.gravida, 1, 20);
+    const parity = cleanupInt(b.parity, 0, 20);
+    const previousComplications = cleanupStr(b.previous_complications, 500);
+    const medicalConditions = cleanupStr(b.medical_conditions, 500);
+    const allergies = cleanupStr(b.allergies, 500);
+    const currentMedications = cleanupStr(b.current_medications, 500);
+    const heightCm = cleanupNum(b.height_cm, 100, 220);
+    const prePregnancyWeightKg = cleanupNum(b.pre_pregnancy_weight_kg, 25, 250);
+    const systolic = cleanupInt(b.systolic, 60, 260);
+    const diastolic = cleanupInt(b.diastolic, 30, 160);
+    const bloodSugarMmol = cleanupNum(b.blood_sugar, 1, 40);
+
+    // care_start_date: prefer what she told us over "today". An EDD implies an LMP
+    // 280 days earlier; either anchors the same care timeline the rest of the app uses.
+    let careStartDate = new Date();
+    if (lmpDate) careStartDate = new Date(`${lmpDate}T00:00:00Z`);
+    else if (eddDate) careStartDate = new Date(new Date(`${eddDate}T00:00:00Z`).getTime() - 280 * 24 * 60 * 60 * 1000);
+
+    // ---- Optional child (pregnancy_status === 'delivered') ------------------------
+    const wantsChild = pregnancyStatus === 'delivered' && cleanupStr(b.child_full_name, 120) && isPlainDate(b.child_date_of_birth);
+    if (pregnancyStatus === 'delivered' && cleanupStr(b.child_full_name, 120) && !isPlainDate(b.child_date_of_birth)) {
+      return res.status(400).json({ error: 'Enter a valid date of birth for your child' });
+    }
+
+    // ---- Initial risk assessment (only when we have enough to score) --------------
+    let riskResult = null;
+    if (dateOfBirth && systolic != null && diastolic != null) {
+      riskResult = riskAssessment.assessRisk({
+        age: ageFromDob(dateOfBirth),
+        systolic,
+        diastolic,
+        blood_sugar: bloodSugarMmol == null ? undefined : bloodSugarMmol,
+        previous_complications: !!previousComplications,
+        preexisting_diabetes: /diabetes/i.test(medicalConditions || ''),
+        medical_conditions: medicalConditions,
+        gravida,
+      });
+      if (riskResult.error) riskResult = null; // missing/invalid vitals — skip silently, not a signup blocker
+    }
+
     const password_hash = await bcrypt.hash(password, 10);
 
-    // Start transaction
     const client = await pool.connect();
     try {
       await client.query('BEGIN');
 
-      // Insert user
       const userResult = await client.query(
         'INSERT INTO users (email, password_hash, role) VALUES ($1, $2, $3) RETURNING id',
         [email, password_hash, 'mother']
       );
-
       const userId = userResult.rows[0].id;
 
-      // Insert mother profile
-      const careStartDate = new Date();
       await client.query(
-        'INSERT INTO mother_profiles (user_id, full_name, phone, emergency_contact_name, emergency_contact_phone, care_start_date) VALUES ($1, $2, $3, $4, $5, $6)',
-        [userId, full_name, phone, emergency_contact_name, emergency_contact_phone, careStartDate]
+        `INSERT INTO mother_profiles (
+           user_id, full_name, phone, emergency_contact_name, emergency_contact_phone, care_start_date,
+           date_of_birth, address, blood_group, pregnancy_status, lmp_date, edd_date, gravida, parity,
+           previous_complications, medical_conditions, allergies, current_medications,
+           height_cm, pre_pregnancy_weight_kg, risk_level, risk_factors, risk_assessed_at
+         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23)`,
+        [userId, full_name, phone, emergency_contact_name, emergency_contact_phone, careStartDate,
+         dateOfBirth, address, bloodGroup, pregnancyStatus, lmpDate, eddDate, gravida, parity,
+         previousComplications, medicalConditions, allergies, currentMedications,
+         heightCm, prePregnancyWeightKg,
+         riskResult ? riskResult.risk_level : null,
+         riskResult ? JSON.stringify(riskResult.factors) : null,
+         riskResult ? new Date() : null]
       );
 
-      // Seed her care timeline from the standard milestone template
       await seedCareMilestones(client, userId, careStartDate);
+
+      if (wantsChild) {
+        await client.query(
+          `INSERT INTO children (mother_id, name, date_of_birth, sex, blood_group)
+           VALUES ($1, $2, $3, $4, $5)`,
+          [userId, cleanupStr(b.child_full_name, 120), b.child_date_of_birth,
+           normalizeChildSex(b.child_gender), cleanupBloodGroup(b.child_blood_group)]
+        );
+      }
 
       await client.query('COMMIT');
 
-      // Generate JWT token
-      const token = jwt.sign(
-        { id: userId, email, role: 'mother' },
-        JWT_SECRET,
-        { expiresIn: JWT_EXPIRES_IN }
-      );
-
-      // Set HTTP-only cookie
+      const token = jwt.sign({ id: userId, email, role: 'mother' }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
       res.cookie('token', token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
-        maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+        maxAge: 7 * 24 * 60 * 60 * 1000
       });
 
       res.status(201).json({
         message: 'Mother registered successfully',
-        user: {
-          id: userId,
-          email,
-          role: 'mother',
-          full_name
-        }
+        user: { id: userId, email, role: 'mother', full_name },
+        risk: riskResult ? { risk_level: riskResult.risk_level, factors: riskResult.factors } : null,
+        child_added: wantsChild
       });
     } catch (error) {
       await client.query('ROLLBACK');
@@ -234,7 +330,6 @@ app.post('/api/auth/register/mother', async (req, res) => {
     res.status(500).json({ error: 'Registration failed' });
   }
 });
-
 // Register Doctor
 app.post('/api/auth/register/doctor', async (req, res) => {
   try {
@@ -920,6 +1015,107 @@ app.patch('/api/appointments/:id/status', authenticateToken, authorizeRole(['doc
 // Mother dashboard: pregnancy profile, vitals/kick logs, reports
 require('./motherDashboard')(app, { pool, authenticateToken, authorizeRole, MILESTONE_TEMPLATE });
 
+// ============================================================================
+// Maternal risk assessment (backend/riskAssessment.js) — mother-only, own data.
+//
+//   GET  /api/risk          the mother's last-saved assessment (or nulls if none yet)
+//   POST /api/risk/assess   recompute from her stored profile + most recent vitals,
+//                           save it, and return the full breakdown
+// ============================================================================
+app.get('/api/risk', authenticateToken, authorizeRole(['mother']), async (req, res) => {
+  try {
+    const r = await pool.query(
+      'SELECT risk_level, risk_factors, risk_assessed_at FROM mother_profiles WHERE user_id = $1',
+      [req.user.id]
+    );
+    if (!r.rows.length) return res.status(404).json({ error: 'Profile not found' });
+    const row = r.rows[0];
+    res.json({ risk_level: row.risk_level, risk_factors: row.risk_factors || [], risk_assessed_at: row.risk_assessed_at });
+  } catch (error) {
+    console.error('Fetch risk error:', error);
+    res.status(500).json({ error: 'Failed to load risk assessment' });
+  }
+});
+
+app.post('/api/risk/assess', authenticateToken, authorizeRole(['mother']), async (req, res) => {
+  try {
+    const b = req.body || {};
+    const profile = await pool.query(
+      `SELECT date_of_birth, gravida, previous_complications, medical_conditions
+         FROM mother_profiles WHERE user_id = $1`,
+      [req.user.id]
+    );
+    if (!profile.rows.length) return res.status(404).json({ error: 'Profile not found' });
+    const p = profile.rows[0];
+    if (!p.date_of_birth) {
+      return res.status(400).json({ error: 'Add your date of birth in your profile before running a risk assessment' });
+    }
+
+    const numOr = (v, min, max) => {
+      if (v === undefined || v === null || v === '') return null;
+      const n = Number(v);
+      return Number.isFinite(n) && n >= min && n <= max ? n : null;
+    };
+
+    let systolic = numOr(b.systolic, 60, 260);
+    let diastolic = numOr(b.diastolic, 30, 160);
+    let bloodSugar = numOr(b.blood_sugar, 1, 40); // mmol/L
+
+    if (systolic == null || diastolic == null) {
+      const bp = await pool.query(
+        `SELECT data FROM health_logs WHERE mother_id = $1 AND log_type = 'blood_pressure' ORDER BY logged_at DESC LIMIT 1`,
+        [req.user.id]
+      );
+      if (bp.rows.length) {
+        systolic = systolic == null ? Number(bp.rows[0].data.systolic) : systolic;
+        diastolic = diastolic == null ? Number(bp.rows[0].data.diastolic) : diastolic;
+      }
+    }
+    if (systolic == null || diastolic == null) {
+      return res.status(400).json({ error: 'Log a blood pressure reading first, then reassess risk' });
+    }
+    if (bloodSugar == null) {
+      const gl = await pool.query(
+        `SELECT data FROM health_logs WHERE mother_id = $1 AND log_type = 'blood_glucose' ORDER BY logged_at DESC LIMIT 1`,
+        [req.user.id]
+      );
+      // health_logs stores blood glucose in mg/dL; riskAssessment.js works in mmol/L.
+      if (gl.rows.length) bloodSugar = Number(gl.rows[0].data.mg_dl) / 18.0182;
+    }
+
+    const age = (() => {
+      const dob = new Date(p.date_of_birth);
+      const now = new Date();
+      let a = now.getUTCFullYear() - dob.getUTCFullYear();
+      if (now.getUTCMonth() < dob.getUTCMonth() || (now.getUTCMonth() === dob.getUTCMonth() && now.getUTCDate() < dob.getUTCDate())) a -= 1;
+      return a;
+    })();
+
+    const assessment = riskAssessment.assessRisk({
+      age, systolic, diastolic,
+      blood_sugar: bloodSugar == null ? undefined : bloodSugar,
+      body_temp: numOr(b.body_temp, 90, 110) == null ? undefined : numOr(b.body_temp, 90, 110),
+      heart_rate: numOr(b.heart_rate, 30, 220) == null ? undefined : numOr(b.heart_rate, 30, 220),
+      previous_complications: !!p.previous_complications,
+      preexisting_diabetes: /diabetes/i.test(p.medical_conditions || ''),
+      medical_conditions: p.medical_conditions,
+      gravida: p.gravida,
+    });
+    if (assessment.error) return res.status(400).json({ error: assessment.error });
+
+    await pool.query(
+      'UPDATE mother_profiles SET risk_level = $2, risk_factors = $3, risk_assessed_at = CURRENT_TIMESTAMP WHERE user_id = $1',
+      [req.user.id, assessment.risk_level, JSON.stringify(assessment.factors)]
+    );
+
+    res.json({ message: 'Risk assessment updated', assessment });
+  } catch (error) {
+    console.error('Assess risk error:', error);
+    res.status(500).json({ error: 'Failed to run risk assessment' });
+  }
+});
+
+
 // Child dashboard: child profiles (DOB, photo), per-child vaccines, growth and milestones
 require('./childDashboard')(app, { pool, authenticateToken, authorizeRole });
 
@@ -936,6 +1132,10 @@ app.get('/api/health', (req, res) => {
 
 // Serve the plain HTML frontend from the same Render service.
 const frontendPath = path.join(__dirname, '..', 'frontend');
+// shared/child-reference.js is the one vaccination/milestone/growth schedule used by
+// both the browser (window.AnvayaChild) and backend/childDashboard.js, so it's served
+// here rather than copied into frontend/ where it could silently drift out of sync.
+app.use('/shared', express.static(path.join(__dirname, '..', 'shared')));
 app.use('/frontend', express.static(frontendPath));
 app.use(express.static(frontendPath));
 app.get('/', (req, res) => {
