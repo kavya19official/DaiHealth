@@ -1,4 +1,4 @@
-// ============================================================================
+// ===========================================================================
 // Child dashboard routes
 //
 // Registered from server.js. Mother routes are scoped to the authenticated
