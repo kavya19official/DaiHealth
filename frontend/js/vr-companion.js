@@ -6,6 +6,7 @@
   var api = window.DaiAPI || {};
   var speechEnabled = localStorage.getItem('dai_companion_voice') === '1';
   var voices = [];
+  var companionName = 'Dr. Daya';
   var scriptBase = document.currentScript && document.currentScript.src
     ? new URL('.', document.currentScript.src).href
     : new URL('js/', location.href).href;
@@ -174,25 +175,34 @@
     root.className = 'vr-companion vr-companion--' + role;
     root.innerHTML =
       '<button class="vr-orb" id="vrCompanionToggle" type="button" aria-label="Open दाई AI Care Companion">' +
-        '<span class="vr-orb__rings" aria-hidden="true"></span><span class="vr-orb__face">दाई</span>' +
+        '<span class="vr-orb__avatar" aria-hidden="true">द</span>' +
+        '<span class="vr-orb__copy"><strong>Ask ' + companionName + '</strong><small>AI Care Guide</small></span>' +
+        '<span class="vr-orb__chev" aria-hidden="true">⌄</span>' +
       '</button>' +
       '<section class="vr-panel" id="vrCompanionPanel" aria-hidden="true" aria-label="दाई AI Care Companion">' +
-        '<header class="vr-panel__head">' +
-          '<div><span class="vr-kicker">AI Care Companion</span><h2>Ask दाई</h2><p>General guidance, portal help and safe next steps.</p></div>' +
-          '<button class="vr-close" id="vrCompanionClose" type="button" aria-label="Close companion">×</button>' +
-        '</header>' +
-        '<div class="vr-character" aria-label="Interactive 3D doctor character">' +
-          '<div class="vr-canvas" id="vrDoctorStage" data-vr-canvas><span data-vr-status>Loading 3D doctor…</span></div>' +
-          '<div class="vr-talk-meter" aria-hidden="true"><span></span><span></span><span></span><span></span></div>' +
+        '<div class="vr-stage-pane">' +
+          '<div class="vr-stage-top"><span><i></i> Live guide</span><b>Virtual care guidance</b></div>' +
+          '<div class="vr-character" aria-label="Interactive 3D doctor character">' +
+            '<div class="vr-canvas" id="vrDoctorStage" data-vr-canvas><span data-vr-status>Loading 3D doctor…</span></div>' +
+            '<div class="vr-talk-meter" aria-hidden="true"><span></span><span></span><span></span><span></span></div>' +
+          '</div>' +
+          '<div class="vr-stage-footer"><span>Ready to help</span><span class="vr-stage-dot">Assistive only</span></div>' +
         '</div>' +
-        '<div class="vr-safety">Assistive only. No diagnosis, medicine advice, or clinical risk scoring.</div>' +
-        '<div class="vr-feed" id="vrCompanionFeed"></div>' +
-        '<div class="vr-chips" id="vrCompanionChips"></div>' +
-        '<form class="vr-form" id="vrCompanionForm">' +
-          '<input id="vrCompanionInput" type="text" autocomplete="off" placeholder="Ask about timelines, appointments, documents…">' +
-          '<button id="vrCompanionSend" type="submit">Ask</button>' +
-        '</form>' +
-        '<button class="vr-voice" id="vrVoiceToggle" type="button" aria-pressed="' + (speechEnabled ? 'true' : 'false') + '">' + (speechEnabled ? 'Voice on' : 'Voice off') + '</button>' +
+        '<div class="vr-chat-pane">' +
+          '<header class="vr-panel__head">' +
+            '<span class="vr-head-avatar" aria-hidden="true">द</span>' +
+            '<div><h2>' + companionName + '</h2><p>Grounded दाई care guidance</p></div>' +
+            '<button class="vr-close" id="vrCompanionClose" type="button" aria-label="Close companion">×</button>' +
+          '</header>' +
+          '<div class="vr-safety">Assistive only. No diagnosis, medicine advice, or clinical risk scoring.</div>' +
+          '<div class="vr-feed" id="vrCompanionFeed"></div>' +
+          '<div class="vr-chips" id="vrCompanionChips"></div>' +
+          '<form class="vr-form" id="vrCompanionForm">' +
+            '<input id="vrCompanionInput" type="text" autocomplete="off" placeholder="Ask your guide…">' +
+            '<button id="vrCompanionSend" type="submit" aria-label="Send message">➤</button>' +
+          '</form>' +
+          '<button class="vr-voice" id="vrVoiceToggle" type="button" aria-pressed="' + (speechEnabled ? 'true' : 'false') + '">' + companionName + ' voice · ' + (speechEnabled ? 'on' : 'off') + '</button>' +
+        '</div>' +
       '</section>';
     document.body.appendChild(root);
 
@@ -201,7 +211,7 @@
     document.getElementById('vrVoiceToggle').addEventListener('click', function () {
       speechEnabled = !speechEnabled;
       localStorage.setItem('dai_companion_voice', speechEnabled ? '1' : '0');
-      this.textContent = speechEnabled ? 'Voice on' : 'Voice off';
+      this.textContent = companionName + ' voice · ' + (speechEnabled ? 'on' : 'off');
       this.setAttribute('aria-pressed', speechEnabled ? 'true' : 'false');
       if (!speechEnabled && 'speechSynthesis' in window) window.speechSynthesis.cancel();
     });
@@ -223,8 +233,8 @@
       chips.appendChild(btn);
     });
     addMessage('assistant', role === 'guest'
-      ? 'Hi, I am दाई. I can explain the platform and safe workflow boundaries.'
-      : 'Hi, I am दाई. Ask me about timelines, appointments, documents, or how to use this portal.');
+      ? 'Namaste, I’m Dr. Daya, your दाई guide. Ask me about the platform, portals, and safety boundaries.'
+      : 'Namaste, I’m Dr. Daya, your दाई guide. Ask me about timelines, appointments, documents, or how to use this portal.');
     if ('noModule' in HTMLScriptElement.prototype) {
       import(scriptBase + 'vr-doctor-viewer.js')
         .then(function (viewer) { viewer.initDaiVrDoctor('#vrDoctorStage'); })
