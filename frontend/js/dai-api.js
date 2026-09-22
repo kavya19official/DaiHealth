@@ -6,10 +6,16 @@
 (function (global) {
   'use strict';
 
-  var API_BASE =
-    /^(localhost|127\.0\.0\.1)$/.test(location.hostname)
+  var isLocal = /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+  var isBackendOrigin = isLocal && location.port === '3001';
+  var isRenderOrigin = /\.onrender\.com$/.test(location.hostname);
+  var API_BASE = global.DAI_API_BASE || (
+    isBackendOrigin || isRenderOrigin
       ? '/api'
-      : (global.DAI_API_BASE || 'https://daihealth.onrender.com/api');
+      : isLocal
+        ? location.protocol + '//' + location.hostname + ':3001/api'
+        : 'https://daihealth.onrender.com/api'
+  );
 
   function toast(msg) {
     var el = document.getElementById('toast');

@@ -6,7 +6,11 @@
   let selectedPatientId = 'P-1002';
   let apiAvailable = false;
   let pendingAction = null;
-  const API_BASE = window.DAI_API_BASE || `${location.protocol}//${location.hostname || 'localhost'}:3001/api`;
+  const localHost = /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+  const API_BASE = window.DAI_API_BASE || (window.DaiAPI && window.DaiAPI.API_BASE) ||
+    (localHost && location.port !== '3001'
+      ? `${location.protocol}//${location.hostname}:3001/api`
+      : '/api');
   const permissions = {
     admin: ['*'],
     doctor: ['brief_review', 'draft_edit', 'draft_review', 'priority', 'facility_review'],
@@ -69,6 +73,12 @@
   let audit = [];
 
   const byId = (id) => document.getElementById(id);
+  const signOut = byId('hospitalSignOut');
+  if (signOut) signOut.addEventListener('click', () => {
+    localStorage.removeItem('dai_guest');
+    localStorage.removeItem('dai_guest_role');
+  });
+
   const esc = (value) => String(value == null ? '' : value).replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const fmtDate = (value) => new Date(value).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
   const addDays = (value,days) => new Date(new Date(value).getTime()+days*DAY_MS);
@@ -131,5 +141,7 @@
   byId('currentRole').addEventListener('change',(e)=>{currentRole=e.target.value;localStorage.setItem('daiHospitalRole',currentRole);showToast(`Viewing as ${currentRole.replaceAll('_',' ')}.`);rerender();});
   document.querySelectorAll('.nav a').forEach((link)=>link.addEventListener('click',()=>{document.querySelectorAll('.nav a').forEach((a)=>a.classList.remove('is-active'));link.classList.add('is-active');}));
 
+  populateControls();
+  rerender();
   loadState(true).then(()=>{populateControls();rerender();});
 })();

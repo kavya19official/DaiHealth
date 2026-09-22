@@ -98,6 +98,9 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 .footer-bar{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.85rem 1.15rem;border-radius:var(--radius-lg);background:linear-gradient(90deg,#faf5ff,#f5f3ff);border:1px solid var(--line);margin-top:1rem;font-size:.85rem;color:var(--ink-2)}
 @media(max-width:1200px){.grid-3{grid-template-columns:1fr 1fr}.action-row{grid-template-columns:1fr 1fr}}
 @media(max-width:900px){.app{grid-template-columns:1fr}.sidebar{display:none}.welcome-row,.grid-3{grid-template-columns:1fr}.action-row{grid-template-columns:1fr}}
+
+.ops-intro{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;margin-bottom:1rem}.ops-intro h1{font-family:var(--display);font-size:1.65rem;margin:0 0 .3rem}.ops-intro p,.ops-status{margin:0;color:var(--ink-muted)}.ops-status{padding:.5rem .75rem;border-radius:999px;background:var(--brand-soft);color:var(--brand-strong);font-size:.78rem;font-weight:700}.ops-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1rem;margin-bottom:1rem}.ops-metric{padding:1rem}.ops-metric span,.ops-metric small{display:block;color:var(--ink-muted)}.ops-metric span{font-size:.72rem;text-transform:uppercase;font-weight:700;letter-spacing:.04em}.ops-metric b{display:block;font:800 1.8rem var(--display);color:var(--brand);margin:.25rem 0}.ops-grid{display:grid;grid-template-columns:minmax(240px,.7fr) minmax(0,1.3fr);gap:1rem;margin-bottom:1rem}.ops-card{padding:1rem}.ops-patients{display:grid;gap:.45rem}.ops-patient{display:flex;align-items:center;justify-content:space-between;gap:.75rem;width:100%;padding:.75rem;border:1px solid var(--line);border-radius:12px;background:#fff;text-align:left}.ops-patient:hover,.ops-patient.is-selected{border-color:var(--brand);background:var(--brand-pale)}.ops-patient b,.ops-patient small,.ops-draft b,.ops-draft small,.list-row small{display:block}.ops-patient small,.ops-draft small,.list-row small,.muted{color:var(--ink-muted);font-size:.76rem}.ops-actions{display:flex;flex-wrap:wrap;gap:.5rem;margin:.75rem 0}.ops-gap-list{border:1px solid var(--line);border-radius:12px;overflow:hidden}.ops-review-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}.ops-draft{padding:.85rem;border:1px solid var(--line);border-radius:12px;margin-top:.65rem}.ops-draft>p{color:var(--ink-2);font-size:.83rem}.ops-draft>.tag{float:right;margin-top:-2.1rem}.ops-card .list-row{justify-content:space-between}.ops-brief-columns{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}.ops-brief-columns h3{font-size:.85rem;margin:.65rem 0}.section-head{display:flex;justify-content:space-between;align-items:flex-start;gap:1rem}.section-title{font-family:var(--display);font-weight:800}.btn--ghost{background:#fff;border:1px solid var(--line);color:var(--brand-strong)}@media(max-width:1100px){.ops-metrics{grid-template-columns:1fr 1fr}.ops-grid,.ops-review-grid{grid-template-columns:1fr}}@media(max-width:640px){.ops-metrics,.ops-brief-columns{grid-template-columns:1fr}.ops-intro{display:block}.ops-status{display:inline-block;margin-top:.6rem}}
+.appointment-layout{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(300px,.75fr);gap:1rem}.appointment-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.75rem;align-items:center;padding:.85rem;border:1px solid var(--line);border-radius:12px;margin-top:.55rem;background:#fff}.appointment-row:hover,.appointment-row.is-selected{border-color:var(--brand);background:var(--brand-pale)}.appointment-row__actions{display:flex;gap:.4rem;flex-wrap:wrap;justify-content:flex-end}.appointment-detail{position:sticky;top:82px;align-self:start}.appointment-detail h2{font-family:var(--display);font-size:1.25rem;margin:0}.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:.65rem;margin:1rem 0}.info-cell{padding:.7rem;border-radius:12px;background:var(--ground);border:1px solid var(--line)}.info-cell small,.info-cell b{display:block}.info-cell small{color:var(--ink-muted);font-size:.7rem;text-transform:uppercase;font-weight:700}.demo-banner{padding:.7rem .85rem;background:var(--brand-soft);color:var(--brand-strong);border-radius:12px;font-size:.8rem;margin-bottom:1rem}.table tr[data-aid]{cursor:pointer}.table tr[data-aid]:hover{background:var(--brand-pale)}@media(max-width:1000px){.appointment-layout{grid-template-columns:1fr}.appointment-detail{position:static}}
 </style>
 <script src="js/dai-api.js"></script>
 </head>
@@ -106,13 +109,14 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 <aside class="sidebar">
   <a class="sidebar__brand" href="index.html">
     <img src="assets/logo-circle.png" alt="" width="40" height="40" onerror="this.src='assets/logo.jpeg'">
-    <span><span class="sidebar__brand-name">दाई</span><span class="sidebar__brand-tag">Hospital Workflow</span></span>
+    <span><span class="sidebar__brand-name">दाई</span><span class="sidebar__brand-tag">Doctor Portal</span></span>
   </a>
   <nav class="sidebar__nav">
     <button type="button" class="nav-item is-active" data-panel="dashboard"> Dashboard</button>
     <button type="button" class="nav-item" data-panel="patients"> Patients</button>
     <button type="button" class="nav-item" data-panel="appointments"> Appointments</button>
     <button type="button" class="nav-item" data-panel="timeline"> Care Timeline</button>
+    <button type="button" class="nav-item" data-panel="clinical-review"> Clinical Review <span class="badge" id="reviewBadge">!</span></button>
     <button type="button" class="nav-item" data-panel="records"> Records</button>
     <button type="button" class="nav-item" data-panel="messages"> Messages <span class="badge">3</span></button>
     <button type="button" class="nav-item" data-panel="settings"> Settings</button>
@@ -165,10 +169,10 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
   </div>
 
   <div class="action-row">
-    <button type="button" class="action-tile" data-go="appointments"><div class="action-tile__icon"></div><div class="action-tile__title">Book Appointment</div><div class="action-tile__sub">Schedule a new visit</div></button>
+    <button type="button" class="action-tile" data-go="appointments"><div class="action-tile__icon"></div><div class="action-tile__title">Review Appointments</div><div class="action-tile__sub">Approve patient requests</div></button>
     <button type="button" class="action-tile" data-go="records"><div class="action-tile__icon"></div><div class="action-tile__title">View Patient Records</div><div class="action-tile__sub">Access medical history</div></button>
     <button type="button" class="action-tile" data-go="timeline"><div class="action-tile__icon"></div><div class="action-tile__title">Update Care Timeline</div><div class="action-tile__sub">Add notes &amp; progress</div></button>
-    <button type="button" class="action-tile" id="teleBtn"><div class="action-tile__icon"></div><div class="action-tile__title">Teleconsultation</div><div class="action-tile__sub">Start online consultation</div></button>
+    <button type="button" class="action-tile" id="teleBtn"><div class="action-tile__icon"></div><div class="action-tile__title">Contact Patient</div><div class="action-tile__sub">Open messages or consultation</div></button>
   </div>
 
   <div class="grid-3">
@@ -200,10 +204,10 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
       <div class="card section-card">
         <div class="section-title" style="margin-bottom:.75rem"> Quick Actions</div>
         <div class="qa-list">
-          <button type="button" class="qa-row" data-go="patients"><span class="qa-row__icon"></span><span class="qa-row__title">Add New Patient</span><span>›</span></button>
+          <button type="button" class="qa-row" data-go="patients"><span class="qa-row__icon"></span><span class="qa-row__title">Assigned Patients</span><span>›</span></button>
           <button type="button" class="qa-row" data-go="records"><span class="qa-row__icon"></span><span class="qa-row__title">View Test Reports</span><span>›</span></button>
           <button type="button" class="qa-row" id="rxBtn"><span class="qa-row__icon"></span><span class="qa-row__title">Send Prescription</span><span>›</span></button>
-          <button type="button" class="qa-row" data-go="records"><span class="qa-row__icon"></span><span class="qa-row__title">Update Records</span><span>›</span></button>
+          <button type="button" class="qa-row" data-go="records"><span class="qa-row__icon"></span><span class="qa-row__title">Review Records</span><span>›</span></button>
           <button type="button" class="qa-row" data-go="timeline"><span class="qa-row__icon"></span><span class="qa-row__title">View Vaccination Schedule</span><span>›</span></button>
         </div>
       </div>
@@ -243,16 +247,14 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 
   <div class="footer-bar">
     <span>Need assistance? Reach out to the support team for any technical or patient-related queries.</span>
-    <button type="button" class="btn btn--primary" id="teleBtn2">Start Teleconsultation →</button>
+    <button type="button" class="btn btn--primary" id="teleBtn2">Contact next patient →</button>
   </div>
 </div>
 
 <!-- PATIENTS -->
 <div class="panel" id="panel-patients">
   <div class="card section-card" style="margin-bottom:1rem">
-    <div class="section-head"><div class="section-title"> Patients</div>
-      <button type="button" class="btn btn--primary btn--sm" id="addPatientBtn">+ Add patient</button>
-    </div>
+    <div class="section-head"><div><div class="section-title">Assigned patients</div><div class="muted">Patients appear after requesting an appointment or being assigned by the hospital.</div></div></div>
     <div style="margin-bottom:.75rem"><input type="search" id="patientFilter" placeholder="Filter patients…" style="width:100%;max-width:320px;padding:.55rem .85rem;border:1px solid var(--line);border-radius:999px"></div>
     <table class="table" id="patientTable"><thead><tr><th>Patient</th><th>Age</th><th>Last visit</th><th>Status</th><th></th></tr></thead><tbody></tbody></table>
   </div>
@@ -270,21 +272,13 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 
 <!-- APPOINTMENTS -->
 <div class="panel" id="panel-appointments">
-  <div class="main-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
-    <div class="card section-card">
-      <div class="section-title" style="margin-bottom:1rem"> Schedule appointment</div>
-      <form class="form-grid" id="docApptForm">
-        <div class="form-group"><label>Patient</label><select id="daPatient"></select></div>
-        <div class="form-group"><label>Reason</label><select id="daReason"><option>Follow-up</option><option>Vaccination</option><option>Sick visit</option><option>Growth check</option><option>Consultation</option></select></div>
-        <div class="form-group"><label>Date</label><input type="date" id="daDate" required></div>
-        <div class="form-group"><label>Time</label><input type="time" id="daTime" value="09:30"></div>
-        <button type="submit" class="btn btn--primary">Book</button>
-      </form>
-    </div>
-    <div class="card section-card">
-      <div class="section-title" style="margin-bottom:.75rem">All appointments</div>
+  <div class="ops-intro"><div><h1>Appointment requests</h1><p>Patients request visits from their dashboard. Review the details, confirm a slot, contact the patient, or mark the visit complete.</p></div><span class="ops-status">Doctor review required</span></div>
+  <div class="appointment-layout">
+    <section class="card section-card">
+      <div class="section-head"><div><div class="section-title">All appointments</div><div class="muted">Pending, confirmed and completed visits</div></div></div>
       <div id="allAppts"></div>
-    </div>
+    </section>
+    <aside class="card section-card appointment-detail" id="appointmentDetail"><div class="empty">Select an appointment to see its details.</div></aside>
   </div>
 </div>
 
@@ -312,6 +306,29 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
   </div>
 </div>
 
+
+<!-- CLINICAL REVIEW -->
+<div class="panel" id="panel-clinical-review">
+  <div class="ops-intro"><div><h1>Clinical review and continuity</h1><p>Review operational gaps, fact-only briefs and drafts. Clinical decisions remain with qualified staff.</p></div><div class="ops-status" id="opsStatus">Loading reviewed workflow…</div></div>
+  <div class="ops-metrics" id="opsMetrics"></div>
+  <div class="ops-grid">
+    <section class="card ops-card"><div class="section-title" style="margin-bottom:.75rem">Assigned patients</div><div class="ops-patients" id="opsPatients"></div></section>
+    <section class="card ops-card" id="opsPatientDetail"><div class="empty">Loading patient continuity data…</div></section>
+  </div>
+  <div class="ops-review-grid">
+    <section class="card ops-card">
+      <div class="section-head"><div><div class="section-title">Pre-consult brief</div><div class="muted">Facts and missing information only</div></div><span class="tag tag--pending" id="opsBriefState">pending review</span></div>
+      <div class="ops-brief-columns"><div><h3>Extracted facts</h3><div id="opsBriefFacts"></div></div><div><h3>Missing or inconsistent</h3><div id="opsBriefFlags"></div></div></div>
+      <div class="ops-actions"><button class="btn btn--primary btn--sm" data-action="review-brief">Mark reviewed</button><button class="btn btn--ghost btn--sm" data-action="reject-brief">Request correction</button></div>
+    </section>
+    <section class="card ops-card">
+      <div class="section-head"><div><div class="section-title">Drafting assistant</div><div class="muted">Approval is required before finalization</div></div><button class="btn btn--primary btn--sm" data-action="new-draft">Generate draft</button></div>
+      <div id="opsDrafts"></div>
+    </section>
+  </div>
+  <section class="card ops-card"><div class="section-title">Recent audit activity</div><div class="muted">Who changed what and when</div><div id="opsAudit" style="margin-top:.65rem"></div></section>
+</div>
+
 <!-- SETTINGS -->
 <div class="panel" id="panel-settings">
   <div class="card section-card" style="max-width:480px">
@@ -336,267 +353,141 @@ var api = window.DaiAPI;
 var currentUser = null;
 var patients = [];
 var appointments = [];
+var selectedAppointmentId = null;
 
 function $(id) { return document.getElementById(id); }
+function esc(value) { return String(value == null ? '' : value).replace(/[&<>"']/g, function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+function addDays(days) { var d=new Date(); d.setDate(d.getDate()+days); return api.localDateStr(d); }
+
+var demoPatients = [
+  {user_id:1001,full_name:'Asha Nair',age_gender:'31 · Female',phone:'+91 90000 11111',gap_count:2,last_appointment:addDays(-12),program:'Maternal care',stage:'Trimester 2',blood_group:'B+',allergies:'None recorded'},
+  {user_id:1002,full_name:'Meera Joshi',age_gender:'28 · Female',phone:'+91 90000 22222',gap_count:3,last_appointment:addDays(-28),program:'Maternal care',stage:'Trimester 3',blood_group:'O+',allergies:'Penicillin'},
+  {user_id:1003,full_name:'Sanya Patel',age_gender:'6 months · Female',phone:'+91 90000 33333',gap_count:1,last_appointment:addDays(-21),program:'Child wellness',stage:'6-month follow-up',blood_group:'A+',allergies:'None recorded'},
+  {user_id:1004,full_name:'Riya Verma',age_gender:'4 years · Female',phone:'+91 90000 44444',gap_count:0,last_appointment:addDays(-45),program:'Paediatric OPD',stage:'Routine care',blood_group:'AB+',allergies:'Dust'},
+  {user_id:1005,full_name:'Kabir Khan',age_gender:'8 years · Male',phone:'+91 90000 55555',gap_count:1,last_appointment:addDays(-18),program:'Paediatric OPD',stage:'Follow-up',blood_group:'O-',allergies:'None recorded'}
+];
+var demoAppointments = [
+  {id:'DEMO-A1',mother_id:1003,mother_name:'Sanya Patel',age_gender:'6 months · Female',phone:'+91 90000 33333',requested_date:addDays(0),requested_time:'09:30',reason:'Vaccination follow-up',note:'Parent wants to confirm the next vaccine dose and discuss feeding.',status:'pending',channel:'In-person'},
+  {id:'DEMO-A2',mother_id:1001,mother_name:'Asha Nair',age_gender:'31 · Female',phone:'+91 90000 11111',requested_date:addDays(0),requested_time:'10:15',reason:'Antenatal follow-up',note:'Routine follow-up after anomaly scan. Reports uploaded.',status:'confirmed',channel:'In-person'},
+  {id:'DEMO-A3',mother_id:1005,mother_name:'Kabir Khan',age_gender:'8 years · Male',phone:'+91 90000 55555',requested_date:addDays(1),requested_time:'11:00',reason:'Follow-up consultation',note:'Review symptoms recorded during the previous consultation.',status:'pending',channel:'Video consultation'},
+  {id:'DEMO-A4',mother_id:1002,mother_name:'Meera Joshi',age_gender:'28 · Female',phone:'+91 90000 22222',requested_date:addDays(2),requested_time:'12:30',reason:'Birth-plan review',note:'Review facility readiness and pending glucose-test record.',status:'confirmed',channel:'In-person'},
+  {id:'DEMO-A5',mother_id:1004,mother_name:'Riya Verma',age_gender:'4 years · Female',phone:'+91 90000 44444',requested_date:addDays(-1),requested_time:'15:00',reason:'Growth assessment',note:'Routine height and weight review completed.',status:'completed',channel:'In-person'}
+];
 
 function showPanel(id) {
   document.querySelectorAll('.panel').forEach(function (p) { p.classList.remove('is-active'); });
   document.querySelectorAll('.nav-item[data-panel]').forEach(function (n) { n.classList.remove('is-active'); });
-  var p = $('panel-' + id); if (p) p.classList.add('is-active');
-  var n = document.querySelector('.nav-item[data-panel="' + id + '"]'); if (n) n.classList.add('is-active');
+  var panel = $('panel-' + id); if (panel) panel.classList.add('is-active');
+  var nav = document.querySelector('.nav-item[data-panel="' + id + '"]'); if (nav) nav.classList.add('is-active');
   try { history.replaceState(null, '', '#' + id); } catch (e) {}
 }
+document.querySelectorAll('.nav-item[data-panel]').forEach(function (b) { b.addEventListener('click', function () { showPanel(b.dataset.panel); }); });
+document.querySelectorAll('[data-go]').forEach(function (b) { b.addEventListener('click', function () { showPanel(b.dataset.go); }); });
 
-document.querySelectorAll('.nav-item[data-panel]').forEach(function (b) {
-  b.addEventListener('click', function () { showPanel(b.getAttribute('data-panel')); });
-});
-document.querySelectorAll('[data-go]').forEach(function (el) {
-  el.addEventListener('click', function () { showPanel(el.getAttribute('data-go')); });
-});
+function normalizeAppointment(a, index) {
+  var patient = patients.find(function(p){return String(p.user_id)===String(a.mother_id || a.user_id);});
+  return Object.assign({
+    id:a.id || 'API-'+index,
+    mother_name:a.mother_name || (patient && patient.full_name) || 'Patient',
+    age_gender:(patient && patient.age_gender) || 'Patient',
+    phone:(patient && patient.phone) || 'Contact through hospital',
+    requested_time:a.requested_time || a.time || '09:30',
+    channel:a.channel || 'In-person',
+    note:a.note || a.notes || 'No additional note supplied.'
+  }, a);
+}
+function appointment(id) { return appointments.find(function(a){return String(a.id)===String(id);}); }
 
 function renderTodayTable() {
-  var tb = document.querySelector('#todayTable tbody');
-  if (!tb) return;
-  var today = api.localDateStr();
-  var rows = appointments.filter(function (a) {
-    return String(a.requested_date).slice(0, 10) === today || a.status === 'confirmed' || a.status === 'pending';
-  }).slice(0, 12);
-  if (!rows.length) {
-    tb.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--ink-muted);padding:1.2rem">No appointments yet</td></tr>';
-    return;
-  }
-  tb.innerHTML = rows.map(function (a) {
-    var name = a.mother_name || 'Patient';
-    var ini = api.initials(name);
-    var st = a.status === 'confirmed' || a.status === 'completed' ? 'ok' : 'pending';
-    return '<tr data-aid="' + a.id + '"><td>' + api.fmtDate(a.requested_date) + '</td><td><span class="avatar">' + ini +
-      '</span>' + name + '</td><td>—</td><td>' + (a.reason || 'Visit') + '</td><td><span class="tag tag--' + st + '">' +
-      a.status + '</span></td></tr>';
-  }).join('');
+  var tb=document.querySelector('#todayTable tbody'); if(!tb)return;
+  var today=api.localDateStr();
+  var rows=appointments.filter(function(a){return String(a.requested_date).slice(0,10)===today;}).slice(0,12);
+  if(!rows.length) rows=appointments.filter(function(a){return a.status==='pending'||a.status==='confirmed';}).slice(0,4);
+  tb.innerHTML=rows.map(function(a){var st=a.status==='completed'||a.status==='confirmed'?'ok':'pending';return '<tr data-aid="'+esc(a.id)+'"><td>'+esc(a.requested_time||api.fmtDate(a.requested_date))+'</td><td><span class="avatar">'+api.initials(a.mother_name)+'</span>'+esc(a.mother_name)+'</td><td>'+esc(a.age_gender)+'</td><td>'+esc(a.reason||'Visit')+'</td><td><span class="tag tag--'+st+'">'+esc(a.status)+'</span></td></tr>';}).join('');
+  tb.querySelectorAll('[data-aid]').forEach(function(row){row.addEventListener('click',function(){openAppointment(row.dataset.aid);});});
 }
 
 function renderPatients() {
-  var q = (($('patientFilter') && $('patientFilter').value) || '').toLowerCase();
-  var list = patients.filter(function (p) {
-    return !q || (p.full_name || '').toLowerCase().indexOf(q) >= 0;
-  });
-  var tb = document.querySelector('#patientTable tbody');
-  if (tb) {
-    tb.innerHTML = list.map(function (p) {
-      var name = p.full_name || 'Patient';
-      return '<tr><td><span class="avatar">' + api.initials(name) + '</span>' + name +
-        '</td><td>' + (p.gap_count != null ? p.gap_count + ' open gaps' : '—') +
-        '</td><td>' + (p.last_appointment ? api.fmtDate(p.last_appointment) : '—') +
-        '</td><td><span class="tag tag--info">Active</span></td>' +
-        '<td><button type="button" class="btn btn--sm btn--ghost" data-pid="' + p.user_id + '">Open</button></td></tr>';
-    }).join('') || '<tr><td colspan="5" style="text-align:center;padding:1rem;color:var(--ink-muted)">No assigned patients yet</td></tr>';
-    tb.querySelectorAll('[data-pid]').forEach(function (b) {
-      b.addEventListener('click', function () { openPatient(Number(b.getAttribute('data-pid'))); });
-    });
-  }
-  var sel = $('daPatient');
-  if (sel) {
-    sel.innerHTML = patients.map(function (p) {
-      return '<option value="' + p.user_id + '">' + (p.full_name || 'Patient') + '</option>';
-    }).join('') || '<option value="">No patients</option>';
-  }
-  var sp = $('statPatients');
-  if (sp) sp.textContent = String(patients.length);
-  var pending = appointments.filter(function (a) { return a.status === 'pending'; }).length;
-  var st = $('statPending'); if (st) st.textContent = String(pending);
-  var stoday = $('statToday');
-  if (stoday) {
-    var today = api.localDateStr();
-    stoday.textContent = String(appointments.filter(function (a) {
-      return String(a.requested_date).slice(0, 10) === today;
-    }).length || appointments.filter(function (a) { return a.status === 'confirmed'; }).length);
-  }
+  var q=(($('patientFilter')&&$('patientFilter').value)||'').toLowerCase();
+  var list=patients.filter(function(p){return !q||(p.full_name+' '+p.program).toLowerCase().includes(q);});
+  var tb=document.querySelector('#patientTable tbody');
+  if(tb){tb.innerHTML=list.map(function(p){return '<tr><td><span class="avatar">'+api.initials(p.full_name)+'</span>'+esc(p.full_name)+'</td><td>'+esc(p.age_gender||'—')+'</td><td>'+api.fmtDate(p.last_appointment)+'</td><td><span class="tag tag--'+(p.gap_count?'pending':'ok')+'">'+(p.gap_count?p.gap_count+' follow-ups':'On track')+'</span></td><td><button type="button" class="btn btn--sm btn--ghost" data-pid="'+esc(p.user_id)+'">Open record</button></td></tr>';}).join('');tb.querySelectorAll('[data-pid]').forEach(function(b){b.addEventListener('click',function(){openPatient(b.dataset.pid);});});}
+  if($('statPatients'))$('statPatients').textContent=String(patients.length);
+  if($('statPending'))$('statPending').textContent=String(appointments.filter(function(a){return a.status==='pending';}).length);
+  if($('statToday'))$('statToday').textContent=String(appointments.filter(function(a){return String(a.requested_date).slice(0,10)===api.localDateStr();}).length);
 }
 
 function renderAllAppts() {
-  var el = $('allAppts');
-  if (!el) return;
-  if (!appointments.length) {
-    el.innerHTML = '<div class="empty">No appointments</div>';
-    return;
-  }
-  el.innerHTML = appointments.map(function (a) {
-    var st = a.status === 'confirmed' || a.status === 'completed' ? 'ok' : 'pending';
-    var actions = '';
-    if (a.status === 'pending') {
-      actions = '<button type="button" class="btn btn--sm btn--primary" data-confirm="' + a.id + '">Confirm</button>';
-    } else if (a.status === 'confirmed') {
-      actions = '<button type="button" class="btn btn--sm btn--ghost" data-complete="' + a.id + '">Complete</button>';
-    }
-    return '<div class="list-row"><div style="flex:1"><b>' + (a.mother_name || 'Patient') + '</b>' +
-      '<div style="font-size:.78rem;color:var(--ink-muted)">' + api.fmtDate(a.requested_date) + ' · ' + (a.reason || '') +
-      '</div></div><span class="tag tag--' + st + '">' + a.status + '</span> ' + actions + '</div>';
-  }).join('');
-  el.querySelectorAll('[data-confirm]').forEach(function (b) {
-    b.addEventListener('click', function () { setApptStatus(b.getAttribute('data-confirm'), 'confirmed'); });
-  });
-  el.querySelectorAll('[data-complete]').forEach(function (b) {
-    b.addEventListener('click', function () { setApptStatus(b.getAttribute('data-complete'), 'completed'); });
-  });
+  var el=$('allAppts'); if(!el)return;
+  el.innerHTML='<div class="demo-banner">Demo appointments are shown whenever the database has no records, so the complete review flow remains visible.</div>'+appointments.map(function(a){var st=a.status==='confirmed'||a.status==='completed'?'ok':'pending';return '<article class="appointment-row'+(String(a.id)===String(selectedAppointmentId)?' is-selected':'')+'" data-row-appt="'+esc(a.id)+'"><div><b>'+esc(a.mother_name)+'</b><div class="muted">'+api.fmtDate(a.requested_date)+' · '+esc(a.requested_time)+' · '+esc(a.reason)+'</div><span class="tag tag--'+st+'" style="margin-top:.4rem">'+esc(a.status)+'</span></div><div class="appointment-row__actions"><button class="btn btn--ghost btn--sm" data-open-appt="'+esc(a.id)+'">View details</button>'+(a.status==='pending'?'<button class="btn btn--primary btn--sm" data-status="confirmed" data-appt="'+esc(a.id)+'">Approve</button>':'')+'</div></article>';}).join('');
+  el.querySelectorAll('[data-open-appt],[data-row-appt]').forEach(function(node){node.addEventListener('click',function(e){if(e.target.closest('[data-status]'))return;openAppointment(node.dataset.openAppt||node.dataset.rowAppt);});});
+  el.querySelectorAll('[data-status]').forEach(function(b){b.addEventListener('click',function(){setApptStatus(b.dataset.appt,b.dataset.status);});});
+}
+function openAppointment(id) {
+  selectedAppointmentId=id; var a=appointment(id); if(!a)return;
+  showPanel('appointments'); renderAllAppts();
+  var detail=$('appointmentDetail');
+  detail.innerHTML='<div class="section-head"><div><div class="muted">Appointment '+esc(a.id)+'</div><h2>'+esc(a.mother_name)+'</h2></div><span class="tag tag--'+(a.status==='pending'?'pending':'ok')+'">'+esc(a.status)+'</span></div><div class="info-grid"><div class="info-cell"><small>Date</small><b>'+api.fmtDate(a.requested_date)+'</b></div><div class="info-cell"><small>Time</small><b>'+esc(a.requested_time)+'</b></div><div class="info-cell"><small>Patient</small><b>'+esc(a.age_gender)+'</b></div><div class="info-cell"><small>Visit type</small><b>'+esc(a.channel)+'</b></div></div><div class="info-cell"><small>Reason</small><b>'+esc(a.reason)+'</b></div><div class="info-cell" style="margin-top:.65rem"><small>Patient note</small><b>'+esc(a.note)+'</b></div><div class="info-cell" style="margin-top:.65rem"><small>Contact</small><b>'+esc(a.phone)+'</b></div><div class="ops-actions">'+(a.status==='pending'?'<button class="btn btn--primary" data-detail-status="confirmed">Approve appointment</button>':'')+(a.status==='confirmed'?'<button class="btn btn--primary" data-detail-status="completed">Mark completed</button>':'')+'<button class="btn btn--ghost" id="detailContact">Contact patient</button><button class="btn btn--ghost" id="detailRecord">Open record</button></div>';
+  detail.querySelectorAll('[data-detail-status]').forEach(function(b){b.addEventListener('click',function(){setApptStatus(a.id,b.dataset.detailStatus);});});
+  $('detailContact').addEventListener('click',function(){showPanel('messages');});
+  $('detailRecord').addEventListener('click',function(){openPatient(a.mother_id);});
+}
+async function setApptStatus(id,status) {
+  var a=appointment(id); var data=null;
+  if(a && !String(id).startsWith('DEMO-')) data=await api.apiRequest('/appointments/'+id+'/status',{method:'PATCH',body:{status:status}});
+  if(data){await loadAppointments();}else if(a){a.status=status;renderTodayTable();renderAllAppts();openAppointment(id);}
+  api.toast('Appointment '+status);
 }
 
-async function setApptStatus(id, status) {
-  var data = await api.apiRequest('/appointments/' + id + '/status', {
-    method: 'PATCH',
-    body: { status: status }
-  });
-  if (data) {
-    api.toast('Appointment ' + status);
-    await loadAppointments();
-  }
+var timelineTemplates=[
+  {title:'Registration and baseline history',stage:'Care started',offset:-70,status:'completed'},
+  {title:'Recent consultation reviewed',stage:'Clinical review',offset:-14,status:'completed'},
+  {title:'Pending follow-up reminder',stage:'Continuity',offset:3,status:'upcoming'},
+  {title:'Next scheduled milestone',stage:'Care plan',offset:14,status:'upcoming'}
+];
+function renderTimeline(items,patientName){var el=$('docTimeline');if(!el)return;el.innerHTML='<div class="section-head"><div><div class="section-title">'+esc(patientName||'Patient')+' care timeline</div><div class="muted">Recorded events and upcoming follow-ups</div></div></div>'+items.map(function(m){var tag=m.status==='completed'?'ok':m.status==='overdue'?'pending':'info';return '<div class="list-row"><div style="flex:1"><div class="feed-item__title">'+esc(m.title)+'</div><div class="feed-item__sub">'+esc(m.stage||'')+' · '+api.fmtDate(m.due_date||addDays(m.offset||0))+'</div></div><span class="tag tag--'+tag+'">'+esc(m.status)+'</span></div>';}).join('');}
+async function openPatient(id){var p=patients.find(function(x){return String(x.user_id)===String(id);})||patients[0];showPanel('timeline');$('docTimeline').innerHTML='<div class="empty">Loading timeline…</div>';var data=null;if(p&&!String(p.user_id).startsWith('DEMO-'))data=await api.apiRequest('/doctor/patients/'+p.user_id+'/timeline');var items=(data&&data.milestones)||timelineTemplates;renderTimeline(items,p&&p.full_name);}
+
+function renderSupportingPanels(){
+  var rr=$('recentRecords');var records=$('docRecords');var messages=$('docMessages');var feed=$('msgFeed');var care=$('careFeed');
+  var recordRows=[['Asha Nair','Anomaly scan reviewed','Report verified · '+api.fmtDate(addDays(-12))],['Meera Joshi','CBC and haemoglobin','Result filed · '+api.fmtDate(addDays(-8))],['Sanya Patel','Vaccination record','Next dose due · '+api.fmtDate(addDays(7))],['Kabir Khan','Follow-up note','Doctor review pending · '+api.fmtDate(addDays(-2))]];
+  var recordHtml=recordRows.map(function(r){return '<div class="feed-item"><span class="avatar">'+api.initials(r[0])+'</span><div style="flex:1"><div class="feed-item__title">'+r[0]+' · '+r[1]+'</div><div class="feed-item__sub">'+r[2]+'</div></div><button class="btn btn--ghost btn--sm" data-go-record>View</button></div>';}).join('');
+  if(rr)rr.innerHTML=recordHtml;if(records)records.innerHTML='<div class="demo-banner">Sample records show how verified reports and notes will appear before live hospital data is connected.</div>'+recordHtml+'<div class="card" style="padding:1rem;margin-top:1rem"><div class="section-title">Selected report preview</div><p class="muted">Haemoglobin: 11.2 g/dL · Source: City Hospital Lab · Reviewed by Dr. S. Kumar</p><span class="tag tag--ok">Verified</span></div>';
+  var msgRows=[['Asha Nair','I have uploaded my scan report.','8:42 AM'],['Sanya Patel’s caregiver','Can we confirm tomorrow’s vaccine visit?','9:05 AM'],['Meera Joshi','Thank you, I will bring the reports.','Yesterday']];
+  var msgHtml=msgRows.map(function(m){return '<div class="feed-item"><span class="avatar">'+api.initials(m[0])+'</span><div style="flex:1"><div class="feed-item__title">'+m[0]+'</div><div class="feed-item__sub">'+m[1]+' · '+m[2]+'</div></div><button class="btn btn--ghost btn--sm" data-reply>Reply</button></div>';}).join('');
+  if(feed)feed.innerHTML=msgHtml;if(messages)messages.innerHTML='<div class="demo-banner">Secure demo inbox for patient questions and appointment communication.</div>'+msgHtml+'<form id="demoMessageForm" class="form-grid" style="margin-top:1rem"><div class="form-group"><label>Reply</label><textarea id="demoMessage" placeholder="Write a message to the selected patient"></textarea></div><button class="btn btn--primary" type="submit">Send message</button></form>';
+  if(care)care.innerHTML=timelineTemplates.slice(0,3).map(function(m){return '<div class="feed-item"><div><div class="feed-item__title">'+m.title+'</div><div class="feed-item__sub">'+api.fmtDate(addDays(m.offset))+'</div></div></div>';}).join('');
+  renderTimeline(timelineTemplates,patients[0]&&patients[0].full_name);
+  document.querySelectorAll('[data-go-record]').forEach(function(b){b.addEventListener('click',function(){showPanel('records');});});
+  document.querySelectorAll('[data-reply]').forEach(function(b){b.addEventListener('click',function(){showPanel('messages');setTimeout(function(){var input=$('demoMessage');if(input)input.focus();},0);});});
+  var form=$('demoMessageForm');if(form)form.addEventListener('submit',function(e){e.preventDefault();api.toast('Demo message sent');$('demoMessage').value='';});
 }
+function renderNextAppt(){var next=appointments.filter(function(a){return a.status==='pending'||a.status==='confirmed';}).sort(function(a,b){return String(a.requested_date).localeCompare(String(b.requested_date));})[0];if(!next)return;if($('nextPatient'))$('nextPatient').textContent=next.mother_name;if($('nextMeta'))$('nextMeta').innerHTML=esc(next.reason)+'<br>'+api.fmtDate(next.requested_date)+' · '+esc(next.requested_time);}
+async function loadPatients(){var data=await api.apiRequest('/doctor/patients');patients=(data&&data.patients&&data.patients.length?data.patients:demoPatients).map(function(p){p.user_id=p.user_id!=null?p.user_id:p.id;return p;});renderPatients();}
+async function loadAppointments(){var data=await api.apiRequest('/appointments');appointments=((data&&data.appointments&&data.appointments.length)?data.appointments:demoAppointments).map(normalizeAppointment);if(!selectedAppointmentId&&appointments.length)selectedAppointmentId=appointments[0].id;renderTodayTable();renderAllAppts();renderNextAppt();renderPatients();}
 
-async function openPatient(motherId) {
-  showPanel('timeline');
-  var el = $('docTimeline');
-  if (el) el.innerHTML = '<div class="empty">Loading timeline…</div>';
-  var data = await api.apiRequest('/doctor/patients/' + motherId + '/timeline');
-  var ms = (data && data.milestones) || [];
-  if (!el) return;
-  if (!ms.length) {
-    el.innerHTML = '<div class="empty">No timeline for this patient</div>';
-    return;
-  }
-  el.innerHTML = ms.map(function (m) {
-    var tag = m.status === 'completed' ? 'ok' : (m.status === 'overdue' ? 'pending' : 'info');
-    return '<div class="list-row"><div style="flex:1"><div class="feed-item__title">' + m.title +
-      '</div><div class="feed-item__sub">' + (m.stage || '') + ' · ' + api.fmtDate(m.due_date) +
-      '</div></div><span class="tag tag--' + tag + '">' + m.status + '</span></div>';
-  }).join('');
+var pf=$('patientFilter');if(pf)pf.addEventListener('input',renderPatients);
+['teleBtn','teleBtn2'].forEach(function(id){var button=$(id);if(button)button.addEventListener('click',function(){showPanel('messages');api.toast('Patient communication opened');});});
+var rx=$('rxBtn');if(rx)rx.addEventListener('click',function(){showPanel('records');api.toast('Review the patient record before using your clinical prescription system');});
+var settings=$('docSettings');if(settings)settings.addEventListener('submit',function(e){e.preventDefault();api.toast('Demo profile preferences saved');});
+var logout=$('docLogout');if(logout)logout.addEventListener('click',async function(){localStorage.removeItem('dai_guest');localStorage.removeItem('dai_guest_role');await api.apiRequest('/auth/logout',{method:'POST'});window.location.href='auth.html';});
+var search=$('searchInput');if(search)search.addEventListener('keydown',function(e){if(e.key==='Enter'){showPanel('patients');if($('patientFilter')){$('patientFilter').value=search.value;renderPatients();}}});
+
+async function boot(){
+  currentUser=await api.fetchCurrentUser();
+  if(!currentUser&&localStorage.getItem('dai_guest')) currentUser={role:localStorage.getItem('dai_guest_role')||'doctor',full_name:'Dr. S. Kumar',specialization:'Maternal and child health'};
+  if(!currentUser)return;
+  if(currentUser.role==='mother'){window.location.href='dashboard.html';return;}
+  if($('userName'))$('userName').textContent=currentUser.full_name||'Doctor';
+  var role=document.querySelector('.user-chip__role');if(role)role.textContent=currentUser.specialization||'Maternal and child health';
+  if($('greetName'))$('greetName').textContent=(currentUser.full_name||'Doctor').replace(/^Dr\.\s*/,'').split(/\s+/)[0];
+  await Promise.all([loadPatients(),loadAppointments()]);
+  renderSupportingPanels();
+  if(location.hash&&$('panel-'+location.hash.slice(1)))showPanel(location.hash.slice(1));
 }
-
-function renderNextAppt() {
-  var next = appointments.filter(function (a) {
-    return a.status === 'pending' || a.status === 'confirmed';
-  }).sort(function (a, b) {
-    return String(a.requested_date).localeCompare(String(b.requested_date));
-  })[0];
-  if (!next) return;
-  var np = $('nextPatient');
-  if (np) np.textContent = next.mother_name || 'Patient';
-  var nm = $('nextMeta');
-  if (nm) nm.innerHTML = (next.reason || 'Visit') + '<br>' + api.fmtDate(next.requested_date);
-}
-
-async function loadPatients() {
-  var data = await api.apiRequest('/doctor/patients');
-  patients = (data && data.patients) || [];
-  // API returns user_id as "id" from mother_profiles.user_id
-  patients = patients.map(function (p) {
-    p.user_id = p.user_id != null ? p.user_id : p.id;
-    return p;
-  });
-  renderPatients();
-}
-
-async function loadAppointments() {
-  var data = await api.apiRequest('/appointments');
-  appointments = (data && data.appointments) || [];
-  renderTodayTable();
-  renderAllAppts();
-  renderNextAppt();
-  renderPatients(); // refresh stats
-}
-
-// Add patient form is registration-side; doctors don't create user accounts here.
-// Hide or repurpose: show message that patients appear after appointment requests.
-var addBtn = $('addPatientBtn');
-if (addBtn) {
-  addBtn.addEventListener('click', function () {
-    api.toast('Patients appear when they book an appointment with you');
-    showPanel('appointments');
-  });
-}
-var addForm = $('addPatientForm');
-if (addForm) addForm.hidden = true;
-
-var docApptForm = $('docApptForm');
-if (docApptForm) {
-  // Doctor booking on behalf is not in API — mothers request appointments.
-  // Convert form to status management helper messaging.
-  docApptForm.addEventListener('submit', function (e) {
-    e.preventDefault();
-    api.toast('Patients request appointments from their portal. Confirm them in the list.');
-  });
-}
-
-var pf = $('patientFilter');
-if (pf) pf.addEventListener('input', renderPatients);
-
-['teleBtn', 'teleBtn2'].forEach(function (id) {
-  var el = $(id);
-  if (el) el.addEventListener('click', function () {
-    api.toast('Teleconsultation is assistive — connect via your hospital channel');
-  });
-});
-var rx = $('rxBtn');
-if (rx) rx.addEventListener('click', function () { api.toast('Send prescriptions via your clinical workflow'); });
-
-var settings = $('docSettings');
-if (settings) {
-  settings.addEventListener('submit', function (e) {
-    e.preventDefault();
-    api.toast('Profile is managed at registration; contact admin for changes');
-  });
-}
-var logout = $('docLogout');
-if (logout) {
-  logout.addEventListener('click', async function () {
-    await api.apiRequest('/auth/logout', { method: 'POST' });
-    window.location.href = 'auth.html';
-  });
-}
-
-var search = $('searchInput');
-if (search) {
-  search.addEventListener('keydown', function (e) {
-    if (e.key === 'Enter') {
-      showPanel('patients');
-      if ($('patientFilter')) {
-        $('patientFilter').value = search.value;
-        renderPatients();
-      }
-    }
-  });
-}
-
-async function boot() {
-  currentUser = await api.fetchCurrentUser();
-  if (!currentUser) return;
-  if (currentUser.role === 'mother') {
-    window.location.href = 'dashboard.html';
-    return;
-  }
-  var chip = document.getElementById('userName') || document.querySelector('.user-chip__name');
-  if (chip) chip.textContent = currentUser.full_name || 'Doctor';
-  var role = document.querySelector('.user-chip__role');
-  if (role && currentUser.specialization) role.textContent = currentUser.specialization;
-  var gn = document.getElementById('greetName');
-  if (gn) {
-    var first = (currentUser.full_name || 'Doctor').split(/\s+/)[0];
-    gn.textContent = first;
-  }
-
-  await Promise.all([loadPatients(), loadAppointments()]);
-
-  // Optional feeds from appointments
-  var rr = $('recentRecords');
-  if (rr && patients.length) {
-    rr.innerHTML = patients.slice(0, 5).map(function (p) {
-      return '<div class="feed-item"><div style="flex:1"><div class="feed-item__title">' + (p.full_name || '') +
-        '</div><div class="feed-item__sub">' + (p.gap_count ? p.gap_count + ' open care gaps' : 'On track') +
-        '</div></div></div>';
-    }).join('');
-  }
-}
-
 boot();
 })();
 </script>
+<script src="js/doctor-workflows.js"></script>
 </body>
 </html>

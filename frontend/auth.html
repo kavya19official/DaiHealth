@@ -7,6 +7,10 @@
 <meta name="theme-color" content="#8f6bb8">
 <link rel="icon" href="assets/logo.jpeg">
 <link rel="stylesheet" href="styles.css">
+<script src="js/dai-api.js"></script>
+<style>
+.workspace-access{margin:.9rem 0 1.1rem;padding:1rem;border:1px solid var(--line);border-radius:16px;background:var(--ground)}.workspace-access h3{margin:0 0 .25rem;font-size:1rem}.workspace-access>p{margin:0 0 .75rem;font-size:.82rem}.workspace-buttons{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem}.workspace-button{padding:.7rem .45rem;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink-2);font-weight:700;font-size:.78rem}.workspace-button:hover{border-color:var(--violet);background:var(--lilac);color:var(--violet)}.workspace-button b{display:block;color:inherit;font-size:.85rem}.workspace-button small{display:block;margin-top:.15rem;font-weight:500;color:var(--ink-3)}@media(max-width:620px){.workspace-buttons{grid-template-columns:1fr}}
+</style>
 </head>
 <body class="auth-page">
 <a class="skip-link" href="#main">Skip to content</a>
@@ -50,9 +54,19 @@
 
     <div class="error-box" id="errorBox"></div>
 
+    <div class="workspace-access">
+      <h3>Choose a workspace</h3>
+      <p>Use an account when the database is connected, or open a complete demo now.</p>
+      <div class="workspace-buttons">
+        <button type="button" class="workspace-button" data-demo-role="mother"><b>Mother / Patient</b><small>Appointments and care timeline</small></button>
+        <button type="button" class="workspace-button" data-demo-role="doctor"><b>Doctor</b><small>Patients and appointment review</small></button>
+        <button type="button" class="workspace-button" data-demo-role="hospital"><b>Hospital Team</b><small>Registry and clinic operations</small></button>
+      </div>
+    </div>
+
     <div class="panel is-active" id="panelLogin">
       <h2>Welcome back</h2>
-      <p>Log in to see your care timeline, tracking data and appointments.</p>
+      <p>Account login automatically opens the correct Mother or Doctor workspace.</p>
       <form id="loginForm">
         <div class="form-group">
           <label for="loginEmail">Email</label>
@@ -263,7 +277,7 @@
     </div>
 
     <div class="divider">or</div>
-    <button type="button" class="btn btn--ghost" id="guestBtn">Continue without an account</button>
+    <button type="button" class="btn btn--ghost" id="guestBtn">Open Mother / Patient demo</button>
     <p class="footnote" style="margin-top:.75rem">Demo mode — your tracking data stays on this device only and your doctor won't be able to see it.</p>
   </section>
 </main>
@@ -305,9 +319,7 @@
 <script>
 (function () {
 "use strict";
-var API_BASE = /^(localhost|127\.0\.0\.1)$/.test(location.hostname)
-      ? '/api'
-      : (window.DAI_API_BASE || 'https://daihealth.onrender.com/api');
+var API_BASE = window.DaiAPI ? window.DaiAPI.API_BASE : (window.DAI_API_BASE || '/api');
 
 var errorBox = document.getElementById('errorBox');
 function showError(msg) { errorBox.textContent = msg; errorBox.classList.add('is-visible'); }
@@ -315,6 +327,7 @@ function clearError() { errorBox.classList.remove('is-visible'); }
 
 function redirectForUser(user) {
   if (user && user.role === 'doctor') return 'doctor.html';
+  if (user && (user.role === 'hospital' || user.role === 'admin' || user.role === 'care_team')) return 'hospital.html';
   if (user && user.pregnancy_status === 'delivered' && user.has_child) return 'child-dashboard.html';
   return 'dashboard.html';
 }
@@ -430,10 +443,15 @@ document.getElementById('registerDoctorForm').addEventListener('submit', functio
   }, document.getElementById('dSubmit'));
 });
 
-document.getElementById('guestBtn').addEventListener('click', function () {
+function openDemo(role) {
   localStorage.setItem('dai_guest', '1');
-  window.location.href = 'dashboard.html';
+  localStorage.setItem('dai_guest_role', role);
+  window.location.href = role === 'doctor' ? 'doctor.html' : role === 'hospital' ? 'hospital.html' : 'dashboard.html';
+}
+document.querySelectorAll('[data-demo-role]').forEach(function (button) {
+  button.addEventListener('click', function () { openDemo(button.dataset.demoRole); });
 });
+document.getElementById('guestBtn').addEventListener('click', function () { openDemo('mother'); });
 })();
 </script>
 </body>
