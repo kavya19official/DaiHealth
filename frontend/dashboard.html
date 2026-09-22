@@ -222,7 +222,20 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
     </div>
   </div>
 
-  <div class="status-row">
+  
+  <div class="card" id="riskCard" style="padding:1.1rem 1.25rem;margin-bottom:1rem;border-left:4px solid var(--brand)">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;flex-wrap:wrap">
+      <div>
+        <div class="section-title" style="margin:0 0 .35rem">Pregnancy risk assessment</div>
+        <div style="font-size:.85rem;color:var(--ink-muted);margin-bottom:.5rem">Based on the Maternal Health Risk dataset (Age, BP, blood sugar, temperature, heart rate) plus your clinical history.</div>
+        <div id="riskLevelLabel" style="font-family:var(--display);font-weight:800;font-size:1.15rem;text-transform:capitalize">—</div>
+        <ul id="riskFactorList" style="margin:.5rem 0 0;padding-left:1.1rem;color:var(--ink-2);font-size:.88rem"></ul>
+        <div id="riskMeta" style="font-size:.75rem;color:var(--ink-3);margin-top:.5rem"></div>
+      </div>
+      <button type="button" class="btn btn--primary" id="reassessRiskBtn">Reassess risk</button>
+    </div>
+  </div>
+<div class="status-row">
     <button type="button" class="status-card" data-go="records">
       <div class="status-card__icon status-card__icon--purple"></div>
       <div><div class="status-card__label">Current Health Status</div><div class="status-card__value"><span class="ok"></span> Stable</div><div class="status-card__sub">No major concerns</div></div>
@@ -395,7 +408,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
     <div class="section-card" style="border:0;box-shadow:none"><div class="section-title"><span></span> Messages</div></div>
     <div id="msgList">
       <div class="list-row" id="feedEmpty"><div class="list-row__meta"><div class="list-row__title">No recent updates</div><div class="list-row__sub">Updates from your care team will appear here.</div></div></div>
-      <div class="list-row"><div class="feed-item__icon feed-item__icon--blue"></div><div class="list-row__meta"><div class="list-row__title">Clinic front desk</div><div class="list-row__sub">Reminder: Obstetrician consultation on 25 Sep at 10:30 AM.</div></div><span class="feed-item__date">1d ago</span></div>
+
     </div>
   </div>
 </div>
@@ -836,6 +849,60 @@ function route() {
   if ($('panel-' + h)) showPanel(h);
 }
 
+
+async function loadRisk() {
+  if (IS_GUEST) return;
+  var data = await api.apiRequest('/risk');
+  renderRisk(data);
+}
+
+function renderRisk(data) {
+  var levelEl = $('riskLevelLabel');
+  var listEl = $('riskFactorList');
+  var metaEl = $('riskMeta');
+  if (!levelEl) return;
+  if (!data || !data.risk_level) {
+    levelEl.textContent = 'Not assessed yet';
+    levelEl.style.color = 'var(--ink-muted)';
+    if (listEl) listEl.innerHTML = '<li>Log blood pressure (and optionally glucose) then tap Reassess risk.</li>';
+    if (metaEl) metaEl.textContent = '';
+    return;
+  }
+  var level = data.risk_level;
+  levelEl.textContent = level;
+  levelEl.style.color = level.indexOf('high') >= 0 ? 'var(--rose)' : (level.indexOf('mid') >= 0 ? 'var(--amber)' : 'var(--green)');
+  var factors = data.risk_factors || [];
+  if (listEl) {
+    if (!factors.length) listEl.innerHTML = '<li>No additional clinical risk factors flagged.</li>';
+    else listEl.innerHTML = factors.map(function (f) {
+      var label = typeof f === 'string' ? f : (f.label || f.code || '');
+      return '<li>' + label + '</li>';
+    }).join('');
+  }
+  if (metaEl) {
+    metaEl.textContent = data.risk_assessed_at ? ('Assessed ' + api.fmtDate(data.risk_assessed_at)) : '';
+  }
+}
+
+var reassessBtn = $('reassessRiskBtn');
+if (reassessBtn) {
+  reassessBtn.addEventListener('click', async function () {
+    if (IS_GUEST) { api.toast('Sign in to assess risk'); return; }
+    reassessBtn.disabled = true;
+    var data = await api.apiRequest('/risk/assess', { method: 'POST', body: {} });
+    reassessBtn.disabled = false;
+    if (data && data.assessment) {
+      api.toast('Risk updated: ' + data.assessment.risk_level);
+      renderRisk({
+        risk_level: data.assessment.risk_level,
+        risk_factors: data.assessment.factors,
+        risk_assessed_at: new Date().toISOString()
+      });
+    }
+  });
+}
+
+
 async function boot() {
   if (IS_GUEST) {
     currentUser = {
@@ -869,13 +936,55 @@ async function boot() {
     loadDoctors(),
     loadHealthLogs(),
     loadMedications(),
-    loadPregnancyIntoForm()
+    loadPregnancyIntoForm(),
+    loadRisk()
   ]);
   route();
 }
 
+
+var settingsForm = $('settingsForm');
+if (settingsForm) {
+  // Restore local prefs
+  try {
+    var prefs = JSON.parse(localStorage.getItem('dai_prefs') || '{}');
+    if ($('setLang') && prefs.lang) $('setLang').value = prefs.lang;
+    if ($('setNotif') && prefs.notif != null) $('setNotif').checked = !!prefs.notif;
+    if ($('setSms') && prefs.sms != null) $('setSms').checked = !!prefs.sms;
+  } catch (e) {}
+  settingsForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var prefs = {
+      lang: $('setLang') ? $('setLang').value : 'English',
+      notif: $('setNotif') ? $('setNotif').checked : true,
+      sms: $('setSms') ? $('setSms').checked : true
+    };
+    localStorage.setItem('dai_prefs', JSON.stringify(prefs));
+    api.toast('Settings saved on this device');
+  });
+}
+
+// Feed messages from real appointments
+async function renderMessagesFromAppts() {
+  var list = $('msgList');
+  if (!list || IS_GUEST) return;
+  var data = await api.apiRequest('/appointments');
+  var appts = (data && data.appointments) || [];
+  if (!appts.length) {
+    list.innerHTML = '<div class="list-row"><div class="list-row__meta"><div class="list-row__title">No messages yet</div><div class="list-row__sub">Appointment updates from your care team will appear here.</div></div></div>';
+    return;
+  }
+  list.innerHTML = appts.slice(0, 15).map(function (a) {
+    return '<div class="list-row"><div class="list-row__meta"><div class="list-row__title">' +
+      (a.doctor_name || 'Doctor') + ' · ' + (a.status || '') +
+      '</div><div class="list-row__sub">' + (a.reason || 'Appointment') + ' · ' + api.fmtDate(a.requested_date) +
+      (a.doctor_notes ? (' — ' + a.doctor_notes) : '') +
+      '</div></div><span class="feed-item__date">' + api.fmtDate(a.created_at || a.requested_date) + '</span></div>';
+  }).join('');
+}
+
 window.addEventListener('hashchange', route);
-boot();
+boot().then(function () { return renderMessagesFromAppts(); });
 })();
 </script>
 </body>
