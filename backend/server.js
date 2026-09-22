@@ -180,12 +180,27 @@ const cleanupInt = (v, min, max) => {
   return n === null ? null : Math.round(n);
 };
 
-const escapeSsml = (value) => String(value || '')
-  .replace(/&/g, '&amp;')
-  .replace(/</g, '&lt;')
-  .replace(/>/g, '&gt;')
-  .replace(/"/g, '&quot;')
-  .replace(/'/g, '&apos;');
+const pcmToWav = (pcm, channels = 1, sampleRate = 24000, bitsPerSample = 16) => {
+  const header = Buffer.alloc(44);
+  const byteRate = sampleRate * channels * bitsPerSample / 8;
+  const blockAlign = channels * bitsPerSample / 8;
+
+  header.write('RIFF', 0);
+  header.writeUInt32LE(36 + pcm.length, 4);
+  header.write('WAVE', 8);
+  header.write('fmt ', 12);
+  header.writeUInt32LE(16, 16);
+  header.writeUInt16LE(1, 20);
+  header.writeUInt16LE(channels, 22);
+  header.writeUInt32LE(sampleRate, 24);
+  header.writeUInt32LE(byteRate, 28);
+  header.writeUInt16LE(blockAlign, 32);
+  header.writeUInt16LE(bitsPerSample, 34);
+  header.write('data', 36);
+  header.writeUInt32LE(pcm.length, 40);
+
+  return Buffer.concat([header, pcm]);
+};
 const BLOOD_GROUPS_RE = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 const cleanupBloodGroup = (v) => (typeof v === 'string' && BLOOD_GROUPS_RE.includes(v.trim().toUpperCase()) ? v.trim().toUpperCase() : null);
 const PREGNANCY_STATUSES = ['pregnant', 'delivered', 'planning'];
@@ -1132,58 +1147,79 @@ require('./notifications')(app, { pool, authenticateToken });
 // Hospital, doctor, and patient continuity workflows
 require('./hospitalPlatform')(app);
 
-// Microsoft Azure Speech TTS for the care chatbot.
-// Keeps the Azure key server-side; the frontend receives only generated audio.
+// Gemini TTS for the care chatbot.
+// Keeps the Gemini API key server-side; the frontend receives only generated audio.
 app.post('/api/tts', async (req, res) => {
-  const key = process.env.AZURE_SPEECH_KEY || process.env.AZURE_TTS_KEY || process.env.SPEECH_KEY;
-  const region = process.env.AZURE_SPEECH_REGION || process.env.AZURE_TTS_REGION || process.env.SPEECH_REGION;
-  const voice = process.env.AZURE_TTS_VOICE || 'en-IN-PrabhatNeural';
+  const key = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
+  const model = process.env.GEMINI_TTS_MODEL || 'gemini-3.1-flash-tts-preview';
+  const voice = process.env.GEMINI_TTS_VOICE || 'Charon';
   const text = cleanupStr(req.body && req.body.text, 900);
 
   if (!text) {
     return res.status(400).json({ error: 'Text is required' });
   }
 
-  if (!key || !region) {
-    return res.status(503).json({ error: 'Microsoft TTS is not configured' });
+  if (!key) {
+    return res.status(503).json({ error: 'Gemini TTS is not configured' });
   }
 
-  const ssml = [
-    '<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="en-IN">',
-    `<voice name="${escapeSsml(voice)}">`,
-    `<prosody rate="-8%" pitch="-2%">${escapeSsml(text)}</prosody>`,
-    '</voice>',
-    '</speak>'
-  ].join('');
+  const ttsPrompt = [
+    'Speak the transcript below in English.',
+    'Use a calm, reassuring Indian male healthcare assistant style.',
+    'Keep the delivery natural, warm, clear, and not dramatic.',
+    '',
+    'Transcript:',
+    text
+  ].join('\n');
 
   try {
-    const azureRes = await fetch(`https://${region}.tts.speech.microsoft.com/cognitiveservices/v1`, {
+    const geminiRes = await fetch('https://generativelanguage.googleapis.com/v1beta/interactions', {
       method: 'POST',
       headers: {
-        'Ocp-Apim-Subscription-Key': key,
-        'Content-Type': 'application/ssml+xml',
-        'X-Microsoft-OutputFormat': 'audio-24khz-48kbitrate-mono-mp3',
+        'x-goog-api-key': key,
+        'Content-Type': 'application/json',
+        'Api-Revision': '2026-05-20',
         'User-Agent': 'DAI-Care-Chatbot'
       },
-      body: ssml
+      body: JSON.stringify({
+        model,
+        input: ttsPrompt,
+        response_format: { type: 'audio' },
+        generation_config: {
+          speech_config: [{ voice }]
+        }
+      })
     });
 
-    if (!azureRes.ok) {
-      const detail = await azureRes.text().catch(() => '');
-      console.error('Azure TTS error:', azureRes.status, detail.slice(0, 300));
-      return res.status(502).json({ error: 'Microsoft TTS failed' });
+    if (!geminiRes.ok) {
+      const detail = await geminiRes.text().catch(() => '');
+      console.error('Gemini TTS error:', geminiRes.status, detail.slice(0, 300));
+      return res.status(502).json({ error: 'Gemini TTS failed' });
     }
 
-    const audio = Buffer.from(await azureRes.arrayBuffer());
+    const data = await geminiRes.json();
+    const audioBase64 =
+      data?.interaction?.output_audio?.data ||
+      data?.output_audio?.data ||
+      data?.outputAudio?.data ||
+      data?.interaction?.outputAudio?.data;
+
+    if (!audioBase64) {
+      console.error('Gemini TTS response missing audio');
+      return res.status(502).json({ error: 'Gemini TTS failed' });
+    }
+
+    const pcmAudio = Buffer.from(audioBase64, 'base64');
+    const audio = pcmToWav(pcmAudio);
     res.set({
-      'Content-Type': 'audio/mpeg',
+      'Content-Type': 'audio/wav',
       'Content-Length': audio.length,
       'Cache-Control': 'no-store'
     });
     return res.send(audio);
   } catch (error) {
     console.error('TTS proxy error:', error);
-    return res.status(502).json({ error: 'Microsoft TTS failed' });
+    return res.status(502).json({ error: 'Gemini TTS failed' });
   }
 });
 

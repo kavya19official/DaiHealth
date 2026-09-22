@@ -170,7 +170,7 @@
       '<input type="text" aria-label="Ask Dr. Daya" placeholder="Ask about DAI..." autocomplete="off">' +
       '<button type="submit">Send</button>' +
       '</form>' +
-      '<button type="button" class="care-chatbot__voice">Indian English voice off</button>';
+      '<button type="button" class="care-chatbot__voice">Gemini voice off</button>';
 
     root.appendChild(launcher);
     root.appendChild(panel);
@@ -222,7 +222,7 @@
     });
     voiceButton.addEventListener('click', function () {
       voiceOn = !voiceOn;
-      voiceButton.textContent = voiceOn ? 'Indian English voice on' : 'Indian English voice off';
+      voiceButton.textContent = voiceOn ? 'Gemini voice on' : 'Gemini voice off';
       if (!voiceOn) stopSpeech();
     });
   }
