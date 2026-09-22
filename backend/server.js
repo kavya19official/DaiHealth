@@ -1179,7 +1179,7 @@ require('./hospitalPlatform')(app);
 // Keeps the Gemini API key server-side; the frontend receives only generated audio.
 app.post('/api/tts', async (req, res) => {
   const key = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
-  const model = process.env.GEMINI_TTS_MODEL || 'gemini-3.1-flash-tts-preview';
+  const model = process.env.GEMINI_TTS_MODEL || 'gemini-2.5-flash-preview-tts';
   const voiceName = process.env.GEMINI_TTS_VOICE || 'Charon';
   const text = cleanupStr(req.body && req.body.text, 900);
 
@@ -1201,23 +1201,22 @@ app.post('/api/tts', async (req, res) => {
   ].join('\n');
 
   try {
-    const geminiRes = await fetch('https://generativelanguage.googleapis.com/v1beta/interactions', {
+    const geminiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(key)}`, {
       method: 'POST',
       headers: {
-        'x-goog-api-key': key,
         'Content-Type': 'application/json',
-        'Api-Revision': '2026-05-20',
         'User-Agent': 'DAI-Care-Chatbot'
       },
       body: JSON.stringify({
-        model,
-        input: ttsPrompt,
-        response_format: { type: 'audio' },
-        generation_config: {
-          speech_config: {
-            voice_config: {
-              prebuilt_voice_config: {
-                voice_name: voiceName
+        contents: [{
+          parts: [{ text: ttsPrompt }]
+        }],
+        generationConfig: {
+          responseModalities: ['AUDIO'],
+          speechConfig: {
+            voiceConfig: {
+              prebuiltVoiceConfig: {
+                voiceName
               }
             }
           }
@@ -1233,10 +1232,11 @@ app.post('/api/tts', async (req, res) => {
 
     const data = await geminiRes.json();
     const audioBase64 =
+      data?.candidates?.[0]?.content?.parts?.find((part) => part?.inlineData?.data)?.inlineData?.data ||
+      data?.candidates?.[0]?.content?.parts?.find((part) => part?.inline_data?.data)?.inline_data?.data ||
       data?.interaction?.output_audio?.data ||
       data?.output_audio?.data ||
-      data?.outputAudio?.data ||
-      data?.interaction?.outputAudio?.data;
+      data?.outputAudio?.data;
 
     if (!audioBase64) {
       console.error('Gemini TTS response missing audio');
