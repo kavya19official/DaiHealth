@@ -439,21 +439,86 @@ async function setApptStatus(id,status) {
   api.toast('Appointment '+status);
 }
 
-var timelineTemplates=[
-  {title:'Registration and baseline history',stage:'Care started',offset:-70,status:'completed'},
-  {title:'Recent consultation reviewed',stage:'Clinical review',offset:-14,status:'completed'},
-  {title:'Pending follow-up reminder',stage:'Continuity',offset:3,status:'upcoming'},
-  {title:'Next scheduled milestone',stage:'Care plan',offset:14,status:'upcoming'}
+var timelineTemplates = [
+  { title: 'Registration and baseline history', stage: 'Care started', offset: -70, status: 'completed' },
+  { title: 'First antenatal visit completed', stage: 'ANC', offset: -56, status: 'completed' },
+  { title: 'Anomaly scan reviewed', stage: 'Investigations', offset: -21, status: 'completed' },
+  { title: 'Recent consultation reviewed', stage: 'Clinical review', offset: -14, status: 'completed' },
+  { title: 'Haemoglobin recheck due', stage: 'Follow-up', offset: -3, status: 'overdue' },
+  { title: 'Pending follow-up reminder', stage: 'Continuity', offset: 3, status: 'upcoming' },
+  { title: 'Next scheduled milestone', stage: 'Care plan', offset: 14, status: 'upcoming' }
 ];
-function renderTimeline(items,patientName){var el=$('docTimeline');if(!el)return;el.innerHTML='<div class="section-head"><div><div class="section-title">'+esc(patientName||'Patient')+' care timeline</div><div class="muted">Recorded events and upcoming follow-ups</div></div></div>'+items.map(function(m){var tag=m.status==='completed'?'ok':m.status==='overdue'?'pending':'info';return '<div class="list-row"><div style="flex:1"><div class="feed-item__title">'+esc(m.title)+'</div><div class="feed-item__sub">'+esc(m.stage||'')+' · '+api.fmtDate(m.due_date||addDays(m.offset||0))+'</div></div><span class="tag tag--'+tag+'">'+esc(m.status)+'</span></div>';}).join('');}
-async function openPatient(id){var p=patients.find(function(x){return String(x.user_id)===String(id);})||patients[0];showPanel('timeline');$('docTimeline').innerHTML='<div class="empty">Loading timeline…</div>';var data=null;if(p&&!String(p.user_id).startsWith('DEMO-'))data=await api.apiRequest('/doctor/patients/'+p.user_id+'/timeline');var items=(data&&data.milestones)||timelineTemplates;renderTimeline(items,p&&p.full_name);}
+
+function demoTimelineForPatient(p) {
+  if (p && /child|paediatric|month|year/i.test(String(p.program || '') + ' ' + String(p.age_gender || ''))) {
+    return [
+      { title: 'Birth / enrolment recorded', stage: 'Care started', offset: -90, status: 'completed' },
+      { title: 'Growth assessment', stage: 'Well-child', offset: -45, status: 'completed' },
+      { title: 'Vaccination dose recorded', stage: 'Immunisation', offset: -21, status: 'completed' },
+      { title: 'Next vaccine due', stage: 'Immunisation', offset: 7, status: 'upcoming' },
+      { title: 'Developmental milestone check', stage: 'Follow-up', offset: 21, status: 'upcoming' }
+    ];
+  }
+  return timelineTemplates.map(function (m) { return Object.assign({}, m); });
+}
+
+function renderTimeline(items, patientName) {
+  var el = $('docTimeline');
+  if (!el) return;
+  var rows = (items && items.length) ? items : timelineTemplates;
+  el.innerHTML =
+    '<div class="section-head"><div><div class="section-title">' +
+    esc(patientName || 'Patient') +
+    ' care timeline</div><div class="muted">Recorded events and upcoming follow-ups</div></div></div>' +
+    rows.map(function (m) {
+      var tag = m.status === 'completed' ? 'ok' : m.status === 'overdue' ? 'pending' : 'info';
+      return (
+        '<div class="list-row"><div style="flex:1"><div class="feed-item__title">' +
+        esc(m.title) +
+        '</div><div class="feed-item__sub">' +
+        esc(m.stage || '') +
+        ' · ' +
+        api.fmtDate(m.due_date || addDays(m.offset || 0)) +
+        '</div></div><span class="tag tag--' +
+        tag +
+        '">' +
+        esc(m.status) +
+        '</span></div>'
+      );
+    }).join('');
+}
+
+async function openPatient(id) {
+  var p = patients.find(function (x) { return String(x.user_id) === String(id); }) || patients[0] || demoPatients[0];
+  showPanel('timeline');
+  if ($('docTimeline')) $('docTimeline').innerHTML = '<div class="empty">Loading timeline…</div>';
+  var data = null;
+  if (p && !String(p.user_id).startsWith('DEMO-')) {
+    try { data = await api.apiRequest('/doctor/patients/' + p.user_id + '/timeline'); } catch (e) {}
+  }
+  var items = (data && data.milestones && data.milestones.length) ? data.milestones : demoTimelineForPatient(p);
+  renderTimeline(items, p && p.full_name);
+}
 
 function renderSupportingPanels(){
   var rr=$('recentRecords');var records=$('docRecords');var messages=$('docMessages');var feed=$('msgFeed');var care=$('careFeed');
-  var recordRows=[['Asha Nair','Anomaly scan reviewed','Report verified · '+api.fmtDate(addDays(-12))],['Meera Joshi','CBC and haemoglobin','Result filed · '+api.fmtDate(addDays(-8))],['Sanya Patel','Vaccination record','Next dose due · '+api.fmtDate(addDays(7))],['Kabir Khan','Follow-up note','Doctor review pending · '+api.fmtDate(addDays(-2))]];
+  var recordRows=[
+    ['Asha Nair','Anomaly scan reviewed','Report verified · '+api.fmtDate(addDays(-12))],
+    ['Meera Joshi','CBC and haemoglobin','Hb 10.9 g/dL · Result filed · '+api.fmtDate(addDays(-8))],
+    ['Sanya Patel','Vaccination record','Next dose due · '+api.fmtDate(addDays(7))],
+    ['Kabir Khan','Follow-up note','Doctor review pending · '+api.fmtDate(addDays(-2))],
+    ['Riya Verma','Growth chart update','Height/weight on track · '+api.fmtDate(addDays(-5))],
+    ['Asha Nair','Glucose challenge test','Pending clinical review · '+api.fmtDate(addDays(-3))]
+  ];
   var recordHtml=recordRows.map(function(r){return '<div class="feed-item"><span class="avatar">'+api.initials(r[0])+'</span><div style="flex:1"><div class="feed-item__title">'+r[0]+' · '+r[1]+'</div><div class="feed-item__sub">'+r[2]+'</div></div><button class="btn btn--ghost btn--sm" data-go-record>View</button></div>';}).join('');
-  if(rr)rr.innerHTML=recordHtml;if(records)records.innerHTML='<div class="demo-banner">Sample records show how verified reports and notes will appear before live hospital data is connected.</div>'+recordHtml+'<div class="card" style="padding:1rem;margin-top:1rem"><div class="section-title">Selected report preview</div><p class="muted">Haemoglobin: 11.2 g/dL · Source: City Hospital Lab · Reviewed by Dr. S. Kumar</p><span class="tag tag--ok">Verified</span></div>';
-  var msgRows=[['Asha Nair','I have uploaded my scan report.','8:42 AM'],['Sanya Patel’s caregiver','Can we confirm tomorrow’s vaccine visit?','9:05 AM'],['Meera Joshi','Thank you, I will bring the reports.','Yesterday']];
+  if(rr)rr.innerHTML=recordHtml;if(records)records.innerHTML='<div class="demo-banner">Hardcoded sample records for demo — verified reports and notes.</div>'+recordHtml+'<div class="card" style="padding:1rem;margin-top:1rem"><div class="section-title">Selected report preview</div><p class="muted">Haemoglobin: 11.2 g/dL · Source: City Hospital Lab · Reviewed by Dr. S. Kumar</p><span class="tag tag--ok">Verified</span></div>';
+  var msgRows=[
+    ['Asha Nair','I have uploaded my scan report. Please review.','8:42 AM'],
+    ['Sanya Patel’s caregiver','Can we confirm tomorrow’s vaccine visit?','9:05 AM'],
+    ['Meera Joshi','Thank you, I will bring the glucose reports.','Yesterday'],
+    ['Kabir Khan’s parent','Fever settled after the last visit. Any follow-up needed?','Yesterday'],
+    ['Riya Verma’s parent','School health form — can you sign it?','2 days ago']
+  ];
   var msgHtml=msgRows.map(function(m){return '<div class="feed-item"><span class="avatar">'+api.initials(m[0])+'</span><div style="flex:1"><div class="feed-item__title">'+m[0]+'</div><div class="feed-item__sub">'+m[1]+' · '+m[2]+'</div></div><button class="btn btn--ghost btn--sm" data-reply>Reply</button></div>';}).join('');
   if(feed)feed.innerHTML=msgHtml;if(messages)messages.innerHTML='<div class="demo-banner">Secure demo inbox for patient questions and appointment communication.</div>'+msgHtml+'<form id="demoMessageForm" class="form-grid" style="margin-top:1rem"><div class="form-group"><label>Reply</label><textarea id="demoMessage" placeholder="Write a message to the selected patient"></textarea></div><button class="btn btn--primary" type="submit">Send message</button></form>';
   if(care)care.innerHTML=timelineTemplates.slice(0,3).map(function(m){return '<div class="feed-item"><div><div class="feed-item__title">'+m.title+'</div><div class="feed-item__sub">'+api.fmtDate(addDays(m.offset))+'</div></div></div>';}).join('');
@@ -463,8 +528,27 @@ function renderSupportingPanels(){
   var form=$('demoMessageForm');if(form)form.addEventListener('submit',function(e){e.preventDefault();api.toast('Demo message sent');$('demoMessage').value='';});
 }
 function renderNextAppt(){var next=appointments.filter(function(a){return a.status==='pending'||a.status==='confirmed';}).sort(function(a,b){return String(a.requested_date).localeCompare(String(b.requested_date));})[0];if(!next)return;if($('nextPatient'))$('nextPatient').textContent=next.mother_name;if($('nextMeta'))$('nextMeta').innerHTML=esc(next.reason)+'<br>'+api.fmtDate(next.requested_date)+' · '+esc(next.requested_time);}
-async function loadPatients(){var data=await api.apiRequest('/doctor/patients');patients=(data&&data.patients&&data.patients.length?data.patients:demoPatients).map(function(p){p.user_id=p.user_id!=null?p.user_id:p.id;return p;});renderPatients();}
-async function loadAppointments(){var data=await api.apiRequest('/appointments');appointments=((data&&data.appointments&&data.appointments.length)?data.appointments:demoAppointments).map(normalizeAppointment);if(!selectedAppointmentId&&appointments.length)selectedAppointmentId=appointments[0].id;renderTodayTable();renderAllAppts();renderNextAppt();renderPatients();}
+async function loadPatients() {
+  var data = null;
+  try { data = await api.apiRequest('/doctor/patients'); } catch (e) {}
+  patients = (data && data.patients && data.patients.length ? data.patients : demoPatients).map(function (p) {
+    p.user_id = p.user_id != null ? p.user_id : p.id;
+    return p;
+  });
+  if (!patients.length) patients = demoPatients.slice();
+  renderPatients();
+}
+async function loadAppointments() {
+  var data = null;
+  try { data = await api.apiRequest('/appointments'); } catch (e) {}
+  appointments = ((data && data.appointments && data.appointments.length) ? data.appointments : demoAppointments).map(normalizeAppointment);
+  if (!appointments.length) appointments = demoAppointments.map(normalizeAppointment);
+  if (!selectedAppointmentId && appointments.length) selectedAppointmentId = appointments[0].id;
+  renderTodayTable();
+  renderAllAppts();
+  renderNextAppt();
+  renderPatients();
+}
 
 var pf=$('patientFilter');if(pf)pf.addEventListener('input',renderPatients);
 ['teleBtn','teleBtn2'].forEach(function(id){var button=$(id);if(button)button.addEventListener('click',function(){showPanel('messages');api.toast('Patient communication opened');});});
