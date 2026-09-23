@@ -429,6 +429,13 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
       <div class="section-card" style="border:0;box-shadow:none;padding-bottom:.5rem"><div class="section-title"><span><svg width="15" height="15" aria-hidden="true"><use href="#i-file"/></svg></span> Health log</div></div>
       <div id="vitalsList"></div>
     </div>
+    <div class="card list-card" style="grid-column:1/-1;margin-top:1rem">
+      <div class="section-card" style="border:0;box-shadow:none;padding-bottom:.5rem">
+        <div class="section-title"><span><svg width="15" height="15" aria-hidden="true"><use href="#i-file"/></svg></span> Reports &amp; documents</div>
+        <p class="muted" style="margin:.25rem 0 0">Lab results, scans and care documents on your record</p>
+      </div>
+      <div id="reportsDocsList"></div>
+    </div>
   </div>
 </div>
 
@@ -471,6 +478,108 @@ var appointments = [];
 var doctorsList = [];
 var healthLogs = [];
 var medications = [];
+
+function addDaysLocal(days) {
+  var d = new Date();
+  d.setDate(d.getDate() + days);
+  return (api.localDateStr ? api.localDateStr(d) : d.toISOString().slice(0, 10));
+}
+
+var demoMilestones = [
+  { id: 'DEMO-M1', title: 'Registration and baseline history', stage: 'Trimester 1', category: 'pregnancy', status: 'completed', due_date: null, offset: -90, guidance: 'Enrolment completed' },
+  { id: 'DEMO-M2', title: 'First antenatal visit', stage: 'Trimester 1', category: 'pregnancy', status: 'completed', due_date: null, offset: -70, guidance: 'BP, weight, blood group recorded' },
+  { id: 'DEMO-M3', title: 'Haemoglobin and blood tests', stage: 'Trimester 1', category: 'pregnancy', status: 'completed', due_date: null, offset: -56, guidance: 'CBC filed' },
+  { id: 'DEMO-M4', title: 'Anomaly scan (TIFFA)', stage: 'Trimester 2', category: 'pregnancy', status: 'completed', due_date: null, offset: -28, guidance: 'Scan reviewed by clinician' },
+  { id: 'DEMO-M5', title: 'Glucose challenge test', stage: 'Trimester 2', category: 'pregnancy', status: 'overdue', due_date: null, offset: -5, guidance: 'Complete and upload report' },
+  { id: 'DEMO-M6', title: 'TT booster / iron review', stage: 'Trimester 2', category: 'pregnancy', status: 'upcoming', due_date: null, offset: 7, guidance: 'Bring prescription card' },
+  { id: 'DEMO-M7', title: 'Third-trimester growth scan', stage: 'Trimester 3', category: 'pregnancy', status: 'upcoming', due_date: null, offset: 28, guidance: 'Schedule with radiology' },
+  { id: 'DEMO-M8', title: 'Birth preparedness counselling', stage: 'Trimester 3', category: 'pregnancy', status: 'upcoming', due_date: null, offset: 42, guidance: 'Facility and emergency plan' }
+];
+
+var demoMotherAppointments = [
+  { id: 'DEMO-MA1', reason: 'Antenatal follow-up', requested_date: null, offset: 3, doctor_name: 'Dr. S. Kumar', specialization: 'Obstetrics', status: 'confirmed' },
+  { id: 'DEMO-MA2', reason: 'Lab review — glucose test', requested_date: null, offset: 10, doctor_name: 'Dr. S. Kumar', specialization: 'Obstetrics', status: 'pending' },
+  { id: 'DEMO-MA3', reason: 'Growth scan', requested_date: null, offset: -14, doctor_name: 'Dr. R. Mehta', specialization: 'Radiology', status: 'completed' }
+];
+
+var demoHealthLogs = [
+  { log_type: 'weight', value: '68.5', unit: 'kg', logged_at: null, offset: -2, notes: 'Morning weight' },
+  { log_type: 'blood_pressure', value: '118/76', unit: 'mmHg', logged_at: null, offset: -2, notes: 'At home' },
+  { log_type: 'weight', value: '67.8', unit: 'kg', logged_at: null, offset: -9, notes: '' },
+  { log_type: 'blood_pressure', value: '120/80', unit: 'mmHg', logged_at: null, offset: -9, notes: 'Clinic' }
+];
+
+var demoReports = [
+  { title: 'Complete blood count (CBC)', type: 'Lab report', dateOffset: -12, status: 'Normal', detail: 'Hb 11.8 g/dL · WBC normal · Platelets normal · City Hospital Lab' },
+  { title: 'Anomaly scan (TIFFA)', type: 'Ultrasound', dateOffset: -21, status: 'Reviewed', detail: 'Single live fetus · Growth on track · No major anomaly flagged' },
+  { title: 'Blood group & Rh', type: 'Lab report', dateOffset: -60, status: 'On file', detail: 'B+ · Rh positive · Verified at enrolment' },
+  { title: 'Glucose challenge test', type: 'Lab report', dateOffset: -8, status: 'Pending review', detail: 'Result filed — discuss with doctor at next visit' },
+  { title: 'Prescription — iron & calcium', type: 'Document', dateOffset: -14, status: 'Active', detail: 'Iron–folic acid 1 OD · Calcium 500 mg BD · 30 days' },
+  { title: 'Antenatal card summary', type: 'Document', dateOffset: -5, status: 'Updated', detail: 'Visits, vitals and immunisation notes summarised for continuity' }
+];
+
+var demoMessages = [
+  { title: 'Dr. S. Kumar · confirmed', sub: 'Antenatal follow-up · Bring previous reports', dateOffset: -1 },
+  { title: 'Care team · reminder', sub: 'Glucose challenge test is overdue — schedule this week', dateOffset: -3 },
+  { title: 'Dr. R. Mehta · completed', sub: 'Growth scan report uploaded to Records', dateOffset: -14 }
+];
+
+function hydrateDemoMilestones() {
+  return demoMilestones.map(function (m) {
+    var copy = Object.assign({}, m);
+    copy.due_date = addDaysLocal(m.offset);
+    return copy;
+  });
+}
+
+function hydrateDemoAppointments() {
+  return demoMotherAppointments.map(function (a) {
+    var copy = Object.assign({}, a);
+    copy.requested_date = addDaysLocal(a.offset);
+    return copy;
+  });
+}
+
+function hydrateDemoHealthLogs() {
+  return demoHealthLogs.map(function (l) {
+    var copy = Object.assign({}, l);
+    copy.logged_at = addDaysLocal(l.offset);
+    return copy;
+  });
+}
+
+function renderReportsDocs() {
+  var el = $('reportsDocsList');
+  if (!el) return;
+  el.innerHTML = demoReports.map(function (r) {
+    var tag = /normal|reviewed|on file|active|updated/i.test(r.status) ? 'ok' : 'pending';
+    return (
+      '<div class="list-row">' +
+      '<div class="list-row__meta" style="flex:1">' +
+      '<div class="list-row__title">' + r.title + '</div>' +
+      '<div class="list-row__sub">' + r.type + ' · ' + addDaysLocal(r.dateOffset) + ' · ' + r.detail + '</div>' +
+      '</div>' +
+      '<span class="tag tag--' + tag + '">' + r.status + '</span>' +
+      '</div>'
+    );
+  }).join('');
+}
+
+function renderDemoMessages() {
+  var list = $('msgList');
+  if (!list) return;
+  list.innerHTML = demoMessages.map(function (m) {
+    return (
+      '<div class="list-row"><div class="list-row__meta"><div class="list-row__title">' +
+      m.title +
+      '</div><div class="list-row__sub">' +
+      m.sub +
+      '</div></div><span class="feed-item__date">' +
+      addDaysLocal(m.dateOffset) +
+      '</span></div>'
+    );
+  }).join('');
+}
 
 function $(id) { return document.getElementById(id); }
 
@@ -581,6 +690,15 @@ function renderTimeline() {
   el.querySelectorAll('[data-complete]').forEach(function (b) {
     b.addEventListener('click', async function () {
       var id = b.getAttribute('data-complete');
+      if (String(id).indexOf('DEMO-') === 0) {
+        motherMilestones = motherMilestones.map(function (m) {
+          if (String(m.id) === String(id)) m.status = 'completed';
+          return m;
+        });
+        api.toast('Milestone marked done (demo)');
+        renderTimeline();
+        return;
+      }
       var data = await api.apiRequest('/timeline/' + id + '/complete', { method: 'PATCH' });
       if (data) {
         api.toast('Milestone marked done');
@@ -663,23 +781,25 @@ function renderDoctorsSelect() {
 
 async function loadTimeline() {
   if (IS_GUEST) {
-    motherMilestones = [];
+    motherMilestones = hydrateDemoMilestones();
     renderTimeline();
     return;
   }
-  var data = await api.apiRequest('/timeline');
-  motherMilestones = (data && data.milestones) || [];
+  var data = null;
+  try { data = await api.apiRequest('/timeline'); } catch (e) {}
+  motherMilestones = (data && data.milestones && data.milestones.length) ? data.milestones : hydrateDemoMilestones();
   renderTimeline();
 }
 
 async function loadAppointments() {
   if (IS_GUEST) {
-    appointments = [];
+    appointments = hydrateDemoAppointments();
     renderAppointments();
     return;
   }
-  var data = await api.apiRequest('/appointments');
-  appointments = (data && data.appointments) || [];
+  var data = null;
+  try { data = await api.apiRequest('/appointments'); } catch (e) {}
+  appointments = (data && data.appointments && data.appointments.length) ? data.appointments : hydrateDemoAppointments();
   renderAppointments();
 }
 
@@ -692,13 +812,16 @@ async function loadDoctors() {
 
 async function loadHealthLogs() {
   if (IS_GUEST) {
-    healthLogs = [];
+    healthLogs = hydrateDemoHealthLogs();
     renderVitals();
+    renderReportsDocs();
     return;
   }
-  var data = await api.apiRequest('/health-logs');
-  healthLogs = (data && data.logs) || [];
+  var data = null;
+  try { data = await api.apiRequest('/health-logs'); } catch (e) {}
+  healthLogs = (data && data.logs && data.logs.length) ? data.logs : hydrateDemoHealthLogs();
   renderVitals();
+  renderReportsDocs();
 }
 
 async function loadMedications() {
@@ -1018,12 +1141,17 @@ async function boot() {
       care_start_date: api.localDateStr(),
       guest: true
     };
+    motherMilestones = hydrateDemoMilestones();
+    appointments = hydrateDemoAppointments();
+    healthLogs = hydrateDemoHealthLogs();
     renderHeader();
     renderAppointments();
     renderTimeline();
     renderVitals();
+    renderReportsDocs();
+    renderDemoMessages();
     route();
-    api.toast('Guest mode — data stays on this device until you sign in');
+    api.toast('Guest mode — sample care data is shown on this device');
     return;
   }
 
@@ -1075,11 +1203,16 @@ if (settingsForm) {
 // Feed messages from real appointments
 async function renderMessagesFromAppts() {
   var list = $('msgList');
-  if (!list || IS_GUEST) return;
-  var data = await api.apiRequest('/appointments');
+  if (!list) return;
+  if (IS_GUEST) {
+    renderDemoMessages();
+    return;
+  }
+  var data = null;
+  try { data = await api.apiRequest('/appointments'); } catch (e) {}
   var appts = (data && data.appointments) || [];
   if (!appts.length) {
-    list.innerHTML = '<div class="list-row"><div class="list-row__meta"><div class="list-row__title">No messages yet</div><div class="list-row__sub">Appointment updates from your care team will appear here.</div></div></div>';
+    renderDemoMessages();
     return;
   }
   list.innerHTML = appts.slice(0, 15).map(function (a) {
