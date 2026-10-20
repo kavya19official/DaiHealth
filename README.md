@@ -96,3 +96,35 @@ Age, SystolicBP, DiastolicBP, BS, BodyTemp, HeartRate → RiskLevel.
 Collects DOB, address, blood group, pregnancy status, LMP/EDD, gravida/parity,
 history, conditions, medications/allergies, height/weight, optional vitals.
 If status is **delivered**, child name + DOB are required and a `children` row is created.
+
+## Hospital workspace update
+
+Open `/hospital.html` after starting the backend. The console now uses section-based
+navigation, with Operations and Administration entry points, responsive styling,
+and an actionable overview. Existing registry, clinic, documents, pathways and
+audit tools remain available.
+
+New server-saved coordination flows:
+- Referrals: requested → accepted → transport arranged → arrived → completed.
+- Discharge coordination: preparing → documents reviewed → follow-ups booked →
+  handover confirmed → completed.
+- Shift handovers: assigned → acknowledged → completed.
+- Resource capacity: administrator-confirmed available units, owner and timestamp.
+
+Each transition requires confirmation notes/evidence and the expected current
+status, preventing stale clients from advancing the same record twice. Changes
+are recorded in the existing audit history and atomic file-backed state. New
+records start empty; they are not fabricated when loading fails.
+
+These remain **demo workflows**: discharge newborn references are entered as notes,
+not relational child links; referrals record staff confirmations rather than
+contacting another hospital; capacity is manually confirmed. The existing
+production authentication model, hospital membership, PostgreSQL migration,
+staff invitation/deactivation, pathway approval/versioning and real external
+communication integrations are not completed by this update. Keep the role
+switcher limited to demo use. Do not use sample workflows for real patient data.
+
+Validation: `npm test --prefix backend` covers existing hospital workflows plus
+coordination validation, permissions, sequential transitions, stale updates,
+resource validation and saved evidence/history. Browser visual QA is still
+required before deployment.

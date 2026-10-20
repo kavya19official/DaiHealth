@@ -76,4 +76,23 @@ test('hospital workflows persist data and enforce human approval gates', async (
   const audit = await request('/audit');
   assert.equal(audit.body.audit.some((entry) => entry.action === 'document_ingested'), true);
   assert.equal(fs.existsSync(process.env.HOSPITAL_STATE_FILE), true);
+  const workflowBody = { kind: 'referral', patientId: 'P-1002', title: 'District maternity facility', owner: 'Care coordinator', dueDate: '2026-10-22' };
+  assert.equal((await request('/coordination', { method: 'POST', role: 'front_desk', body: workflowBody })).status, 403);
+  assert.equal((await request('/coordination', { method: 'POST', body: { ...workflowBody, patientId: 'unknown' } })).status, 400);
+  const created = await request('/coordination', { method: 'POST', role: 'care_team', body: workflowBody });
+  assert.equal(created.status, 201);
+  const route = `/coordination/${created.body.record.id}/advance`;
+  assert.equal((await request(route, { method: 'POST', role: 'care_team', body: { expectedStatus: 'requested' } })).status, 400);
+  for (const status of ['requested', 'accepted', 'transport_arranged', 'arrived']) {
+    assert.equal((await request(route, { method: 'POST', role: 'care_team', body: { expectedStatus: status, evidence: 'Confirmed with receiving team' } })).status, 200);
+  }
+  assert.equal((await request(route, { method: 'POST', body: { expectedStatus: 'requested', evidence: 'Stale update' } })).status, 409);
+  assert.equal((await request('/resources', { method: 'POST', role: 'care_team', body: { name: 'Maternity beds', available: 3, owner: 'Ward lead' } })).status, 403);
+  assert.equal((await request('/resources', { method: 'POST', body: { name: 'Maternity beds', available: -1, owner: 'Ward lead' } })).status, 400);
+  assert.equal((await request('/resources', { method: 'POST', body: { name: 'Maternity beds', available: 3, owner: 'Ward lead' } })).status, 201);
+  const persisted = JSON.parse(fs.readFileSync(process.env.HOSPITAL_STATE_FILE, 'utf8'));
+  assert.equal(persisted.coordination[0].status, 'completed');
+  assert.equal(persisted.coordination[0].history.length, 4);
+  assert.equal(persisted.resources[0].available, 3);
+
 });

@@ -5,7 +5,7 @@ const fs = require('fs');
 const path = require('path');
 
 const DAY_MS = 24 * 60 * 60 * 1000;
-const HOSPITAL_TODAY = process.env.HOSPITAL_TODAY || '2026-09-22T09:00:00+05:30';
+const HOSPITAL_TODAY = process.env.HOSPITAL_TODAY || new Date().toISOString();
 const DATA_DIR = process.env.HOSPITAL_DATA_DIR || path.join(__dirname, 'data');
 const STATE_FILE = process.env.HOSPITAL_STATE_FILE || path.join(DATA_DIR, 'hospital-demo-state.json');
 const UPLOAD_DIR = process.env.HOSPITAL_UPLOAD_DIR || path.join(DATA_DIR, 'hospital-uploads');
@@ -87,6 +87,8 @@ const seedState = {
   ] }],
   notifications: [],
   sosRequests: [],
+  coordination: [],
+  resources: [],
   audit: []
 };
 
@@ -195,6 +197,45 @@ module.exports = function registerHospitalPlatform(app, options = {}) {
     });
   }
   if (!state.audit.length) audit({ body: { actor: 'system', role: 'admin' }, get: () => null }, 'gap_engine_run', 'CareGap', 'all', 'Deterministic expected-versus-recorded comparison completed.');
+
+  // Coordination records use the same atomic persistence and audit mechanism as the console.
+  const stages = {
+    referral: ['requested', 'accepted', 'transport_arranged', 'arrived', 'completed'],
+    discharge: ['preparing', 'documents_reviewed', 'followups_booked', 'handover_confirmed', 'completed'],
+    handover: ['assigned', 'acknowledged', 'completed']
+  };
+  app.get('/api/hospital/coordination', (req, res) => res.json({ records: state.coordination, resources: state.resources }));
+  app.post('/api/hospital/coordination', requirePermission('facility_review'), (req, res) => {
+    const { kind, patientId, title, owner, dueDate, notes } = req.body;
+    if (!stages[kind] || !patientById(patientId) || !String(title || '').trim() || !String(owner || '').trim() || !/^\d{4}-\d{2}-\d{2}$/.test(dueDate || '') || !Number.isFinite(Date.parse(dueDate))) return res.status(400).json({ error: 'Valid workflow, patient, title, owner and due date are required.' });
+    const record = { id: id('CO'), kind, patientId, title: String(title).trim().slice(0,160), owner: String(owner).trim().slice(0,100), dueDate, notes: String(notes || '').slice(0,2000), status: stages[kind][0], createdAt: now(), updatedAt: now(), history: [] };
+    state.coordination.unshift(record);
+    audit(req, 'coordination_created', 'Coordination', record.id, record.title, null, record);
+    res.status(201).json({ record });
+  });
+  app.post('/api/hospital/coordination/:id/advance', requirePermission('facility_review'), (req, res) => {
+    const record = state.coordination.find(item => item.id === req.params.id);
+    if (!record) return res.status(404).json({ error: 'Workflow not found.' });
+    if (req.body.expectedStatus !== record.status) return res.status(409).json({ error: 'This workflow changed. Refresh before updating.' });
+    const sequence = stages[record.kind], next = sequence[sequence.indexOf(record.status) + 1];
+    if (!next) return res.status(409).json({ error: 'This workflow is already complete.' });
+    if (!String(req.body.evidence || '').trim()) return res.status(400).json({ error: 'Confirmation notes or an evidence reference are required.' });
+    const before = clone(record);
+    record.history.push({ from: record.status, to: next, evidence: String(req.body.evidence).slice(0,2000), actor: actor(req), at: now() });
+    record.status = next; record.updatedAt = now();
+    audit(req, 'coordination_advanced', 'Coordination', record.id, next, before, record);
+    res.json({ record });
+  });
+  app.post('/api/hospital/resources', requirePermission('pathway_manage'), (req, res) => {
+    const { name, available, owner } = req.body;
+    if (!String(name || '').trim() || !String(owner || '').trim() || !Number.isInteger(available) || available < 0 || available > 10000) return res.status(400).json({ error: 'Resource, owner and a nonnegative whole-number capacity are required.' });
+    const record = { id: id('RES'), name: String(name).trim().slice(0,100), available, owner: String(owner).trim().slice(0,100), confirmedAt: now() };
+    const previous = state.resources.find(item => item.name.toLowerCase() === record.name.toLowerCase());
+    if (previous) state.resources.splice(state.resources.indexOf(previous), 1);
+    state.resources.unshift(record);
+    audit(req, 'capacity_confirmed', 'Resource', record.id, record.name, previous || null, record);
+    res.status(201).json({ record });
+  });
 
   app.get('/api/hospital/state', (req, res) => res.json(snapshot()));
   app.get('/api/hospital/registry', (req, res) => res.json(registry(req.query)));
