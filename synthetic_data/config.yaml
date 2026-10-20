@@ -1,0 +1,63 @@
+# JSON-form YAML: intentionally parsed with the standard library (no PyYAML).
+# All sizing values are synthetic placeholders, NOT compliance claims.
+{
+  "seed": 20261020,
+  "as_of_date": "2026-10-20",
+  "hospitals": 12,
+  "patients": 5000,
+  "edge_case_fraction": 0.09,
+  "minimum_examples_per_scenario": 15,
+  "small_population_policy": "raise_edge_fraction_to_preserve_15_examples",
+  "msr_norms": {
+    # VERIFY against NMC Minimum Standard Requirements (MSR) document.
+    # Totals cover the entire hospital, including general medicine/surgery beds.
+    # Ward weights, ICU ratios, NICU counts, equipment minima, OTs and labour
+    # tables below are configurable modeling placeholders, not mandated norms.
+    "PHC": {"total_beds": [4,10], "occupancy": [0.60,0.75], "nicu_level": "none", "nicu_beds": [0,0], "icu_ratio": 0, "ot_count": [0,0], "labour_tables": [1,1], "obg_count": 0, "paediatricians": 0, "equipment_minimums": {"infant warmer": 1, "oxygen concentrator": 1}, "ward_weights": {"general ANC ward": 2, "postnatal ward": 2, "labour room": 1, "emergency/casualty": 1}},
+    "CHC": {"total_beds": [30,60], "occupancy": [0.65,0.85], "nicu_level": "none", "nicu_beds": [0,0], "icu_ratio": 0.03, "ot_count": [1,1], "labour_tables": [2,3], "obg_count": 2, "paediatricians": 1, "equipment_minimums": {"infant warmer": 2, "phototherapy unit": 1, "CTG machine": 1, "ultrasound": 1, "oxygen concentrator": 3}, "ward_weights": {"general ANC ward": 5, "postnatal ward": 5, "labour room": 2, "maternity OT": 1, "SNCU": 2, "paediatric ward": 5, "emergency/casualty": 3, "isolation": 1, "KMC unit": 1, "PNC": 2}},
+    "District Hospital": {"total_beds": [100,400], "occupancy": [0.70,0.90], "nicu_level": "II", "nicu_beds": [8,16], "icu_ratio": 0.06, "ot_count": [2,4], "labour_tables": [3,6], "obg_count": 4, "paediatricians": 3, "equipment_minimums": {"ventilator": 4, "infant warmer": 8, "phototherapy unit": 6, "CTG machine": 3, "ultrasound": 2, "neonatal incubator": 4, "CPAP": 4, "syringe pump": 12, "defibrillator": 2, "anaesthesia machine": 3, "oxygen concentrator": 6, "cardiac monitor": 8, "blood storage unit": 2}, "ward_weights": {"general ANC ward": 5, "postnatal ward": 6, "labour room": 2, "labour-room HDU": 1, "maternity OT": 1, "obstetric ICU/HDU": 1, "SNCU": 2, "paediatric ward": 6, "paediatric ICU": 1, "emergency/casualty": 4, "isolation": 2, "KMC unit": 1, "PNC": 2, "general medicine/surgery": 12}},
+    "Medical College Hospital": {"total_beds": [500,1500], "occupancy": [0.85,0.95], "nicu_level": "III", "nicu_beds": [20,40], "icu_ratio": 0.10, "ot_count": [6,12], "labour_tables": [6,12], "obg_count": 10, "paediatricians": 8, "equipment_minimums": {"ventilator": 20, "infant warmer": 25, "phototherapy unit": 16, "CTG machine": 8, "ultrasound": 5, "neonatal incubator": 16, "CPAP": 12, "syringe pump": 50, "defibrillator": 8, "anaesthesia machine": 10, "oxygen concentrator": 15, "cardiac monitor": 40, "blood storage unit": 5}, "ward_weights": {"general ANC ward": 5, "postnatal ward": 6, "labour room": 2, "labour-room HDU": 1, "maternity OT": 1, "obstetric ICU/HDU": 2, "SNCU": 2, "paediatric ward": 7, "paediatric ICU": 1, "emergency/casualty": 5, "isolation": 2, "KMC unit": 1, "PNC": 2, "general medicine/surgery": 25}},
+    "Private Multispecialty": {"total_beds": [100,300], "occupancy": [0.60,0.80], "nicu_level": "III", "nicu_beds": [8,16], "icu_ratio": 0.08, "ot_count": [3,6], "labour_tables": [3,6], "obg_count": 5, "paediatricians": 4, "equipment_minimums": {"ventilator": 8, "infant warmer": 10, "phototherapy unit": 6, "CTG machine": 4, "ultrasound": 3, "neonatal incubator": 6, "CPAP": 6, "syringe pump": 20, "defibrillator": 3, "anaesthesia machine": 4, "oxygen concentrator": 8, "cardiac monitor": 16, "blood storage unit": 2}, "ward_weights": {"general ANC ward": 4, "postnatal ward": 5, "labour room": 2, "labour-room HDU": 1, "maternity OT": 1, "obstetric ICU/HDU": 1, "paediatric ward": 5, "paediatric ICU": 1, "emergency/casualty": 3, "isolation": 1, "KMC unit": 1, "PNC": 2, "general medicine/surgery": 12}}
+  },
+  "geography": [
+    {"district":"New Delhi","state":"Delhi","pincode_prefix":"110","latitude":28.6139,"longitude":77.2090,"language":"Hindi","names":["Aarohi","Kavini","Nivara"],"surnames":["Mehra","Batra","Sethi"]},
+    {"district":"Lucknow","state":"Uttar Pradesh","pincode_prefix":"226","latitude":26.8467,"longitude":80.9462,"language":"Hindi","names":["Anvita","Kusuma","Rewati"],"surnames":["Tiwari","Mishra","Verma"]},
+    {"district":"Patna","state":"Bihar","pincode_prefix":"800","latitude":25.5941,"longitude":85.1376,"language":"Hindi","names":["Maithili","Kalyani","Suhani"],"surnames":["Sinha","Jha","Kumari"]},
+    {"district":"Pune","state":"Maharashtra","pincode_prefix":"411","latitude":18.5204,"longitude":73.8567,"language":"Marathi","names":["Mrinali","Vaidehi","Anagha"],"surnames":["Deshmukh","Kulkarni","Patil"]},
+    {"district":"Chennai","state":"Tamil Nadu","pincode_prefix":"600","latitude":13.0600,"longitude":80.2400,"language":"Tamil","names":["Kavitha","Thenmozhi","Kayal"],"surnames":["Selvan","Kannan","Murugan"]},
+    {"district":"Jaipur","state":"Rajasthan","pincode_prefix":"302","latitude":26.9124,"longitude":75.7873,"language":"Hindi","names":["Rupali","Padmika","Chandrika"],"surnames":["Rathore","Chauhan","Joshi"]}
+  ],
+  "hospital_tier_cycle": ["Medical College Hospital","PHC","District Hospital","CHC","Private Multispecialty","Medical College Hospital","CHC","District Hospital","Medical College Hospital","Private Multispecialty","PHC","District Hospital"],
+  "prevalences": {
+    # Illustrative population weights; VERIFY with Indian epidemiology before research.
+    "twins": 0.013, "triplets_plus": 0.0005,
+    "twin_chorionicity": {"twins_dcda":0.70,"twins_mcda":0.295,"twins_mcma":0.005},
+    "emergency_child_share":0.25,
+    "conditions": {"anaemia_mild":0.18,"anaemia_moderate":0.16,"anaemia_severe":0.015,"gdm":0.10,"preexisting_diabetes":0.015,"gestational_hypertension":0.06,"preeclampsia":0.025,"hypothyroidism":0.04,"hepatitis_b":0.01,"hiv_art":0.002,"syphilis":0.002,"rh_alloimmunisation":0.005,"tb":0.002,"placenta_praevia":0.004,"fgr":0.035,"prior_two_cs":0.025},
+    "outcomes": {"ongoing":0.45,"live birth":0.48,"miscarriage":0.045,"ectopic":0.01,"stillbirth":0.01,"MTP":0.004,"molar":0.001},
+    "stages": {"Preconception":0.03,"T1":0.23,"T2":0.34,"T3":0.36,"In-labour":0.04},
+    "low_literacy":0.23,"low_income":0.38,"messiness":0.025,"male_birth":0.51,
+    "caesarean":0.26,"nicu_singleton":0.08,"nicu_multiple":0.65,"newborn_death":0.01,
+    "emergency_event":0.025,"sos_rejected":0.08,"equipment_nonfunctional":0.04,"equipment_maintenance":0.06
+  },
+  "care": {"anc_weeks":[8,12,20,26,30,34,36,38,40,41],"high_risk_interval_weeks":2,"pnc_days":[1,3,7,42],"baseline_dropout":0.04,"literacy_dropout_add":0.12,"income_dropout_add":0.09,"distance_dropout_per_km":0.002,"adolescent_dropout_add":0.08,"max_dropout":0.75,"missed_vaccine_multiplier":0.65,"vaccine_grace_days":28,"vaccine_allowed_early_days":4,"early_birth_vaccine_days":0,"historical_child_days_max":900,"visit_weight_gain_kg_per_week":0.35,"max_daily_patients":[12,28],"delivery_admission_days":1,"normal_stay_days":1,"cs_stay_days":3,"nicu_stay_days":3},
+  "clinical": {"anaemia_mild_hb":[10.0,10.9],"anaemia_moderate_hb":[7.0,9.9],"anaemia_severe_hb":[5.0,6.9],"normal_hb":[11.0,13.5],"normal_sbp":[100,135],"normal_dbp":[60,85],"hypertension_sbp":[140,158],"hypertension_dbp":[90,108],"severe_sbp":[160,185],"severe_dbp":[110,125],"ogtt_gdm_2h_mg_dl":[155,225],"ogtt_normal_2h_mg_dl":[90,135],"gdm_threshold_2h_mg_dl":153,"singleton_birth_weight_g_mean":3050,"multiple_weight_penalty_g":250,"prematurity_weight_penalty_g_per_week":160,"birth_weight_sd_g":270,"normal_gestation_weeks":[37,41],"multiple_gestation_weeks":[34,37],"triplet_gestation_weeks":[30,34],"quadruplet_gestation_weeks":[28,32],"severe_gestation_weeks":[30,36],"age_mean":26,"age_sd":4.5,"epds_positive_threshold":13},
+  "growth_model": {"months":[0,1,2,3,6,9,12,18,24],"weight_median_kg":[3.3,4.5,5.6,6.4,7.9,8.9,9.6,10.9,12.2],"height_median_cm":[49.9,54.7,58.4,61.4,67.6,72.0,75.7,82.3,87.1],"head_median_cm":[34.5,37.3,39.1,40.5,43.3,45.0,46.1,47.4,48.3],"weight_sd_kg":[0.45,0.55,0.65,0.7,0.85,0.95,1.0,1.2,1.4],"height_sd_cm":[1.8,1.9,2.0,2.1,2.3,2.4,2.5,2.8,3.0],"female_weight_offset_kg":-0.2,"female_height_offset_cm":-0.7},
+  "equipment_ward": {"ventilator":"NICU","infant warmer":"NICU","phototherapy unit":"NICU","CTG machine":"labour room","ultrasound":"general ANC ward","neonatal incubator":"NICU","CPAP":"NICU","syringe pump":"obstetric ICU/HDU","defibrillator":"emergency/casualty","anaesthesia machine":"maternity OT","oxygen concentrator":"emergency/casualty","cardiac monitor":"obstetric ICU/HDU","blood storage unit":"postnatal ward"},
+  "vaccines": [
+    ["BCG",0,0],["OPV0",0,0],["HepB0",0,0],
+    ["OPV1",42,0],["Penta1",42,0],["Rota1",42,0],["fIPV1",42,0],["PCV1",42,0],
+    ["OPV2",70,0],["Penta2",70,0],["Rota2",70,0],
+    ["OPV3",98,0],["Penta3",98,0],["Rota3",98,0],["fIPV2",98,0],["PCV2",98,0],
+    ["MR1",0,9],["fIPV3",0,9],["PCV_booster",0,9],["VitaminA1",0,9],
+    ["MR2",0,16],["DPT_booster1",0,16],["OPV_booster",0,16],["VitaminA2",0,18],
+    ["VitaminA3",0,24],["VitaminA4",0,30],["VitaminA5",0,36],["VitaminA6",0,42],["VitaminA7",0,48],["VitaminA8",0,54],["VitaminA9",0,60],
+    ["DPT_booster2",0,60],["Td10",0,120],["Td16",0,192]
+  ],
+  "maternal_vaccines": [["Td1",84],["Td2",112]],
+  "investigations": [["blood_group_Rh",8],["Hb",8],["HIV",8],["HBsAg",8],["VDRL",8],["urine",8],["thyroid",8],["USG_dating_NT",12],["double_marker",12],["anomaly_scan",19],["triple_marker",16],["OGTT",26],["growth_scan",30]],
+  "references": {
+    "UIP":"https://www.mohfw.gov.in/sites/default/files/Routine%20Immunization%20Manual%20For%20Health%20Workers.pdf",
+    "MSR":"https://nmc.org.in/MCIRest/open/getDocument?path=%2FDocuments%2FPublic%2FPortal%2FE_Compendium_of_NMC_2024%2F8.+Minimum+standard+requirement.pdf"
+  }
+}

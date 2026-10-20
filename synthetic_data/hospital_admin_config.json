@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "snapshot_time": "12:00:00",
+  "flagship_obstetric_hdu_beds": 15,
+  "large_hospital_tiers": ["Medical College Hospital"],
+  "obg_units": [
+    {"code":"I","anc_day":0,"gynae_day":3,"anc_ward":"9","gynae_ward":"10G","labour_room":"LR-I","ot_day":2},
+    {"code":"II","anc_day":2,"gynae_day":5,"anc_ward":"8","gynae_ward":"10G","labour_room":"LR-I","ot_day":1},
+    {"code":"III","anc_day":4,"gynae_day":1,"anc_ward":"10O","gynae_ward":"10G","labour_room":"LR-I","ot_day":0},
+    {"code":"IV","anc_day":1,"gynae_day":4,"anc_ward":"4","gynae_ward":"6","labour_room":"LR-II","ot_day":3},
+    {"code":"V","anc_day":5,"gynae_day":2,"anc_ward":"5","gynae_ward":"6","labour_room":"LR-II","ot_day":4},
+    {"code":"VI","anc_day":3,"gynae_day":0,"anc_ward":"3","gynae_ward":"6","labour_room":"LR-II","ot_day":5}
+  ],
+  "paediatric_units": [
+    {"code":"I","opd_day":0,"ward":"21"},{"code":"II","opd_day":1,"ward":"20"},{"code":"III","opd_day":2,"ward":"18"},
+    {"code":"IV","opd_day":3,"ward":"21"},{"code":"V","opd_day":4,"ward":"20"},{"code":"VI","opd_day":5,"ward":"18"}
+  ],
+  "roles": ["Director","Medical Superintendent","Additional Medical Superintendent","Principal","Joint Director","Deputy Director (Administration)","Nodal Officer — Maternal Death Review","Nodal Officer — Referrals","Quality Assurance Committee Member"],
+  "clinics": [
+    {"name":"Infertility","department":"obg","day":1,"start":"14:00","end":"16:00","room":"OPD-101","unit":"II"},
+    {"name":"Cardio-obstetric","department":"obg","day":3,"start":"14:00","end":"16:00","room":"OPD-102","unit":"IV"},
+    {"name":"Fetal medicine / NEEV","department":"obg","day":2,"start":"14:00","end":"16:00","room":"NEEV-01","unit":"III"},
+    {"name":"Adolescent health","department":"obg","day":4,"start":"14:00","end":"16:00","room":"OPD-103","unit":"V"},
+    {"name":"Colposcopy","department":"obg","day":0,"start":"14:00","end":"16:00","room":"PROC-01","unit":"I"},
+    {"name":"Family planning","department":"obg","day":3,"start":"14:00","end":"16:00","room":"FP-01","unit":"FP"},
+    {"name":"High-risk pregnancy","department":"obg","day":5,"start":"14:00","end":"16:00","room":"ANC-201","unit":"VI"},
+    {"name":"Immunisation","department":"paediatrics","day":0,"start":"09:00","end":"13:00","room":"IMM-01","unit":"I"},
+    {"name":"High-risk newborn","department":"paediatrics","day":2,"start":"14:00","end":"16:00","room":"HRNB-01","unit":"III"},
+    {"name":"Child development","department":"paediatrics","day":4,"start":"14:00","end":"16:00","room":"CDC-01","unit":"V"}
+  ],
+  "blood_components": {"Packed red cells":1.0,"Fresh frozen plasma":0.7,"Platelets":0.3,"Cryoprecipitate":0.15},
+  "equipment": {"CTG machine":"anc","ultrasound":"labour","Doppler":"anc","neonatal incubator":"nicu","infant warmer":"nicu","phototherapy unit":"nicu","ventilator":"critical"},
+  "assumptions": [
+    "The six-unit OBG and paediatric mappings follow the structure supplied by the user, applied to synthetic medical-college facilities. They are not claims about a real hospital.",
+    "Special-clinic days, rooms, staffing establishment counts and resource allocations are configurable synthetic placeholders. VERIFY against the applicable NMC MSR / IPHS documents.",
+    "The flagship obstetric HDU/CCU is configured as 15 beds. Other hospitals retain their configured tier capacity.",
+    "Labour tables are procedure resources with separate interval allocations; inpatient beds remain linked to admissions.",
+    "This database is an enriched copy of the generated DAI dataset. The validated original dataset is preserved."
+  ]
+}

@@ -1181,6 +1181,9 @@ require('./patientDocuments')(app, { pool, authenticateToken, authorizeRole });
 // Hospital, doctor, and patient continuity workflows
 require('./hospitalPlatform')(app, { authenticateToken });
 
+// Relational synthetic hospital and administration workspace.
+require('./hospitalAdministration')(app);
+
 // Gemini TTS for the care chatbot.
 // Keeps the Gemini API key server-side; the frontend receives only generated audio.
 app.post('/api/tts', async (req, res) => {

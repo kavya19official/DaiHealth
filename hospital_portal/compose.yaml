@@ -1,0 +1,60 @@
+name: dai-hospital
+services:
+  postgres:
+    image: postgis/postgis:16-3.5
+    environment:
+      POSTGRES_DB: dai
+      POSTGRES_USER: dai
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    volumes: ["postgres_data:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dai -d dai"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+  redis:
+    image: redis:7.4-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes: ["redis_data:/data"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+  api:
+    build: {context: ., dockerfile: api/Dockerfile}
+    environment: &api_environment
+      DATABASE_URL: postgresql+psycopg://dai:${POSTGRES_PASSWORD}@postgres:5432/dai
+      REDIS_URL: redis://redis:6379/0
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env}
+      DAI_DEMO: "true"
+      DAI_DEMO_PASSWORD: ${DAI_DEMO_PASSWORD:-Dai-Synthetic-2026!}
+      DAI_SOURCE_DB: /seed/dai-hospital.db
+      DAI_WEB_ORIGIN: http://localhost:3000
+    volumes: ["../backend/data:/seed:ro"]
+    ports: ["127.0.0.1:8000:8000"]
+    command: ["sh", "-c", "python -m api.seed && uvicorn api.main:app --host 0.0.0.0 --port 8000"]
+    depends_on:
+      postgres: {condition: service_healthy}
+      redis: {condition: service_healthy}
+  web:
+    build:
+      context: web
+      args: {API_ORIGIN: "http://api:8000"}
+    ports: ["127.0.0.1:3000:3000"]
+    depends_on: [api]
+  ml-service:
+    build: {context: ., dockerfile: api/Dockerfile}
+    command: ["uvicorn", "ml_service.main:app", "--host", "0.0.0.0", "--port", "8001"]
+    environment:
+      DATA_LABEL: Simulated on synthetic data
+  worker:
+    build: {context: ., dockerfile: api/Dockerfile}
+    command: ["python", "-m", "worker.main"]
+    environment: *api_environment
+    depends_on:
+      postgres: {condition: service_healthy}
+      redis: {condition: service_healthy}
+volumes:
+  postgres_data:
+  redis_data:

@@ -1,0 +1,101 @@
+{
+  "phase": 1,
+  "database": "sqlite",
+  "data_label": "Simulated on synthetic data",
+  "counts": {
+    "facility": 12,
+    "department": 102,
+    "ward": 206,
+    "unit": 72,
+    "clinic": 102,
+    "portal_user": 157,
+    "role_permission": 46,
+    "patient": 11111,
+    "mother": 2000,
+    "bed": 4127,
+    "bed_state_history": 4127,
+    "critical_unit": 44,
+    "admission": 3565,
+    "child": 1078,
+    "anc_visit": 0,
+    "investigation_order": 20638,
+    "investigation_result": 0,
+    "delivery_record": 0,
+    "birth_record": 0,
+    "vaccination_record": 0,
+    "postnatal_followup": 0,
+    "care_gap": 6668,
+    "blood_stock_snapshot": 2688,
+    "blood_request": 0,
+    "blood_issue_log": 0,
+    "inventory_item": 0,
+    "inventory_stock": 0,
+    "inventory_consumption": 0,
+    "equipment": 0,
+    "equipment_fault_log": 0,
+    "staff_post": 75,
+    "shift": 0,
+    "roster_entry": 4410,
+    "on_call_entry": 0,
+    "staff_leave": 0,
+    "ambulance": 31,
+    "dispatch_log": 0,
+    "sos_request": 0,
+    "sos_event_timeline": 0,
+    "sos_abuse_log": 0,
+    "referral": 0,
+    "readiness_check": 0,
+    "reservation": 3,
+    "alert": 0,
+    "worklist_item": 0,
+    "review_case": 0,
+    "audit_log": 1,
+    "consent_ledger": 0,
+    "break_glass_event": 0,
+    "ml_prediction": 0,
+    "ml_model_registry": 0,
+    "seed_manifest": 1,
+    "auth_challenge": 1,
+    "auth_session": 2,
+    "organisation_role": 108,
+    "icu_admission_log": 0
+  },
+  "checks": [
+    {
+      "check": "2000 imported mothers",
+      "status": "PASS",
+      "count": 2000
+    },
+    {
+      "check": "12 percent existing clinician-confirmed high-risk",
+      "status": "PASS",
+      "count": 240
+    },
+    {
+      "check": "Mother / unit / assigned doctor facility chain",
+      "status": "PASS",
+      "count": 0
+    },
+    {
+      "check": "Clinician validation preserved",
+      "status": "PASS",
+      "count": 0
+    },
+    {
+      "check": "Ward capacity equals actual bed rows",
+      "status": "PASS",
+      "count": 0
+    },
+    {
+      "check": "Every foreign key resolves",
+      "status": "PASS",
+      "count": 0
+    },
+    {
+      "check": "PostgreSQL/PostGIS runtime acceptance",
+      "status": "PENDING",
+      "reason": "This run uses SQLite. Run against the dedicated Compose database."
+    }
+  ],
+  "phase_2_unlocked": false
+}

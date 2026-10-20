@@ -1,0 +1,32 @@
+# DAI portal configuration. JSON syntax is valid YAML.
+# VERIFY all proposed capacities against the applicable NMC MSR document.
+{
+  "seed": 20261020,
+  "as_of_date": "2026-10-20",
+  "cohort_size": 2000,
+  "clinician_high_risk_fraction": 0.12,
+  "source_database": "../backend/data/dai-hospital.db",
+  "anchor_targets": {
+    "authorized_beds": 1500,
+    "obstetric_beds": 279,
+    "gynaecology_beds": 76,
+    "obstetric_hdu_beds": 15,
+    "labour_rooms": 2,
+    "operation_theatres": 2,
+    "paediatric_beds": 345,
+    "inborn_nicu_cots": 30,
+    "outborn_nicu_cots": 20,
+    "picu_beds": 12,
+    "critical_ventilators": 10,
+    "ambulances": 21,
+    "annual_deliveries": 25000
+  },
+  "assumptions": [
+    "Existing DAI source data and its clinical relationships are imported unchanged. Anchor targets are a proposed future capacity scenario, not silently substituted for the imported bed ledger.",
+    "279 obstetric plus 76 gynaecology beds equals 355. The requested additional 15 HDU beds would make 370 if HDU is additional; this needs confirmation before capacity migration.",
+    "The original 12-facility network is retained. A separate seven-facility scenario and third PHC must be generated and validated before replacing that network.",
+    "The 2000-mother cohort is a deterministic stratified sample of existing records, approximately 12 percent already clinician-confirmed high-risk; no new clinical labels are inferred.",
+    "ABHA and ABDM IDs remain null because no genuine identifier may appear.",
+    "All forecast, partograph, external OTP delivery, ABDM, LIS/PACS, billing, and S3 integration work remains explicitly simulated or roadmap until its phase passes acceptance."
+  ]
+}

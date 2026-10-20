@@ -5,3 +5,18 @@ backend/data/hospital-demo-state.json
 
 # Patient document binary storage (metadata lives in Postgres)
 backend/data/patient-documents/
+
+# Derived synthetic hospital prototype database
+backend/data/dai-hospital*.db*
+backend/data/dai-hospital.validation.json
+
+# DAI Next/FastAPI portal local state and credentials
+hospital_portal/web/node_modules/
+hospital_portal/web/.next/
+hospital_portal/web/*.tsbuildinfo
+hospital_portal/.venv/
+hospital_portal/.env
+portal-preview.db
+*.db-journal
+__pycache__/
+.pytest_cache/

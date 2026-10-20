@@ -4,8 +4,9 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "test": "node --test hospitalPlatform.test.js",
-    "start": "node server.js"
+    "test": "node --test hospitalPlatform.test.js hospitalAdministration.test.js",
+    "start": "node server.js",
+    "hospital:seed": "python3 ../synthetic_data/build_hospital_admin.py"
   },
   "keywords": [],
   "author": "",
@@ -19,5 +20,8 @@
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
     "pg": "^8.23.0"
+  },
+  "engines": {
+    "node": ">=22.13.0"
   }
 }

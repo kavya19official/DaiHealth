@@ -128,3 +128,8 @@ Validation: `npm test --prefix backend` covers existing hospital workflows plus
 coordination validation, permissions, sequential transitions, stale updates,
 resource validation and saved evidence/history. Browser visual QA is still
 required before deployment.
+
+
+## DAI hospital portal
+
+The new Next.js/FastAPI hospital readiness portal imports the existing synthetic DAI dataset. See [hospital_portal/README.md](hospital_portal/README.md) for backend/frontend commands and [phase gates](hospital_portal/PHASES.md). Phase 1 local checks pass; PostgreSQL/PostGIS deployment acceptance remains pending. The existing `frontend/hospital.html` administration preview remains available through the Express backend.
