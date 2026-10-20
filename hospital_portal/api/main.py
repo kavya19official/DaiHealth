@@ -10,7 +10,7 @@ import jwt
 from fastapi import FastAPI, HTTPException, Depends, Request, Response
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel, Field, ConfigDict
-from sqlalchemy import select, update, delete, func
+from sqlalchemy import select, update, delete, func, or_
 from . import schema as s
 from .db import database, initialize
 from .security import ROLES, CLINICAL, digest, verify_password
@@ -618,14 +618,28 @@ def create_app(engine=None):
         return {"deleted": identifier}
 
     @app.get("/api/patients")
-    def patients(limit: int = 25, offset: int = 0, u=Depends(require("patient.read"))):
-        if limit < 1 or limit > 100 or offset < 0:
+    def patients(
+        limit: int = 25,
+        offset: int = 0,
+        q: str = "",
+        u=Depends(require("patient.read")),
+    ):
+        if limit < 1 or limit > 100 or offset < 0 or len(q) > 100:
             raise HTTPException(422, "Invalid pagination")
         filters = [s.mother.c.registered_facility_id == u["facility_id"]]
         if u["role"] in CLINICAL:
             filters.append(s.mother.c.assigned_unit_id == u["unit_id"])
         if u["role"] == "resident":
             filters.append(s.mother.c.assigned_doctor_id == u["id"])
+        if q.strip():
+            filters.append(
+                or_(
+                    s.mother.c.details["name"]
+                    .as_string()
+                    .icontains(q.strip(), autoescape=True),
+                    s.mother.c.source_id.icontains(q.strip(), autoescape=True),
+                )
+            )
         with engine.begin() as c:
             items = [
                 dict(r)
@@ -727,6 +741,9 @@ def create_app(engine=None):
             )
             return {"verified": body.verified}
 
+    from .workspace import register_workspace
+
+    register_workspace(app, engine, require, audit, ROLES)
     return app
 
 

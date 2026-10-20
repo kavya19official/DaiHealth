@@ -26,3 +26,5 @@ Phase 1 checks:
 Phase 2 remains gated. SQLite preview tests do not substitute for PostgreSQL integration acceptance.
 
 External OTP delivery is MOCK, clearly labelled. The non-demo API fails closed. Production security review, real identity verification and deployment are separate acceptance work; no real records are permitted in this prototype.
+
+Read-only operational browsing was restored at the user’s request: Operations / Administration navigation, bed/cot snapshots, resource and staffing views, recorded care worklists and emergency history. This restores data visibility while leaving Phase 2+ write/live workflow acceptance gated.

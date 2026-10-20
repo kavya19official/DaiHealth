@@ -116,3 +116,12 @@ Tests cover source/provenance integrity, clinician-confirmed risk preservation, 
 `config.yaml` stores all proposed anchor targets. Actual imported anchor capacity remains **1,227 authorized / 1,216 functional beds**, based on the validated source. Do not replace it with a cosmetic 1,500 counter: adding capacity requires creating corresponding wards/beds and rerunning relational/census checks.
 
 Before the capacity phase, verify the proposed NMC MSR/IPHS figures, whether 15 HDU beds are included in the 355 OBG total (279+76 already equals 355), NICU/PICU/ventilator counts, the 21-ambulance scenario, and network composition. The imported network has 12 facilities; a separate 7-facility scenario and a third PHC are not silently invented. Twenty-four months of operational training history and operational forecast evaluation are Phase 5 work. No model performance is claimed.
+
+
+## Operations and Administration workspace
+
+The portal restores both workspace tabs and a fuller sidebar. Existing records now power the ward/bed grid, critical-care census and admission log, blood components, staff establishment and shift rosters, equipment, ambulances, daily admissions/discharges/deliveries/referrals, appointments, derived care gaps, diagnostic orders, referrals and recorded SOS history. The patient registry supports name/source-ID search and pagination. Every view stays scoped by facility/role; clinical worklists also enforce unit/assignment scope and audit patient records returned. An incoming referral may display its mother's identity only to an authorized receiving administrator and is audit-logged.
+
+These operational screens are explicitly **recorded synthetic snapshots, read only**. They do not imply that live reservation, discharge, dispatch, clinical write, or forecast phases have passed. Source records are read from the existing enriched SQLite ledger (`DAI_SOURCE_DB`); this source must remain available alongside the portal database. No extra patient or clinical data is invented to fill a panel.
+
+After upgrading an already running copy, stop and restart the FastAPI terminal once to load `api/workspace.py`. The frontend development server reloads the interface automatically. For future development you can add `--reload --reload-dir hospital_portal/api` to the Uvicorn command. The user-facing snapshot remains 2026-10-20 even when the host date advances.

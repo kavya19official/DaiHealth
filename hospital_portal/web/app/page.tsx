@@ -1,5 +1,6 @@
 "use client";
-import { FormEvent, useCallback, useEffect, useState } from "react";
+import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
+import { OperationalOverview, SnapshotView } from "./operations";
 type Row = Record<string, any>;
 type User = {
   id: string;
@@ -19,20 +20,129 @@ const days = [
   "Saturday",
   "Sunday",
 ];
-const nav = [
-  ["overview", "Command centre", "◈"],
+const operationNav = [
+  ["overview", "Today’s overview", "◈"],
+  ["patients", "Patient registry", "♡"],
+  ["appointments", "Appointments & queue", "◷"],
+  ["gaps", "Care-gap worklist", "☷"],
+  ["readiness", "Delivery readiness", "✚"],
+  ["critical", "Critical & neonatal care", "⌁"],
+  ["referrals", "Referrals & handovers", "⇄"],
+  ["sos", "SOS & emergency inbox", "◉"],
+  ["diagnostics", "Diagnostics & results", "▤"],
+];
+const administrationNav = [
+  ["adminOverview", "Administration overview", "◈"],
   ["facility", "Facility master", "✚"],
+  ["organisation", "Organisation & roles", "♧"],
   ["structure", "Departments & units", "▦"],
+  ["beds", "Wards & bed board", "▱"],
   ["clinics", "Clinics & services", "▤"],
-  ["patients", "My patients", "♡"],
+  ["blood", "Blood bank snapshot", "♦"],
+  ["staffing", "Staffing & on-call roster", "♧"],
+  ["equipment", "Equipment & resources", "✣"],
+  ["ambulances", "Ambulance fleet", "⇢"],
+  ["census", "Daily census", "▥"],
   ["audit", "Access & audit", "◎"],
   ["credentials", "Credential verification", "✓"],
   ["roadmap", "Build phases", "↗"],
 ];
+const workspacePermissions: Record<string, string> = {
+  beds: "bed.read",
+  critical: "bed.read",
+  blood: "blood.read",
+  equipment: "equipment.read",
+  staffing: "facility.read",
+  census: "facility.read",
+  organisation: "facility.read",
+  ambulances: "sos.read",
+  sos: "sos.read",
+  referrals: "referral.read",
+  appointments: "patient.read",
+  gaps: "patient.read",
+  readiness: "patient.read",
+  diagnostics: "diagnostics.read",
+  patients: "patient.read",
+  audit: "audit.read",
+  credentials: "user.verify",
+};
+const snapshotViews = new Set([
+  "beds",
+  "critical",
+  "blood",
+  "equipment",
+  "staffing",
+  "census",
+  "organisation",
+  "ambulances",
+  "sos",
+  "referrals",
+  "appointments",
+  "gaps",
+  "readiness",
+  "diagnostics",
+]);
 const titles: Record<string, [string, string]> = {
   overview: [
-    "Hospital readiness, together.",
-    "A shared foundation for the people, places and resources behind every care handover.",
+    "Today’s overview",
+    "Keep every handover moving. One shared view of patients, people and care readiness.",
+  ],
+  adminOverview: [
+    "Administration overview",
+    "Know your hospital’s capacity, resources and responsible teams.",
+  ],
+  beds: [
+    "Wards & bed board",
+    "Explore recorded bed availability across obstetric, neonatal and paediatric care.",
+  ],
+  critical: [
+    "Critical & neonatal care",
+    "Separate capacity and admission records for OBG HDU, NICU, PICU and paediatric HDU.",
+  ],
+  blood: [
+    "Blood bank snapshot",
+    "Blood groups, components and available units in one connected stock view.",
+  ],
+  staffing: [
+    "Staffing & on-call roster",
+    "Sanctioned posts, clinical unit assignments and shift coverage.",
+  ],
+  equipment: [
+    "Equipment & resources",
+    "See what is installed, what is functional and where each resource belongs.",
+  ],
+  organisation: [
+    "Organisation & roles",
+    "Fictional office holders with clear responsibility for administration and care coordination.",
+  ],
+  ambulances: [
+    "Ambulance fleet",
+    "A recorded view of ALS, BLS and neonatal transport capability.",
+  ],
+  census: ["Daily census", "Recorded delivery activity, by date and mode."],
+  appointments: [
+    "Appointments & queue",
+    "Browse the recorded appointment list and attendance status for your care cohort.",
+  ],
+  gaps: [
+    "Care-gap worklist",
+    "Expected care versus recorded completion, with the next follow-up action.",
+  ],
+  readiness: [
+    "Delivery readiness",
+    "Bring clinician-confirmed arrivals, blood, beds and roster cover into one preparation view.",
+  ],
+  referrals: [
+    "Referrals & handovers",
+    "Follow the referring facility, receiving hospital, reason and transport time.",
+  ],
+  sos: [
+    "SOS & emergency inbox",
+    "Review recorded SOS verification, capability requirements and response history.",
+  ],
+  diagnostics: [
+    "Diagnostics & results",
+    "Recorded investigation orders, due dates and completion status.",
   ],
   facility: [
     "Facility master",
@@ -119,6 +229,17 @@ export default function Home() {
   const [user, setUser] = useState<User | null>(null);
   const [data, setData] = useState<Row | null>(null);
   const [view, setView] = useState("overview");
+  const [mode, setMode] = useState<"operations" | "administration">(
+    "operations",
+  );
+  const [summary, setSummary] = useState<Row | null>(null);
+  const [workspaceData, setWorkspaceData] = useState<Row | null>(null);
+  const [filters, setFilters] = useState<Row>({
+    page: 1,
+    q: "",
+    status: "",
+    ward: "",
+  });
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [challenge, setChallenge] = useState<Row | null>(null);
@@ -126,6 +247,7 @@ export default function Home() {
   const [password, setPassword] = useState("Dai-Synthetic-2026!");
   const [otp, setOtp] = useState("");
   const [records, setRecords] = useState<Row[]>([]);
+  const [patientTotal, setPatientTotal] = useState(0);
   const [patient, setPatient] = useState<Row | null>(null);
   const [editor, setEditor] = useState<Row | null>(null);
   const [notification, setNotification] = useState("");
@@ -142,6 +264,14 @@ export default function Home() {
         },
       });
       const result = await response.json();
+      if (
+        !response.ok &&
+        response.status === 404 &&
+        path.startsWith("/workspace/")
+      )
+        throw new Error(
+          "The richer workspace needs the updated backend. Restart your FastAPI terminal once, then refresh.",
+        );
       if (!response.ok)
         throw new Error(
           typeof result.detail === "string"
@@ -152,38 +282,71 @@ export default function Home() {
     },
     [token],
   );
+  const loadSequence = useRef(0);
   const load = useCallback(async () => {
     if (!user) return;
+    const sequence = ++loadSequence.current;
     setBusy(true);
     setError("");
     try {
-      setData(await api("/facilities/" + user.facility_id + "/structure"));
-      if (view === "patients") setRecords((await api("/patients")).items);
-      else if (view === "credentials") setRecords((await api("/users")).items);
-      else if (view === "audit") setRecords((await api("/audit")).items);
+      const params = new URLSearchParams();
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value) params.set(key, String(value));
+      });
+      const extraPath = snapshotViews.has(view)
+        ? "/workspace/" + view + "?" + params.toString()
+        : view === "patients"
+          ? "/patients?limit=25&offset=" +
+            (filters.page - 1) * 25 +
+            "&q=" +
+            encodeURIComponent(filters.q || "")
+          : view === "credentials"
+            ? "/users"
+            : view === "audit"
+              ? "/audit"
+              : null;
+      const [structure, nextSummary, extra] = await Promise.all([
+        api("/facilities/" + user.facility_id + "/structure"),
+        api("/workspace/summary"),
+        extraPath ? api(extraPath) : Promise.resolve(null),
+      ]);
+      if (sequence !== loadSequence.current) return;
+      setData(structure);
+      setSummary(nextSummary);
+      if (snapshotViews.has(view)) setWorkspaceData(extra);
+      else if (extra) {
+        setRecords(extra.items);
+        if (view === "patients") setPatientTotal(extra.total);
+      }
     } catch (e) {
-      setError((e as Error).message);
+      if (sequence === loadSequence.current) setError((e as Error).message);
     } finally {
-      setBusy(false);
+      if (sequence === loadSequence.current) setBusy(false);
     }
-  }, [api, user, view]);
+  }, [api, user, view, filters]);
   useEffect(() => {
     load();
   }, [load]);
-  async function session(result: Row) {
+  async function session(result: Row, resetNavigation = true) {
     setToken(result.access_token);
     const me = await api("/me", {}, result.access_token);
     setUser(me);
-    setData(null);
-    setRecords([]);
-    setPatient(null);
-    setView("overview");
+    if (resetNavigation) {
+      setData(null);
+      setRecords([]);
+      setPatient(null);
+      setView("overview");
+      setMode("operations");
+      setSummary(null);
+      setWorkspaceData(null);
+      setFilters({ page: 1, q: "", status: "", ward: "" });
+    }
     setChallenge(null);
     setOtp("");
   }
   useEffect(() => {
     api("/auth/refresh", { method: "POST" }, "")
-      .then(session)
+      .then((result) => session(result, false))
       .catch(() => {}); /* access tokens stay in memory */
   }, []);
   useEffect(() => {
@@ -191,7 +354,7 @@ export default function Home() {
     const timer = setInterval(
       () =>
         api("/auth/refresh", { method: "POST" })
-          .then(session)
+          .then((result) => session(result, false))
           .catch(() => {
             setUser(null);
             setToken("");
@@ -459,15 +622,29 @@ export default function Home() {
         </section>
       </main>
     );
-  const allowed = nav
-    .filter(
-      ([id]) => id !== "patients" || user.permissions.includes("patient.read"),
-    )
-    .filter(([id]) => id !== "audit" || user.permissions.includes("audit.read"))
-    .filter(
-      ([id]) =>
-        id !== "credentials" || user.permissions.includes("user.verify"),
+  const canOpen = (id: string) => {
+    const permission = workspacePermissions[id];
+    return (
+      !permission ||
+      (snapshotViews.has(id) && user.permissions.includes("facility.write")) ||
+      user.permissions.includes(permission)
     );
+  };
+  const allowed = (
+    mode === "operations" ? operationNav : administrationNav
+  ).filter(([id]) => canOpen(id));
+  function navigate(id: string) {
+    setView(id);
+    setFilters({ page: 1, q: "", status: "", ward: "" });
+    setMode(
+      administrationNav.some(([view]) => view === id)
+        ? "administration"
+        : "operations",
+    );
+    setWorkspaceData(null);
+    setMenu(false);
+    setNotification("");
+  }
   return (
     <div className="portal-shell">
       <a className="skip" href="#main">
@@ -480,7 +657,14 @@ export default function Home() {
             DAI<small>HOSPITAL READINESS</small>
           </span>
         </a>
-        <div className="eyebrow nav-label">YOUR WORKSPACE</div>
+        <div className="sidebar-workspace-label">
+          <span className="dot" /> Hospital workspace
+        </div>
+        <div className="eyebrow nav-label">
+          {mode === "operations"
+            ? "CARE OPERATIONS"
+            : "HOSPITAL ADMINISTRATION"}
+        </div>
         <nav>
           {allowed.map(([id, title, icon]) => (
             <button
@@ -488,9 +672,7 @@ export default function Home() {
               className={view === id ? "active" : ""}
               aria-current={view === id ? "page" : undefined}
               onClick={() => {
-                setView(id);
-                setMenu(false);
-                setNotification("");
+                navigate(id);
               }}
             >
               <span aria-hidden>{icon}</span>
@@ -542,11 +724,32 @@ export default function Home() {
           </button>
         </header>
         <main id="main" className="page">
+          <div className="workspace-toolbar">
+            <div className="workspace-switch" aria-label="Workspace area">
+              {(["operations", "administration"] as const).map((area) => (
+                <button
+                  key={area}
+                  className={mode === area ? "active" : ""}
+                  aria-pressed={mode === area}
+                  onClick={() =>
+                    navigate(
+                      area === "operations" ? "overview" : "adminOverview",
+                    )
+                  }
+                >
+                  {area === "operations" ? "Operations" : "Administration"}
+                </button>
+              ))}
+            </div>
+            <span className="snapshot-caption">
+              <i /> Connected · recorded synthetic workspace
+            </span>
+          </div>
           <div className="page-heading">
             <div>
               <div className="eyebrow">
                 HOSPITAL /{" "}
-                {view === "patients" ? "CARE COORDINATION" : "ADMINISTRATION"}
+                {mode === "operations" ? "OPERATIONS" : "ADMINISTRATION"}
               </div>
               <h1>{titles[view][0]}</h1>
               <p>{titles[view][1]}</p>
@@ -616,138 +819,37 @@ export default function Home() {
           )}
           {data && (
             <>
-              {view === "overview" && (
+              {(view === "overview" || view === "adminOverview") && summary && (
+                <OperationalOverview
+                  summary={summary}
+                  structure={data}
+                  navigate={navigate}
+                  canOpen={canOpen}
+                  admin={view === "adminOverview"}
+                />
+              )}
+              {snapshotViews.has(view) && (
                 <>
-                  <section className="hero">
-                    <div>
-                      <div className="eyebrow">
-                        CONNECTED TO YOUR DAI DATASET
-                      </div>
-                      <h2>{compact(facility.name)}</h2>
-                      <p>
-                        {nice(facility.tier)} · {nice(facility.ownership)} ·
-                        Snapshot {data.provenance?.as_of_date}
-                      </p>
-                    </div>
-                    <div className="hero-tags">
-                      <Pill color={facility.emergency_24x7 ? "green" : "amber"}>
-                        {facility.emergency_24x7
-                          ? "24×7 emergency"
-                          : "Limited emergency"}
-                      </Pill>
-                      <Pill>
-                        {facility.sos_participating
-                          ? "SOS participating"
-                          : "SOS disabled"}
-                      </Pill>
-                    </div>
-                  </section>
-                  <div className="metrics">
-                    {[
-                      [
-                        "Authorized beds",
-                        facility.authorized_beds,
-                        "From the existing bed ledger",
-                      ],
-                      [
-                        "Functional beds",
-                        facility.functional_beds,
-                        "Excludes maintenance beds",
-                      ],
-                      [
-                        "Clinical units",
-                        data.units.length,
-                        "Connected to wards and clinicians",
-                      ],
-                      [
-                        "Special clinics",
-                        data.clinics.length,
-                        "Day, room and unit configured",
-                      ],
-                    ].map(([title, value, hint]) => (
-                      <section className="card metric" key={title}>
-                        <span>{title}</span>
-                        <strong>{Number(value).toLocaleString("en-IN")}</strong>
-                        <small>{hint}</small>
-                      </section>
-                    ))}
+                  <div className="snapshot-notice">
+                    <span>◷</span> Recorded snapshot ·{" "}
+                    {summary?.snapshot_at?.slice(0, 10) || "2026-10-20"} ·
+                    Read-only data view
                   </div>
-                  <div className="two-column">
-                    <section className="card">
-                      <div className="card-head">
-                        <div>
-                          <div className="eyebrow">FOUNDATION STATUS</div>
-                          <h2>One connected facility.</h2>
-                        </div>
-                        <Pill color="green">Local checks passed</Pill>
-                      </div>
-                      <div className="check-list">
-                        {[
-                          "Existing synthetic records imported with stable UUIDs",
-                          "Hospital → unit → ward → doctor links preserved",
-                          "OTP, scoped roles and refresh rotation checked",
-                          "Every permitted patient record read audit-logged",
-                        ].map((text) => (
-                          <div key={text}>
-                            <span>✓</span>
-                            {text}
-                          </div>
-                        ))}
-                      </div>
-                      <div className="callout">
-                        PostgreSQL/PostGIS deployment acceptance is pending.
-                        Live capacity and clinical workflows unlock in the next
-                        phase after that gate.
-                      </div>
-                    </section>
-                    <section className="card">
-                      <div className="card-head">
-                        <div>
-                          <div className="eyebrow">YOUR ROLE</div>
-                          <h2>{nice(user.role)}</h2>
-                        </div>
-                      </div>
-                      <p className="padded">
-                        Your permissions are checked by the API. Patient access
-                        also checks facility, unit and assignment.
-                      </p>
-                      <div className="permission-list">
-                        {user.permissions.map((p) => (
-                          <Pill key={p} color="neutral">
-                            {p}
-                          </Pill>
-                        ))}
-                      </div>
-                    </section>
-                  </div>
-                  <section className="card">
-                    <div className="card-head">
-                      <div>
-                        <h2>The source stays traceable.</h2>
-                        <p>
-                          {data.provenance?.counts.mother.toLocaleString(
-                            "en-IN",
-                          )}{" "}
-                          mothers ·{" "}
-                          {data.provenance?.counts.child.toLocaleString(
-                            "en-IN",
-                          )}{" "}
-                          individual child records ·{" "}
-                          {data.provenance?.counts.facility} imported facilities
-                        </p>
-                      </div>
-                      <button
-                        className="secondary"
-                        onClick={() => setView("roadmap")}
-                      >
-                        View build phases ↗
-                      </button>
+                  {workspaceData && summary ? (
+                    <SnapshotView
+                      key={view}
+                      view={view}
+                      data={workspaceData}
+                      summary={summary}
+                      filters={filters}
+                      setFilters={setFilters}
+                      navigate={navigate}
+                    />
+                  ) : (
+                    <div className="empty">
+                      Loading connected hospital records…
                     </div>
-                    <div className="provenance">
-                      Source SHA-256{" "}
-                      <code>{data.provenance?.source_sha256}</code>
-                    </div>
-                  </section>
+                  )}
                 </>
               )}
               {view === "facility" && (
@@ -947,11 +1049,26 @@ export default function Home() {
                     <div>
                       <h2>Permitted care records</h2>
                       <p>
-                        First 25 records in your access scope. No phone or
-                        genuine ABHA identifiers are exposed.
+                        Browse your permitted cohort with search and pagination.
+                        Every opened record is audited.
                       </p>
                     </div>
                     <Pill color="green">Read access audited</Pill>
+                  </div>
+                  <div className="snapshot-toolbar">
+                    <label>
+                      Find a mother
+                      <input
+                        placeholder="Search fictional name or source ID"
+                        value={filters.q || ""}
+                        onChange={(e) =>
+                          setFilters({ ...filters, q: e.target.value, page: 1 })
+                        }
+                      />
+                    </label>
+                    <span className="small">
+                      {patientTotal.toLocaleString("en-IN")} permitted records
+                    </span>
                   </div>
                   <Table
                     headers={[
@@ -990,6 +1107,30 @@ export default function Home() {
                       </button>,
                     ])}
                   />
+                  <div className="pagination">
+                    <button
+                      className="secondary"
+                      disabled={filters.page <= 1}
+                      onClick={() =>
+                        setFilters({ ...filters, page: filters.page - 1 })
+                      }
+                    >
+                      ← Previous
+                    </button>
+                    <span>
+                      Page {filters.page} of{" "}
+                      {Math.max(1, Math.ceil(patientTotal / 25))}
+                    </span>
+                    <button
+                      className="secondary"
+                      disabled={filters.page * 25 >= patientTotal}
+                      onClick={() =>
+                        setFilters({ ...filters, page: filters.page + 1 })
+                      }
+                    >
+                      Next →
+                    </button>
+                  </div>
                 </section>
               )}
               {view === "credentials" && (
