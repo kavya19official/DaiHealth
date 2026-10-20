@@ -2,3 +2,6 @@ backend/.env
 
 # Local hospital demo state
 backend/data/hospital-demo-state.json
+
+# Patient document binary storage (metadata lives in Postgres)
+backend/data/patient-documents/

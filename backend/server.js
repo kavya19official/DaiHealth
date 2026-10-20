@@ -37,7 +37,7 @@ app.use((req, res, next) => {
 
 // Hospital document ingestion accepts small base64 demo files. Keep a strict
 // ceiling so uploads work locally without allowing unbounded request bodies.
-app.use(express.json({ limit: '6mb' }));
+app.use(express.json({ limit: '8mb' }));
 app.use(cookieParser());
 
 // Database connection. Render Postgres exposes a DATABASE_URL; local development
@@ -1176,6 +1176,7 @@ require('./notifications')(app, { pool, authenticateToken });
 
 // Patient experience: notification prefs + privacy controls
 require('./patientPreferences')(app, { pool, authenticateToken });
+require('./patientDocuments')(app, { pool, authenticateToken, authorizeRole });
 
 // Hospital, doctor, and patient continuity workflows
 require('./hospitalPlatform')(app, { authenticateToken });

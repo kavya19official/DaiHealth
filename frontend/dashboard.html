@@ -484,9 +484,40 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
     <div class="card list-card" style="grid-column:1/-1;margin-top:1rem">
       <div class="section-card" style="border:0;box-shadow:none;padding-bottom:.5rem">
         <div class="section-title"><span><svg width="15" height="15" aria-hidden="true"><use href="#i-file"/></svg></span> Reports &amp; documents</div>
-        <p class="muted" style="margin:.25rem 0 0">Lab results, scans and care documents on your record</p>
+        <p class="muted" style="margin:.25rem 0 .75rem;font-size:.85rem;color:var(--ink-muted)">Upload lab results, prescriptions, discharge summaries and share them with your care team</p>
+        <form class="form-grid" id="docUploadForm" style="max-width:100%;margin-bottom:1rem">
+          <div class="form-group">
+            <label for="docTitle">Title</label>
+            <input id="docTitle" name="title" required maxlength="200" placeholder="e.g. CBC — City Hospital">
+          </div>
+          <div class="form-group">
+            <label for="docType">Document type</label>
+            <select id="docType" name="doc_type" required>
+              <option value="lab_report">Laboratory report</option>
+              <option value="prescription">Prescription</option>
+              <option value="medical_report">Medical report</option>
+              <option value="discharge_summary">Discharge summary</option>
+              <option value="scan_imaging">Scan / imaging</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="docFile">File (PDF or image, max 5 MB)</label>
+            <input id="docFile" type="file" accept=".pdf,image/jpeg,image/png,image/webp,application/pdf" required>
+          </div>
+          <div class="form-group">
+            <label for="docNotes">Notes (optional)</label>
+            <input id="docNotes" maxlength="500" placeholder="Lab name, visit date, etc.">
+          </div>
+          <button type="submit" class="btn btn--primary" id="docUploadBtn">Upload document</button>
+        </form>
       </div>
       <div id="reportsDocsList"></div>
+      <div id="docHistoryPanel" class="section-card" style="display:none;border-top:1px solid var(--line);margin-top:.5rem">
+        <div class="section-title" style="font-size:.95rem;margin-bottom:.5rem">Upload &amp; share history</div>
+        <div id="docHistoryList"></div>
+        <button type="button" class="link-btn" id="docHistoryClose" style="margin-top:.5rem">Close history</button>
+      </div>
     </div>
   </div>
 </div>
@@ -622,18 +653,92 @@ function hydrateDemoHealthLogs() {
 function renderReportsDocs() {
   var el = $('reportsDocsList');
   if (!el) return;
-  el.innerHTML = demoReports.map(function (r) {
-    var tag = /normal|reviewed|on file|active|updated/i.test(r.status) ? 'ok' : 'pending';
+  if (IS_GUEST) {
+    el.innerHTML = demoReports.map(function (r) {
+      var tag = /normal|reviewed|on file|active|updated/i.test(r.status) ? 'ok' : 'pending';
+      return (
+        '<div class="list-row">' +
+        '<div class="list-row__meta" style="flex:1">' +
+        '<div class="list-row__title">' + r.title + '</div>' +
+        '<div class="list-row__sub">' + r.type + ' · ' + addDaysLocal(r.dateOffset) + ' · ' + r.detail + '</div>' +
+        '</div>' +
+        '<span class="tag tag--' + tag + '">' + r.status + '</span>' +
+        '</div>'
+      );
+    }).join('');
+    return;
+  }
+  if (!window._patientDocs || !window._patientDocs.length) {
+    el.innerHTML = '<div class="empty">No documents yet. Upload a lab report, prescription or discharge summary above.</div>';
+    return;
+  }
+  var TYPE_LABELS = {
+    medical_report: 'Medical report',
+    prescription: 'Prescription',
+    lab_report: 'Laboratory report',
+    discharge_summary: 'Discharge summary',
+    scan_imaging: 'Scan / imaging',
+    other: 'Other'
+  };
+  var STATUS_TAG = {
+    pending: 'pending',
+    verified: 'ok',
+    rejected: 'pending',
+    locked: 'info'
+  };
+  el.innerHTML = window._patientDocs.map(function (d) {
+    var typeLabel = TYPE_LABELS[d.doc_type] || d.doc_type;
+    var when = api.fmtDate(d.uploaded_at);
+    var sizeKb = d.size_bytes ? Math.round(d.size_bytes / 1024) + ' KB' : '';
+    var tag = STATUS_TAG[d.verification_status] || 'pending';
+    var statusLabel = d.verification_status || 'pending';
+    var actions =
+      '<div style="display:flex;flex-wrap:wrap;gap:.35rem;align-items:center">' +
+      '<span class="tag tag--' + tag + '">' + statusLabel + '</span>' +
+      '<button type="button" class="link-btn" data-doc-dl="' + d.id + '">Download</button>' +
+      '<button type="button" class="link-btn" data-doc-share="' + d.id + '">Share</button>' +
+      '<button type="button" class="link-btn" data-doc-hist="' + d.id + '">History</button>' +
+      (d.can_delete !== false
+        ? '<button type="button" class="link-btn" data-doc-del="' + d.id + '" style="color:var(--rose)">Delete</button>'
+        : '') +
+      '</div>';
     return (
-      '<div class="list-row">' +
-      '<div class="list-row__meta" style="flex:1">' +
-      '<div class="list-row__title">' + r.title + '</div>' +
-      '<div class="list-row__sub">' + r.type + ' · ' + addDaysLocal(r.dateOffset) + ' · ' + r.detail + '</div>' +
-      '</div>' +
-      '<span class="tag tag--' + tag + '">' + r.status + '</span>' +
-      '</div>'
+      '<div class="list-row" data-doc-id="' + d.id + '">' +
+      '<div class="list-row__meta" style="flex:1;min-width:0">' +
+      '<div class="list-row__title">' + (d.title || d.original_filename) + '</div>' +
+      '<div class="list-row__sub">' + typeLabel + ' · uploaded ' + when +
+      (sizeKb ? ' · ' + sizeKb : '') +
+      (d.notes ? ' · ' + d.notes : '') +
+      '</div></div>' + actions + '</div>'
     );
   }).join('');
+}
+
+async function loadPatientDocuments() {
+  if (IS_GUEST) {
+    window._patientDocs = [];
+    renderReportsDocs();
+    return;
+  }
+  var data = null;
+  try {
+    data = await api.apiRequest('/documents');
+  } catch (e) {}
+  window._patientDocs = (data && data.documents) || [];
+  renderReportsDocs();
+}
+
+function fileToBase64(file) {
+  return new Promise(function (resolve, reject) {
+    var reader = new FileReader();
+    reader.onload = function () {
+      var result = String(reader.result || '');
+      var comma = result.indexOf(',');
+      resolve(comma >= 0 ? result.slice(comma + 1) : result);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
 }
 
 function renderDemoMessages() {
@@ -918,7 +1023,7 @@ async function loadHealthLogs() {
   try { data = await api.apiRequest('/health-logs'); } catch (e) {}
   healthLogs = (data && data.logs && data.logs.length) ? data.logs : hydrateDemoHealthLogs();
   renderVitals();
-  renderReportsDocs();
+  await loadPatientDocuments();
 }
 
 async function loadMedications() {
@@ -1343,7 +1448,8 @@ async function boot() {
     loadFinancial(),
     loadPregnancyIntoForm(),
     loadRisk(),
-    loadNotifications()
+    loadNotifications(),
+    loadPatientDocuments()
   ]);
   route();
   clearInterval(boot._notifPoll);
@@ -1361,6 +1467,138 @@ if (setLangEl) {
     if (window.DaiI18n) window.DaiI18n.setLang(setLangEl.value === 'hi' ? 'hi' : 'en');
   });
 }
+
+/* ---- Patient documents upload / download / share / delete / history ---- */
+(function initPatientDocumentsUI() {
+  var form = $('docUploadForm');
+  if (form) {
+    form.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      if (IS_GUEST) {
+        api.toast('Sign in to upload documents');
+        return;
+      }
+      var title = ($('docTitle') && $('docTitle').value || '').trim();
+      var docType = $('docType') && $('docType').value;
+      var fileInput = $('docFile');
+      var notes = ($('docNotes') && $('docNotes').value || '').trim();
+      var file = fileInput && fileInput.files && fileInput.files[0];
+      if (!title || !file) {
+        api.toast('Title and file are required');
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        api.toast('File must be 5 MB or smaller');
+        return;
+      }
+      var btn = $('docUploadBtn');
+      if (btn) btn.disabled = true;
+      try {
+        var b64 = await fileToBase64(file);
+        var res = await api.apiRequest('/documents', {
+          method: 'POST',
+          body: {
+            title: title,
+            doc_type: docType,
+            filename: file.name,
+            mime_type: file.type || 'application/pdf',
+            content_base64: b64,
+            notes: notes || undefined
+          }
+        });
+        if (res && res.document) {
+          api.toast('Document uploaded');
+          form.reset();
+          await loadPatientDocuments();
+        }
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+    });
+  }
+
+  document.addEventListener('click', async function (ev) {
+    var t = ev.target;
+    if (!t || !t.getAttribute) return;
+
+    var dl = t.getAttribute('data-doc-dl');
+    if (dl) {
+      // Cookie auth: open download URL in same origin
+      window.open(api.API_BASE + '/documents/' + dl + '/download', '_blank');
+      return;
+    }
+
+    var del = t.getAttribute('data-doc-del');
+    if (del) {
+      if (!confirm('Delete this document? This cannot be undone.')) return;
+      var delRes = await api.apiRequest('/documents/' + del, { method: 'DELETE' });
+      if (delRes) {
+        api.toast('Document deleted');
+        await loadPatientDocuments();
+      }
+      return;
+    }
+
+    var share = t.getAttribute('data-doc-share');
+    if (share) {
+      if (!doctorsList.length) {
+        await loadDoctors();
+      }
+      if (!doctorsList.length) {
+        api.toast('No doctors available to share with');
+        return;
+      }
+      var options = doctorsList.map(function (d, i) {
+        return (i + 1) + '. ' + (d.full_name || d.email) + (d.specialization ? ' (' + d.specialization + ')' : '');
+      }).join('\n');
+      var pick = prompt('Share with doctor — enter number:\n' + options);
+      var idx = parseInt(pick, 10) - 1;
+      if (Number.isNaN(idx) || idx < 0 || idx >= doctorsList.length) return;
+      var doctor = doctorsList[idx];
+      var shareRes = await api.apiRequest('/documents/' + share + '/share', {
+        method: 'POST',
+        body: { doctor_id: doctor.id || doctor.user_id }
+      });
+      if (shareRes) api.toast('Shared with ' + (doctor.full_name || 'provider'));
+      return;
+    }
+
+    var hist = t.getAttribute('data-doc-hist');
+    if (hist) {
+      var panel = $('docHistoryPanel');
+      var list = $('docHistoryList');
+      if (!panel || !list) return;
+      var h = await api.apiRequest('/documents/' + hist + '/history');
+      var rows = (h && h.history) || [];
+      if (!rows.length) {
+        list.innerHTML = '<div class="empty">No history yet.</div>';
+      } else {
+        list.innerHTML = rows.map(function (ev) {
+          return (
+            '<div class="list-row">' +
+            '<div class="list-row__meta"><div class="list-row__title">' + ev.event_type +
+            (ev.actor_name ? ' · ' + ev.actor_name : '') +
+            '</div><div class="list-row__sub">' + api.fmtDate(ev.created_at) +
+            (ev.detail && Object.keys(ev.detail).length
+              ? ' · ' + JSON.stringify(ev.detail)
+              : '') +
+            '</div></div></div>'
+          );
+        }).join('');
+      }
+      panel.style.display = '';
+      return;
+    }
+  });
+
+  var histClose = $('docHistoryClose');
+  if (histClose) {
+    histClose.addEventListener('click', function () {
+      var panel = $('docHistoryPanel');
+      if (panel) panel.style.display = 'none';
+    });
+  }
+})();
 
 // Feed messages from real appointments
 async function renderMessagesFromAppts() {
