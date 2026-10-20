@@ -1174,6 +1174,9 @@ require('./childDashboard')(app, { pool, authenticateToken, authorizeRole });
 // Notification Center: derived, deduped notifications for mothers and doctors
 require('./notifications')(app, { pool, authenticateToken });
 
+// Patient experience: notification prefs + privacy controls
+require('./patientPreferences')(app, { pool, authenticateToken });
+
 // Hospital, doctor, and patient continuity workflows
 require('./hospitalPlatform')(app, { authenticateToken });
 
