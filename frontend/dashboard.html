@@ -161,10 +161,28 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 .empty{padding:2rem;text-align:center;color:var(--ink-muted);font-size:.9rem}
 @media(max-width:1100px){.main-grid{grid-template-columns:1fr}.welcome-row{grid-template-columns:1fr}.status-row{grid-template-columns:1fr 1fr}}
 @media(max-width:860px){.app{grid-template-columns:1fr}.sidebar{position:fixed;inset:0 auto 0 0;width:min(260px,86vw);z-index:60;transform:translateX(-105%);transition:transform .25s;box-shadow:var(--shadow)}.sidebar.is-open{transform:translateX(0)}.content{padding:1rem}.growth-body{grid-template-columns:1fr}.status-row{grid-template-columns:1fr}}
+.menu-btn{display:none;width:40px;height:40px;border-radius:12px;border:1px solid var(--line);background:#fff;align-items:center;justify-content:center;color:var(--ink-2);flex-shrink:0}
+.sidebar-backdrop{display:none;position:fixed;inset:0;background:rgba(30,27,75,.35);z-index:55}
+.sidebar-backdrop.is-open{display:block}
+@media(max-width:860px){
+  .menu-btn{display:inline-flex}
+  .topbar{padding-left:.85rem}
+  .search{max-width:none}
+}
+.field-error{display:block;margin-top:.35rem;font-size:.8rem;color:var(--rose);font-weight:500}
+.field-error[hidden]{display:none}
+.prefs-fieldset{border:1px solid var(--line);border-radius:14px;padding:.85rem 1rem;margin:0 0 .75rem;background:var(--ground)}
+.prefs-fieldset legend{font-size:.78rem;font-weight:700;color:var(--ink-2);padding:0 .35rem}
+.prefs-fieldset label{display:flex;align-items:center;gap:.55rem;font-size:.88rem;font-weight:500;color:var(--ink);margin:.45rem 0}
 </style>
 <script src="js/dai-api.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/form-validation.js"></script>
+<script src="js/patient-prefs.js"></script>
 </head>
 <body>
+<a class="skip-link" href="#main-content" data-i18n="a11y.skip" style="position:absolute;left:1rem;top:-5rem;z-index:500;padding:.7rem 1rem;border-radius:0 0 10px 10px;background:var(--ink);color:#fff">Skip to main content</a>
+<div class="sidebar-backdrop" id="sidebarBackdrop" hidden></div>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
 <symbol id="i-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></symbol>
 <symbol id="i-user" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
@@ -197,21 +215,24 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
     <span><span class="sidebar__brand-name">दाई</span><span class="sidebar__brand-tag">Hospital Workflow</span></span>
   </a>
   <nav class="sidebar__nav" aria-label="Mother navigation">
-    <button type="button" class="nav-item is-active" data-panel="dashboard"><svg width="18" height="18"><use href="#i-home"/></svg> Dashboard</button>
-    <button type="button" class="nav-item" data-panel="profile"><svg width="18" height="18"><use href="#i-user"/></svg> Mother / Patient</button>
-    <a class="nav-item" href="child-dashboard.html"><svg width="18" height="18"><use href="#i-baby"/></svg> Child</a>
-    <button type="button" class="nav-item" data-panel="appointments"><svg width="18" height="18"><use href="#i-cal"/></svg> Appointments</button>
-    <button type="button" class="nav-item" data-panel="timeline"><svg width="18" height="18"><use href="#i-clock"/></svg> Care Timeline</button>
-    <button type="button" class="nav-item" data-panel="records"><svg width="18" height="18"><use href="#i-file"/></svg> Records</button>
-    <button type="button" class="nav-item" data-panel="messages"><svg width="18" height="18"><use href="#i-msg"/></svg> Messages</button>
-    <button type="button" class="nav-item" data-panel="settings"><svg width="18" height="18"><use href="#i-set"/></svg> Settings</button>
+    <button type="button" class="nav-item is-active" data-panel="dashboard"><svg width="18" height="18"><use href="#i-home"/></svg> <span data-i18n="nav.dashboard">Dashboard</span></button>
+    <button type="button" class="nav-item" data-panel="profile"><svg width="18" height="18"><use href="#i-user"/></svg> <span data-i18n="nav.profile">Mother / Patient</span></button>
+    <a class="nav-item" href="child-dashboard.html"><svg width="18" height="18"><use href="#i-baby"/></svg> <span data-i18n="nav.child">Child</span></a>
+    <button type="button" class="nav-item" data-panel="appointments"><svg width="18" height="18"><use href="#i-cal"/></svg> <span data-i18n="nav.appointments">Appointments</span></button>
+    <button type="button" class="nav-item" data-panel="timeline"><svg width="18" height="18"><use href="#i-clock"/></svg> <span data-i18n="nav.timeline">Care Timeline</span></button>
+    <button type="button" class="nav-item" data-panel="records"><svg width="18" height="18"><use href="#i-file"/></svg> <span data-i18n="nav.records">Records</span></button>
+    <button type="button" class="nav-item" data-panel="messages"><svg width="18" height="18"><use href="#i-msg"/></svg> <span data-i18n="nav.messages">Messages</span></button>
+    <button type="button" class="nav-item" data-panel="settings"><svg width="18" height="18"><use href="#i-set"/></svg> <span data-i18n="nav.settings">Settings</span></button>
   </nav>
   <div class="sidebar__footer"><div class="sidebar__tagline"><svg width="18" height="18"><use href="#i-heart"/></svg><span>Healthier mothers.<br>Brighter futures.</span></div></div>
 </aside>
 
 <div class="main">
 <header class="topbar">
-  <div class="search" role="search"><svg width="16" height="16"><use href="#i-search"/></svg><input type="search" id="globalSearch" placeholder="Search anything..." aria-label="Search"></div>
+  <button type="button" class="menu-btn" id="menuBtn" data-i18n-aria="a11y.menu" aria-label="Open navigation menu" aria-expanded="false" aria-controls="sidebar">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+  </button>
+  <div class="search" role="search"><svg width="16" height="16"><use href="#i-search"/></svg><input type="search" id="globalSearch" placeholder="Search anything..." data-i18n-placeholder="search.placeholder" aria-label="Search"></div>
   <div class="topbar__right">
     <div style="position:relative">
 <button class="icon-btn" type="button" aria-label="Notifications" id="notifBtn"><svg width="18" height="18"><use href="#i-bell"/></svg><span class="badge" id="notifCount" style="display:none">0</span></button>
@@ -224,7 +245,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
   </div>
 </header>
 
-<div class="content">
+<div class="content" id="main-content">
 <!-- DASHBOARD -->
 <div class="panel is-active" id="panel-dashboard">
   <div class="welcome-row">
@@ -484,13 +505,31 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 <!-- SETTINGS -->
 <div class="panel" id="panel-settings">
   <div class="card section-card" style="max-width:520px">
-    <div class="section-title" style="margin-bottom:1rem"><span><svg width="15" height="15" aria-hidden="true"><use href="#i-set"/></svg></span> Settings</div>
-    <form class="form-grid" id="settingsForm">
-      <div class="form-group"><label for="setLang">Language</label><select id="setLang"><option>English</option><option>Hindi</option></select></div>
-      <div class="form-group"><label><input type="checkbox" id="setNotif" checked> Appointment reminders</label></div>
-      <div class="form-group"><label><input type="checkbox" id="setSms" checked> SMS alerts</label></div>
-      <button type="submit" class="btn btn--primary">Save settings</button>
-      <button type="button" class="btn btn--ghost" id="logoutBtn">Log out</button>
+    <div class="section-title" style="margin-bottom:1rem"><span><svg width="15" height="15" aria-hidden="true"><use href="#i-set"/></svg></span> <span data-i18n="settings.title">Settings</span></div>
+    <form class="form-grid" id="settingsForm" data-validate>
+      <div class="form-group">
+        <label for="setLang" data-i18n="settings.lang">Language</label>
+        <select id="setLang" name="lang">
+          <option value="en">English</option>
+          <option value="hi">हिन्दी</option>
+        </select>
+      </div>
+      <fieldset class="prefs-fieldset">
+        <legend data-i18n="settings.notif">Notification preferences</legend>
+        <label><input type="checkbox" id="notif_appt" name="notif_appt" checked> <span data-i18n="notif.appt">Appointment reminders</span></label>
+        <label><input type="checkbox" id="notif_vax" name="notif_vax" checked> <span data-i18n="notif.vax">Vaccination due / missed</span></label>
+        <label><input type="checkbox" id="notif_growth" name="notif_growth" checked> <span data-i18n="notif.growth">Growth alerts</span></label>
+        <label><input type="checkbox" id="notif_care" name="notif_care" checked> <span data-i18n="notif.care">Care timeline gaps</span></label>
+        <label><input type="checkbox" id="notif_sms" name="notif_sms" checked> <span data-i18n="notif.sms">SMS alerts</span></label>
+      </fieldset>
+      <fieldset class="prefs-fieldset">
+        <legend data-i18n="settings.privacy">Privacy controls</legend>
+        <label><input type="checkbox" id="privacy_share_doctors" name="privacy_share_doctors" checked> <span data-i18n="privacy.share_doctors">Share records with linked doctors</span></label>
+        <label><input type="checkbox" id="privacy_analytics" name="privacy_analytics"> <span data-i18n="privacy.analytics">Allow anonymous product analytics</span></label>
+      </fieldset>
+      <button type="submit" class="btn btn--primary" data-i18n="settings.save">Save settings</button>
+      <p data-prefs-status hidden role="status" style="font-size:.85rem;color:var(--green);font-weight:600"></p>
+      <button type="button" class="btn btn--ghost" id="logoutBtn" data-i18n="settings.logout">Log out</button>
     </form>
   </div>
 </div>
@@ -624,7 +663,33 @@ function showPanel(id) {
   if (nav) nav.classList.add('is-active');
   try { history.replaceState(null, '', '#' + id); } catch (e) {}
   window.scrollTo({ top: 0, behavior: 'smooth' });
+  closeSidebar();
 }
+
+function openSidebar() {
+  var sb = $('sidebar');
+  var bd = $('sidebarBackdrop');
+  var btn = $('menuBtn');
+  if (sb) sb.classList.add('is-open');
+  if (bd) { bd.hidden = false; bd.classList.add('is-open'); }
+  if (btn) btn.setAttribute('aria-expanded', 'true');
+}
+function closeSidebar() {
+  var sb = $('sidebar');
+  var bd = $('sidebarBackdrop');
+  var btn = $('menuBtn');
+  if (sb) sb.classList.remove('is-open');
+  if (bd) { bd.hidden = true; bd.classList.remove('is-open'); }
+  if (btn) btn.setAttribute('aria-expanded', 'false');
+}
+var menuBtn = $('menuBtn');
+if (menuBtn) menuBtn.addEventListener('click', function () {
+  var sb = $('sidebar');
+  if (sb && sb.classList.contains('is-open')) closeSidebar();
+  else openSidebar();
+});
+var sidebarBackdrop = $('sidebarBackdrop');
+if (sidebarBackdrop) sidebarBackdrop.addEventListener('click', closeSidebar);
 
 document.querySelectorAll('.nav-item[data-panel]').forEach(function (btn) {
   btn.addEventListener('click', function () { showPanel(btn.getAttribute('data-panel')); });
@@ -1286,24 +1351,14 @@ async function boot() {
 }
 
 
-var settingsForm = $('settingsForm');
-if (settingsForm) {
-  // Restore local prefs
-  try {
-    var prefs = JSON.parse(localStorage.getItem('dai_prefs') || '{}');
-    if ($('setLang') && prefs.lang) $('setLang').value = prefs.lang;
-    if ($('setNotif') && prefs.notif != null) $('setNotif').checked = !!prefs.notif;
-    if ($('setSms') && prefs.sms != null) $('setSms').checked = !!prefs.sms;
-  } catch (e) {}
-  settingsForm.addEventListener('submit', function (e) {
-    e.preventDefault();
-    var prefs = {
-      lang: $('setLang') ? $('setLang').value : 'English',
-      notif: $('setNotif') ? $('setNotif').checked : true,
-      sms: $('setSms') ? $('setSms').checked : true
-    };
-    localStorage.setItem('dai_prefs', JSON.stringify(prefs));
-    api.toast('Settings saved on this device');
+/* Settings: language, notification prefs, privacy — dual-write local + API */
+if (window.DaiPrefs) {
+  window.DaiPrefs.bindSettingsForm($('settingsForm'));
+}
+var setLangEl = $('setLang');
+if (setLangEl) {
+  setLangEl.addEventListener('change', function () {
+    if (window.DaiI18n) window.DaiI18n.setLang(setLangEl.value === 'hi' ? 'hi' : 'en');
   });
 }
 
