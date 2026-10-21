@@ -58,7 +58,7 @@ cp .env.example .env
 docker compose up --build
 ```
 
-Services: `web`, `api`, `postgres` (PostGIS), `redis`, `ml-service`, `worker`. The API imports the existing read-only `../backend/data/dai-hospital.db`; run the hospital seed builder first. Public host ports bind to loopback. The ML service explicitly returns 501 for predictions, and the worker runs no jobs in this phase. Redis-backed live channels, expiry jobs and forecasting are later-phase work, not represented as working features. S3/report storage is roadmap.
+Services: `web`, `api`, `postgres` (PostGIS), `redis`, `ml-service`, `worker`. The API imports the existing read-only `../backend/data/dai-hospital.db`; run the hospital seed builder first. Public host ports bind to loopback. The ML service serves trained, checksum-verified synthetic forecasts when artifacts exist; see `ml_service/README.md`. The worker still runs no jobs. Redis-backed live channels and expiry jobs remain later-phase work. S3/report storage is roadmap.
 
 ## Source data and relationships
 
@@ -94,7 +94,7 @@ The supplied document references a Section 9 phase plan that was not included. T
 
 Phase 1 provides M1 facility edits and department/unit/clinic CRUD; fictional organisation office holders; M2 password + simulated OTP, JWT access sessions, refresh rotation, logout revocation, credential verification API, deny-by-default permissions, facility/unit/assigned-patient filters and read-access audit logging. The demo role switcher requires an administrator-originated session, issues a new signed session, records the switch and revokes the prior session. A separately logged-in nurse cannot switch into admin. Access tokens stay in browser memory; refresh tokens are HttpOnly/SameSite cookies. The server checks current credentials on each access.
 
-Registration, consult links, live bed edits, referrals, clinical completion, second-factor SOS, blood issue, roster approvals, external integrations and ML are not built in this new portal yet. Role home screens show their permissions and permitted navigation; workflow-specific home screens arrive with the corresponding module.
+Registration, consult links, live bed edits, referrals, clinical completion, second-factor SOS, blood issue, roster approvals, external integrations are not built in this new portal yet. Role home screens show their permissions and permitted navigation; workflow-specific home screens arrive with the corresponding module.
 
 ## Validate
 
@@ -115,7 +115,7 @@ Tests cover source/provenance integrity, clinician-confirmed risk preservation, 
 
 `config.yaml` stores all proposed anchor targets. Actual imported anchor capacity remains **1,227 authorized / 1,216 functional beds**, based on the validated source. Do not replace it with a cosmetic 1,500 counter: adding capacity requires creating corresponding wards/beds and rerunning relational/census checks.
 
-Before the capacity phase, verify the proposed NMC MSR/IPHS figures, whether 15 HDU beds are included in the 355 OBG total (279+76 already equals 355), NICU/PICU/ventilator counts, the 21-ambulance scenario, and network composition. The imported network has 12 facilities; a separate 7-facility scenario and a third PHC are not silently invented. Twenty-four months of operational training history and operational forecast evaluation are Phase 5 work. No model performance is claimed.
+Before the capacity phase, verify the proposed NMC MSR/IPHS figures, whether 15 HDU beds are included in the 355 OBG total (279+76 already equals 355), NICU/PICU/ventilator counts, the 21-ambulance scenario, and network composition. The imported network has 12 facilities; a separate 7-facility scenario and a third PHC are not silently invented. A separate 24-month aggregate operating scenario and trained ML evaluation are now available via `ml_service/README.md`. Only measured synthetic-data performance is reported; no real-hospital accuracy is claimed.
 
 
 ## Operations and Administration workspace
@@ -125,3 +125,8 @@ The portal restores both workspace tabs and a fuller sidebar. Existing records n
 These operational screens are explicitly **recorded synthetic snapshots, read only**. They do not imply that live reservation, discharge, dispatch, clinical write, or forecast phases have passed. Source records are read from the existing enriched SQLite ledger (`DAI_SOURCE_DB`); this source must remain available alongside the portal database. No extra patient or clinical data is invented to fill a panel.
 
 After upgrading an already running copy, stop and restart the FastAPI terminal once to load `api/workspace.py`. The frontend development server reloads the interface automatically. For future development you can add `--reload --reload-dir hospital_portal/api` to the Uvicorn command. The user-facing snapshot remains 2026-10-20 even when the host date advances.
+
+
+## ML forecasts
+
+Run `hospital_portal/.venv/bin/python -m hospital_portal.ml_service.train --persist`, then open **Administration → ML forecasts & stock planning**. See [ML setup, data provenance and evaluation](ml_service/README.md). Delivery load, aggregate NICU admissions and eight stock-consumption targets use actual trained models with time-ordered baseline selection and calibration. No-show, length-of-stay and clinical risk models are not included. OTP remains simulated at the user’s request.

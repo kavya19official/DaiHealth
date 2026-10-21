@@ -30,8 +30,11 @@ services:
       DAI_DEMO: "true"
       DAI_DEMO_PASSWORD: ${DAI_DEMO_PASSWORD:-Dai-Synthetic-2026!}
       DAI_SOURCE_DB: /seed/dai-hospital.db
+      DAI_ML_ARTIFACT_DIR: /models
+      DAI_ML_SERVICE_URL: ${DAI_ML_SERVICE_URL:-}
+      DAI_ML_SERVICE_TOKEN: ${DAI_ML_SERVICE_TOKEN:-}
       DAI_WEB_ORIGIN: http://localhost:3000
-    volumes: ["../backend/data:/seed:ro"]
+    volumes: ["../backend/data:/seed:ro", "./ml_service/artifacts:/models:ro"]
     ports: ["127.0.0.1:8000:8000"]
     command: ["sh", "-c", "python -m api.seed && uvicorn api.main:app --host 0.0.0.0 --port 8000"]
     depends_on:
@@ -48,6 +51,9 @@ services:
     command: ["uvicorn", "ml_service.main:app", "--host", "0.0.0.0", "--port", "8001"]
     environment:
       DATA_LABEL: Simulated on synthetic data
+      DAI_ML_ARTIFACT_DIR: /models
+      DAI_ML_SERVICE_TOKEN: ${DAI_ML_SERVICE_TOKEN:-}
+    volumes: ["./ml_service/artifacts:/models:ro"]
   worker:
     build: {context: ., dockerfile: api/Dockerfile}
     command: ["python", "-m", "worker.main"]

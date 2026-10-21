@@ -1,0 +1,52 @@
+{
+  "seed": 20261020,
+  "as_of_date": "2026-10-20",
+  "history_days": 730,
+  "horizon_days": 14,
+  "validation_days": 60,
+  "calibration_days": 60,
+  "test_days": 60,
+  "interval_coverage": 0.8,
+  "minimum_history_days": 365,
+  "annual_deliveries_by_tier": {
+    "Medical College Hospital": 20000,
+    "District Hospital": 9000,
+    "CHC": 2000,
+    "PHC": 350,
+    "Private Multispecialty": 5000
+  },
+  "anchor_annual_deliveries": 25000,
+  "weekday_weights": [1.1, 1.09, 1.06, 1.05, 1.02, 0.89, 0.79],
+  "seasonality_amplitude": 0.12,
+  "growth_per_year": 0.025,
+  "booking_fraction": 0.65,
+  "booking_lead_days": 28,
+  "nicu_rate_by_tier": {
+    "Medical College Hospital": 0.14,
+    "District Hospital": 0.10,
+    "CHC": 0.03,
+    "PHC": 0.0,
+    "Private Multispecialty": 0.08
+  },
+  "forest": {"n_estimators": 100, "max_depth": 9, "min_samples_leaf": 12},
+  "stock_items": [
+    {"code":"oxytocin","name":"Oxytocin","unit":"stock units","units_per_delivery":1.8,"scenario_days_on_hand":4.2,"reorder_days":7},
+    {"code":"magnesium_sulphate","name":"Magnesium sulphate","unit":"stock units","units_per_delivery":0.14,"scenario_days_on_hand":3.1,"reorder_days":7},
+    {"code":"misoprostol","name":"Misoprostol","unit":"stock units","units_per_delivery":0.3,"scenario_days_on_hand":16,"reorder_days":7},
+    {"code":"antenatal_steroids","name":"Antenatal steroids","unit":"stock units","units_per_delivery":0.15,"scenario_days_on_hand":10,"reorder_days":7},
+    {"code":"iv_iron","name":"IV iron","unit":"stock units","units_per_delivery":0.28,"scenario_days_on_hand":12,"reorder_days":7},
+    {"code":"surfactant","name":"Surfactant","unit":"stock units","units_per_delivery":0.04,"scenario_days_on_hand":9,"reorder_days":7},
+    {"code":"delivery_kits","name":"Delivery kits","unit":"kits","units_per_delivery":1.0,"scenario_days_on_hand":6,"reorder_days":7},
+    {"code":"gloves","name":"Gloves","unit":"pairs","units_per_delivery":12,"scenario_days_on_hand":8,"reorder_days":7}
+  ],
+  "assumptions": [
+    "This is a separately generated synthetic operating scenario, linked to existing DAI hospital IDs. It is not a count of the registered mother cohort and is not real hospital history.",
+    "The anchor's 25000 annual deliveries is a user-supplied configurable scenario assumption, not a claim about the imported hospital census. Other tier volumes, weekday effects, seasonality and stock balances are placeholders requiring partner validation.",
+    "All daily operating totals end at the configured as_of_date; this simulation assumes close-of-day totals. The clinical source ledger separately remains its original noon snapshot.",
+    "Synthetic booked-arrival counts are known 28 days in advance and are generated independently of realised delivery noise. Historical real-world booking snapshots are unavailable.",
+    "NICU counts forecast aggregate operational demand only. They do not predict or diagnose a particular baby's condition.",
+    "Stock units and consumption coefficients are inventory-planning assumptions, not medication doses or prescribing guidance. Scenario balances are not the hospital's recorded pharmacy stock.",
+    "Ranges use historical calibration residuals and are evaluated on a later untouched test period. Temporal dependence means nominal coverage is not guaranteed.",
+    "Clinical decisions, high-risk validation, reservations and purchasing remain with authorised humans. No automatic action is executed."
+  ]
+}

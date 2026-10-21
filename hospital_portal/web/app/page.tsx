@@ -1,6 +1,7 @@
 "use client";
 import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
 import { OperationalOverview, SnapshotView } from "./operations";
+import { ForecastPanel } from "./forecasts";
 type Row = Record<string, any>;
 type User = {
   id: string;
@@ -33,6 +34,7 @@ const operationNav = [
 ];
 const administrationNav = [
   ["adminOverview", "Administration overview", "◈"],
+  ["forecasts", "ML forecasts & stock planning", "⌁"],
   ["facility", "Facility master", "✚"],
   ["organisation", "Organisation & roles", "♧"],
   ["structure", "Departments & units", "▦"],
@@ -48,6 +50,7 @@ const administrationNav = [
   ["roadmap", "Build phases", "↗"],
 ];
 const workspacePermissions: Record<string, string> = {
+  forecasts: "forecast.read",
   beds: "bed.read",
   critical: "bed.read",
   blood: "blood.read",
@@ -83,6 +86,10 @@ const snapshotViews = new Set([
   "diagnostics",
 ]);
 const titles: Record<string, [string, string]> = {
+  forecasts: [
+    "ML forecasts & stock planning",
+    "Forecast demand, compare evidence and plan resources—with every clinical decision staying with people.",
+  ],
   overview: [
     "Today’s overview",
     "Keep every handover moving. One shared view of patients, people and care readiness.",
@@ -233,6 +240,7 @@ export default function Home() {
     "operations",
   );
   const [summary, setSummary] = useState<Row | null>(null);
+  const [forecastReport, setForecastReport] = useState<Row | null>(null);
   const [workspaceData, setWorkspaceData] = useState<Row | null>(null);
   const [filters, setFilters] = useState<Row>({
     page: 1,
@@ -293,18 +301,21 @@ export default function Home() {
       Object.entries(filters).forEach(([key, value]) => {
         if (value) params.set(key, String(value));
       });
-      const extraPath = snapshotViews.has(view)
-        ? "/workspace/" + view + "?" + params.toString()
-        : view === "patients"
-          ? "/patients?limit=25&offset=" +
-            (filters.page - 1) * 25 +
-            "&q=" +
-            encodeURIComponent(filters.q || "")
-          : view === "credentials"
-            ? "/users"
-            : view === "audit"
-              ? "/audit"
-              : null;
+      const extraPath =
+        view === "forecasts"
+          ? "/ml/forecast"
+          : snapshotViews.has(view)
+            ? "/workspace/" + view + "?" + params.toString()
+            : view === "patients"
+              ? "/patients?limit=25&offset=" +
+                (filters.page - 1) * 25 +
+                "&q=" +
+                encodeURIComponent(filters.q || "")
+              : view === "credentials"
+                ? "/users"
+                : view === "audit"
+                  ? "/audit"
+                  : null;
       const [structure, nextSummary, extra] = await Promise.all([
         api("/facilities/" + user.facility_id + "/structure"),
         api("/workspace/summary"),
@@ -313,7 +324,8 @@ export default function Home() {
       if (sequence !== loadSequence.current) return;
       setData(structure);
       setSummary(nextSummary);
-      if (snapshotViews.has(view)) setWorkspaceData(extra);
+      if (view === "forecasts") setForecastReport(extra);
+      else if (snapshotViews.has(view)) setWorkspaceData(extra);
       else if (extra) {
         setRecords(extra.items);
         if (view === "patients") setPatientTotal(extra.total);
@@ -819,6 +831,14 @@ export default function Home() {
           )}
           {data && (
             <>
+              {view === "forecasts" &&
+                (forecastReport ? (
+                  <ForecastPanel report={forecastReport} />
+                ) : (
+                  <div className="empty">
+                    Train the synthetic forecast models to populate this view.
+                  </div>
+                ))}
               {(view === "overview" || view === "adminOverview") && summary && (
                 <OperationalOverview
                   summary={summary}
@@ -1237,9 +1257,9 @@ export default function Home() {
                         ],
                         [
                           "05",
-                          "Operational simulations",
-                          "Simulated / roadmap",
-                          "M8 inventory plus labelled forecasts, 24-month training history, ML evaluation, integrations and quality reporting.",
+                          "Operational ML forecasts",
+                          "Trained on synthetic data",
+                          "Delivery load, NICU admission counts and eight stock-demand targets: trained models, 24-month scenario history and time-ordered evaluation. Live inventory writes, external integrations and quality reporting remain roadmap.",
                         ],
                       ].map(([n, title, status, detail]) => (
                         <div key={n}>

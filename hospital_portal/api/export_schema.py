@@ -24,5 +24,7 @@ lines.extend(
 )
 if __name__ == "__main__":
     target = Path(__file__).resolve().parents[1] / "schema.sql"
-    target.write_text("\n".join(line.rstrip() for line in "\n\n".join(lines).splitlines()) + "\n")
+    target.write_text(
+        "\n".join(line.rstrip() for line in "\n\n".join(lines).splitlines()) + "\n"
+    )
     print(target)

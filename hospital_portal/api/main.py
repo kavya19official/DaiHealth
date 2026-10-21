@@ -42,6 +42,23 @@ def create_app(engine=None):
     @asynccontextmanager
     async def lifespan(app):
         initialize(engine)
+        # Keep the persisted permission catalogue aligned with the application policy.
+        with engine.begin() as c:
+            existing = set(
+                c.execute(
+                    select(s.role_permission.c.role, s.role_permission.c.permission)
+                ).all()
+            )
+            for role, permissions in ROLES.items():
+                for permission in permissions:
+                    if (role, permission) not in existing:
+                        c.execute(
+                            s.role_permission.insert().values(
+                                role=role,
+                                permission=permission,
+                                source_id=role + ":" + permission,
+                            )
+                        )
         yield
 
     app = FastAPI(
@@ -744,6 +761,9 @@ def create_app(engine=None):
     from .workspace import register_workspace
 
     register_workspace(app, engine, require, audit, ROLES)
+    from .forecasts import register_forecasts
+
+    register_forecasts(app, engine, require, audit)
     return app
 
 

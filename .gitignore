@@ -20,3 +20,6 @@ portal-preview.db
 *.db-journal
 __pycache__/
 .pytest_cache/
+
+# Reproducible trained models and synthetic ML history are generated locally.
+hospital_portal/ml_service/artifacts/

@@ -3,3 +3,5 @@ web
 __pycache__
 .pytest_cache
 *.db
+
+ml_service/artifacts

@@ -8,7 +8,7 @@ The supplied phase-order section is missing. This sequence follows its module de
 | 2 | M3 front office + admission/discharge, M4 bed twin, M5 critical/LR/OT capacity; Redis/WebSockets and reservation expiry | Not started in the new stack |
 | 3 | M6 delivery/twins/birth doses/PNC; M7 simulated diagnostics with actual gap closure | Not started |
 | 4 | Blood/on-call readiness, human-approved referrals, two-step SOS, explainable arrivals | Not started |
-| 5 | M8 inventory, simulated operational ML/history, model evaluation; roadmap integrations | Scaffolds only |
+| 5 | M8 inventory, simulated operational ML/history, model evaluation; roadmap integrations | Delivery/NICU/stock forecasting trained and tested on synthetic data; inventory write workflows and external integrations remain pending |
 
 Phase 1 checks:
 - PASS: existing synthetic records imported with stable UUID/source provenance, 2,000 mothers and separate children.
@@ -28,3 +28,5 @@ Phase 2 remains gated. SQLite preview tests do not substitute for PostgreSQL int
 External OTP delivery is MOCK, clearly labelled. The non-demo API fails closed. Production security review, real identity verification and deployment are separate acceptance work; no real records are permitted in this prototype.
 
 Read-only operational browsing was restored at the user’s request: Operations / Administration navigation, bed/cot snapshots, resource and staffing views, recorded care worklists and emergency history. This restores data visibility while leaving Phase 2+ write/live workflow acceptance gated.
+
+At the user’s explicit request, ML forecasts were implemented before database deployment. Their synthetic evaluation is separate from the still-pending PostgreSQL/PostGIS gate. Real SMS OTP is excluded; existing simulated OTP remains.
