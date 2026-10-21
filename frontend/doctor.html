@@ -117,6 +117,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
     <button type="button" class="nav-item" data-panel="appointments"> Appointments</button>
     <button type="button" class="nav-item" data-panel="timeline"> Care Timeline</button>
     <button type="button" class="nav-item" data-panel="clinical-review"> Clinical Review <span class="badge" id="reviewBadge">!</span></button>
+    <button type="button" class="nav-item" data-panel="safety"> Safety Monitor <span class="badge" id="safetyBadge" style="display:none">0</span></button>
     <button type="button" class="nav-item" data-panel="records"> Records</button>
     <button type="button" class="nav-item" data-panel="messages"> Messages <span class="badge">3</span></button>
     <button type="button" class="nav-item" data-panel="settings"> Settings</button>
@@ -330,6 +331,11 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 </div>
 
 <!-- SETTINGS -->
+<!-- SAFETY MONITOR -->
+<div class="panel" id="panel-safety">
+  <div style="max-width:860px" id="safetyRoot"></div>
+</div>
+
 <div class="panel" id="panel-settings">
   <div class="card section-card" style="max-width:480px">
     <div class="section-title" style="margin-bottom:1rem"> Settings</div>
@@ -346,6 +352,9 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 </div></div></div>
 <div class="toast" id="toast"></div>
 
+<script src="/shared/emergency-triage.js"></script>
+<script src="js/care-extensions.js"></script>
+<script src="js/doctor-safety.js"></script>
 <script>
 (function () {
 "use strict";
@@ -411,7 +420,7 @@ function renderPatients() {
   var q=(($('patientFilter')&&$('patientFilter').value)||'').toLowerCase();
   var list=patients.filter(function(p){return !q||(p.full_name+' '+p.program).toLowerCase().includes(q);});
   var tb=document.querySelector('#patientTable tbody');
-  if(tb){tb.innerHTML=list.map(function(p){return '<tr><td><span class="avatar">'+api.initials(p.full_name)+'</span>'+esc(p.full_name)+'</td><td>'+esc(p.age_gender||'—')+'</td><td>'+api.fmtDate(p.last_appointment)+'</td><td><span class="tag tag--'+(p.gap_count?'pending':'ok')+'">'+(p.gap_count?p.gap_count+' follow-ups':'On track')+'</span></td><td><button type="button" class="btn btn--sm btn--ghost" data-pid="'+esc(p.user_id)+'">Open record</button></td></tr>';}).join('');tb.querySelectorAll('[data-pid]').forEach(function(b){b.addEventListener('click',function(){openPatient(b.dataset.pid);});});}
+  if(tb){tb.innerHTML=list.map(function(p){return '<tr><td><span class="avatar">'+api.initials(p.full_name)+'</span>'+esc(p.full_name)+'</td><td>'+esc(p.age_gender||'—')+'</td><td>'+api.fmtDate(p.last_appointment)+'</td><td><span class="tag tag--'+(p.gap_count?'pending':'ok')+'">'+(p.gap_count?p.gap_count+' follow-ups':'On track')+'</span></td><td><button type="button" class="btn btn--sm btn--ghost" data-pid="'+esc(p.user_id)+'">Open record</button> <button type="button" class="btn btn--sm btn--ghost" data-safe="'+esc(p.user_id)+'">Safety view</button></td></tr>';}).join('');tb.querySelectorAll('[data-pid]').forEach(function(b){b.addEventListener('click',function(){openPatient(b.dataset.pid);});});}
   if($('statPatients'))$('statPatients').textContent=String(patients.length);
   if($('statPending'))$('statPending').textContent=String(appointments.filter(function(a){return a.status==='pending';}).length);
   if($('statToday'))$('statToday').textContent=String(appointments.filter(function(a){return String(a.requested_date).slice(0,10)===api.localDateStr();}).length);
@@ -565,6 +574,7 @@ async function boot(){
   if($('userName'))$('userName').textContent=currentUser.full_name||'Doctor';
   var role=document.querySelector('.user-chip__role');if(role)role.textContent=currentUser.specialization||'Maternal and child health';
   if($('greetName'))$('greetName').textContent=(currentUser.full_name||'Doctor').replace(/^Dr\.\s*/,'').split(/\s+/)[0];
+  if(window.DoctorSafety)window.DoctorSafety.init({guest:!currentUser.id});
   await Promise.all([loadPatients(),loadAppointments()]);
   renderSupportingPanels();
   if(location.hash&&$('panel-'+location.hash.slice(1)))showPanel(location.hash.slice(1));
