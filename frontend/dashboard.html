@@ -220,6 +220,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
     <a class="nav-item" href="child-dashboard.html"><svg width="18" height="18"><use href="#i-baby"/></svg> <span data-i18n="nav.child">Child</span></a>
     <button type="button" class="nav-item" data-panel="appointments"><svg width="18" height="18"><use href="#i-cal"/></svg> <span data-i18n="nav.appointments">Appointments</span></button>
     <button type="button" class="nav-item" data-panel="timeline"><svg width="18" height="18"><use href="#i-clock"/></svg> <span data-i18n="nav.timeline">Care Timeline</span></button>
+    <button type="button" class="nav-item" data-panel="postpartum"><svg width="18" height="18"><use href="#i-heart"/></svg> <span>Postpartum</span></button>
     <button type="button" class="nav-item" data-panel="records"><svg width="18" height="18"><use href="#i-file"/></svg> <span data-i18n="nav.records">Records</span></button>
     <button type="button" class="nav-item" data-panel="messages"><svg width="18" height="18"><use href="#i-msg"/></svg> <span data-i18n="nav.messages">Messages</span></button>
     <button type="button" class="nav-item" data-panel="settings"><svg width="18" height="18"><use href="#i-set"/></svg> <span data-i18n="nav.settings">Settings</span></button>
@@ -285,6 +286,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
       </div>
       <button type="button" class="btn btn--primary" id="reassessRiskBtn">Reassess risk</button>
     </div>
+    <div id="riskTrendRoot"></div>
   </div>
 <div class="status-row">
     <button type="button" class="status-card" data-go="records">
@@ -425,6 +427,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
     </form>
     <div id="paymentList" style="margin-top:1rem"></div>
   </div>
+  <div id="emergencyPlanRoot" style="margin-top:1rem"></div>
 </div>
 
 <!-- APPOINTMENTS -->
@@ -458,6 +461,11 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
     <div class="section-head"><div class="section-title"><span><svg width="15" height="15" aria-hidden="true"><use href="#i-clock"/></svg></span> Care Timeline</div></div>
     <div id="timelineList"></div>
   </div>
+</div>
+
+<!-- POSTPARTUM -->
+<div class="panel" id="panel-postpartum">
+  <div style="max-width:760px" id="ppRoot"></div>
 </div>
 
 <!-- RECORDS -->
@@ -568,6 +576,9 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 </div></div></div>
 <div class="toast" id="toast" role="status"></div>
 
+<script src="/shared/emergency-triage.js"></script>
+<script src="/shared/postpartum-rules.js"></script>
+<script src="js/care-extensions.js"></script>
 <script>
 (function () {
 "use strict";
@@ -1225,7 +1236,7 @@ if (vitalsForm) {
         method: 'POST',
         body: { log_type: 'blood_pressure', data: { systolic: Number(parts[0]), diastolic: Number(parts[1]) } }
       });
-      if (r2) ok = true;
+      if (r2) { ok = true; if (window.CareExt) window.CareExt.afterHealthLog(r2); }
     }
     if (ok) {
       api.toast('Vitals saved');
@@ -1255,7 +1266,8 @@ if (vitalsForm) {
 var sosBtn = $('sosBtn');
 if (sosBtn) {
   sosBtn.addEventListener('click', function () {
-    api.toast('Emergency: call your hospital or local emergency number (e.g. 108)');
+    if (window.CareExt) { window.CareExt.openSOS(); return; }
+    api.toast('Emergency: call 112 (or 108 where available) now');
   });
 }
 var logoutBtn = $('logoutBtn');
@@ -1332,6 +1344,7 @@ if (reassessBtn) {
         risk_factors: data.assessment.factors,
         risk_assessed_at: new Date().toISOString()
       });
+      if (window.CareExt) window.CareExt.refreshRisk();
     }
   });
 }
@@ -1421,6 +1434,7 @@ async function boot() {
     appointments = hydrateDemoAppointments();
     healthLogs = hydrateDemoHealthLogs();
     renderHeader();
+    if (window.CareExt) window.CareExt.init({ guest: true, user: currentUser });
     renderAppointments();
     renderTimeline();
     renderVitals();
@@ -1439,6 +1453,7 @@ async function boot() {
   }
 
   renderHeader();
+  if (window.CareExt) window.CareExt.init({ guest: false, user: currentUser });
   await Promise.all([
     loadTimeline(),
     loadAppointments(),
