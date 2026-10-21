@@ -30,3 +30,14 @@ External OTP delivery is MOCK, clearly labelled. The non-demo API fails closed. 
 Read-only operational browsing was restored at the user’s request: Operations / Administration navigation, bed/cot snapshots, resource and staffing views, recorded care worklists and emergency history. This restores data visibility while leaving Phase 2+ write/live workflow acceptance gated.
 
 At the user’s explicit request, ML forecasts were implemented before database deployment. Their synthetic evaluation is separate from the still-pending PostgreSQL/PostGIS gate. Real SMS OTP is excluded; existing simulated OTP remains.
+
+
+### Additional blueprint workflow preview
+
+At the user's explicit request, the authenticated SQLite demo now supports owned
+care tasks, outreach/access barriers, escalation to clinician review, approved visit
+summaries and a facility-reported Green Hospital module. These reuse existing
+mother/child/gap/worklist/review entities. New sustainability tables are additive.
+They are demo-only writes with server-side scope, version checks and audit history;
+they do not unlock production clinical, bed-reservation or referral-transfer phases.
+The PostgreSQL/PostGIS deployment gate is still pending. ML forecast code is unchanged.

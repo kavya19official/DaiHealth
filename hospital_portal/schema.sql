@@ -655,6 +655,57 @@ CREATE TABLE auth_session (
 ;
 
 
+CREATE TABLE sustainability_measurement (
+	id UUID NOT NULL,
+	source_id VARCHAR,
+	created_at TIMESTAMP WITH TIME ZONE NOT NULL,
+	updated_at TIMESTAMP WITH TIME ZONE NOT NULL,
+	facility_id UUID NOT NULL,
+	recorded_by UUID NOT NULL,
+	period VARCHAR NOT NULL,
+	metric VARCHAR NOT NULL,
+	value FLOAT NOT NULL,
+	quality VARCHAR NOT NULL,
+	source VARCHAR NOT NULL,
+	evidence VARCHAR NOT NULL,
+	occupied_bed_days INTEGER,
+	PRIMARY KEY (id),
+	UNIQUE (facility_id, period, metric),
+	CHECK (value >= 0),
+	CHECK (occupied_bed_days IS NULL OR occupied_bed_days > 0),
+	UNIQUE (source_id),
+	FOREIGN KEY(facility_id) REFERENCES facility (id),
+	FOREIGN KEY(recorded_by) REFERENCES portal_user (id)
+)
+
+;
+
+
+CREATE TABLE sustainability_action (
+	id UUID NOT NULL,
+	source_id VARCHAR,
+	created_at TIMESTAMP WITH TIME ZONE NOT NULL,
+	updated_at TIMESTAMP WITH TIME ZONE NOT NULL,
+	facility_id UUID NOT NULL,
+	owner_id UUID NOT NULL,
+	title VARCHAR NOT NULL,
+	metric VARCHAR NOT NULL,
+	baseline FLOAT NOT NULL,
+	target FLOAT NOT NULL,
+	unit VARCHAR NOT NULL,
+	due_date VARCHAR NOT NULL,
+	status VARCHAR NOT NULL,
+	details JSON NOT NULL,
+	PRIMARY KEY (id),
+	CHECK (baseline >= 0 AND target >= 0),
+	UNIQUE (source_id),
+	FOREIGN KEY(facility_id) REFERENCES facility (id),
+	FOREIGN KEY(owner_id) REFERENCES portal_user (id)
+)
+
+;
+
+
 CREATE TABLE child (
 	id UUID NOT NULL,
 	source_id VARCHAR,

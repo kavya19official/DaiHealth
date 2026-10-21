@@ -2,6 +2,8 @@
 import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
 import { OperationalOverview, SnapshotView } from "./operations";
 import { ForecastPanel } from "./forecasts";
+import { CarePanel, PatientCoordination } from "./care";
+import { SustainabilityPanel } from "./sustainability";
 type Row = Record<string, any>;
 type User = {
   id: string;
@@ -25,7 +27,9 @@ const operationNav = [
   ["overview", "Today’s overview", "◈"],
   ["patients", "Patient registry", "♡"],
   ["appointments", "Appointments & queue", "◷"],
-  ["gaps", "Care-gap worklist", "☷"],
+  ["gaps", "Recorded care gaps", "☷"],
+  ["careTasks", "Follow-up & outreach", "✓"],
+  ["careReviews", "Clinical review & summaries", "▤"],
   ["readiness", "Delivery readiness", "✚"],
   ["critical", "Critical & neonatal care", "⌁"],
   ["referrals", "Referrals & handovers", "⇄"],
@@ -35,6 +39,7 @@ const operationNav = [
 const administrationNav = [
   ["adminOverview", "Administration overview", "◈"],
   ["forecasts", "ML forecasts & stock planning", "⌁"],
+  ["sustainability", "Green hospital", "♧"],
   ["facility", "Facility master", "✚"],
   ["organisation", "Organisation & roles", "♧"],
   ["structure", "Departments & units", "▦"],
@@ -50,6 +55,9 @@ const administrationNav = [
   ["roadmap", "Build phases", "↗"],
 ];
 const workspacePermissions: Record<string, string> = {
+  careTasks: "care.read",
+  careReviews: "care.read",
+  sustainability: "green.read",
   forecasts: "forecast.read",
   beds: "bed.read",
   critical: "bed.read",
@@ -86,6 +94,18 @@ const snapshotViews = new Set([
   "diagnostics",
 ]);
 const titles: Record<string, [string, string]> = {
+  careTasks: [
+    "Follow-up & outreach",
+    "Owned care tasks, access barriers and evidence-backed follow-through.",
+  ],
+  careReviews: [
+    "Clinical review & summaries",
+    "Recorded concerns, human acknowledgement and clinician-approved next steps.",
+  ],
+  sustainability: [
+    "Green hospital",
+    "Resource observations and accountable actions, without unsupported impact claims.",
+  ],
   forecasts: [
     "ML forecasts & stock planning",
     "Forecast demand, compare evidence and plan resources—with every clinical decision staying with people.",
@@ -831,6 +851,23 @@ export default function Home() {
           )}
           {data && (
             <>
+              {(view === "careTasks" || view === "careReviews") && (
+                <CarePanel
+                  key={user.id + view}
+                  api={api}
+                  permissions={user.permissions}
+                  role={user.role}
+                  userId={user.id}
+                  reviews={view === "careReviews"}
+                />
+              )}
+              {view === "sustainability" && (
+                <SustainabilityPanel
+                  key={user.id}
+                  api={api}
+                  permissions={user.permissions}
+                />
+              )}
               {view === "forecasts" &&
                 (forecastReport ? (
                   <ForecastPanel report={forecastReport} />
@@ -1354,9 +1391,16 @@ export default function Home() {
                 c.birth_weight_g + " g",
               ])}
             />
+            {user.permissions.includes("care.read") && (
+              <PatientCoordination
+                key={patient.mother.id}
+                api={api}
+                motherId={patient.mother.id}
+              />
+            )}
             <div className="callout">
-              Clinical workflows and family timeline updates are scheduled for
-              Phase 3.
+              Imported clinical observations remain unchanged. Confirmed
+              summaries and operational follow-through are shown separately.
             </div>
           </section>
         </div>
