@@ -4,7 +4,7 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "test": "node --test hospitalPlatform.test.js hospitalAdministration.test.js",
+    "test": "node --test hospitalPlatform.test.js hospitalAdministration.test.js childReference.test.js childHealth.test.js",
     "start": "node server.js",
     "hospital:seed": "python3 ../synthetic_data/build_hospital_admin.py"
   },

@@ -14,7 +14,8 @@
 //   DELETE /api/notifications/:id          dismiss (hide, doesn't come back
 //                                           unless the underlying condition changes)
 //
-// Mothers get: vaccines due/missed for each child, low/severe growth flags,
+// Mothers get: vaccines coming up (14 days), due (7 days) or missed for each child, growth flags
+// (weight, length/height and head size against the WHO standards),
 // care-timeline items due soon or overdue, and appointments happening soon.
 // Doctors get: pending appointment requests and today's confirmed appointments.
 // ============================================================================
@@ -45,8 +46,9 @@ module.exports = function registerNotificationRoutes(app, { pool, authenticateTo
       const ids = kids.map((k) => k.id);
       const [vax, growth] = await Promise.all([
         pool.query(`SELECT child_id, vaccine_code, to_char(given_on, 'YYYY-MM-DD') AS given_on FROM child_vaccinations WHERE child_id = ANY($1::int[])`, [ids]),
-        pool.query(`SELECT child_id, to_char(measured_on, 'YYYY-MM-DD') AS measured_on, weight_kg::float8 AS weight_kg FROM child_growth_logs
-                      WHERE child_id = ANY($1::int[]) AND weight_kg IS NOT NULL ORDER BY child_id, measured_on`, [ids]),
+        pool.query(`SELECT child_id, to_char(measured_on, 'YYYY-MM-DD') AS measured_on, weight_kg::float8 AS weight_kg,
+                           height_cm::float8 AS height_cm, head_cm::float8 AS head_cm
+                      FROM child_growth_logs WHERE child_id = ANY($1::int[]) ORDER BY child_id, measured_on, id`, [ids]),
       ]);
       kids.forEach((k) => {
         const given = {};
@@ -57,6 +59,10 @@ module.exports = function registerNotificationRoutes(app, { pool, authenticateTo
             out.push({ dedupe_key: `vax:${k.id}:${v.code}:missed`, severity: 'warn', category: 'vaccine',
               title: `${v.name} is overdue for ${k.name}`, body: `Due ${v.dueDate} · ${v.stage}. A late dose can usually still be given — ask your ASHA worker or health centre.`,
               route: 'child', route_sub: 'vaccines', child_id: k.id, event_date: v.dueDate });
+          } else if (v.status === 'upcoming' && v.daysUntil <= Ref.REMINDER_LEAD_DAYS) {
+            out.push({ dedupe_key: `vax:${k.id}:${v.code}:soon`, severity: 'info', category: 'vaccine',
+              title: `${v.name} is coming up for ${k.name}`, body: `${v.stage} · due ${v.dueDate} (${relDays(v.daysUntil)}). Book a visit to your health centre or paediatrician.`,
+              route: 'child', route_sub: 'vaccines', child_id: k.id, event_date: v.dueDate });
           } else if (v.status === 'due') {
             out.push({ dedupe_key: `vax:${k.id}:${v.code}:due`, severity: 'info', category: 'vaccine',
               title: `${v.name} is due ${relDays(v.daysUntil)} for ${k.name}`, body: `${v.stage} · due ${v.dueDate}.`,
@@ -64,16 +70,26 @@ module.exports = function registerNotificationRoutes(app, { pool, authenticateTo
           }
         });
         const rows = growth.rows.filter((g) => g.child_id === k.id);
-        const last = rows[rows.length - 1];
-        if (last) {
-          const status = Ref.weightStatus(k.sex, Ref.chartAgeMonths(k.date_of_birth, last.measured_on, k.born_at_weeks), last.weight_kg);
-          if (status === 'severe' || status === 'low') {
-            out.push({ dedupe_key: `growth:${k.id}:${last.measured_on}:${status}`, severity: status === 'severe' ? 'danger' : 'warn', category: 'growth',
-              title: `${k.name}'s weight is ${status === 'severe' ? 'well ' : ''}below the WHO reference`,
-              body: `${last.weight_kg} kg on ${last.measured_on}. This is a screening flag, not a diagnosis — please show it to your paediatrician.`,
-              route: 'child', route_sub: 'growth', child_id: k.id, event_date: last.measured_on });
-          }
-        }
+        // Latest reading of each measure, judged against the WHO standard for the child's age and sex.
+        const FLAGS = [
+          ['wfa', 'weight_kg', 'weight', 'kg'],
+          ['lhfa', 'height_cm', 'length/height', 'cm'],
+          ['hcfa', 'head_cm', 'head size', 'cm'],
+        ];
+        FLAGS.forEach(([indicator, col, label, unit]) => {
+          const last = rows.filter((g) => g[col] != null).pop();
+          if (!last) return;
+          const a = Ref.growthAssess(indicator, k.sex, Ref.chartAgeMonths(k.date_of_birth, last.measured_on, k.born_at_weeks), last[col]);
+          // A high weight-for-age isn't a useful flag on its own (WHO uses weight-for-length for that), so it is skipped.
+          if (!a || a.status === 'ok' || (a.status === 'high' && indicator === 'wfa')) return;
+          const where = a.status === 'severe' ? 'well below' : a.status === 'low' ? 'below' : 'above';
+          out.push({ dedupe_key: indicator === 'wfa'
+              ? `growth:${k.id}:${last.measured_on}:${a.status}`   // unchanged key, so existing weight alerts don't repeat
+              : `growth:${k.id}:${indicator}:${last.measured_on}:${a.status}`, severity: a.status === 'severe' ? 'danger' : 'warn', category: 'growth',
+            title: `${k.name}'s ${label} is ${where} the WHO reference`,
+            body: `${last[col]} ${unit} on ${last.measured_on}. This is a screening flag, not a diagnosis — please show it to your paediatrician.`,
+            route: 'child', route_sub: 'growth', child_id: k.id, event_date: last.measured_on });
+        });
       });
     }
 

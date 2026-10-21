@@ -12,12 +12,14 @@
    Sources (paraphrased; have a paediatrician review before real-world use):
      • Vaccines   — India's Universal Immunisation Programme (UIP) schedule.
      • Milestones — CDC "Learn the Signs. Act Early." checklists.
-     • Growth     — WHO Child Growth Standards, weight-for-age, birth–12 months.
+     • Growth     — WHO Child Growth Standards (2006), weight / length-height /
+                    head circumference for age, birth–60 months, via the LMS
+                    tables in shared/who-growth-standards.js.
    ========================================================================== */
 (function (root, factory) {
-  if (typeof module === 'object' && module.exports) module.exports = factory();
-  else root.AnvayaChild = factory();
-})(typeof self !== 'undefined' ? self : this, function () {
+  if (typeof module === 'object' && module.exports) module.exports = factory(require('./who-growth-standards.js'));
+  else root.AnvayaChild = factory(root.AnvayaWho);
+})(typeof self !== 'undefined' ? self : this, function (WHO) {
   'use strict';
 
   /* ---- Dates ------------------------------------------------------------- */
@@ -108,6 +110,12 @@
   var VACCINE_BY_CODE = {};
   VACCINES.forEach(function (v) { VACCINE_BY_CODE[v.code] = v; });
   var DUE_SOON_DAYS = 7;
+  // Reminders start this many days before a dose falls due ("coming up" at 14 days, "due" at 7).
+  var REMINDER_LEAD_DAYS = 14;
+  var SCHEDULE_SOURCE = {
+    name: 'India\u2019s Universal Immunisation Programme (National Immunization Schedule, Ministry of Health & Family Welfare)',
+    disclaimer: 'Due dates are worked out from the date of birth. A late dose can usually still be given \u2014 ask your ASHA worker, health centre or paediatrician. Your doctor may follow a different schedule (for example the IAP schedule) or add vaccines, so confirm before acting on a reminder.'
+  };
 
   // 'completed' | 'optional' (a conditional vaccine not given: offered only in
   // some states/districts, so it is never flagged as missed) | 'missed' | 'due'
@@ -153,6 +161,15 @@
     };
   }
 
+  // Doses not yet given that are due within `withinDays` (default: the reminder window) or already
+  // overdue, soonest first. Optional (state-dependent) vaccines are never included.
+  function upcomingVaccines(schedule, withinDays) {
+    var lead = withinDays == null ? REMINDER_LEAD_DAYS : withinDays;
+    return schedule.filter(function (v) {
+      return v.status !== 'completed' && v.status !== 'optional' && v.daysUntil <= lead;
+    }).sort(function (a, b) { return a.at - b.at; });
+  }
+
   /* ---- Developmental milestones (CDC checklists, paraphrased) ---------------- */
   var MILESTONES = [
     { months: 2, items: [
@@ -194,49 +211,208 @@
       ['m24_upset', 'social',   'Notices when others are hurt or upset'],
       ['m24_two',   'language', 'Says at least two words together'],
       ['m24_body',  'cognitive','Points to at least two body parts when you ask'],
-      ['m24_run',   'movement', 'Runs and tries to kick a ball']] }
+      ['m24_run',   'movement', 'Runs and tries to kick a ball']] },
+    { months: 30, items: [
+      ['m30_play',  'social',   'Plays next to other children and sometimes plays with them'],
+      ['m30_words', 'language', 'Says about 50 words and puts two words together with an action, like \u201Cdoggie run\u201D'],
+      ['m30_pretend','cognitive','Uses things to pretend, like feeding a block to a doll as if it were food'],
+      ['m30_jump',  'movement', 'Jumps off the ground with both feet']] },
+    { months: 36, items: [
+      ['m36_calm',  'social',   'Calms down within 10 minutes after you leave them, like at a childcare drop-off'],
+      ['m36_talk',  'language', 'Holds a conversation with at least two back-and-forth exchanges'],
+      ['m36_circle','cognitive','Draws a circle after you show them how'],
+      ['m36_beads', 'movement', 'Strings items together, like large beads or macaroni']] },
+    { months: 48, items: [
+      ['m48_pretend','social',  'Pretends to be something else during play, like a teacher or superhero'],
+      ['m48_story', 'language', 'Says sentences of four or more words and talks about something that happened in their day'],
+      ['m48_colors','cognitive','Names a few colours of items'],
+      ['m48_catch', 'movement', 'Catches a large ball most of the time']] },
+    { months: 60, items: [
+      ['m60_rules', 'social',   'Follows rules or takes turns when playing games with other children'],
+      ['m60_tell',  'language', 'Tells a story with at least two events, like a toy getting lost and then found'],
+      ['m60_count', 'cognitive','Counts to 10'],
+      ['m60_hop',   'movement', 'Hops on one foot']] }
   ].map(function (c) {
-    return { months: c.months, label: c.months + ' months', items: c.items.map(function (i) { return { code: i[0], domain: i[1], text: i[2] }; }) };
+    return { months: c.months, label: c.months < 24 ? c.months + ' months' : (c.months % 12 === 0 ? (c.months / 12) + ' years' : c.months + ' months'), items: c.items.map(function (i) { return { code: i[0], domain: i[1], text: i[2] }; }) };
   });
   var MILESTONE_CODES = {};
   MILESTONES.forEach(function (c) { c.items.forEach(function (i) { MILESTONE_CODES[i.code] = c.months; }); });
 
-  /* ---- WHO weight-for-age, months 0..12 (kg) ------------------------------------
-     minus3 / minus2 = the -3 SD and -2 SD lines, median = the 50th percentile.
+  // Where a child is against one checkpoint. ageMonths should be the CORRECTED age for babies
+  // born early (see chartAgeMonths). CDC milestones are skills most children have by that age,
+  // so a gap is a prompt to mention it to the doctor, never a diagnosis.
+  //   complete    every skill marked
+  //   upcoming    the child hasn't reached the checkpoint age yet
+  //   in_progress at the checkpoint age (or within the grace window) with skills still to mark
+  //   discuss     past the grace window with skills still unmarked
+  var MILESTONE_GRACE_MONTHS = 2;
+  function milestoneCheckpointStatus(ageMonths, checkpoint, achievedMap) {
+    achievedMap = achievedMap || {};
+    var done = checkpoint.items.filter(function (i) { return !!achievedMap[i.code]; }).length;
+    var total = checkpoint.items.length, status;
+    if (done === total) status = 'complete';
+    else if (ageMonths < checkpoint.months) status = 'upcoming';
+    else if (ageMonths < checkpoint.months + MILESTONE_GRACE_MONTHS) status = 'in_progress';
+    else status = 'discuss';
+    return { months: checkpoint.months, status: status, done: done, total: total };
+  }
+
+  /* ---- WHO growth standards (LMS), birth–60 months -------------------------------
+     indicator: 'wfa' weight-for-age (kg) | 'lhfa' length/height-for-age (cm) |
+                'hcfa' head-circumference-for-age (cm)
+     The WHO standards are published for boys and girls only, so a child whose sex is
+     'other' has no reference (every function returns null rather than guessing).
+     Ages are in months — pass chartAgeMonths() so early-born babies use corrected age.
      ------------------------------------------------------------------------------- */
-  var WHO_WFA = {
-    male: {
-      median: [3.3, 4.5, 5.6, 6.4, 7.0, 7.5, 7.9, 8.3, 8.6, 8.9, 9.2, 9.4, 9.6],
-      minus2: [2.5, 3.4, 4.3, 5.0, 5.6, 6.0, 6.4, 6.7, 6.9, 7.1, 7.4, 7.6, 7.7],
-      minus3: [2.1, 2.9, 3.8, 4.4, 4.9, 5.3, 5.7, 5.9, 6.2, 6.4, 6.6, 6.8, 6.9]
-    },
-    female: {
-      median: [3.2, 4.2, 5.1, 5.8, 6.4, 6.9, 7.3, 7.6, 7.9, 8.2, 8.5, 8.7, 8.9],
-      minus2: [2.4, 3.2, 3.9, 4.5, 5.0, 5.4, 5.7, 6.0, 6.3, 6.5, 6.7, 6.9, 7.0],
-      minus3: [2.0, 2.7, 3.3, 3.9, 4.4, 4.8, 5.1, 5.3, 5.6, 5.8, 5.9, 6.1, 6.2]
-    }
+  var GROWTH_MAX_MONTHS = WHO.MAX_MONTHS;
+  var WFA_MAX_MONTHS = GROWTH_MAX_MONTHS;
+  var GROWTH_INDICATORS = {
+    wfa:  { key: 'weight_kg', label: 'Weight', unit: 'kg' },
+    lhfa: { key: 'height_cm', label: 'Height', unit: 'cm' },
+    hcfa: { key: 'head_cm',   label: 'Head circumference', unit: 'cm' }
   };
-  var WFA_MAX_MONTHS = 12;
 
-  function interp(arr, months) {
-    var m = Math.min(Math.max(months, 0), arr.length - 1), i = Math.floor(m), f = m - i;
-    return i >= arr.length - 1 ? arr[arr.length - 1] : arr[i] + (arr[i + 1] - arr[i]) * f;
+  function lmsTable(indicator, sex) { return WHO.LMS[indicator + '_' + sex] || null; }
+
+  // [L, M, S] at a (fractional) age, linearly interpolated between the monthly rows.
+  function lmsAt(indicator, sex, months) {
+    var t = lmsTable(indicator, sex);
+    if (!t || !isFinite(months) || months < 0 || months > GROWTH_MAX_MONTHS) return null;
+    var i = Math.min(Math.floor(months), t.length - 2), f = months - i;
+    return [0, 1, 2].map(function (k) { return t[i][k] + (t[i + 1][k] - t[i][k]) * f; });
   }
 
-  // Reference values at an age, or null outside 0-12 months / unknown sex.
+  function growthZ(indicator, sex, months, value) {
+    var p = lmsAt(indicator, sex, months);
+    if (!p || !isFinite(value) || value <= 0) return null;
+    var L = p[0], M = p[1], S = p[2];
+    return L === 0 ? Math.log(value / M) / S : (Math.pow(value / M, L) - 1) / (L * S);
+  }
+
+  function growthValueAtZ(indicator, sex, months, z) {
+    var p = lmsAt(indicator, sex, months);
+    if (!p) return null;
+    var L = p[0], M = p[1], S = p[2];
+    return L === 0 ? M * Math.exp(S * z) : M * Math.pow(1 + L * S * z, 1 / L);
+  }
+
+  // Standard normal CDF (Abramowitz & Stegun 7.1.26), as a percentile 0..100.
+  function zToPercentile(z) {
+    var a = Math.abs(z) / Math.SQRT2, t = 1 / (1 + 0.3275911 * a);
+    var erf = 1 - (((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t * Math.exp(-a * a);
+    return 100 * 0.5 * (1 + (z < 0 ? -erf : erf));
+  }
+
+  // 'severe' (z < -3) | 'low' (< -2) | 'high' (> +2; > +3 for length/height, where tall is rarely a concern)
+  // | 'ok' | null when there is no reference.
+  function growthStatus(indicator, z) {
+    if (z == null || !isFinite(z)) return null;
+    if (z < -3) return 'severe';
+    if (z < -2) return 'low';
+    if (z > (indicator === 'lhfa' ? 3 : 2)) return 'high';
+    return 'ok';
+  }
+
+  // One reading, fully interpreted: { z, percentile, status } or null.
+  function growthAssess(indicator, sex, months, value) {
+    var z = growthZ(indicator, sex, months, value);
+    if (z == null) return null;
+    return { z: z, percentile: zToPercentile(z), status: growthStatus(indicator, z) };
+  }
+
+  // Reference lines for a chart: { '-3': [{m, v}...], '-2': ..., '0': ..., '2': ..., '3': ... }
+  var CURVE_ZS = [-3, -2, 0, 2, 3];
+  function growthCurves(indicator, sex, fromMonth, toMonth, step) {
+    if (!lmsTable(indicator, sex)) return null;
+    var lo = Math.max(0, fromMonth), hi = Math.min(GROWTH_MAX_MONTHS, toMonth), out = {};
+    step = step || 1;
+    CURVE_ZS.forEach(function (z) {
+      out[z] = [];
+      for (var m = lo; m <= hi + 1e-9; m += step) out[z].push({ m: m, v: growthValueAtZ(indicator, sex, m, z) });
+    });
+    return out;
+  }
+
+  // Back-compatible weight helpers (the notification centre and the doctor's summary use these).
   function weightReference(sex, months) {
-    var t = WHO_WFA[sex];
-    if (!t || !isFinite(months) || months < 0 || months > WFA_MAX_MONTHS) return null;
-    return { median: interp(t.median, months), minus2: interp(t.minus2, months), minus3: interp(t.minus3, months) };
+    if (!lmsAt('wfa', sex, months)) return null;
+    return { median: growthValueAtZ('wfa', sex, months, 0), minus2: growthValueAtZ('wfa', sex, months, -2), minus3: growthValueAtZ('wfa', sex, months, -3) };
   }
-
   // 'severe' (< -3 SD) | 'low' (< -2 SD) | 'ok' | null when there is no reference
   function weightStatus(sex, months, kg) {
-    var r = weightReference(sex, months);
-    if (!r || !isFinite(kg)) return null;
-    if (kg < r.minus3) return 'severe';
-    if (kg < r.minus2) return 'low';
-    return 'ok';
+    var s = growthStatus('wfa', growthZ('wfa', sex, months, kg));
+    return s === 'high' ? 'ok' : s;
+  }
+
+  /* ---- Paediatric health events (the medical-history log) ------------------- */
+  var HEALTH_EVENT_TYPES = [
+    ['checkup', 'Check-up'], ['illness', 'Illness'], ['injury', 'Injury'],
+    ['hospitalisation', 'Hospital stay'], ['surgery', 'Surgery / procedure'],
+    ['allergy', 'Allergy / reaction'], ['medication', 'Medication'], ['note', 'Note']
+  ];
+  var HEALTH_EVENT_CODES = {};
+  HEALTH_EVENT_TYPES.forEach(function (t) { HEALTH_EVENT_CODES[t[0]] = t[1]; });
+
+  /* ---- Health timeline -------------------------------------------------------
+     Merges everything recorded for one child into a single newest-first list.
+       input: { child, vaccinations: [{vaccine_code, given_on, facility}], growth: [...],
+                milestones: [{milestone_code, achieved_on}], events: [{id, event_type, title,
+                details, event_date, doctor_name, facility}], appointments: [{id, requested_date,
+                status, reason, doctor_name, doctor_notes}] }
+       -> [{ type, date, title, detail, upcoming, refId }]
+       type: birth | vaccine | growth | milestone | health | appointment
+     Appointments dated after `todayISO` are marked upcoming and cancelled ones are left out.
+     ------------------------------------------------------------------------- */
+  var MILESTONE_TEXT = {};
+  MILESTONES.forEach(function (c) { c.items.forEach(function (i) { MILESTONE_TEXT[i.code] = i.text; }); });
+  var TYPE_ORDER = { appointment: 0, health: 1, vaccine: 2, growth: 3, milestone: 4, birth: 5 };
+
+  function buildTimeline(input, todayISO) {
+    var child = input.child, out = [];
+    var join = function (parts) { return parts.filter(Boolean).join(' · '); };
+
+    var birth = [];
+    if (child.born_at_weeks) birth.push('born at ' + child.born_at_weeks + ' weeks');
+    if (child.birth_weight_kg != null) birth.push(child.birth_weight_kg + ' kg');
+    if (child.birth_length_cm != null) birth.push(child.birth_length_cm + ' cm');
+    out.push({ type: 'birth', date: child.date_of_birth, title: child.name + ' was born', detail: join(birth), upcoming: false, refId: null });
+
+    (input.vaccinations || []).forEach(function (v) {
+      var def = VACCINE_BY_CODE[v.vaccine_code];
+      out.push({ type: 'vaccine', date: v.given_on, title: (def ? def.name : v.vaccine_code) + ' given',
+        detail: join([def && def.stage, v.facility || v.hospital_or_doctor]), upcoming: false, refId: v.vaccine_code });
+    });
+
+    (input.growth || []).forEach(function (g) {
+      var parts = [];
+      if (g.weight_kg != null) parts.push(g.weight_kg + ' kg');
+      if (g.height_cm != null) parts.push(g.height_cm + ' cm');
+      if (g.head_cm != null) parts.push('head ' + g.head_cm + ' cm');
+      out.push({ type: 'growth', date: g.measured_on, title: 'Growth measured', detail: parts.join(' · '), upcoming: false, refId: g.id });
+    });
+
+    (input.milestones || []).forEach(function (m) {
+      out.push({ type: 'milestone', date: m.achieved_on, title: 'Milestone reached', detail: MILESTONE_TEXT[m.milestone_code] || m.milestone_code, upcoming: false, refId: m.milestone_code });
+    });
+
+    (input.events || []).forEach(function (e) {
+      out.push({ type: 'health', date: e.event_date, title: e.title, detail: join([HEALTH_EVENT_CODES[e.event_type], e.doctor_name, e.facility, e.details]),
+        upcoming: false, refId: e.id, eventType: e.event_type });
+    });
+
+    (input.appointments || []).forEach(function (a) {
+      if (a.status === 'cancelled') return;
+      var upcoming = a.requested_date >= todayISO && a.status !== 'completed';
+      out.push({ type: 'appointment', date: a.requested_date,
+        title: (upcoming ? 'Appointment' : 'Visit') + (a.doctor_name ? ' with Dr. ' + a.doctor_name : ''),
+        detail: join([a.reason, a.status === 'pending' ? 'awaiting confirmation' : a.status === 'completed' ? 'completed' : '', a.doctor_notes ? 'Doctor’s note: ' + a.doctor_notes : '']),
+        upcoming: upcoming, refId: a.id, status: a.status });
+    });
+
+    return out.sort(function (a, b) {
+      if (a.date !== b.date) return a.date < b.date ? 1 : -1;
+      return TYPE_ORDER[a.type] - TYPE_ORDER[b.type];
+    });
   }
 
   var CHILD_DANGER_SIGNS = [
@@ -253,9 +429,16 @@
     parseISO: parseISO, toISO: toISO, daysBetween: daysBetween, addDaysISO: addDaysISO,
     ageParts: ageParts, ageText: ageText, chartAgeMonths: chartAgeMonths,
     VACCINES: VACCINES, VACCINE_BY_CODE: VACCINE_BY_CODE, DUE_SOON_DAYS: DUE_SOON_DAYS,
+    REMINDER_LEAD_DAYS: REMINDER_LEAD_DAYS, SCHEDULE_SOURCE: SCHEDULE_SOURCE,
     vaccineStatus: vaccineStatus, vaccineSchedule: vaccineSchedule, summarizeSchedule: summarizeSchedule,
-    MILESTONES: MILESTONES, MILESTONE_CODES: MILESTONE_CODES,
-    WHO_WFA: WHO_WFA, WFA_MAX_MONTHS: WFA_MAX_MONTHS, weightReference: weightReference, weightStatus: weightStatus,
+    upcomingVaccines: upcomingVaccines,
+    MILESTONES: MILESTONES, MILESTONE_CODES: MILESTONE_CODES, MILESTONE_GRACE_MONTHS: MILESTONE_GRACE_MONTHS,
+    milestoneCheckpointStatus: milestoneCheckpointStatus,
+    GROWTH_MAX_MONTHS: GROWTH_MAX_MONTHS, WFA_MAX_MONTHS: WFA_MAX_MONTHS, GROWTH_INDICATORS: GROWTH_INDICATORS,
+    growthZ: growthZ, growthValueAtZ: growthValueAtZ, zToPercentile: zToPercentile, growthStatus: growthStatus,
+    growthAssess: growthAssess, growthCurves: growthCurves,
+    weightReference: weightReference, weightStatus: weightStatus,
+    HEALTH_EVENT_TYPES: HEALTH_EVENT_TYPES, HEALTH_EVENT_CODES: HEALTH_EVENT_CODES, buildTimeline: buildTimeline,
     CHILD_DANGER_SIGNS: CHILD_DANGER_SIGNS
   };
 });

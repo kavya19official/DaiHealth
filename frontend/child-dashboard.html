@@ -868,7 +868,78 @@ button, input { font: inherit; }
   .stats-panel { flex-direction: row; flex-wrap: wrap; }
   .stat-item { flex: 1; min-width: 100px; }
 }
+
+/* ---- Child health expansion: profile, timeline, appointments, history, WHO chart ---- */
+.form-group{display:flex;flex-direction:column;gap:.25rem;min-width:0}
+.form-group label{font-size:.74rem;font-weight:600;color:var(--ink-muted)}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:.45rem .6rem;border:1px solid var(--line);border-radius:8px;background:#fff;font-family:inherit;font-size:.85rem;color:var(--ink)}
+.form-group textarea{resize:vertical;min-height:60px}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{outline:2px solid var(--brand-soft);border-color:var(--brand)}
+.muted{color:var(--ink-muted)}
+.health-card{padding:1.1rem 1.25rem 1.2rem;margin-top:1rem}
+.health-card__head{display:flex;align-items:center;justify-content:space-between;gap:.75rem;margin-bottom:.9rem;flex-wrap:wrap}
+.health-form{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.75rem;align-items:end;margin-top:1rem;padding-top:1rem;border-top:1px dashed var(--line)}
+.health-form .span-all{grid-column:1/-1}
+.health-form__title{grid-column:1/-1;font-weight:700;font-size:.85rem;color:var(--ink)}
+.chart-wrap{height:250px}
+.growth-reading{margin-top:.8rem;padding:.7rem .85rem;border-radius:12px;background:var(--brand-pale);border:1px solid var(--line);font-size:.82rem;color:var(--ink-2)}
+.growth-reading strong{color:var(--ink)}
+.growth-reading--low{background:var(--amber-soft);border-color:#fde68a}
+.growth-reading--severe{background:#fef2f2;border-color:#fecaca}
+.growth-reading small{display:block;margin-top:.35rem;color:var(--ink-muted);font-size:.72rem}
+.profile-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:.6rem 1.25rem;margin:0}
+.profile-grid div{min-width:0}
+.profile-grid dt{font-size:.7rem;font-weight:600;color:var(--ink-muted);text-transform:uppercase;letter-spacing:.03em}
+.profile-grid dd{margin:.1rem 0 0;font-size:.88rem;color:var(--ink);overflow-wrap:anywhere}
+.alert-text{color:#b45309;font-weight:600}
+.profile-counts{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.9rem}
+.vax-reminders{display:flex;flex-wrap:wrap;align-items:center;gap:.4rem;margin:0 0 .8rem;padding:.6rem .75rem;border-radius:12px;background:var(--amber-soft);border:1px solid #fde68a;font-size:.8rem}
+.vax-reminders--ok{background:var(--green-soft);border-color:#a7f3d0;color:#047857}
+.vax-chip{padding:.15rem .55rem;border-radius:999px;font-size:.73rem;font-weight:600;background:#fff;border:1px solid #fde68a;color:#92400e}
+.vax-chip--overdue{border-color:#fecaca;color:#b91c1c}
+.vax-source{margin:.9rem 0 0;font-size:.72rem;line-height:1.45;color:var(--ink-muted)}
+.ms-note{margin-top:.9rem;padding:.65rem .8rem;border-radius:12px;background:var(--amber-soft);border:1px solid #fde68a;font-size:.8rem;color:#92400e}
+.ms-all{margin-top:1rem;display:flex;flex-direction:column;gap:.9rem}
+.ms-group__head{display:flex;align-items:center;gap:.5rem;font-weight:700;font-size:.85rem;margin-bottom:.35rem}
+.ms-row{display:flex;align-items:flex-start;gap:.6rem;width:100%;text-align:left;padding:.4rem .5rem;border:0;border-radius:8px;background:transparent;font-size:.82rem;color:var(--ink-2)}
+.ms-row:hover{background:var(--brand-pale)}
+.ms-row__box{flex:none;width:18px;height:18px;margin-top:1px;border-radius:6px;border:2px solid var(--line);display:grid;place-items:center;font-size:.7rem;color:#fff}
+.ms-row.is-done .ms-row__box{background:var(--green);border-color:var(--green)}
+.ms-row__tag{margin-left:auto;flex:none;font-size:.68rem;color:var(--ink-3)}
+.ms-domain{font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--brand);margin-right:.35rem}
+.tl-filters{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.9rem}
+.tl-filter{padding:.25rem .7rem;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:.76rem;font-weight:600;color:var(--ink-2)}
+.tl-filter.is-active{background:var(--brand);border-color:var(--brand);color:#fff}
+.tl{list-style:none;margin:0;padding:0;position:relative}
+.tl::before{content:"";position:absolute;left:7px;top:6px;bottom:6px;width:2px;background:var(--line)}
+.tl__item{position:relative;padding:0 0 .9rem 1.6rem}
+.tl__dot{position:absolute;left:0;top:.25rem;width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid var(--brand)}
+.tl__item--vaccine .tl__dot{border-color:var(--amber)}
+.tl__item--growth .tl__dot{border-color:var(--blue)}
+.tl__item--milestone .tl__dot{border-color:var(--green)}
+.tl__item--health .tl__dot{border-color:var(--rose)}
+.tl__item--appointment .tl__dot{border-color:var(--brand-mid)}
+.tl__item--upcoming .tl__dot{background:var(--brand-soft)}
+.tl__top{display:flex;gap:.5rem;align-items:baseline;flex-wrap:wrap}
+.tl__title{font-weight:600;font-size:.86rem;color:var(--ink)}
+.tl__date{font-size:.72rem;color:var(--ink-muted)}
+.tl__tag{font-size:.64rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:.1rem .45rem;border-radius:999px;background:var(--brand-soft);color:var(--brand-strong)}
+.tl__tag--upcoming{background:#dbeafe;color:#1d4ed8}
+.tl__detail{font-size:.78rem;color:var(--ink-muted);margin-top:.1rem;overflow-wrap:anywhere}
+.row-item{display:flex;gap:.75rem;align-items:flex-start;justify-content:space-between;padding:.65rem 0;border-bottom:1px solid var(--line-soft)}
+.row-item:last-child{border-bottom:0}
+.row-item__body{min-width:0;flex:1}
+.row-item__title{font-weight:600;font-size:.86rem;color:var(--ink)}
+.row-item__sub{font-size:.76rem;color:var(--ink-muted);margin-top:.1rem;overflow-wrap:anywhere}
+.row-item__actions{display:flex;gap:.4rem;flex:none;flex-wrap:wrap;justify-content:flex-end}
+.group-label{margin:.6rem 0 .1rem;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-3)}
+.status-pill{display:inline-block;margin-left:.4rem;padding:.1rem .5rem;border-radius:999px;font-size:.66rem;font-weight:700;background:var(--brand-soft);color:var(--brand-strong)}
+.status-pill--confirmed{background:#d1fae5;color:#047857}
+.status-pill--pending{background:#fffbeb;color:#b45309}
+.status-pill--completed{background:#e0e7ff;color:#3730a3}
+.status-pill--cancelled{background:#f3f4f6;color:#6b7280}
 </style>
+<script src="/shared/who-growth-standards.js"></script>
 <script src="/shared/child-reference.js"></script>
 <script src="js/dai-api.js"></script>
 </head>
@@ -1044,7 +1115,7 @@ button, input { font: inherit; }
                 <span><svg width="14" height="14"><use href="#i-chart"/></svg></span>
                 Growth Tracker
               </div>
-              <button class="link-btn" type="button">View Full Growth Chart <svg width="14" height="14"><use href="#i-arrow"/></svg></button>
+              <button class="link-btn" type="button" id="growthRangeBtn">View Full Growth Chart <svg width="14" height="14"><use href="#i-arrow"/></svg></button>
             </div>
             <div class="growth-tabs" role="tablist">
               <button type="button" class="is-active" role="tab" aria-selected="true" data-metric="weight">Weight</button>
@@ -1122,6 +1193,8 @@ button, input { font: inherit; }
                 </div>
               </div>
             </div>
+            <div class="growth-reading" id="growthReading" style="display:none"></div>
+            <div id="growthList" style="margin-top:.75rem"></div>
           </div>
 
           <!-- Vaccinations -->
@@ -1133,7 +1206,9 @@ button, input { font: inherit; }
               </div>
               <span class="vax-tag" id="vaxSummary" style="display:none"></span>
             </div>
+            <div class="vax-reminders vax-reminders--ok" id="vaxReminders" style="display:none"></div>
             <div class="vax-list" id="vaxList"></div>
+            <p class="vax-source" id="vaxSource"></p>
           </div>
 
           <!-- Milestones -->
@@ -1143,7 +1218,7 @@ button, input { font: inherit; }
                 <span style="background:#fef3c7;color:#d97706"></span>
                 Milestones
               </div>
-              <button class="link-btn" type="button">View All ›</button>
+              <button class="link-btn" type="button" id="milestoneAllBtn">View All <span aria-hidden="true">›</span></button>
             </div>
             <div class="milestones-track">
               <div class="milestone is-done">
@@ -1172,6 +1247,58 @@ button, input { font: inherit; }
                 <div class="milestone__range">(8–10 mo)</div>
               </div>
             </div>
+            <div id="milestoneNote"></div>
+            <div class="ms-all" id="milestoneAll" style="display:none"></div>
+          </div>
+
+          <!-- Medical profile -->
+          <div class="card health-card" id="profileCard">
+            <div class="health-card__head">
+              <div class="growth-card__title"><span style="background:#ede9fe;color:#7c3aed"><svg width="14" height="14"><use href="#i-user"/></svg></span>Medical profile</div>
+              <button class="link-btn" type="button" id="profileEditBtn">Edit profile</button>
+            </div>
+            <div id="profileBody"></div>
+          </div>
+
+          <!-- Health timeline -->
+          <div class="card health-card" id="timelineCard">
+            <div class="health-card__head">
+              <div class="growth-card__title"><span style="background:#dbeafe;color:#2563eb"><svg width="14" height="14"><use href="#i-clock"/></svg></span>Health timeline</div>
+            </div>
+            <div id="timelineBody"></div>
+          </div>
+
+          <!-- Paediatric appointments -->
+          <div class="card health-card" id="apptCard">
+            <div class="health-card__head">
+              <div class="growth-card__title"><span style="background:#dbeafe;color:#2563eb"><svg width="14" height="14"><use href="#i-calendar"/></svg></span>Paediatric appointments</div>
+            </div>
+            <div id="apptList"></div>
+            <form class="health-form" id="apptForm" style="display:none">
+              <div class="health-form__title">Request an appointment for this child</div>
+              <div class="form-group"><label for="apptDoctor">Doctor</label><select id="apptDoctor" required></select></div>
+              <div class="form-group"><label for="apptDate">Preferred date</label><input id="apptDate" type="date" required></div>
+              <div class="form-group span-all"><label for="apptReason">Reason (optional)</label><input id="apptReason" maxlength="500" placeholder="e.g. 6-week check-up and vaccines"></div>
+              <div><button type="submit" class="btn btn--primary">Request appointment</button></div>
+            </form>
+          </div>
+
+          <!-- Medical history -->
+          <div class="card health-card" id="historyCard">
+            <div class="health-card__head">
+              <div class="growth-card__title"><span style="background:#fee2e2;color:#dc2626"><svg width="14" height="14"><use href="#i-file"/></svg></span>Medical history</div>
+            </div>
+            <div id="historyList"></div>
+            <form class="health-form" id="historyForm" style="display:none">
+              <div class="health-form__title" id="historyFormTitle">Add to medical history</div>
+              <div class="form-group"><label for="heType">Type</label><select id="heType"></select></div>
+              <div class="form-group"><label for="heTitle">Title</label><input id="heTitle" required maxlength="160" placeholder="e.g. Fever and cough"></div>
+              <div class="form-group"><label for="heDate">Date</label><input id="heDate" type="date" required></div>
+              <div class="form-group"><label for="heDoctor">Doctor (optional)</label><input id="heDoctor" maxlength="120"></div>
+              <div class="form-group"><label for="heFacility">Hospital / clinic (optional)</label><input id="heFacility" maxlength="120"></div>
+              <div class="form-group span-all"><label for="heDetails">Details (optional)</label><textarea id="heDetails" maxlength="1000" placeholder="Diagnosis, treatment, medicines and doses as prescribed, follow-up advice…"></textarea></div>
+              <div style="display:flex;gap:.5rem"><button type="submit" class="btn btn--primary" id="heSubmit">Add entry</button><button type="button" class="mini-btn" id="heCancel" style="display:none">Cancel edit</button></div>
+            </form>
           </div>
         </div>
 
@@ -1187,7 +1314,7 @@ button, input { font: inherit; }
                 <div class="qa-item__title">Book Appointment <span>›</span></div>
                 <div class="qa-item__sub">See a doctor</div>
               </a>
-              <a class="qa-item" href="#">
+              <a class="qa-item" href="#vaxCard">
                 <div class="qa-item__icon qa-item__icon--purple">
                   <svg width="16" height="16"><use href="#i-shield"/></svg>
                 </div>
@@ -1201,7 +1328,7 @@ button, input { font: inherit; }
                 <div class="qa-item__title">Track Growth <span>›</span></div>
                 <div class="qa-item__sub">Weight, height, head size</div>
               </a>
-              <a class="qa-item" href="#">
+              <a class="qa-item" href="#historyCard">
                 <div class="qa-item__icon qa-item__icon--amber">
                   <svg width="16" height="16"><use href="#i-file"/></svg>
                 </div>
@@ -1214,42 +1341,9 @@ button, input { font: inherit; }
           <div class="card panel">
             <div class="panel__title">
               Recent Care Updates
-              <a href="#">View All ›</a>
+              <a href="#timelineCard">View All ›</a>
             </div>
-            <div class="feed-list">
-              <div class="feed-item">
-                <div class="feed-item__icon feed-item__icon--amber"></div>
-                <div class="feed-item__body">
-                  <div class="feed-item__title">Vaccination scheduled</div>
-                  <div class="feed-item__sub">Hepatitis B (2nd dose) · 12 days left</div>
-                </div>
-                <div class="feed-item__date">Sep 10</div>
-              </div>
-              <div class="feed-item">
-                <div class="feed-item__icon feed-item__icon--blue"></div>
-                <div class="feed-item__body">
-                  <div class="feed-item__title">Growth checkup</div>
-                  <div class="feed-item__sub">Weight &amp; height recorded</div>
-                </div>
-                <div class="feed-item__date">Sep 5</div>
-              </div>
-              <div class="feed-item">
-                <div class="feed-item__icon feed-item__icon--purple"></div>
-                <div class="feed-item__body">
-                  <div class="feed-item__title">Doctor visit</div>
-                  <div class="feed-item__sub">Pediatrician consultation</div>
-                </div>
-                <div class="feed-item__date">Aug 20</div>
-              </div>
-              <div class="feed-item">
-                <div class="feed-item__icon feed-item__icon--green"></div>
-                <div class="feed-item__body">
-                  <div class="feed-item__title">Health note</div>
-                  <div class="feed-item__sub">No concerns, all parameters normal</div>
-                </div>
-                <div class="feed-item__date">Aug 20</div>
-              </div>
-            </div>
+            <div class="feed-list" id="feedList"></div>
           </div>
         </div>
       </div>
@@ -1282,7 +1376,6 @@ var currentUser = null;
 var children = [];
 var activeChildId = null;
 var notifications = [];
-var appointments = [];
 var legacyGrowthCount = 0;
 var growthMetric = 'weight';
 
@@ -1371,7 +1464,9 @@ function ensureChildFormCard() {
     '<div class="form-group"><label for="cfBlood">Blood group</label><select id="cfBlood"><option value="">Unknown</option>' + BLOOD_GROUPS.map(function (g) { return '<option>' + g + '</option>'; }).join('') + '</select></div>' +
     '<div class="form-group"><label for="cfWeeks">Weeks at birth</label><input id="cfWeeks" type="number" min="22" max="44" placeholder="e.g. 39"></div>' +
     '<div class="form-group"><label for="cfBirthWeight">Birth weight (kg)</label><input id="cfBirthWeight" type="number" step="0.01" min="0.4" max="7"></div>' +
+    '<div class="form-group"><label for="cfBirthLength">Birth length (cm)</label><input id="cfBirthLength" type="number" step="0.1" min="20" max="65"></div>' +
     '<div class="form-group"><label for="cfAllergies">Allergies</label><input id="cfAllergies" maxlength="300" placeholder="Optional"></div>' +
+    '<div class="form-group"><label for="cfNotes">Notes</label><input id="cfNotes" maxlength="500" placeholder="Optional"></div>' +
     '<div style="display:flex;gap:.5rem"><button type="submit" class="btn btn--primary" id="cfSubmit">Add child</button>' +
     '<button type="button" class="mini-btn" id="cfCancel">Cancel</button>' +
     '<button type="button" class="mini-btn" id="cfDelete" style="display:none;color:#dc2626">Remove child</button></div>' +
@@ -1393,16 +1488,20 @@ function ensureChildFormCard() {
   });
   $id('childForm').addEventListener('submit', async function (e) {
     e.preventDefault();
+    var editing = card.getAttribute('data-edit-id');
+    // When editing, a cleared field is sent as '' so it can be removed; when adding, blanks are simply left out.
+    var blank = editing ? '' : undefined;
     var body = {
       name: $id('cfName').value.trim(),
       date_of_birth: $id('cfDob').value,
       sex: $id('cfSex').value,
-      blood_group: $id('cfBlood').value || undefined,
-      born_at_weeks: $id('cfWeeks').value || undefined,
-      birth_weight_kg: $id('cfBirthWeight').value || undefined,
-      allergies: $id('cfAllergies').value.trim() || undefined
+      blood_group: $id('cfBlood').value || blank,
+      born_at_weeks: $id('cfWeeks').value || blank,
+      birth_weight_kg: $id('cfBirthWeight').value || blank,
+      birth_length_cm: $id('cfBirthLength').value || blank,
+      allergies: $id('cfAllergies').value.trim() || blank,
+      notes: $id('cfNotes').value.trim() || blank
     };
-    var editing = card.getAttribute('data-edit-id');
     var data = editing
       ? await api.apiRequest('/children/' + editing, { method: 'PATCH', body: body })
       : await api.apiRequest('/children', { method: 'POST', body: body });
@@ -1431,7 +1530,9 @@ function openChildForm(child) {
   $id('cfBlood').value = (child && child.blood_group) || '';
   $id('cfWeeks').value = (child && child.born_at_weeks) || '';
   $id('cfBirthWeight').value = (child && child.birth_weight_kg) || '';
+  $id('cfBirthLength').value = (child && child.birth_length_cm) || '';
   $id('cfAllergies').value = (child && child.allergies) || '';
+  $id('cfNotes').value = (child && child.notes) || '';
   card.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
@@ -1522,6 +1623,7 @@ function renderVaccinations() {
   if (!c) {
     host.innerHTML = '<p style="color:var(--ink-muted);padding:.5rem 0">Add a child to see their vaccination schedule.</p>';
     if (summary) summary.style.display = 'none';
+    if ($id('vaxReminders')) $id('vaxReminders').style.display = 'none';
     return;
   }
   var byCode = {};
@@ -1532,6 +1634,21 @@ function renderVaccinations() {
     summary.style.display = '';
     summary.className = 'vax-tag ' + (sum.missed.length ? 'vax-tag--overdue' : 'vax-tag--done');
     summary.textContent = sum.completed + ' of ' + sum.total + ' given' + (sum.missed.length ? ' \u00b7 ' + sum.missed.length + ' overdue' : '');
+  }
+
+  // Reminders: anything overdue, due now, or falling due inside the reminder window (14 days).
+  var remHost = $id('vaxReminders');
+  if (remHost) {
+    var rem = Ref.upcomingVaccines(schedule);
+    remHost.innerHTML = rem.length
+      ? '<strong>Reminders</strong>' + rem.slice(0, 5).map(function (v) {
+          var late = v.status === 'missed';
+          var when = late ? 'overdue — was due ' + api.fmtDate(v.dueDate) : (v.daysUntil <= 0 ? 'due now' : 'due in ' + v.daysUntil + ' day' + (v.daysUntil === 1 ? '' : 's'));
+          return '<span class="vax-chip' + (late ? ' vax-chip--overdue' : '') + '">' + esc(v.name) + ' · ' + when + '</span>';
+        }).join('') + (rem.length > 5 ? '<span class="muted">+' + (rem.length - 5) + ' more below</span>' : '')
+      : 'No vaccines are due in the next ' + Ref.REMINDER_LEAD_DAYS + ' days.';
+    remHost.className = 'vax-reminders' + (rem.length ? '' : ' vax-reminders--ok');
+    remHost.style.display = '';
   }
 
   host.innerHTML = schedule.map(function (v) {
@@ -1612,23 +1729,40 @@ function renderVaccinations() {
 /* ======================================================================
    Developmental milestones
    ====================================================================== */
+var showAllMilestones = false;
+
+async function toggleMilestone(c, code, isDone) {
+  if (IS_GUEST) { api.toast('Sign in to track milestones'); return; }
+  if (isDone) {
+    var ok = await api.apiRequest('/children/' + c.id + '/milestones/' + code, { method: 'DELETE' });
+    if (ok) { await loadChildren(); renderAll(); }
+    return;
+  }
+  var data = await api.apiRequest('/children/' + c.id + '/milestones/' + code, { method: 'PUT', body: { achieved_on: todayISO() } });
+  if (data) { api.toast('Marked achieved'); await loadChildren(); renderAll(); }
+}
+
 function renderMilestones() {
   var track = $('.milestones-track');
+  var noteHost = $id('milestoneNote'), allHost = $id('milestoneAll'), allBtn = $id('milestoneAllBtn');
   var c = activeChild();
   if (!track) return;
   if (!c) {
     track.innerHTML = '<div class="milestone is-locked"><div class="milestone__icon"></div><div class="milestone__name">Add a child to see milestones</div></div>';
+    if (noteHost) noteHost.innerHTML = '';
+    if (allHost) allHost.style.display = 'none';
+    if (allBtn) allBtn.style.display = 'none';
     return;
   }
   var achieved = {};
   (c.milestones || []).forEach(function (m) { achieved[m.milestone_code] = m.achieved_on; });
-  var dayAge = Ref.daysBetween(c.date_of_birth, todayISO());
-  var ageMonths = dayAge / 30.4375;
-  // Checkpoints up to the child's current age, plus the next one so there's always
-  // something to look forward to.
-  var idx = Ref.MILESTONES.findIndex(function (chk) { return chk.months > ageMonths; });
-  var visible = idx === -1 ? Ref.MILESTONES : Ref.MILESTONES.slice(0, idx + 1);
-  if (!visible.length) visible = [Ref.MILESTONES[0]];
+  // CDC milestones follow corrected age for babies born early, like the growth charts do.
+  var ageM = Ref.chartAgeMonths(c.date_of_birth, todayISO(), c.born_at_weeks);
+
+  // The track focuses on where the child is now: the last two checkpoints reached plus the next one.
+  var idx = Ref.MILESTONES.findIndex(function (chk) { return chk.months > ageM; });
+  var end = idx === -1 ? Ref.MILESTONES.length : idx + 1;
+  var visible = Ref.MILESTONES.slice(Math.max(0, end - 3), end);
   var items = [];
   visible.forEach(function (chk) { chk.items.forEach(function (i) { items.push({ code: i.code, text: i.text, months: chk.months }); }); });
 
@@ -1638,23 +1772,42 @@ function renderMilestones() {
     var cls = done ? 'is-done' : (!foundCurrent ? (foundCurrent = true, 'is-current') : 'is-locked');
     return '<div class="milestone ' + cls + '" data-mcode="' + it.code + '" data-months="' + it.months + '" title="' + esc(it.text) + '">' +
       '<div class="milestone__icon">' + (done ? '<span class="milestone__check"></span>' : '') + '</div>' +
-      '<div class="milestone__name">' + esc(it.text.length > 34 ? it.text.slice(0, 32) + '\u2026' : it.text) + '</div>' +
+      '<div class="milestone__name">' + esc(it.text.length > 34 ? it.text.slice(0, 32) + '…' : it.text) + '</div>' +
       '<div class="milestone__range">(' + it.months + ' mo)</div></div>';
   }).join('');
 
-  track.querySelectorAll('.milestone[data-mcode]').forEach(function (node) {
-    var code = node.getAttribute('data-mcode');
+  // Checkpoints already passed (by more than the grace window) that still have unmarked skills.
+  var statuses = Ref.MILESTONES.map(function (chk) { return Ref.milestoneCheckpointStatus(ageM, chk, achieved); });
+  var behind = statuses.filter(function (s) { return s.status === 'discuss'; });
+  if (noteHost) {
+    noteHost.innerHTML = behind.length
+      ? '<div class="ms-note">Some skills at the ' + behind.slice(-3).map(function (s) { return s.months + '-month'; }).join(', ') + ' checkpoint' + (behind.length > 1 ? 's' : '') +
+        ' aren’t marked yet (' + behind.slice(-3).map(function (s) { return (s.total - s.done) + ' of ' + s.total; }).join(', ') + '). Children develop at their own pace, and you may simply not have ticked them off — but if you are unsure, mention it at your next check-up. Milestones are a prompt for that conversation, not a diagnosis.</div>'
+      : '';
+  }
+
+  if (allBtn) { allBtn.style.display = ''; allBtn.firstChild.nodeValue = showAllMilestones ? 'Hide full checklist ' : 'View All '; }
+  if (allHost) {
+    allHost.style.display = showAllMilestones ? '' : 'none';
+    allHost.innerHTML = showAllMilestones ? Ref.MILESTONES.map(function (chk, i) {
+      var st = statuses[i];
+      var label = { complete: 'All reached', upcoming: 'Coming up', in_progress: st.done + ' of ' + st.total + ' reached', discuss: st.done + ' of ' + st.total + ' marked' }[st.status];
+      var tagCls = st.status === 'complete' ? 'status-pill--confirmed' : st.status === 'discuss' ? 'status-pill--pending' : '';
+      return '<div class="ms-group"><div class="ms-group__head">' + esc(chk.label) + '<span class="status-pill ' + tagCls + '">' + label + '</span></div>' +
+        chk.items.map(function (it) {
+          var on = achieved[it.code];
+          return '<button type="button" class="ms-row' + (on ? ' is-done' : '') + '" data-mcode="' + it.code + '">' +
+            '<span class="ms-row__box">' + (on ? '✓' : '') + '</span>' +
+            '<span><span class="ms-domain">' + it.domain + '</span>' + esc(it.text) + '</span>' +
+            '<span class="ms-row__tag">' + (on ? esc(api.fmtDate(on)) : '') + '</span></button>';
+        }).join('') + '</div>';
+    }).join('') : '';
+  }
+
+  $all('.milestone[data-mcode], .ms-row[data-mcode]').forEach(function (node) {
     node.style.cursor = 'pointer';
-    node.addEventListener('click', async function () {
-      if (IS_GUEST) { api.toast('Sign in to track milestones'); return; }
-      var done = node.classList.contains('is-done');
-      if (done) {
-        var ok = await api.apiRequest('/children/' + c.id + '/milestones/' + code, { method: 'DELETE' });
-        if (ok) { await loadChildren(); renderAll(); }
-        return;
-      }
-      var data = await api.apiRequest('/children/' + c.id + '/milestones/' + code, { method: 'PUT', body: { achieved_on: todayISO() } });
-      if (data) { api.toast('Marked achieved'); await loadChildren(); renderAll(); }
+    node.addEventListener('click', function () {
+      toggleMilestone(c, node.getAttribute('data-mcode'), !!achieved[node.getAttribute('data-mcode')]);
     });
   });
 }
@@ -1662,7 +1815,7 @@ function renderMilestones() {
 /* ======================================================================
    Growth
    ====================================================================== */
-function metricLabel(m) { return m === 'weight' ? 'Weight (kg)' : m === 'height' ? 'Height (cm)' : 'Head circumference (cm)'; }
+function metricLabel(m) { return m === 'weight' ? 'Weight (kg)' : m === 'height' ? 'Height (cm)' : 'Head size (cm)'; }
 function metricKey(m) { return m === 'weight' ? 'weight_kg' : m === 'height' ? 'height_cm' : 'head_cm'; }
 function metricUnit(m) { return m === 'weight' ? 'kg' : 'cm'; }
 
@@ -1699,23 +1852,131 @@ function buildChartSVG(points, unit) {
     '<g>' + dots + '</g>' + xLabels + '</svg>';
 }
 
+var GROWTH_INDICATOR = { weight: 'wfa', height: 'lhfa', head: 'hcfa' };
+var growthFullRange = false;
+
+function ordinal(n) {
+  var s = ['th', 'st', 'nd', 'rd'], v = n % 100;
+  return n + (s[(v - 20) % 10] || s[v] || s[0]);
+}
+function percentileText(p) {
+  if (p < 1) return 'below the 1st percentile';
+  if (p > 99) return 'above the 99th percentile';
+  return 'about the ' + ordinal(Math.round(p)) + ' percentile';
+}
+
+// A child's measurements plotted over the WHO reference lines (−3, −2, median, +2, +3 SD).
+function buildReferenceChartSVG(c, metric, pts, end) {
+  var ind = GROWTH_INDICATOR[metric], unit = Ref.GROWTH_INDICATORS[ind].unit;
+  var W = 560, H = 250, L = 40, R = 54, T = 14, B = 36;
+  var curves = Ref.growthCurves(ind, c.sex, 0, end, end <= 12 ? 0.5 : 1);
+  var lo = Infinity, hi = -Infinity;
+  curves[-3].forEach(function (p) { lo = Math.min(lo, p.v); });
+  curves[3].forEach(function (p) { hi = Math.max(hi, p.v); });
+  pts.forEach(function (p) { lo = Math.min(lo, p.v); hi = Math.max(hi, p.v); });
+  var pad = (hi - lo) * 0.04; lo -= pad; hi += pad;
+  var x = function (m) { return L + m / end * (W - L - R); };
+  var y = function (v) { return T + (1 - (v - lo) / (hi - lo)) * (H - T - B); };
+  var xy = function (p) { return x(p.m).toFixed(1) + ' ' + y(p.v).toFixed(1); };
+  var line = function (arr) { return arr.map(function (p, i) { return (i ? 'L' : 'M') + xy(p); }).join(' '); };
+  var band = line(curves[2]) + curves[-2].slice().reverse().map(function (p) { return ' L' + xy(p); }).join('') + ' Z';
+  var font = 'font-family="Inter,sans-serif"';
+
+  var yTicks = [0, 0.25, 0.5, 0.75, 1].map(function (f) {
+    var v = lo + (hi - lo) * f, yy = y(v);
+    return '<line x1="' + L + '" y1="' + yy.toFixed(1) + '" x2="' + (W - R) + '" y2="' + yy.toFixed(1) + '" stroke="#f1ecfd"/>' +
+      '<text x="' + (L - 5) + '" y="' + (yy + 3).toFixed(1) + '" text-anchor="end" fill="#9ca3af" font-size="10" ' + font + '>' + v.toFixed(hi - lo < 8 ? 1 : 0) + '</text>';
+  }).join('');
+  var step = end <= 12 ? 2 : end <= 24 ? 3 : end <= 36 ? 6 : 12;
+  var xTicks = '';
+  for (var m = 0; m <= end; m += step) {
+    xTicks += '<text x="' + x(m).toFixed(1) + '" y="' + (H - B + 14) + '" text-anchor="middle" fill="#9ca3af" font-size="10" ' + font + '>' + m + '</text>';
+  }
+  var last = function (arr) { return arr[arr.length - 1]; };
+  var tag = function (z, text, color) {
+    var p = last(curves[z]);
+    return '<text x="' + (W - R + 5) + '" y="' + (y(p.v) + 3).toFixed(1) + '" fill="' + color + '" font-size="9.5" font-weight="600" ' + font + '>' + text + '</text>';
+  };
+  var ptsInWindow = pts.filter(function (p) { return p.m <= end + 1e-9; });
+  var path = ptsInWindow.map(function (p, i) { return (i ? 'L' : 'M') + xy(p); }).join(' ');
+  var dots = ptsInWindow.map(function (p, i) {
+    var a = Ref.growthAssess(GROWTH_INDICATOR[metric], c.sex, p.m, p.v);
+    var color = !a || a.status === 'ok' ? '#7c3aed' : a.status === 'severe' ? '#dc2626' : '#f59e0b';
+    var isLast = i === ptsInWindow.length - 1;
+    return '<circle cx="' + x(p.m).toFixed(1) + '" cy="' + y(p.v).toFixed(1) + '" r="' + (isLast ? 5.5 : 4) + '" fill="' + (isLast ? color : '#fff') + '" stroke="' + color + '" stroke-width="2.2">' +
+      '<title>' + p.v + ' ' + unit + ' · ' + esc(api.fmtDate(p.date)) + (a ? ' · ' + percentileText(a.percentile) : '') + '</title></circle>';
+  }).join('');
+
+  return '<svg class="chart-svg" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="xMidYMid meet" role="img" aria-label="' + esc(metricLabel(metric)) + ' against the WHO growth standard">' +
+    '<path d="' + band + '" fill="#ede9fe" opacity=".75"/>' + yTicks + xTicks +
+    '<text x="' + ((L + W - R) / 2) + '" y="' + (H - 4) + '" text-anchor="middle" fill="#9ca3af" font-size="10" ' + font + '>Age (months)</text>' +
+    '<path d="' + line(curves[3]) + '" fill="none" stroke="#fca5a5" stroke-width="1.2" stroke-dasharray="4 3"/>' +
+    '<path d="' + line(curves[-3]) + '" fill="none" stroke="#fca5a5" stroke-width="1.2" stroke-dasharray="4 3"/>' +
+    '<path d="' + line(curves[2]) + '" fill="none" stroke="#c4b5fd" stroke-width="1.2"/>' +
+    '<path d="' + line(curves[-2]) + '" fill="none" stroke="#c4b5fd" stroke-width="1.2"/>' +
+    '<path d="' + line(curves[0]) + '" fill="none" stroke="#8b5cf6" stroke-width="1.6" stroke-dasharray="1 0"/>' +
+    tag(3, '+3 SD', '#ef4444') + tag(2, '+2 SD', '#8b5cf6') + tag(0, 'median', '#6d28d9') + tag(-2, '−2 SD', '#8b5cf6') + tag(-3, '−3 SD', '#ef4444') +
+    (path ? '<path d="' + path + '" fill="none" stroke="#7c3aed" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>' : '') +
+    dots + '</svg>';
+}
+
+function growthReadingHTML(c, metric, pts) {
+  var info = Ref.GROWTH_INDICATORS[GROWTH_INDICATOR[metric]];
+  var foot = '<small>WHO Child Growth Standards (2006). A screening aid for your paediatrician to interpret — not a diagnosis. Percentiles and the ±2 SD / ±3 SD lines assume the age and sex on this profile.</small>';
+  if (!pts.length) return { cls: '', html: 'Add a ' + info.label.toLowerCase() + ' measurement below to see where it falls on the WHO curves.' + foot };
+  var p = pts[pts.length - 1];
+  var a = Ref.growthAssess(GROWTH_INDICATOR[metric], c.sex, p.m, p.v);
+  if (!a) return { cls: '', html: 'That measurement is outside the 0–60 month range of the WHO standard.' + foot };
+  var lead = '<strong>Latest ' + info.label.toLowerCase() + ': ' + p.v + ' ' + info.unit + '</strong> on ' + esc(api.fmtDate(p.date)) + ' — ' + percentileText(a.percentile) + ' (z-score ' + a.z.toFixed(1).replace('-', '−') + '). ';
+  var msg = {
+    ok: 'This is within the expected range (between −2 and +2 SD).',
+    low: 'This is below the −2 SD line. Worth mentioning to your paediatrician at the next visit.',
+    severe: 'This is well below the −3 SD line. Please show this to your paediatrician soon.',
+    high: 'This is above the usual range. Worth mentioning to your paediatrician at the next visit.'
+  }[a.status];
+  var corrected = c.born_at_weeks && c.born_at_weeks < 37 && Ref.daysBetween(c.date_of_birth, todayISO()) < 730
+    ? '<small>Plotted on corrected age because ' + esc(c.name.split(/\s+/)[0]) + ' was born at ' + c.born_at_weeks + ' weeks.</small>' : '';
+  return { cls: a.status === 'low' || a.status === 'high' ? 'growth-reading--low' : a.status === 'severe' ? 'growth-reading--severe' : '', html: lead + msg + corrected + foot };
+}
+
 function renderGrowth() {
   var c = activeChild();
   var wrap = $('.chart-wrap');
-  var yLabel = $('.chart-y-label');
+  var reading = $id('growthReading');
+  var rangeBtn = $id('growthRangeBtn');
   var entries = c ? (c.growth || []) : [];
   var key = metricKey(growthMetric), unit = metricUnit(growthMetric);
-  var points = entries.filter(function (g) { return g[key] != null; }).map(function (g) {
-    return { t: Ref ? Ref.parseISO(g.measured_on) : new Date(g.measured_on).getTime(), v: Number(g[key]), label: api.fmtDate(g.measured_on) };
-  });
-  if (wrap) wrap.innerHTML = buildChartSVG(points, unit);
-  if (yLabel) yLabel.textContent = metricLabel(growthMetric);
+  var hasRef = !!(c && Ref && (c.sex === 'male' || c.sex === 'female'));
+  var chartHTML = '', readingState = { cls: '', html: '' };
+
+  if (hasRef) {
+    var pts = entries.filter(function (g) { return g[key] != null; }).map(function (g) {
+      return { m: Ref.chartAgeMonths(c.date_of_birth, g.measured_on, c.born_at_weeks), v: Number(g[key]), date: g.measured_on };
+    }).filter(function (p) { return p.m <= Ref.GROWTH_MAX_MONTHS; });
+    var ageNow = Ref.chartAgeMonths(c.date_of_birth, todayISO(), c.born_at_weeks);
+    var reach = Math.max(Math.min(ageNow, Ref.GROWTH_MAX_MONTHS), pts.length ? pts[pts.length - 1].m : 0);
+    var end = growthFullRange ? Ref.GROWTH_MAX_MONTHS : ([6, 12, 24, 36, 48, 60].filter(function (s) { return s >= reach + 0.5; })[0] || Ref.GROWTH_MAX_MONTHS);
+    chartHTML = buildReferenceChartSVG(c, growthMetric, pts, end);
+    readingState = growthReadingHTML(c, growthMetric, pts);
+    if (rangeBtn) { rangeBtn.style.display = ''; rangeBtn.firstChild.nodeValue = growthFullRange ? 'Zoom to current age ' : 'View Full Growth Chart '; }
+  } else {
+    var points = entries.filter(function (g) { return g[key] != null; }).map(function (g) {
+      return { t: Ref ? Ref.parseISO(g.measured_on) : new Date(g.measured_on).getTime(), v: Number(g[key]), label: api.fmtDate(g.measured_on) };
+    });
+    chartHTML = buildChartSVG(points, unit);
+    if (rangeBtn) rangeBtn.style.display = 'none';
+    readingState.html = c && c.sex === 'other'
+      ? 'The WHO growth curves are published for boys and girls only, so this chart shows your child’s own measurements without a reference.'
+      : (c ? '' : 'Add a child to track growth.');
+  }
+  if (wrap) wrap.innerHTML = '<span class="chart-y-label">' + esc(metricLabel(growthMetric)) + '</span>' + chartHTML;
+  if (reading) { reading.className = 'growth-reading ' + readingState.cls; reading.innerHTML = readingState.html; reading.style.display = readingState.html ? '' : 'none'; }
 
   var last = entries.length ? entries[entries.length - 1] : null;
   var w = $id('statWeight'), h = $id('statHeight'), hd = $id('statHead');
-  if (w) w.textContent = last && last.weight_kg != null ? Number(last.weight_kg) + ' kg' : '\u2014';
-  if (h) h.textContent = last && last.height_cm != null ? Number(last.height_cm) + ' cm' : '\u2014';
-  if (hd) hd.textContent = last && last.head_cm != null ? Number(last.head_cm) + ' cm' : '\u2014';
+  if (w) w.textContent = last && last.weight_kg != null ? Number(last.weight_kg) + ' kg' : '—';
+  if (h) h.textContent = last && last.height_cm != null ? Number(last.height_cm) + ' cm' : '—';
+  if (hd) hd.textContent = last && last.head_cm != null ? Number(last.head_cm) + ' cm' : '—';
   $all('.stat-item__sub').forEach(function (el) { el.textContent = last ? 'on ' + api.fmtDate(last.measured_on) : '(no data yet)'; });
 
   var list = $id('growthList');
@@ -1737,7 +1998,7 @@ function renderGrowth() {
         if (g.height_cm != null) parts.push(g.height_cm + ' cm');
         if (g.head_cm != null) parts.push('HC ' + g.head_cm + ' cm');
         return '<div style="display:flex;justify-content:space-between;align-items:center;padding:.5rem 0;border-bottom:1px solid var(--line)">' +
-          '<span>' + api.fmtDate(g.measured_on) + '</span><span>' + parts.join(' \u00b7 ') + '</span>' +
+          '<span>' + api.fmtDate(g.measured_on) + '</span><span>' + parts.join(' · ') + '</span>' +
           '<button type="button" class="mini-btn" data-del-growth="' + g.id + '">Remove</button></div>';
       }).join('');
       list.querySelectorAll('[data-del-growth]').forEach(function (btn) {
@@ -1809,8 +2070,10 @@ function renderNextVax() {
     if (sh) sh.textContent = sum.completed + ' of ' + sum.total + ' vaccines given' + (sum.missed.length ? ' \u00b7 ' + sum.missed.length + ' overdue' : '');
   }
   if (sa) {
-    var upcoming = appointments.filter(function (a) { return a.status === 'pending' || a.status === 'confirmed'; });
-    sa.textContent = upcoming.length ? (upcoming.length + ' scheduled') : 'None scheduled';
+    var next = c ? (childAppts[c.id] || []).filter(function (a) {
+      return (a.status === 'pending' || a.status === 'confirmed') && a.requested_date >= todayISO();
+    }).sort(function (a, b) { return a.requested_date < b.requested_date ? -1 : 1; })[0] : null;
+    sa.textContent = next ? 'Next: ' + api.fmtDate(next.requested_date) + (next.doctor_name ? ' \u00b7 Dr. ' + next.doctor_name : '') : 'None scheduled';
   }
 }
 
@@ -1891,6 +2154,278 @@ if (notifReadAllBtn) {
 }
 
 /* ======================================================================
+   Medical profile
+   ====================================================================== */
+function renderProfile() {
+  var host = $id('profileBody'), editBtn = $id('profileEditBtn');
+  if (!host) return;
+  var c = activeChild();
+  if (editBtn) editBtn.style.display = c ? '' : 'none';
+  if (!c) { host.innerHTML = '<p class="muted">Add a child to build their medical profile.</p>'; return; }
+  var today = todayISO();
+  var sexLabel = (SEX_OPTIONS.filter(function (o) { return o[0] === c.sex; })[0] || [0, '—'])[1];
+  var born = !c.born_at_weeks ? 'Not recorded'
+    : c.born_at_weeks < 37 ? c.born_at_weeks + ' weeks — premature (growth is plotted on corrected age until 2 years)'
+    : c.born_at_weeks + ' weeks';
+  var sched = Ref.summarizeSchedule(Ref.vaccineSchedule(c.date_of_birth, vaxGivenMap(c), today));
+  var rows = [
+    ['Date of birth', api.fmtDate(c.date_of_birth) + ' · ' + Ref.ageText(c.date_of_birth, today)],
+    ['Sex', sexLabel],
+    ['Born at', born],
+    ['Birth weight / length', (c.birth_weight_kg != null ? c.birth_weight_kg + ' kg' : '—') + ' / ' + (c.birth_length_cm != null ? c.birth_length_cm + ' cm' : '—')],
+    ['Blood group', c.blood_group || 'Not recorded'],
+    ['Allergies', c.allergies ? '<span class="alert-text">' + esc(c.allergies) + '</span>' : 'None recorded']
+  ];
+  if (c.notes) rows.push(['Notes', esc(c.notes)]);
+  host.innerHTML = '<dl class="profile-grid">' + rows.map(function (r) {
+    var value = r[0] === 'Allergies' ? r[1] : (r[0] === 'Notes' ? r[1] : esc(r[1]));
+    return '<div><dt>' + r[0] + '</dt><dd>' + value + '</dd></div>';
+  }).join('') + '</dl>' +
+    '<div class="profile-counts">' +
+    '<span class="vax-tag vax-tag--' + (sched.missed.length ? 'overdue' : 'done') + '">' + sched.completed + ' of ' + sched.total + ' vaccines given</span>' +
+    '<span class="vax-tag vax-tag--upcoming">' + (c.growth || []).length + ' growth measurement' + ((c.growth || []).length === 1 ? '' : 's') + '</span>' +
+    '<span class="vax-tag vax-tag--upcoming">' + (c.health_events || []).length + ' history entr' + ((c.health_events || []).length === 1 ? 'y' : 'ies') + '</span></div>';
+}
+
+/* ======================================================================
+   Health timeline + recent updates feed (same data, built by Ref.buildTimeline)
+   ====================================================================== */
+var tlFilter = 'all', tlLimit = 12;
+var TL_FILTERS = [['all', 'Everything'], ['appointment', 'Visits'], ['vaccine', 'Vaccines'], ['growth', 'Growth'], ['milestone', 'Milestones'], ['health', 'Health']];
+var TL_LABELS = { appointment: 'Visit', health: 'Health', vaccine: 'Vaccine', growth: 'Growth', milestone: 'Milestone', birth: 'Birth' };
+
+function timelineFor(c) {
+  return Ref.buildTimeline({
+    child: c, vaccinations: c.vaccinations, growth: c.growth, milestones: c.milestones,
+    events: c.health_events, appointments: childAppts[c.id] || []
+  }, todayISO());
+}
+function renderTimeline() {
+  var host = $id('timelineBody');
+  if (!host) return;
+  var c = activeChild();
+  if (!c) { host.innerHTML = '<p class="muted">Add a child to see their health timeline.</p>'; return; }
+  var all = timelineFor(c);
+  var shown = all.filter(function (e) { return tlFilter === 'all' || e.type === tlFilter; });
+  var more = shown.length > tlLimit;
+  host.innerHTML =
+    '<div class="tl-filters">' + TL_FILTERS.map(function (f) {
+      return '<button type="button" class="tl-filter' + (tlFilter === f[0] ? ' is-active' : '') + '" data-tl-filter="' + f[0] + '">' + f[1] + '</button>';
+    }).join('') + '</div>' +
+    (shown.length ? '<ul class="tl">' + shown.slice(0, tlLimit).map(function (e) {
+      return '<li class="tl__item tl__item--' + e.type + (e.upcoming ? ' tl__item--upcoming' : '') + '">' +
+        '<span class="tl__dot"></span><div class="tl__top"><span class="tl__title">' + esc(e.title) + '</span>' +
+        '<span class="tl__tag">' + TL_LABELS[e.type] + '</span>' + (e.upcoming ? '<span class="tl__tag tl__tag--upcoming">Upcoming</span>' : '') +
+        '<span class="tl__date">' + esc(api.fmtDate(e.date)) + '</span></div>' +
+        (e.detail ? '<div class="tl__detail">' + esc(e.detail) + '</div>' : '') + '</li>';
+    }).join('') + '</ul>' : '<p class="muted">Nothing recorded under this filter yet.</p>') +
+    (more ? '<button type="button" class="mini-btn" id="tlMore">Show ' + Math.min(12, shown.length - tlLimit) + ' more</button>' : '');
+  host.querySelectorAll('[data-tl-filter]').forEach(function (b) {
+    b.addEventListener('click', function () { tlFilter = b.getAttribute('data-tl-filter'); tlLimit = 12; renderTimeline(); });
+  });
+  var moreBtn = $id('tlMore');
+  if (moreBtn) moreBtn.addEventListener('click', function () { tlLimit += 12; renderTimeline(); });
+}
+function renderFeed() {
+  var host = $id('feedList');
+  if (!host) return;
+  var c = activeChild();
+  if (!c) { host.innerHTML = '<div class="feed-item"><div class="feed-item__body"><div class="feed-item__sub">Care updates appear here once you add a child.</div></div></div>'; return; }
+  var iconCls = { appointment: 'blue', health: 'green', vaccine: 'amber', growth: 'blue', milestone: 'purple', birth: 'purple' };
+  host.innerHTML = timelineFor(c).slice(0, 4).map(function (e) {
+    var d = new Date(e.date + 'T00:00:00');
+    return '<div class="feed-item"><div class="feed-item__icon feed-item__icon--' + iconCls[e.type] + '"></div>' +
+      '<div class="feed-item__body"><div class="feed-item__title">' + esc(e.title) + '</div>' +
+      (e.detail ? '<div class="feed-item__sub">' + esc(e.detail.length > 60 ? e.detail.slice(0, 58) + '…' : e.detail) + '</div>' : '') + '</div>' +
+      '<div class="feed-item__date">' + (isNaN(d.getTime()) ? '' : d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })) + '</div></div>';
+  }).join('');
+}
+
+/* ======================================================================
+   Paediatric appointments
+   ====================================================================== */
+var childAppts = {};   // child id -> appointments booked for that child
+var doctors = null;    // [{id, full_name, specialization, facility_name}]
+var APPT_LABELS = { pending: 'Awaiting confirmation', confirmed: 'Confirmed', completed: 'Completed', cancelled: 'Cancelled' };
+
+async function loadChildAppointments(c) {
+  if (IS_GUEST || !c) return;
+  var data = await api.apiRequest('/children/' + c.id + '/appointments');
+  if (data) childAppts[c.id] = data.appointments || [];
+}
+async function loadDoctors() {
+  if (IS_GUEST || doctors !== null) return;
+  var data = await api.apiRequest('/doctors');
+  doctors = ((data && data.doctors) || []).slice().sort(function (a, b) {
+    var pa = /paed|pedia/i.test(a.specialization || '') ? 0 : 1, pb = /paed|pedia/i.test(b.specialization || '') ? 0 : 1;
+    return pa - pb || String(a.full_name).localeCompare(String(b.full_name));
+  });
+}
+
+function apptRowHTML(a, canCancel) {
+  var sub = [a.reason, a.specialization, a.facility_name].filter(Boolean).map(esc).join(' · ');
+  return '<div class="row-item"><div class="row-item__body">' +
+    '<div class="row-item__title">' + esc(api.fmtDate(a.requested_date)) + ' — Dr. ' + esc(a.doctor_name) + '<span class="status-pill status-pill--' + a.status + '">' + APPT_LABELS[a.status] + '</span></div>' +
+    (sub ? '<div class="row-item__sub">' + sub + '</div>' : '') +
+    (a.doctor_notes ? '<div class="row-item__sub">Doctor’s note: ' + esc(a.doctor_notes) + '</div>' : '') + '</div>' +
+    (canCancel ? '<div class="row-item__actions"><button type="button" class="mini-btn" data-cancel-appt="' + a.id + '">Cancel</button></div>' : '') + '</div>';
+}
+function renderAppointments() {
+  var host = $id('apptList'), form = $id('apptForm');
+  if (!host) return;
+  var c = activeChild();
+  if (form) form.style.display = c ? '' : 'none';
+  if (!c) { host.innerHTML = '<p class="muted">Add a child to book and track their paediatric visits.</p>'; return; }
+  var today = todayISO();
+  var list = childAppts[c.id] || [];
+  var live = function (a) { return (a.status === 'pending' || a.status === 'confirmed') && a.requested_date >= today; };
+  var upcoming = list.filter(live).sort(function (a, b) { return a.requested_date < b.requested_date ? -1 : 1; });
+  var past = list.filter(function (a) { return !live(a); });
+  host.innerHTML = list.length
+    ? (upcoming.length ? '<div class="group-label">Upcoming</div>' + upcoming.map(function (a) { return apptRowHTML(a, true); }).join('') : '') +
+      (past.length ? '<div class="group-label">Visit history</div>' + past.map(function (a) { return apptRowHTML(a, false); }).join('') : '')
+    : '<p class="muted">No appointments booked for ' + esc(c.name) + ' yet.</p>';
+
+  host.querySelectorAll('[data-cancel-appt]').forEach(function (btn) {
+    btn.addEventListener('click', async function () {
+      if (!confirm('Cancel this appointment request?')) return;
+      var ok = await api.apiRequest('/children/' + c.id + '/appointments/' + btn.getAttribute('data-cancel-appt') + '/cancel', { method: 'PATCH' });
+      if (ok) { api.toast('Appointment cancelled'); await loadChildAppointments(c); renderAll(); }
+    });
+  });
+
+  var sel = $id('apptDoctor'), dateInput = $id('apptDate');
+  if (sel) {
+    var keep = sel.value;
+    sel.innerHTML = doctors && doctors.length
+      ? doctors.map(function (d) { return '<option value="' + d.id + '">Dr. ' + esc(d.full_name) + (d.specialization ? ' — ' + esc(d.specialization) : '') + '</option>'; }).join('')
+      : '<option value="">No doctors available yet</option>';
+    if (keep) sel.value = keep;
+  }
+  if (dateInput) { dateInput.min = today; if (!dateInput.value) dateInput.value = today; }
+}
+
+/* ======================================================================
+   Medical history
+   ====================================================================== */
+var editingEventId = null;
+
+function renderHistory() {
+  var host = $id('historyList');
+  if (!host) return;
+  var c = activeChild();
+  var form = $id('historyForm');
+  if (form) form.style.display = c ? '' : 'none';
+  if (!c) { host.innerHTML = '<p class="muted">Add a child to keep their medical history.</p>'; return; }
+  var events = c.health_events || [];
+  host.innerHTML = events.length ? events.map(function (e) {
+    var sub = [e.doctor_name, e.facility].filter(Boolean).map(esc).join(' · ');
+    return '<div class="row-item"><div class="row-item__body">' +
+      '<div class="row-item__title">' + esc(e.title) + '<span class="status-pill">' + esc(Ref.HEALTH_EVENT_CODES[e.event_type] || e.event_type) + '</span></div>' +
+      '<div class="row-item__sub">' + esc(api.fmtDate(e.event_date)) + (sub ? ' · ' + sub : '') + '</div>' +
+      (e.details ? '<div class="row-item__sub">' + esc(e.details) + '</div>' : '') + '</div>' +
+      '<div class="row-item__actions"><button type="button" class="mini-btn" data-edit-event="' + e.id + '">Edit</button>' +
+      '<button type="button" class="mini-btn" data-del-event="' + e.id + '" style="color:#dc2626">Delete</button></div></div>';
+  }).join('') : '<p class="muted">No history recorded for ' + esc(c.name) + ' yet. Illnesses, injuries, hospital stays, allergies, medicines and check-ups can all go here.</p>';
+
+  host.querySelectorAll('[data-edit-event]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var ev = events.filter(function (x) { return String(x.id) === btn.getAttribute('data-edit-event'); })[0];
+      if (!ev) return;
+      editingEventId = ev.id;
+      $id('heType').value = ev.event_type; $id('heTitle').value = ev.title; $id('heDate').value = ev.event_date;
+      $id('heDetails').value = ev.details || ''; $id('heDoctor').value = ev.doctor_name || ''; $id('heFacility').value = ev.facility || '';
+      syncHistoryForm();
+      form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+  });
+  host.querySelectorAll('[data-del-event]').forEach(function (btn) {
+    btn.addEventListener('click', async function () {
+      if (!confirm('Delete this history entry?')) return;
+      var ok = await api.apiRequest('/children/' + c.id + '/health-events/' + btn.getAttribute('data-del-event'), { method: 'DELETE' });
+      if (ok) { api.toast('Entry deleted'); if (String(editingEventId) === btn.getAttribute('data-del-event')) resetHistoryForm(); await loadChildren(); renderAll(); }
+    });
+  });
+
+  var dateInput = $id('heDate');
+  if (dateInput) { dateInput.max = todayISO(); dateInput.min = c.date_of_birth; if (!dateInput.value) dateInput.value = todayISO(); }
+  syncHistoryForm();
+}
+function syncHistoryForm() {
+  var title = $id('historyFormTitle'), submit = $id('heSubmit'), cancel = $id('heCancel');
+  if (title) title.textContent = editingEventId ? 'Edit history entry' : 'Add to medical history';
+  if (submit) submit.textContent = editingEventId ? 'Save changes' : 'Add entry';
+  if (cancel) cancel.style.display = editingEventId ? '' : 'none';
+}
+function resetHistoryForm() {
+  editingEventId = null;
+  var f = $id('historyForm');
+  if (f) f.reset();
+  var d = $id('heDate');
+  if (d) d.value = todayISO();
+  syncHistoryForm();
+}
+
+function wireHealthForms() {
+  var type = $id('heType');
+  if (type) type.innerHTML = Ref.HEALTH_EVENT_TYPES.map(function (t) { return '<option value="' + t[0] + '">' + t[1] + '</option>'; }).join('');
+
+  var hForm = $id('historyForm');
+  if (hForm) {
+    hForm.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      if (IS_GUEST) { api.toast('Sign in to save medical history'); return; }
+      var c = activeChild();
+      if (!c) { api.toast('Add a child profile first'); return; }
+      var body = {
+        event_type: $id('heType').value, title: $id('heTitle').value.trim(), event_date: $id('heDate').value,
+        details: $id('heDetails').value.trim(), doctor_name: $id('heDoctor').value.trim(), facility: $id('heFacility').value.trim()
+      };
+      var data = editingEventId
+        ? await api.apiRequest('/children/' + c.id + '/health-events/' + editingEventId, { method: 'PATCH', body: body })
+        : await api.apiRequest('/children/' + c.id + '/health-events', { method: 'POST', body: body });
+      if (data) {
+        api.toast(editingEventId ? 'Entry updated' : 'Added to medical history');
+        resetHistoryForm();
+        await loadChildren();
+        renderAll();
+      }
+    });
+    $id('heCancel').addEventListener('click', resetHistoryForm);
+  }
+
+  var aForm = $id('apptForm');
+  if (aForm) {
+    aForm.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      if (IS_GUEST) { api.toast('Sign in to book appointments'); return; }
+      var c = activeChild();
+      if (!c) { api.toast('Add a child profile first'); return; }
+      var docId = Number($id('apptDoctor').value);
+      if (!docId) { api.toast('Choose a doctor'); return; }
+      var data = await api.apiRequest('/children/' + c.id + '/appointments', {
+        method: 'POST', body: { doctor_id: docId, requested_date: $id('apptDate').value, reason: $id('apptReason').value.trim() }
+      });
+      if (data) {
+        api.toast('Appointment requested — the doctor will confirm');
+        $id('apptReason').value = '';
+        await loadChildAppointments(c);
+        renderAll();
+      }
+    });
+  }
+
+  var pEdit = $id('profileEditBtn');
+  if (pEdit) pEdit.addEventListener('click', function () { if (activeChild()) openChildForm(activeChild()); });
+  var rangeBtn = $id('growthRangeBtn');
+  if (rangeBtn) rangeBtn.addEventListener('click', function () { growthFullRange = !growthFullRange; renderGrowth(); });
+  var msBtn = $id('milestoneAllBtn');
+  if (msBtn) msBtn.addEventListener('click', function () { showAllMilestones = !showAllMilestones; renderMilestones(); });
+  var src = $id('vaxSource');
+  if (src) src.innerHTML = '<strong>Schedule:</strong> ' + esc(Ref.SCHEDULE_SOURCE.name) + '. ' + esc(Ref.SCHEDULE_SOURCE.disclaimer);
+}
+
+/* ======================================================================
    Data loading + top-level render
    ====================================================================== */
 async function loadChildren() {
@@ -1903,19 +2438,19 @@ async function loadChildren() {
     activeChildId = children.some(function (c) { return c.id === saved; }) ? saved : (children[0] ? children[0].id : null);
   }
 }
-async function loadAppointments() {
-  if (IS_GUEST) { appointments = []; return; }
-  var data = await api.apiRequest('/appointments');
-  appointments = (data && data.appointments) || [];
-}
 
 function renderAll() {
   renderChildTabs();
   renderChildHeader();
+  renderProfile();
   renderVaccinations();
   renderMilestones();
   renderGrowth();
   renderNextVax();
+  renderTimeline();
+  renderAppointments();
+  renderHistory();
+  renderFeed();
   renderNotifications();
 }
 
@@ -1957,6 +2492,7 @@ if (logoutBtn) {
 async function boot() {
   ensureGrowthForm();
   ensureChildFormCard();
+  wireHealthForms();
 
   if (IS_GUEST) {
     currentUser = { full_name: 'Guest', role: 'mother', guest: true };
@@ -1970,7 +2506,8 @@ async function boot() {
   if (!currentUser) return;
   if (currentUser.role === 'doctor') { window.location.href = 'doctor.html'; return; }
 
-  await Promise.all([loadChildren(), loadAppointments(), loadNotifications()]);
+  await Promise.all([loadChildren(), loadNotifications(), loadDoctors()]);
+  await Promise.all(children.map(loadChildAppointments));
   renderAll();
   if (!children.length) openChildForm(null);
 }

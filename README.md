@@ -20,6 +20,7 @@ psql "$DATABASE_URL" -f backend/db/mother_dashboard.sql
 psql "$DATABASE_URL" -f backend/db/antenatal_profile.sql
 psql "$DATABASE_URL" -f backend/db/child_dashboard.sql
 psql "$DATABASE_URL" -f backend/db/child_dashboard_v2.sql
+psql "$DATABASE_URL" -f backend/db/child_health_v3.sql
 psql "$DATABASE_URL" -f backend/db/hospital_platform.sql
 ```
 
@@ -64,7 +65,7 @@ Open http://localhost:3001 — homepage, auth, mother dashboard (`dashboard.html
 2. Auth issues JWT cookie; redirects by role.
 3. Mother dashboard loads timeline, appointments, wellness, profile from authenticated APIs only (guest mode is localStorage-only, no network writes required for viewing).
 4. Doctor dashboard loads patients and appointments from `/api/doctor/*` and `/api/appointments`.
-5. Child dashboard (`child-dashboard.html`) uses `/api/children` (per-child vaccination schedule with certificates, growth with a WHO weight-for-age reference, CDC developmental milestones, and a profile photo — `backend/childDashboard.js` + `shared/child-reference.js`, the schedule shared with the browser via `/shared/child-reference.js`). Mothers can only access their own children.
+5. Child dashboard (`child-dashboard.html`) uses `/api/children` — see **Child health** below. Mothers can only access their own children.
 6. Unauthenticated access to protected API routes returns 401; client redirects to `auth.html`.
 
 ## Notes
@@ -133,3 +134,29 @@ required before deployment.
 ## DAI hospital portal
 
 The new Next.js/FastAPI hospital readiness portal imports the existing synthetic DAI dataset. See [hospital_portal/README.md](hospital_portal/README.md) for backend/frontend commands and [phase gates](hospital_portal/PHASES.md). Phase 1 local checks pass; PostgreSQL/PostGIS deployment acceptance remains pending. The existing `frontend/hospital.html` administration preview remains available through the Express backend.
+
+## Child health
+
+`child-dashboard.html` + `backend/childDashboard.js` + `shared/child-reference.js`
+(shared with the browser via `/shared/…`):
+
+- **Medical profile & health timeline** — birth details, blood group, allergies, notes;
+  one newest-first timeline of births, vaccines, growth, milestones, medical history and
+  appointments (`Ref.buildTimeline`).
+- **Vaccination history & schedule** — India's Universal Immunisation Programme schedule
+  (`VACCINES` in `child-reference.js`), certificates per dose. Reminders start 14 days before
+  a dose (`REMINDER_LEAD_DAYS`), become "due" at 7 days, and "overdue" afterwards; state-dependent
+  vaccines (PCV, JE) are never flagged. The schedule is a convenience, **not** medical advice —
+  have a paediatrician review it before real-world use (a doctor may follow the IAP schedule).
+- **Growth charts** — weight, length/height and head circumference plotted against the WHO Child
+  Growth Standards (0–60 months, LMS tables in `shared/who-growth-standards.js`), with z-scores,
+  percentiles, corrected age for babies born before 37 weeks, and screening flags in the
+  Notification Center. WHO publishes boys and girls only, so profiles with sex "other" get no curves.
+- **Developmental milestones** — CDC checklists from 2 to 60 months, per-checkpoint status, and a
+  gentle "mention it at your next check-up" prompt (never a diagnosis).
+- **Paediatric appointments & medical history** — appointments booked for a specific child
+  (`appointments.child_id`) and a medical-history log (`child_health_events`); doctors with an
+  appointment relationship see the history in `GET /api/doctor/patients/:motherId/children`.
+
+Tests: `npm test` in `backend/` runs the unit tests. The route tests in `childHealth.test.js`
+also run when `TEST_DATABASE_URL` points at a database with all migrations applied.

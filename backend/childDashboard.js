@@ -22,13 +22,24 @@
 //   POST   /api/children/:id/growth/import-legacy     copy the old shared growth-widget entries onto this child
 //   PUT    /api/children/:id/milestones/:code         {achieved_on}
 //   DELETE /api/children/:id/milestones/:code
+//   GET    /api/children/:id/health-events            the child's medical history log
+//   POST   /api/children/:id/health-events            {event_type, title, event_date, details?, doctor_name?, facility?}
+//   PATCH  /api/children/:id/health-events/:eventId   edit an entry
+//   DELETE /api/children/:id/health-events/:eventId
+//   GET    /api/children/:id/appointments             paediatric appointments booked for this child
+//   POST   /api/children/:id/appointments             {doctor_id, requested_date, reason?}  (a pending request, as on the main form)
+//   PATCH  /api/children/:id/appointments/:apptId/cancel   mother withdraws a pending/confirmed request
 //   GET    /api/doctor/patients/:motherId/children    doctor: read-only summary (same access rule as the
 //                                                     doctor's other patient views: an appointment exists)
+//
+// The health timeline is assembled in the browser from these same records by
+// Ref.buildTimeline() (shared/child-reference.js).
 // ============================================================================
 const express = require('express');
 const Ref = require('../shared/child-reference.js');
 
 const MAX_CHILDREN_PER_MOTHER = 10;
+const MAX_EVENTS_PER_CHILD = 500;
 const MAX_PHOTO_BYTES = 600 * 1024;
 const MAX_CERTIFICATE_BYTES = 5 * 1024 * 1024;
 const CERTIFICATE_TYPES = ['image/jpeg', 'image/png', 'application/pdf'];
@@ -70,6 +81,9 @@ const shapeChild = (r) => ({
   has_photo: !!r.has_photo, photo_v: r.photo_v == null ? null : Number(r.photo_v),
 });
 
+const EVENT_SELECT = `SELECT id, child_id, event_type, title, details, to_char(event_date, 'YYYY-MM-DD') AS event_date, doctor_name, facility
+  FROM child_health_events`;
+
 const GROWTH_SELECT = `SELECT id, child_id, to_char(measured_on, 'YYYY-MM-DD') AS measured_on,
        weight_kg::float8 AS weight_kg, height_cm::float8 AS height_cm, head_cm::float8 AS head_cm
   FROM child_growth_logs`;
@@ -110,15 +124,16 @@ module.exports = function registerChildDashboardRoutes(app, { pool, authenticate
   // ==========================================================================
 
   async function loadRecords(childIds) {
-    if (!childIds.length) return { vax: [], growth: [], ms: [] };
-    const [vax, growth, ms] = await Promise.all([
+    if (!childIds.length) return { vax: [], growth: [], ms: [], events: [] };
+    const [vax, growth, ms, events] = await Promise.all([
       pool.query(`SELECT child_id, vaccine_code, to_char(given_on, 'YYYY-MM-DD') AS given_on, facility
                     FROM child_vaccinations WHERE child_id = ANY($1::int[]) ORDER BY given_on`, [childIds]),
       pool.query(`${GROWTH_SELECT} WHERE child_id = ANY($1::int[]) ORDER BY measured_on, id`, [childIds]),
       pool.query(`SELECT child_id, milestone_code, to_char(achieved_on, 'YYYY-MM-DD') AS achieved_on
                     FROM child_milestones WHERE child_id = ANY($1::int[])`, [childIds]),
+      pool.query(`${EVENT_SELECT} WHERE child_id = ANY($1::int[]) ORDER BY event_date DESC, id DESC`, [childIds]),
     ]);
-    return { vax: vax.rows, growth: growth.rows, ms: ms.rows };
+    return { vax: vax.rows, growth: growth.rows, ms: ms.rows, events: events.rows };
   }
 
   app.get('/api/children', ...motherOnly, async (req, res) => {
@@ -140,6 +155,7 @@ module.exports = function registerChildDashboardRoutes(app, { pool, authenticate
           })),
           growth: rec.growth.filter((g) => g.child_id === k.id).map(({ child_id, ...g }) => g),
           milestones: rec.ms.filter((m) => m.child_id === k.id).map(({ milestone_code, achieved_on }) => ({ milestone_code, achieved_on })),
+          health_events: rec.events.filter((e) => e.child_id === k.id).map(({ child_id, ...e }) => e),
         })),
         legacy_growth_count: legacy.rows[0].n,
       });
@@ -212,7 +228,7 @@ module.exports = function registerChildDashboardRoutes(app, { pool, authenticate
         [req.user.id, v.name, v.date_of_birth, v.sex, v.born_at_weeks ?? null, v.birth_weight_kg ?? null, v.birth_length_cm ?? null,
          v.blood_group ?? null, v.allergies ?? null, v.notes ?? null]);
       const child = await findOwnChild(req.user.id, ins.rows[0].id);
-      res.status(201).json({ child: { ...child, vaccinations: [], growth: [], milestones: [] } });
+      res.status(201).json({ child: { ...child, vaccinations: [], growth: [], milestones: [], health_events: [] } });
     } catch (e) { fail(res, 'Add child', e, 'Failed to add your child'); }
   });
 
@@ -229,8 +245,9 @@ module.exports = function registerChildDashboardRoutes(app, { pool, authenticate
       const early = await pool.query(
         `SELECT 1 FROM child_vaccinations WHERE child_id = $1 AND given_on < $2::date
          UNION ALL SELECT 1 FROM child_growth_logs WHERE child_id = $1 AND measured_on < $2::date
-         UNION ALL SELECT 1 FROM child_milestones WHERE child_id = $1 AND achieved_on < $2::date LIMIT 1`, [child.id, v.date_of_birth]);
-      if (early.rows.length) return res.status(409).json({ error: 'Some saved vaccines, measurements or milestones are dated before that birth date. Remove or correct them first.' });
+         UNION ALL SELECT 1 FROM child_milestones WHERE child_id = $1 AND achieved_on < $2::date
+         UNION ALL SELECT 1 FROM child_health_events WHERE child_id = $1 AND event_date < $2::date LIMIT 1`, [child.id, v.date_of_birth]);
+      if (early.rows.length) return res.status(409).json({ error: 'Some saved vaccines, measurements, milestones or health entries are dated before that birth date. Remove or correct them first.' });
     }
 
     const cols = Object.keys(v);
@@ -442,10 +459,124 @@ module.exports = function registerChildDashboardRoutes(app, { pool, authenticate
   }));
 
   // ==========================================================================
+  // Medical history — illnesses, injuries, hospital stays, allergies, medications ...
+  // ==========================================================================
+  function readEventBody(body, child, today, partial) {
+    const b = body || {};
+    const out = {};
+    const has = (k) => Object.prototype.hasOwnProperty.call(b, k);
+    if (!partial || has('event_type')) {
+      if (!Object.prototype.hasOwnProperty.call(Ref.HEALTH_EVENT_CODES, b.event_type)) return { error: 'Choose what kind of entry this is' };
+      out.event_type = b.event_type;
+    }
+    if (!partial || has('title')) {
+      const title = cleanStr(b.title, 160);
+      if (!title) return { error: 'Give the entry a short title' };
+      out.title = title;
+    }
+    if (!partial || has('event_date')) {
+      if (!isRealDate(b.event_date)) return { error: 'Enter the date this happened' };
+      if (b.event_date < child.date_of_birth) return { error: 'That date is before the child was born' };
+      if (!notInFuture(b.event_date, today)) return { error: 'The date can’t be in the future' };
+      out.event_date = b.event_date;
+    }
+    if (has('details')) out.details = cleanStr(b.details, 1000) || null;
+    if (has('doctor_name')) out.doctor_name = cleanStr(b.doctor_name, 120) || null;
+    if (has('facility')) out.facility = cleanStr(b.facility, 120) || null;
+    return { values: out };
+  }
+
+  app.get('/api/children/:id/health-events', ...motherOnly, withChild(async (req, res, child) => {
+    const r = await pool.query(`${EVENT_SELECT} WHERE child_id = $1 ORDER BY event_date DESC, id DESC`, [child.id]);
+    res.json({ health_events: r.rows.map(({ child_id, ...e }) => e) });
+  }));
+
+  app.post('/api/children/:id/health-events', ...motherOnly, withChild(async (req, res, child) => {
+    const parsed = readEventBody(req.body, child, await todayISO(), false);
+    if (parsed.error) return res.status(400).json({ error: parsed.error });
+    const v = parsed.values;
+    const count = await pool.query('SELECT COUNT(*)::int AS n FROM child_health_events WHERE child_id = $1', [child.id]);
+    if (count.rows[0].n >= MAX_EVENTS_PER_CHILD) return res.status(400).json({ error: `You can keep up to ${MAX_EVENTS_PER_CHILD} history entries per child` });
+    const r = await pool.query(
+      `INSERT INTO child_health_events (child_id, event_type, title, details, event_date, doctor_name, facility)
+       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
+      [child.id, v.event_type, v.title, v.details ?? null, v.event_date, v.doctor_name ?? null, v.facility ?? null]);
+    const row = await pool.query(`${EVENT_SELECT} WHERE id = $1`, [r.rows[0].id]);
+    const { child_id, ...event } = row.rows[0];
+    res.status(201).json({ health_event: event });
+  }));
+
+  app.patch('/api/children/:id/health-events/:eventId', ...motherOnly, withChild(async (req, res, child) => {
+    const eventId = parseId(req.params.eventId);
+    if (!eventId) return res.status(400).json({ error: 'Invalid entry' });
+    const parsed = readEventBody(req.body, child, await todayISO(), true);
+    if (parsed.error) return res.status(400).json({ error: parsed.error });
+    const cols = Object.keys(parsed.values);
+    if (!cols.length) return res.status(400).json({ error: 'Nothing to update' });
+    const r = await pool.query(
+      `UPDATE child_health_events SET ${cols.map((c, i) => `${c} = $${i + 3}`).join(', ')} WHERE id = $1 AND child_id = $2 RETURNING id`,
+      [eventId, child.id, ...cols.map((c) => parsed.values[c])]);
+    if (!r.rowCount) return res.status(404).json({ error: 'Entry not found' });
+    const row = await pool.query(`${EVENT_SELECT} WHERE id = $1`, [eventId]);
+    const { child_id, ...event } = row.rows[0];
+    res.json({ health_event: event });
+  }));
+
+  app.delete('/api/children/:id/health-events/:eventId', ...motherOnly, withChild(async (req, res, child) => {
+    const eventId = parseId(req.params.eventId);
+    if (!eventId) return res.status(400).json({ error: 'Invalid entry' });
+    const r = await pool.query('DELETE FROM child_health_events WHERE id = $1 AND child_id = $2', [eventId, child.id]);
+    if (!r.rowCount) return res.status(404).json({ error: 'Entry not found' });
+    res.json({ message: 'Deleted' });
+  }));
+
+  // ==========================================================================
+  // Paediatric appointments — the same `appointments` rows the main dashboard and the
+  // doctor's console already use, tagged with the child they are for.
+  // ==========================================================================
+  app.get('/api/children/:id/appointments', ...motherOnly, withChild(async (req, res, child) => {
+    const r = await pool.query(
+      `SELECT a.id, a.doctor_id, to_char(a.requested_date, 'YYYY-MM-DD') AS requested_date, a.reason, a.status, a.doctor_notes,
+              dp.full_name AS doctor_name, dp.specialization, dp.facility_name
+         FROM appointments a
+         JOIN doctor_profiles dp ON dp.user_id = a.doctor_id
+        WHERE a.mother_id = $1 AND a.child_id = $2
+        ORDER BY a.requested_date DESC, a.id DESC`, [req.user.id, child.id]);
+    res.json({ appointments: r.rows });
+  }));
+
+  app.post('/api/children/:id/appointments', ...motherOnly, withChild(async (req, res, child) => {
+    const b = req.body || {};
+    const doctorId = parseId(b.doctor_id);
+    if (!doctorId) return res.status(400).json({ error: 'Choose a doctor' });
+    if (!isRealDate(b.requested_date)) return res.status(400).json({ error: 'Choose the date you would like to be seen' });
+    const today = await todayISO();
+    if (Ref.daysBetween(today, b.requested_date) < -1) return res.status(400).json({ error: 'Choose today or a future date' });
+    const doctor = await pool.query("SELECT 1 FROM users WHERE id = $1 AND role = 'doctor'", [doctorId]);
+    if (!doctor.rows.length) return res.status(400).json({ error: 'Selected doctor not found' });
+    const reason = cleanStr(b.reason, 500) || null;
+    const r = await pool.query(
+      `INSERT INTO appointments (mother_id, doctor_id, requested_date, reason, child_id) VALUES ($1, $2, $3, $4, $5) RETURNING id`,
+      [req.user.id, doctorId, b.requested_date, reason, child.id]);
+    res.status(201).json({ message: 'Appointment requested', appointment_id: r.rows[0].id });
+  }));
+
+  app.patch('/api/children/:id/appointments/:apptId/cancel', ...motherOnly, withChild(async (req, res, child) => {
+    const apptId = parseId(req.params.apptId);
+    if (!apptId) return res.status(400).json({ error: 'Invalid appointment' });
+    const r = await pool.query(
+      `UPDATE appointments SET status = 'cancelled'
+        WHERE id = $1 AND mother_id = $2 AND child_id = $3 AND status IN ('pending', 'confirmed') RETURNING id`,
+      [apptId, req.user.id, child.id]);
+    if (!r.rowCount) return res.status(404).json({ error: 'That appointment can’t be cancelled' });
+    res.json({ message: 'Appointment cancelled' });
+  }));
+
+  // ==========================================================================
   // Doctor: read-only summary of a patient's children. Same rule as the other
   // doctor patient views — the doctor must have an appointment with the mother.
-  // No photos and no notes are shared; allergies and blood group are, because
-  // they matter clinically.
+  // No photos and no free-text profile notes are shared; allergies, blood group and the
+  // medical-history log are, because they matter clinically.
   // ==========================================================================
   app.get('/api/doctor/patients/:motherId/children', ...doctorOnly, async (req, res) => {
     try {
@@ -494,6 +625,8 @@ module.exports = function registerChildDashboardRoutes(app, { pool, authenticate
             latest_weight: lastWeight ? { measured_on: lastWeight.measured_on, weight_kg: lastWeight.weight_kg, status: weightStatus } : null,
           },
           milestones: { achieved, expected_by_age: expected },
+          history: rec.events.filter((e) => e.child_id === k.id).slice(0, 20)
+            .map((e) => ({ event_type: e.event_type, title: e.title, event_date: e.event_date, details: e.details })),
           flags,
         };
       });
