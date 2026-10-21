@@ -117,6 +117,86 @@ function clinicalFactors(input) {
   return factors;
 }
 
+// ---------------------------------------------------------------------------
+// Explainability. The kNN vote on its own is a black box ("mid risk"), so this
+// answers "why?" in three plain-language layers:
+//   1. what the 7 most similar reference records said,
+//   2. which of the person's readings stand out against typical LOW-risk
+//      records (largest gaps first),
+//   3. whether clinical rules overrode the model, and which inputs were guesses.
+// It describes the screen; it does not add to or change the risk level.
+// ---------------------------------------------------------------------------
+const FEATURES = [
+  { code: 'age',   label: 'Age',                          unit: 'years' },
+  { code: 'sbp',   label: 'Top blood-pressure number',    unit: 'mmHg' },
+  { code: 'dbp',   label: 'Bottom blood-pressure number', unit: 'mmHg' },
+  { code: 'bs',    label: 'Blood sugar',                  unit: 'mmol/L' },
+  { code: 'temp',  label: 'Body temperature',             unit: '°F' },
+  { code: 'hr',    label: 'Heart rate',                   unit: 'bpm' }
+];
+
+let LOW_MEANS = null;
+function lowRiskMeans() {
+  if (LOW_MEANS) return LOW_MEANS;
+  const ref = loadReference();
+  const low = ref.rows.filter((r) => r.label === 'low risk');
+  const rows = low.length ? low : ref.rows;
+  LOW_MEANS = FEATURES.map((_, i) => rows.reduce((a, r) => a + r.features[i], 0) / rows.length);
+  return LOW_MEANS;
+}
+
+const round1 = (n) => Math.round(n * 10) / 10;
+
+function featureDrivers(features) {
+  const ref = loadReference();
+  const means = lowRiskMeans();
+  return features.map((v, i) => {
+    const diffSd = (v - means[i]) / ref.stds[i];
+    return {
+      code: FEATURES[i].code, label: FEATURES[i].label, unit: FEATURES[i].unit,
+      value: round1(v), typical_low_risk: round1(means[i]),
+      diff_sd: round1(diffSd), direction: diffSd >= 0 ? 'above' : 'below'
+    };
+  })
+    .filter((d) => Math.abs(d.diff_sd) >= 0.5)
+    .sort((a, b) => Math.abs(b.diff_sd) - Math.abs(a.diff_sd))
+    .slice(0, 3);
+}
+
+function explainAssessment({ features, knn, factors, finalLevel, defaulted }) {
+  const lines = [];
+  lines.push(`${knn.votes[knn.label]} of the ${knn.neighbours} most similar records in the reference data were "${knn.label}".`);
+
+  const drivers = featureDrivers(features);
+  drivers.forEach((d) => {
+    const strength = Math.abs(d.diff_sd) >= 1.5 ? 'well' : 'somewhat';
+    lines.push(`${d.label} (${d.value} ${d.unit}) is ${strength} ${d.direction} where most low-risk records sit (about ${d.typical_low_risk} ${d.unit}).`);
+  });
+  if (!drivers.length) lines.push('None of the readings stand out from typical low-risk records.');
+
+  const escalated = finalLevel !== knn.label;
+  const highFactors = factors.filter((f) => f.severity === 'high').map((f) => f.label);
+  if (escalated) {
+    lines.push(`Clinical rules raised the level from "${knn.label}" to "${finalLevel}"${highFactors.length ? ' because of: ' + highFactors.join('; ') : ''}.`);
+  }
+
+  const data_gaps = [];
+  if (defaulted.blood_sugar) data_gaps.push('Blood sugar was not logged, so a typical value was assumed. Logging it makes this screen more accurate.');
+  if (defaulted.body_temp) data_gaps.push('Temperature was not entered, so 98.6 °F was assumed.');
+  if (defaulted.heart_rate) data_gaps.push('Heart rate was not entered, so 76 bpm was assumed.');
+
+  return {
+    summary: lines,
+    drivers,
+    votes: knn.votes,
+    knn_level: knn.label,
+    escalated,
+    escalation_reasons: escalated ? highFactors : [],
+    data_gaps,
+    caveat: 'This is a screening aid built from a small public dataset, not a diagnosis. It can miss problems and can flag people who are fine. Your doctor\'s assessment always comes first.'
+  };
+}
+
 /**
  * @param {object} input numeric vitals + optional history flags
  * @returns {{ risk_level, factors, model, inputs_used }}
@@ -155,9 +235,16 @@ function assessRisk(input) {
     risk_level = 'high risk';
   }
 
+  const explanation = explainAssessment({
+    features, knn, factors, finalLevel: risk_level,
+    defaulted: { blood_sugar: input.blood_sugar == null, body_temp: input.body_temp == null, heart_rate: input.heart_rate == null }
+  });
+
   return {
     risk_level,
+    knn_level: knn.label,
     factors,
+    explanation,
     model: {
       method: 'kNN (k=7) on Maternal Health Risk Data Set + clinical thresholds',
       votes: knn.votes,
