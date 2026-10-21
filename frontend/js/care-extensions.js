@@ -725,5 +725,8 @@
     loadTrend();
   }
 
-  window.CareExt = { init: init, openSOS: openSOS, refreshRisk: loadTrend, afterHealthLog: afterHealthLog, refreshPostpartum: loadPostpartum };
+  // Rendering helpers reused by the doctor portal (js/doctor-safety.js).
+  var helpers = { esc: esc, chip: chip, fmtShort: fmtShort, lineChart: lineChart, injectStyles: injectStyles, LEVEL_STYLE: LEVEL_STYLE, telHref: telHref };
+
+  window.CareExt = { helpers: helpers, init: init, openSOS: openSOS, refreshRisk: loadTrend, afterHealthLog: afterHealthLog, refreshPostpartum: loadPostpartum };
 })();
