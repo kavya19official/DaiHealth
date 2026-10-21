@@ -560,3 +560,36 @@ icu_admission_log = table(
     ref("admission_id", "admission", False),
     data(),
 )
+
+# Facility-reported sustainability observations are separate from clinical records.
+sustainability_measurement = table(
+    "sustainability_measurement",
+    ref("facility_id", "facility", False),
+    ref("recorded_by", "portal_user", False),
+    text("period", False),
+    text("metric", False),
+    Column("value", Float, nullable=False),
+    text("quality", False),
+    text("source", False),
+    text("evidence", False),
+    number("occupied_bed_days"),
+    constraints=(
+        UniqueConstraint("facility_id", "period", "metric"),
+        CheckConstraint("value >= 0"),
+        CheckConstraint("occupied_bed_days IS NULL OR occupied_bed_days > 0"),
+    ),
+)
+sustainability_action = table(
+    "sustainability_action",
+    ref("facility_id", "facility", False),
+    ref("owner_id", "portal_user", False),
+    text("title", False),
+    text("metric", False),
+    Column("baseline", Float, nullable=False),
+    Column("target", Float, nullable=False),
+    text("unit", False),
+    text("due_date", False),
+    text("status", False),
+    data(),
+    constraints=(CheckConstraint("baseline >= 0 AND target >= 0"),),
+)

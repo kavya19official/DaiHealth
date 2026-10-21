@@ -761,6 +761,13 @@ def create_app(engine=None):
     from .workspace import register_workspace
 
     register_workspace(app, engine, require, audit, ROLES)
+    from .coordination import register_coordination
+
+    register_coordination(app, engine, require, audit, one, clinical_scope)
+    from .sustainability import register_sustainability
+
+    register_sustainability(app, engine, require, audit, one)
+
     from .forecasts import register_forecasts
 
     register_forecasts(app, engine, require, audit)

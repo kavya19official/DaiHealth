@@ -130,3 +130,84 @@ After upgrading an already running copy, stop and restart the FastAPI terminal o
 ## ML forecasts
 
 Run `hospital_portal/.venv/bin/python -m hospital_portal.ml_service.train --persist`, then open **Administration → ML forecasts & stock planning**. See [ML setup, data provenance and evaluation](ml_service/README.md). Delivery load, aggregate NICU admissions and eight stock-consumption targets use actual trained models with time-ordered baseline selection and calibration. No-show, length-of-stay and clinical risk models are not included. OTP remains simulated at the user’s request.
+
+
+## Blueprint additions in the authenticated portal
+
+These additions extend the Next.js/FastAPI portal at `http://localhost:3004`.
+They do not replace the Express preview at port 3001 and do not modify trained
+forecasting models, source clinical observations, mother/child identity or risk labels.
+The supplied product blueprint is the scope reference for this implementation.
+
+| Navigation | Implemented workflow |
+|---|---|
+| Operations → Follow-up & outreach | Link imported gaps to owned tasks; record contact outcomes and access barriers; acknowledge, reassign, escalate, complete with evidence or reopen. Newborn tasks link the existing separate child record. |
+| Operations → Clinical review & summaries | Staff record concerns; consultants acknowledge and close reviews. Clinicians draft visit summaries; consultant approval makes them visible in the authorised patient timeline. Corrections withdraw approved text until the revised version is reviewed again. |
+| Patient registry → Open patient | View saved care tasks/history and clinician-approved next steps alongside the existing separate children. No new patient timeline or vaccination subsystem is created. |
+| Administration → Green hospital | Report monthly water (m³), electricity (kWh), paper (sheets) and waste (kg), reporting method, source/evidence and optional occupied bed-days. Log baseline/target actions, owner, due date, progress and actual completion evidence. |
+
+### Preview behaviour and controls
+
+- Existing JWT sessions, clinical credential verification, facility, unit and
+  resident-assignment checks protect every new endpoint. Coordination consent is
+  checked on reads and writes. The backend rejects cross-mother child links,
+  duplicate tasks for a gap, unauthorised owners and stale record versions.
+- New writes require `DAI_DEMO=true`. This is an explicit synthetic workflow
+  preview, not PostgreSQL/PostGIS deployment acceptance or clinical validation.
+- Escalation creates a clinician-review inbox item. An outcome of “needs clinician
+  review” stays escalated rather than falsely appearing complete. Administrative
+  users cannot approve visit summaries or certify clinical completion.
+- Task completion means recorded operational follow-through. It does not overwrite
+  the historical source gap or imply a new test result. Clinical observations in
+  the imported source ledger remain read-only.
+- Sustainability starts empty. Measurements are entered explicitly, not inferred
+  from hospital capacity or forecasts. Existing month/metric observations cannot
+  be silently overwritten. Report changes only against the adjacent month with
+  matching reporting method and source; missing observations remain unavailable.
+- Targets are goals, not demonstrated savings. No overall green score, peer
+  ranking, AI water/carbon conversion, fabricated token telemetry or environmental
+  causal claim is provided. No IoT, billing, SMS, ABDM, LIS or PACS adapter is added.
+- SQLite preview transactions reserve their write lock before audited reads. This
+  prevents parallel panel loads from deadlocking during read-to-audit upgrades;
+  it serialises SQLite transactions and is not a PostgreSQL concurrency claim.
+
+Restart the FastAPI server after updating. New sustainability tables are created
+additively by the existing startup `metadata.create_all`; no reset or re-import of
+an existing preview database is needed. Keep `DATABASE_URL` pointed to the same
+preview database. Existing rows, forecasts and source manifests remain intact.
+
+Example startup from your repository root, using your existing environment:
+
+```sh
+DAI_DEMO=true DAI_WEB_ORIGIN=http://localhost:3004 hospital_portal/.venv/bin/uvicorn hospital_portal.api.main:app --host 127.0.0.1 --port 8000
+```
+
+In another terminal:
+
+```sh
+npm run dev --prefix hospital_portal/web -- --port 3004
+```
+
+### Verification and short demo
+
+`hospital_portal/tests/test_care_and_green.py` covers evidence and version gates,
+source preservation, mother/child separation, access revocation, role/unit/patient
+scope, summary correction history, parallel audited SQLite reads and resource
+reporting. The existing foundation/workspace/forecast tests remain part of the
+regression suite. PostgreSQL-dependent checks still need a configured test service.
+
+1. Sign in to the explicit synthetic portal as hospital admin. In Follow-up &
+   outreach, select a recorded gap, choose an accountable owner and due date,
+   record a contact barrier, then escalate to the review inbox.
+2. Switch the admin-originated demo session to consultant. Open an authorised
+   patient in that consultant's unit, draft a visit summary, review it, and verify
+   the approved text appears in that patient's coordination timeline.
+3. Return to hospital admin. In Green hospital, enter one measured monthly resource
+   observation with source/evidence; leave the other indicators unavailable.
+4. Create an improvement action with a baseline and target, record progress, and
+   complete it with an actual value and evidence. The interface presents this as
+   a reported observation rather than a proven environmental saving.
+
+Remaining blueprint work includes cross-facility referral write/consent handoffs,
+patient-side directory matching and booking, real delivery/discharge writes,
+external integrations, production database deployment and validated clinical rules.
