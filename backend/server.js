@@ -7,6 +7,7 @@ const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const riskAssessment = require('./riskAssessment');
+const { runRiskAssessment } = require('./riskService');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -1066,6 +1067,8 @@ app.patch('/api/appointments/:id/status', authenticateToken, authorizeRole(['doc
 
 // Mother dashboard: pregnancy profile, vitals/kick logs, reports
 require('./motherDashboard')(app, { pool, authenticateToken, authorizeRole, MILESTONE_TEMPLATE });
+// Predictive risk trend, postpartum pathway, emergency response (db/care_extensions_v4.sql)
+require('./careExtensions')(app, { pool, authenticateToken, authorizeRole });
 
 // ============================================================================
 // Maternal risk assessment (backend/riskAssessment.js) — mother-only, own data.
@@ -1091,76 +1094,8 @@ app.get('/api/risk', authenticateToken, authorizeRole(['mother']), async (req, r
 
 app.post('/api/risk/assess', authenticateToken, authorizeRole(['mother']), async (req, res) => {
   try {
-    const b = req.body || {};
-    const profile = await pool.query(
-      `SELECT date_of_birth, gravida, previous_complications, medical_conditions
-         FROM mother_profiles WHERE user_id = $1`,
-      [req.user.id]
-    );
-    if (!profile.rows.length) return res.status(404).json({ error: 'Profile not found' });
-    const p = profile.rows[0];
-    if (!p.date_of_birth) {
-      return res.status(400).json({ error: 'Add your date of birth in your profile before running a risk assessment' });
-    }
-
-    const numOr = (v, min, max) => {
-      if (v === undefined || v === null || v === '') return null;
-      const n = Number(v);
-      return Number.isFinite(n) && n >= min && n <= max ? n : null;
-    };
-
-    let systolic = numOr(b.systolic, 60, 260);
-    let diastolic = numOr(b.diastolic, 30, 160);
-    let bloodSugar = numOr(b.blood_sugar, 1, 40); // mmol/L
-
-    if (systolic == null || diastolic == null) {
-      const bp = await pool.query(
-        `SELECT data FROM health_logs WHERE mother_id = $1 AND log_type = 'blood_pressure' ORDER BY logged_at DESC LIMIT 1`,
-        [req.user.id]
-      );
-      if (bp.rows.length) {
-        systolic = systolic == null ? Number(bp.rows[0].data.systolic) : systolic;
-        diastolic = diastolic == null ? Number(bp.rows[0].data.diastolic) : diastolic;
-      }
-    }
-    if (systolic == null || diastolic == null) {
-      return res.status(400).json({ error: 'Log a blood pressure reading first, then reassess risk' });
-    }
-    if (bloodSugar == null) {
-      const gl = await pool.query(
-        `SELECT data FROM health_logs WHERE mother_id = $1 AND log_type = 'blood_glucose' ORDER BY logged_at DESC LIMIT 1`,
-        [req.user.id]
-      );
-      // health_logs stores blood glucose in mg/dL; riskAssessment.js works in mmol/L.
-      if (gl.rows.length) bloodSugar = Number(gl.rows[0].data.mg_dl) / 18.0182;
-    }
-
-    const age = (() => {
-      const dob = new Date(p.date_of_birth);
-      const now = new Date();
-      let a = now.getUTCFullYear() - dob.getUTCFullYear();
-      if (now.getUTCMonth() < dob.getUTCMonth() || (now.getUTCMonth() === dob.getUTCMonth() && now.getUTCDate() < dob.getUTCDate())) a -= 1;
-      return a;
-    })();
-
-    const assessment = riskAssessment.assessRisk({
-      age, systolic, diastolic,
-      blood_sugar: bloodSugar == null ? undefined : bloodSugar,
-      body_temp: numOr(b.body_temp, 90, 110) == null ? undefined : numOr(b.body_temp, 90, 110),
-      heart_rate: numOr(b.heart_rate, 30, 220) == null ? undefined : numOr(b.heart_rate, 30, 220),
-      previous_complications: !!p.previous_complications,
-      preexisting_diabetes: /diabetes/i.test(p.medical_conditions || ''),
-      medical_conditions: p.medical_conditions,
-      gravida: p.gravida,
-    });
-    if (assessment.error) return res.status(400).json({ error: assessment.error });
-
-    await pool.query(
-      'UPDATE mother_profiles SET risk_level = $2, risk_factors = $3, risk_assessed_at = CURRENT_TIMESTAMP WHERE user_id = $1',
-      [req.user.id, assessment.risk_level, JSON.stringify(assessment.factors)]
-    );
-
-    res.json({ message: 'Risk assessment updated', assessment });
+    const out = await runRiskAssessment(pool, req.user.id, req.body || {}, 'manual');
+    res.status(out.status).json(out.body);
   } catch (error) {
     console.error('Assess risk error:', error);
     res.status(500).json({ error: 'Failed to run risk assessment' });
