@@ -333,9 +333,9 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
             </svg>
           </div>
           <div class="stats-panel">
-            <div><div class="stat-label">Current Weight</div><div class="stat-value" id="curWeight">68 kg</div><div class="stat-sub">(at 18 weeks)</div></div>
-            <div><div class="stat-label">Starting Weight</div><div class="stat-value" id="startWeight">62 kg</div><div class="stat-sub">(at 12 weeks)</div></div>
-            <div><div class="stat-label">BMI</div><div class="stat-value" id="bmiVal">24.8</div><div class="stat-sub">(normal range)</div></div>
+            <div><div class="stat-label">Current Weight</div><div class="stat-value" id="curWeight">-- kg</div><div class="stat-sub" id="curWeightSub">No data</div></div>
+            <div><div class="stat-label">Starting Weight</div><div class="stat-value" id="startWeight">-- kg</div><div class="stat-sub" id="startWeightSub">No data</div></div>
+            <div><div class="stat-label">BMI</div><div class="stat-value" id="bmiVal">--</div><div class="stat-sub" id="bmiSub">No data</div></div>
           </div>
         </div>
       </div>
@@ -616,10 +616,10 @@ var demoMotherAppointments = [
 ];
 
 var demoHealthLogs = [
-  { log_type: 'weight', value: '68.5', unit: 'kg', logged_at: null, offset: -2, notes: 'Morning weight' },
-  { log_type: 'blood_pressure', value: '118/76', unit: 'mmHg', logged_at: null, offset: -2, notes: 'At home' },
-  { log_type: 'weight', value: '67.8', unit: 'kg', logged_at: null, offset: -9, notes: '' },
-  { log_type: 'blood_pressure', value: '120/80', unit: 'mmHg', logged_at: null, offset: -9, notes: 'Clinic' }
+  { log_type: 'weight', data: { kg: 68.5 }, logged_at: null, offset: -2, notes: 'Morning weight' },
+  { log_type: 'blood_pressure', data: { systolic: 118, diastolic: 76 }, logged_at: null, offset: -2, notes: 'At home' },
+  { log_type: 'weight', data: { kg: 67.8 }, logged_at: null, offset: -9, notes: '' },
+  { log_type: 'blood_pressure', data: { systolic: 120, diastolic: 80 }, logged_at: null, offset: -9, notes: 'Clinic' }
 ];
 
 var demoReports = [
@@ -780,6 +780,14 @@ function showPanel(id) {
   try { history.replaceState(null, '', '#' + id); } catch (e) {}
   window.scrollTo({ top: 0, behavior: 'smooth' });
   closeSidebar();
+  // Refresh postpartum data when switching to postpartum panel
+  if (id === 'postpartum' && window.CareExt) {
+    window.CareExt.refreshPostpartum();
+  }
+  // Refresh weight chart when switching to dashboard panel
+  if (id === 'dashboard') {
+    renderVitals();
+  }
 }
 
 function openSidebar() {
@@ -948,14 +956,140 @@ function renderTimeline() {
   }
 }
 
+function renderWeightChart() {
+  var weights = healthLogs.filter(function (l) { return l.log_type === 'weight' && l.data && l.data.kg != null; });
+  var chartSvg = $('weightChart');
+  var curWeightEl = $('curWeight');
+  var startWeightEl = $('startWeight');
+  var bmiValEl = $('bmiVal');
+
+  if (!chartSvg) return;
+
+  // Sort by date (most recent first)
+  weights.sort(function (a, b) { return new Date(b.logged_at) - new Date(a.logged_at); });
+
+  if (weights.length === 0) {
+    // Show empty state or default chart
+    return;
+  }
+
+  // Get current and starting weight
+  var currentWeight = weights[0].data.kg;
+  var startWeight = weights[weights.length - 1].data.kg;
+
+  // Update weight displays
+  if (curWeightEl) curWeightEl.textContent = currentWeight + ' kg';
+  if (startWeightEl) startWeightEl.textContent = startWeight + ' kg';
+
+  // Update subtitles with week information
+  var curWeightSub = $('curWeightSub');
+  var startWeightSub = $('startWeightSub');
+  if (curWeightSub) {
+    if (currentUser && currentUser.care_start_date) {
+      var weeks = api.gestationalWeeks ? api.gestationalWeeks(currentUser.care_start_date) : '?';
+      curWeightSub.textContent = '(at ' + weeks + ' weeks)';
+    } else {
+      curWeightSub.textContent = '(latest)';
+    }
+  }
+  if (startWeightSub) startWeightSub.textContent = '(first recorded)';
+
+  // Calculate BMI (simple calculation - would need height for accurate BMI)
+  if (bmiValEl && currentUser && currentUser.height_cm) {
+    var heightM = currentUser.height_cm / 100;
+    var bmi = (currentWeight / (heightM * heightM)).toFixed(1);
+    bmiValEl.textContent = bmi;
+    var bmiSub = $('bmiSub');
+    if (bmiSub) {
+      if (bmi < 18.5) bmiSub.textContent = '(underweight)';
+      else if (bmi < 25) bmiSub.textContent = '(normal range)';
+      else if (bmi < 30) bmiSub.textContent = '(overweight)';
+      else bmiSub.textContent = '(obese)';
+    }
+  } else if (bmiValEl) {
+    bmiValEl.textContent = '--';
+    var bmiSub = $('bmiSub');
+    if (bmiSub) bmiSub.textContent = 'Height needed';
+  }
+
+  // Render dynamic chart
+  var chartData = weights.slice(0, 10).reverse(); // Show up to 10 entries, oldest to newest
+  if (chartData.length < 2) return; // Need at least 2 points for a line
+
+  var minWeight = Math.min.apply(null, chartData.map(function (w) { return w.data.kg; })) - 2;
+  var maxWeight = Math.max.apply(null, chartData.map(function (w) { return w.data.kg; })) + 2;
+  var weightRange = maxWeight - minWeight || 1;
+
+  var width = 400;
+  var height = 140;
+  var padding = 30;
+  var chartWidth = width - padding * 2;
+  var chartHeight = height - padding * 2;
+
+  // Generate points
+  var points = chartData.map(function (w, i) {
+    var x = padding + (i / (chartData.length - 1)) * chartWidth;
+    var y = padding + chartHeight - ((w.data.kg - minWeight) / weightRange) * chartHeight;
+    return { x: x, y: y, weight: w.data.kg, date: w.logged_at };
+  });
+
+  // Build SVG path
+  var pathD = points.map(function (p, i) { return (i === 0 ? 'M' : 'L') + ' ' + p.x + ' ' + p.y; }).join(' ');
+
+  // Build grid lines and labels
+  var gridLines = '';
+  var yLabels = '';
+  for (var i = 0; i <= 4; i++) {
+    var y = padding + (i / 4) * chartHeight;
+    var weightLabel = (maxWeight - (i / 4) * weightRange).toFixed(0);
+    gridLines += '<line x1="' + padding + '" y1="' + y + '" x2="' + (width - padding) + '" y2="' + y + '" stroke="#ede9fe" stroke-width="1"/>';
+    yLabels += '<text x="2" y="' + (y + 3) + '" fill="#9ca3af" font-size="10" font-family="Inter,sans-serif">' + weightLabel + '</text>';
+  }
+
+  // Build circles for data points
+  var circles = points.map(function (p, i) {
+    var isLast = i === points.length - 1;
+    return '<circle cx="' + p.x + '" cy="' + p.y + '" r="' + (isLast ? 5 : 3.5) + '" ' +
+           (isLast ? 'fill="#fff" stroke="#7c3aed" stroke-width="2.5"' : 'fill="#7c3aed"') + '/>';
+  }).join('');
+
+  // Build date labels
+  var dateLabels = '';
+  if (points.length > 0) {
+    var firstDate = new Date(points[0].date);
+    var midDate = new Date(points[Math.floor(points.length / 2)].date);
+    var lastDate = new Date(points[points.length - 1].date);
+    dateLabels = '<text x="' + points[0].x + '" y="168" fill="#9ca3af" font-size="9" font-family="Inter,sans-serif" text-anchor="middle">' +
+                 formatDate(firstDate) + '</text>' +
+                 '<text x="' + points[Math.floor(points.length / 2)].x + '" y="168" fill="#9ca3af" font-size="9" font-family="Inter,sans-serif" text-anchor="middle">' +
+                 formatDate(midDate) + '</text>' +
+                 '<text x="' + points[points.length - 1].x + '" y="168" fill="#9ca3af" font-size="9" font-family="Inter,sans-serif" text-anchor="middle">' +
+                 formatDate(lastDate) + '</text>';
+  }
+
+  // Current weight badge
+  var badge = '<g transform="translate(' + (points[points.length - 1].x - 24) + ',' + (points[points.length - 1].y - 30) + ')">' +
+              '<rect width="48" height="20" rx="8" fill="#7c3aed"/>' +
+              '<text x="24" y="14" text-anchor="middle" fill="#fff" font-size="10" font-weight="700">' + currentWeight + ' kg</text></g>';
+
+  chartSvg.innerHTML = gridLines + yLabels +
+                      '<path d="' + pathD + '" fill="none" stroke="#7c3aed" stroke-width="2.5" stroke-linecap="round"/>' +
+                      circles + badge + dateLabels;
+}
+
+function formatDate(date) {
+  var d = new Date(date);
+  return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+}
+
 function renderVitals() {
   var el = $('vitalsList');
   var weights = healthLogs.filter(function (l) { return l.log_type === 'weight'; });
   var bps = healthLogs.filter(function (l) { return l.log_type === 'blood_pressure'; });
-  if (weights[0] && weights[0].data && weights[0].data.kg != null) {
-    var cw = $('curWeight');
-    if (cw) cw.textContent = weights[0].data.kg + ' kg';
-  }
+
+  // Render dynamic weight chart
+  renderWeightChart();
+
   if (!el) return;
   if (!healthLogs.length) {
     el.innerHTML = '<div class="empty">No health log entries yet.</div>';
@@ -963,10 +1097,11 @@ function renderVitals() {
   }
   el.innerHTML = healthLogs.slice(0, 20).map(function (l) {
     var summary = l.log_type;
-    if (l.log_type === 'weight' && l.data) summary = l.data.kg + ' kg';
-    if (l.log_type === 'blood_pressure' && l.data) summary = l.data.systolic + '/' + l.data.diastolic + (l.data.pulse ? ' · pulse ' + l.data.pulse : '');
-    if (l.log_type === 'blood_glucose' && l.data) summary = l.data.mg_dl + ' mg/dL';
-    if (l.log_type === 'kick_session' && l.data) summary = l.data.kicks + ' kicks';
+    if (l.log_type === 'weight' && l.data && l.data.kg != null) summary = l.data.kg + ' kg';
+    else if (l.log_type === 'blood_pressure' && l.data && l.data.systolic && l.data.diastolic) summary = l.data.systolic + '/' + l.data.diastolic + (l.data.pulse ? ' · pulse ' + l.data.pulse : '');
+    else if (l.log_type === 'blood_glucose' && l.data && l.data.mg_dl != null) summary = l.data.mg_dl + ' mg/dL';
+    else if (l.log_type === 'kick_session' && l.data && l.data.kicks != null) summary = l.data.kicks + ' kicks';
+    else if (l.data && l.value) summary = l.value + (l.unit ? ' ' + l.unit : ''); // Fallback for old format
     return '<div class="list-row"><div class="list-row__meta"><div class="list-row__title">' + summary +
       '</div><div class="list-row__sub">' + l.log_type.replace(/_/g, ' ') + ' · ' + api.fmtDate(l.logged_at) +
       '</div></div></div>';
@@ -1032,7 +1167,7 @@ async function loadHealthLogs() {
   }
   var data = null;
   try { data = await api.apiRequest('/health-logs'); } catch (e) {}
-  healthLogs = (data && data.logs && data.logs.length) ? data.logs : hydrateDemoHealthLogs();
+  healthLogs = (data && data.logs && data.logs.length) ? data.logs : [];
   renderVitals();
   await loadPatientDocuments();
 }
