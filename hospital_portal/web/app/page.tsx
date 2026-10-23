@@ -282,7 +282,7 @@ export default function Home() {
   const [menu, setMenu] = useState(false);
   const api = useCallback(
     async (path: string, options: RequestInit = {}, access = token) => {
-      const response = await fetch("/api" + path, {
+      const response = await fetch((process.env.NEXT_PUBLIC_DAI_BASE_PATH || "") + "/api" + path, {
         ...options,
         headers: {
           "Content-Type": "application/json",

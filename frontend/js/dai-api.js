@@ -7,7 +7,7 @@
   'use strict';
 
   var isLocal = /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
-  var isBackendOrigin = isLocal && location.port === '3001';
+  var isBackendOrigin = isLocal && !/^(5500|5501)$/.test(location.port);
   var isRenderOrigin = /\.onrender\.com$/.test(location.hostname);
   var API_BASE = global.DAI_API_BASE || (
     isBackendOrigin || isRenderOrigin

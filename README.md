@@ -2,6 +2,44 @@
 
 Connected maternal and paediatric care — mother, doctor and hospital workflows on one continuous record.
 
+## Start the complete DAI locally (all three interfaces)
+
+Install **Node.js 22.13+**, **Python 3.11+** (with venv). No PostgreSQL server or Docker installation is needed for this local demo. Then, from the DAI repository root:
+
+```bash
+git pull --ff-only
+npm start
+```
+
+Open **http://localhost:3001**. The homepage has **Patient**, **Doctor**, and **Hospital / Admin** entry points. Keep this terminal running; Ctrl+C stops the three application services. From another terminal in the same checkout, `npm run stop` also stops the launcher without deleting data. First startup installs dependencies, applies every patient/doctor SQL migration to the embedded local database, generates the fixed-seed synthetic hospital database, imports the 2,000-mother cohort into both applications, and trains the synthetic ML models if missing. It can take several minutes and needs internet for package downloads. Subsequent runs reuse local data, installed dependencies and the compiled hospital UI. Restart `npm start` after editing hospital UI code to rebuild it; use `DAI_DEV=true npm start` for hot reload instead.
+
+| Interface | Local synthetic email | Password |
+| --- | --- | --- |
+| Patient | `mother@dai-synthetic.invalid` | `Dai-Synthetic-2026!` |
+| Doctor | `doctor@dai-synthetic.invalid` | `Dai-Synthetic-2026!` |
+| Hospital/Admin | `hospital_admin@dai-synthetic.invalid` | `Dai-Synthetic-2026!` |
+
+Hospital/Admin opens at `/hospital-admin` with the full **Operations / Administration** layout. Its second-factor OTP appears on screen in this explicit synthetic demo; no SMS/API key is required. Patient and doctor use the existing authenticated dashboards and SQL routes, backed locally by persistent embedded PostgreSQL (PGlite). Hosted operation still uses PostgreSQL through node-postgres. These are separate role-appropriate sessions behind one address, not a new shared identity provider. The old hospital console remains at `/hospital-legacy.html` in local mode.
+
+### Why pulling alone did not work
+
+Git contains application code and generation scripts, **not running API servers, `.env` secrets, databases, uploaded files or trained model artifacts**. The old instructions assumed a pre-existing PostgreSQL schema and account data, and the hospital preview used a separate FastAPI/Next process plus an ignored generated database. The root launcher now creates these dependencies reproducibly instead of depending on one teammate's laptop.
+
+- Each laptop gets the same initial fixed-seed synthetic records, with source-ID links between the hospital, patient and doctor imports. The seeded doctor is assigned to the seeded mother's cohort. The patient-side initial timeline/appointment entries are explicitly synthetic schedule examples, not imported completion evidence.
+- **Local edits do not sync across laptops.** To collaborate on the same live mutable data, deploy a shared authenticated backend and database later. Pulling Git never synchronises database edits.
+- Per-device JWT/database secrets and databases live in ignored `.local/`; no teammate's production `.env` or personal database is used by this launcher. Existing PostgreSQL databases are untouched. The local patient/doctor preview uses PGlite inside the Express process, while Hospital/Admin retains its SQLite preview. This local mode does not verify a production PostgreSQL/PostGIS deployment.
+- Express serves the homepage/patient/doctor at 3001 and proxies Hospital/Admin to internal loopback services 3104 (Next.js) and 8100 (FastAPI). Browser requests stay on one origin; hospital and patient cookies are separated by path/name.
+- `npm run setup`: install/import without starting the apps. `npm run doctor`: show missing prerequisites/generated files. `npm run test:local`: gateway/database regression tests. `npm run check:local`: verify all three login/data flows against the running app (default `http://localhost:3001`, override with `DAI_CHECK_URL`).
+- A busy port produces an actionable error; the launcher never kills an unrelated process. Stop older DAI terminals with Ctrl+C. Change the public port with `DAI_PORT=3011 npm start` (PowerShell: `$env:DAI_PORT=3011; npm start`). Use the printed **localhost** URL consistently, rather than switching between localhost and 127.0.0.1 during a session.
+- Later `npm start` runs apply newly added migrations and keep seed records/edits intact. An incompatible changed synthetic source is reported rather than overwriting existing data. Back up `.local/` before replacing a scenario.
+- On Windows, install Python with venv and Node.js. If Python has a custom location, set `DAI_PYTHON`. Both local databases persist under `.local/` after Ctrl+C. PGlite is a single-connection local development database; the adapter serialises entire transactions to keep concurrent requests separate. Never use these demonstration accounts/data for real patient care.
+
+### Manual / hosted operation
+
+The sections below describe individual services and deployment. For the complete local demo use the root command above; starting only `backend` does **not** start the new Hospital/Admin portal. Optional Gemini speech needs its own key; sign-in, data and hospital features do not.
+
+Embedded local database reference: [PGlite documentation](https://pglite.dev/docs/).
+
 ## Architecture
 
 - **Backend**: Express + PostgreSQL + JWT (HTTP-only cookie). Serves the frontend statically from `frontend/`.
@@ -22,6 +60,9 @@ psql "$DATABASE_URL" -f backend/db/child_dashboard.sql
 psql "$DATABASE_URL" -f backend/db/child_dashboard_v2.sql
 psql "$DATABASE_URL" -f backend/db/child_health_v3.sql
 psql "$DATABASE_URL" -f backend/db/hospital_platform.sql
+psql "$DATABASE_URL" -f backend/db/patient_preferences.sql
+psql "$DATABASE_URL" -f backend/db/patient_documents.sql
+psql "$DATABASE_URL" -f backend/db/care_extensions_v4.sql
 ```
 
 For Render, create/connect a Render PostgreSQL database and add its **Internal

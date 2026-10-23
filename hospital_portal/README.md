@@ -211,3 +211,7 @@ regression suite. PostgreSQL-dependent checks still need a configured test servi
 Remaining blueprint work includes cross-facility referral write/consent handoffs,
 patient-side directory matching and booking, real delivery/discharge writes,
 external integrations, production database deployment and validated clinical rules.
+
+## Team-wide local entry point
+
+From the repository root run `npm start`. This bootstraps the fixed-seed source, imports the hospital cohort into `.local/portal.db`, prepares the existing patient/doctor SQL schema and cohort in the local embedded PostgreSQL preview, and starts all three interfaces at `http://localhost:3001`. Use `/hospital-admin` for this portal. See the root README for prerequisites, synthetic accounts, cookie/origin handling and the distinction between identical initial records and live data synchronisation. The standalone commands above remain supported with an empty base path.

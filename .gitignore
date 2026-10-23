@@ -23,3 +23,10 @@ __pycache__/
 
 # Reproducible trained models and synthetic ML history are generated locally.
 hospital_portal/ml_service/artifacts/
+
+# Launcher-managed local databases, logs and per-device secrets
+.local/
+
+# Installed dependencies are recreated by the launcher, never shared as data
+backend/node_modules/
+hospital_portal/web/.next-local/
