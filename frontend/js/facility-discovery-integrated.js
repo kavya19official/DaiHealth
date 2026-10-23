@@ -22,8 +22,8 @@
     const facilitiesList = $('facilitiesList');
     const locationChip = $('locationChip');
 
-    // Load saved location
-    loadSavedLocation();
+    // Only request account location when connected and signed in.
+    if(navigator.onLine && localStorage.getItem('dai_guest')!=='1') loadSavedLocation();
 
     // Event listeners
     if (deviceLocationBtn) {
@@ -127,7 +127,7 @@
         deviceLocationBtn.disabled = false;
         deviceLocationBtn.textContent = 'Location detected ✓';
       },
-      (error) {
+      (error) => {
         console.error('Geolocation error:', error);
         let message = 'Could not get your location. ';
         if (error.code === 1) {
@@ -239,7 +239,7 @@
           ${escapeHtml(facility.address)}, ${escapeHtml(facility.city)}, ${escapeHtml(facility.pincode)}
         </div>
         <div class="facility-contact">
-          ${facility.phone ? `<a href="tel:${escapeHtml(facility.phone)}">📞 ${escapeHtml(facility.phone)}</a>` : ''}
+          ${facility.phone ? `<a href="tel:${String(facility.phone).replace(/[^+0-9]/g,'')}">📞 ${escapeHtml(facility.phone)}</a>` : ''}
           ${facility.email ? `<a href="mailto:${escapeHtml(facility.email)}">✉️ ${escapeHtml(facility.email)}</a>` : ''}
         </div>
         <div class="services-list">
@@ -251,10 +251,10 @@
           ${facility.verified_at ? `· ${formatDate(facility.verified_at)}` : ''}
         </div>
         <div class="facility-actions">
-          <button type="button" class="btn btn--primary btn--sm" onclick="window.FacilityDiscovery.bookAppointment(${facility.id})">
+          <button type="button" class="btn btn--primary btn--sm" data-facility-book="${Number(facility.id)}">
             Book Appointment
           </button>
-          <button type="button" class="btn btn--ghost btn--sm" onclick="window.FacilityDiscovery.callFacility('${escapeHtml(facility.phone || '')}')">
+          <button type="button" class="btn btn--ghost btn--sm" data-facility-call="${Number(facility.id)}">
             Call
           </button>
         </div>
@@ -274,7 +274,8 @@
 
   // Book appointment (placeholder - would open modal)
   function bookAppointment(facilityId) {
-    alert('Appointment booking would open a modal here. Facility ID: ' + facilityId);
+    const facility=facilities.find(f=>Number(f.id)===Number(facilityId));
+    if(facility && window.PatientExperience) window.PatientExperience.requestVisit(facility.name);
   }
 
   // Call facility
@@ -305,6 +306,8 @@
   } else {
     initFacilityDiscovery();
   }
+
+  document.addEventListener('click',event=>{const button=event.target.closest('[data-facility-book],[data-facility-call]');if(!button)return;if(button.dataset.facilityBook)bookAppointment(button.dataset.facilityBook);else{const facility=facilities.find(f=>Number(f.id)===Number(button.dataset.facilityCall));callFacility(facility?.phone);}});
 
   // Expose functions globally
   window.FacilityDiscovery = {

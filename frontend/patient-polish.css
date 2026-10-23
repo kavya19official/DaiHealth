@@ -1,0 +1,144 @@
+/* Shared presentation tokens only. Existing DAI colour/theme variables are authoritative. */
+.patient-view{--care-radius:24px;--care-radius-small:16px;--care-space:24px;--care-motion:240ms;--care-font:"Plus Jakarta Sans","Noto Sans Devanagari","Nirmala UI","Kohinoor Devanagari",system-ui,sans-serif;font-family:var(--care-font)}
+.patient-view :is(button,input,select,textarea){font-family:var(--care-font)}
+.patient-view :is(h1,h2,h3){font-family:var(--care-font);text-wrap:balance}
+.patient-view :is(.home-surface,.pending-item,.vault-card,.connected-appointment,.connected-calendar,.connected-report-card,.journey-landscape){border-radius:var(--care-radius);box-shadow:var(--shadow-sm)}
+.patient-view :is(.home-section-head,.pending-section-heading,.connected-subheading){margin-bottom:20px}
+.patient-view :is(.pending-eyebrow,.connected-eyebrow,.journey-eyebrow,.home-kicker){font-size:11px;letter-spacing:1.4px;line-height:1.7}
+.patient-view :is(.journey-intro h2,.pending-header h1,.connected-heading h1){font-size:clamp(30px,3vw,39px)!important;line-height:1.25;letter-spacing:-1.1px;font-weight:800}
+.patient-view :is(.zone-header h3,.vault-card h2,.pending-section-heading h2){font-size:calc(22px * var(--patient-scale,1));line-height:1.4;font-weight:750}
+.patient-view :is(.stop-guidance,.pending-why,.appointment-facts p,.vault-card p,.emergency-record-card>p,.journey-intro-copy>p,.pending-header p,.connected-heading p,.stop-details p,.pending-details p,.report-detail-notes p){font-size:calc(14px * var(--patient-scale,1));line-height:1.85}
+.patient-view :is(.stop-when,.stop-when>span,.stop-date,.pending-date,.pending-sort,.record-file-info p,.record-file-info small,.vault-fields dt,.vault-card small,.appointment-facts>small,.journey-progress-card p,.zone-recap p,.zone-header p,.loop-note,.pending-proof,.pending-trust,.journey-trust){font-size:calc(12px * var(--patient-scale,1));line-height:1.8;color:var(--ink-muted)}
+.patient-view :is(.pending-status,.stop-status,.connected-status){font-size:11px;line-height:1.6;padding:6px 10px;gap:5px}
+.patient-view :is(.pending-overdue .pending-status,.pending-week .pending-status,.stop-overdue .stop-status,.stop-due .stop-status){color:var(--ink);background:var(--amber-soft)}
+.patient-view :is(.pending-completed .pending-status,.stop-completed .stop-status){color:var(--ink);background:var(--green-soft)}
+.patient-view :is(.journey-filters button,.pending-filters button,.connected-tabbar>button,.pending-lanes button,.journey-view-switch button,.pending-babies button,.journey-baby-tabs button){min-height:44px;font-size:12px;line-height:1.5}
+.patient-view :is(.btn,.pending-listen,.journey-listen){min-height:44px;font-size:13px;line-height:1.5;border-radius:13px}
+.patient-view .stop-heading>strong{font-size:calc(17px * var(--patient-scale,1));line-height:1.5}
+.patient-view .stop-current .stop-heading>strong{font-size:calc(23px * var(--patient-scale,1));font-weight:750}
+.patient-view .stop-summary{padding-block:22px}
+.patient-view .stop-content{padding-bottom:22px}
+.patient-view :is(.stop-icon,.pending-icon){border-radius:50%;width:44px;height:44px}
+.patient-view .stop-current .stop-icon{width:48px;height:48px}
+.patient-view .pending-why{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+.patient-view .pending-start{background:linear-gradient(120deg,var(--brand-pale),var(--connected-surface,var(--surface)));padding:28px;border-radius:26px}
+.patient-view .pending-start-label{font-size:11px;padding-bottom:18px;margin-bottom:20px}
+.patient-view :is(.pending-section,.pending-history){border-radius:24px}
+.patient-view .pending-section{padding:22px;border:1px solid var(--line);background:var(--brand-pale)}
+.patient-view .pending-section .pending-item{background:var(--connected-surface,var(--surface))}
+.patient-view .pending-history[open]{padding:20px;border:1px solid var(--line);background:var(--green-soft)}
+.patient-view .pending-history[open]>summary{background:var(--connected-surface,var(--surface))}
+.patient-view :is(.pending-icon svg,.stop-icon svg){stroke-width:1.7}
+.patient-view :is(.stop-details,.pending-details){padding-top:16px;margin-top:18px}
+.patient-view :is(.stop-details>summary,.pending-details>summary){min-height:36px;font-size:12px;line-height:1.8}
+.patient-view :is(.stop-details .link-btn,.pending-details .link-btn,.pending-secondary .link-btn){font-size:12px!important;min-height:40px}
+.patient-view .pending-full-guidance{padding:10px 0}
+.patient-view :is(.loop-dot,.pending-loop span){font-size:11px;line-height:1.6;padding-top:20px}
+.patient-view :is(.loop-dot::before,.pending-loop span::before){width:9px;height:9px;left:calc(50% - 4.5px)}
+.patient-view :is(.journey-completion,.pending-ring,.home-progress-ring){contain:layout}
+.patient-view :is(.stop-current .path-node,.patient-sos){animation:care-soft-pulse 360ms ease-out 2}
+.patient-view :is(button,.btn){transition:transform 140ms ease,box-shadow 180ms ease,background 180ms ease}
+.patient-view :is(button,.btn):active:not(:disabled){transform:scale(.98)}
+.patient-view :is(button,a,input,select,textarea,summary):focus-visible{outline:3px solid var(--brand);outline-offset:4px}
+.patient-view :is(.connected-dialog,.patient-dialog){border-radius:26px;box-shadow:var(--shadow);background:var(--connected-surface,var(--surface))}
+.patient-view :is(.connected-dialog,.patient-dialog)::backdrop{backdrop-filter:blur(5px)}
+.patient-view .record-category-chips{display:flex;gap:7px;overflow:auto;padding:0 0 12px;margin-bottom:18px;scrollbar-width:none}
+.record-category-chips button{display:flex;align-items:center;gap:7px;white-space:nowrap;border:1px solid var(--line);border-radius:99px;background:var(--connected-surface,var(--surface));color:var(--ink-muted);font-size:12px;min-height:44px;padding:9px 14px;position:relative;cursor:pointer}
+.record-category-chips button>svg{width:17px;height:17px;color:var(--brand)}
+.record-category-chips button[aria-pressed=true]{background:var(--brand-soft);color:var(--brand-strong);border-color:var(--brand-mid)}
+.record-category-chips button[aria-pressed=true]::after{content:'';position:absolute;left:18px;right:18px;bottom:2px;height:2px;background:var(--brand);border-radius:99px}
+.patient-view .connected-report-card{border-left:4px solid var(--brand-mid);padding:24px;background:var(--connected-surface,var(--surface))}
+.patient-view .connected-report-card.report-category-vaccination{border-left-color:var(--green)}
+.patient-view .connected-report-card.report-category-blood,.patient-view .connected-report-card.report-category-screening{border-left-style:double;border-left-width:6px;border-left-color:var(--brand)}
+.patient-view .connected-report-card.report-category-scan_imaging{border-left-color:var(--brand-strong)}
+.patient-view .connected-report-card.report-unread{background:linear-gradient(110deg,var(--brand-pale),var(--connected-surface,var(--surface)))}
+.report-new::before{content:'';display:inline-block;width:5px;height:5px;border-radius:50%;background:currentColor;margin-right:5px;vertical-align:middle}
+.patient-view .record-file-info h3{font-size:calc(20px * var(--patient-scale,1));line-height:1.5;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+.patient-view .record-file-icon{border-radius:16px;width:52px;height:64px}
+.patient-view .report-original-tools{margin-bottom:22px}
+.patient-view .report-detail-notes{border-radius:20px;background:var(--brand-pale)}
+.patient-view .report-preview{border-radius:18px;touch-action:pan-x pan-y pinch-zoom}
+.patient-view .report-preview img{transition:width 180ms ease}
+.report-verified-seal{display:inline-flex;align-items:center;gap:7px;line-height:1.6;font-size:12px;color:var(--ink);border:1px solid var(--line);border-radius:99px;padding:7px 12px;background:var(--green-soft);margin:0 0 16px}
+.report-verified-seal>svg{width:18px;height:18px;color:var(--green)}
+.vault-privacy-banner{display:flex;align-items:center;gap:13px;background:var(--brand-pale);border:1px solid var(--line);border-radius:18px;padding:18px 22px;margin-bottom:24px}
+.vault-privacy-banner>svg{width:24px;height:24px;flex:none;color:var(--brand)}
+.vault-privacy-banner strong{font-size:13px;color:var(--brand-strong);display:block}
+.vault-privacy-banner p{font-size:12px;line-height:1.8;margin:4px 0 0;color:var(--ink-muted)}
+.vault-folder-jump{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px;margin-bottom:26px}
+.vault-folder-jump button{display:flex;align-items:flex-start;flex-direction:column;gap:13px;text-align:left;min-height:118px;padding:21px 18px;border-radius:19px;border:1px solid var(--line);background:var(--connected-surface,var(--surface));color:var(--ink);font-size:13px;font-weight:650;cursor:pointer;position:relative;box-shadow:var(--shadow-sm)}
+.vault-folder-jump button::before{content:'';position:absolute;top:-5px;left:17px;width:38px;height:6px;border:1px solid var(--line);border-bottom:0;background:var(--brand-soft);border-radius:6px 6px 0 0}
+.vault-folder-jump button>svg{width:27px;height:27px;color:var(--brand)}
+.vault-folder-jump button:hover{background:var(--brand-pale)}
+.vault-card[data-folder-anchor],.vault-children,.vault-visit-history{scroll-margin-top:175px}
+.vault-twin-switch{display:flex;gap:9px;overflow:auto;padding:5px 0 14px;margin:12px 0 20px;scrollbar-width:none}
+.vault-twin-switch button{display:flex;align-items:center;gap:10px;white-space:nowrap;padding:9px 14px 9px 9px;border:1px solid var(--line);border-radius:99px;background:var(--connected-surface,var(--surface));color:var(--ink-muted);font-size:12px;min-height:48px;cursor:pointer}
+.vault-twin-switch button[aria-pressed=true]{border-color:var(--brand-mid);background:var(--brand-pale);color:var(--brand-strong)}
+.baby-record-avatar{display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:var(--brand-soft);border:1px solid var(--line);color:var(--brand);font-size:11px;font-weight:750;flex:none}
+.vault-twin-switch button:nth-child(2n) .baby-record-avatar{background:var(--brand-pale);border-style:dashed}
+.patient-view .vault-card{padding:28px}
+.patient-view .vault-section-icon{width:48px;height:48px;border-radius:16px}
+.patient-view .vault-fields dd{font-size:calc(14px * var(--patient-scale,1));line-height:1.8}
+.patient-view .vault-mini-list{border-left:2px solid var(--line);padding-left:18px;margin-left:5px}
+.patient-view .vault-mini-list>div,.patient-view .vault-mini-list>details{position:relative}
+.patient-view .vault-mini-list>div::before,.patient-view .vault-mini-list>details::before{content:'';width:8px;height:8px;position:absolute;left:-23px;top:19px;border:2px solid var(--brand-mid);border-radius:50%;background:var(--connected-surface,var(--surface))}
+.patient-view .vault-mini-list>div>strong,.patient-view .vault-mini-list>details>summary{font-size:13px;line-height:1.8}
+.patient-view .emergency-record-card{border:2px solid var(--brand-strong);box-shadow:var(--shadow-sm);background:var(--connected-surface,var(--surface));padding:32px}
+.patient-view .emergency-record-card .vault-fields>div:first-child+div{border:1px solid var(--line);padding:16px;border-radius:16px;background:var(--brand-pale)}
+.patient-view .emergency-record-card .vault-fields>div:first-child+div dd{font-size:24px;font-weight:800;color:var(--brand-strong)}
+.patient-view .connected-consent-toggle{padding:20px 0;gap:17px}
+.patient-view .connected-consent-toggle>input[type=checkbox]{appearance:none;width:48px;height:28px;border:1px solid var(--line);border-radius:99px;background:var(--line);position:relative;cursor:pointer;transition:background 180ms ease;flex:none}
+.patient-view .connected-consent-toggle>input[type=checkbox]::after{content:'';position:absolute;top:3px;left:3px;width:20px;height:20px;background:var(--connected-surface,var(--surface));border-radius:50%;box-shadow:var(--shadow-sm);transition:transform 180ms ease}
+.patient-view .connected-consent-toggle>input[type=checkbox]:checked{background:var(--brand);border-color:var(--brand)}
+.patient-view .connected-consent-toggle>input[type=checkbox]:checked::after{transform:translateX(20px)}
+.patient-view .connected-consent-toggle>input[type=checkbox]:disabled{opacity:.5;cursor:default}
+.care-skeleton{padding:22px;border:1px solid var(--line);border-radius:22px;background:var(--connected-surface,var(--surface));display:grid;gap:15px}
+.care-skeleton>span{display:block;height:13px;width:85%;border-radius:99px;background:var(--brand-soft);animation:care-skeleton-in 300ms ease both}
+.care-skeleton>span:first-child{width:44%;height:23px}.care-skeleton>span:last-child{width:61%}
+.care-empty-art{width:90px;height:82px;color:var(--brand);display:block;margin:0 auto 18px}
+.care-empty-art svg{width:100%;height:100%}
+.care-enter{animation:care-enter 280ms ease-out both}
+.care-check-draw path{stroke-dasharray:30;stroke-dashoffset:0;animation:care-check 320ms ease-out both}
+.patient-view .home-celebrate{animation:care-celebration-in 260ms ease-out both;max-width:calc(100vw - 32px);font-size:16px;line-height:1.7;text-align:center}
+.patient-view .home-celebrate::before,.patient-view .home-celebrate::after{animation-duration:320ms;animation-delay:0ms}
+.patient-view .pending-just-done{animation:care-closed 360ms ease-out}
+.care-sparkline{width:100%;height:100px;color:var(--brand);margin:15px 0}
+.care-sparkline polyline{fill:none;stroke:currentColor;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.care-sparkline circle{fill:var(--connected-surface,var(--surface));stroke:currentColor;stroke-width:2}
+.care-trend-caption{display:flex;justify-content:space-between;font-size:11px;color:var(--ink-muted);gap:15px;line-height:1.7}
+.care-trend-section{margin-top:25px}
+.care-trend-section>p{font-size:13px;line-height:1.8;color:var(--ink-muted)}
+.vaccine-keepsake{border:1px solid var(--brand-mid);border-radius:22px;overflow:hidden;background:var(--connected-surface,var(--surface));margin:15px 0 22px}
+.vaccine-keepsake>header{padding:22px;display:flex;align-items:center;gap:14px;background:var(--brand-pale);border-bottom:1px solid var(--line)}
+.vaccine-keepsake h3{font-size:21px;margin:0 0 6px;color:var(--brand-strong)}
+.vaccine-keepsake header p{font-size:12px;margin:0;color:var(--ink-muted)}
+.vaccine-keepsake .baby-record-avatar{width:52px;height:52px;font-size:19px}
+.vaccine-stamps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding:18px}
+.vaccine-stamp{padding:13px 9px;text-align:center;border:1px dashed var(--line);border-radius:15px;background:var(--brand-pale);min-width:0}
+.vaccine-stamp.is-given{border-style:solid;background:var(--green-soft)}
+.vaccine-stamp>.stamp-icon{display:grid;place-items:center;width:29px;height:29px;border:1px solid var(--line);border-radius:50%;margin:0 auto 9px;color:var(--brand);font-size:15px;background:var(--connected-surface,var(--surface))}
+.vaccine-stamp strong{display:block;font-size:11px;line-height:1.5;overflow-wrap:anywhere}.vaccine-stamp small{display:block;font-size:10px;line-height:1.7;margin-top:5px;color:var(--ink-muted)}
+.vaccine-stamp.is-given .stamp-icon{color:var(--green)}
+.care-feedback-settings{display:grid;gap:12px;padding:16px;border:1px solid var(--line);border-radius:15px;background:var(--brand-pale)}
+.care-feedback-settings label{font-size:13px;line-height:1.8;display:flex;align-items:center;gap:10px}.care-feedback-settings input{accent-color:var(--brand);width:18px;height:18px;flex:none}.care-feedback-settings p{font-size:12px;line-height:1.8;color:var(--ink-muted);margin:0}
+@keyframes care-enter{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:none}}
+@keyframes care-check{from{stroke-dashoffset:30}to{stroke-dashoffset:0}}
+@keyframes care-soft-pulse{50%{box-shadow:0 0 0 6px var(--brand-soft)}}
+@keyframes care-skeleton-in{from{opacity:.4}to{opacity:1}}
+@keyframes care-closed{from{box-shadow:0 0 0 5px var(--green-soft)}to{box-shadow:var(--shadow-sm)}}
+@keyframes care-celebration-in{from{opacity:0;translate:0 8px}to{opacity:1;translate:0 0}}
+@media(min-width:1100px){.patient-view .connected-report-detail{width:min(1120px,calc(100vw - 48px));display:grid;grid-template-columns:minmax(0,1.4fr) minmax(280px,1fr);gap:0 24px}.patient-view .connected-report-detail:not([open]){display:none}.connected-report-detail>.connected-eyebrow,.connected-report-detail>h2,.connected-report-detail>.connected-muted,.connected-report-detail>.report-verified-seal{grid-column:1/-1}.connected-report-detail>.report-preview{grid-column:1;grid-row:5/8;height:520px;margin-top:5px}.connected-report-detail>.report-detail-notes{grid-column:2;grid-row:5/7}.connected-report-detail>.report-original-tools{grid-column:1}.connected-report-detail>.connected-links{grid-column:2;align-items:flex-start;align-content:start}.connected-report-detail>.report-detail-activity{grid-column:1/-1}}
+@media(max-width:1000px){.vault-folder-jump{grid-template-columns:repeat(3,minmax(0,1fr))}.patient-view .pending-start{padding:24px}.patient-view .pending-section{padding:18px}.patient-view .pending-list{grid-template-columns:1fr}}
+@media(max-width:680px){.patient-view{--care-space:20px;--care-radius:21px}.patient-view :is(.connected-heading h1,.pending-header h1,.journey-intro h2){font-size:30px!important;line-height:1.28}.patient-view :is(.pending-header,.journey-intro-copy){padding:23px 20px!important}.patient-view .pending-ring{width:83px;height:83px}.patient-view .pending-header h1{max-width:220px}.patient-view .pending-header p{font-size:13px}.patient-view :is(.pending-item,.vault-card,.connected-report-card){padding:22px 18px}.patient-view .pending-list .pending-item{padding:20px 16px}.patient-view .pending-section{padding:18px 13px}.patient-view .pending-start-label>span{font-size:11px;max-width:130px;text-align:right}.patient-view .stop-summary{padding:20px 13px}.patient-view .stop-heading{flex-basis:calc(100% - 59px)}.patient-view .stop-status{margin-left:52px;font-size:11px}.patient-view .stop-current .stop-status{margin-left:56px}.patient-view :is(.stop-content,.journey-zone){padding-inline:16px}.patient-view .stop-current .stop-heading>strong{font-size:22px}.patient-view :is(.journey-filters,.pending-filters){padding-bottom:8px}.patient-view .pending-status{white-space:normal}.patient-view .pending-loop{gap:2px}.patient-view .pending-loop span{font-size:10px}.patient-view .pending-history[open]{padding:13px}.patient-view .connected-status{font-size:10px}.patient-view :is(.connected-record-filters input,.connected-record-filters select,.connected-upload input,.connected-upload select){font-size:16px}.vault-folder-jump{grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}.vault-folder-jump button{min-height:110px;padding:18px 15px;font-size:13px}.patient-view .vault-card h2{font-size:23px}.vault-privacy-banner{padding:17px 16px;align-items:flex-start}.vaccine-stamps{grid-template-columns:repeat(2,minmax(0,1fr));padding:14px;gap:9px}.patient-view .connected-dialog h2{font-size:27px}.patient-view .emergency-record-card{padding:24px 20px}.care-trend-caption{font-size:10px}.patient-view .record-file-actions>.btn{font-size:13px}.patient-view .journey-trust{font-size:11px}.patient-view .zone-header p{font-size:13px}.patient-view .zone-header h3{font-size:24px}}
+@media(prefers-reduced-motion:reduce){.patient-view *,.patient-view *::before,.patient-view *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}.care-enter{opacity:1;transform:none}}
+.patient-view .journey-simple *,.patient-view .journey-simple *::before,.patient-view .journey-simple *::after{animation:none!important;transition:none!important}
+.patient-view .vault-listen{position:absolute;right:23px;top:23px;width:36px;height:36px;min-height:36px;padding:8px;display:grid;place-items:center;border:1px solid var(--line);border-radius:50%;background:var(--brand-pale);color:var(--brand);cursor:pointer}.vault-listen svg{width:17px;height:17px}
+.vault-folder-anchor{scroll-margin-top:180px}
+.patient-view .pending-section--attention{background:var(--amber-soft)}
+.patient-view .pending-completion{display:inline-flex;align-items:center;gap:7px}
+.patient-view .journey-completion .completion-stroke,.patient-view .pending-ring-fill{transition-duration:320ms}
+.care-sparkline polyline{stroke-dasharray:1;stroke-dashoffset:0;animation:care-chart-draw 320ms ease-out both}
+.pending-loop .is-recorded::before{animation:care-dot-fill 220ms ease-out both}
+@keyframes care-chart-draw{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
+@keyframes care-dot-fill{from{transform:scale(.7)}to{transform:scale(1)}}
+@media(prefers-reduced-motion:reduce){.care-sparkline polyline,.pending-loop .is-recorded::before{animation:none!important}}

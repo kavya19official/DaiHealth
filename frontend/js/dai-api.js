@@ -24,7 +24,7 @@
       el.id = 'toast';
       el.setAttribute('role', 'status');
       el.style.cssText =
-        'position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(120%);' +
+        'position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(calc(100% + 2rem));' +
         'background:#1e1b4b;color:#fff;padding:.7rem 1.2rem;border-radius:999px;font-size:.88rem;' +
         'z-index:200;transition:transform .25s;font-family:Inter,system-ui,sans-serif';
       document.body.appendChild(el);
@@ -33,7 +33,7 @@
     el.style.transform = 'translateX(-50%) translateY(0)';
     clearTimeout(el._t);
     el._t = setTimeout(function () {
-      el.style.transform = 'translateX(-50%) translateY(120%)';
+      el.style.transform = 'translateX(-50%) translateY(calc(100% + 2rem))';
     }, 2600);
   }
 
@@ -45,9 +45,11 @@
       opts.headers = Object.assign({ 'Content-Type': 'application/json' }, opts.headers || {});
     }
     var response;
+    apiRequest.lastNetworkError = false;
     try {
       response = await fetch(API_BASE + path, opts);
     } catch (err) {
+      apiRequest.lastNetworkError = true;
       console.error('Network error', err);
       toast('Network error — please try again');
       return null;

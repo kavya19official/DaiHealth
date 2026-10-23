@@ -63,6 +63,10 @@ psql "$DATABASE_URL" -f backend/db/hospital_platform.sql
 psql "$DATABASE_URL" -f backend/db/patient_preferences.sql
 psql "$DATABASE_URL" -f backend/db/patient_documents.sql
 psql "$DATABASE_URL" -f backend/db/care_extensions_v4.sql
+psql "$DATABASE_URL" -f backend/db/facility_discovery.sql
+psql "$DATABASE_URL" -f backend/db/referral_continuity.sql
+psql "$DATABASE_URL" -f backend/db/patient_experience.sql
+psql "$DATABASE_URL" -f backend/db/patient_home.sql
 ```
 
 For Render, create/connect a Render PostgreSQL database and add its **Internal
@@ -231,3 +235,135 @@ Get a key from https://aistudio.google.com/apikey. The same Charon voice reads b
 Restart from the DAI root with `npm run stop`, then `npm start`. At http://localhost:3001 open **Ask Dr. Daya**, choose English or Hindi, enable **Voice**, then select a question. The status shows **Gemini · Charon · English/हिंदी** for actual Gemini audio. **Gemini voice unavailable** identifies a failure; the error is displayed and no default browser voice is used. The avatar talks during actual audio playback and returns to Idle at the end. Cancelling, changing language or closing the panel aborts pending speech and stops playback.
 
 The default preview TTS model is configurable via the setting above if Google changes its availability. Only curated answers are accepted by `POST /api/tts`; it has a timeout, a request limit, bounded caching and WAV conversion. Test the integration without spending API quota using `node --test backend/dayaSpeech.test.js`; tests mock Google. A real audio check requires adding your key locally.
+
+
+## Patient dashboard layout and controls
+
+The patient workspace keeps DAI’s purple palette and now uses a persistent stage
+banner, one next-step card, a calendar, a care timeline, a clinician-only health
+snapshot and separate navigation for records, children, nearby care and consent.
+The stage switches after a recorded delivery. Old ANC gaps remain in history and
+are not promoted as the current postpartum action. Missing postnatal records
+prompt a catch-up review; they do not imply a new diagnosis.
+
+Appointment rescheduling and cancellation are scoped to the signed-in mother.
+Uploaded report access can be disabled globally or revoked per doctor. Family and
+ASHA switches are disabled until an account is linked; this prototype does not
+pretend those accounts have been granted access. A data export contains the
+patient’s records and report metadata, not report binaries or passwords. Account
+deletion is a password-confirmed request for review, not an immediate purge.
+
+In local mode the clinician snapshot reads the same seeded cohort as the hospital
+portal via its explicit user/source mapping. It only includes ANC measurements
+linked to verified synthetic clinicians. Self-entered notes remain in Records.
+There is no clinician glucose source in this seed, so glucose stays empty. In a
+non-local deployment without that mapping, the snapshot remains empty rather than
+inventing readings. Apply `patient_experience.sql` after existing migrations.
+
+The device can cache a minimal timeline and stage in IndexedDB. Reports,
+passwords and API responses are not cached by the service worker. Offline
+completion is labelled waiting-to-sync, and is sent only after the same account
+reconnects (or reload after the server returns). Sign out or disable offline storage to clear saved care data. This
+cache is intended for a trusted personal device. Registration and other server
+operations still require a connection.
+
+The main navigation includes English, Hindi, Marathi, Tamil and Bengali labels;
+secondary forms and clinical content currently retain English/the author’s
+original wording. This is partial localization, not a claim of full translation.
+Page read-aloud uses available device voices; Dr. Daya remains Gemini-powered in
+Hindi and English. Reminder channel and quiet-hour preferences are stored, while
+external SMS/WhatsApp delivery and delivery scheduling remain unconnected.
+Scheme cards link to official PM-JAY, JSY and PMMVY information and do not
+calculate eligibility. Confirm eligibility and document requirements officially.
+
+Verification: `npm test --prefix backend` includes patient stage, care-gap,
+clinician-source and isolated database/API tests for ownership, rescheduling,
+report-sharing controls, export and deletion requests. `npm run test:local`
+checks the unified local authentication/gateway flow.
+
+
+### Warm patient home
+
+The home page now includes original, generated illustrations for pregnancy,
+postpartum with a linked baby, and neutral self-care when no baby is linked.
+The default purple palette is unchanged; dark mode is an explicit preference.
+The journey card uses recorded dates, shows separate baby tabs, and generates a
+shareable card containing a stage/age only, without patient names or identifiers.
+
+Daily checklist ticks and mood notes are self-reported and stored per mother/date
+in `patient_daily_checkins`. A streak counts consecutive days with all four items
+checked, and is not a health score. Mood is not a screening result, and does not
+send a clinician alert. Postnatal screening remains in the existing recovery
+module. Journal notes and optional photos are account-scoped; photos use the
+existing authorised document store and are not automatically shared. Feeding and
+sleep logs are scoped to both the mother and selected child, reject pre-birth
+entries, and are not feeding assessments. The export includes these new records.
+Personal logs require a connection; offline timeline support is unchanged.
+
+Quick actions and the Ask DAI text/voice entry open the existing functional
+workflows. Card read-aloud uses device voices; Dr. Daya keeps its Gemini voice.
+Reduced-motion preferences suppress celebration animation. Charts only render
+when recorded measurements exist. No token number, clinician call channel, ASHA
+link, caregiver access or hospital-ready acknowledgement is invented. The home
+shows unconfirmed readiness for clinician-flagged cases until a real confirmation
+flow is connected. Family account invitations remain unconnected; report-sharing
+controls work in Family & consent.
+
+Education cards link to NHS/NHS Inform or WHO primary sources. Approximate fruit
+comparisons are currently curated for weeks 26 and 28 only; other weeks show a
+stage-based learning card, not an invented size measurement. These are general
+education and not an assessment of any fetus. Main navigation remains partially
+localized as described above; much of the new editorial home copy is English.
+
+Original illustration assets are in `frontend/assets/patient/` (generated with
+the built-in image generator; fictional people, no stock patient photographs).
+`backend/db/patient_home.sql` is applied automatically by `npm start`. Hosted
+PostgreSQL deployments must apply it after `patient_experience.sql`.
+
+
+### Visual care journey and voice latency
+
+Care Timeline now displays the existing API milestones on a winding path, grouped
+into trimester chapters and followed by the recorded postnatal schedule. Filter
+chips, a week jump slider, compact view, read-aloud, a recorded-completion ring,
+chapter summaries, high contrast, reduced-decoration low-bandwidth mode and a text recap download are available. The baby lane derives
+vaccination dates from the shared child schedule and switches children without
+mixing their records. Dark/large-text and offline timeline support are preserved.
+
+The Plan / Booked / Result / Done strip only fills booking/result steps when an
+explicit record link is present. Self-reported completion does not imply verified
+results or clinical clearance. While the timeline is open, recorded milestones refresh every 30 seconds; changed completion records trigger the gentle celebration. No unrecorded clinician checkpoints, provider
+verification badges, family access or hospital-ready acknowledgements are
+invented. Full milestone-linked attachments, per-stop voice notes, caregiver
+accounts, automatic hospital result linkage and a shared doctor path remain
+future integration work. Current doctor records keep using the existing API.
+Journey educational week content and shareable cards remain available from Home;
+the timeline does not fabricate weekly medical facts or award unearned badges.
+The new journey copy is currently English; card read-aloud uses device voices.
+
+Dr. Daya keeps Gemini/Charon in English and Hindi. Approved FAQ audio is cached
+in memory and under `.local/tts-cache/` (ignored by Git), keyed by model, voice,
+language and the exact approved text. It survives restarts. Identical requests
+share one upstream generation. The widget caches twelve recent audio clips and
+prepares a question’s approved answer on focus/hover only when voice is on.
+It also prepares an already-recognized FAQ answer after a typing pause (voice on, at most one draft warm-up per eight seconds). Only the approved answer goes to Gemini, not the typed question.
+It never sends patient records, silently switches voices, or generates the full
+FAQ catalogue in the background. A first uncached response still waits for the
+configured Gemini 2.5 TTS generation; streaming/model migration is not claimed.
+Stopping or changing language cancels playback, while an in-flight approved clip
+can finish caching. Gemini errors remain visible. `DAI_TTS_CACHE_DIR` can change
+the cache directory; voice/model changes use separate entries.
+
+### Connected patient appointments, reports and health folder
+
+The patient Appointments page now requests time windows against the hospital's configured unit OPD weekdays and room. It defaults to the assigned doctor, supports an explicitly selected baby, Upcoming/Past/Cancelled views, calendar downloads, and reasoned reschedule/cancellation requests. Duplicate windows and doctor daily limits are checked inside the appointment transaction. A request remains pending until the doctor confirms it; no live token or queue position is invented.
+
+`backend/continuity-config.json` holds the demo request-window length, booking horizon and fallback hours. Unit weekdays/rooms come from the hospital configuration; matching synthetic doctor schedules supply session times where available. Fallback hours and the request-window length need verification with a partner clinic. Local requests are mirrored through a durable outbox into the hospital workspace, using its existing unit/cohort access controls and read audit. This bridge is for the local SQLite/PGlite prototype; it is not a verified PostgreSQL/PostGIS production integration.
+
+Reports support original PDF/image previews, download, date/category/subject filtering and search. Self-uploaded files can explicitly link a mother milestone and record completion **awaiting clinician verification**. Baby uploads cannot link to a mother milestone. Private screenings are redacted until the owner explicitly reveals them. Sharing is limited to connected doctors, requires explicit consent for sensitive reports, expires within 30 days and can be revoked immediately. The global doctor-sharing preference still blocks per-report shares. Metadata reads, previews, downloads, consent changes and review actions are logged. Unreviewed uploads never receive a hospital-verification badge.
+
+On the doctor Records page, **Consented patient reports** displays only active shares and offers a manual, registered-clinician review form. Saving the review records the clinician note and verifies the explicitly linked milestone. There is no automated clinical interpretation, dose advice or OCR extraction. This is a clinician-review workflow, not a live LIS/PACS connection.
+
+The patient Health folder groups pregnancy, delivery, recovery, history and separate baby records. Birth details map through durable child IDs, never through twin array order. Emergency summary and per-child vaccination cards can be printed or saved using the browser's PDF printer. Profile-entered history is distinguished from hospital-source data; missing allergies or conditions are shown as **not recorded**, not as “none”. No report files are cached offline.
+
+ABHA linking, teleconsultation, a unified cross-hospital access ledger, live tokens, caregiver/facility sharing links, transport booking and external reminders are not connected. Their panels explain the limitation. Full ABDM sync, OCR and claims remain roadmap items. Original files remain in ignored local storage; no patient report or its numeric results are sent to the assistant/TTS provider by these screens.

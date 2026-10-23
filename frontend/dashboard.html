@@ -8,7 +8,7 @@
 <link rel="icon" href="assets/logo.jpeg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
   --brand:#7c3aed;--brand-strong:#5b21b6;--brand-soft:#f3e8ff;--brand-pale:#faf5ff;--brand-mid:#8b5cf6;
@@ -432,8 +432,9 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 <script src="js/i18n.js"></script>
 <script src="js/form-validation.js"></script>
 <script src="js/patient-prefs.js"></script>
+<link rel="stylesheet" href="patient-dashboard.css?v=patient-2"><link rel="stylesheet" href="patient-home.css?v=warm-1"><link rel="stylesheet" href="patient-journey.css?v=3"><link rel="stylesheet" href="patient-pending.css?v=1"><link rel="stylesheet" href="patient-connected.css?v=1"><link rel="stylesheet" href="patient-polish.css?v=1">
 </head>
-<body>
+<body class="patient-view">
 <a class="skip-link" href="#main-content" data-i18n="a11y.skip" style="position:absolute;left:1rem;top:-5rem;z-index:500;padding:.7rem 1rem;border-radius:0 0 10px 10px;background:var(--ink);color:#fff">Skip to main content</a>
 <div class="sidebar-backdrop" id="sidebarBackdrop" hidden></div>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
@@ -459,27 +460,12 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 <symbol id="i-droplet" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5S5.5 10 5.5 15a6.5 6.5 0 0 0 13 0C18.5 10 12 2.5 12 2.5Z"/><path d="M9.5 16.5c.7 1 1.6 1.5 2.8 1.5"/></symbol>
 <symbol id="i-trend" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m3 17 6-6 4 4 8-9"/><path d="M15 6h6v6"/></symbol>
 <symbol id="i-clipboard" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="18" rx="2"/><path d="M9 4V2h6v2M8 10h8M8 14h8M8 18h5"/></symbol>
-</defs></svg>
+<symbol id="i-speaker" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="M15 8a6 6 0 0 1 0 8M18 5a10 10 0 0 1 0 14"/></symbol><symbol id="i-mic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2M12 19v3M8 22h8"/></symbol></defs></svg>
 
 <div class="app">
 <aside class="sidebar" id="sidebar">
-  <a class="sidebar__brand" href="index.html">
-    <img src="assets/logo-circle.png" alt="" width="40" height="40" onerror="this.src='assets/logo.jpeg'">
-    <span><span class="sidebar__brand-name">दाई</span><span class="sidebar__brand-tag">Hospital Workflow</span></span>
-  </a>
-  <nav class="sidebar__nav" aria-label="Mother navigation">
-    <button type="button" class="nav-item is-active" data-panel="dashboard"><svg width="18" height="18"><use href="#i-home"/></svg> <span data-i18n="nav.dashboard">Dashboard</span></button>
-    <button type="button" class="nav-item" data-panel="profile"><svg width="18" height="18"><use href="#i-user"/></svg> <span data-i18n="nav.profile">Mother / Patient</span></button>
-    <a class="nav-item" href="child-dashboard.html"><svg width="18" height="18"><use href="#i-baby"/></svg> <span data-i18n="nav.child">Child</span></a>
-    <button type="button" class="nav-item" data-panel="appointments"><svg width="18" height="18"><use href="#i-cal"/></svg> <span data-i18n="nav.appointments">Appointments</span></button>
-    <button type="button" class="nav-item" data-panel="facilities"><svg width="18" height="18"><use href="#i-search"/></svg> <span>Find Care</span></button>
-    <button type="button" class="nav-item" data-panel="timeline"><svg width="18" height="18"><use href="#i-clock"/></svg> <span data-i18n="nav.timeline">Care Timeline</span></button>
-    <button type="button" class="nav-item" data-panel="postpartum"><svg width="18" height="18"><use href="#i-heart"/></svg> <span>Postpartum</span></button>
-    <button type="button" class="nav-item" data-panel="records"><svg width="18" height="18"><use href="#i-file"/></svg> <span data-i18n="nav.records">Records</span></button>
-    <button type="button" class="nav-item" data-panel="messages"><svg width="18" height="18"><use href="#i-msg"/></svg> <span data-i18n="nav.messages">Messages</span></button>
-    <button type="button" class="nav-item" data-panel="settings"><svg width="18" height="18"><use href="#i-set"/></svg> <span data-i18n="nav.settings">Settings</span></button>
-  </nav>
-  <div class="sidebar__footer"><div class="sidebar__tagline"><svg width="18" height="18"><use href="#i-heart"/></svg><span>Healthier mothers.<br>Brighter futures.</span></div></div>
+  <a class="sidebar__brand patient-brand" href="dashboard.html" aria-label="DAI patient home"><span class="patient-brand__hindi" lang="hi">दाई</span><span class="patient-brand__english">DAI<small>YOUR CARE COMPANION</small></span></a>
+<nav class="sidebar__nav" aria-label="Patient navigation"><span class="nav-caption" data-copy="yourCare">YOUR CARE</span><button type="button" class="nav-item is-active" data-panel="dashboard"><svg aria-hidden="true"><use href="#i-home"/></svg><span data-copy="nav.dashboard">Home</span></button><button type="button" class="nav-item" data-panel="timeline"><svg aria-hidden="true"><use href="#i-clock"/></svg><span data-copy="nav.timeline">Care timeline</span></button><button type="button" class="nav-item" data-panel="gaps"><svg aria-hidden="true"><use href="#i-clipboard"/></svg><span data-copy="nav.gaps">Pending care</span></button><button type="button" class="nav-item" data-panel="appointments"><svg aria-hidden="true"><use href="#i-cal"/></svg><span data-copy="nav.appointments">Appointments</span></button><button type="button" class="nav-item" data-panel="records"><svg aria-hidden="true"><use href="#i-file"/></svg><span data-copy="nav.records">Reports & records</span></button><button type="button" class="nav-item" data-panel="children"><svg aria-hidden="true"><use href="#i-baby"/></svg><span data-copy="nav.children">My children</span></button><button type="button" class="nav-item" data-panel="postpartum"><svg aria-hidden="true"><use href="#i-heart"/></svg><span data-copy="nav.postpartum">After delivery</span></button><button type="button" class="nav-item" data-panel="facilities"><svg aria-hidden="true"><use href="#i-search"/></svg><span data-copy="nav.facilities">Nearby care</span></button><button type="button" class="nav-item" data-panel="companion"><svg aria-hidden="true"><use href="#i-msg"/></svg><span data-copy="nav.companion">Care companion</span></button><button type="button" class="nav-item" data-panel="schemes"><svg aria-hidden="true"><use href="#i-shield"/></svg><span data-copy="nav.schemes">Schemes & support</span></button><button type="button" class="nav-item" data-panel="family"><svg aria-hidden="true"><use href="#i-user"/></svg><span data-copy="nav.family">Family & consent</span></button><button type="button" class="nav-item" data-panel="messages"><svg aria-hidden="true"><use href="#i-bell"/></svg><span data-copy="nav.messages">Updates</span></button><button type="button" class="nav-item" data-panel="settings"><svg aria-hidden="true"><use href="#i-set"/></svg><span data-copy="nav.settings">Settings</span></button></nav><div class="sidebar__footer"><span class="privacy-symbol">♡</span><div><strong data-copy="yourInformation">Your information. Your choice.</strong><button class="link-btn" data-go="family" data-copy="manageSharing">Manage sharing →</button></div></div>
 </aside>
 
 <div class="main">
@@ -487,8 +473,9 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
   <button type="button" class="menu-btn" id="menuBtn" data-i18n-aria="a11y.menu" aria-label="Open navigation menu" aria-expanded="false" aria-controls="sidebar">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
   </button>
-  <div class="search" role="search"><svg width="16" height="16"><use href="#i-search"/></svg><input type="search" id="globalSearch" placeholder="Search anything..." data-i18n-placeholder="search.placeholder" aria-label="Search"></div>
-  <div class="topbar__right">
+  <div class="search" role="search" hidden><svg width="16" height="16"><use href="#i-search"/></svg><input type="search" id="globalSearch" placeholder="Search anything..." data-i18n-placeholder="search.placeholder" aria-label="Search"></div>
+  <div class="patient-crumb"><span data-copy="patientSpace">MY CARE SPACE</span><strong id="pageTitle">Home</strong></div>
+  <div class="topbar__right"><select id="patientLanguage" aria-label="Page language"><option value="en">English</option><option value="hi">हिंदी</option><option value="mr">मराठी</option><option value="ta">தமிழ்</option><option value="bn">বাংলা</option></select><button type="button" class="read-page" id="readPage" aria-label="Read this page aloud" title="Read this page aloud"><svg width="17" height="17"><use href="#i-msg"/></svg><span data-copy="listen">Listen</span></button>
     <div style="position:relative">
 <button class="icon-btn" type="button" aria-label="Notifications" id="notifBtn"><svg width="18" height="18"><use href="#i-bell"/></svg><span class="badge" id="notifCount" style="display:none">0</span></button>
 <div class="notif-pop" id="notifPop" role="dialog" aria-label="Notifications">
@@ -496,148 +483,42 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
   <div id="notifList"></div>
 </div>
 </div>
-    <div class="user-chip"><img src="assets/logo-circle.png" alt="" width="34" height="34" onerror="this.src='assets/logo.jpeg'"><div><div class="user-chip__name" id="userName">—</div><div class="user-chip__role">Mother / Patient</div></div></div>
+    <div class="user-chip"><span class="patient-initials" id="patientInitials">♡</span><div><div class="user-chip__name" id="userName">—</div><div class="user-chip__role">Mother / Patient</div></div></div>
   </div>
 </header>
 
-<div class="content" id="main-content">
+<section class="stage-banner" aria-label="Your care stage"><div class="stage-emblem" aria-hidden="true"><svg><use href="#i-heart"/></svg></div><div class="stage-summary"><span class="stage-eyebrow" data-copy="yourJourney">YOUR CARE JOURNEY</span><strong id="patientStage">Loading your care stage…</strong><div class="stage-progress"><progress id="patientProgress" max="100" value="0" aria-label="Stage progress"></progress><span id="patientStageDetail">Checking recorded dates</span></div></div><div class="stage-due"><span data-copy="expectedDate">Expected delivery</span><strong id="patientEdd">—</strong></div><button class="stage-next" type="button" data-go="dashboard"><span data-copy="nextStep">Your next step</span><strong id="stickyNext">View your care plan ↗</strong></button></section>
+<div id="offlineBanner" class="offline-banner" role="status" hidden></div>
+<div class="content" id="main-content" tabindex="-1">
 <!-- DASHBOARD -->
-<div class="panel is-active" id="panel-dashboard">
-  <div class="welcome-row">
-    <div class="welcome-card">
-      <div class="welcome-card__art" aria-hidden="true">
-        <img src="assets/mother-illustration.jpeg" alt="" width="100" height="110" style="width:100%;height:100%;object-fit:contain;border-radius:12px">
-      </div>
-      <div>
-        <div class="welcome-card__hello">Hello, <span id="greetName">Mother</span></div>
-        <div class="welcome-card__title">You're doing great!</div>
-        <div class="welcome-card__sub">Your health and your baby's health matter.</div>
-        <div class="pills">
-          <span class="pill">Second trimester · <span id="weekLabel">—</span></span>
-          <span class="pill">EDD: <span id="eddLabel">—</span></span>
-        </div>
-      </div>
-    </div>
-    <div class="card appt-card">
-      <div>
-        <div class="appt-card__label">Next Appointment</div>
-        <div class="appt-card__title" id="nextApptTitle">No upcoming appointment</div>
-        <div class="appt-card__meta" id="nextApptMeta">—</div>
-      </div>
-      <button type="button" class="btn btn--primary btn--full" data-go="appointments">View Schedule <svg width="15" height="15"><use href="#i-arrow"/></svg></button>
-          <button type="button" class="qa-item" data-go="facilities"><div class="qa-item__icon qa-item__icon--purple"><svg width="16" height="16" aria-hidden="true"><use href="#i-search"/></svg></div><div class="qa-item__title">Find Care <span>›</span></div><div class="qa-item__sub">Hospitals, labs, vaccines nearby</div></button>
-    </div>
-  </div>
-
-  
-  <div class="card" id="riskCard" style="padding:1.1rem 1.25rem;margin-bottom:1rem;border-left:4px solid var(--brand)">
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;flex-wrap:wrap">
-      <div>
-        <div class="section-title" style="margin:0 0 .35rem">Pregnancy risk assessment</div>
-        <div style="font-size:.85rem;color:var(--ink-muted);margin-bottom:.5rem">Based on the Maternal Health Risk dataset (Age, BP, blood sugar, temperature, heart rate) plus your clinical history.</div>
-        <div id="riskLevelLabel" style="font-family:var(--display);font-weight:800;font-size:1.15rem;text-transform:capitalize">—</div>
-        <ul id="riskFactorList" style="margin:.5rem 0 0;padding-left:1.1rem;color:var(--ink-2);font-size:.88rem"></ul>
-        <div id="riskMeta" style="font-size:.75rem;color:var(--ink-3);margin-top:.5rem"></div>
-      </div>
-      <button type="button" class="btn btn--primary" id="reassessRiskBtn">Reassess risk</button>
-    </div>
-    <div id="riskTrendRoot"></div>
-  </div>
-<div class="status-row">
-    <button type="button" class="status-card" data-go="records">
-      <div class="status-card__icon status-card__icon--purple"><svg width="18" height="18" aria-hidden="true"><use href="#i-shield"/></svg></div>
-      <div><div class="status-card__label">Current Health Status</div><div class="status-card__value"><span class="ok"></span> Stable</div><div class="status-card__sub">No major concerns</div></div>
-    </button>
-    <button type="button" class="status-card" data-go="records">
-      <div class="status-card__icon status-card__icon--green"><svg width="18" height="18" aria-hidden="true"><use href="#i-activity"/></svg></div>
-      <div><div class="status-card__label">Vitals</div><div class="status-card__value"><span class="ok"></span> All normal</div><div class="status-card__sub">Last updated: today</div></div>
-    </button>
-    <button type="button" class="status-card" data-go="records">
-      <div class="status-card__icon status-card__icon--blue"><svg width="18" height="18" aria-hidden="true"><use href="#i-pill"/></svg></div>
-      <div><div class="status-card__label">Medications</div><div class="status-card__value"><span class="ok"></span> On schedule</div><div class="status-card__sub" id="medCount">1 supplement</div></div>
-    </button>
-    <button type="button" class="status-card" data-go="appointments">
-      <div class="status-card__icon status-card__icon--purple"><svg width="18" height="18" aria-hidden="true"><use href="#i-cal"/></svg></div>
-      <div><div class="status-card__label">Upcoming Appointments</div><div class="status-card__value"> <span id="apptCount">1</span> scheduled</div></div>
-    </button>
-  </div>
-
-  <div class="main-grid">
-    <div>
-      <div class="card section-card">
-        <div class="section-head">
-          <div class="section-title"><span><svg width="15" height="15" aria-hidden="true"><use href="#i-activity"/></svg></span> Health Overview</div>
-          <button type="button" class="link-btn" data-go="records">View All →</button>
-        </div>
-        <div class="tabs" role="tablist">
-          <button type="button" class="is-active" data-metric="weight">Weight</button>
-          <button type="button" data-metric="bp">Blood Pressure</button>
-          <button type="button" data-metric="temp">Temperature</button>
-          <button type="button" data-metric="other">Others</button>
-        </div>
-        <div class="growth-body">
-          <div class="chart-wrap">
-            <span class="chart-y">Weight (kg)</span>
-            <svg class="chart-svg" viewBox="0 0 400 170" preserveAspectRatio="none" id="weightChart">
-              <g stroke="#ede9fe" stroke-width="1"><line x1="0" y1="15" x2="400" y2="15"/><line x1="0" y1="50" x2="400" y2="50"/><line x1="0" y1="85" x2="400" y2="85"/><line x1="0" y1="120" x2="400" y2="120"/><line x1="0" y1="155" x2="400" y2="155"/></g>
-              <g fill="#9ca3af" font-size="10" font-family="Inter,sans-serif"><text x="2" y="18">80</text><text x="2" y="53">70</text><text x="2" y="88">60</text><text x="2" y="123">50</text><text x="2" y="158">40</text></g>
-              <path d="M30 130 L80 120 L130 110 L180 100 L230 95 L280 88 L330 78 L370 70" fill="none" stroke="#7c3aed" stroke-width="2.5" stroke-linecap="round"/>
-              <g fill="#7c3aed"><circle cx="30" cy="130" r="3.5"/><circle cx="80" cy="120" r="3.5"/><circle cx="130" cy="110" r="3.5"/><circle cx="180" cy="100" r="3.5"/><circle cx="230" cy="95" r="3.5"/><circle cx="280" cy="88" r="3.5"/><circle cx="330" cy="78" r="3.5"/><circle cx="370" cy="70" r="5" fill="#fff" stroke="#7c3aed" stroke-width="2.5"/></g>
-              <g transform="translate(340,40)"><rect width="48" height="20" rx="8" fill="#7c3aed"/><text x="24" y="14" text-anchor="middle" fill="#fff" font-size="10" font-weight="700">68 kg</text></g>
-              <g fill="#9ca3af" font-size="9" font-family="Inter,sans-serif" text-anchor="middle"><text x="30" y="168">1 Aug</text><text x="130" y="168">15 Aug</text><text x="230" y="168">29 Aug</text><text x="330" y="168">12 Sep</text></g>
-            </svg>
-          </div>
-          <div class="stats-panel">
-            <div><div class="stat-label">Current Weight</div><div class="stat-value" id="curWeight">-- kg</div><div class="stat-sub" id="curWeightSub">No data</div></div>
-            <div><div class="stat-label">Starting Weight</div><div class="stat-value" id="startWeight">-- kg</div><div class="stat-sub" id="startWeightSub">No data</div></div>
-            <div><div class="stat-label">BMI</div><div class="stat-value" id="bmiVal">--</div><div class="stat-sub" id="bmiSub">No data</div></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="card section-card">
-        <div class="section-head">
-          <div class="section-title"><span style="background:#fef3c7;color:#d97706"><svg width="15" height="15" aria-hidden="true"><use href="#i-flag"/></svg></span> Milestones</div>
-          <button type="button" class="link-btn" data-go="timeline">View All →</button>
-        </div>
-        <div class="milestones-track" id="milestoneTrack">
-          <div class="milestone is-done"><div class="milestone__icon"><svg width="19" height="19" aria-hidden="true"><use href="#i-heart"/></svg><span class="milestone__check"></span></div><div class="milestone__name">12 weeks</div><div class="milestone__range">Baby's organs forming</div></div>
-          <div class="milestone is-done"><div class="milestone__icon"><svg width="19" height="19" aria-hidden="true"><use href="#i-baby"/></svg><span class="milestone__check"></span></div><div class="milestone__name">16 weeks</div><div class="milestone__range">Gender (optional)</div></div>
-          <div class="milestone is-current"><div class="milestone__icon"><svg width="19" height="19" aria-hidden="true"><use href="#i-scan"/></svg></div><div class="milestone__name">20 weeks</div><div class="milestone__range">Anomaly scan</div></div>
-          <div class="milestone is-locked"><div class="milestone__icon"><svg width="19" height="19" aria-hidden="true"><use href="#i-droplet"/></svg></div><div class="milestone__name">24 weeks</div><div class="milestone__range">Glucose test</div></div>
-          <div class="milestone is-locked"><div class="milestone__icon"><svg width="19" height="19" aria-hidden="true"><use href="#i-trend"/></svg></div><div class="milestone__name">28 weeks</div><div class="milestone__range">Growth scan</div></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="side-stack">
-      <div class="card section-card">
-        <div class="section-title" style="margin-bottom:.85rem"><span><svg width="15" height="15" aria-hidden="true"><use href="#i-grid"/></svg></span> Quick Actions</div>
-        <div class="qa-grid">
-          <button type="button" class="qa-item" data-go="appointments"><div class="qa-item__icon qa-item__icon--blue"><svg width="16" height="16" aria-hidden="true"><use href="#i-cal"/></svg></div><div class="qa-item__title">Book Appointment <span>›</span></div><div class="qa-item__sub">See a doctor</div></button>
-          <button type="button" class="qa-item" data-go="records"><div class="qa-item__icon qa-item__icon--purple"><svg width="16" height="16" aria-hidden="true"><use href="#i-file"/></svg></div><div class="qa-item__title">View Test Reports <span>›</span></div><div class="qa-item__sub">Lab results &amp; reports</div></button>
-          <button type="button" class="qa-item" data-go="records"><div class="qa-item__icon qa-item__icon--green"><svg width="16" height="16" aria-hidden="true"><use href="#i-activity"/></svg></div><div class="qa-item__title">Track Health <span>›</span></div><div class="qa-item__sub">Weight, vitals &amp; more</div></button>
-          <button type="button" class="qa-item" data-go="timeline"><div class="qa-item__icon qa-item__icon--amber"><svg width="16" height="16" aria-hidden="true"><use href="#i-clock"/></svg></div><div class="qa-item__title">View Care Timeline <span>›</span></div><div class="qa-item__sub">Your pregnancy journey</div></button>
-        </div>
-      </div>
-      <div class="card section-card">
-        <div class="section-head"><div class="section-title"><span><svg width="15" height="15" aria-hidden="true"><use href="#i-bell"/></svg></span> Recent Updates</div><button type="button" class="link-btn">View All →</button></div>
-        <div class="feed-list" id="recentFeed">
-          <div class="feed-item"><div class="feed-item__icon feed-item__icon--amber"><svg width="16" height="16" aria-hidden="true"><use href="#i-bell"/></svg></div><div><div class="feed-item__title">Care updates</div><div class="feed-item__sub">No items yet</div></div><div class="feed-item__date">—</div></div>
-          <div class="feed-item"><div class="feed-item__icon feed-item__icon--green"><svg width="16" height="16" aria-hidden="true"><use href="#i-file"/></svg></div><div><div class="feed-item__title">Test report available</div><div class="feed-item__sub">Blood test · All parameters normal</div></div><div class="feed-item__date">Sep 8</div></div>
-          <div class="feed-item"><div class="feed-item__icon feed-item__icon--purple"><svg width="16" height="16" aria-hidden="true"><use href="#i-trend"/></svg></div><div><div class="feed-item__title">Growth checkup</div><div class="feed-item__sub">Weight &amp; BP recorded</div></div><div class="feed-item__date">Sep 5</div></div>
-          <div class="feed-item"><div class="feed-item__icon feed-item__icon--blue"><svg width="16" height="16" aria-hidden="true"><use href="#i-cal"/></svg></div><div><div class="feed-item__title">Next appointment</div><div class="feed-item__sub">—</div></div><div class="feed-item__date">—</div></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="sos-bar">
-    <div class="sos-bar__left"><div class="sos-bar__icon"><svg width="16" height="16"><use href="#i-heart"/></svg></div><div><strong>Need medical advice?</strong> Chat with your doctor for non-urgent queries. For emergencies, use the emergency button.</div></div>
-    <button class="btn--sos" type="button" id="sosBtn"><svg width="14" height="14"><use href="#i-phone"/></svg> Emergency SOS</button>
-  </div>
+<div class="panel is-active warm-home" id="panel-dashboard">
+ <div class="home-heading"><div><span class="eyebrow" id="homeGreetingTime">A LITTLE SPACE FOR YOU</span><h1><span id="homeGreetingWord">Hello</span>, <span id="greetName">there</span><span class="greeting-dot">.</span></h1><p id="homeGreetingSub">One day, one little step at a time.</p></div><div class="home-display-controls"><button type="button" id="homeTextSize" aria-label="Toggle large text" title="Larger text">A<span>+</span></button><button type="button" id="homeTheme" aria-label="Toggle dark mode" title="Dark mode">☾</button><span class="home-synthetic-label">Synthetic demo</span></div></div>
+ <div class="home-hero-grid">
+  <section class="home-journey home-surface" id="homeJourneyCard"><button type="button" class="home-listen" data-listen="homeJourneyCard" aria-label="Listen to this card"><svg aria-hidden="true"><use href="#i-speaker"/></svg></button><div class="home-journey-copy"><span class="home-kicker">YOUR LITTLE UNIVERSE</span><h2 id="homeJourneyTitle">A journey full of little wonders.</h2><p id="homeJourneyText">Your next chapter, with a little support along the way.</p><div id="homeBabyTabs" class="home-baby-tabs" role="tablist" aria-label="Choose a baby for home logs"></div><div id="homeJourneyProgress"></div><button type="button" id="shareJourney" class="home-share"><svg aria-hidden="true"><use href="#i-heart"/></svg> Save a milestone card ↗</button></div><div class="home-illustration"><div class="illustration-halo"></div><img id="homeStageImage" alt="Original illustration of a mother holding her baby" width="1024" height="1536" fetchpriority="high"><span class="illustration-caption">Every little moment matters.</span></div></section>
+  <article class="home-next home-surface" id="nextStepCard" aria-labelledby="nextStepTitle"><button type="button" class="home-listen" data-listen="nextStepCard" aria-label="Listen to this card"><svg aria-hidden="true"><use href="#i-speaker"/></svg></button><span class="home-kicker">ONE THING FOR TODAY</span><div class="home-next-icon"><svg aria-hidden="true"><use href="#i-clipboard"/></svg></div><span id="nextStepStatus" class="care-label">Care plan</span><h2 id="nextStepTitle">Your next little step</h2><p id="nextStepWhy">Loading your recorded care plan.</p><div id="nextStepPlace" class="home-next-place"></div><button type="button" class="btn btn--primary" id="nextStepBook" data-go="appointments"><span>Book a visit</span><svg aria-hidden="true"><use href="#i-arrow"/></svg></button><button type="button" class="home-directions" id="nextStepDirections">Get directions ↗</button><small>Your care team decides the care you need.</small></article>
+ </div>
+ <section class="home-quick home-surface" aria-label="Quick actions"><button type="button" data-go="records" class="quick-tile"><span><svg aria-hidden="true"><use href="#i-file"/></svg></span><strong>My records</strong></button><button type="button" data-go="facilities" class="quick-tile"><span><svg aria-hidden="true"><use href="#i-search"/></svg></span><strong>Find care</strong></button><button type="button" data-go="appointments" class="quick-tile"><span><svg aria-hidden="true"><use href="#i-cal"/></svg></span><strong>Book a visit</strong></button><button type="button" data-go="companion" class="quick-tile"><span><svg aria-hidden="true"><use href="#i-msg"/></svg></span><strong>Ask DAI</strong></button><button type="button" data-go="children" class="quick-tile"><span><svg aria-hidden="true"><use href="#i-baby"/></svg></span><strong>Vaccinations</strong></button><button type="button" data-go="schemes" class="quick-tile"><span><svg aria-hidden="true"><use href="#i-shield"/></svg></span><strong>Schemes</strong></button></section>
+ <section class="home-ask-bar" aria-label="Ask DAI"><span class="home-ask-symbol">✦</span><div><strong>Something on your mind?</strong><span>Ask DAI. A little clarity, in your language.</span></div><form id="homeAskForm"><label class="sr-only" for="homeAskInput">Ask DAI a question</label><input id="homeAskInput" maxlength="1000" placeholder="Ask me about your care…"><button type="submit" aria-label="Send question"><svg aria-hidden="true"><use href="#i-arrow"/></svg></button></form><button type="button" id="homeAskVoice" class="home-voice" aria-label="Talk to Dr. Daya"><svg aria-hidden="true"><use href="#i-mic"/></svg><span>Speak</span></button></section>
+ <div class="home-middle-grid">
+  <section class="home-surface home-checkin" id="homeCheckinCard"><div class="home-section-head"><div><span class="home-kicker">SMALL STEPS, JUST FOR YOU</span><h2>Today’s little checklist</h2></div><button type="button" class="home-listen" data-listen="homeCheckinCard" aria-label="Listen to this card"><svg aria-hidden="true"><use href="#i-speaker"/></svg></button></div><div class="home-checkin-meta"><span id="homeChecklistDate"></span><span id="homeStreak">A fresh start</span></div><div id="homeChecklist"></div><small class="home-disclaimer">Personal reminders. Follow the plan your clinician gave you.</small><div class="home-mood"><h3>How are you feeling today?</h3><div id="homeMoodOptions" class="mood-options"></div><p id="homeMoodNote">A small check-in with yourself. This is not a mental-health screening.</p><button type="button" class="link-btn" data-go="appointments">I’d like to talk to my care team →</button></div><p id="homeCheckinStatus" class="home-save-status" role="status"></p></section>
+  <section class="home-surface home-appointments" id="homeAppointmentCard"><div class="home-section-head"><div><span class="home-kicker">YOUR NEXT HELLO</span><h2>Coming up for you</h2></div><button type="button" class="home-listen" data-listen="homeAppointmentCard" aria-label="Listen to this card"><svg aria-hidden="true"><use href="#i-speaker"/></svg></button></div><div id="nextAppointmentPreview"></div><button type="button" class="link-btn" data-go="appointments">All appointments →</button><div class="home-gap-status"><h3>Your care, at a glance</h3><div id="homeGapChips" class="home-gap-chips"></div><button type="button" class="link-btn" data-go="timeline">Open your full care timeline →</button></div></section>
+ </div>
+ <div class="home-insight-grid">
+  <section class="home-surface home-development" id="homeDevelopmentCard"><div class="home-section-head"><span class="home-kicker" id="homeDevelopmentKicker">GROWING, TOGETHER</span><button type="button" class="home-listen" data-listen="homeDevelopmentCard" aria-label="Listen to this card"><svg aria-hidden="true"><use href="#i-speaker"/></svg></button></div><div id="homeDevelopment"></div><div id="homeBabyLogArea" hidden><div class="home-baby-log-buttons"><button type="button" data-baby-log="feed"><svg aria-hidden="true"><use href="#i-heart"/></svg> Log a feed</button><button type="button" data-baby-log="sleep">☾ Log sleep</button><button type="button" data-go="postpartum">Mother’s recovery →</button></div><div id="homeBabyLogList"></div></div></section>
+  <section class="home-surface home-health" id="homeHealthCard"><div class="home-section-head"><div><span class="home-kicker">FROM YOUR LAST VISITS</span><h2>My health, simply</h2></div><button type="button" class="home-listen" data-listen="homeHealthCard" aria-label="Listen to this card"><svg aria-hidden="true"><use href="#i-speaker"/></svg></button></div><div id="healthSnapshot" class="health-snapshot"></div><div id="clinicianStatus"></div><p class="home-disclaimer">Only clinician-entered readings. Trends show change; your doctor interprets them.</p></section>
+ </div>
+ <div class="home-support-grid">
+  <section class="home-surface home-team" id="homeTeamCard"><div class="home-section-head"><div><span class="home-kicker">PEOPLE IN YOUR CORNER</span><h2>Your care circle</h2></div><button type="button" class="home-listen" data-listen="homeTeamCard" aria-label="Listen to this card"><svg aria-hidden="true"><use href="#i-speaker"/></svg></button></div><div id="homeCareTeam"></div><div id="homeReadiness"></div><div class="home-family"><div class="care-avatar faint">♡</div><div><strong>Your family, in the loop</strong><p id="homeFamilySummary">Manage who can see your shared reports.</p></div><button type="button" class="link-btn" data-go="family">Manage →</button></div></section>
+  <section class="home-surface home-tip" id="homeTipCard"><div class="home-section-head"><span class="home-kicker">A LITTLE KNOWLEDGE, A LITTLE COMFORT</span><button type="button" class="home-listen" data-listen="homeTipCard" aria-label="Listen to this card"><svg aria-hidden="true"><use href="#i-speaker"/></svg></button></div><div class="home-tip-art" aria-hidden="true">✧</div><h2 id="homeTipTitle">One helpful thought</h2><p id="homeTipText"></p><a id="homeTipSource" target="_blank" rel="noopener">Read the official source ↗</a><div class="home-scheme"><span><svg aria-hidden="true"><use href="#i-shield"/></svg></span><div><strong>There may be support for your journey.</strong><p>Explore maternity benefit schemes. Confirm eligibility officially.</p><button type="button" class="link-btn" data-go="schemes">Explore government schemes →</button></div></div></section>
+ </div>
+ <section class="home-surface home-journal" id="homeJournalCard"><details><summary><span class="journal-icon"><svg aria-hidden="true"><use href="#i-file"/></svg></span><span><strong>Your little book of moments</strong><small>A thought, a photo, a memory. Yours to keep.</small></span><span class="journal-open">Open journal +</span></summary><div class="home-journal-body"><p>Personal notes and photos are saved to your account. They are not clinical records or automatically shared with family.</p><form id="homeJournalForm"><label for="homeJournalDate">Date</label><input type="date" id="homeJournalDate" required><label for="homeJournalNote">A moment to remember</label><textarea id="homeJournalNote" maxlength="2000" rows="3" placeholder="Today, I want to remember…"></textarea><label for="homeJournalPhoto">Add a photo (optional, JPG or PNG, up to 3 MB)</label><input id="homeJournalPhoto" type="file" accept="image/jpeg,image/png"><button type="submit" class="btn btn--primary">Save my moment</button><p id="homeJournalStatus" role="status"></p></form><div id="homeJournalEntries"></div></div></details></section>
+ <p class="home-footer-note"><svg aria-hidden="true"><use href="#i-shield"/></svg> Simulated on synthetic data · Fictional people and facilities. Clinical decisions stay with your care team.</p>
 </div>
-
+<div class="panel" id="panel-gaps"><div class="page-section-heading"><h1 data-copy="nav.gaps">Pending care</h1><p data-copy="gapsIntro">Open visits and tests, ordered by what needs attention first.</p></div><div id="allCareGaps" class="card"></div></div>
+<div class="panel" id="panel-children"><div class="page-section-heading"><h1 data-copy="nav.children">My children</h1><p data-copy="childrenIntro">Separate profiles. Connected care. Never mixed-up records.</p></div><div id="patientChildTabs" class="patient-child-tabs" role="tablist" aria-label="Choose child"></div><div id="patientChildSummary"></div></div>
+<div class="panel" id="panel-companion"><div class="page-section-heading"><h1 data-copy="nav.companion">Care companion</h1><p data-copy="companionBoundary">Guidance and explanations. Medical decisions stay with your doctor.</p></div><div class="companion-page-grid"><section class="patient-companion-card"><div class="companion-orb">✦</div><h2 data-copy="youCanAsk">A question on your mind?</h2><p data-copy="companionIntro">Understand your care, in words that feel familiar.</p><button class="btn btn--primary" data-open-daya data-copy="askDaya">Ask Dr. Daya</button><div id="companionQuickQuestions"></div></section><section class="card section-card"><h2 data-copy="prepareQuestions">Prepare questions for my doctor</h2><p data-copy="questionsIntro">A simple checklist from your open care items. Add anything you want to discuss.</p><button class="btn btn--primary" id="prepareDoctorQuestions" data-copy="makeChecklist">Make my checklist</button><textarea id="doctorQuestions" rows="10" aria-label="Questions for your doctor" placeholder="Your questions will appear here"></textarea><button type="button" class="btn btn--ghost" id="downloadQuestions" data-copy="downloadChecklist">Download checklist</button></section></div></div>
+<div class="panel" id="panel-schemes"><div class="page-section-heading"><h1 data-copy="nav.schemes">Schemes & support</h1><p data-copy="schemeIntro">See what support may fit you. Final eligibility is confirmed on the official website.</p></div><div id="patientSchemes" class="scheme-grid"></div></div>
+<div class="panel" id="panel-family"><div class="page-section-heading"><h1 data-copy="nav.family">Family & consent</h1><p data-copy="sharingIntro">Choose how your documents are shared. Your care team can help connect a family or ASHA account.</p></div><div class="family-grid"><section class="card section-card"><h2 data-copy="whoCanSee">Who can see my records?</h2><div id="sharingControls"></div><div class="form-group"><label for="familyEmergencyName" data-copy="emergencyName">Emergency contact name</label><input id="familyEmergencyName" maxlength="100"></div><div class="form-group"><label for="familyEmergencyPhone" data-copy="emergencyPhone">Emergency contact phone</label><input id="familyEmergencyPhone" inputmode="tel" maxlength="20"></div><button class="btn btn--primary" id="saveEmergencyContact" data-copy="saveContact">Save emergency contact</button></section><section class="card section-card"><h2 data-copy="sharingHistory">Consent & sharing history</h2><div id="sharingHistory"></div><h3 data-copy="sharedDocuments">Shared documents</h3><div id="activeDocumentShares"></div></section></div></div>
 <!-- PROFILE -->
 <div class="panel" id="panel-profile">
   <div class="card section-card" style="max-width:560px">
@@ -686,8 +567,8 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 </div>
 
 <!-- APPOINTMENTS -->
-<div class="panel" id="panel-appointments">
-  <div class="main-grid">
+<div class="panel" id="panel-appointments"><div class="page-section-heading"><h1 data-copy="nav.appointments">Appointments</h1><p data-copy="appointmentsIntro">See upcoming and past visits. Request changes without losing your care history.</p></div>
+  <div id="connectedAppointments"></div><div class="main-grid legacy-appointments" style="display:none">
     <div class="card section-card">
       <div class="section-title" style="margin-bottom:1rem"><span><svg width="15" height="15" aria-hidden="true"><use href="#i-cal"/></svg></span> Request appointment</div>
       <form class="form-grid" id="apptForm">
@@ -698,20 +579,20 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
           <select id="apptDoctor" required><option value="">Loading doctors…</option></select>
         </div>
         <div class="form-group"><label for="apptDate">Preferred date</label><input id="apptDate" type="date" required></div>
-        <div class="form-group"><label for="apptTime">Preferred time</label><input id="apptTime" type="time" value="10:30"></div>
+        <div class="form-group"><label for="apptTime">Preferred time</label><input id="apptTime" type="time"></div>
         <div class="form-group"><label for="apptNotes">Notes</label><textarea id="apptNotes" rows="2" placeholder="Any symptoms or requests…"></textarea></div>
         <button type="submit" class="btn btn--primary">Request appointment</button>
       </form>
     </div>
     <div class="card list-card">
       <div class="section-card" style="border:0;box-shadow:none;padding-bottom:.5rem"><div class="section-title"><span><svg width="15" height="15" aria-hidden="true"><use href="#i-clock"/></svg></span> Your requests</div></div>
-      <div id="apptList"></div>
+      <div class="patient-appt-tabs" role="group" aria-label="Appointment filter"><button type="button" data-appt-filter="upcoming" aria-pressed="true" data-copy="upcoming">Upcoming</button><button type="button" data-appt-filter="past" aria-pressed="false" data-copy="past">Past</button></div><div id="apptList"></div>
     </div>
   </div>
 </div>
 
 <!-- TIMELINE -->
-<div class="panel" id="panel-timeline">
+<div class="panel" id="panel-timeline"><div class="page-section-heading"><h1 data-copy="nav.timeline">Care timeline</h1><p data-copy="timelineIntro">Your visits and milestones, with a plain-language explanation at each step.</p></div>
   <div class="card section-card">
     <div class="section-head"><div class="section-title"><span><svg width="15" height="15" aria-hidden="true"><use href="#i-clock"/></svg></span> Care Timeline</div></div>
     <div id="timelineList"></div>
@@ -719,15 +600,47 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 </div>
 
 <!-- POSTPARTUM -->
-<div class="panel" id="panel-postpartum">
+<div class="panel" id="panel-postpartum"><div class="page-section-heading"><h1 data-copy="nav.postpartum">After delivery</h1><p data-copy="postpartumIntro">Recovery, feeding support, mood check-ins and follow-up with your care team.</p></div>
   <div style="max-width:760px" id="ppRoot"></div>
 </div>
 
 <!-- RECORDS -->
-<div class="panel" id="panel-records">
-  <div class="main-grid">
+<div class="panel" id="panel-records"><div class="page-section-heading"><h1>Reports & records</h1></div><div id="connectedRecords"></div>
+<div id="connectedReportArea"><div class="record-filters connected-record-filters"><label>Search<input id="recordSearch" type="search" placeholder="Name, date or centre"></label><label>Type<select id="recordTypeFilter"><option value="">All types</option><option value="blood">Blood tests</option><option value="urine">Urine</option><option value="scan_imaging">Scans</option><option value="screening">Screening</option><option value="discharge_summary">Discharge summaries</option><option value="prescription">Prescriptions</option><option value="vaccination">Vaccination certificates</option><option value="documents">Documents & IDs</option></select></label><label>From date<input id="recordDateFilter" type="date"></label><label>Patient<select id="recordSubjectFilter"><option value="">Mother</option><option value="all">Mother & all babies</option></select></label></div>
+<div id="recordCategoryChips"></div><div id="reportsDocsList"></div><details class="connected-upload" id="connectedUploadDetails"><summary>＋ Upload an original report</summary><p>Self-uploaded files await clinician verification. Choose the correct person and milestone. No automatic interpretation is performed.</p><form class="form-grid" id="docUploadForm" style="max-width:100%;margin-bottom:1rem">
+          <div class="form-group">
+            <label for="docTitle">Title</label>
+            <input id="docTitle" name="title" required maxlength="200" placeholder="e.g. Blood count report — synthetic centre">
+          </div>
+          <div class="form-group">
+            <label for="docType">Document type</label>
+            <select id="docType" name="doc_type" required>
+              <option value="lab_report">Laboratory report</option>
+              <option value="prescription">Prescription</option>
+              <option value="medical_report">Medical report</option>
+              <option value="discharge_summary">Discharge summary</option>
+              <option value="scan_imaging">Scan / imaging</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="form-group"><label for="docReportDate">Report date</label><input type="date" id="docReportDate"></div>
+          <div class="form-group"><label for="docFacility">Report centre</label><input id="docFacility" maxlength="200" placeholder="Centre printed on the report"></div>
+          <div class="form-group"><label for="docSubject">Whose report?</label><select id="docSubject"><option value="">Mother</option></select></div>
+          <div class="form-group"><label for="docMilestone">Link to a mother care milestone</label><select id="docMilestone"><option value="">No milestone linked</option></select></div>
+          <div class="form-group"><label for="docAppointment">Link to a visit</label><select id="docAppointment"><option value="">No visit linked</option></select></div><div class="form-group"><label for="docCategory">Report category</label><select id="docCategory"><option value="general">General</option><option value="blood">Blood test</option><option value="urine">Urine</option><option value="screening">Screening</option><option value="vaccination">Vaccination certificate</option><option value="documents">Documents & IDs</option></select></div>
+          <label class="connected-check"><input id="docSensitive" type="checkbox">Private screening report — hide contents until I choose to reveal them</label>
+          <div class="form-group">
+            <label for="docFile">File (PDF or image, max 5 MB)</label>
+            <input id="docFile" type="file" accept=".pdf,image/jpeg,image/png,image/webp,application/pdf" required>
+          </div>
+          <div class="form-group">
+            <label for="docNotes">Notes (optional)</label>
+            <input id="docNotes" maxlength="500" placeholder="Lab name, visit date, etc.">
+          </div>
+          <button type="submit" class="btn btn--primary" id="docUploadBtn">Upload document</button>
+        </form></details><details class="connected-self-notes"><summary>My self-entered health notes</summary><p>These are your own notes, separate from clinician-entered records.</p><div class="main-grid">
     <div class="card section-card">
-      <div class="section-title" style="margin-bottom:1rem"><span><svg width="15" height="15" aria-hidden="true"><use href="#i-activity"/></svg></span> Log vitals</div>
+      <div class="section-title" style="margin-bottom:1rem"><span><svg width="15" height="15" aria-hidden="true"><use href="#i-activity"/></svg></span> Self-entered notes</div>
       <form class="form-grid" id="vitalsForm">
         <div class="form-group"><label for="vWeight">Weight (kg)</label><input id="vWeight" type="number" step="0.1" placeholder="68"></div>
         <div class="form-group"><label for="vBp">Blood pressure</label><input id="vBp" placeholder="120/80"></div>
@@ -744,45 +657,8 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
       <div class="section-card" style="border:0;box-shadow:none;padding-bottom:.5rem"><div class="section-title"><span><svg width="15" height="15" aria-hidden="true"><use href="#i-file"/></svg></span> Health log</div></div>
       <div id="vitalsList"></div>
     </div>
-    <div class="card list-card" style="grid-column:1/-1;margin-top:1rem">
-      <div class="section-card" style="border:0;box-shadow:none;padding-bottom:.5rem">
-        <div class="section-title"><span><svg width="15" height="15" aria-hidden="true"><use href="#i-file"/></svg></span> Reports &amp; documents</div>
-        <p class="muted" style="margin:.25rem 0 .75rem;font-size:.85rem;color:var(--ink-muted)">Upload lab results, prescriptions, discharge summaries and share them with your care team</p>
-        <form class="form-grid" id="docUploadForm" style="max-width:100%;margin-bottom:1rem">
-          <div class="form-group">
-            <label for="docTitle">Title</label>
-            <input id="docTitle" name="title" required maxlength="200" placeholder="e.g. CBC — City Hospital">
-          </div>
-          <div class="form-group">
-            <label for="docType">Document type</label>
-            <select id="docType" name="doc_type" required>
-              <option value="lab_report">Laboratory report</option>
-              <option value="prescription">Prescription</option>
-              <option value="medical_report">Medical report</option>
-              <option value="discharge_summary">Discharge summary</option>
-              <option value="scan_imaging">Scan / imaging</option>
-              <option value="other">Other</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="docFile">File (PDF or image, max 5 MB)</label>
-            <input id="docFile" type="file" accept=".pdf,image/jpeg,image/png,image/webp,application/pdf" required>
-          </div>
-          <div class="form-group">
-            <label for="docNotes">Notes (optional)</label>
-            <input id="docNotes" maxlength="500" placeholder="Lab name, visit date, etc.">
-          </div>
-          <button type="submit" class="btn btn--primary" id="docUploadBtn">Upload document</button>
-        </form>
-      </div>
-      <div id="reportsDocsList"></div>
-      <div id="docHistoryPanel" class="section-card" style="display:none;border-top:1px solid var(--line);margin-top:.5rem">
-        <div class="section-title" style="font-size:.95rem;margin-bottom:.5rem">Upload &amp; share history</div>
-        <div id="docHistoryList"></div>
-        <button type="button" class="link-btn" id="docHistoryClose" style="margin-top:.5rem">Close history</button>
-      </div>
-    </div>
-  </div>
+    </div></details></div>
+<div id="docHistoryPanel" hidden><div id="docHistoryList"></div><button id="docHistoryClose" type="button">Close history</button></div>
 </div>
 
 <!-- MESSAGES -->
@@ -805,7 +681,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
         <label for="setLang" data-i18n="settings.lang">Language</label>
         <select id="setLang" name="lang">
           <option value="en">English</option>
-          <option value="hi">हिन्दी</option>
+          <option value="hi">हिन्दी</option><option value="mr">मराठी</option><option value="ta">தமிழ்</option><option value="bn">বাংলা</option>
         </select>
       </div>
       <fieldset class="prefs-fieldset">
@@ -816,20 +692,22 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
         <label><input type="checkbox" id="notif_care" name="notif_care" checked> <span data-i18n="notif.care">Care timeline gaps</span></label>
         <label><input type="checkbox" id="notif_sms" name="notif_sms" checked> <span data-i18n="notif.sms">SMS alerts</span></label>
       </fieldset>
+      <fieldset class="prefs-fieldset"><legend data-copy="readingAndOffline">Reading & offline</legend><label>Appearance<select id="theme" name="theme"><option value="light">Light</option><option value="dark">Dark</option></select></label><label><span data-copy="textSize">Text size</span><select id="text_size" name="text_size"><option value="standard">Standard</option><option value="large">Large</option><option value="extra-large">Extra large</option></select></label><label><input type="checkbox" name="read_aloud" id="read_aloud"><span data-copy="pageVoice">Enable device read-aloud</span></label><p class="setting-note" data-copy="voiceNote">Page read-aloud uses your browser's available voices. Dr. Daya uses Gemini in Hindi and English.</p><label><input type="checkbox" name="offline_enabled" id="offline_enabled" checked><span data-copy="offlineTimeline">Keep my timeline on this device</span></label><p class="setting-note" data-copy="offlineNote">A saved timeline is available offline. Reports and passwords are never cached. Signing out clears saved care data.</p></fieldset>
+      <fieldset class="prefs-fieldset"><legend data-copy="quietHours">Quiet hours</legend><label><input type="checkbox" name="quiet_hours_enabled" id="quiet_hours_enabled"><span data-copy="quietHours">Quiet hours</span></label><label><span data-copy="from">From</span><input type="time" name="quiet_start" id="quiet_start" value="21:00"></label><label><span data-copy="until">Until</span><input type="time" name="quiet_end" id="quiet_end" value="07:00"></label><label><input type="checkbox" id="notif_whatsapp" name="notif_whatsapp"><span>WhatsApp reminders</span></label><p class="setting-note" data-copy="reminderNote">App reminders work here. SMS and WhatsApp are saved preferences; external sending is not connected in this prototype.</p></fieldset>
       <fieldset class="prefs-fieldset">
         <legend data-i18n="settings.privacy">Privacy controls</legend>
-        <label><input type="checkbox" id="privacy_share_doctors" name="privacy_share_doctors" checked> <span data-i18n="privacy.share_doctors">Share records with linked doctors</span></label>
+        <label><input type="checkbox" id="privacy_share_doctors" name="privacy_share_doctors" checked> <span >Share uploaded reports with doctors I choose</span></label>
         <label><input type="checkbox" id="privacy_analytics" name="privacy_analytics"> <span data-i18n="privacy.analytics">Allow anonymous product analytics</span></label>
       </fieldset>
       <button type="submit" class="btn btn--primary" data-i18n="settings.save">Save settings</button>
       <p data-prefs-status hidden role="status" style="font-size:.85rem;color:var(--green);font-weight:600"></p>
-      <button type="button" class="btn btn--ghost" id="logoutBtn" data-i18n="settings.logout">Log out</button>
+      <button type="button" class="btn btn--ghost" data-go="profile">My profile and pregnancy dates</button><button type="button" class="btn btn--ghost" id="exportPatientData" data-copy="downloadData">Download my data</button><button type="button" class="link-btn" id="requestDataDeletion" data-copy="requestDeletion">Request account deletion</button><button type="button" class="btn btn--ghost" id="logoutBtn" data-i18n="settings.logout">Log out</button>
     </form>
   </div>
 </div>
 
 <!-- ========== Find Care (facility discovery) — integrated panel ========== -->
-<div class="panel" id="panel-facilities">
+<div class="panel" id="panel-facilities"><div class="page-section-heading"><h1 data-copy="nav.facilities">Nearby care</h1><p data-copy="nearbyIntro">Choose a centre by services and location. Check availability with the centre before travelling.</p></div><div id="registeredNetwork" class="network-grid"></div>
   <div class="card section-card" style="margin-bottom:1rem">
     <div class="section-head">
       <div class="section-title"><span><svg width="15" height="15" aria-hidden="true"><use href="#i-search"/></svg></span> Find Care</div>
@@ -1042,11 +920,12 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 
 
 </div></div></div>
-<div class="toast" id="toast" role="status"></div>
+<button type="button" id="sosBtn" class="patient-sos"><svg width="21" height="21"><use href="#i-phone"/></svg><span><strong>SOS</strong><small data-copy="emergencyHelp">Emergency help</small></span></button><div class="toast" id="toast" role="status"></div>
 
 <script src="/shared/emergency-triage.js"></script>
 <script src="/shared/postpartum-rules.js"></script>
 <script src="js/care-extensions.js"></script>
+<script src="/shared/who-growth-standards.js"></script><script src="/shared/child-reference.js"></script><script src="js/patient-visuals.js?v=1"></script><script src="js/patient-polish.js?v=1"></script><script src="js/patient-home-model.js?v=1"></script><script src="js/patient-home.js?v=1"></script><script src="js/patient-model.js?v=2"></script><script src="js/patient-offline.js?v=2"></script><script src="js/patient-copy.js?v=2"></script><script src="js/patient-journey.js?v=1"></script><script src="js/patient-pending-model.js?v=1"></script><script src="js/patient-pending.js?v=1"></script><script src="js/patient-connected.js?v=1"></script><script src="js/patient-dashboard.js?v=4"></script>
 <script>
 (function () {
 "use strict";
@@ -1130,6 +1009,7 @@ function hydrateDemoHealthLogs() {
 }
 
 function renderReportsDocs() {
+  if(window.PatientConnected){PatientConnected.documents(window._patientDocs||[]);return;}
   var el = $('reportsDocsList');
   if (!el) return;
   if (IS_GUEST) {
@@ -1151,46 +1031,7 @@ function renderReportsDocs() {
     el.innerHTML = '<div class="empty">No documents yet. Upload a lab report, prescription or discharge summary above.</div>';
     return;
   }
-  var TYPE_LABELS = {
-    medical_report: 'Medical report',
-    prescription: 'Prescription',
-    lab_report: 'Laboratory report',
-    discharge_summary: 'Discharge summary',
-    scan_imaging: 'Scan / imaging',
-    other: 'Other'
-  };
-  var STATUS_TAG = {
-    pending: 'pending',
-    verified: 'ok',
-    rejected: 'pending',
-    locked: 'info'
-  };
-  el.innerHTML = window._patientDocs.map(function (d) {
-    var typeLabel = TYPE_LABELS[d.doc_type] || d.doc_type;
-    var when = api.fmtDate(d.uploaded_at);
-    var sizeKb = d.size_bytes ? Math.round(d.size_bytes / 1024) + ' KB' : '';
-    var tag = STATUS_TAG[d.verification_status] || 'pending';
-    var statusLabel = d.verification_status || 'pending';
-    var actions =
-      '<div style="display:flex;flex-wrap:wrap;gap:.35rem;align-items:center">' +
-      '<span class="tag tag--' + tag + '">' + statusLabel + '</span>' +
-      '<button type="button" class="link-btn" data-doc-dl="' + d.id + '">Download</button>' +
-      '<button type="button" class="link-btn" data-doc-share="' + d.id + '">Share</button>' +
-      '<button type="button" class="link-btn" data-doc-hist="' + d.id + '">History</button>' +
-      (d.can_delete !== false
-        ? '<button type="button" class="link-btn" data-doc-del="' + d.id + '" style="color:var(--rose)">Delete</button>'
-        : '') +
-      '</div>';
-    return (
-      '<div class="list-row" data-doc-id="' + d.id + '">' +
-      '<div class="list-row__meta" style="flex:1;min-width:0">' +
-      '<div class="list-row__title">' + (d.title || d.original_filename) + '</div>' +
-      '<div class="list-row__sub">' + typeLabel + ' · uploaded ' + when +
-      (sizeKb ? ' · ' + sizeKb : '') +
-      (d.notes ? ' · ' + d.notes : '') +
-      '</div></div>' + actions + '</div>'
-    );
-  }).join('');
+  PatientExperience.renderDocs(window._patientDocs || []);
 }
 
 async function loadPatientDocuments() {
@@ -1248,6 +1089,7 @@ function showPanel(id) {
   try { history.replaceState(null, '', '#' + id); } catch (e) {}
   window.scrollTo({ top: 0, behavior: 'smooth' });
   closeSidebar();
+  PatientExperience.route(id);
   // Refresh postpartum data when switching to postpartum panel
   if (id === 'postpartum' && window.CareExt) {
     window.CareExt.refreshPostpartum();
@@ -1294,256 +1136,13 @@ function weeksAlong() {
   return api.gestationalWeeks(currentUser && currentUser.care_start_date);
 }
 
-function renderHeader() {
-  if (!currentUser) return;
-  var name = currentUser.full_name || currentUser.email || 'Mother';
-  var first = name.split(/\s+/)[0];
-  var un = $('userName'); if (un) un.textContent = name;
-  var gn = $('greetName'); if (gn) gn.textContent = first;
-  var weeks = weeksAlong();
-  var wl = $('weekLabel');
-  if (wl) wl.textContent = weeks != null ? (weeks + ' weeks') : '—';
-  var tri = api.trimesterLabel(weeks);
-  var pills = document.querySelectorAll('.pill');
-  // first pill contains trimester
-  var edd = api.eddFromCareStart(currentUser.care_start_date);
-  var eddEl = $('eddLabel');
-  if (eddEl) eddEl.textContent = edd ? api.fmtDate(edd) : '—';
-  // Update trimester text in first pill if present
-  var pill0 = document.querySelector('.pills .pill');
-  if (pill0 && weeks != null) {
-    pill0.innerHTML = tri + ' · <span id="weekLabel">' + weeks + ' weeks</span>';
-  }
-}
+function renderHeader() { if(currentUser) PatientExperience.update({user:currentUser}); }
 
-function renderAppointments() {
-  var list = $('apptList');
-  var upcoming = appointments.filter(function (a) {
-    return a.status === 'pending' || a.status === 'confirmed';
-  });
-  var countEl = $('apptCount');
-  if (countEl) countEl.textContent = String(upcoming.length);
+function renderAppointments() { PatientExperience.update({appointments:appointments}); }
 
-  var next = upcoming.slice().sort(function (a, b) {
-    return String(a.requested_date).localeCompare(String(b.requested_date));
-  })[0];
-  if (next) {
-    var title = $('nextApptTitle');
-    if (title) title.textContent = next.reason || 'Consultation';
-    var meta = $('nextApptMeta');
-    if (meta) {
-      meta.innerHTML = (next.doctor_name ? next.doctor_name : 'Doctor') +
-        (next.specialization ? ' · ' + next.specialization : '') +
-        '<br>' + api.fmtDate(next.requested_date) +
-        ' · <span class="tag tag--' + (next.status === 'confirmed' ? 'ok' : 'pending') + '">' + next.status + '</span>';
-    }
-  } else {
-    var title2 = $('nextApptTitle'); if (title2) title2.textContent = 'No upcoming appointment';
-    var meta2 = $('nextApptMeta'); if (meta2) meta2.textContent = 'Request one from Appointments';
-  }
+function renderTimeline() { PatientExperience.update({milestones:motherMilestones}); }
 
-  if (!list) return;
-  if (!appointments.length) {
-    list.innerHTML = '<div class="empty">No appointment requests yet.</div>';
-    return;
-  }
-  list.innerHTML = appointments.map(function (a) {
-    return '<div class="list-row"><div class="list-row__meta"><div class="list-row__title">' +
-      (a.reason || 'Appointment') + '</div><div class="list-row__sub">' +
-      api.fmtDate(a.requested_date) + (a.doctor_name ? ' · ' + a.doctor_name : '') +
-      '</div></div><span class="tag tag--' + (a.status === 'confirmed' || a.status === 'completed' ? 'ok' : 'pending') + '">' +
-      a.status + '</span></div>';
-  }).join('');
-}
-
-function renderTimeline() {
-  var el = $('timelineList');
-  if (!el) return;
-  var preg = motherMilestones.filter(function (m) { return m.category !== 'child'; });
-  if (!preg.length) {
-    el.innerHTML = '<div class="empty">No care milestones yet. Confirm your due date in profile to seed your timeline.</div>';
-    return;
-  }
-  el.innerHTML = preg.map(function (m) {
-    var tag = m.status === 'completed' ? 'ok' : (m.status === 'overdue' ? 'pending' : 'info');
-    var label = m.status === 'completed' ? 'Done' : (m.status === 'overdue' ? 'Overdue' : 'Upcoming');
-    var btn = m.status !== 'completed'
-      ? '<button type="button" class="btn btn--sm btn--primary" data-complete="' + m.id + '">Mark done</button>'
-      : '';
-    return '<div class="list-row"><div class="list-row__meta"><div class="list-row__title">' +
-      m.title + '</div><div class="list-row__sub">' + (m.stage || '') + ' · due ' + api.fmtDate(m.due_date) +
-      (m.guidance ? ' · ' + m.guidance : '') + '</div></div><span class="tag tag--' + tag + '">' + label +
-      '</span>' + btn + '</div>';
-  }).join('');
-
-  el.querySelectorAll('[data-complete]').forEach(function (b) {
-    b.addEventListener('click', async function () {
-      var id = b.getAttribute('data-complete');
-      if (String(id).indexOf('DEMO-') === 0) {
-        motherMilestones = motherMilestones.map(function (m) {
-          if (String(m.id) === String(id)) m.status = 'completed';
-          return m;
-        });
-        api.toast('Milestone marked done (demo)');
-        renderTimeline();
-        return;
-      }
-      var data = await api.apiRequest('/timeline/' + id + '/complete', { method: 'PATCH' });
-      if (data) {
-        api.toast('Milestone marked done');
-        await loadTimeline();
-      }
-    });
-  });
-
-  // Dashboard milestone strip — first 5 pregnancy milestones
-  var track = $('milestoneTrack');
-  if (track) {
-    var slice = preg.slice(0, 5);
-    track.innerHTML = slice.map(function (m, i) {
-      var cls = m.status === 'completed' ? 'is-done' : (m.status === 'overdue' || (m.status === 'upcoming' && !slice.slice(0, i).some(function (x) { return x.status !== 'completed'; })) ? 'is-current' : 'is-locked');
-      // simplify: first non-completed is current
-      return cls;
-    });
-    var foundCurrent = false;
-    track.innerHTML = slice.map(function (m) {
-      var cls, icon;
-      if (m.status === 'completed') { cls = 'is-done'; }
-      else if (!foundCurrent) { cls = 'is-current'; foundCurrent = true; }
-      else { cls = 'is-locked'; }
-      var iconId = /blood|glucose|haemoglobin/i.test(m.title) ? 'i-droplet' :
-        (/scan|ultrasound/i.test(m.title) ? 'i-scan' :
-        (/growth/i.test(m.title) ? 'i-trend' :
-        (/visit|check|antenatal/i.test(m.title) ? 'i-clipboard' : 'i-heart')));
-      icon = '<svg width="19" height="19" aria-hidden="true"><use href="#' + iconId + '"/></svg>';
-      return '<div class="milestone ' + cls + '"><div class="milestone__icon">' + icon +
-        (m.status === 'completed' ? '<span class="milestone__check"></span>' : '') +
-        '</div><div class="milestone__name">' + m.title + '</div><div class="milestone__range">' +
-        api.fmtDate(m.due_date) + '</div></div>';
-    }).join('');
-  }
-}
-
-function renderWeightChart() {
-  var weights = healthLogs.filter(function (l) { return l.log_type === 'weight' && l.data && l.data.kg != null; });
-  var chartSvg = $('weightChart');
-  var curWeightEl = $('curWeight');
-  var startWeightEl = $('startWeight');
-  var bmiValEl = $('bmiVal');
-
-  if (!chartSvg) return;
-
-  // Sort by date (most recent first)
-  weights.sort(function (a, b) { return new Date(b.logged_at) - new Date(a.logged_at); });
-
-  if (weights.length === 0) {
-    // Show empty state or default chart
-    return;
-  }
-
-  // Get current and starting weight
-  var currentWeight = weights[0].data.kg;
-  var startWeight = weights[weights.length - 1].data.kg;
-
-  // Update weight displays
-  if (curWeightEl) curWeightEl.textContent = currentWeight + ' kg';
-  if (startWeightEl) startWeightEl.textContent = startWeight + ' kg';
-
-  // Update subtitles with week information
-  var curWeightSub = $('curWeightSub');
-  var startWeightSub = $('startWeightSub');
-  if (curWeightSub) {
-    if (currentUser && currentUser.care_start_date) {
-      var weeks = api.gestationalWeeks ? api.gestationalWeeks(currentUser.care_start_date) : '?';
-      curWeightSub.textContent = '(at ' + weeks + ' weeks)';
-    } else {
-      curWeightSub.textContent = '(latest)';
-    }
-  }
-  if (startWeightSub) startWeightSub.textContent = '(first recorded)';
-
-  // Calculate BMI (simple calculation - would need height for accurate BMI)
-  if (bmiValEl && currentUser && currentUser.height_cm) {
-    var heightM = currentUser.height_cm / 100;
-    var bmi = (currentWeight / (heightM * heightM)).toFixed(1);
-    bmiValEl.textContent = bmi;
-    var bmiSub = $('bmiSub');
-    if (bmiSub) {
-      if (bmi < 18.5) bmiSub.textContent = '(underweight)';
-      else if (bmi < 25) bmiSub.textContent = '(normal range)';
-      else if (bmi < 30) bmiSub.textContent = '(overweight)';
-      else bmiSub.textContent = '(obese)';
-    }
-  } else if (bmiValEl) {
-    bmiValEl.textContent = '--';
-    var bmiSub = $('bmiSub');
-    if (bmiSub) bmiSub.textContent = 'Height needed';
-  }
-
-  // Render dynamic chart
-  var chartData = weights.slice(0, 10).reverse(); // Show up to 10 entries, oldest to newest
-  if (chartData.length < 2) return; // Need at least 2 points for a line
-
-  var minWeight = Math.min.apply(null, chartData.map(function (w) { return w.data.kg; })) - 2;
-  var maxWeight = Math.max.apply(null, chartData.map(function (w) { return w.data.kg; })) + 2;
-  var weightRange = maxWeight - minWeight || 1;
-
-  var width = 400;
-  var height = 140;
-  var padding = 30;
-  var chartWidth = width - padding * 2;
-  var chartHeight = height - padding * 2;
-
-  // Generate points
-  var points = chartData.map(function (w, i) {
-    var x = padding + (i / (chartData.length - 1)) * chartWidth;
-    var y = padding + chartHeight - ((w.data.kg - minWeight) / weightRange) * chartHeight;
-    return { x: x, y: y, weight: w.data.kg, date: w.logged_at };
-  });
-
-  // Build SVG path
-  var pathD = points.map(function (p, i) { return (i === 0 ? 'M' : 'L') + ' ' + p.x + ' ' + p.y; }).join(' ');
-
-  // Build grid lines and labels
-  var gridLines = '';
-  var yLabels = '';
-  for (var i = 0; i <= 4; i++) {
-    var y = padding + (i / 4) * chartHeight;
-    var weightLabel = (maxWeight - (i / 4) * weightRange).toFixed(0);
-    gridLines += '<line x1="' + padding + '" y1="' + y + '" x2="' + (width - padding) + '" y2="' + y + '" stroke="#ede9fe" stroke-width="1"/>';
-    yLabels += '<text x="2" y="' + (y + 3) + '" fill="#9ca3af" font-size="10" font-family="Inter,sans-serif">' + weightLabel + '</text>';
-  }
-
-  // Build circles for data points
-  var circles = points.map(function (p, i) {
-    var isLast = i === points.length - 1;
-    return '<circle cx="' + p.x + '" cy="' + p.y + '" r="' + (isLast ? 5 : 3.5) + '" ' +
-           (isLast ? 'fill="#fff" stroke="#7c3aed" stroke-width="2.5"' : 'fill="#7c3aed"') + '/>';
-  }).join('');
-
-  // Build date labels
-  var dateLabels = '';
-  if (points.length > 0) {
-    var firstDate = new Date(points[0].date);
-    var midDate = new Date(points[Math.floor(points.length / 2)].date);
-    var lastDate = new Date(points[points.length - 1].date);
-    dateLabels = '<text x="' + points[0].x + '" y="168" fill="#9ca3af" font-size="9" font-family="Inter,sans-serif" text-anchor="middle">' +
-                 formatDate(firstDate) + '</text>' +
-                 '<text x="' + points[Math.floor(points.length / 2)].x + '" y="168" fill="#9ca3af" font-size="9" font-family="Inter,sans-serif" text-anchor="middle">' +
-                 formatDate(midDate) + '</text>' +
-                 '<text x="' + points[points.length - 1].x + '" y="168" fill="#9ca3af" font-size="9" font-family="Inter,sans-serif" text-anchor="middle">' +
-                 formatDate(lastDate) + '</text>';
-  }
-
-  // Current weight badge
-  var badge = '<g transform="translate(' + (points[points.length - 1].x - 24) + ',' + (points[points.length - 1].y - 30) + ')">' +
-              '<rect width="48" height="20" rx="8" fill="#7c3aed"/>' +
-              '<text x="24" y="14" text-anchor="middle" fill="#fff" font-size="10" font-weight="700">' + currentWeight + ' kg</text></g>';
-
-  chartSvg.innerHTML = gridLines + yLabels +
-                      '<path d="' + pathD + '" fill="none" stroke="#7c3aed" stroke-width="2.5" stroke-linecap="round"/>' +
-                      circles + badge + dateLabels;
-}
+function renderWeightChart() {}
 
 function formatDate(date) {
   var d = new Date(date);
@@ -1603,7 +1202,7 @@ async function loadTimeline() {
   }
   var data = null;
   try { data = await api.apiRequest('/timeline'); } catch (e) {}
-  motherMilestones = (data && data.milestones && data.milestones.length) ? data.milestones : hydrateDemoMilestones();
+  if(data) motherMilestones = data.milestones || [];
   renderTimeline();
 }
 
@@ -1615,7 +1214,7 @@ async function loadAppointments() {
   }
   var data = null;
   try { data = await api.apiRequest('/appointments'); } catch (e) {}
-  appointments = (data && data.appointments && data.appointments.length) ? data.appointments : hydrateDemoAppointments();
+  if(data) appointments = data.appointments || [];
   renderAppointments();
 }
 
@@ -1800,6 +1399,7 @@ if (apptForm) {
   }
   apptForm.addEventListener('submit', async function (e) {
     e.preventDefault();
+    if(window.PatientConnected)return;
     if (IS_GUEST) { api.toast('Sign in to request appointments'); return; }
     var doctorId = $('apptDoctor') && $('apptDoctor').value;
     var date = $('apptDate') && $('apptDate').value;
@@ -1807,7 +1407,7 @@ if (apptForm) {
     if (!doctorId || !date) { api.toast('Select a doctor and date'); return; }
     var data = await api.apiRequest('/appointments', {
       method: 'POST',
-      body: { doctor_id: Number(doctorId), requested_date: date, reason: reason }
+      body: { doctor_id: Number(doctorId), requested_date: date, requested_time: $('apptTime').value || null, reason: reason + ($('apptNotes').value ? ' · ' + $('apptNotes').value : '') }
     });
     if (data) {
       api.toast('Appointment requested');
@@ -1876,6 +1476,9 @@ if (sosBtn) {
 var logoutBtn = $('logoutBtn');
 if (logoutBtn) {
   logoutBtn.addEventListener('click', async function () {
+    await PatientOffline.clear();
+    localStorage.removeItem('dai_patient_prefs');
+    if(window.speechSynthesis) speechSynthesis.cancel();
     if (IS_GUEST) {
       localStorage.removeItem('dai_guest');
       window.location.href = 'auth.html';
@@ -1899,62 +1502,8 @@ function route() {
 }
 
 
-async function loadRisk() {
-  if (IS_GUEST) return;
-  var data = await api.apiRequest('/risk');
-  renderRisk(data);
-}
-
-function renderRisk(data) {
-  var levelEl = $('riskLevelLabel');
-  var listEl = $('riskFactorList');
-  var metaEl = $('riskMeta');
-  if (!levelEl) return;
-  if (!data || !data.risk_level) {
-    levelEl.textContent = 'Not assessed yet';
-    levelEl.style.color = 'var(--ink-muted)';
-    if (listEl) listEl.innerHTML = '<li>Log blood pressure (and optionally glucose) then tap Reassess risk.</li>';
-    if (metaEl) metaEl.textContent = '';
-    return;
-  }
-  var level = data.risk_level;
-  levelEl.textContent = level;
-  levelEl.style.color = level.indexOf('high') >= 0 ? 'var(--rose)' : (level.indexOf('mid') >= 0 ? 'var(--amber)' : 'var(--green)');
-  var factors = data.risk_factors || [];
-  if (listEl) {
-    if (!factors.length) listEl.innerHTML = '<li>No additional clinical risk factors flagged.</li>';
-    else listEl.innerHTML = factors.map(function (f) {
-      var label = typeof f === 'string' ? f : (f.label || f.code || '');
-      return '<li>' + label + '</li>';
-    }).join('');
-  }
-  if (metaEl) {
-    metaEl.textContent = data.risk_assessed_at ? ('Assessed ' + api.fmtDate(data.risk_assessed_at)) : '';
-  }
-}
-
-var reassessBtn = $('reassessRiskBtn');
-if (reassessBtn) {
-  reassessBtn.addEventListener('click', async function () {
-    if (IS_GUEST) { api.toast('Sign in to assess risk'); return; }
-    reassessBtn.disabled = true;
-    var data = await api.apiRequest('/risk/assess', { method: 'POST', body: {} });
-    reassessBtn.disabled = false;
-    if (data && data.assessment) {
-      api.toast('Risk updated: ' + data.assessment.risk_level);
-      renderRisk({
-        risk_level: data.assessment.risk_level,
-        risk_factors: data.assessment.factors,
-        risk_assessed_at: new Date().toISOString()
-      });
-      if (window.CareExt) window.CareExt.refreshRisk();
-    }
-  });
-}
-
-
-/* ---- Notifications ------------------------------------------------------- */
 var notifications = [];
+
 function renderNotifPop() {
   var list = $('notifList');
   var count = $('notifCount');
@@ -2024,20 +1573,25 @@ if (notifReadAllBtn) {
 }
 
 async function boot() {
+  if(!navigator.onLine && !IS_GUEST){
+    var cached=await PatientExperience.restore();
+    if(cached){currentUser=cached.user; motherMilestones=cached.milestones; PatientExperience.init({user:currentUser,showPanel:showPanel,reloadTimeline:loadTimeline,reloadAppointments:loadAppointments,offlineOnly:true});route();return;}
+  }
   if (IS_GUEST) {
     currentUser = {
       id: 0,
       full_name: 'Guest',
       email: 'guest@dai.demo',
       role: 'mother',
-      care_start_date: api.localDateStr(),
+      care_start_date: addDaysLocal(-182),
       guest: true
     };
     motherMilestones = hydrateDemoMilestones();
     appointments = hydrateDemoAppointments();
     healthLogs = hydrateDemoHealthLogs();
+    await PatientExperience.init({user:currentUser,showPanel:showPanel,reloadTimeline:loadTimeline,reloadAppointments:loadAppointments});
     renderHeader();
-    if (window.CareExt) window.CareExt.init({ guest: true, user: currentUser });
+    if (window.CareExt) window.CareExt.init({ guest: true, user: currentUser, educationOnly:true });
     renderAppointments();
     renderTimeline();
     renderVitals();
@@ -2049,14 +1603,18 @@ async function boot() {
   }
 
   currentUser = await api.fetchCurrentUser();
-  if (!currentUser) return;
+  if (!currentUser) {
+    if(api.apiRequest.lastNetworkError){var fallback=await PatientExperience.restore();if(fallback){currentUser=fallback.user;motherMilestones=fallback.milestones;await PatientExperience.init({user:currentUser,showPanel:showPanel,reloadTimeline:loadTimeline,reloadAppointments:loadAppointments,offlineOnly:true});route();}}
+    return;
+  }
   if (currentUser.role === 'doctor') {
     window.location.href = 'doctor.html';
     return;
   }
 
+  await PatientExperience.init({user:currentUser,showPanel:showPanel,reloadTimeline:loadTimeline,reloadAppointments:loadAppointments});
   renderHeader();
-  if (window.CareExt) window.CareExt.init({ guest: false, user: currentUser });
+  if (window.CareExt) window.CareExt.init({ guest: false, user: currentUser, educationOnly:true });
   await Promise.all([
     loadTimeline(),
     loadAppointments(),
@@ -2065,7 +1623,6 @@ async function boot() {
     loadMedications(),
     loadFinancial(),
     loadPregnancyIntoForm(),
-    loadRisk(),
     loadNotifications(),
     loadPatientDocuments()
   ]);
@@ -2082,7 +1639,7 @@ if (window.DaiPrefs) {
 var setLangEl = $('setLang');
 if (setLangEl) {
   setLangEl.addEventListener('change', function () {
-    if (window.DaiI18n) window.DaiI18n.setLang(setLangEl.value === 'hi' ? 'hi' : 'en');
+    if (window.DaiI18n) window.DaiI18n.setLang(setLangEl.value);
   });
 }
 
@@ -2121,13 +1678,14 @@ if (setLangEl) {
             filename: file.name,
             mime_type: file.type || 'application/pdf',
             content_base64: b64,
-            notes: notes || undefined
+            notes: notes || undefined,report_date:$('docReportDate').value||null,facility_name:$('docFacility').value||null,child_id:$('docSubject').value?Number($('docSubject').value):null,milestone_id:$('docMilestone').value?Number($('docMilestone').value):null,appointment_id:$('docAppointment').value?Number($('docAppointment').value):null,report_category:$('docCategory').value,is_sensitive:$('docSensitive').checked
           }
         });
         if (res && res.document) {
           api.toast('Document uploaded');
           form.reset();
           await loadPatientDocuments();
+          await loadTimeline();
         }
       } finally {
         if (btn) btn.disabled = false;
@@ -2152,7 +1710,9 @@ if (setLangEl) {
       var delRes = await api.apiRequest('/documents/' + del, { method: 'DELETE' });
       if (delRes) {
         api.toast('Document deleted');
+        document.querySelectorAll('dialog.connected-report-detail').forEach(function(d){d.close();});
         await loadPatientDocuments();
+        await loadTimeline();
       }
       return;
     }
@@ -2229,10 +1789,7 @@ async function renderMessagesFromAppts() {
   var data = null;
   try { data = await api.apiRequest('/appointments'); } catch (e) {}
   var appts = (data && data.appointments) || [];
-  if (!appts.length) {
-    renderDemoMessages();
-    return;
-  }
+  if (!appts.length) { list.textContent='No appointment updates recorded.'; return; }
   list.innerHTML = appts.slice(0, 15).map(function (a) {
     return '<div class="list-row"><div class="list-row__meta"><div class="list-row__title">' +
       (a.doctor_name || 'Doctor') + ' · ' + (a.status || '') +

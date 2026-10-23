@@ -1,4 +1,5 @@
 'use strict';
+const fs=require('node:fs/promises'),path=require('node:path'),crypto=require('node:crypto');
 const {faqs,respond}=require('../frontend/js/daya-knowledge');
 
 function pcmToWav(pcm,sampleRate=24000){
@@ -10,7 +11,8 @@ function pcmToWav(pcm,sampleRate=24000){
   header.write('data',36);header.writeUInt32LE(pcm.length,40);return Buffer.concat([header,pcm]);
 }
 function createSpeechHandler({env=process.env,fetchImpl=(...args)=>fetch(...args),now=Date.now}={}){
-  const cache=new Map(),requests=new Map();
+  const cache=new Map(),requests=new Map(),inflight=new Map();
+  const diskDir=env.DAI_TTS_CACHE_DIR || (env===process.env?path.join(__dirname,'../.local/tts-cache'):null);
   const approved=Object.fromEntries(['en','hi'].map(lang=>[lang,new Set([...faqs.map(f=>f.answer[lang]),respond('',lang).text])]));
   return async function speech(req,res){
     const text=typeof req.body?.text==='string'?req.body.text.trim():'';
@@ -25,7 +27,8 @@ function createSpeechHandler({env=process.env,fetchImpl=(...args)=>fetch(...args
     if(!key)return res.status(503).json({error:'Gemini voice is not configured. Add GEMINI_API_KEY to backend/.env and restart DAI.'});
     const model=env.GEMINI_TTS_MODEL||'gemini-2.5-flash-preview-tts';
     const voice=env.GEMINI_TTS_VOICE||'Charon';
-    const cacheKey=JSON.stringify([model,voice,language,text]);
+    const cacheKey=JSON.stringify(['v2',model,voice,language,text]);
+    const diskPath=diskDir?path.join(diskDir,crypto.createHash('sha256').update(cacheKey).digest('hex')+'.wav'):null;
     function send(audio,cached){
       res.set({'Content-Type':'audio/wav','Content-Length':audio.length,'Cache-Control':'no-store',
         'X-DAI-TTS-Provider':'gemini','X-DAI-TTS-Voice':voice,'X-DAI-TTS-Model':model,
@@ -33,10 +36,15 @@ function createSpeechHandler({env=process.env,fetchImpl=(...args)=>fetch(...args
       return res.send(audio);
     }
     if(cache.has(cacheKey))return send(cache.get(cacheKey),true);
+    if(diskPath){try{const bytes=await fs.readFile(diskPath);if(bytes.length>44&&bytes.length<=8*1024*1024&&bytes.toString('ascii',0,4)==='RIFF'){cache.set(cacheKey,bytes);return send(bytes,true);}}catch{}}
+    if(inflight.has(cacheKey)){const result=await inflight.get(cacheKey);return result.audio?send(result.audio,true):res.status(result.code).json({error:result.error});}
+
     const time=now();for(const [ip,entry] of requests)if(entry.expires<=time)requests.delete(ip);
     const ip=req.ip||'local',entry=requests.get(ip)||{count:0,expires:time+600000};
     if(entry.count>=30||requests.size>10000)return res.status(429).json({error:'Voice request limit reached. Please try later.'});
     entry.count++;requests.set(ip,entry);
+    let settle;inflight.set(cacheKey,new Promise(resolve=>{settle=resolve;}));
+    function failure(code,error){settle({code,error});inflight.delete(cacheKey);return res.status(code).json({error});}
     try{
       const response=await fetchImpl(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,{
         method:'POST',signal:AbortSignal.timeout(30000),
@@ -57,19 +65,21 @@ function createSpeechHandler({env=process.env,fetchImpl=(...args)=>fetch(...args
         else if(response.status===429)message='Gemini voice quota is exhausted. Check your Google AI Studio quota or billing, then try again.';
         else if(response.status===403)message='Google denied Gemini voice access. Check API key restrictions and project access in Google AI Studio.';
         else if(response.status===404)message='This Gemini TTS model is unavailable to the running backend. Check GEMINI_TTS_MODEL in backend/.env and restart DAI.';
-        return res.status(response.status===429?429:502).json({error:message});
+        return failure(response.status===429?429:502,message);
       }
       const data=await response.json();
       const audioPart=data.candidates?.[0]?.content?.parts?.find(p=>p.inlineData?.data)?.inlineData;
-      if(!audioPart||!/^audio\/L16(?:;|$)/i.test(audioPart.mimeType||''))return res.status(502).json({error:'Gemini returned no supported PCM audio'});
+      if(!audioPart||!/^audio\/L16(?:;|$)/i.test(audioPart.mimeType||''))return failure(502,'Gemini returned no supported PCM audio');
       const rate=Number((audioPart.mimeType.match(/rate=(\d+)/)||[])[1]||24000);
-      if(!Number.isInteger(rate)||rate<8000||rate>96000)return res.status(502).json({error:'Gemini returned an unsupported sample rate'});
+      if(!Number.isInteger(rate)||rate<8000||rate>96000)return failure(502,'Gemini returned an unsupported sample rate');
       const pcm=Buffer.from(audioPart.data,'base64');
-      if(!pcm.length||pcm.length%2||pcm.length>8*1024*1024)return res.status(502).json({error:'Gemini returned invalid audio'});
+      if(!pcm.length||pcm.length%2||pcm.length>8*1024*1024)return failure(502,'Gemini returned invalid audio');
       const audio=pcmToWav(pcm,rate);
       if(cache.size>=64)cache.delete(cache.keys().next().value);
-      cache.set(cacheKey,audio);return send(audio,false);
-    }catch(error){return res.status(error.name==='TimeoutError'||error.name==='AbortError'?504:502).json({error:'Gemini voice is temporarily unavailable'});}
+      cache.set(cacheKey,audio);
+      if(diskPath){try{await fs.mkdir(diskDir,{recursive:true});const temporary=diskPath+'.'+crypto.randomUUID()+'.tmp';await fs.writeFile(temporary,audio);await fs.rename(temporary,diskPath);}catch{ /* Audio still plays if disk storage is unavailable. */ }}
+      settle({audio});inflight.delete(cacheKey);return send(audio,false);
+    }catch(error){return failure(error.name==='TimeoutError'||error.name==='AbortError'?504:502,'Gemini voice is temporarily unavailable');}
   };
 }
 module.exports={createSpeechHandler,pcmToWav};

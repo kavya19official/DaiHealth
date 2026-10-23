@@ -25,6 +25,24 @@
     const panel=root.querySelector('section'),launcher=root.querySelector('.care-chatbot__launcher'),feed=root.querySelector('.care-chatbot__feed'),input=root.querySelector('input'),mic=root.querySelector('.daya-mic'),voiceButton=root.querySelector('.care-chatbot__voice'),state=root.querySelector('.daya-state'),help=root.querySelector('.daya-help-status'),avatarHost=root.querySelector('.daya-avatar');
     const tr=(en,hi)=>language==='hi'?hi:en;
     let activeCategory='app';
+    const preparedAudio=new Map(),preparingAudio=new Map();
+    async function prepareAudio(text,requestedLanguage){
+      const key=JSON.stringify([requestedLanguage,text]);
+      if(preparedAudio.has(key))return preparedAudio.get(key);
+      if(preparingAudio.has(key))return preparingAudio.get(key);
+      const pending=(async()=>{
+        const response=await fetch(new URL('api/tts',appBase).href,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text,language:requestedLanguage}),signal:AbortSignal.timeout(35000)});
+        if(!response.ok){const error=await response.json().catch(()=>({}));throw new Error(error.error||('Gemini voice unavailable: '+response.status));}
+        if(response.headers.get('X-DAI-TTS-Provider')!=='gemini')throw new Error('The voice service did not return Gemini audio.');
+        const blob=await response.blob();if(!/^audio\//i.test(blob.type)||!blob.size)throw new Error('No Gemini audio');
+        const result={blob,voice:response.headers.get('X-DAI-TTS-Voice')||'Charon'};
+        if(preparedAudio.size>=12)preparedAudio.delete(preparedAudio.keys().next().value);preparedAudio.set(key,result);return result;
+      })();preparingAudio.set(key,pending);
+      try{return await pending;}finally{preparingAudio.delete(key);}
+    }
+    function warmQuestion(text){if(!voice||!opened)return;prepareAudio(text,language).catch(()=>{});}
+    let draftWarmTimer,lastDraftWarm=0;
+    input.addEventListener('input',()=>{clearTimeout(draftWarmTimer);if(!voice||input.value.trim().length<12)return;draftWarmTimer=setTimeout(()=>{if(!voice||!opened||Date.now()-lastDraftWarm<8000)return;const result=knowledge.respond(input.value,language);if(!knowledge.faqs.some(f=>f.answer[language]===result.text))return;lastDraftWarm=Date.now();warmQuestion(result.text);},650);});
     function releaseAudio(){
       if(currentAudio){currentAudio.onplaying=null;currentAudio.onended=null;currentAudio.onerror=null;currentAudio.pause();currentAudio.removeAttribute('src');currentAudio.load();currentAudio=null;}
       if(audioUrl){URL.revokeObjectURL(audioUrl);audioUrl=null;}
@@ -47,17 +65,10 @@
       };
       const errorBox=root.querySelector('.daya-voice-error');errorBox.hidden=true;
       try{
-        const response=await fetch(new URL('api/tts',appBase).href,{
-          method:'POST',headers:{'Content-Type':'application/json'},
-          body:JSON.stringify({text,language:requestedLanguage}),signal:controller.signal
-        });
-        if(!response.ok){const error=await response.json().catch(()=>({}));throw new Error(error.error||('Gemini voice unavailable: '+response.status));}
-        if(response.headers.get('X-DAI-TTS-Provider')!=='gemini')throw new Error('The voice service did not return Gemini audio.');
-        const blob=await response.blob();
-        if(!/^audio\//i.test(blob.type)||!blob.size)throw new Error('No Gemini audio');
+        const prepared=await Promise.race([prepareAudio(text,requestedLanguage),new Promise((_,reject)=>{controller.signal.addEventListener('abort',()=>reject(new DOMException('Request stopped','AbortError')),{once:true});})]);
         if(id!==speechId||!voice||!opened)return;
-        audioUrl=URL.createObjectURL(blob);const audio=new Audio(audioUrl);currentAudio=audio;
-        const voiceName=response.headers.get('X-DAI-TTS-Voice')||'Charon';
+        audioUrl=URL.createObjectURL(prepared.blob);const audio=new Audio(audioUrl);currentAudio=audio;
+        const voiceName=prepared.voice;
         help.textContent='Gemini · '+voiceName+' · '+(requestedLanguage==='hi'?'हिंदी':'English');
         audio.onplaying=()=>{if(id===speechId){avatar?.setTalking(true);state.textContent=tr('Speaking…','बोल रहा हूँ…');}};
         audio.onended=()=>{if(id===speechId){releaseAudio();avatar?.setTalking(false);state.textContent=tr('Ready when you are','आपका प्रश्न सुनने को तैयार');}};
@@ -97,7 +108,7 @@
         button.addEventListener('click',()=>{activeCategory=category.id;topics();});categories.appendChild(button);
       });
       const chips=root.querySelector('.care-chatbot__chips');chips.replaceChildren();
-      knowledge.faqs.filter(q=>q.category===activeCategory).forEach(q=>{const button=el('button',{type:'button','data-question-id':q.id},q.question[language]);button.addEventListener('click',()=>ask(q.question[language]));chips.appendChild(button);});
+      knowledge.faqs.filter(q=>q.category===activeCategory).forEach(q=>{const button=el('button',{type:'button','data-question-id':q.id},q.question[language]);button.addEventListener('click',()=>ask(q.question[language]));let warmTimer;button.addEventListener('pointerenter',()=>{warmTimer=setTimeout(()=>warmQuestion(q.answer[language]),220);});button.addEventListener('pointerleave',()=>clearTimeout(warmTimer));button.addEventListener('focus',()=>warmQuestion(q.answer[language]));chips.appendChild(button);});
     }
     function labels(){
       root.querySelector('.care-chatbot__notice').textContent=tr('No diagnosis or prescriptions. Voice sends the prepared answer to Google Gemini; private records are not read.','Diagnosis या prescription नहीं। आवाज़ के लिए तैयार जवाब Google Gemini को भेजा जाता है; निजी records नहीं पढ़े जाते।');
