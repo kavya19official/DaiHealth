@@ -12,7 +12,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
 </head>
-<body>
+<body class="dai-home">
 <a class="skip-link" href="#main">Skip to content</a>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
@@ -35,9 +35,9 @@
       <span><span class="brand__name">दाई</span><span class="brand__tag">Hospital Workflow</span></span>
     </a>
     <nav class="site-nav" aria-label="Primary navigation">
-      <a href="auth.html">Mother / Patient</a>
-      <a href="auth.html">Doctor</a>
-      <a href="auth.html">Hospital Team</a>
+      <a href="auth.html?role=mother">Mother / Patient</a>
+      <a href="auth.html?role=doctor">Doctor</a>
+      <a href="hospital.html">Hospital / Admin</a>
       <a href="#modules">Features</a>
       <a href="#why">About</a>
     </nav>
@@ -53,11 +53,12 @@
     <div class="wrap hero__grid">
       <div class="hero__copy">
         <span class="eyebrow">Assistive healthcare operations</span>
-        <h1>दाई helps hospitals stay ahead of patient follow-up.</h1>
-        <p>One shared workspace for care gaps, pre-consult context, registry views, clinic flow and human-reviewed patient communication.</p>
-        <div class="hero__actions">
-          <a class="btn btn--primary" href="auth.html">Book a Demo <svg width="17" height="17" aria-hidden="true"><use href="#i-arrow"/></svg></a>
-          <a class="btn btn--outline" href="auth.html">Open Doctor Portal</a>
+        <h1>One DAI.<br>Three workspaces.</h1>
+        <p>Continue your care journey, manage clinical follow-up, or prepare your hospital. Choose your workspace to get started.</p>
+        <div class="workspace-choices" aria-label="Choose your DAI interface">
+          <a class="workspace-choice" href="auth.html?role=mother"><span>01 · PATIENT</span><strong>My care journey</strong><small>Appointments, reports and child health</small></a>
+          <a class="workspace-choice" href="auth.html?role=doctor"><span>02 · DOCTOR</span><strong>Clinical workspace</strong><small>Assigned patients and care follow-up</small></a>
+          <a class="workspace-choice" href="hospital.html"><span>03 · HOSPITAL / ADMIN</span><strong>Hospital readiness</strong><small>Operations, administration and resources</small></a>
         </div>
       </div>
       <div class="hero__visual" aria-hidden="false">
@@ -300,9 +301,9 @@
       <ul class="footer-links">
         <li><a href="#why">Safety model</a></li>
         <li><a href="#workflow">Workflow overview</a></li>
-        <li><a href="auth.html">Mother / patient portal</a></li>
-        <li><a href="auth.html">Doctor portal</a></li>
-        <li><a href="auth.html">Hospital console</a></li>
+        <li><a href="auth.html?role=mother">Mother / patient portal</a></li>
+        <li><a href="auth.html?role=doctor">Doctor portal</a></li>
+        <li><a href="hospital.html">Hospital / Admin</a></li>
       </ul>
     </div>
     <div>
@@ -334,5 +335,6 @@ document.querySelectorAll('.faq-question').forEach(function (button) {
 });
 </script>
 <script src="js/care-chatbot.js?v=voice-fallback-3"></script>
+<script src="js/local-workspace.js"></script>
 </body>
 </html>

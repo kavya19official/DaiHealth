@@ -1091,3 +1091,18 @@ body.doctor-page .doctor-patient.is-selected {
     bottom: 0.75rem;
   }
 }
+
+/* Three workspaces, one DAI entry point. */
+.workspace-choices {display:grid;gap:10px;margin-top:24px;max-width:570px}
+.workspace-choice {display:grid;grid-template-columns:145px 1fr;gap:3px 14px;padding:15px 18px;border:1px solid #e3d9ed;border-radius:16px;background:#fffafeda;text-decoration:none;color:#362344;box-shadow:0 4px 16px #7f56a00a}
+.workspace-choice:hover,.workspace-choice:focus-visible {border-color:#9270b4;background:#f5edf9;transform:translateY(-1px)}
+.workspace-choice>span {grid-row:span 2;align-self:center;font-size:10px;font-weight:800;letter-spacing:.07em;color:#7f5c9d}
+.workspace-choice>strong {font-size:16px}.workspace-choice>small{font-size:12px;color:#776a80}
+.local-workspace-banner {margin:20px auto;padding:14px 20px;max-width:1160px;background:#f0e9f6;border:1px solid #ded1e9;border-radius:14px;color:#57416c;font-size:13px}
+.local-workspace-banner strong,.local-workspace-banner span {display:block}.local-workspace-banner span{margin-top:4px}.local-workspace-banner p{margin:8px 0 0;overflow-wrap:anywhere}
+@media(max-width:540px){.workspace-choice{grid-template-columns:1fr}.workspace-choice>span{grid-row:auto}.local-workspace-banner{margin:12px}}
+
+body.dai-home .hero {min-height:540px;padding-top:26px;justify-content:flex-start}
+body.dai-home .hero__copy h1 {font-size:clamp(36px,4vw,50px);line-height:1.06;margin-bottom:14px}
+body.dai-home .workspace-choice {padding:12px 18px}
+body.dai-home .hero__photo-wrap {width:min(380px,100%)}

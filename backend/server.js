@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config({ path: require('node:path').join(__dirname, '.env') });
 const express = require('express');
 const path = require('path');
 const { Pool } = require('pg');
@@ -11,6 +11,9 @@ const { runRiskAssessment } = require('./riskService');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+
+// One local entry point; proxy before body parsing so uploads/auth stream intact.
+const attachLocalUpgrade = require('./localGateway').registerLocalGateway(app);
 
 // Middleware
 
@@ -63,7 +66,9 @@ const dbConfig = hasDatabaseUrl
       }
     : null;
 
-const pool = dbConfig
+const pool = process.env.DAI_LOCAL === 'true'
+  ? require('./localPool').createLocalPool(process.env.DAI_LOCAL_DB_DIR)
+  : dbConfig
   ? new Pool(dbConfig)
   : {
       query() {
@@ -75,7 +80,7 @@ const pool = dbConfig
     };
 
 // Test database connection only when a database has actually been configured.
-if (dbConfig) {
+if (dbConfig || process.env.DAI_LOCAL === 'true') {
   pool.query('SELECT NOW()', (err, dbRes) => {
     if (err) {
       console.error('Database connection error:', err.message);
@@ -105,7 +110,7 @@ const authenticateToken = (req, res, next) => {
     next();
   } catch (error) {
     res.clearCookie('token');
-    return res.status(403).json({ error: 'Invalid or expired token' });
+    return res.status(401).json({ error: 'Invalid or expired token' });
   }
 };
 
@@ -474,7 +479,7 @@ app.post('/api/auth/login', async (req, res) => {
     }
 
     // Find user
-    const userResult = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+    const userResult = await pool.query('SELECT * FROM users WHERE lower(email) = lower($1)', [String(email).trim()]);
     if (userResult.rows.length === 0) {
       return res.status(401).json({ error: 'Invalid email or password' });
     }
@@ -1204,6 +1209,19 @@ app.post('/api/tts', async (req, res) => {
   }
 });
 
+// Local-only diagnostics. No secrets or patient identifiers are returned.
+if (process.env.DAI_LOCAL === 'true') {
+  app.get('/api/local/status', async (req, res) => {
+    try {
+      const result = await pool.query("SELECT counts FROM dai_local_seed WHERE version='cohort-v1'");
+      res.json({local:true, data_label:'Simulated on synthetic data', counts:result.rows[0]?.counts,
+        accounts:{mother:'mother@dai-synthetic.invalid',doctor:'doctor@dai-synthetic.invalid',hospital:'hospital_admin@dai-synthetic.invalid'}, hospital_path:'/hospital-admin'});
+    } catch (_) { res.status(503).json({error:'Local database setup incomplete. Run npm start from the DAI root.'}); }
+  });
+  app.get('/hospital.html', (req, res) => res.redirect('/hospital-admin'));
+  app.get('/hospital-legacy.html', (req, res) => res.sendFile(path.join(__dirname,'../frontend/hospital.html')));
+}
+
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
@@ -1222,6 +1240,24 @@ app.get('/', (req, res) => {
 });
 
 // Start server
-app.listen(PORT, () => {
-  console.log(`DAI backend server running on port ${PORT}`);
+const server = app.listen(PORT, process.env.DAI_LOCAL === 'true' ? '127.0.0.1' : undefined, () => {
+  console.log(`DAI backend server running on port ${server.address().port}`);
 });
+
+if (attachLocalUpgrade) attachLocalUpgrade(server);
+
+if (process.env.DAI_LOCAL === 'true') {
+  let stopping = false;
+  const shutdown = () => {
+    if (stopping) return;
+    stopping = true;
+    server.close(async () => {
+      try { await pool.end(); process.exit(0); }
+      catch (_) { process.exit(1); }
+    });
+    server.closeIdleConnections?.();
+    setTimeout(() => process.exit(1), 8000).unref();
+  };
+  process.on('SIGINT', shutdown);
+  process.on('SIGTERM', shutdown);
+}

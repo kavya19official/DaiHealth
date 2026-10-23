@@ -1,0 +1,15 @@
+{
+  "name": "dai-local-workspace",
+  "private": true,
+  "scripts": {
+    "start": "node scripts/local.cjs run",
+    "setup": "node scripts/local.cjs setup",
+    "doctor": "node scripts/local.cjs doctor",
+    "test:local": "node --test backend/localGateway.test.js backend/localPool.test.js backend/localAuth.test.js",
+    "check:local": "node scripts/check-local.cjs",
+    "stop": "node scripts/local.cjs stop"
+  },
+  "engines": {
+    "node": ">=22.13.0"
+  }
+}
