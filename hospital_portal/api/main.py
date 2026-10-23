@@ -14,6 +14,7 @@ from sqlalchemy import select, update, delete, func, or_
 from . import schema as s
 from .db import database, initialize
 from .security import ROLES, CLINICAL, digest, verify_password
+from .staff_scope import effective_staff, facility_staff
 
 LABEL = "Simulated on synthetic data"
 UTC = timezone.utc
@@ -85,11 +86,16 @@ def create_app(engine=None):
                 action=action,
                 entity_type=entity,
                 entity_id=identifier,
-                details=details or {},
+                details={
+                    **(details or {}),
+                    "facility_id": (details or {}).get(
+                        "facility_id", actor.get("facility_id")
+                    ),
+                },
             )
         )
 
-    def issue(c, u, response, impersonator=None):
+    def issue(c, u, response, impersonator=None, previous_session=None):
         sid = str(uuid4())
         refresh = secrets.token_urlsafe(48)
         c.execute(
@@ -102,6 +108,18 @@ def create_app(engine=None):
                 impersonated_by=impersonator,
             )
         )
+        if previous_session:
+            membership_id = c.scalar(
+                select(s.session_scope.c.affiliation_id).where(
+                    s.session_scope.c.session_id == previous_session
+                )
+            )
+            if membership_id:
+                c.execute(
+                    s.session_scope.insert().values(
+                        session_id=sid, affiliation_id=membership_id
+                    )
+                )
         token = jwt.encode(
             {
                 "sub": u["id"],
@@ -146,6 +164,51 @@ def create_app(engine=None):
             )
         }
 
+    def affiliation_context(c, u, session_id=None):
+        membership = None
+        if session_id:
+            membership = (
+                c.execute(
+                    select(s.staff_affiliation)
+                    .join(
+                        s.session_scope,
+                        s.session_scope.c.affiliation_id == s.staff_affiliation.c.id,
+                    )
+                    .where(s.session_scope.c.session_id == session_id)
+                )
+                .mappings()
+                .first()
+            )
+        if membership is None:
+            membership = (
+                c.execute(
+                    select(s.staff_affiliation).where(
+                        s.staff_affiliation.c.user_id == u["id"],
+                        s.staff_affiliation.c.facility_id == u["facility_id"],
+                    )
+                )
+                .mappings()
+                .first()
+            )
+        if membership:
+            if membership["user_id"] != u["id"] or not membership["active"]:
+                raise HTTPException(403, "Facility access is inactive")
+            u = {
+                **u,
+                **{
+                    k: membership[k]
+                    for k in (
+                        "facility_id",
+                        "department_id",
+                        "unit_id",
+                        "role",
+                        "verified",
+                        "registration_no",
+                    )
+                },
+            }
+        return u
+
     def actor(credentials: HTTPAuthorizationCredentials | None = Depends(bearer)):
         if credentials is None:
             raise HTTPException(401, "Authentication required")
@@ -174,7 +237,7 @@ def create_app(engine=None):
                 or session["user_id"] != payload["sub"]
             ):
                 raise HTTPException(401, "Session expired")
-            u = one(s.user, payload["sub"], c)
+            u = affiliation_context(c, one(s.user, payload["sub"], c), session["id"])
             if u["role"] not in ROLES:
                 raise HTTPException(403, "Unknown role")
             if u["role"] in CLINICAL and (
@@ -219,9 +282,9 @@ def create_app(engine=None):
             "data_label": LABEL,
             "phase": "foundation",
             "demo_auth_delivery": demo,
-            "postgres_acceptance": "pending"
-            if engine.dialect.name != "postgresql"
-            else "available",
+            "postgres_acceptance": (
+                "pending" if engine.dialect.name != "postgresql" else "available"
+            ),
         }
 
     class Login(BaseModel):
@@ -309,7 +372,7 @@ def create_app(engine=None):
                     .where(s.auth_challenge.c.id == body.challenge_id)
                     .values(consumed=True)
                 )
-                u = one(s.user, challenge["user_id"], c)
+                u = affiliation_context(c, one(s.user, challenge["user_id"], c))
                 if u["role"] in CLINICAL and (
                     not u["verified"]
                     or not u["registration_no"]
@@ -364,9 +427,12 @@ def create_app(engine=None):
                 raise HTTPException(401, "Refresh session already rotated")
             return issue(
                 c,
-                one(s.user, session["user_id"], c),
+                affiliation_context(
+                    c, one(s.user, session["user_id"], c), session["id"]
+                ),
                 response,
                 session["impersonated_by"],
+                previous_session=session["id"],
             )
 
     @app.post("/api/auth/logout")
@@ -492,12 +558,19 @@ def create_app(engine=None):
         if "name" in values and not values["name"].startswith("DAI SYNTHETIC "):
             raise HTTPException(400, "Keep the DAI SYNTHETIC name prefix")
         with engine.begin() as c:
-            one(s.facility, fid, c)
+            previous = one(s.facility, fid, c)
             if values:
                 c.execute(
                     update(s.facility).where(s.facility.c.id == fid).values(**values)
                 )
-            audit(c, u, "update", "facility", fid, {"fields": list(values)})
+            audit(
+                c,
+                u,
+                "update",
+                "facility",
+                fid,
+                {"before": {k: previous[k] for k in values}, "after": values},
+            )
             return one(s.facility, fid, c)
 
     # M1 editable structure: constrained field allowlists, all references stay in this facility.
@@ -556,9 +629,7 @@ def create_app(engine=None):
                 target = (
                     s.department
                     if key == "department_id"
-                    else s.unit
-                    if key == "unit_id"
-                    else s.ward
+                    else s.unit if key == "unit_id" else s.ward
                 )
                 if one(target, value, c)["facility_id"] != fid:
                     raise HTTPException(
@@ -609,7 +680,14 @@ def create_app(engine=None):
                 raise HTTPException(403)
             t = clean_entity(kind, body, fid, c, False, existing)
             c.execute(update(t).where(t.c.id == identifier).values(**body))
-            audit(c, u, "update", t.name, identifier)
+            audit(
+                c,
+                u,
+                "update",
+                t.name,
+                identifier,
+                {"before": {k: existing[k] for k in body}, "after": body},
+            )
             return one(t, identifier, c)
 
     @app.delete("/api/facilities/{fid}/structure/{kind}/{identifier}")
@@ -706,7 +784,16 @@ def create_app(engine=None):
             items = c.execute(
                 select(s.audit_log)
                 .join(s.user, s.audit_log.c.actor_id == s.user.c.id)
-                .where(s.user.c.facility_id == u["facility_id"])
+                .where(
+                    or_(
+                        s.audit_log.c.details["facility_id"].as_string()
+                        == u["facility_id"],
+                        (
+                            s.audit_log.c.details["facility_id"].as_string().is_(None)
+                            & (s.user.c.facility_id == u["facility_id"])
+                        ),
+                    )
+                )
                 .order_by(s.audit_log.c.created_at.desc())
                 .limit(100)
             ).mappings()
@@ -715,9 +802,7 @@ def create_app(engine=None):
     @app.get("/api/users")
     def users(u=Depends(require("user.verify"))):
         with engine.connect() as c:
-            rows = c.execute(
-                select(s.user).where(s.user.c.facility_id == u["facility_id"])
-            ).mappings()
+            rows = facility_staff(c, u["facility_id"])
             return {
                 "items": [
                     {
@@ -738,7 +823,7 @@ def create_app(engine=None):
         identifier: str, body: Verification, u=Depends(require("user.verify"))
     ):
         with engine.begin() as c:
-            target = one(s.user, identifier, c)
+            target = effective_staff(c, one(s.user, identifier, c), u["facility_id"])
             scope(u, target["facility_id"])
             if (
                 body.verified
@@ -748,15 +833,44 @@ def create_app(engine=None):
                 raise HTTPException(
                     422, "Registration number and department are required"
                 )
-            c.execute(
-                update(s.user)
-                .where(s.user.c.id == identifier)
-                .values(verified=body.verified)
+            membership = (
+                c.execute(
+                    select(s.staff_affiliation).where(
+                        s.staff_affiliation.c.user_id == identifier,
+                        s.staff_affiliation.c.facility_id == u["facility_id"],
+                    )
+                )
+                .mappings()
+                .first()
             )
+            if membership:
+                c.execute(
+                    update(s.staff_affiliation)
+                    .where(s.staff_affiliation.c.id == membership["id"])
+                    .values(verified=body.verified, version=membership["version"] + 1)
+                )
+            else:
+                c.execute(
+                    update(s.user)
+                    .where(s.user.c.id == identifier)
+                    .values(verified=body.verified)
+                )
             audit(
-                c, u, "verify", "portal_user", identifier, {"verified": body.verified}
+                c,
+                u,
+                "verify",
+                "portal_user",
+                identifier,
+                {
+                    "before": {"verified": target["verified"]},
+                    "after": {"verified": body.verified},
+                },
             )
             return {"verified": body.verified}
+
+    from .administration import register_administration
+
+    register_administration(app, engine, require, actor, audit, one, clinical_scope)
 
     from .workspace import register_workspace
 
