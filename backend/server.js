@@ -346,7 +346,7 @@ app.post('/api/auth/register/mother', async (req, res) => {
       res.cookie('token', token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
+        sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
         maxAge: 7 * 24 * 60 * 60 * 1000
       });
 
@@ -1103,6 +1103,12 @@ require('./hospitalPlatform')(app, { authenticateToken });
 // Relational synthetic hospital and administration workspace.
 require('./hospitalAdministration')(app);
 
+// Facility discovery and doctor directory
+require('./facilityDiscovery')(app, { pool, authenticateToken, authorizeRole });
+
+// Smart referral handoff and mother-newborn continuity
+require('./referralContinuity')(app, { pool, authenticateToken, authorizeRole });
+
 // Gemini receives approved Dr. Daya answers only; the API key remains server-side.
 app.post('/api/tts', require('./dayaSpeech').createSpeechHandler());
 
@@ -1140,7 +1146,9 @@ app.use(express.static(frontendPath));
 
 // Start server
 const server = app.listen(PORT, process.env.DAI_LOCAL === 'true' ? '127.0.0.1' : undefined, () => {
-  console.log(`DAI backend server running on port ${server.address().port}`);
+  const address = server.address();
+  const port = address ? (typeof address === 'string' ? address : address.port) : PORT;
+  console.log(`DAI backend server running on port ${port}`);
 });
 
 if (attachLocalUpgrade) attachLocalUpgrade(server);

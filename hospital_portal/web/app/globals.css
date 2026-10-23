@@ -2736,3 +2736,9 @@ select {
   z-index: 1;
   background: #faf9fc;
 }
+
+.admin-manager-grid { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:24px; margin-top:20px; }
+.admin-manager form, .admin-manager article { background:var(--surface,#fff); padding:20px; border:1px solid #dbe4e3; border-radius:14px; margin-bottom:14px; }
+.admin-manager input:not([type=checkbox]), .admin-manager select, .admin-manager textarea { width:100%; min-width:0; box-sizing:border-box; padding:10px; border:1px solid #bccfcb; border-radius:8px; }
+.admin-manager .toolbar { display:flex; flex-wrap:wrap; gap:10px; }
+@media(max-width:800px){ .admin-manager-grid { grid-template-columns:minmax(0,1fr); } }

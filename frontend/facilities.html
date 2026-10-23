@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>दाई — Find Facilities</title>
+<meta name="theme-color" content="#7c3aed">
+<link rel="icon" href="assets/logo.jpeg">
+<link rel="stylesheet" href="styles.css">
+<script src="js/dai-api.js"></script>
+<style>
+.facility-search-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+.location-setup {
+  background: linear-gradient(135deg, #faf5ff, #f3e8ff);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.location-setup.is-set {
+  background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+  border-color: #10b981;
+}
+
+.location-setup h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1.2rem;
+  color: var(--ink);
+}
+
+.location-hint {
+  margin: 0 0 1rem;
+  color: var(--ink-2);
+  font-size: 0.9rem;
+}
+
+.location-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.location-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.device-location-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  color: var(--brand);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.device-location-btn:hover:not(:disabled) {
+  border-color: var(--brand);
+  background: var(--brand-soft);
+}
+
+.device-location-btn:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+.device-location-btn svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.current-location-chip {
+  display: none;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.85rem;
+  background: #fff;
+  border: 1px solid #10b981;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  color: #047857;
+  font-weight: 600;
+}
+
+.current-location-chip.is-visible {
+  display: inline-flex;
+}
+
+.filters-section {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.filters-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.filters-header h2 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.filters-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1rem;
+}
+
+.filter-group label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ink-2);
+  margin-bottom: 0.4rem;
+}
+
+.filter-group select,
+.filter-group input {
+  width: 100%;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  background: #fff;
+}
+
+.search-btn {
+  padding: 0.75rem 1.5rem;
+  background: var(--brand);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.search-btn:hover {
+  background: var(--brand-strong);
+}
+
+.search-btn.secondary {
+  background: #fff;
+  color: var(--brand);
+  border: 1px solid var(--brand);
+}
+
+.results-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+  color: var(--ink-2);
+}
+
+.facilities-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 1.25rem;
+}
+
+.facility-card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+}
+
+.facility-card:hover {
+  border-color: var(--brand);
+  box-shadow: var(--shadow);
+}
+
+.facility-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.facility-name {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0 0 0.25rem;
+}
+
+.facility-type {
+  font-size: 0.8rem;
+  color: var(--ink-3);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.facility-distance {
+  background: var(--brand-soft);
+  color: var(--brand);
+  padding: 0.25rem 0.55rem;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.facility-address {
+  font-size: 0.9rem;
+  color: var(--ink-2);
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
+}
+
+.facility-contact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  font-size: 0.85rem;
+  color: var(--ink-3);
+  margin-bottom: 0.75rem;
+}
+
+.facility-contact a {
+  color: var(--brand);
+  text-decoration: none;
+}
+
+.facility-contact a:hover {
+  text-decoration: underline;
+}
+
+.field-missing {
+  color: var(--ink-3);
+  font-style: italic;
+  font-size: 0.85rem;
+}
+
+.services-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 0.75rem;
+}
+
+.service-tag {
+  background: var(--ground);
+  color: var(--ink-2);
+  padding: 0.25rem 0.55rem;
+  border-radius: 6px;
+  font-size: 0.72rem;
+}
+
+.service-tag.capability {
+  background: #ede9fe;
+  color: #5b21b6;
+}
+
+.verification-badge {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  color: var(--ink-3);
+  margin-top: auto;
+  padding-top: 0.65rem;
+  border-top: 1px solid var(--line-soft);
+}
+
+.verification-badge.verified {
+  color: #047857;
+}
+
+.verification-badge.unverified {
+  color: #b45309;
+}
+
+.facility-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.85rem;
+}
+
+.facility-actions button {
+  flex: 1;
+  min-width: 90px;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ink-2);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.facility-actions button.primary {
+  background: var(--brand);
+  color: #fff;
+  border-color: var(--brand);
+}
+
+.facility-actions button:hover {
+  transform: translateY(-1px);
+}
+
+.empty-state, .loading-state, .alternatives-banner {
+  text-align: center;
+  padding: 2rem 1.5rem;
+  color: var(--ink-3);
+  border: 1px dashed var(--line);
+  border-radius: var(--radius-lg);
+  margin-bottom: 1rem;
+}
+
+.alternatives-banner {
+  background: #fffbeb;
+  border-color: #f59e0b;
+  color: #92400e;
+  text-align: left;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--line);
+  border-top-color: var(--brand);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.modal-overlay.is-open {
+  display: flex;
+}
+
+.modal {
+  background: #fff;
+  border-radius: var(--radius-lg);
+  max-width: 640px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 1.5rem;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--ink-3);
+  line-height: 1;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.35rem;
+  color: var(--ink-2);
+  font-size: 0.9rem;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+.doctor-item {
+  padding: 1rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  margin-bottom: 0.65rem;
+}
+
+.doctor-name {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.doctor-meta {
+  font-size: 0.85rem;
+  color: var(--ink-3);
+  margin-top: 0.25rem;
+  line-height: 1.45;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.badge.ok { background: #d1fae5; color: #065f46; }
+.badge.warn { background: #fef3c7; color: #92400e; }
+.badge.muted { background: var(--ground); color: var(--ink-3); }
+
+.appointments-section {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--line);
+}
+
+.appointment-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 0.85rem 0;
+  border-bottom: 1px solid var(--line-soft);
+  font-size: 0.9rem;
+}
+
+.status-pending { color: #b45309; }
+.status-confirmed { color: #047857; }
+.status-completed { color: var(--ink-3); }
+.status-cancelled { color: #b91c1c; }
+
+@media (max-width: 600px) {
+  .facility-actions button { flex: 1 1 100%; }
+}
+</style>
+</head>
+<body class="auth-page">
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <div class="site-header__inner">
+    <a class="brand" href="dashboard.html" aria-label="दाई dashboard">
+      <img class="brand__mark" src="assets/logo.jpeg" width="48" height="48" alt="">
+      <span><span class="brand__name">दाई</span><span class="brand__tag">Find Care</span></span>
+    </a>
+    <nav class="site-nav" aria-label="Primary navigation">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="facilities.html" class="is-active">Find Facilities</a>
+      <a href="child-dashboard.html">Child</a>
+    </nav>
+  </div>
+</header>
+
+<main class="facility-search-container" id="main">
+  <!-- Location: manual first; device only on explicit permission -->
+  <section class="location-setup" id="locationSetup" aria-labelledby="loc-heading">
+    <h2 id="loc-heading">📍 Your location</h2>
+    <p class="location-hint">
+      Enter city or PIN first. Device location is requested only when you choose “Use my current location”.
+      You can change city anytime to search elsewhere.
+    </p>
+    <form class="location-form" id="locationForm" onsubmit="return false;">
+      <div class="form-group">
+        <label for="city">City *</label>
+        <input type="text" id="city" required placeholder="e.g. New Delhi" autocomplete="address-level2">
+      </div>
+      <div class="form-group">
+        <label for="pincode">PIN code</label>
+        <input type="text" id="pincode" inputmode="numeric" maxlength="6" placeholder="e.g. 110001" autocomplete="postal-code">
+      </div>
+      <div class="form-group">
+        <label for="district">District</label>
+        <input type="text" id="district" placeholder="Optional">
+      </div>
+      <div class="form-group">
+        <label for="state">State</label>
+        <input type="text" id="state" placeholder="Optional" autocomplete="address-level1">
+      </div>
+    </form>
+    <div class="location-actions">
+      <button type="button" class="device-location-btn" id="deviceLocationBtn" title="Asks browser permission only when you click">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"/>
+          <circle cx="12" cy="12" r="3"/>
+        </svg>
+        Use my current location
+      </button>
+      <button type="button" class="search-btn" id="saveLocationBtn">Save location</button>
+      <button type="button" class="search-btn secondary" id="changeLocationBtn" style="display:none;">Change / search another city</button>
+      <span class="current-location-chip" id="locationChip" role="status"></span>
+    </div>
+  </section>
+
+  <!-- Filters -->
+  <section class="filters-section" id="filtersSection">
+    <div class="filters-header">
+      <h2>🔍 Nearby facilities</h2>
+      <button type="button" class="search-btn" id="searchBtn">Search</button>
+    </div>
+    <div class="filters-grid">
+      <div class="filter-group">
+        <label for="facilityType">Facility type</label>
+        <select id="facilityType">
+          <option value="">All types</option>
+          <option value="hospital">Hospital</option>
+          <option value="maternity_centre">Maternity centre</option>
+          <option value="clinic">Clinic</option>
+          <option value="diagnostic_lab">Diagnostic lab</option>
+          <option value="vaccination_center">Vaccination provider</option>
+          <option value="phc">PHC</option>
+          <option value="chc">CHC</option>
+          <option value="nursing_home">Nursing home</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label for="service">Service</label>
+        <select id="service">
+          <option value="">All services</option>
+          <option value="obstetrics">Obstetrics</option>
+          <option value="gynecology">Gynecology</option>
+          <option value="ultrasound">Ultrasound</option>
+          <option value="lab_tests">Lab tests</option>
+          <option value="vaccination">Vaccination</option>
+          <option value="emergency">Emergency</option>
+          <option value="nicu">Newborn / NICU</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label for="capability">Capability</label>
+        <select id="capability">
+          <option value="">Any capability</option>
+          <option value="high_risk_pregnancy">High-risk pregnancy</option>
+          <option value="emergency_maternity">Emergency maternity care</option>
+          <option value="c_section_24x7">24×7 C-section</option>
+          <option value="blood_transfusion">Blood transfusion</option>
+          <option value="neonatal_surgery">Neonatal surgery</option>
+          <option value="icu_mother">Mother ICU</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label for="language">Language</label>
+        <select id="language">
+          <option value="">Any language</option>
+          <option value="hindi">Hindi</option>
+          <option value="english">English</option>
+          <option value="marathi">Marathi</option>
+          <option value="tamil">Tamil</option>
+          <option value="telugu">Telugu</option>
+          <option value="bengali">Bengali</option>
+          <option value="kannada">Kannada</option>
+          <option value="gujarati">Gujarati</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label for="accessibility">Accessibility</label>
+        <select id="accessibility">
+          <option value="">Any</option>
+          <option value="wheelchair">Wheelchair access</option>
+          <option value="elevator">Elevator</option>
+          <option value="accessible_toilet">Accessible toilet</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label for="maxDistance">Max distance (km)</label>
+        <input type="number" id="maxDistance" value="50" min="1" max="500" step="1">
+      </div>
+    </div>
+  </section>
+
+  <div class="results-meta" id="resultsMeta" hidden>
+    <span id="resultsCount"></span>
+    <button type="button" class="search-btn secondary" id="loadAppointmentsBtn" style="padding:0.45rem 1rem;font-size:0.85rem;">My facility appointments</button>
+  </div>
+
+  <div class="alternatives-banner" id="alternativesBanner" hidden role="status"></div>
+
+  <section id="resultsSection" aria-live="polite">
+    <div class="loading-state" id="loadingState" hidden>
+      <div class="spinner" aria-hidden="true"></div>
+      <p>Searching verified facilities…</p>
+    </div>
+    <div class="empty-state" id="emptyState" hidden>
+      <p>No facilities matched these filters nearby. Try another city, widen distance, or clear a filter — we will still show the nearest appropriate options when coordinates are available.</p>
+    </div>
+    <div class="facilities-list" id="facilitiesList"></div>
+  </section>
+
+  <section class="appointments-section" id="appointmentsSection" hidden>
+    <h2 style="font-size:1.1rem;margin:0 0 0.75rem;">Your facility appointments &amp; referrals</h2>
+    <div id="appointmentsList"></div>
+  </section>
+</main>
+
+<!-- Book appointment -->
+<div class="modal-overlay" id="appointmentModal" role="dialog" aria-modal="true" aria-labelledby="apptTitle">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="apptTitle">Request appointment</h2>
+      <button type="button" class="modal-close" id="closeAppointmentModal" aria-label="Close">&times;</button>
+    </div>
+    <form id="appointmentForm">
+      <input type="hidden" id="appointmentFacilityId">
+      <div class="form-group">
+        <label for="appointmentDoctorId">Doctor (optional)</label>
+        <select id="appointmentDoctorId">
+          <option value="">Facility / any available</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="appointmentType">Type *</label>
+        <select id="appointmentType" required>
+          <option value="">Select type</option>
+          <option value="consultation">Consultation</option>
+          <option value="diagnostic">Diagnostic</option>
+          <option value="vaccination">Vaccination</option>
+          <option value="follow_up">Follow-up</option>
+          <option value="emergency">Emergency</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="appointmentDate">Preferred date *</label>
+        <input type="date" id="appointmentDate" required>
+      </div>
+      <div class="form-group">
+        <label for="appointmentTime">Preferred time</label>
+        <input type="time" id="appointmentTime">
+      </div>
+      <div class="form-group">
+        <label for="appointmentReason">Reason</label>
+        <textarea id="appointmentReason" rows="3" placeholder="What do you need care for?"></textarea>
+      </div>
+      <button type="submit" class="search-btn" style="width:100%;">Submit request</button>
+      <p style="margin:0.75rem 0 0;font-size:0.8rem;color:var(--ink-3);">Status starts as <strong>pending</strong>. You will see confirmed / completed / cancelled updates here when the facility responds.</p>
+    </form>
+  </div>
+</div>
+
+<!-- Facility detail + doctors -->
+<div class="modal-overlay" id="facilityModal" role="dialog" aria-modal="true" aria-labelledby="facilityModalTitle">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="facilityModalTitle">Facility</h2>
+      <button type="button" class="modal-close" id="closeFacilityModal" aria-label="Close">&times;</button>
+    </div>
+    <div id="facilityModalContent"></div>
+  </div>
+</div>
+
+<!-- Referral -->
+<div class="modal-overlay" id="referralModal" role="dialog" aria-modal="true" aria-labelledby="refTitle">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="refTitle">Create referral</h2>
+      <button type="button" class="modal-close" id="closeReferralModal" aria-label="Close">&times;</button>
+    </div>
+    <form id="referralForm">
+      <input type="hidden" id="referralToFacilityId">
+      <div class="form-group">
+        <label for="referralReason">Reason *</label>
+        <textarea id="referralReason" rows="3" required placeholder="Why is referral needed?"></textarea>
+      </div>
+      <div class="form-group">
+        <label for="referralUrgency">Urgency</label>
+        <select id="referralUrgency">
+          <option value="routine">Routine</option>
+          <option value="urgent">Urgent</option>
+          <option value="emergency">Emergency</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="referralNotes">Notes</label>
+        <textarea id="referralNotes" rows="2"></textarea>
+      </div>
+      <button type="submit" class="search-btn" style="width:100%;">Submit referral</button>
+    </form>
+  </div>
+</div>
+
+<script src="js/facility-discovery.js"></script>
+</body>
+</html>

@@ -248,6 +248,23 @@ CREATE TABLE organisation_role (
 ;
 
 
+CREATE TABLE admin_record (
+	id UUID NOT NULL,
+	source_id VARCHAR,
+	created_at TIMESTAMP WITH TIME ZONE NOT NULL,
+	updated_at TIMESTAMP WITH TIME ZONE NOT NULL,
+	facility_id UUID NOT NULL,
+	kind VARCHAR NOT NULL,
+	payload JSON NOT NULL,
+	version INTEGER NOT NULL,
+	PRIMARY KEY (id),
+	UNIQUE (source_id),
+	FOREIGN KEY(facility_id) REFERENCES facility (id)
+)
+
+;
+
+
 CREATE TABLE ward (
 	id UUID NOT NULL,
 	source_id VARCHAR,
@@ -706,6 +723,36 @@ CREATE TABLE sustainability_action (
 ;
 
 
+CREATE TABLE staff_affiliation (
+	id UUID NOT NULL,
+	source_id VARCHAR,
+	created_at TIMESTAMP WITH TIME ZONE NOT NULL,
+	updated_at TIMESTAMP WITH TIME ZONE NOT NULL,
+	facility_id UUID NOT NULL,
+	user_id UUID,
+	email VARCHAR NOT NULL,
+	name VARCHAR NOT NULL,
+	role VARCHAR NOT NULL,
+	department_id UUID,
+	unit_id UUID,
+	registration_no VARCHAR,
+	verified BOOLEAN NOT NULL,
+	active BOOLEAN NOT NULL,
+	version INTEGER NOT NULL,
+	invite_hash VARCHAR,
+	expires_at TIMESTAMP WITH TIME ZONE,
+	PRIMARY KEY (id),
+	UNIQUE (facility_id, email),
+	UNIQUE (source_id),
+	FOREIGN KEY(facility_id) REFERENCES facility (id),
+	FOREIGN KEY(user_id) REFERENCES portal_user (id),
+	FOREIGN KEY(department_id) REFERENCES department (id),
+	FOREIGN KEY(unit_id) REFERENCES unit (id)
+)
+
+;
+
+
 CREATE TABLE child (
 	id UUID NOT NULL,
 	source_id VARCHAR,
@@ -1017,6 +1064,23 @@ CREATE TABLE icu_admission_log (
 	UNIQUE (source_id),
 	FOREIGN KEY(critical_unit_id) REFERENCES critical_unit (id),
 	FOREIGN KEY(admission_id) REFERENCES admission (id)
+)
+
+;
+
+
+CREATE TABLE session_scope (
+	id UUID NOT NULL,
+	source_id VARCHAR,
+	created_at TIMESTAMP WITH TIME ZONE NOT NULL,
+	updated_at TIMESTAMP WITH TIME ZONE NOT NULL,
+	session_id UUID NOT NULL,
+	affiliation_id UUID NOT NULL,
+	PRIMARY KEY (id),
+	UNIQUE (session_id),
+	UNIQUE (source_id),
+	FOREIGN KEY(session_id) REFERENCES auth_session (id),
+	FOREIGN KEY(affiliation_id) REFERENCES staff_affiliation (id)
 )
 
 ;
