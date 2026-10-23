@@ -252,6 +252,7 @@ function Table({
   );
 }
 export default function Home() {
+  const [sessionChecked, setSessionChecked] = useState(false);
   const [token, setToken] = useState("");
   const [user, setUser] = useState<User | null>(null);
   const [data, setData] = useState<Row | null>(null);
@@ -379,7 +380,8 @@ export default function Home() {
   useEffect(() => {
     api("/auth/refresh", { method: "POST" }, "")
       .then((result) => session(result, false))
-      .catch(() => {}); /* access tokens stay in memory */
+      .catch(() => {})
+      .finally(() => setSessionChecked(true)); /* access tokens stay in memory */
   }, []);
   useEffect(() => {
     if (!user) return;
@@ -396,6 +398,10 @@ export default function Home() {
     );
     return () => clearInterval(timer);
   }, [user, api]);
+  useEffect(() => {
+    if (sessionChecked && !user && process.env.NEXT_PUBLIC_DAI_BASE_PATH)
+      window.location.replace("/auth.html?role=hospital");
+  }, [sessionChecked, user]);
   async function login(e: FormEvent) {
     e.preventDefault();
     setBusy(true);
@@ -531,6 +537,8 @@ export default function Home() {
     ) : (
       <Pill color="neutral">Read only</Pill>
     );
+  if (!user && process.env.NEXT_PUBLIC_DAI_BASE_PATH)
+    return <main className="login-shell"><p role="status">Opening DAI sign in…</p></main>;
   if (!user)
     return (
       <main className="login-shell">
