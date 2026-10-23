@@ -14,6 +14,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import select, update, func
 from sqlalchemy.exc import IntegrityError
 from . import schema as s
+from .staff_scope import effective_staff, facility_staff
 from .security import ROLES
 
 
@@ -113,7 +114,7 @@ def register_coordination(app, engine, require, audit, one, clinical_scope):
         return m
 
     def owner(c, u, m, identifier):
-        user = one(s.user, str(identifier), c)
+        user = effective_staff(c, one(s.user, str(identifier), c), u["facility_id"])
         if user["facility_id"] != u["facility_id"] or "care.write" not in ROLES.get(
             user["role"], set()
         ):
@@ -203,9 +204,7 @@ def register_coordination(app, engine, require, audit, one, clinical_scope):
                 audit(c, u, "read", "child", ch["id"], {"view": "coordination_picker"})
             staff = [
                 {k: r[k] for k in ("id", "name", "role", "unit_id")}
-                for r in c.execute(
-                    select(s.user).where(s.user.c.facility_id == u["facility_id"])
-                ).mappings()
+                for r in facility_staff(c, u["facility_id"])
                 if "care.write" in ROLES.get(r["role"], set())
             ]
             return {

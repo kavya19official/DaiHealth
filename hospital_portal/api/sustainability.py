@@ -10,6 +10,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 from sqlalchemy import select, update
 from sqlalchemy.exc import IntegrityError
 from . import schema as s
+from .staff_scope import effective_staff, facility_staff
 from .security import ROLES
 
 METRICS = {
@@ -173,9 +174,7 @@ def register_sustainability(app, engine, require, audit, one):
             ]
             staff = [
                 {"id": r["id"], "name": r["name"], "role": r["role"]}
-                for r in c.execute(
-                    select(s.user).where(s.user.c.facility_id == u["facility_id"])
-                ).mappings()
+                for r in facility_staff(c, u["facility_id"])
                 if "green.write" in ROLES.get(r["role"], set())
             ]
             audit(
@@ -225,7 +224,9 @@ def register_sustainability(app, engine, require, audit, one):
     def create_action(body: GreenAction, u=Depends(require("green.write"))):
         preview()
         with engine.begin() as c:
-            owner = one(s.user, str(body.owner_id), c)
+            owner = effective_staff(
+                c, one(s.user, str(body.owner_id), c), u["facility_id"]
+            )
             if owner["facility_id"] != u[
                 "facility_id"
             ] or "green.write" not in ROLES.get(owner["role"], set()):
