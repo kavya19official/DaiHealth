@@ -713,7 +713,7 @@
       fab.addEventListener('click', openSOS);
       document.body.appendChild(fab);
     }
-    renderTrend(); renderPostpartum(); renderPlan();
+    renderTrend(); renderPlan();
     loadTrend(); loadPostpartum(); loadPlan(); loadEmergencyContext();
   }
 

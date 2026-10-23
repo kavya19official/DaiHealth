@@ -780,6 +780,10 @@ function showPanel(id) {
   try { history.replaceState(null, '', '#' + id); } catch (e) {}
   window.scrollTo({ top: 0, behavior: 'smooth' });
   closeSidebar();
+  // Refresh postpartum data when switching to postpartum panel
+  if (id === 'postpartum' && window.CareExt) {
+    window.CareExt.refreshPostpartum();
+  }
 }
 
 function openSidebar() {
