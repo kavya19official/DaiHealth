@@ -7,7 +7,7 @@ const { DatabaseSync } = require('node:sqlite');
 const { createLocalPool } = require('../backend/localPool');
 const bcrypt = require('../backend/node_modules/bcrypt');
 const ROOT = path.join(__dirname, '..');
-const migrations = ['auth_and_wellness.sql', 'care_timeline_and_appointments.sql', 'mother_dashboard.sql', 'antenatal_profile.sql', 'child_dashboard.sql', 'child_dashboard_v2.sql', 'child_health_v3.sql', 'hospital_platform.sql', 'patient_preferences.sql', 'patient_documents.sql', 'care_extensions_v4.sql', 'facility_discovery.sql', 'referral_continuity.sql'];
+const migrations = ['auth_and_wellness.sql', 'care_timeline_and_appointments.sql', 'mother_dashboard.sql', 'antenatal_profile.sql', 'child_dashboard.sql', 'child_dashboard_v2.sql', 'child_health_v3.sql', 'hospital_platform.sql', 'patient_preferences.sql', 'patient_documents.sql', 'care_extensions_v4.sql', 'facility_discovery.sql', 'referral_continuity.sql', 'access_matching.sql'];
 
 async function seedLocal() {
   if (process.env.DAI_LOCAL !== 'true' || path.resolve(process.env.DAI_LOCAL_DB_DIR || '') !== path.join(ROOT,'.local/patient-db')) throw new Error('Local seed is restricted to the launcher-managed local database.');
@@ -29,6 +29,7 @@ async function seedLocal() {
         throw new Error(`Migration ${name}: ${error.message}`);
       }
     }
+    await require('./seed-matching-demo.cjs').seedMatchingDemo(client);
     source = new DatabaseSync(path.join(ROOT, '.local/portal.db'), { readOnly: true });
     const manifest = source.prepare('SELECT source_sha256 FROM seed_manifest LIMIT 1').get();
     if (!manifest) throw new Error('Hospital cohort has not been imported. Run npm start from the root.');

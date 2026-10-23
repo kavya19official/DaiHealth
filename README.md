@@ -231,3 +231,59 @@ Get a key from https://aistudio.google.com/apikey. The same Charon voice reads b
 Restart from the DAI root with `npm run stop`, then `npm start`. At http://localhost:3001 open **Ask Dr. Daya**, choose English or Hindi, enable **Voice**, then select a question. The status shows **Gemini · Charon · English/हिंदी** for actual Gemini audio. **Gemini voice unavailable** identifies a failure; the error is displayed and no default browser voice is used. The avatar talks during actual audio playback and returns to Idle at the end. Cancelling, changing language or closing the panel aborts pending speech and stops playback.
 
 The default preview TTS model is configurable via the setting above if Google changes its availability. Only curated answers are accepted by `POST /api/tts`; it has a timeout, a request limit, bounded caching and WAV conversion. Test the integration without spending API quota using `node --test backend/dayaSpeech.test.js`; tests mock Google. A real audio check requires adding your key locally.
+
+## Access-aware, explainable Find Care
+
+In the patient dashboard open **Find Care**, select the required service and any
+required capability, then set access preferences: travel radius, language,
+appointment date/time (IST), service-fee budget and transport difficulty.
+**Find suitable care** ranks eligible facilities and explains each component of
+its preference score. Required service, capability and accessibility are hard
+filters; a cheaper or closer unsuitable facility cannot enter the shortlist.
+Widening the search never silently drops these requirements.
+
+- Preferences influence ranking by default. **Only show confirmed preference
+  matches** excludes unknown, unmet or partially matching preferences.
+- The score is earned points / possible points × 100. Normal weights are travel
+  30, language 20, reported availability 25 and stated budget 25; only requested
+  language/budget/distance signals are included. Transport difficulty increases
+  the travel weight to 45. Unknown information earns zero. The card discloses all
+  component weights and points. This is not a clinical safety or quality score.
+- Distance uses coordinates supplied with permission and is straight-line, not
+  road travel time. City/PIN entry is not geocoded or used to infer affordability,
+  transport difficulty or personal characteristics. Without coordinates, distance
+  remains unknown and the limit is explicitly unconfirmed. With coordinates,
+  facilities with unknown distance or outside the radius are excluded.
+- Costs use a sourced, dated fee range for the selected service. Missing costs
+  are unknown, never assumed free. Partial overlap with the patient's budget is
+  labelled. Other charges/insurance coverage are not inferred.
+- Timing uses future reported service slots with available places; opening hours
+  are not treated as confirmed appointments. Matching does not reserve capacity.
+- **Remember my preferences** explicitly saves only these stated preferences in
+  the existing patient-preferences record. Coordinates stay in the existing
+  separate location workflow. **Clear access preferences** preserves the selected
+  required service and capability. Both the dashboard and `/facilities.html` use
+  one shared implementation, including the existing appointment-request dialogs.
+
+Root `npm start` applies `backend/db/access_matching.sql` after the existing
+facility migrations. Hosted PostgreSQL deployments must apply that migration too.
+It adds optional service fee evidence and reported service slots; existing facility
+and patient records are retained. Real listings without the new evidence show
+unknown costs/availability until that information is provided. The hospital portal
+and patient directory remain separate stores; this change does not claim live
+synchronisation between their service/slot editors.
+
+In explicit local mode the launcher inserts six clearly labelled synthetic access
+examples once; it never overwrites later directory edits. Five offer obstetrics,
+but only four meet the high-risk capability gate. The sixth is a vaccination
+example. One eligible example intentionally has no price/schedule evidence.
+Search **New Delhi → Obstetrics → High-risk pregnancy**, with Hindi, an afternoon
+three days after first setup, and a budget up to ₹1,000. Coordinates around
+28.6139, 77.209 can be used in browser automation for this synthetic scenario;
+users choose whether to share their own device coordinates. These are fictional
+providers and fees, not a real Delhi directory. Saved demo slots expire normally.
+
+Checks: `npm test --prefix backend` includes matching gates, preferences,
+unknown/partial evidence, IST timing, transport weights and actual PostgreSQL
+queries through PGlite. Browser checks cover both patient entry points, preference
+persistence, strict matches, changes in ranking and mobile overflow.
