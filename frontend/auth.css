@@ -1,0 +1,49 @@
+/* Shared Patient, Doctor and Hospital sign-in, matching the split-screen reference. */
+body.auth-page {--brand:#7950a6;--brand-strong:#633c8e;--brand-pale:#f4eff8;min-height:100svh;background:#fff;color:#292331}
+.auth-page .auth-main {display:grid;grid-template-columns:50% 50%;align-items:stretch;width:100%;margin:0;padding:0;gap:0;min-height:100svh}
+.auth-page .auth-intro {display:flex;flex-direction:column;justify-content:space-between;position:sticky;top:0;height:100svh;min-height:660px;background:#eee7f4;padding:42px 48px;color:#65418a}
+.auth-wordmark {display:inline-flex;align-items:center;gap:12px;text-decoration:none;color:#7950a6;width:fit-content}
+.auth-hindi {font-family:Georgia,'Noto Serif Devanagari',serif;font-size:54px;font-weight:850;line-height:1}
+.auth-wordmark-text {font-size:27px;font-weight:850;letter-spacing:.03em;line-height:1.1}
+.auth-wordmark-text small {display:block;margin-top:5px;font-size:9px;font-weight:750;letter-spacing:.19em;color:#84758f}
+.auth-story-content {padding:32px 0;max-width:560px}
+.auth-synthetic-label {display:block;margin-bottom:20px;font-size:13px;font-weight:750;color:#77549a}
+.auth-page .auth-intro h1 {font-size:clamp(48px,5.3vw,80px);font-weight:850;letter-spacing:-.045em;line-height:1.03;margin:0 0 24px;color:#66418a}
+.auth-page .auth-intro p {max-width:420px;font-size:17px;font-weight:550;line-height:1.65;color:#796486;margin:0}
+.auth-care-loop {display:flex;align-items:center;flex-wrap:wrap;gap:14px;margin-top:32px;font-size:14px;font-weight:650;color:#7a5c91;max-width:420px}
+.auth-care-loop i {font-style:normal;color:#a28cb2}
+.auth-care-loop>div {display:flex;gap:13px;align-items:center;flex-basis:100%;margin-top:1px}
+.auth-story-footer {font-size:12px;font-weight:550;line-height:1.7;color:#80698f}
+.auth-page .auth-card {align-self:center;justify-self:center;display:block;width:min(460px,calc(100% - 80px));margin:32px 0;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none}
+.auth-form-eyebrow {font-size:11px;font-weight:800;letter-spacing:.15em;color:#8e8297;margin-bottom:13px;line-height:1.7}
+.auth-page .auth-card h2 {font-size:34px;letter-spacing:-.04em;line-height:1.12;margin:0 0 12px;font-weight:850;color:#302638}
+.auth-page .auth-card>p#loginDescription {font-size:15px;font-weight:550;line-height:1.6;color:#796a83;margin-bottom:22px}
+.auth-page .login-role-toggle {margin-bottom:24px;background:#f7f4fa;border-color:#e9e1ef;padding:4px}
+.auth-page .login-role-toggle button {font-size:15px;font-weight:750;min-height:44px;padding:10px 12px}
+.auth-page .login-role-toggle button.is-active {background:#7950a6;box-shadow:0 2px 7px #7950a619}
+.auth-page .tabs {padding:0;border:0;background:none;gap:20px;margin:0 0 22px;border-radius:0}
+.auth-page .tabs button {padding:0 0 7px;border-radius:0;font-size:13px;font-weight:700;border-bottom:2px solid transparent}
+.auth-page .tabs button.is-active {background:none;color:#7950a6;border-bottom-color:#7950a6}
+.auth-page[data-workspace="hospital"] .tabs {display:none}
+.auth-page .auth-card label {display:block;font-size:14px;font-weight:750;color:#675271;margin-bottom:9px}
+.auth-page .auth-card input,.auth-page .auth-card select {min-height:52px;border:1px solid #ded8e3;border-radius:6px;padding:10px 12px;font:inherit;font-size:15px;font-weight:600;color:#453a4b;background:#fff;width:100%;box-shadow:0 1px 3px #39254505}
+.auth-page .auth-card input:focus,.auth-page .auth-card select:focus {outline:2px solid #bba1d5;outline-offset:2px;border-color:#9574b1}
+.auth-page .form-group {margin-bottom:19px}
+.auth-page .login-demo-hint,.auth-page .login-otp-notice {background:#f3edf8;border:1px solid #e6dced;border-radius:6px;padding:14px 17px;margin:0 0 20px;font-size:13px;font-weight:500;color:#7d638f;line-height:1.8}
+.auth-page .login-demo-hint strong,.auth-page .login-demo-hint span {display:block}
+.auth-page .login-demo-hint strong {font-weight:800;color:#715080;margin-bottom:2px}
+.auth-page .btn--primary {min-height:52px;border-radius:7px;background:#7950a6;box-shadow:none;font-size:16px;font-weight:800}
+.auth-page .btn--primary:hover {background:#694191}
+.auth-page .error-box {font-size:11px;border:1px solid #edd8df;background:#fbf0f3;border-radius:6px;color:#a46f7d}
+.auth-page .auth-disclaimer {margin:18px 0 0;font-size:12px;font-weight:500;line-height:1.65;color:#807088}
+.auth-about-link {display:inline-block;font-size:12px;font-weight:650;color:#806492;text-decoration:none;margin-top:14px}
+.auth-guest-options {margin-top:16px;font-size:12px;font-weight:600;color:#806b8f}
+.auth-guest-options summary {cursor:pointer;color:#8a739b}
+.auth-guest-options .divider {display:none}
+.auth-guest-options .btn {margin-top:12px;min-height:34px;font-size:11px}
+.auth-guest-options .footnote {font-size:10px}
+.auth-page .field-row {gap:12px}
+.auth-page.is-registering .auth-card {align-self:start}
+@media(min-width:1600px){.auth-page .auth-intro{padding:55px 65px}.auth-page .auth-card{width:min(510px,calc(100% - 120px))}}
+@media(max-width:760px){.auth-page .auth-main{grid-template-columns:1fr}.auth-page .auth-intro{position:relative;height:auto;min-height:0;padding:26px 25px}.auth-wordmark .auth-hindi{font-size:35px}.auth-wordmark-text{font-size:18px}.auth-story-content{padding:32px 0 8px}.auth-page .auth-intro h1{font-size:38px}.auth-page .auth-intro p{font-size:15px}.auth-synthetic-label{font-size:10px;margin-bottom:15px}.auth-care-loop,.auth-story-footer{display:none}.auth-page .auth-card{width:min(420px,calc(100% - 48px));margin:36px auto 40px}.auth-page .auth-card h2{font-size:30px}.auth-page .auth-intro h1 br{display:none}}
+@media(prefers-reduced-motion:reduce){.auth-page *{transition:none!important}}

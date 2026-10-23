@@ -6,7 +6,9 @@
     "dev": "next dev --webpack --hostname 127.0.0.1",
     "build": "next build",
     "start": "next start --hostname 0.0.0.0",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "predev": "node scripts/sync-daya.cjs",
+    "prebuild": "node scripts/sync-daya.cjs"
   },
   "dependencies": {
     "next": "16.4.2",

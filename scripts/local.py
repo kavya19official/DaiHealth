@@ -26,31 +26,43 @@ def run(args, env=None, cwd=ROOT):
     subprocess.run([str(a) for a in args], cwd=cwd, env=env, check=True)
 
 
+class LauncherBusy(RuntimeError):
+    pass
+
+
 @contextmanager
-def workspace_lock():
+def workspace_lock(wait_timeout=0):
+    """Use the OS lock, not file existence, to detect a running launcher."""
     STATE.mkdir(exist_ok=True)
     with (STATE / "run.lock").open("a+") as handle:
         if WIN:
             import msvcrt
-
-            handle.write(" ")
-            handle.flush()
-            handle.seek(0)
-            try:
-                msvcrt.locking(handle.fileno(), msvcrt.LK_NBLCK, 1)
-            except OSError:
-                raise RuntimeError(
-                    "DAI is already running or being set up in this checkout. Stop that terminal first."
-                )
+            if handle.tell() == 0:
+                handle.write(" ")
+                handle.flush()
         else:
             import fcntl
-
+        deadline = time.monotonic() + wait_timeout
+        while True:
             try:
-                fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
-            except OSError:
-                raise RuntimeError(
-                    "DAI is already running or being set up in this checkout. Stop that terminal first."
-                )
+                if WIN:
+                    handle.seek(0)
+                    msvcrt.locking(handle.fileno(), msvcrt.LK_NBLCK, 1)
+                else:
+                    fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+                break
+            except (BlockingIOError, PermissionError):
+                if time.monotonic() >= deadline:
+                    if wait_timeout:
+                        raise LauncherBusy(
+                            "DAI has not finished stopping or setting up yet. Check the original DAI terminal, "
+                            "press Ctrl+C there if needed, then run npm start again."
+                        )
+                    raise LauncherBusy(
+                        "DAI is already running or being set up in this checkout. "
+                        "Run npm run stop and wait for 'DAI stopped', then run npm start."
+                    )
+                time.sleep(0.1)
         try:
             yield
         finally:
@@ -59,6 +71,16 @@ def workspace_lock():
                 msvcrt.locking(handle.fileno(), msvcrt.LK_UNLCK, 1)
             else:
                 fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+
+
+def stop_launcher(wait_timeout=60):
+    STATE.mkdir(exist_ok=True)
+    (STATE / "stop-request").touch()
+    print("Stopping DAI; waiting for this checkout's services to exit...", flush=True)
+    # The run command releases its lock only after its service cleanup completes.
+    # Never unlink run.lock: that could let two launchers own different inodes.
+    with workspace_lock(wait_timeout=wait_timeout):
+        print("DAI stopped. Local data is preserved. You can run npm start now.", flush=True)
 
 
 def config():
@@ -165,19 +187,27 @@ def build_web(env):
     if env.get("DAI_DEV") == "true":
         return
     web = ROOT / "hospital_portal/web"
-    files = sorted((web / "app").rglob("*")) + [
+    files = sorted((web / "app").rglob("*")) + sorted((web / "scripts").rglob("*")) + [
         web / name
         for name in [
             "next.config.ts",
+            "package.json",
             "package-lock.json",
             "tsconfig.json",
             "postcss.config.mjs",
         ]
         if (web / name).exists()
     ]
+    # Assistant assets are shared with the static patient/doctor site. Include
+    # them so pulling a new FAQ, model or animation refreshes the hospital build.
+    for folder in ["frontend/assets/dr-daya", "frontend/vendor/three"]:
+        files += sorted((ROOT / folder).rglob("*"))
+    files += [ROOT / "frontend/js" / name for name in [
+        "care-chatbot.js", "care-chatbot.css", "daya-avatar.mjs", "daya-knowledge.js"
+    ]]
     fingerprint = hashlib.sha256(
         b"".join(
-            str(p.relative_to(web)).encode() + p.read_bytes()
+            str(p.relative_to(ROOT)).encode() + p.read_bytes()
             for p in files
             if p.is_file()
         )
@@ -226,11 +256,10 @@ def ready(url, processes):
 
 def main():
     action = sys.argv[1] if len(sys.argv) > 1 else "run"
-    env = environment(config())
     if action == "stop":
-        (STATE / "stop-request").touch()
-        print("Stop requested for this checkout's DAI launcher.")
+        stop_launcher()
         return
+    env = environment(config())
     if action == "doctor":
         print(
             "Node:",
@@ -366,7 +395,9 @@ if __name__ == "__main__":
         if len(sys.argv) > 1 and sys.argv[1] in ("doctor", "stop"):
             main()
         else:
-            with workspace_lock():
+            # Also tolerate an immediate start after an older, non-waiting stop.
+            wait_timeout = 60 if (STATE / "stop-request").exists() else 0
+            with workspace_lock(wait_timeout=wait_timeout):
                 main()
     except KeyboardInterrupt:
         print("\nDAI stopped. Your local data is preserved.")

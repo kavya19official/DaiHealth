@@ -6,7 +6,7 @@
     if (!response.ok) return;
     var status = await response.json();
     if (!status.local) return;
-    if (location.pathname.endsWith('auth.html')) {
+    if (document.body.classList.contains('auth-page')) {
       window.dispatchEvent(new CustomEvent('dai:local-ready', {detail:status}));
       return;
     }

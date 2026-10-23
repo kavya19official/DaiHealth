@@ -1,337 +1,153 @@
-(function () {
-  if (document.getElementById('daiCareChatbot')) return;
-
-  var voiceOn = true;
-  var currentAudio = null;
-  var currentUtterance = null;
-  var speechRequestId = 0;
-  var lastBotReply = '';
-  var messages = [];
-  var safeReplies = [
-    {
-      test: /(dangerous|symptom|bleeding|pain|fever|emergency|what'?s wrong)/i,
-      reply: 'I cannot diagnose symptoms or judge danger. Please contact your doctor or emergency care now if this feels urgent. I can help you note this concern for your care team.'
-    },
-    {
-      test: /(medicine|medication|dose|tablet|supplement|take .*mg|should i take)/i,
-      reply: 'I cannot tell you what medicine or dose to take. Please ask your doctor, pharmacist, or care team before changing anything.'
-    },
-    {
-      test: /(high.?risk|risk pregnancy|am i risk)/i,
-      reply: 'Only a qualified clinician can decide whether a pregnancy is high-risk. DAI can show doctor-set flags and appointment information, but it does not infer clinical risk.'
-    },
-    {
-      test: /(diagnose|treatment|recommend treatment|clinical advice)/i,
-      reply: 'DAI does not diagnose or recommend treatment. It supports follow-up, appointments, documents, and reviewed communication.'
-    }
-  ];
-  var helpfulReplies = [
-    {
-      test: /(what.*dai|help|platform|what can)/i,
-      reply: 'DAI helps hospitals, doctors, and mothers stay aligned on appointments, care timelines, documents, follow-up gaps, and reviewed communication.'
-    },
-    {
-      test: /(portal|mother|doctor|hospital|three)/i,
-      reply: 'The mother portal focuses on personal care timelines and appointments. The doctor portal focuses on today’s patients and consult context. The hospital portal focuses on registry, queue, audits, and operations.'
-    },
-    {
-      test: /(appointment|reschedule|schedule|booking)/i,
-      reply: 'You can use the portal to view appointment information and request changes. Final scheduling is handled by the care team.'
-    },
-    {
-      test: /(test|scan|vaccination|documents|bring)/i,
-      reply: 'For tests, scans, vaccinations, or documents, DAI can show timeline items and reminders that were configured by the care team. Please confirm medical details with your hospital.'
-    },
-    {
-      test: /(audit|override|review|approved|approval)/i,
-      reply: 'Every important action is designed to stay reviewable. Drafts and AI-assisted content need human review before they are used.'
-    }
-  ];
-
-  function el(tag, attrs, text) {
-    var node = document.createElement(tag);
-    Object.keys(attrs || {}).forEach(function (key) {
-      if (key === 'class') node.className = attrs[key];
-      else if (key === 'html') node.innerHTML = attrs[key];
-      else node.setAttribute(key, attrs[key]);
-    });
-    if (text) node.textContent = text;
-    return node;
-  }
-
-  function ensureStyles() {
-    if (document.getElementById('daiCareChatbotStyles')) return;
-    var style = el('style', { id: 'daiCareChatbotStyles' });
-    style.textContent = [
-      '.care-chatbot{position:fixed;right:1.25rem;bottom:1.25rem;z-index:2147483000;font-family:inherit}',
-      '.care-chatbot__launcher{border:1px solid rgba(132,63,117,.18);border-radius:999px;background:#fff;color:#6f2b63;box-shadow:0 18px 45px rgba(70,29,63,.16);cursor:pointer;font-weight:800;padding:.9rem 1.2rem}',
-      '.care-chatbot__panel{width:min(380px,calc(100vw - 2rem));max-height:min(620px,calc(100vh - 2rem));display:flex;flex-direction:column;overflow:hidden;border:1px solid rgba(132,63,117,.16);border-radius:24px;background:#fff;box-shadow:0 22px 60px rgba(70,29,63,.18)}',
-      '.care-chatbot__panel[hidden]{display:none}',
-      '.care-chatbot__header{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:1rem 1rem .85rem;border-bottom:1px solid #f0dce9}',
-      '.care-chatbot__header strong{display:block;color:#371331;font-size:1.05rem}.care-chatbot__header span{display:block;color:#8a7484;font-size:.86rem;margin-top:.15rem}',
-      '.care-chatbot__close{width:2rem;height:2rem;border:0;border-radius:50%;background:#f8edf4;color:#6f2b63;cursor:pointer;font-size:1rem}',
-      '.care-chatbot__notice{margin:.9rem 1rem 0;border-left:3px solid #c63f83;border-radius:12px;background:#fbf2f7;color:#6f2b63;font-size:.84rem;line-height:1.45;padding:.75rem .85rem}',
-      '.care-chatbot__feed{display:flex;flex:1;flex-direction:column;gap:.7rem;min-height:220px;overflow:auto;padding:1rem}',
-      '.care-chatbot__message{max-width:88%;border-radius:18px;font-size:.94rem;line-height:1.45;padding:.75rem .9rem}.care-chatbot__message--bot{align-self:flex-start;background:#f8edf4;color:#422039}.care-chatbot__message--user{align-self:flex-end;background:#c63f83;color:#fff}',
-      '.care-chatbot__chips{display:flex;gap:.5rem;overflow-x:auto;padding:0 1rem .85rem}.care-chatbot__chips button,.care-chatbot__voice{border:1px solid #ead4e3;border-radius:999px;background:#fff;color:#6f2b63;cursor:pointer;font-weight:700;white-space:nowrap;padding:.55rem .8rem}',
-      '.care-chatbot__form{display:flex;gap:.55rem;border-top:1px solid #f0dce9;padding:.85rem 1rem}.care-chatbot__form input{flex:1;min-width:0;border:1px solid #ead4e3;border-radius:999px;color:#371331;font:inherit;padding:.75rem .9rem}.care-chatbot__form button{border:0;border-radius:999px;background:#c63f83;color:#fff;cursor:pointer;font-weight:800;padding:.75rem 1rem}.care-chatbot__voice{align-self:flex-start;margin:0 1rem 1rem}',
-      '@media(max-width:520px){.care-chatbot{right:.75rem;bottom:.75rem}}'
-    ].join('');
-    document.head.appendChild(style);
-  }
-
-  function getApiBase() {
-    if (window.DaiAPI && window.DaiAPI.API_BASE) return window.DaiAPI.API_BASE;
-    var isLocal = /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
-    var isBackendOrigin = isLocal && location.port === '3001';
-    var isRenderOrigin = /\.onrender\.com$/.test(location.hostname);
-    if (isBackendOrigin || isRenderOrigin) return '/api';
-    if (isLocal) return location.protocol + '//' + location.hostname + ':3001/api';
-    return 'https://daihealth.onrender.com/api';
-  }
-
-  function setVoiceStatus(label) {
-    var voiceButton = document.querySelector('.care-chatbot__voice');
-    if (voiceButton) voiceButton.textContent = label;
-  }
-
-  function stopSpeech() {
-    speechRequestId += 1;
-    if (currentAudio) {
-      currentAudio.onplaying = null;
-      currentAudio.onended = null;
-      currentAudio.onerror = null;
-      var objectUrl = currentAudio.dataset && currentAudio.dataset.objectUrl;
-      currentAudio.pause();
-      currentAudio.removeAttribute('src');
-      currentAudio.load();
-      if (objectUrl) URL.revokeObjectURL(objectUrl);
-      currentAudio = null;
-    }
-    if (window.speechSynthesis) window.speechSynthesis.cancel();
-    currentUtterance = null;
-  }
-
-  function pickBrowserVoice() {
-    if (!window.speechSynthesis) return null;
-    var voices = window.speechSynthesis.getVoices() || [];
-    var preferredNames = /ravi|aaron|daniel|google uk english male|microsoft.*(ravi|prabhat|david)/i;
-    return voices.find(function (voice) {
-      return /^en[-_]IN$/i.test(voice.lang) && preferredNames.test(voice.name);
-    }) || voices.find(function (voice) {
-      return /^en[-_]IN$/i.test(voice.lang);
-    }) || voices.find(function (voice) {
-      return /^en([-_]|$)/i.test(voice.lang) && preferredNames.test(voice.name);
-    }) || voices.find(function (voice) {
-      return /^en([-_]|$)/i.test(voice.lang);
-    }) || null;
-  }
-
-  function speakWithBrowser(text) {
-    if (!voiceOn || !window.speechSynthesis || !window.SpeechSynthesisUtterance) return false;
-    var utterance = new SpeechSynthesisUtterance(text);
-    var selectedVoice = pickBrowserVoice();
-    if (selectedVoice) {
-      utterance.voice = selectedVoice;
-      utterance.lang = selectedVoice.lang;
-    } else {
-      utterance.lang = 'en-IN';
-    }
-    utterance.rate = 0.95;
-    utterance.pitch = 1;
-    utterance.onstart = function () {
-      if (voiceOn) setVoiceStatus('Voice playing');
-    };
-    utterance.onend = function () {
-      if (currentUtterance === utterance) currentUtterance = null;
-      if (voiceOn) setVoiceStatus('Voice: On');
-    };
-    utterance.onerror = function (event) {
-      if (currentUtterance === utterance) currentUtterance = null;
-      if (!voiceOn || (event && event.error === 'canceled')) return;
-      setVoiceStatus('Voice unavailable');
-    };
-    currentUtterance = utterance;
-    // A short delay after cancel avoids a Chrome/WebKit race that can swallow speech.
-    setTimeout(function () {
-      if (voiceOn && currentUtterance === utterance) window.speechSynthesis.speak(utterance);
-    }, 40);
-    return true;
-  }
-
-  function showVoiceUnavailable(error) {
-    console.error('Chatbot TTS failed:', error);
-    setVoiceStatus('Voice unavailable');
-    var feed = document.querySelector('.care-chatbot__feed');
-    if (feed && !feed.querySelector('[data-voice-error]')) {
-      var row = el('div', {
-        class: 'care-chatbot__message care-chatbot__message--bot',
-        'data-voice-error': 'true'
-      });
-      row.textContent = 'Voice is unavailable in this browser. You can still read my replies here.';
-      feed.appendChild(row);
-      feed.scrollTop = feed.scrollHeight;
-    }
-  }
-
-  async function speak(text) {
-    if (!voiceOn || !text) return;
-    stopSpeech();
-    var requestId = speechRequestId;
-    setVoiceStatus('Voice loading...');
-
-    var controller = window.AbortController ? new AbortController() : null;
-    var timeout = controller ? setTimeout(function () { controller.abort(); }, 6000) : null;
-    try {
-      var response = await fetch(getApiBase() + '/tts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: text }),
-        signal: controller ? controller.signal : undefined
-      });
-      if (timeout) clearTimeout(timeout);
-      if (!response.ok) throw new Error('Cloud voice unavailable: HTTP ' + response.status);
-      if (!voiceOn || requestId !== speechRequestId) return;
-
-      var blob = await response.blob();
-      if (!blob.size || !/^audio\//i.test(blob.type || '')) throw new Error('Cloud voice returned no audio');
-      var audioUrl = URL.createObjectURL(blob);
-      var audio = new Audio(audioUrl);
-      var fellBack = false;
-      currentAudio = audio;
-      audio.dataset.objectUrl = audioUrl;
-      audio.onplaying = function () {
-        if (voiceOn) setVoiceStatus('Charon voice playing');
-      };
-      audio.onended = function () {
-        URL.revokeObjectURL(audioUrl);
-        if (currentAudio === audio) currentAudio = null;
-        if (voiceOn) setVoiceStatus('Voice: On');
-      };
-      audio.onerror = function () {
-        if (fellBack || !voiceOn || requestId !== speechRequestId) return;
-        fellBack = true;
-        URL.revokeObjectURL(audioUrl);
-        if (currentAudio === audio) currentAudio = null;
-        if (!speakWithBrowser(text)) showVoiceUnavailable(new Error('Audio playback failed'));
-      };
-      await audio.play();
-    } catch (error) {
-      if (timeout) clearTimeout(timeout);
-      if (!voiceOn || requestId !== speechRequestId) return;
-      // Local demos and deployments without a Gemini key still speak using the
-      // browser's installed English voice.
-      if (!speakWithBrowser(text)) showVoiceUnavailable(error);
-    }
-  }
-
-  function getReply(text) {
-    var match = safeReplies.concat(helpfulReplies).find(function (entry) {
-      return entry.test.test(text);
-    });
-    if (match) return match.reply;
-    return 'I can help with DAI workflows, appointments, timelines, portal navigation, documents, and safety boundaries. For medical decisions, please ask your care team.';
-  }
-
-  function renderMessage(feed, who, text) {
-    var row = el('div', { class: 'care-chatbot__message care-chatbot__message--' + who });
-    row.textContent = text;
-    feed.appendChild(row);
-    feed.scrollTop = feed.scrollHeight;
-  }
-
-  function init() {
-    ensureStyles();
-    var root = el('div', { class: 'care-chatbot', id: 'daiCareChatbot' });
-    var launcher = el('button', {
-      class: 'care-chatbot__launcher',
-      type: 'button',
-      'aria-expanded': 'false',
-      'aria-controls': 'careChatbotPanel'
-    }, 'Ask Dr. Daya');
-    var panel = el('section', {
-      class: 'care-chatbot__panel',
-      id: 'careChatbotPanel',
-      'aria-label': 'Dr. Daya care chatbot',
-      hidden: ''
-    });
-    panel.innerHTML =
-      '<header class="care-chatbot__header">' +
-      '<div><strong>Dr. Daya</strong><span>English care chatbot</span></div>' +
-      '<button type="button" class="care-chatbot__close" aria-label="Close chatbot">x</button>' +
-      '</header>' +
-      '<div class="care-chatbot__notice">Assistive only. No diagnosis, treatment advice, or clinical risk scoring.</div>' +
-      '<div class="care-chatbot__feed" role="log" aria-live="polite"></div>' +
-      '<div class="care-chatbot__chips">' +
-      '<button type="button">What can DAI help with?</button>' +
-      '<button type="button">Does DAI diagnose patients?</button>' +
-      '<button type="button">How do the three portals work?</button>' +
-      '</div>' +
-      '<form class="care-chatbot__form">' +
-      '<input type="text" aria-label="Ask Dr. Daya" placeholder="Ask about DAI..." autocomplete="off">' +
-      '<button type="submit">Send</button>' +
-      '</form>' +
-      '<button type="button" class="care-chatbot__voice" aria-pressed="true">Voice: On</button>';
-
-    root.appendChild(launcher);
-    root.appendChild(panel);
+(function(){
+  'use strict';
+  if(document.getElementById('daiCareChatbot')||window.daiDayaLoading)return;
+  window.daiDayaLoading=true;
+  const script=document.currentScript;
+  const base=new URL('../',script.src);
+  const appBase=new URL('/',location.origin);
+  const asset=path=>new URL(path,base).href;
+  const style=document.createElement('link');style.rel='stylesheet';style.href=asset('js/care-chatbot.css?v=daya-3d-1');document.head.appendChild(style);
+  function el(tag,attrs={},text){const n=document.createElement(tag);for(const [key,value] of Object.entries(attrs))n.setAttribute(key,value);if(text)n.textContent=text;return n;}
+  function boot(){
+    const knowledge=window.DaiDayaKnowledge;
+    let language='en',voice=false,avatar=null,avatarPromise=null,recognition=null,lastReply='',speechId=0,opened=false,speechAbort=null,currentAudio=null,audioUrl=null;
+    const root=el('div',{class:'care-chatbot',id:'daiCareChatbot'});
+    root.innerHTML=`<button type="button" class="care-chatbot__launcher" aria-controls="careChatbotPanel" aria-expanded="false"><span class="daya-spark" aria-hidden="true">✦</span>Ask Dr. Daya</button>
+      <section id="careChatbotPanel" class="care-chatbot__panel" aria-label="Dr. Daya assistant" hidden>
+      <header class="care-chatbot__header"><div><strong>Dr. Daya</strong><small>Your DAI care guide · 3D & voice</small></div><div class="daya-header-actions"><select aria-label="Assistant language"><option value="en">English</option><option value="hi">हिंदी</option></select><button type="button" class="care-chatbot__close" aria-label="Close assistant">×</button></div></header>
+      <div class="daya-body"><aside class="daya-character" aria-label="Animated doctor"><span class="daya-badge">SIMULATED ON SYNTHETIC DATA</span><div class="daya-avatar"><span class="daya-avatar-status" role="status">Loading doctor…</span></div><h3>Here to help.</h3><p>One question. A clearer next step.</p><span class="daya-state" role="status">Ready when you are</span><a class="daya-credit" href="https://sketchfab.com/3d-models/doctor-sketchfab-weekly-13-mar23-9c89a438a5e940e59a0f9a07c22d6ade" target="_blank" rel="noopener noreferrer">Avatar: BrushDip · CC BY · adapted</a></aside>
+      <div class="daya-conversation"><p class="care-chatbot__notice"></p><p class="daya-voice-error" role="status" hidden></p><div class="care-chatbot__feed" role="log" aria-live="polite" aria-label="Conversation"></div>
+      <details class="daya-topics" open><summary>Explore questions</summary><div class="daya-categories" aria-label="Question topics"></div><div class="care-chatbot__chips"></div></details>
+      <form class="care-chatbot__form"><input type="text" maxlength="1500" aria-label="Ask Dr. Daya" placeholder="Type your question…" autocomplete="off"><button type="submit">Send</button></form>
+      <div class="daya-tools"><button type="button" class="daya-mic" aria-pressed="false">◉ Speak</button><button type="button" class="care-chatbot__voice" aria-pressed="false">Voice: Off</button><button type="button" class="daya-clear">Clear</button><span class="daya-help-status" role="status">English · text or voice</span></div></div></div></section>`;
     document.body.appendChild(root);
-
-    var feed = panel.querySelector('.care-chatbot__feed');
-    var form = panel.querySelector('form');
-    var input = panel.querySelector('input');
-    var voiceButton = panel.querySelector('.care-chatbot__voice');
-
-    function openPanel() {
-      panel.hidden = false;
-      launcher.setAttribute('aria-expanded', 'true');
-      if (!messages.length) {
-        messages.push('intro');
-        lastBotReply = 'Hi, I am Dr. Daya. Ask me about DAI, appointments, portals, documents, or safety boundaries.';
-        renderMessage(feed, 'bot', lastBotReply);
+    if(matchMedia("(max-height: 650px)").matches)root.querySelector(".daya-topics").open=false;
+    const panel=root.querySelector('section'),launcher=root.querySelector('.care-chatbot__launcher'),feed=root.querySelector('.care-chatbot__feed'),input=root.querySelector('input'),mic=root.querySelector('.daya-mic'),voiceButton=root.querySelector('.care-chatbot__voice'),state=root.querySelector('.daya-state'),help=root.querySelector('.daya-help-status'),avatarHost=root.querySelector('.daya-avatar');
+    const tr=(en,hi)=>language==='hi'?hi:en;
+    let activeCategory='app';
+    function releaseAudio(){
+      if(currentAudio){currentAudio.onplaying=null;currentAudio.onended=null;currentAudio.onerror=null;currentAudio.pause();currentAudio.removeAttribute('src');currentAudio.load();currentAudio=null;}
+      if(audioUrl){URL.revokeObjectURL(audioUrl);audioUrl=null;}
+    }
+    function stop(){speechId++;speechAbort?.abort();speechAbort=null;releaseAudio();avatar?.setTalking(false);state.textContent=tr('Ready when you are','आपका प्रश्न सुनने को तैयार');}
+    function stopListening(){if(recognition){recognition.abort();recognition=null;}mic.setAttribute('aria-pressed','false');mic.textContent=tr('◉ Speak','◉ बोलें');}
+    async function speak(text){
+      stop();if(!voice||!text)return;
+      const id=speechId,requestedLanguage=language,controller=new AbortController();speechAbort=controller;
+      let failed=false;
+      const timeout=setTimeout(()=>controller.abort(),35000);
+      state.textContent=tr('Preparing Gemini voice…','Gemini आवाज़ तैयार हो रही है…');
+      const fail=(message)=>{
+        if(failed||id!==speechId||!voice||!opened)return;
+        failed=true;releaseAudio();avatar?.setTalking(false);
+        state.textContent=tr('Gemini voice unavailable','Gemini आवाज़ उपलब्ध नहीं');
+        help.textContent=tr('Gemini error · no substitute voice','Gemini त्रुटि · दूसरी आवाज़ नहीं');
+        const errorBox=root.querySelector('.daya-voice-error');errorBox.hidden=false;
+        errorBox.textContent=message||tr('Gemini could not play this reply. Your answer is still shown below.','Gemini यह जवाब नहीं सुना पाया। लिखित जवाब नीचे उपलब्ध है।');
+      };
+      const errorBox=root.querySelector('.daya-voice-error');errorBox.hidden=true;
+      try{
+        const response=await fetch(new URL('api/tts',appBase).href,{
+          method:'POST',headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({text,language:requestedLanguage}),signal:controller.signal
+        });
+        if(!response.ok){const error=await response.json().catch(()=>({}));throw new Error(error.error||('Gemini voice unavailable: '+response.status));}
+        if(response.headers.get('X-DAI-TTS-Provider')!=='gemini')throw new Error('The voice service did not return Gemini audio.');
+        const blob=await response.blob();
+        if(!/^audio\//i.test(blob.type)||!blob.size)throw new Error('No Gemini audio');
+        if(id!==speechId||!voice||!opened)return;
+        audioUrl=URL.createObjectURL(blob);const audio=new Audio(audioUrl);currentAudio=audio;
+        const voiceName=response.headers.get('X-DAI-TTS-Voice')||'Charon';
+        help.textContent='Gemini · '+voiceName+' · '+(requestedLanguage==='hi'?'हिंदी':'English');
+        audio.onplaying=()=>{if(id===speechId){avatar?.setTalking(true);state.textContent=tr('Speaking…','बोल रहा हूँ…');}};
+        audio.onended=()=>{if(id===speechId){releaseAudio();avatar?.setTalking(false);state.textContent=tr('Ready when you are','आपका प्रश्न सुनने को तैयार');}};
+        audio.onerror=()=>fail(tr('Gemini audio could not play. Click Voice off, then on to retry.','Gemini आवाज़ नहीं चल पाई। Voice बंद करके फिर चालू करें।'));await audio.play();
+      }catch(error){fail(error.name==='AbortError'?tr('Gemini voice timed out. Please try again.','Gemini आवाज़ का समय समाप्त हुआ। फिर कोशिश करें।'):error.message);}
+      finally{clearTimeout(timeout);if(speechAbort===controller)speechAbort=null;}
+    }
+    function navigateLink(target){
+      const names={timeline:['Open Care Timeline','Care Timeline खोलें'],records:['Open Records','Records खोलें'],settings:['Open Settings','Settings खोलें'],appointments:['Open Appointments','Appointments खोलें'],postpartum:['Open Postpartum','Postpartum खोलें'],child:['Open Child workspace','Child workspace खोलें']};
+      const a=el('a',{href:new URL(target==='child'?'child-dashboard.html':'dashboard.html',appBase).href},names[target]?tr(...names[target]):'Open workspace');
+      if(target!=='child')a.addEventListener('click',event=>{
+        const button=document.querySelector('[data-panel="'+target+'"]');
+        if(button&&location.pathname.endsWith('/dashboard.html')){event.preventDefault();button.click();close();}
+      });return a;
+    }
+    function message(who,text,result){
+      const row=el('div',{class:'care-chatbot__message care-chatbot__message--'+who},text);
+      if(result){row.dataset.replyId=result.id;if(result.safety)row.dataset.safety='true';
+        if(!result.safety&&(result.sources.length||result.navigation)){
+          const links=el('div',{class:'daya-links'});
+          if(result.navigation)links.appendChild(navigateLink(result.navigation));
+          result.sources.forEach((source,i)=>{const u=new URL(source);if(u.protocol!=='https:')return;links.appendChild(el('a',{href:u.href,target:'_blank',rel:'noopener noreferrer'},tr('Official / clinical source','आधिकारिक / चिकित्सा स्रोत')+(result.sources.length>1?' '+(i+1):'')+' ↗'));});row.appendChild(links);
+        }
       }
-      setTimeout(function () { input.focus(); }, 0);
+      feed.appendChild(row);feed.scrollTop=feed.scrollHeight;
     }
-
-    function closePanel() {
-      panel.hidden = true;
-      launcher.setAttribute('aria-expanded', 'false');
-      stopSpeech();
-      launcher.focus();
+    function intro(){message('bot',tr('Hello, I’m Dr. Daya. Ask me how to use DAI, understand a care milestone or find the right next step. Choose a topic below or type a question.','नमस्ते, मैं Dr. Daya हूँ। DAI इस्तेमाल करने, care के पड़ाव समझने या अगला कदम ढूँढ़ने में मदद कर सकता हूँ। नीचे विषय चुनें या प्रश्न लिखें।'));}
+    function ask(text){
+      const clean=String(text||'').trim().slice(0,1500);if(!clean)return;
+      stopListening();message('user',clean);input.value='';
+      const result=knowledge.respond(clean,language);lastReply=result.text;message('bot',result.text,result);speak(result.text);
     }
-
-    function ask(text) {
-      var clean = String(text || '').trim();
-      if (!clean) return;
-      renderMessage(feed, 'user', clean);
-      input.value = '';
-      var reply = getReply(clean);
-      lastBotReply = reply;
-      renderMessage(feed, 'bot', reply);
-      speak(reply);
+    function topics(){
+      const categories=root.querySelector('.daya-categories');categories.replaceChildren();
+      knowledge.categories.forEach(category=>{
+        const button=el('button',{type:'button','aria-pressed':String(category.id===activeCategory)},category[language]);
+        button.addEventListener('click',()=>{activeCategory=category.id;topics();});categories.appendChild(button);
+      });
+      const chips=root.querySelector('.care-chatbot__chips');chips.replaceChildren();
+      knowledge.faqs.filter(q=>q.category===activeCategory).forEach(q=>{const button=el('button',{type:'button','data-question-id':q.id},q.question[language]);button.addEventListener('click',()=>ask(q.question[language]));chips.appendChild(button);});
     }
-
-    launcher.addEventListener('click', function () {
-      if (panel.hidden) openPanel();
-      else closePanel();
+    function labels(){
+      root.querySelector('.care-chatbot__notice').textContent=tr('No diagnosis or prescriptions. Voice sends the prepared answer to Google Gemini; private records are not read.','Diagnosis या prescription नहीं। आवाज़ के लिए तैयार जवाब Google Gemini को भेजा जाता है; निजी records नहीं पढ़े जाते।');
+      input.placeholder=tr('Type your question…','अपना प्रश्न लिखें…');
+      root.querySelector('form button').textContent=tr('Send','भेजें');
+      root.querySelector('.daya-topics summary').textContent=tr('Explore questions','प्रश्न और विषय देखें');
+      root.querySelector('.daya-clear').textContent=tr('Clear','साफ़ करें');
+      voiceButton.textContent=tr('Voice: ','आवाज़: ')+(voice?tr('On','चालू'):tr('Off','बंद'));
+      mic.textContent=tr('◉ Speak','◉ बोलें');
+      help.textContent=tr('English · text or voice','हिंदी · लिखें या बोलें');
+      root.querySelector('.daya-character h3').textContent=tr('Here to help.','आपकी मदद के लिए।');
+      root.querySelector('.care-chatbot__header small').textContent=tr('Your DAI care guide · 3D & voice','आपका DAI care guide · 3D और आवाज़');
+      topics();
+    }
+    async function loadAvatar(){
+      if(avatarPromise)return avatarPromise;
+      const status=avatarHost.querySelector('.daya-avatar-status');
+      avatarPromise=import(asset('js/daya-avatar.mjs')).then(module=>module.createAvatar(avatarHost,base)).then(instance=>{
+        avatar=instance;avatar.setVisible(opened);status.hidden=true;if(currentAudio&&!currentAudio.paused)avatar.setTalking(true);
+      }).catch(error=>{console.warn('Dr. Daya 3D preview unavailable:',error);status.textContent=tr('3D view unavailable. Chat and voice still work.','3D उपलब्ध नहीं। चैट और आवाज़ इस्तेमाल करें।');});
+      return avatarPromise;
+    }
+    function open(){opened=true;panel.hidden=false;launcher.hidden=true;launcher.setAttribute('aria-expanded','true');avatar?.setVisible(true);if(!feed.children.length)intro();loadAvatar();input.focus();}
+    function close(){opened=false;panel.hidden=true;launcher.hidden=false;launcher.setAttribute('aria-expanded','false');stop();stopListening();avatar?.setVisible(false);launcher.focus();}
+    launcher.addEventListener('click',open);root.querySelector('.care-chatbot__close').addEventListener('click',close);
+    root.addEventListener('keydown',event=>{if(event.key==='Escape')close();});
+    root.querySelector('form').addEventListener('submit',event=>{event.preventDefault();ask(input.value);});
+    root.querySelector('select').addEventListener('change',event=>{stopListening();language=event.target.value;stop();lastReply='';labels();intro();});
+    voiceButton.addEventListener('click',()=>{voice=!voice;voiceButton.setAttribute('aria-pressed',String(voice));labels();if(voice&&lastReply)speak(lastReply);else stop();});
+    root.querySelector('.daya-clear').addEventListener('click',()=>{stop();stopListening();feed.replaceChildren();lastReply='';intro();input.focus();});
+    const Recognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+    if(!Recognition){mic.disabled=true;mic.title='Speech recognition is not supported in this browser. You can type instead.';}
+    mic.addEventListener('click',()=>{
+      if(recognition){stopListening();return;}
+      stop();const r=new Recognition();recognition=r;r.lang=language==='hi'?'hi-IN':'en-IN';r.interimResults=false;r.continuous=false;
+      // Browser handles the permission prompt. Audio may be processed by its provider.
+      help.textContent=tr('Browser speech service may process audio','ब्राउज़र की speech service आवाज़ प्रोसेस कर सकती है');
+      r.onstart=()=>{mic.setAttribute('aria-pressed','true');mic.textContent=tr('■ Stop','■ रोकें');state.textContent=tr('Listening…','सुन रहा हूँ…');};
+      r.onresult=event=>{if(recognition!==r||!opened)return;const text=event.results[0][0].transcript;recognition=null;ask(text);};
+      r.onerror=event=>{if(recognition!==r)return;help.textContent=event.error==='not-allowed'?tr('Microphone permission denied. Type instead.','माइक्रोफ़ोन अनुमति नहीं मिली। टाइप करें।'):tr('Could not hear you. Please type or try again.','आवाज़ नहीं समझ पाया। लिखें या फिर बोलें।');};
+      r.onend=()=>{if(recognition===r)recognition=null;mic.setAttribute('aria-pressed','false');mic.textContent=tr('◉ Speak','◉ बोलें');if(!currentAudio&&!speechAbort)state.textContent=tr('Ready when you are','आपका प्रश्न सुनने को तैयार');};
+      try{r.start();}catch{recognition=null;help.textContent=tr('Microphone unavailable. Type instead.','माइक्रोफ़ोन उपलब्ध नहीं। टाइप करें।');}
     });
-    panel.querySelector('.care-chatbot__close').addEventListener('click', closePanel);
-    panel.querySelectorAll('.care-chatbot__chips button').forEach(function (button) {
-      button.addEventListener('click', function () { ask(button.textContent); });
-    });
-    form.addEventListener('submit', function (event) {
-      event.preventDefault();
-      ask(input.value);
-    });
-    voiceButton.addEventListener('click', function () {
-      voiceOn = !voiceOn;
-      voiceButton.setAttribute('aria-pressed', String(voiceOn));
-      voiceButton.textContent = voiceOn ? 'Voice: On' : 'Voice: Off';
-      if (!voiceOn) stopSpeech();
-      else if (lastBotReply) speak(lastBotReply);
-    });
+    document.addEventListener('visibilitychange',()=>{if(document.hidden){stop();stopListening();}});
+    window.addEventListener('pagehide',event=>{stop();stopListening();if(event.persisted)avatar?.setVisible(false);else avatar?.dispose();});
+    window.addEventListener('pageshow',event=>{if(event.persisted)avatar?.setVisible(opened);});
+    labels();
+    if(location.hash === "#dr-daya")open();
   }
-
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
-  else init();
+  if(window.DaiDayaKnowledge)boot();else{
+    const knowledge=document.createElement('script');knowledge.src=asset('js/daya-knowledge.js?v=daya-3d-1');knowledge.onload=boot;knowledge.onerror=()=>{window.daiDayaLoading=false;console.error('Dr. Daya questions could not load.');};document.head.appendChild(knowledge);
+  }
 })();
