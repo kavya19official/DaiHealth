@@ -8,9 +8,7 @@
 <link rel="icon" href="assets/logo.jpeg">
 <link rel="stylesheet" href="styles.css">
 <script src="js/dai-api.js"></script>
-<style>
-.workspace-access{margin:.9rem 0 1.1rem;padding:1rem;border:1px solid var(--line);border-radius:16px;background:var(--ground)}.workspace-access h3{margin:0 0 .25rem;font-size:1rem}.workspace-access>p{margin:0 0 .75rem;font-size:.82rem}.workspace-buttons{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem}.workspace-button{padding:.7rem .45rem;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink-2);font-weight:700;font-size:.78rem}.workspace-button:hover{border-color:var(--violet);background:var(--lilac);color:var(--violet)}.workspace-button b{display:block;color:inherit;font-size:.85rem}.workspace-button small{display:block;margin-top:.15rem;font-weight:500;color:var(--ink-3)}@media(max-width:620px){.workspace-buttons{grid-template-columns:1fr}}
-</style>
+
 </head>
 <body class="auth-page">
 <a class="skip-link" href="#main">Skip to content</a>
@@ -22,9 +20,9 @@
       <span><span class="brand__name">दाई</span><span class="brand__tag">Hospital Workflow</span></span>
     </a>
     <nav class="site-nav" aria-label="Primary navigation">
-      <a href="dashboard.html">Mother / Patient</a>
-      <a href="doctor.html">Doctor</a>
-      <a href="hospital.html">Hospital Team</a>
+      <a href="auth.html?role=mother">Mother / Patient</a>
+      <a href="auth.html?role=doctor">Doctor</a>
+      <a href="auth.html?role=hospital">Hospital</a>
       <a href="index.html#modules">Features</a>
       <a href="index.html#why">About</a>
     </nav>
@@ -54,29 +52,34 @@
 
     <div class="error-box" id="errorBox"></div>
 
-    <div class="workspace-access">
-      <h3>Choose a workspace</h3>
-      <p>Use an account when the database is connected, or open a complete demo now.</p>
-      <div class="workspace-buttons">
-        <button type="button" class="workspace-button" data-demo-role="mother"><b>Mother / Patient</b><small>Appointments and care timeline</small></button>
-        <button type="button" class="workspace-button" data-demo-role="doctor"><b>Doctor</b><small>Patients and appointment review</small></button>
-        <button type="button" class="workspace-button" data-demo-role="hospital"><b>Hospital Team</b><small>Registry and clinic operations</small></button>
-      </div>
+    <div class="login-role-toggle" role="group" aria-label="Sign in as">
+      <button type="button" data-login-role="mother" class="is-active" aria-pressed="true">Patient</button>
+      <button type="button" data-login-role="doctor" aria-pressed="false">Doctor</button>
+      <button type="button" data-login-role="hospital" aria-pressed="false">Hospital</button>
     </div>
 
     <div class="panel is-active" id="panelLogin">
       <h2>Welcome back</h2>
-      <p>Account login automatically opens the correct Mother or Doctor workspace.</p>
+      <p id="loginDescription">Sign in to continue your care journey.</p>
       <form id="loginForm">
-        <div class="form-group">
+        <div class="form-group" id="loginEmailGroup">
           <label for="loginEmail">Email</label>
           <input type="email" id="loginEmail" required autocomplete="email">
         </div>
-        <div class="form-group">
+        <div class="form-group" id="loginPasswordGroup">
           <label for="loginPassword">Password</label>
           <input type="password" id="loginPassword" required autocomplete="current-password">
         </div>
+        <div class="login-demo-hint" id="loginDemoHint" hidden></div>
+        <div id="hospitalOtpGroup" hidden>
+          <p class="login-otp-notice" id="hospitalOtpNotice" role="status"></p>
+          <div class="form-group">
+            <label for="hospitalOtp">Six-digit verification code</label>
+            <input id="hospitalOtp" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="one-time-code" disabled>
+          </div>
+        </div>
         <button type="submit" class="btn btn--primary" id="loginSubmit">Log in</button>
+        <button type="button" class="login-back" id="hospitalOtpBack" hidden>Back to sign in</button>
       </form>
     </div>
 
@@ -276,9 +279,9 @@
       </form>
     </div>
 
-    <div class="divider">or</div>
+    <div class="divider" id="guestDivider">or</div>
     <button type="button" class="btn btn--ghost" id="guestBtn">Open Mother / Patient demo</button>
-    <p class="footnote" style="margin-top:.75rem">Demo mode — your tracking data stays on this device only and your doctor won't be able to see it.</p>
+    <p id="guestFootnote" class="footnote" style="margin-top:.75rem">Demo mode — your tracking data stays on this device only and your doctor won't be able to see it.</p>
   </section>
 </main>
 
@@ -324,6 +327,72 @@ var API_BASE = window.DaiAPI ? window.DaiAPI.API_BASE : (window.DAI_API_BASE || 
 var errorBox = document.getElementById('errorBox');
 function showError(msg) { errorBox.textContent = msg; errorBox.classList.add('is-visible'); }
 function clearError() { errorBox.classList.remove('is-visible'); }
+var selectedRole = 'mother';
+var hospitalChallenge = null;
+var localAccounts = null;
+var automaticEmail = '';
+var roleButtons = document.querySelectorAll('[data-login-role]');
+function updateDemoHint() {
+  var hint = document.getElementById('loginDemoHint');
+  hint.hidden = !localAccounts || !!hospitalChallenge;
+  if (!localAccounts) return;
+  var email = localAccounts[selectedRole];
+  hint.textContent = 'Simulated on synthetic data · Demo: ' + email + ' · Password: Dai-Synthetic-2026!';
+  var field = document.getElementById('loginEmail');
+  if (!field.value || field.value === automaticEmail) { field.value = email; automaticEmail = email; }
+}
+function resetHospitalChallenge() {
+  hospitalChallenge = null;
+  document.getElementById('loginEmailGroup').hidden = false;
+  document.getElementById('loginPasswordGroup').hidden = false;
+  document.getElementById('loginEmail').disabled = false;
+  document.getElementById('loginPassword').disabled = false;
+  document.getElementById('hospitalOtpGroup').hidden = true;
+  document.getElementById('hospitalOtpBack').hidden = true;
+  document.getElementById('hospitalOtp').disabled = true;
+  document.getElementById('hospitalOtp').required = false;
+  document.getElementById('hospitalOtp').value = '';
+  document.getElementById('loginSubmit').textContent = 'Log in';
+  updateDemoHint();
+}
+function selectRole(role) {
+  selectedRole = ['mother','doctor','hospital'].includes(role) ? role : 'mother';
+  resetHospitalChallenge(); clearError();
+  roleButtons.forEach(function(button){var active=button.dataset.loginRole===selectedRole;button.classList.toggle('is-active',active);button.setAttribute('aria-pressed',String(active));});
+  document.getElementById('loginDescription').textContent = selectedRole==='doctor' ? 'Sign in to your clinical workspace.' : selectedRole==='hospital' ? 'Sign in to hospital operations and administration.' : 'Sign in to continue your care journey.';
+  var register = document.querySelector('[data-tab="register"]');
+  register.disabled = selectedRole==='hospital';
+  register.title = selectedRole==='hospital' ? 'Hospital staff accounts are managed by an administrator.' : '';
+  if (selectedRole==='hospital') document.querySelector('[data-tab="login"]').click();
+  else document.querySelector('[data-role="'+selectedRole+'"]').click();
+  ['guestBtn','guestDivider','guestFootnote'].forEach(function(id){document.getElementById(id).hidden=selectedRole==='hospital';});
+  document.getElementById('guestBtn').textContent = selectedRole==='doctor' ? 'Open Doctor demo' : 'Open Mother / Patient demo';
+  var url = new URL(location.href);url.searchParams.set('role',selectedRole);history.replaceState(null,'',url);
+}
+roleButtons.forEach(function(button){button.addEventListener('click',function(){selectRole(button.dataset.loginRole);});});
+document.getElementById('hospitalOtpBack').addEventListener('click',function(){resetHospitalChallenge();clearError();});
+window.addEventListener('dai:local-ready',function(event){localAccounts=event.detail.accounts;updateDemoHint();});
+async function hospitalLogin() {
+  clearError();var button=document.getElementById('loginSubmit');button.disabled=true;
+  roleButtons.forEach(function(item){item.disabled=true;});
+  try {
+    var path=hospitalChallenge ? '/auth/otp' : '/auth/login';
+    var body=hospitalChallenge ? {challenge_id:hospitalChallenge.challenge_id,code:document.getElementById('hospitalOtp').value} : {email:document.getElementById('loginEmail').value.trim(),password:document.getElementById('loginPassword').value};
+    var response=await fetch('/hospital-admin/api'+path,{method:'POST',credentials:'same-origin',headers:{'content-type':'application/json','x-dai-client':'portal'},body:JSON.stringify(body)});
+    var data=await response.json().catch(function(){return {};});
+    if(!response.ok) throw new Error(typeof data.detail==='string'?data.detail:'Hospital sign-in is unavailable. Start DAI with npm start and try again.');
+    if(hospitalChallenge){localStorage.removeItem('dai_guest');location.href='/hospital-admin';return;}
+    hospitalChallenge=data;
+    document.getElementById('loginEmailGroup').hidden=true;document.getElementById('loginPasswordGroup').hidden=true;
+    document.getElementById('loginEmail').disabled=true;document.getElementById('loginPassword').disabled=true;
+    document.getElementById('loginDemoHint').hidden=true;
+    document.getElementById('hospitalOtpGroup').hidden=false;document.getElementById('hospitalOtpBack').hidden=false;
+    var input=document.getElementById('hospitalOtp');input.disabled=false;input.required=true;input.focus();
+    document.getElementById('hospitalOtpNotice').textContent=data.demo_otp ? 'Simulated OTP: '+data.demo_otp+'. No SMS is sent.' : data.message || 'Enter your verification code.';
+  } catch(error) {showError(error.message || 'Could not connect to the hospital service.');}
+  finally {button.disabled=false;button.textContent=hospitalChallenge?'Verify & log in':'Log in';roleButtons.forEach(function(item){item.disabled=false;});}
+}
+
 
 function redirectForUser(user) {
   if (user && user.role === 'doctor') return 'doctor.html';
@@ -379,6 +448,7 @@ document.querySelectorAll('.role-toggle [data-role]').forEach(function (btn) {
 
 document.getElementById('loginForm').addEventListener('submit', function (e) {
   e.preventDefault();
+  if (selectedRole === 'hospital') { hospitalLogin(); return; }
   submitAuth('/auth/login', {
     email: document.getElementById('loginEmail').value.trim(),
     password: document.getElementById('loginPassword').value
@@ -451,7 +521,8 @@ function openDemo(role) {
 document.querySelectorAll('[data-demo-role]').forEach(function (button) {
   button.addEventListener('click', function () { openDemo(button.dataset.demoRole); });
 });
-document.getElementById('guestBtn').addEventListener('click', function () { openDemo('mother'); });
+document.getElementById('guestBtn').addEventListener('click', function () { openDemo(selectedRole); });
+selectRole(new URLSearchParams(location.search).get('role') || 'mother');
 })();
 </script>
 <script src="js/care-chatbot.js?v=voice-fallback-3"></script>

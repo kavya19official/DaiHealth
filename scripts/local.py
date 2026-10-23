@@ -256,6 +256,7 @@ def main():
         if action == "run":
             for port in [int(env["PORT"]), 3104, 8100]:
                 with socket.socket() as check:
+                    check.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
                     try:
                         check.bind(("127.0.0.1", port))
                     except OSError:
