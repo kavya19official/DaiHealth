@@ -543,7 +543,7 @@ app.get('/api/auth/me', authenticateToken, async (req, res) => {
 // ============================================================================
 
 const MILESTONE_SELECT = `
-  SELECT id, stage, category, title, guidance, due_date, completed_at, sort_order,
+  SELECT id, stage, category, title, guidance, due_date, completed_at, sort_order, appointment_id, result_id, completion_verification, verified_facility_name,
          CASE WHEN completed_at IS NOT NULL THEN 'completed'
               WHEN due_date < CURRENT_DATE THEN 'overdue'
               ELSE 'upcoming' END AS status
@@ -567,7 +567,7 @@ app.patch('/api/timeline/:id/complete', authenticateToken, authorizeRole(['mothe
   try {
     const { id } = req.params;
     const result = await pool.query(
-      `UPDATE care_milestones SET completed_at = CURRENT_TIMESTAMP
+      `UPDATE care_milestones SET completed_at = CURRENT_TIMESTAMP, completion_verification=COALESCE(completion_verification,'self_reported')
        WHERE id = $1 AND mother_id = $2
        RETURNING id, completed_at`,
       [id, req.user.id]
@@ -966,30 +966,22 @@ app.get('/api/doctors', authenticateToken, authorizeRole(['mother']), async (req
 
 // Mother: request a new appointment
 app.post('/api/appointments', authenticateToken, authorizeRole(['mother']), async (req, res) => {
-  try {
-    const { doctor_id, requested_date, reason } = req.body;
-    if (!doctor_id || !requested_date) {
-      return res.status(400).json({ error: 'Doctor and requested date are required' });
-    }
-
-    const doctorCheck = await pool.query(
-      "SELECT id FROM users WHERE id = $1 AND role = 'doctor'",
-      [doctor_id]
-    );
-    if (doctorCheck.rows.length === 0) {
-      return res.status(400).json({ error: 'Selected doctor not found' });
-    }
-
-    const result = await pool.query(
-      `INSERT INTO appointments (mother_id, doctor_id, requested_date, reason)
-       VALUES ($1, $2, $3, $4) RETURNING *`,
-      [req.user.id, doctor_id, requested_date, reason || null]
-    );
-    res.status(201).json({ message: 'Appointment requested', appointment: result.rows[0] });
-  } catch (error) {
-    console.error('Create appointment error:', error);
-    res.status(500).json({ error: 'Failed to request appointment' });
-  }
+ const continuity=require('./patientContinuity');const client=await pool.connect();let appointment;
+ try {
+  await client.query('BEGIN');
+  const b=req.body||{};
+  const lock=await client.query("SELECT id FROM users WHERE id=$1 AND role='doctor' FOR UPDATE",[b.doctor_id]);
+  if(!lock.rows.length)throw Object.assign(new Error('Selected doctor not found'),{status:400});
+  const ctx=await continuity.validateBooking(client,req.user.id,b);
+  appointment=(await client.query(`INSERT INTO appointments(mother_id,doctor_id,requested_date,requested_time,reason,child_id,visit_type,milestone_id,facility_uuid,unit_uuid,unit_label,room,slot_end)
+    VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) RETURNING *`,[req.user.id,b.doctor_id,b.requested_date,b.requested_time||null,String(b.reason||'Consultation').slice(0,2000),b.child_id||null,b.visit_type||null,b.milestone_id||null,ctx.facility_uuid||null,ctx.unit_uuid||null,ctx.unit_label||null,ctx.room||null,ctx.slot_end||null])).rows[0];
+  if(b.milestone_id)await client.query('UPDATE care_milestones SET appointment_id=$1 WHERE id=$2 AND mother_id=$3',[appointment.id,b.milestone_id,req.user.id]);
+  await continuity.queueBridge(client,appointment.id);
+  await client.query('COMMIT');
+ }catch(error){await client.query('ROLLBACK');return res.status(error.status||500).json({error:error.status?error.message:'Could not request this appointment'});}
+ finally{client.release();}
+ await continuity.syncBridge(pool).catch(e=>console.warn('Hospital mirror queued:',e.message));
+ res.status(201).json({message:'Appointment requested; the clinic will confirm',appointment});
 });
 
 // Mother or doctor: list their own appointments (never each other's)
@@ -998,7 +990,7 @@ app.get('/api/appointments', authenticateToken, authorizeRole(['mother', 'doctor
     let result;
     if (req.user.role === 'mother') {
       result = await pool.query(
-        `SELECT a.*, dp.full_name AS doctor_name, dp.specialization
+        `SELECT a.*, dp.full_name AS doctor_name, dp.specialization, dp.facility_name AS hospital_name
          FROM appointments a
          JOIN doctor_profiles dp ON dp.user_id = a.doctor_id
          WHERE a.mother_id = $1
@@ -1042,6 +1034,8 @@ app.patch('/api/appointments/:id/status', authenticateToken, authorizeRole(['doc
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Appointment not found' });
     }
+    await require('./patientContinuity').queueBridge(pool,result.rows[0].id);
+    await require('./patientContinuity').syncBridge(pool).catch(e=>console.warn('Hospital mirror queued:',e.message));
     res.json({ message: 'Appointment updated', appointment: result.rows[0] });
   } catch (error) {
     console.error('Update appointment error:', error);
@@ -1095,6 +1089,9 @@ require('./notifications')(app, { pool, authenticateToken });
 
 // Patient experience: notification prefs + privacy controls
 require('./patientPreferences')(app, { pool, authenticateToken });
+require('./patientContinuity')(app, { pool, authenticateToken, authorizeRole });
+require('./patientExperience')(app, { pool, authenticateToken, authorizeRole });
+require('./patientHome')(app, { pool, authenticateToken, authorizeRole });
 require('./patientDocuments')(app, { pool, authenticateToken, authorizeRole });
 
 // Hospital, doctor, and patient continuity workflows

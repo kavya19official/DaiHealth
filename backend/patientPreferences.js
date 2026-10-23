@@ -17,6 +17,7 @@ module.exports = function registerPatientPreferences(app, { pool, authenticateTo
     'notif_sms',
     'privacy_share_doctors',
     'privacy_analytics',
+    'theme', 'notif_whatsapp', 'quiet_hours_enabled', 'quiet_start', 'quiet_end', 'text_size', 'read_aloud', 'offline_enabled',
   ];
 
   function cleanPrefs(incoming) {
@@ -26,10 +27,17 @@ module.exports = function registerPatientPreferences(app, { pool, authenticateTo
       if (!Object.prototype.hasOwnProperty.call(incoming, k)) continue;
       if (k === 'lang') {
         const v = String(incoming[k] || '').toLowerCase();
-        if (v === 'hi' || v === 'hindi') clean.lang = 'hi';
-        else if (v === 'en' || v === 'english') clean.lang = 'en';
-      } else {
-        clean[k] = !!incoming[k];
+        if (['en','hi','mr','ta','bn'].includes(v)) clean.lang=v;
+        else if(v==='hindi')clean.lang='hi';
+        else if(v==='english')clean.lang='en';
+      } else if(k==='theme'){
+        if(['light','dark'].includes(incoming[k]))clean[k]=incoming[k];
+      } else if(k==='text_size'){
+        if(['standard','large','extra-large'].includes(incoming[k]))clean[k]=incoming[k];
+      } else if(k==='quiet_start'||k==='quiet_end'){
+        if(/^([01]\d|2[0-3]):[0-5]\d$/.test(incoming[k]))clean[k]=incoming[k];
+      } else if(typeof incoming[k]==='boolean'){
+        clean[k] = incoming[k];
       }
     }
     return clean;
@@ -51,6 +59,7 @@ module.exports = function registerPatientPreferences(app, { pool, authenticateTo
   app.patch('/api/me/preferences', authenticateToken, async (req, res) => {
     try {
       const clean = cleanPrefs(req.body && req.body.preferences);
+      const before=await pool.query('SELECT preferences FROM patient_preferences WHERE user_id=$1',[req.user.id]);
       const { rows } = await pool.query(
         `INSERT INTO patient_preferences (user_id, preferences, updated_at)
          VALUES ($1, $2::jsonb, NOW())
@@ -60,6 +69,9 @@ module.exports = function registerPatientPreferences(app, { pool, authenticateTo
          RETURNING preferences`,
         [req.user.id, JSON.stringify(clean)]
       );
+      if(Object.prototype.hasOwnProperty.call(clean,'privacy_share_doctors') && clean.privacy_share_doctors !== before.rows[0]?.preferences?.privacy_share_doctors){
+        await pool.query("INSERT INTO patient_access_events(mother_id,event_type,details) VALUES($1,'document_sharing_preference',$2)",[req.user.id,JSON.stringify({enabled:clean.privacy_share_doctors})]);
+      }
       res.json({ preferences: rows[0].preferences });
     } catch (err) {
       console.error('PATCH /api/me/preferences', err.message);

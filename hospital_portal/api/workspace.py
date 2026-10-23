@@ -8,7 +8,7 @@ from pathlib import Path
 from contextlib import contextmanager
 from datetime import date, timedelta
 from fastapi import Depends, HTTPException, Query
-from sqlalchemy import select
+from sqlalchemy import select, text
 from . import schema as s
 
 LABEL = "Simulated on synthetic data"
@@ -373,6 +373,23 @@ def register_workspace(app, engine, require, audit, roles):
                     "SELECT a.appointment_id,a.mother_id,a.appointment_date,a.start_time,a.end_time,a.status,a.reason,d.name doctor FROM appointments a JOIN doctors d USING(doctor_id) WHERE a.hospital_id=? ORDER BY a.appointment_date DESC",
                     hid,
                 )
+                # Locally requested visits share this view, with identical cohort/unit access checks.
+                if c.dialect.name == "sqlite" and c.exec_driver_sql(
+                    "SELECT name FROM sqlite_master WHERE type='table' AND name='patient_appointment_bridge'"
+                ).first():
+                    requested = list(c.execute(
+                        text("SELECT appointment_id,mother_id,appointment_date,start_time,end_time,status,reason,doctor FROM patient_appointment_bridge WHERE facility_uuid=:facility ORDER BY appointment_date DESC"),
+                        {"facility": str(u["facility_id"]).replace("-", "")},
+                    ).mappings())
+                    # A patient's explicit request supplies a minimal incoming handoff to
+                    # the destination administrator. Clinical unit browsing is unchanged.
+                    if "facility.write" in roles[u["role"]] and requested:
+                        incoming = c.execute(select(s.mother).where(
+                            s.mother.c.source_id.in_({r["mother_id"] for r in requested})
+                        )).mappings()
+                        mothers = {**mothers, **{m["source_id"]: dict(m) for m in incoming}}
+                    raw = [dict(r) for r in requested] + raw
+                    raw.sort(key=lambda r: (str(r["appointment_date"]), str(r["appointment_id"])), reverse=True)
                 result["items"] = attach_mothers(
                     [r for r in raw if r["mother_id"] in mothers][:100],
                     mothers,

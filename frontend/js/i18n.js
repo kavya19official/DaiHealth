@@ -82,7 +82,7 @@
     if (!STRINGS[next]) return;
     lang = next;
     localStorage.setItem(KEY, lang);
-    document.documentElement.lang = lang === 'hi' ? 'hi' : 'en';
+    document.documentElement.lang = lang;
     applyDom();
     try {
       window.dispatchEvent(new CustomEvent('dai:lang', { detail: { lang: lang } }));
@@ -108,9 +108,9 @@
     return lang;
   }
 
-  global.DaiI18n = { t: t, setLang: setLang, getLang: getLang, applyDom: applyDom };
+  global.DaiI18n = { registerLocale: function(code, values) { STRINGS[code] = Object.assign({}, STRINGS.en, STRINGS[code] || {}, values); }, t: t, setLang: setLang, getLang: getLang, applyDom: applyDom };
   document.addEventListener('DOMContentLoaded', function () {
-    document.documentElement.lang = lang === 'hi' ? 'hi' : 'en';
+    document.documentElement.lang = lang;
     applyDom();
   });
 })(typeof window !== 'undefined' ? window : this);

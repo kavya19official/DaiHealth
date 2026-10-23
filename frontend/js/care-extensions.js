@@ -213,6 +213,7 @@
   }
 
   async function loadTrend() {
+    if(state.educationOnly)return;
     if (state.guest) { renderTrend(); return; }
     var d = await api.apiRequest('/risk/trend?days=' + state.trendDays);
     if (d) { state.trend = d; renderTrend(); }
@@ -417,7 +418,7 @@
   var sos = { el: null, step: 1, context: 'pregnant', codes: [], note: '', triage: null, summary: null, eventId: null, actions: [], saved: null, opener: null };
 
   async function loadEmergencyContext() {
-    if (state.guest) return null;
+    if (state.guest || state.offline) return null;
     var c = await api.apiRequest('/emergency/context');
     if (c) state.emCtx = c;
     return c;
@@ -703,9 +704,12 @@
   function init(opts) {
     if (started) return;
     started = true;
+    state.educationOnly = !!(opts && opts.educationOnly);
     state.guest = !!(opts && opts.guest);
     state.user = (opts && opts.user) || null;
     injectStyles();
+    state.offline=!!(opts&&opts.offline);
+    if(state.offline){state.pp=opts.cachedPost||null;renderPostpartum();renderPlan();return;}
     if (!$('cxFab')) {
       var fab = document.createElement('button');
       fab.id = 'cxFab'; fab.type = 'button'; fab.className = 'cx-fab'; fab.setAttribute('aria-label', 'Emergency help');
@@ -713,12 +717,13 @@
       fab.addEventListener('click', openSOS);
       document.body.appendChild(fab);
     }
-    renderTrend(); renderPlan();
+    if(!state.educationOnly)renderTrend(); renderPlan();
     loadTrend(); loadPostpartum(); loadPlan(); loadEmergencyContext();
   }
 
   // Called by dashboard.html after a BP/glucose log; shows a toast if the screen changed.
   function afterHealthLog(res) {
+    if(state.educationOnly)return;
     if (res && res.risk_update && res.risk_update.changed) {
       api.toast('Risk screen updated: ' + res.risk_update.previous_level + ' → ' + res.risk_update.risk_level);
     }

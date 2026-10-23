@@ -1,0 +1,7 @@
+{
+  "request_window_minutes": 30,
+  "booking_horizon_days": 28,
+  "fallback_session_start": "08:00",
+  "fallback_session_end": "14:00",
+  "assumptions": "Request-window length and fallback hours are demo assumptions. Unit weekdays and rooms come from hospital configuration; known source doctor session times override fallback hours. A request is not attendance confirmation."
+}

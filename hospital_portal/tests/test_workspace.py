@@ -114,3 +114,39 @@ def test_restricted_roles_and_audited_patient_rows(workspace):
         ]
         == []
     )
+
+
+def test_patient_requested_visits_keep_unit_scope_and_audit(workspace):
+    engine, client = workspace
+    with engine.begin() as c:
+        doctor = c.execute(
+            select(s.user).where(s.user.c.email == "consultant@dai-synthetic.invalid")
+        ).mappings().one()
+        permitted = c.execute(
+            select(s.mother).where(
+                s.mother.c.registered_facility_id == doctor["facility_id"],
+                s.mother.c.assigned_unit_id == doctor["unit_id"],
+            )
+        ).mappings().first()
+        other = c.execute(
+            select(s.mother).where(
+                s.mother.c.registered_facility_id == doctor["facility_id"],
+                s.mother.c.assigned_unit_id != doctor["unit_id"],
+            )
+        ).mappings().first()
+        assert permitted and other
+        c.exec_driver_sql("CREATE TABLE IF NOT EXISTS patient_appointment_bridge(appointment_id TEXT PRIMARY KEY,mother_id TEXT,facility_uuid TEXT,unit_uuid TEXT,doctor TEXT,appointment_date TEXT,start_time TEXT,end_time TEXT,reason TEXT,status TEXT,updated_at TEXT)")
+        for key, mother in [("patient:allowed-test", permitted), ("patient:other-test", other)]:
+            c.exec_driver_sql(
+                "INSERT INTO patient_appointment_bridge VALUES(?,?,?,?,?,?,?,?,?,?,?)",
+                (key, mother["source_id"], str(doctor["facility_id"]).replace("-", ""), str(mother["assigned_unit_id"]).replace("-", ""), "SYNTHETIC Doctor", "2099-01-01", "09:00", "09:30", "Synthetic patient request", "pending", "2026-10-24"),
+            )
+    headers = sign_in(client, "consultant")
+    result = client.get("/api/workspace/appointments", headers=headers)
+    assert result.status_code == 200
+    ids = {r["appointment_id"] for r in result.json()["items"]}
+    assert "patient:allowed-test" in ids
+    assert "patient:other-test" not in ids
+    with engine.connect() as c:
+        log = c.execute(select(s.audit_log).where(s.audit_log.c.entity_id == permitted["id"])).mappings().all()
+        assert any(r["details"].get("view") == "appointments" for r in log)

@@ -8,7 +8,7 @@
 
   var LS_KEY = 'dai_patient_prefs';
   var DEFAULTS = {
-    lang: 'en',
+    lang: 'en', theme:'light', text_size:'standard', read_aloud:true, offline_enabled:true, quiet_hours_enabled:true, quiet_start:'21:00', quiet_end:'07:00', notif_whatsapp:false,
     notif_appt: true,
     notif_vax: true,
     notif_growth: true,
@@ -33,6 +33,7 @@
   }
 
   async function loadFromServer() {
+    if(!navigator.onLine || localStorage.getItem('dai_guest')==='1')return null;
     if (!window.DaiAPI || typeof window.DaiAPI.apiRequest !== 'function') return null;
     try {
       var res = await window.DaiAPI.apiRequest('/me/preferences');
@@ -42,6 +43,7 @@
   }
 
   async function saveToServer(prefs) {
+    if(!navigator.onLine || localStorage.getItem('dai_guest')==='1')return false;
     if (!window.DaiAPI || typeof window.DaiAPI.apiRequest !== 'function') return false;
     try {
       var res = await window.DaiAPI.apiRequest('/me/preferences', {
@@ -66,7 +68,7 @@
   async function setPrefs(partial) {
     var next = Object.assign({}, readLocal(), partial);
     writeLocal(next);
-    if (next.lang && window.DaiI18n) window.DaiI18n.setLang(next.lang === 'hi' ? 'hi' : 'en');
+    if (next.lang && window.DaiI18n) window.DaiI18n.setLang(next.lang);
     await saveToServer(next);
     try {
       window.dispatchEvent(new CustomEvent('dai:prefs', { detail: next }));
@@ -78,24 +80,24 @@
     if (!form) return;
     getPrefs().then(function (prefs) {
       var langEl = form.querySelector('#setLang') || form.querySelector('[name="lang"]');
-      if (langEl) langEl.value = prefs.lang === 'hi' ? 'hi' : 'en';
+      if (langEl) langEl.value = prefs.lang;
       Object.keys(DEFAULTS).forEach(function (k) {
         if (k === 'lang') return;
         var el = form.querySelector('[name="' + k + '"]') || form.querySelector('#' + k);
-        if (el && el.type === 'checkbox') el.checked = !!prefs[k];
+        if (el) { if(el.type === 'checkbox') el.checked = !!prefs[k]; else el.value = prefs[k]; }
       });
-      if (window.DaiI18n) window.DaiI18n.setLang(prefs.lang === 'hi' ? 'hi' : 'en');
+      if (window.DaiI18n) window.DaiI18n.setLang(prefs.lang);
     });
 
     form.addEventListener('submit', async function (ev) {
       ev.preventDefault();
       var partial = {};
       var langEl = form.querySelector('#setLang') || form.querySelector('[name="lang"]');
-      if (langEl) partial.lang = langEl.value === 'hi' ? 'hi' : 'en';
+      if (langEl) partial.lang = langEl.value;
       Object.keys(DEFAULTS).forEach(function (k) {
         if (k === 'lang') return;
         var el = form.querySelector('[name="' + k + '"]') || form.querySelector('#' + k);
-        if (el && el.type === 'checkbox') partial[k] = el.checked;
+        if (el) partial[k] = el.type === 'checkbox' ? el.checked : el.value;
       });
       await setPrefs(partial);
       var status = form.querySelector('[data-prefs-status]');
