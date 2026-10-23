@@ -1,479 +1,573 @@
-/* Facility Discovery - Location setup, facility search, booking, and referrals */
-
+/* Facility Discovery — patient/caregiver frontend for /api/facilities & /api/patient/location */
 (function () {
   'use strict';
 
-  const API_BASE = window.DaiAPI ? window.DaiAPI.API_BASE : (window.DAI_API_BASE || '/api');
+  const API = window.DaiAPI;
+  const API_BASE = (API && API.API_BASE) || window.DAI_API_BASE || '/api';
+  const toast = (API && API.toast) || function (m) { alert(m); };
   const $ = (id) => document.getElementById(id);
 
-  // State
   let userLocation = null;
   let facilities = [];
   let selectedFacility = null;
+  let lastSearchHadCoords = false;
 
-  // DOM Elements
-  const locationForm = $('locationForm');
-  const deviceLocationBtn = $('deviceLocationBtn');
-  const saveLocationBtn = $('saveLocationBtn');
-  const searchBtn = $('searchBtn');
-  const facilitiesList = $('facilitiesList');
-  const loadingState = $('loadingState');
-  const emptyState = $('emptyState');
-  const appointmentModal = $('appointmentModal');
-  const appointmentForm = $('appointmentForm');
-  const closeAppointmentModal = $('closeAppointmentModal');
-  const facilityModal = $('facilityModal');
-  const closeFacilityModal = $('closeFacilityModal');
+  function escapeHtml(s) {
+    if (s == null || s === '') return '';
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
 
-  // Load saved location on page load
-  async function loadSavedLocation() {
-    try {
-      const response = await fetch(`${API_BASE}/patient/location`, {
-        credentials: 'include'
-      });
-      const data = await response.json();
-      if (data.location) {
-        userLocation = data.location;
-        $('city').value = data.location.city || '';
-        $('pincode').value = data.location.pincode || '';
-        $('district').value = data.location.district || '';
-        $('state').value = data.location.state || '';
-        updateLocationUI();
+  function formatDate(iso) {
+    if (!iso) return null;
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return null;
+    return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+
+  function missing(label) {
+    return '<span class="field-missing">' + escapeHtml(label) + ' not available</span>';
+  }
+
+  function displayOrMissing(value, label) {
+    if (value == null || value === '' || (Array.isArray(value) && value.length === 0)) {
+      return missing(label);
+    }
+    return escapeHtml(typeof value === 'object' ? JSON.stringify(value) : value);
+  }
+
+  async function api(path, options) {
+    if (API && API.apiRequest) {
+      return API.apiRequest(path, options || {});
+    }
+    const opts = Object.assign({ credentials: 'include' }, options || {});
+    if (opts.body && typeof opts.body === 'object' && !(opts.body instanceof FormData)) {
+      opts.body = JSON.stringify(opts.body);
+      opts.headers = Object.assign({ 'Content-Type': 'application/json' }, opts.headers || {});
+    }
+    const res = await fetch(API_BASE + path, opts);
+    if (res.status === 401) {
+      window.location.href = 'auth.html';
+      return null;
+    }
+    let data = null;
+    try { data = await res.json(); } catch (e) { data = {}; }
+    if (!res.ok) {
+      toast((data && data.error) || 'Request failed');
+      return null;
+    }
+    return data;
+  }
+
+  function updateLocationUI() {
+    const setup = $('locationSetup');
+    const chip = $('locationChip');
+    const changeBtn = $('changeLocationBtn');
+    if (userLocation && userLocation.city) {
+      setup.classList.add('is-set');
+      chip.classList.add('is-visible');
+      const parts = [userLocation.city];
+      if (userLocation.pincode) parts.push(userLocation.pincode);
+      if (userLocation.latitude != null && userLocation.longitude != null) {
+        parts.push('coords saved');
       }
-    } catch (error) {
-      console.error('Failed to load saved location:', error);
+      chip.textContent = 'Searching near: ' + parts.join(' · ');
+      changeBtn.style.display = 'inline-block';
+    } else {
+      setup.classList.remove('is-set');
+      chip.classList.remove('is-visible');
+      changeBtn.style.display = 'none';
     }
   }
 
-  // Save location
-  async function saveLocation(source = 'manual') {
-    const city = $('city').value.trim();
-    const pincode = $('pincode').value.trim();
-    const district = $('district').value.trim();
-    const state = $('state').value.trim();
+  async function loadSavedLocation() {
+    const data = await api('/patient/location');
+    if (data && data.location) {
+      userLocation = data.location;
+      $('city').value = data.location.city || '';
+      $('pincode').value = data.location.pincode || '';
+      $('district').value = data.location.district || '';
+      $('state').value = data.location.state || '';
+      updateLocationUI();
+    }
+  }
 
+  async function saveLocation(source) {
+    const city = $('city').value.trim();
     if (!city) {
-      alert('Please enter a city');
+      toast('City is required');
       return;
     }
-
-    try {
-      const response = await fetch(`${API_BASE}/patient/location`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          city,
-          pincode,
-          district,
-          state,
-          latitude: userLocation?.latitude,
-          longitude: userLocation?.longitude,
-          location_source: source
-        })
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        userLocation = data.location;
-        updateLocationUI();
-        alert('Location saved successfully!');
-      } else {
-        const error = await response.json();
-        alert('Failed to save location: ' + (error.error || 'Unknown error'));
-      }
-    } catch (error) {
-      console.error('Failed to save location:', error);
-      alert('Failed to save location. Please try again.');
+    const body = {
+      city,
+      pincode: $('pincode').value.trim() || null,
+      district: $('district').value.trim() || null,
+      state: $('state').value.trim() || null,
+      latitude: userLocation && userLocation.latitude != null ? userLocation.latitude : null,
+      longitude: userLocation && userLocation.longitude != null ? userLocation.longitude : null,
+      location_source: source || 'manual'
+    };
+    const data = await api('/patient/location', { method: 'POST', body });
+    if (data && data.location) {
+      userLocation = data.location;
+      updateLocationUI();
+      toast('Location saved');
     }
   }
 
-  // Get device location
+  /** Device location only after explicit button click (browser permission prompt). */
   function getDeviceLocation() {
     if (!navigator.geolocation) {
-      alert('Geolocation is not supported by your browser');
+      toast('Geolocation is not supported in this browser');
       return;
     }
-
-    deviceLocationBtn.disabled = true;
-    deviceLocationBtn.textContent = 'Getting location...';
+    const btn = $('deviceLocationBtn');
+    btn.disabled = true;
+    const prev = btn.innerHTML;
+    btn.textContent = 'Waiting for permission…';
 
     navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const { latitude, longitude } = position.coords;
-
-        // Reverse geocode to get city (simplified - in production use a geocoding API)
-        try {
-          // For now, we'll just save coordinates and let user fill in city
-          userLocation = { latitude, longitude };
-          alert('Location detected! Please fill in your city name and save.');
-          deviceLocationBtn.disabled = false;
-          deviceLocationBtn.innerHTML = `
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"/>
-              <circle cx="12" cy="12" r="3"/>
-            </svg>
-            Location Detected ✓
-          `;
-        } catch (error) {
-          console.error('Geocoding error:', error);
-          alert('Could not determine city from location. Please enter manually.');
-          deviceLocationBtn.disabled = false;
+      function (position) {
+        const latitude = position.coords.latitude;
+        const longitude = position.coords.longitude;
+        userLocation = Object.assign({}, userLocation || {}, { latitude, longitude });
+        btn.disabled = false;
+        btn.innerHTML = prev.replace('Use my current location', 'Location detected ✓');
+        toast('Coordinates saved. Confirm city / PIN and press Save location.');
+        if (!$('city').value.trim()) {
+          $('city').focus();
         }
       },
-      (error) => {
-        console.error('Geolocation error:', error);
-        let message = 'Could not get your location. ';
-        if (error.code === 1) {
-          message += 'Please enable location permissions.';
-        } else if (error.code === 2) {
-          message += 'Position unavailable.';
-        } else if (error.code === 3) {
-          message += 'Request timed out.';
-        }
-        alert(message);
-        deviceLocationBtn.disabled = false;
-        deviceLocationBtn.innerHTML = `
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"/>
-            <circle cx="12" cy="12" r="3"/>
-          </svg>
-          Use My Current Location
-        `;
+      function (error) {
+        btn.disabled = false;
+        btn.innerHTML = prev;
+        let msg = 'Could not use device location. ';
+        if (error.code === 1) msg += 'Permission denied — enter city manually.';
+        else if (error.code === 2) msg += 'Position unavailable.';
+        else if (error.code === 3) msg += 'Timed out.';
+        toast(msg);
       },
-      { timeout: 10000, enableHighAccuracy: true }
+      { timeout: 12000, enableHighAccuracy: true, maximumAge: 0 }
     );
   }
 
-  // Update location UI
-  function updateLocationUI() {
-    if (userLocation && userLocation.city) {
-      $('locationSetup').style.background = 'linear-gradient(135deg, #ecfdf5, #d1fae5)';
-      $('locationSetup').style.borderColor = '#10b981';
-    }
+  function changeLocation() {
+    userLocation = userLocation
+      ? { latitude: userLocation.latitude, longitude: userLocation.longitude }
+      : null;
+    $('city').value = '';
+    $('pincode').value = '';
+    $('district').value = '';
+    $('state').value = '';
+    $('city').focus();
+    updateLocationUI();
+    $('facilitiesList').innerHTML = '';
+    $('resultsMeta').hidden = true;
+    $('alternativesBanner').hidden = true;
+    $('emptyState').hidden = true;
+    toast('Enter another city or PIN, then Save and Search');
   }
 
-  // Search facilities
   async function searchFacilities() {
     const city = $('city').value.trim();
+    if (!city) {
+      toast('Set a city first (manual entry is enough)');
+      $('city').focus();
+      return;
+    }
+
+    $('loadingState').hidden = false;
+    $('emptyState').hidden = true;
+    $('alternativesBanner').hidden = true;
+    $('facilitiesList').innerHTML = '';
+    $('resultsMeta').hidden = true;
+
+    const params = new URLSearchParams({ city, limit: '50' });
     const facilityType = $('facilityType').value;
     const service = $('service').value;
     const capability = $('capability').value;
     const language = $('language').value;
+    const accessibility = $('accessibility').value;
     const maxDistance = $('maxDistance').value;
 
-    if (!city) {
-      alert('Please set your location first');
+    if (facilityType) params.set('facility_type', facilityType);
+    if (service) params.set('service', service);
+    if (capability) params.set('capability', capability);
+    if (language) params.set('language', language);
+    if (accessibility) params.set('accessibility', accessibility);
+    if (maxDistance) params.set('max_distance_km', maxDistance);
+
+    lastSearchHadCoords = !!(userLocation && userLocation.latitude != null && userLocation.longitude != null);
+    if (lastSearchHadCoords) {
+      params.set('user_lat', userLocation.latitude);
+      params.set('user_lon', userLocation.longitude);
+    }
+
+    const data = await api('/facilities/search?' + params.toString());
+    $('loadingState').hidden = true;
+
+    if (!data) return;
+
+    facilities = data.facilities || [];
+    $('resultsMeta').hidden = false;
+    $('resultsCount').textContent = facilities.length
+      ? facilities.length + ' facility' + (facilities.length === 1 ? '' : 'ies') + ' in / near ' + city
+      : 'No exact matches for these filters';
+
+    if (facilities.length === 0) {
+      $('emptyState').hidden = false;
+      if (service || capability || accessibility) {
+        await searchNearestAlternatives(city, maxDistance);
+      }
       return;
     }
 
-    // Show loading state
-    loadingState.style.display = 'block';
-    emptyState.style.display = 'none';
-    facilitiesList.innerHTML = '';
+    renderFacilities(facilities);
+  }
 
+  /** When filters yield nothing, show nearest appropriate options. */
+  async function searchNearestAlternatives(city, maxDistance) {
     const params = new URLSearchParams({
       city,
-      ...(facilityType && { facility_type: facilityType }),
-      ...(service && { service }),
-      ...(capability && { capability }),
-      ...(language && { language }),
-      ...(maxDistance && { max_distance_km: maxDistance }),
-      ...(userLocation?.latitude && { user_lat: userLocation.latitude }),
-      ...(userLocation?.longitude && { user_lon: userLocation.longitude }),
-      limit: 50
+      limit: '15',
+      max_distance_km: String(Math.max(Number(maxDistance) || 50, 100))
     });
+    if (userLocation && userLocation.latitude != null) {
+      params.set('user_lat', userLocation.latitude);
+      params.set('user_lon', userLocation.longitude);
+    }
+    const data = await api('/facilities/search?' + params.toString());
+    if (!data || !data.facilities || !data.facilities.length) return;
 
+    const banner = $('alternativesBanner');
+    banner.hidden = false;
+    banner.innerHTML =
+      '<strong>No exact match nearby.</strong> Showing nearest facilities in this city (filters relaxed). ' +
+      'Call or request a referral if the service you need is not listed as verified.';
+    facilities = data.facilities;
+    $('emptyState').hidden = true;
+    $('resultsCount').textContent = facilities.length + ' nearest alternative(s)';
+    renderFacilities(facilities);
+  }
+
+  function renderServiceTags(services, capabilities) {
+    const tags = [];
+    (services || []).slice(0, 6).forEach(function (s) {
+      const name = s.service_name || s.service_category || '';
+      if (name) tags.push('<span class="service-tag">' + escapeHtml(name) + '</span>');
+    });
+    (capabilities || []).slice(0, 4).forEach(function (c) {
+      const name = c.capability || '';
+      if (name) tags.push('<span class="service-tag capability">' + escapeHtml(name.replace(/_/g, ' ')) + '</span>');
+    });
+    if (!tags.length) return '<span class="field-missing">Services not listed</span>';
+    return tags.join('');
+  }
+
+  function verificationBlock(f) {
+    const verified = !!f.verified_at;
+    const cls = verified ? 'verified' : 'unverified';
+    const source = f.verification_source
+      ? escapeHtml(f.verification_source)
+      : '<span class="field-missing">source not recorded</span>';
+    const when = formatDate(f.verified_at) || formatDate(f.last_updated);
+    return (
+      '<div class="verification-badge ' + cls + '">' +
+      (verified ? '✓ Verified' : '⚠ Unverified') +
+      ' · Source: ' + source +
+      (when ? ' · Last verified / updated: ' + escapeHtml(when) : ' · <span class="field-missing">date unknown</span>') +
+      '</div>'
+    );
+  }
+
+  function renderFacilities(list) {
+    $('facilitiesList').innerHTML = list.map(function (f) {
+      const phone = f.phone
+        ? '<a href="tel:' + escapeHtml(f.phone) + '">📞 ' + escapeHtml(f.phone) + '</a>'
+        : missing('Phone');
+      const addr = [f.address, f.city, f.pincode].filter(Boolean).join(', ') || null;
+      return (
+        '<article class="facility-card" data-id="' + f.id + '">' +
+        '<div class="facility-header">' +
+        '<div><h3 class="facility-name">' + escapeHtml(f.name) + '</h3>' +
+        '<div class="facility-type">' + escapeHtml((f.facility_type || 'facility').replace(/_/g, ' ')) + '</div></div>' +
+        (f.distance_km != null
+          ? '<div class="facility-distance">' + escapeHtml(String(f.distance_km)) + ' km</div>'
+          : (lastSearchHadCoords ? '<div class="facility-distance" title="No coordinates on record">Distance unknown</div>' : '')) +
+        '</div>' +
+        '<div class="facility-address">' + (addr ? escapeHtml(addr) : missing('Address')) + '</div>' +
+        '<div class="facility-contact">' + phone + '</div>' +
+        '<div class="services-list">' + renderServiceTags(f.services, f.capabilities) + '</div>' +
+        verificationBlock(f) +
+        '<div class="facility-actions">' +
+        '<button type="button" class="primary" data-action="book" data-id="' + f.id + '">Book</button>' +
+        '<button type="button" data-action="details" data-id="' + f.id + '">Details &amp; doctors</button>' +
+        '<button type="button" data-action="call" data-phone="' + escapeHtml(f.phone || '') + '">Call</button>' +
+        '<button type="button" data-action="refer" data-id="' + f.id + '">Referral</button>' +
+        '</div></article>'
+      );
+    }).join('');
+  }
+
+  function hoursText(hours) {
+    if (!hours || typeof hours !== 'object') return null;
     try {
-      const response = await fetch(`${API_BASE}/facilities/search?${params}`, {
-        credentials: 'include'
-      });
-      const data = await response.json();
-
-      loadingState.style.display = 'none';
-
-      if (data.facilities && data.facilities.length > 0) {
-        facilities = data.facilities;
-        renderFacilities(data.facilities);
-      } else {
-        emptyState.style.display = 'block';
-      }
-    } catch (error) {
-      console.error('Search error:', error);
-      loadingState.style.display = 'none';
-      alert('Failed to search facilities. Please try again.');
+      return Object.keys(hours).map(function (d) {
+        return d + ': ' + (hours[d] || '—');
+      }).join('; ');
+    } catch (e) {
+      return null;
     }
   }
 
-  // Render facilities
-  function renderFacilities(facilitiesData) {
-    facilitiesList.innerHTML = facilitiesData.map(facility => `
-      <div class="facility-card">
-        <div class="facility-header">
-          <div>
-            <h3 class="facility-name">${escapeHtml(facility.name)}</h3>
-            <div class="facility-type">${escapeHtml(facility.facility_type || 'Healthcare Facility')}</div>
-          </div>
-          ${facility.distance_km ? `<div class="facility-distance">${facility.distance_km} km</div>` : ''}
-        </div>
-        <div class="facility-address">
-          ${escapeHtml(facility.address)}, ${escapeHtml(facility.city)}, ${escapeHtml(facility.pincode)}
-        </div>
-        <div class="facility-contact">
-          ${facility.phone ? `<a href="tel:${escapeHtml(facility.phone)}">📞 ${escapeHtml(facility.phone)}</a>` : ''}
-          ${facility.email ? `<a href="mailto:${escapeHtml(facility.email)}">✉️ ${escapeHtml(facility.email)}</a>` : ''}
-        </div>
-        <div class="services-list">
-          ${renderServiceTags(facility.services || [])}
-        </div>
-        <div class="verification-badge ${facility.verified_at ? 'verified' : ''}">
-          ${facility.verified_at ? '✓ Verified' : '⚠ Unverified'}
-          ${facility.verification_source ? `· ${escapeHtml(facility.verification_source)}` : ''}
-          ${facility.verified_at ? `· ${formatDate(facility.verified_at)}` : ''}
-        </div>
-        <div class="facility-actions">
-          <button type="button" class="primary" onclick="window.FacilityDiscovery.bookAppointment(${facility.id})">
-            Book Appointment
-          </button>
-          <button type="button" onclick="window.FacilityDiscovery.showDetails(${facility.id})">
-            View Details
-          </button>
-          <button type="button" onclick="window.FacilityDiscovery.callFacility('${escapeHtml(facility.phone || '')}')">
-            Call
-          </button>
-        </div>
-      </div>
-    `).join('');
-  }
-
-  // Render service tags
-  function renderServiceTags(services) {
-    if (!services || services.length === 0) {
-      return '<span class="service-tag">No services listed</span>';
-    }
-    return services.slice(0, 5).map(s => 
-      `<span class="service-tag">${escapeHtml(s.service_name)}</span>`
-    ).join('') + (services.length > 5 ? `<span class="service-tag">+${services.length - 5} more</span>` : '');
-  }
-
-  // Show facility details
   async function showDetails(facilityId) {
-    try {
-      const response = await fetch(`${API_BASE}/facilities/${facilityId}`, {
-        credentials: 'include'
-      });
-      const data = await response.json();
+    const data = await api('/facilities/' + facilityId);
+    if (!data || !data.facility) return;
+    selectedFacility = data.facility;
+    const f = data.facility;
+    $('facilityModalTitle').textContent = f.name || 'Facility';
 
-      if (data.facility) {
-        selectedFacility = data.facility;
-        renderFacilityDetails(data.facility);
-        facilityModal.classList.add('is-open');
-      }
-    } catch (error) {
-      console.error('Failed to load facility details:', error);
-      alert('Failed to load facility details');
+    const opHours = hoursText(f.operating_hours);
+    const langs = Array.isArray(f.languages) && f.languages.length
+      ? f.languages.join(', ')
+      : null;
+    const access = Array.isArray(f.accessibility_features) && f.accessibility_features.length
+      ? f.accessibility_features.join(', ')
+      : null;
+
+    let html =
+      '<p><strong>Address</strong><br>' +
+      (f.address ? escapeHtml(f.address) + '<br>' : '') +
+      [f.city, f.district, f.state, f.pincode].filter(Boolean).map(escapeHtml).join(', ') +
+      (!f.address && !f.city ? missing('Address') : '') +
+      '</p>' +
+      '<p><strong>Phone</strong><br>' +
+      (f.phone ? '<a href="tel:' + escapeHtml(f.phone) + '">' + escapeHtml(f.phone) + '</a>' : missing('Phone')) +
+      (f.alternate_phone ? ' · alt ' + escapeHtml(f.alternate_phone) : '') +
+      '</p>' +
+      '<p><strong>Hours</strong><br>' + (opHours ? escapeHtml(opHours) : missing('Operating hours')) + '</p>' +
+      '<p><strong>Languages</strong><br>' + (langs ? escapeHtml(langs) : missing('Languages')) + '</p>' +
+      '<p><strong>Accessibility</strong><br>' + (access ? escapeHtml(access) : missing('Accessibility features')) + '</p>' +
+      '<p><strong>NICU</strong><br>' +
+      (f.has_nicu_level && f.has_nicu_level !== 'none'
+        ? 'Level ' + escapeHtml(f.has_nicu_level)
+        : (f.has_nicu_level === 'none' ? 'None' : missing('NICU level'))) +
+      '</p>' +
+      '<div style="margin:1rem 0;"><strong>Services</strong><div class="services-list" style="margin-top:0.4rem;">' +
+      renderServiceTags(f.services, []) + '</div></div>' +
+      '<div style="margin:1rem 0;"><strong>Capabilities</strong><div class="services-list" style="margin-top:0.4rem;">' +
+      renderServiceTags([], f.capabilities) + '</div></div>' +
+      verificationBlock(f) +
+      '<div id="doctorsBlock" style="margin-top:1.25rem;"><p class="field-missing">Loading doctors…</p></div>' +
+      '<div class="facility-actions" style="margin-top:1.25rem;">' +
+      '<button type="button" class="primary" data-action="book" data-id="' + f.id + '">Book appointment</button>' +
+      '<button type="button" data-action="call" data-phone="' + escapeHtml(f.phone || '') + '">Call facility</button>' +
+      '<button type="button" data-action="refer" data-id="' + f.id + '">Create referral</button>' +
+      '</div>';
+
+    $('facilityModalContent').innerHTML = html;
+    $('facilityModal').classList.add('is-open');
+    loadDoctors(facilityId);
+  }
+
+  async function loadDoctors(facilityId) {
+    const data = await api('/facilities/' + facilityId + '/doctors');
+    const block = $('doctorsBlock');
+    if (!block) return;
+    if (!data || !data.doctors || !data.doctors.length) {
+      block.innerHTML = '<strong>Doctors</strong><p class="field-missing">No affiliated clinicians listed for this facility.</p>';
+      return;
+    }
+    block.innerHTML =
+      '<strong>Doctors at this facility</strong>' +
+      data.doctors.map(function (d) {
+        const name = d.full_name || 'Clinician';
+        const spec = d.specialization || null;
+        const verified = d.qualification_verified
+          ? '<span class="badge ok">Registration verified</span>'
+          : '<span class="badge warn">Verification not confirmed</span>';
+        const accepts = d.accepts_new_patients
+          ? '<span class="badge ok">Accepts new patients</span>'
+          : '<span class="badge muted">Not accepting new patients</span>';
+        const langs = Array.isArray(d.languages) && d.languages.length
+          ? escapeHtml(d.languages.join(', '))
+          : '<span class="field-missing">languages unknown</span>';
+        const hours = hoursText(d.clinic_hours);
+        const reg = d.verification_details && d.verification_details.registration_number
+          ? escapeHtml(d.verification_details.registration_number)
+          : (d.medical_license_number ? escapeHtml(d.medical_license_number) : null);
+        return (
+          '<div class="doctor-item">' +
+          '<div class="doctor-name">' + escapeHtml(name) + '</div>' +
+          '<div class="doctor-meta">' +
+          (spec ? escapeHtml(spec) + ' · ' : '') +
+          (d.role ? escapeHtml(String(d.role).replace(/_/g, ' ')) + ' · ' : '') +
+          verified + ' ' + accepts + '<br>' +
+          'Languages: ' + langs + '<br>' +
+          (hours ? 'Clinic hours: ' + escapeHtml(hours) + '<br>' : 'Clinic hours: ' + missing('hours') + '<br>') +
+          (reg ? 'Reg. / license: ' + reg : missing('Registration number')) +
+          '</div></div>'
+        );
+      }).join('');
+
+    const sel = $('appointmentDoctorId');
+    if (sel && String($('appointmentFacilityId').value) === String(facilityId)) {
+      sel.innerHTML = '<option value="">Facility / any available</option>' +
+        data.doctors.map(function (d) {
+          return '<option value="' + d.doctor_id + '">' + escapeHtml(d.full_name || 'Doctor') +
+            (d.specialization ? ' — ' + escapeHtml(d.specialization) : '') + '</option>';
+        }).join('');
     }
   }
 
-  // Render facility details in modal
-  function renderFacilityDetails(facility) {
-    $('facilityModalTitle').textContent = facility.name;
-    $('facilityModalContent').innerHTML = `
-      <div style="margin-bottom: 1rem;">
-        <strong>Address:</strong><br>
-        ${escapeHtml(facility.address)}<br>
-        ${escapeHtml(facility.city)}, ${escapeHtml(facility.district)}, ${escapeHtml(facility.state)}<br>
-        PIN: ${escapeHtml(facility.pincode)}
-      </div>
-      ${facility.phone ? `<div style="margin-bottom: 1rem;"><strong>Phone:</strong> <a href="tel:${escapeHtml(facility.phone)}">${escapeHtml(facility.phone)}</a></div>` : ''}
-      ${facility.email ? `<div style="margin-bottom: 1rem;"><strong>Email:</strong> <a href="mailto:${escapeHtml(facility.email)}">${escapeHtml(facility.email)}</a></div>` : ''}
-      ${facility.website ? `<div style="margin-bottom: 1rem;"><strong>Website:</strong> <a href="${escapeHtml(facility.website)}" target="_blank">${escapeHtml(facility.website)}</a></div>` : ''}
-      
-      <div style="margin: 1.5rem 0; padding: 1rem; background: var(--ground); border-radius: 8px;">
-        <strong>Services:</strong>
-        <div class="services-list" style="margin-top: 0.5rem;">
-          ${renderServiceTags(facility.services || [])}
-        </div>
-      </div>
-
-      <div style="margin: 1.5rem 0; padding: 1rem; background: var(--ground); border-radius: 8px;">
-        <strong>Capabilities:</strong>
-        <div class="services-list" style="margin-top: 0.5rem;">
-          ${facility.capabilities && facility.capabilities.length > 0 
-            ? facility.capabilities.map(c => `<span class="service-tag">${escapeHtml(c.capability)}</span>`).join('')
-            : '<span class="service-tag">No capabilities listed</span>'}
-        </div>
-      </div>
-
-      ${facility.languages && facility.languages.length > 0 ? `
-        <div style="margin-bottom: 1rem;">
-          <strong>Languages:</strong> ${facility.languages.map(l => escapeHtml(l)).join(', ')}
-        </div>
-      ` : ''}
-
-      ${facility.accessibility_features && facility.accessibility_features.length > 0 ? `
-        <div style="margin-bottom: 1rem;">
-          <strong>Accessibility:</strong> ${facility.accessibility_features.map(a => escapeHtml(a)).join(', ')}
-        </div>
-      ` : ''}
-
-      <div style="margin: 1.5rem 0; padding: 1rem; border: 1px solid var(--line); border-radius: 8px;">
-        <strong>Information Source:</strong><br>
-        Source: ${escapeHtml(facility.verification_source || 'Not specified')}<br>
-        Last Updated: ${facility.last_updated ? formatDate(facility.last_updated) : 'Not specified'}<br>
-        ${facility.verified_at ? `Verified: ${formatDate(facility.verified_at)}` : 'Not verified'}
-      </div>
-
-      <div class="facility-actions" style="margin-top: 1.5rem;">
-        <button type="button" class="primary" onclick="window.FacilityDiscovery.bookAppointment(${facility.id})">
-          Book Appointment
-        </button>
-        <button type="button" onclick="window.FacilityDiscovery.showDoctors(${facility.id})">
-          View Doctors
-        </button>
-        <button type="button" onclick="window.FacilityDiscovery.createReferral(${facility.id})">
-          Request Referral
-        </button>
-      </div>
-    `;
-  }
-
-  // Show doctors at facility
-  async function showDoctors(facilityId) {
-    try {
-      const response = await fetch(`${API_BASE}/facilities/${facilityId}/doctors`, {
-        credentials: 'include'
-      });
-      const data = await response.json();
-
-      if (data.doctors && data.doctors.length > 0) {
-        const doctorsHtml = data.doctors.map(doctor => `
-          <div class="doctor-item">
-            <div class="doctor-name">${escapeHtml(doctor.full_name)}</div>
-            <div class="doctor-specialization">${escapeHtml(doctor.specialization || 'Specialization not specified')}</div>
-            ${doctor.medical_license_number ? `<div style="font-size: 0.8rem; color: var(--ink-3);">License: ${escapeHtml(doctor.medical_license_number)}</div>` : ''}
-            ${doctor.phone ? `<div style="font-size: 0.8rem; margin-top: 0.3rem;">📞 ${escapeHtml(doctor.phone)}</div>` : ''}
-            ${doctor.qualification_verified ? '<div style="font-size: 0.8rem; color: var(--green); margin-top: 0.3rem;">✓ Qualification Verified</div>' : ''}
-          </div>
-        `).join('');
-
-        $('facilityModalContent').innerHTML = `
-          <h3>Doctors at ${selectedFacility.name}</h3>
-          <div class="doctor-list">${doctorsHtml}</div>
-        `;
-      } else {
-        $('facilityModalContent').innerHTML = `
-          <h3>Doctors at ${selectedFacility.name}</h3>
-          <p>No doctors listed at this facility.</p>
-        `;
-      }
-    } catch (error) {
-      console.error('Failed to load doctors:', error);
-      alert('Failed to load doctors');
-    }
-  }
-
-  // Book appointment
-  function bookAppointment(facilityId) {
-    selectedFacility = facilities.find(f => f.id === facilityId);
-    if (!selectedFacility) {
-      selectedFacility = { id: facilityId, name: 'Facility' };
-    }
+  async function openBook(facilityId) {
     $('appointmentFacilityId').value = facilityId;
-    appointmentModal.classList.add('is-open');
+    $('appointmentDoctorId').innerHTML = '<option value="">Facility / any available</option>';
+    $('appointmentType').value = '';
+    $('appointmentDate').value = '';
+    $('appointmentTime').value = '';
+    $('appointmentReason').value = '';
+    const min = new Date();
+    $('appointmentDate').min = min.toISOString().slice(0, 10);
+    $('appointmentModal').classList.add('is-open');
+    loadDoctors(facilityId);
   }
 
-  // Create referral
-  function createReferral(facilityId) {
-    const reason = prompt('Why do you need a referral to this facility?');
-    if (reason) {
-      alert('Referral request functionality would be implemented here. In production, this would create a referral record.');
-    }
-  }
-
-  // Call facility
-  function callFacility(phone) {
-    if (phone) {
-      window.location.href = `tel:${phone}`;
-    } else {
-      alert('No phone number available for this facility');
-    }
-  }
-
-  // Submit appointment form
   async function submitAppointment(e) {
     e.preventDefault();
     const facilityId = $('appointmentFacilityId').value;
-    const appointmentType = $('appointmentType').value;
-    const appointmentDate = $('appointmentDate').value;
-    const appointmentTime = $('appointmentTime').value;
-    const appointmentReason = $('appointmentReason').value;
-
-    try {
-      const response = await fetch(`${API_BASE}/facilities/${facilityId}/appointment`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          appointment_type: appointmentType,
-          requested_date: appointmentDate,
-          preferred_time: appointmentTime,
-          reason: appointmentReason
-        })
-      });
-
-      if (response.ok) {
-        alert('Appointment request submitted successfully! The facility will confirm your appointment.');
-        appointmentModal.classList.remove('is-open');
-        appointmentForm.reset();
-      } else {
-        const error = await response.json();
-        alert('Failed to book appointment: ' + (error.error || 'Unknown error'));
-      }
-    } catch (error) {
-      console.error('Appointment booking error:', error);
-      alert('Failed to book appointment. Please try again.');
+    const body = {
+      appointment_type: $('appointmentType').value,
+      requested_date: $('appointmentDate').value,
+      preferred_time: $('appointmentTime').value || null,
+      reason: $('appointmentReason').value.trim() || null,
+      doctor_id: $('appointmentDoctorId').value || null
+    };
+    if (!body.appointment_type || !body.requested_date) {
+      toast('Type and date are required');
+      return;
+    }
+    const data = await api('/facilities/' + facilityId + '/appointment', { method: 'POST', body });
+    if (data && data.appointment) {
+      toast('Appointment requested — status: ' + (data.appointment.status || 'pending'));
+      $('appointmentModal').classList.remove('is-open');
+      loadAppointments();
     }
   }
 
-  // Helper functions
-  function escapeHtml(text) {
-    if (!text) return '';
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
+  function openReferral(facilityId) {
+    $('referralToFacilityId').value = facilityId;
+    $('referralReason').value = '';
+    $('referralNotes').value = '';
+    $('referralUrgency').value = 'routine';
+    $('referralModal').classList.add('is-open');
   }
 
-  function formatDate(dateStr) {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+  async function submitReferral(e) {
+    e.preventDefault();
+    const body = {
+      to_facility_id: Number($('referralToFacilityId').value),
+      referral_reason: $('referralReason').value.trim(),
+      urgency: $('referralUrgency').value,
+      referral_notes: $('referralNotes').value.trim() || null
+    };
+    if (!body.to_facility_id || !body.referral_reason) {
+      toast('Reason is required');
+      return;
+    }
+    const data = await api('/facilities/referral', { method: 'POST', body });
+    if (data && data.referral) {
+      toast('Referral created — status: ' + (data.referral.status || 'pending'));
+      $('referralModal').classList.remove('is-open');
+    }
   }
 
-  // Event listeners
-  deviceLocationBtn.addEventListener('click', getDeviceLocation);
-  saveLocationBtn.addEventListener('click', () => saveLocation('manual'));
-  searchBtn.addEventListener('click', searchFacilities);
-  appointmentForm.addEventListener('submit', submitAppointment);
-  closeAppointmentModal.addEventListener('click', () => appointmentModal.classList.remove('is-open'));
-  closeFacilityModal.addEventListener('click', () => facilityModal.classList.remove('is-open'));
+  async function loadAppointments() {
+    const data = await api('/facilities/appointments');
+    const section = $('appointmentsSection');
+    const list = $('appointmentsList');
+    if (!data || !data.appointments) return;
+    section.hidden = false;
+    if (!data.appointments.length) {
+      list.innerHTML = '<p class="field-missing">No facility appointments yet.</p>';
+      return;
+    }
+    list.innerHTML = data.appointments.map(function (a) {
+      const st = a.status || 'pending';
+      return (
+        '<div class="appointment-row">' +
+        '<div><strong>' + escapeHtml(a.facility_name || 'Facility') + '</strong><br>' +
+        escapeHtml(a.appointment_type || '') +
+        (a.doctor_name ? ' · ' + escapeHtml(a.doctor_name) : '') +
+        '<br>' + escapeHtml(a.requested_date || '') +
+        (a.preferred_time ? ' · ' + escapeHtml(a.preferred_time) : '') +
+        '</div>' +
+        '<div class="status-' + escapeHtml(st) + '"><strong>' + escapeHtml(st) + '</strong></div>' +
+        '</div>'
+      );
+    }).join('');
+  }
 
-  // Close modals on overlay click
-  appointmentModal.addEventListener('click', (e) => {
-    if (e.target === appointmentModal) appointmentModal.classList.remove('is-open');
-  });
-  facilityModal.addEventListener('click', (e) => {
-    if (e.target === facilityModal) facilityModal.classList.remove('is-open');
-  });
+  function callFacility(phone) {
+    if (!phone) {
+      toast('Phone number not available for this facility');
+      return;
+    }
+    window.location.href = 'tel:' + phone;
+  }
 
-  // Initialize
-  loadSavedLocation();
+  function onListClick(e) {
+    const btn = e.target.closest('[data-action]');
+    if (!btn) return;
+    const action = btn.getAttribute('data-action');
+    const id = btn.getAttribute('data-id');
+    if (action === 'book') openBook(id);
+    else if (action === 'details') showDetails(id);
+    else if (action === 'call') callFacility(btn.getAttribute('data-phone'));
+    else if (action === 'refer') openReferral(id);
+  }
 
-  // Expose functions globally for onclick handlers
+  function closeModals() {
+    $('appointmentModal').classList.remove('is-open');
+    $('facilityModal').classList.remove('is-open');
+    $('referralModal').classList.remove('is-open');
+  }
+
+  function init() {
+    $('deviceLocationBtn').addEventListener('click', getDeviceLocation);
+    $('saveLocationBtn').addEventListener('click', function () { saveLocation('manual'); });
+    $('changeLocationBtn').addEventListener('click', changeLocation);
+    $('searchBtn').addEventListener('click', searchFacilities);
+    $('loadAppointmentsBtn').addEventListener('click', loadAppointments);
+    $('facilitiesList').addEventListener('click', onListClick);
+    $('facilityModalContent').addEventListener('click', onListClick);
+    $('appointmentForm').addEventListener('submit', submitAppointment);
+    $('referralForm').addEventListener('submit', submitReferral);
+    $('closeAppointmentModal').addEventListener('click', closeModals);
+    $('closeFacilityModal').addEventListener('click', closeModals);
+    $('closeReferralModal').addEventListener('click', closeModals);
+    document.querySelectorAll('.modal-overlay').forEach(function (el) {
+      el.addEventListener('click', function (ev) {
+        if (ev.target === el) closeModals();
+      });
+    });
+
+    loadSavedLocation();
+  }
+
   window.FacilityDiscovery = {
-    bookAppointment,
-    showDetails,
-    callFacility,
-    showDoctors,
-    createReferral
+    bookAppointment: openBook,
+    showDetails: showDetails,
+    callFacility: callFacility,
+    showDoctors: loadDoctors
   };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
 })();
