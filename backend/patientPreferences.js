@@ -10,6 +10,7 @@
 module.exports = function registerPatientPreferences(app, { pool, authenticateToken }) {
   const ALLOWED = [
     'lang',
+    'care_access',
     'notif_appt',
     'notif_vax',
     'notif_growth',
@@ -25,7 +26,14 @@ module.exports = function registerPatientPreferences(app, { pool, authenticateTo
     if (!incoming || typeof incoming !== 'object' || Array.isArray(incoming)) return clean;
     for (const k of ALLOWED) {
       if (!Object.prototype.hasOwnProperty.call(incoming, k)) continue;
-      if (k === 'lang') {
+      if (k === 'care_access') {
+        const { parsePreferences } = require('./facilityMatching');
+        if (!incoming[k] || typeof incoming[k] !== 'object' || Array.isArray(incoming[k])) throw new Error('Access preferences must be an object');
+        const allowed = ['language','max_distance_km','budget_min','budget_max','preferred_date','preferred_time','transport_difficulty','strict_preferences'];
+        const values=Object.fromEntries(allowed.filter(key=>incoming[k][key]!==undefined && incoming[k][key]!==null).map(key=>[key,String(incoming[k][key])]));
+        const parsed=parsePreferences(values);
+        clean.care_access=Object.fromEntries(allowed.map(key=>[key,parsed[key]]));
+      } else if (k === 'lang') {
         const v = String(incoming[k] || '').toLowerCase();
         if (['en','hi','mr','ta','bn'].includes(v)) clean.lang=v;
         else if(v==='hindi')clean.lang='hi';
@@ -58,7 +66,9 @@ module.exports = function registerPatientPreferences(app, { pool, authenticateTo
 
   app.patch('/api/me/preferences', authenticateToken, async (req, res) => {
     try {
-      const clean = cleanPrefs(req.body && req.body.preferences);
+      let clean;
+      try { clean=cleanPrefs(req.body && req.body.preferences); }
+      catch(error){ return res.status(400).json({error:error.message}); }
       const before=await pool.query('SELECT preferences FROM patient_preferences WHERE user_id=$1',[req.user.id]);
       const { rows } = await pool.query(
         `INSERT INTO patient_preferences (user_id, preferences, updated_at)

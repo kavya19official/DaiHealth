@@ -432,6 +432,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 <script src="js/i18n.js"></script>
 <script src="js/form-validation.js"></script>
 <script src="js/patient-prefs.js"></script>
+<link rel="stylesheet" href="facility-matching.css">
 <link rel="stylesheet" href="patient-dashboard.css?v=patient-2"><link rel="stylesheet" href="patient-home.css?v=warm-1"><link rel="stylesheet" href="patient-journey.css?v=3"><link rel="stylesheet" href="patient-pending.css?v=1"><link rel="stylesheet" href="patient-connected.css?v=1"><link rel="stylesheet" href="patient-polish.css?v=1">
 </head>
 <body class="patient-view">
@@ -746,7 +747,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
   <div class="card section-card" style="margin-bottom:1rem">
     <div class="section-head">
       <div class="section-title">Filters</div>
-      <button type="button" class="btn btn--primary btn--sm" id="searchBtn">Search</button>
+      <button type="button" class="btn btn--primary btn--sm" id="searchBtn">Find suitable care</button>
     </div>
     <div class="filters-grid">
       <div class="form-group">
@@ -766,7 +767,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
       <div class="form-group">
         <label for="service">Service</label>
         <select id="service">
-          <option value="">All services</option>
+          <option value="">Choose a care need</option>
           <option value="obstetrics">Obstetrics</option>
           <option value="gynecology">Gynecology</option>
           <option value="ultrasound">Ultrasound</option>
@@ -779,7 +780,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
       <div class="form-group">
         <label for="capability">Capability</label>
         <select id="capability">
-          <option value="">Any capability</option>
+          <option value="">No additional requirement</option>
           <option value="high_risk_pregnancy">High-risk pregnancy</option>
           <option value="emergency_maternity">Emergency maternity care</option>
           <option value="c_section_24x7">24×7 C-section</option>
@@ -788,7 +789,26 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
           <option value="icu_mother">Mother ICU</option>
         </select>
       </div>
+
       <div class="form-group">
+        <label for="accessibility">Accessibility</label>
+        <select id="accessibility">
+          <option value="">Any</option>
+          <option value="wheelchair">Wheelchair access</option>
+          <option value="elevator">Elevator</option>
+          <option value="accessible_toilet">Accessible toilet</option>
+        </select>
+      </div>
+
+    </div>
+  </div>
+
+<section class="care-access-panel" aria-labelledby="accessPreferencesTitle">
+ <span class="matching-eyebrow">CARE THAT FITS YOUR DAY</span>
+ <h3 id="accessPreferencesTitle">Your access preferences</h3>
+ <p>Tell us what makes getting care easier. We rank only facilities that offer your required service and capability. Your location never determines your budget or personal circumstances.</p>
+ <div class="care-preference-grid">
+       <div class="form-group">
         <label for="language">Language</label>
         <select id="language">
           <option value="">Any language</option>
@@ -803,21 +823,20 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
         </select>
       </div>
       <div class="form-group">
-        <label for="accessibility">Accessibility</label>
-        <select id="accessibility">
-          <option value="">Any</option>
-          <option value="wheelchair">Wheelchair access</option>
-          <option value="elevator">Elevator</option>
-          <option value="accessible_toilet">Accessible toilet</option>
-        </select>
-      </div>
-      <div class="form-group">
         <label for="maxDistance">Max distance (km)</label>
         <input type="number" id="maxDistance" value="50" min="1" max="500" step="1">
       </div>
-    </div>
-  </div>
-
+ <div><label for="preferredDate">Preferred appointment date</label><input type="date" id="preferredDate"><small>Optional · availability must be confirmed.</small></div>
+ <div><label for="preferredTime">Preferred time · IST</label><select id="preferredTime"><option value="">Any time</option><option value="morning">Morning · before 12 pm</option><option value="afternoon">Afternoon · 12–5 pm</option><option value="evening">Evening · after 5 pm</option></select></div>
+ <div><label for="budgetMin">Service budget from · ₹</label><input type="number" id="budgetMin" min="0" max="1000000" step="1" placeholder="No minimum"><small>Only the range you state is used.</small></div>
+ <div><label for="budgetMax">Service budget up to · ₹</label><input type="number" id="budgetMax" min="0" max="1000000" step="1" placeholder="No maximum"><small>Unreported fees remain unknown.</small></div>
+ </div>
+ <label class="care-check"><input type="checkbox" id="transportDifficulty"><span>Transport is difficult for me — give shorter travel more weight.</span></label>
+ <label class="care-check"><input type="checkbox" id="strictPreferences"><span>Only show confirmed preference matches. Exclude unknown or unmet availability, language, cost and distance preferences.</span></label>
+ <div class="care-preference-actions"><button type="button" id="saveCarePreferences">Remember my preferences</button><button type="button" id="resetCarePreferences">Clear access preferences</button></div>
+ <span id="matchingStatus" role="status" aria-live="polite"></span>
+</section>
+<div id="matchingWarnings" role="status" hidden></div>
   <div class="results-meta" id="resultsMeta" hidden>
     <span id="resultsCount"></span>
     <button type="button" class="btn btn--ghost btn--sm" id="loadAppointmentsBtn">My facility appointments</button>
@@ -825,10 +844,10 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
   <div class="alternatives-banner" id="alternativesBanner" hidden role="status"></div>
   <div class="loading-state" id="loadingState" hidden>
     <div class="spinner" aria-hidden="true"></div>
-    <p>Searching verified facilities…</p>
+    <p>Checking services and your preferences…</p>
   </div>
   <div class="empty-state" id="emptyState" hidden>
-    <p>No facilities matched these filters nearby. Try another city, widen distance, or clear a filter.</p>
+    <p>No suitable facilities match this search. Try another city or adjust access preferences. Keep the service and capability you need.</p>
   </div>
   <div class="facilities-list" id="facilitiesList"></div>
 
@@ -1803,7 +1822,8 @@ window.addEventListener('hashchange', route);
 boot().then(function () { return renderMessagesFromAppts(); });
 })();
 </script>
-<script src="js/facility-discovery-integrated.js"></script>
+<script src="js/facility-match-ui.js"></script>
+<script src="js/facility-discovery.js"></script>
 <script src="js/care-chatbot.js?v=daya-3d-1"></script>
 </body>
 </html>
