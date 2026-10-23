@@ -3,6 +3,7 @@ import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
 import { OperationalOverview, SnapshotView } from "./operations";
 import { ForecastPanel } from "./forecasts";
 import { CarePanel, PatientCoordination } from "./care";
+import { AdministrationPanel, AffiliationSwitcher, InvitationAcceptance, PatientStaffRecords, ReferralInbox, CreateReferral } from "./administration";
 import { SustainabilityPanel } from "./sustainability";
 type Row = Record<string, any>;
 type User = {
@@ -24,6 +25,7 @@ const days = [
   "Sunday",
 ];
 const operationNav = [
+  ["handoffs", "Facility handoffs", "⇄"],
   ["overview", "Today’s overview", "◈"],
   ["patients", "Patient registry", "♡"],
   ["appointments", "Appointments & queue", "◷"],
@@ -37,6 +39,7 @@ const operationNav = [
   ["diagnostics", "Diagnostics & results", "▤"],
 ];
 const administrationNav = [
+  ["management", "Facility & staff management", "✚"],
   ["adminOverview", "Administration overview", "◈"],
   ["forecasts", "ML forecasts & stock planning", "⌁"],
   ["sustainability", "Green hospital", "♧"],
@@ -55,6 +58,8 @@ const administrationNav = [
   ["roadmap", "Build phases", "↗"],
 ];
 const workspacePermissions: Record<string, string> = {
+  management: "facility.write",
+  handoffs: "care.read",
   careTasks: "care.read",
   careReviews: "care.read",
   sustainability: "green.read",
@@ -94,6 +99,8 @@ const snapshotViews = new Set([
   "diagnostics",
 ]);
 const titles: Record<string, [string, string]> = {
+  handoffs: ["Facility handoffs", "Consented referral packets, receiving decisions and recorded outcomes."],
+  management: ["Facility & staff management", "Onboarding, services, slots and accountable staff access."],
   careTasks: [
     "Follow-up & outreach",
     "Owned care tasks, access barriers and evidence-backed follow-through.",
@@ -582,6 +589,7 @@ export default function Home() {
               ? "Second-factor delivery is simulated in this synthetic demo."
               : "Sign in to a scoped, audited workspace."}
           </p>
+          <InvitationAcceptance api={api}/>
           <form onSubmit={login}>
             {!challenge ? (
               <>
@@ -791,6 +799,7 @@ export default function Home() {
                 HOSPITAL /{" "}
                 {mode === "operations" ? "OPERATIONS" : "ADMINISTRATION"}
               </div>
+              <AffiliationSwitcher api={api} onSwitch={async()=>{setUser(await api("/me"));setPatient(null);setView("overview");setMode("operations");}}/>
               <h1>{titles[view][0]}</h1>
               <p>{titles[view][1]}</p>
             </div>
@@ -859,6 +868,8 @@ export default function Home() {
           )}
           {data && (
             <>
+              {view === "handoffs" && <ReferralInbox key={user.id+user.facility_id} api={api} role={user.role} facilityId={user.facility_id}/>}
+              {view === "management" && <AdministrationPanel key={user.id + user.facility_id} api={api}/>}
               {(view === "careTasks" || view === "careReviews") && (
                 <CarePanel
                   key={user.id + view}
@@ -1406,6 +1417,8 @@ export default function Home() {
                 motherId={patient.mother.id}
               />
             )}
+            {["consultant","resident"].includes(user.role) && <CreateReferral key={patient.mother.id+"referral"} api={api} motherId={patient.mother.id}/>}
+            {user.permissions.includes("care.read") && <PatientStaffRecords key={patient.mother.id+user.facility_id} api={api} motherId={patient.mother.id} role={user.role}/>}
             <div className="callout">
               Imported clinical observations remain unchanged. Confirmed
               summaries and operational follow-through are shown separately.

@@ -593,3 +593,35 @@ sustainability_action = table(
     data(),
     constraints=(CheckConstraint("baseline >= 0 AND target >= 0"),),
 )
+
+# Additive administration records; corrections are retained in audit history.
+admin_record = table(
+    "admin_record",
+    ref("facility_id", "facility", False),
+    text("kind", False),
+    data("payload"),
+    number("version", False),
+)
+staff_affiliation = table(
+    "staff_affiliation",
+    ref("facility_id", "facility", False),
+    ref("user_id", "portal_user"),
+    text("email", False),
+    text("name", False),
+    text("role", False),
+    ref("department_id", "department"),
+    ref("unit_id", "unit"),
+    text("registration_no"),
+    flag("verified"),
+    flag("active", True),
+    number("version", False),
+    text("invite_hash"),
+    Column("expires_at", DateTime(timezone=True)),
+    constraints=(UniqueConstraint("facility_id", "email"),),
+)
+session_scope = table(
+    "session_scope",
+    ref("session_id", "auth_session", False),
+    ref("affiliation_id", "staff_affiliation", False),
+    constraints=(UniqueConstraint("session_id"),),
+)

@@ -215,3 +215,66 @@ external integrations, production database deployment and validated clinical rul
 ## Team-wide local entry point
 
 From the repository root run `npm start`. This bootstraps the fixed-seed source, imports the hospital cohort into `.local/portal.db`, prepares the existing patient/doctor SQL schema and cohort in the local embedded PostgreSQL preview, and starts all three interfaces at `http://localhost:3001`. Use `/hospital-admin` for this portal. See the root README for prerequisites, synthetic accounts, cookie/origin handling and the distinction between identical initial records and live data synchronisation. The standalone commands above remain supported with an empty base path.
+
+## Facility, staff and operational administration
+
+The authenticated portal now provides **Administration → Facility & staff management**:
+
+- **Facility onboarding:** organisation, address, six-digit PIN code, coordinates,
+  operating hours, public/emergency contacts and private verification PDF documents
+  (5 MB maximum per file). Uploads are authorised and downloads audited. Document
+  submission is evidence collection, not independent facility accreditation.
+  Departments, units, wards and bed capacity continue to use their existing editors.
+- **Services & slots:** department, optional verified affiliated clinician, timed
+  slot, reported capacity, availability, temporary-closure reason, referral intake
+  preference and contact. Times are stored with timezone information.
+- **Staff & access:** invite an account, set its facility role, department/unit,
+  registration, verification and active status. A new account receives a copyable
+  token valid for 48 hours; the recipient opens `/hospital-admin/invitation` in the
+  combined local app (or `/invitation` standalone). The token is single-use and
+  stored hashed. No email is sent. Existing account emails create separate
+  facility affiliations. Administrators cannot change their own access here.
+- **Multiple facilities:** the facility-context selector changes only the current
+  session's authorisation. Roles, credential verification, departments and units
+  are evaluated separately for that facility. Refresh retains the selected
+  affiliation. Staff changes revoke existing sessions; inactive affiliations
+  cannot be used. Home-facility access is preserved unless explicitly disabled.
+- **Patient workflow:** open an authorised patient in Patient registry. Clinicians
+  can record visits, care plans, test-status notes and referral notes, or correct
+  them with a reason. Entries supplement the existing imported record rather than
+  rewriting observations. Existing Follow-up & outreach remains the task queue.
+- **Facility handoffs:** clinicians can submit a consented summary from a patient
+  detail view; receiving administrators/consultants can accept or reject and record
+  arrival. Consultants record completion. Receiving access is limited to the
+  handoff packet; it does not grant access to the full originating patient record.
+  These portal handoffs reuse the existing portal referral entity. They remain
+  separate from the Express facility-referral APIs added by the preceding commits.
+- **History:** new edits require the current version and a reason. Access & audit
+  preserves before/after values for corrections. Existing facility and structure
+  editors also retain the values they change. Staff assignment in existing care
+  and sustainability workflows respects active local affiliations.
+
+Run `npm start` from the root for the complete local demo. New portal tables are
+additive; existing previews do not need a reset. The root migration list now also
+applies the existing facility-discovery and referral-continuity SQL migrations.
+Verification PDFs persist under `.local/verification-documents`; set
+`DAI_ADMIN_DOCUMENTS` for another private location and include it in backups.
+
+### Boundaries of this implementation
+
+These writes remain restricted to `DAI_DEMO=true`, using synthetic data and the
+existing simulated OTP. Service slots are maintained operational records; this
+change does not reserve patient appointments against them or synchronize the
+Express facility directory and appointment tables with the hospital portal.
+Cross-facility handoff uses the demo's recorded care-coordination consent; real
+onboarding needs purpose-specific patient sharing consent, independent credential
+verification, document malware scanning and retention controls. Native PostgreSQL
+concurrency/deployment acceptance, real invitation email and full diagnostic/
+clinical-system integrations remain pending. Recording a test-status note does
+not change the read-only imported investigation ledger or create a lab result.
+
+Validation: `python -m pytest hospital_portal/tests -q`, `npm test --prefix backend`,
+`npm run test:local`, and the hospital web TypeScript/production build checks.
+`test_administration.py` covers correction history, stale versions, role/facility
+scope, account invitations and deactivation, patient consent, document restrictions,
+multiple facility affiliations, and receiving-facility referral transitions.
