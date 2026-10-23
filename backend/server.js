@@ -367,7 +367,7 @@ app.post('/api/auth/register/mother', async (req, res) => {
       res.cookie('token', token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
+        sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
         maxAge: 7 * 24 * 60 * 60 * 1000
       });
 
@@ -1127,6 +1127,9 @@ require('./hospitalAdministration')(app);
 // Facility discovery and doctor directory
 require('./facilityDiscovery')(app, { pool, authenticateToken, authorizeRole });
 
+// Smart referral handoff and mother-newborn continuity
+require('./referralContinuity')(app, { pool, authenticateToken, authorizeRole });
+
 // Gemini TTS for the care chatbot.
 // Keeps the Gemini API key server-side; the frontend receives only generated audio.
 app.post('/api/tts', async (req, res) => {
@@ -1244,7 +1247,9 @@ app.get('/', (req, res) => {
 
 // Start server
 const server = app.listen(PORT, process.env.DAI_LOCAL === 'true' ? '127.0.0.1' : undefined, () => {
-  console.log(`DAI backend server running on port ${server.address().port}`);
+  const address = server.address();
+  const port = address ? (typeof address === 'string' ? address : address.port) : PORT;
+  console.log(`DAI backend server running on port ${port}`);
 });
 
 if (attachLocalUpgrade) attachLocalUpgrade(server);
