@@ -11,7 +11,7 @@ git pull --ff-only
 npm start
 ```
 
-Open **http://localhost:3001**. The homepage has **Patient**, **Doctor**, and **Hospital / Admin** entry points. Keep this terminal running; Ctrl+C stops the three application services. From another terminal in the same checkout, `npm run stop` also stops the launcher without deleting data. First startup installs dependencies, applies every patient/doctor SQL migration to the embedded local database, generates the fixed-seed synthetic hospital database, imports the 2,000-mother cohort into both applications, and trains the synthetic ML models if missing. It can take several minutes and needs internet for package downloads. Subsequent runs reuse local data, installed dependencies and the compiled hospital UI. Restart `npm start` after editing hospital UI code to rebuild it; use `DAI_DEV=true npm start` for hot reload instead.
+Open **http://localhost:3001**. DAI opens directly to the familiar sign-in form with a **Patient / Doctor / Hospital** toggle. The marketing overview remains at `/about.html`. Keep this terminal running; Ctrl+C stops the three application services. From another terminal in the same checkout, `npm run stop` also stops the launcher without deleting data and waits for shutdown to finish, so `npm run stop && npm start` safely restarts this checkout. First startup installs dependencies, applies every patient/doctor SQL migration to the embedded local database, generates the fixed-seed synthetic hospital database, imports the 2,000-mother cohort into both applications, and trains the synthetic ML models if missing. It can take several minutes and needs internet for package downloads. Subsequent runs reuse local data, installed dependencies and the compiled hospital UI. Restart `npm start` after editing hospital UI code to rebuild it; use `DAI_DEV=true npm start` for hot reload instead.
 
 | Interface | Local synthetic email | Password |
 | --- | --- | --- |
@@ -201,3 +201,33 @@ The new Next.js/FastAPI hospital readiness portal imports the existing synthetic
 
 Tests: `npm test` in `backend/` runs the unit tests. The route tests in `childHealth.test.js`
 also run when `TEST_DATABASE_URL` points at a database with all migrations applied.
+
+
+### Dr. Daya: animated English / Hindi care guide
+
+Open **Ask Dr. Daya** from the shared sign-in, patient, doctor or hospital workspace. The panel renders the supplied full-body doctor with local Three.js assets, Idle and Talking FBX animations and repaired texture references. Enable **Voice** to hear a reply; the character gestures while speech plays. **Speak** accepts browser speech recognition where supported (microphone permission required); typed questions always work. Language selection applies to both recognition and read-aloud. Gemini provides the Charon male voice in English and Hindi when configured; no browser voice is substituted if Gemini fails. Set the backend API key as shown below. This is a 3D web assistant; headset VR and facial lip-sync are not implemented.
+
+There are **40 curated FAQs in English and Hindi**, across app navigation, pregnancy milestones, medical terms, postpartum, child care, appointments, emergency/SOS, schemes, privacy and medical boundaries. Responses are deterministic, with official/clinical source links. Answer selection does not call an LLM or retrieve private patient records or invent appointments, pending tests, hospital availability or eligibility. Document/family permissions and unsupported flows are described honestly. Questions stay in page memory and can be cleared. When Voice is on, only the prepared answer and chosen language are sent through the backend to Google Gemini for speech; the speech endpoint rejects arbitrary text. The browser's speech provider may process microphone audio. Gemini audio is cached in bounded server memory; text remains available when voice generation fails, and a visible Gemini error is shown; there is no browser-voice fallback.
+
+Danger signs bypass FAQ retrieval and return only **“Turant SOS dabaiye ya nazdiki hospital jaiye.”** in Hindi, or its fixed English translation. Medication changes, personal pregnancy safety and diagnosis requests have fixed refusals. Recognition is keyword-based; this is educational navigation, not a clinical triage service. Demo SOS does not dispatch real services.
+
+`frontend/js/daya-knowledge.js` is the shared content source. `hospital_portal/web/scripts/sync-daya.cjs` copies only the assistant, model and renderer assets to ignored `public/daya/` before Next dev/build. The root launcher fingerprints these assets so future pulls rebuild the hospital copy. Docker Compose uses the repository root as the web build context to include them. Retain avatar attribution: **BrushDip**, *Doctor - Sketchfab Weekly - 13 Mar'23*, CC Attribution; details and modifications are recorded in `frontend/assets/dr-daya/CREDITS.md`. Three.js and fflate license notices are included.
+
+Verify responses with `node --test backend/dayaAssistant.test.js` (also part of `npm test` in backend). Asset integration check: `node scripts/check-daya-assets.mjs`.
+
+
+### Gemini male voice: API key setup
+
+Edit `backend/.env` (create it if necessary); add these settings without replacing existing database or login settings:
+
+```dotenv
+GEMINI_API_KEY=YOUR_GOOGLE_AI_STUDIO_KEY
+GEMINI_TTS_MODEL=gemini-2.5-flash-preview-tts
+GEMINI_TTS_VOICE=Charon
+```
+
+Get a key from https://aistudio.google.com/apikey. The same Charon voice reads both English and Hindi; choose the language in Dr. Daya. The Express backend loads this file independently of the terminal working directory. `backend/.env` is Git-ignored. Never put this key in frontend files or a `NEXT_PUBLIC_*` variable. API access and quotas depend on your Google project.
+
+Restart from the DAI root with `npm run stop`, then `npm start`. At http://localhost:3001 open **Ask Dr. Daya**, choose English or Hindi, enable **Voice**, then select a question. The status shows **Gemini · Charon · English/हिंदी** for actual Gemini audio. **Gemini voice unavailable** identifies a failure; the error is displayed and no default browser voice is used. The avatar talks during actual audio playback and returns to Idle at the end. Cancelling, changing language or closing the panel aborts pending speech and stops playback.
+
+The default preview TTS model is configurable via the setting above if Google changes its availability. Only curated answers are accepted by `POST /api/tts`; it has a timeout, a request limit, bounded caching and WAV conversion. Test the integration without spending API quota using `node --test backend/dayaSpeech.test.js`; tests mock Google. A real audio check requires adding your key locally.

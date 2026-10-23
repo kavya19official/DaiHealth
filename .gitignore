@@ -30,3 +30,6 @@ hospital_portal/ml_service/artifacts/
 # Installed dependencies are recreated by the launcher, never shared as data
 backend/node_modules/
 hospital_portal/web/.next-local/
+
+# Generated copy of the shared Dr. Daya assistant for Next.js
+hospital_portal/web/public/daya/

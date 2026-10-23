@@ -7,44 +7,39 @@
 <meta name="theme-color" content="#8f6bb8">
 <link rel="icon" href="assets/logo.jpeg">
 <link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="auth.css">
 <script src="js/dai-api.js"></script>
 
 </head>
 <body class="auth-page">
 <a class="skip-link" href="#main">Skip to content</a>
 
-<header class="site-header">
-  <div class="site-header__inner">
-    <a class="brand" href="index.html" aria-label="दाई home">
-      <img class="brand__mark" src="assets/logo.jpeg" width="48" height="48" alt="">
-      <span><span class="brand__name">दाई</span><span class="brand__tag">Hospital Workflow</span></span>
-    </a>
-    <nav class="site-nav" aria-label="Primary navigation">
-      <a href="auth.html?role=mother">Mother / Patient</a>
-      <a href="auth.html?role=doctor">Doctor</a>
-      <a href="auth.html?role=hospital">Hospital</a>
-      <a href="index.html#modules">Features</a>
-      <a href="index.html#why">About</a>
-    </nav>
-    <div class="header-actions">
-      <a class="contact-link" href="mailto:hello@dai.health">Contact</a>
-      <a class="btn btn--primary" href="auth.html">Sign In</a>
-    </div>
-  </div>
-</header>
-
 <main class="auth-main" id="main">
   <section class="auth-intro" aria-labelledby="authTitle">
-    <span class="eyebrow">Secure workspace</span>
-    <h1 id="authTitle">Access दाई care workflows.</h1>
-    <p>Log in to continue care timelines, appointment requests and hospital-side follow-up workflows. Demo mode stays local to this device.</p>
-    <div class="trust-strip" style="width:auto;margin:1.5rem 0 0">
-      <span class="trust-pill">Human-reviewed outputs</span>
-      <span class="trust-pill">Audit-ready workflows</span>
+    <a class="auth-wordmark" href="index.html" aria-label="DAI home"><span class="auth-hindi">दाई</span><span class="auth-wordmark-text">DAI<small>CARE CONTINUITY</small></span></a>
+    <div class="auth-story-content">
+      <span class="auth-synthetic-label">Simulated on synthetic data</span>
+      <h1 id="authTitle">Ready for the<br>next handover.</h1>
+      <p>Connect the care team, the facility and the next step in a mother’s journey.</p>
+      <div class="auth-care-loop" aria-label="DAI care continuity loop">
+        <span>Care gap</span><i>→</i><span>Action</span><i>→</i><span>Access</span>
+        <div><span>Completion</span><i>→</i><span>Continuity</span></div>
+      </div>
     </div>
+    <small class="auth-story-footer">A readiness and coordination layer for every step of care.</small>
   </section>
 
   <section class="auth-card" aria-label="Authentication form">
+    <div class="auth-form-eyebrow" id="loginEyebrow">DAI · PATIENT WORKSPACE</div>
+    <h2 id="sharedLoginTitle">Welcome to your workspace</h2>
+    <p id="loginDescription">Sign in to continue your care journey.</p>
+    <div class="login-role-toggle" role="group" aria-label="Sign in as">
+      <button type="button" data-login-role="mother" class="is-active" aria-pressed="true">Patient</button>
+      <button type="button" data-login-role="doctor" aria-pressed="false">Doctor</button>
+      <button type="button" data-login-role="hospital" aria-pressed="false">Hospital</button>
+    </div>
+
+
     <div class="tabs" role="tablist">
       <button type="button" class="is-active" data-tab="login" role="tab" aria-selected="true">Log in</button>
       <button type="button" data-tab="register" role="tab" aria-selected="false">Create account</button>
@@ -52,15 +47,7 @@
 
     <div class="error-box" id="errorBox"></div>
 
-    <div class="login-role-toggle" role="group" aria-label="Sign in as">
-      <button type="button" data-login-role="mother" class="is-active" aria-pressed="true">Patient</button>
-      <button type="button" data-login-role="doctor" aria-pressed="false">Doctor</button>
-      <button type="button" data-login-role="hospital" aria-pressed="false">Hospital</button>
-    </div>
-
     <div class="panel is-active" id="panelLogin">
-      <h2>Welcome back</h2>
-      <p id="loginDescription">Sign in to continue your care journey.</p>
       <form id="loginForm">
         <div class="form-group" id="loginEmailGroup">
           <label for="loginEmail">Email</label>
@@ -84,7 +71,6 @@
     </div>
 
     <div class="panel" id="panelRegister">
-      <h2>Create your account</h2>
       <p>Mothers get a care timeline seeded automatically. Doctors get a dashboard of their patients.</p>
 
       <div class="role-toggle">
@@ -279,45 +265,15 @@
       </form>
     </div>
 
+    <details class="auth-guest-options" id="guestOptions"><summary>Explore a device-only demo</summary>
     <div class="divider" id="guestDivider">or</div>
     <button type="button" class="btn btn--ghost" id="guestBtn">Open Mother / Patient demo</button>
     <p id="guestFootnote" class="footnote" style="margin-top:.75rem">Demo mode — your tracking data stays on this device only and your doctor won't be able to see it.</p>
+    </details>
+    <p class="auth-disclaimer">All people and records are fictional. Clinical decisions remain with clinicians.</p>
+    <a class="auth-about-link" href="about.html">About DAI ↗</a>
   </section>
 </main>
-
-<footer class="site-footer">
-  <div class="footer-grid">
-    <div>
-      <h3>दाई</h3>
-      <p>Assistive healthcare workflow infrastructure for continuity of care, operations and reviewed patient communication.</p>
-    </div>
-    <div>
-      <h4>Modules</h4>
-      <ul class="footer-links">
-        <li><a href="index.html#modules">Follow-Up Engine</a></li>
-        <li><a href="index.html#modules">Pre-Consult Brief</a></li>
-        <li><a href="index.html#modules">Patient Registry</a></li>
-      </ul>
-    </div>
-    <div>
-      <h4>Resources</h4>
-      <ul class="footer-links">
-        <li><a href="index.html#why">Safety model</a></li>
-        <li><a href="dashboard.html">Mother / patient portal</a></li>
-        <li><a href="doctor.html">Doctor portal</a></li>
-        <li><a href="hospital.html">Hospital console</a></li>
-      </ul>
-    </div>
-    <div>
-      <h4>Contact</h4>
-      <ul class="footer-links">
-        <li><a href="mailto:hello@dai.health">hello@dai.health</a></li>
-        <li><a href="auth.html">Sign in</a></li>
-      </ul>
-    </div>
-  </div>
-  <div class="footer-bottom">Copyright © 2026 दाई. Demo content only.</div>
-</footer>
 
 <script>
 (function () {
@@ -337,7 +293,8 @@ function updateDemoHint() {
   hint.hidden = !localAccounts || !!hospitalChallenge;
   if (!localAccounts) return;
   var email = localAccounts[selectedRole];
-  hint.textContent = 'Simulated on synthetic data · Demo: ' + email + ' · Password: Dai-Synthetic-2026!';
+  hint.replaceChildren();
+  [['strong','Local synthetic demo account'],['span',email],['span','Password: Dai-Synthetic-2026!']].forEach(function(item){var node=document.createElement(item[0]);node.textContent=item[1];hint.appendChild(node);});
   var field = document.getElementById('loginEmail');
   if (!field.value || field.value === automaticEmail) { field.value = email; automaticEmail = email; }
 }
@@ -357,6 +314,8 @@ function resetHospitalChallenge() {
 }
 function selectRole(role) {
   selectedRole = ['mother','doctor','hospital'].includes(role) ? role : 'mother';
+  document.body.dataset.workspace=selectedRole;
+  document.getElementById('loginEyebrow').textContent='DAI · '+(selectedRole==='hospital'?'HOSPITAL / ADMIN':selectedRole==='doctor'?'DOCTOR':'PATIENT')+' WORKSPACE';
   resetHospitalChallenge(); clearError();
   roleButtons.forEach(function(button){var active=button.dataset.loginRole===selectedRole;button.classList.toggle('is-active',active);button.setAttribute('aria-pressed',String(active));});
   document.getElementById('loginDescription').textContent = selectedRole==='doctor' ? 'Sign in to your clinical workspace.' : selectedRole==='hospital' ? 'Sign in to hospital operations and administration.' : 'Sign in to continue your care journey.';
@@ -365,7 +324,7 @@ function selectRole(role) {
   register.title = selectedRole==='hospital' ? 'Hospital staff accounts are managed by an administrator.' : '';
   if (selectedRole==='hospital') document.querySelector('[data-tab="login"]').click();
   else document.querySelector('[data-role="'+selectedRole+'"]').click();
-  ['guestBtn','guestDivider','guestFootnote'].forEach(function(id){document.getElementById(id).hidden=selectedRole==='hospital';});
+  ['guestBtn','guestDivider','guestFootnote','guestOptions'].forEach(function(id){document.getElementById(id).hidden=selectedRole==='hospital';});
   document.getElementById('guestBtn').textContent = selectedRole==='doctor' ? 'Open Doctor demo' : 'Open Mother / Patient demo';
   var url = new URL(location.href);url.searchParams.set('role',selectedRole);history.replaceState(null,'',url);
 }
@@ -432,6 +391,8 @@ document.querySelectorAll('.tabs [data-tab]').forEach(function (btn) {
     btn.classList.add('is-active'); btn.setAttribute('aria-selected', 'true');
     document.getElementById('panelLogin').classList.toggle('is-active', btn.dataset.tab === 'login');
     document.getElementById('panelRegister').classList.toggle('is-active', btn.dataset.tab === 'register');
+    document.body.classList.toggle('is-registering',btn.dataset.tab==='register');
+    document.getElementById('sharedLoginTitle').textContent=btn.dataset.tab==='register'?'Create your account':'Welcome to your workspace';
     clearError();
   });
 });
@@ -525,7 +486,7 @@ document.getElementById('guestBtn').addEventListener('click', function () { open
 selectRole(new URLSearchParams(location.search).get('role') || 'mother');
 })();
 </script>
-<script src="js/care-chatbot.js?v=voice-fallback-3"></script>
 <script src="js/local-workspace.js"></script>
+<script src="js/care-chatbot.js?v=daya-3d-1" defer></script>
 </body>
 </html>

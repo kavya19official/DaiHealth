@@ -11,7 +11,7 @@ async function request(path,options={}) {
 async function check(){
  const status=await request('/api/local/status');assert.equal(status.response.status,200);assert.equal(status.data.local,true);
  assert.equal(status.data.counts.mothers,2000);
- const home=await request('/');assert.match(home.data,/01 · PATIENT/);assert.match(home.data,/02 · DOCTOR/);assert.match(home.data,/03 · HOSPITAL \/ ADMIN/);
+ const home=await request('/');for(const role of ['mother','doctor','hospital']) assert.ok(home.data.includes('data-login-role="'+role+'"'));assert.ok(!home.data.includes('class="workspace-choices"'));
  assert.equal((await request('/api/auth/me')).response.status,401);
  const identities={};
  for(const role of ['mother','doctor']){
@@ -34,7 +34,7 @@ async function check(){
  const forecast=await request('/hospital-admin/api/ml/forecast',{headers:auth});assert.equal(forecast.response.status,200);
  const renewed=await request('/hospital-admin/api/auth/refresh',{method:'POST',headers:{...headers,cookie:refresh.split(';')[0]}});assert.equal(renewed.response.status,200,'refresh through same-origin proxy');
  const logout=await request('/hospital-admin/api/auth/logout',{method:'POST',headers:{...headers,authorization:'Bearer '+renewed.data.access_token,cookie:renewed.response.headers.get('set-cookie').split(';')[0]}});assert.equal(logout.response.status,200);
- console.log('PASS: three interface links; patient/doctor authenticated sessions; doctor–mother assignment; separate twin records; patient timeline; role denial; hospital OTP, source cohort match, ML API and refresh/logout through the unified origin.');
+ console.log('PASS: shared login with three-role toggle; patient/doctor authenticated sessions; doctor–mother assignment; separate twin records; patient timeline; role denial; hospital OTP, source cohort match, ML API and refresh/logout through the unified origin.');
  console.log(JSON.stringify(status.data.counts,null,2));
 }
 check().catch(error=>{console.error(error);process.exitCode=1;});

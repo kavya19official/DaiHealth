@@ -216,27 +216,6 @@ const cleanupInt = (v, min, max) => {
   return n === null ? null : Math.round(n);
 };
 
-const pcmToWav = (pcm, channels = 1, sampleRate = 24000, bitsPerSample = 16) => {
-  const header = Buffer.alloc(44);
-  const byteRate = sampleRate * channels * bitsPerSample / 8;
-  const blockAlign = channels * bitsPerSample / 8;
-
-  header.write('RIFF', 0);
-  header.writeUInt32LE(36 + pcm.length, 4);
-  header.write('WAVE', 8);
-  header.write('fmt ', 12);
-  header.writeUInt32LE(16, 16);
-  header.writeUInt16LE(1, 20);
-  header.writeUInt16LE(channels, 22);
-  header.writeUInt32LE(sampleRate, 24);
-  header.writeUInt32LE(byteRate, 28);
-  header.writeUInt16LE(blockAlign, 32);
-  header.writeUInt16LE(bitsPerSample, 34);
-  header.write('data', 36);
-  header.writeUInt32LE(pcm.length, 40);
-
-  return Buffer.concat([header, pcm]);
-};
 const BLOOD_GROUPS_RE = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 const cleanupBloodGroup = (v) => (typeof v === 'string' && BLOOD_GROUPS_RE.includes(v.trim().toUpperCase()) ? v.trim().toUpperCase() : null);
 const PREGNANCY_STATUSES = ['pregnant', 'delivered', 'planning'];
@@ -1124,90 +1103,8 @@ require('./hospitalPlatform')(app, { authenticateToken });
 // Relational synthetic hospital and administration workspace.
 require('./hospitalAdministration')(app);
 
-// Gemini TTS for the care chatbot.
-// Keeps the Gemini API key server-side; the frontend receives only generated audio.
-app.post('/api/tts', async (req, res) => {
-  const key = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
-  const model = 'gemini-3.1-flash-tts-preview';
-  const voiceName = 'Charon';
-  const text = cleanupStr(req.body && req.body.text, 900);
-
-  if (!text) {
-    return res.status(400).json({ error: 'Text is required' });
-  }
-
-  if (!key) {
-    return res.status(503).json({ error: 'Gemini TTS is not configured' });
-  }
-
-  const ttsPrompt = [
-    'Speak the transcript below in English.',
-    'Use a calm, reassuring Indian male healthcare assistant style.',
-    'Keep the delivery natural, warm, clear, and not dramatic.',
-    '',
-    'Transcript:',
-    text
-  ].join('\n');
-
-  try {
-    const geminiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(key)}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'User-Agent': 'DAI-Care-Chatbot'
-      },
-      body: JSON.stringify({
-        contents: [{
-          parts: [{ text: ttsPrompt }]
-        }],
-        generationConfig: {
-          responseModalities: ['AUDIO'],
-          speechConfig: {
-            voiceConfig: {
-              prebuiltVoiceConfig: {
-                voiceName
-              }
-            }
-          }
-        }
-      })
-    });
-
-    if (!geminiRes.ok) {
-      const detail = await geminiRes.text().catch(() => '');
-      console.error('Gemini TTS error:', geminiRes.status, detail.slice(0, 300));
-      return res.status(502).json({ error: 'Gemini TTS failed' });
-    }
-
-    const data = await geminiRes.json();
-    const audioBase64 =
-      data?.candidates?.[0]?.content?.parts?.find((part) => part?.inlineData?.data)?.inlineData?.data ||
-      data?.candidates?.[0]?.content?.parts?.find((part) => part?.inline_data?.data)?.inline_data?.data ||
-      data?.interaction?.output_audio?.data ||
-      data?.output_audio?.data ||
-      data?.outputAudio?.data;
-
-    if (!audioBase64) {
-      console.error('Gemini TTS response missing audio');
-      return res.status(502).json({ error: 'Gemini TTS failed' });
-    }
-
-    const pcmAudio = Buffer.from(audioBase64, 'base64');
-    const audio = pcmToWav(pcmAudio);
-    res.set({
-      'Content-Type': 'audio/wav',
-      'Content-Length': audio.length,
-      'X-DAI-TTS-Provider': 'gemini',
-      'X-DAI-TTS-Voice': voiceName,
-      'X-DAI-TTS-Model': model,
-      'Cache-Control': 'no-store'
-    });
-    return res.send(audio);
-  } catch (error) {
-    console.error('TTS proxy error:', error);
-    return res.status(502).json({ error: 'Gemini TTS failed' });
-  }
-});
+// Gemini receives approved Dr. Daya answers only; the API key remains server-side.
+app.post('/api/tts', require('./dayaSpeech').createSpeechHandler());
 
 // Local-only diagnostics. No secrets or patient identifiers are returned.
 if (process.env.DAI_LOCAL === 'true') {
@@ -1232,12 +1129,14 @@ const frontendPath = path.join(__dirname, '..', 'frontend');
 // shared/child-reference.js is the one vaccination/milestone/growth schedule used by
 // both the browser (window.AnvayaChild) and backend/childDashboard.js, so it's served
 // here rather than copied into frontend/ where it could silently drift out of sync.
+// Start directly at the familiar shared sign-in form, with no workspace chooser.
+app.get(['/', '/index.html'], (req, res) => {
+  const query = req.originalUrl.includes('?') ? req.originalUrl.slice(req.originalUrl.indexOf('?')) : '';
+  res.redirect('/auth.html' + query);
+});
 app.use('/shared', express.static(path.join(__dirname, '..', 'shared')));
 app.use('/frontend', express.static(frontendPath));
 app.use(express.static(frontendPath));
-app.get('/', (req, res) => {
-  res.sendFile(path.join(frontendPath, 'index.html'));
-});
 
 // Start server
 const server = app.listen(PORT, process.env.DAI_LOCAL === 'true' ? '127.0.0.1' : undefined, () => {
