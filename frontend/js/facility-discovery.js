@@ -155,9 +155,7 @@
   }
 
   function changeLocation() {
-    userLocation = userLocation
-      ? { latitude: userLocation.latitude, longitude: userLocation.longitude }
-      : null;
+    userLocation = null; // Coordinates from the previous city must not follow a new manual location.
     $('city').value = '';
     $('pincode').value = '';
     $('district').value = '';
@@ -168,89 +166,33 @@
     $('resultsMeta').hidden = true;
     $('alternativesBanner').hidden = true;
     $('emptyState').hidden = true;
-    toast('Enter another city or PIN, then Save and Search');
+    toast('Enter another city, then save and search. Use device location again if you want distance ranking.');
   }
 
   async function searchFacilities() {
     const city = $('city').value.trim();
-    if (!city) {
-      toast('Set a city first (manual entry is enough)');
-      $('city').focus();
-      return;
-    }
-
-    $('loadingState').hidden = false;
-    $('emptyState').hidden = true;
-    $('alternativesBanner').hidden = true;
-    $('facilitiesList').innerHTML = '';
-    $('resultsMeta').hidden = true;
-
-    const params = new URLSearchParams({ city, limit: '50' });
-    const facilityType = $('facilityType').value;
     const service = $('service').value;
-    const capability = $('capability').value;
-    const language = $('language').value;
-    const accessibility = $('accessibility').value;
-    const maxDistance = $('maxDistance').value;
-
-    if (facilityType) params.set('facility_type', facilityType);
-    if (service) params.set('service', service);
-    if (capability) params.set('capability', capability);
-    if (language) params.set('language', language);
-    if (accessibility) params.set('accessibility', accessibility);
-    if (maxDistance) params.set('max_distance_km', maxDistance);
-
+    if (!city) { toast('Set a city first. Device location is optional.'); $('city').focus(); return; }
+    if (!service) { toast('Choose the service you need before matching.'); $('service').focus(); return; }
+    const params = new URLSearchParams({city,service,limit:'50',...window.FacilityMatchUI.read()});
+    for (const [key,id] of [['facility_type','facilityType'],['capability','capability'],['accessibility','accessibility']]) if($(id).value)params.set(key,$(id).value);
     lastSearchHadCoords = !!(userLocation && userLocation.latitude != null && userLocation.longitude != null);
-    if (lastSearchHadCoords) {
-      params.set('user_lat', userLocation.latitude);
-      params.set('user_lon', userLocation.longitude);
-    }
-
-    const data = await api('/facilities/search?' + params.toString());
-    $('loadingState').hidden = true;
-
-    if (!data) return;
-
-    facilities = data.facilities || [];
-    $('resultsMeta').hidden = false;
-    $('resultsCount').textContent = facilities.length
-      ? facilities.length + ' facility' + (facilities.length === 1 ? '' : 'ies') + ' in / near ' + city
-      : 'No exact matches for these filters';
-
-    if (facilities.length === 0) {
-      $('emptyState').hidden = false;
-      if (service || capability || accessibility) {
-        await searchNearestAlternatives(city, maxDistance);
-      }
-      return;
-    }
-
-    renderFacilities(facilities);
-  }
-
-  /** When filters yield nothing, show nearest appropriate options. */
-  async function searchNearestAlternatives(city, maxDistance) {
-    const params = new URLSearchParams({
-      city,
-      limit: '15',
-      max_distance_km: String(Math.max(Number(maxDistance) || 50, 100))
-    });
-    if (userLocation && userLocation.latitude != null) {
-      params.set('user_lat', userLocation.latitude);
-      params.set('user_lon', userLocation.longitude);
-    }
-    const data = await api('/facilities/search?' + params.toString());
-    if (!data || !data.facilities || !data.facilities.length) return;
-
-    const banner = $('alternativesBanner');
-    banner.hidden = false;
-    banner.innerHTML =
-      '<strong>No exact match nearby.</strong> Showing nearest facilities in this city (filters relaxed). ' +
-      'Call or request a referral if the service you need is not listed as verified.';
-    facilities = data.facilities;
-    $('emptyState').hidden = true;
-    $('resultsCount').textContent = facilities.length + ' nearest alternative(s)';
-    renderFacilities(facilities);
+    if (lastSearchHadCoords) { params.set('user_lat',userLocation.latitude);params.set('user_lon',userLocation.longitude); }
+    $('searchBtn').disabled=true;
+    $('loadingState').hidden=false;$('emptyState').hidden=true;$('alternativesBanner').hidden=true;
+    $('facilitiesList').innerHTML='';$('resultsMeta').hidden=true;$('matchingWarnings').hidden=true;
+    try {
+      const data=await api('/facilities/search?'+params.toString());
+      if(!data)return;
+      facilities=data.facilities||[];
+      $('resultsMeta').hidden=false;
+      $('resultsCount').textContent=facilities.length+' suitable '+(facilities.length===1?'facility':'facilities')+' · ranked by your stated preferences';
+      const warnings=data.warnings||[];
+      if(warnings.length){$('matchingWarnings').hidden=false;$('matchingWarnings').className='matching-warning';$('matchingWarnings').textContent=warnings.join(' ');}
+      window.FacilityMatchUI.announce(data.scoring_note);
+      if(!facilities.length){$('emptyState').hidden=false;return;}
+      renderFacilities(facilities);
+    } finally {$('loadingState').hidden=true;$('searchBtn').disabled=false;}
   }
 
   function renderServiceTags(services, capabilities) {
@@ -268,6 +210,7 @@
   }
 
   function verificationBlock(f) {
+    if (f.verification_source === 'synthetic_fixture') return '<div class="verification-badge unverified">Synthetic demo · Fictional facility, not a verified provider</div>';
     const verified = !!f.verified_at;
     const cls = verified ? 'verified' : 'unverified';
     const source = f.verification_source
@@ -302,6 +245,7 @@
         '<div class="facility-contact">' + phone + '</div>' +
         '<div class="services-list">' + renderServiceTags(f.services, f.capabilities) + '</div>' +
         verificationBlock(f) +
+        window.FacilityMatchUI.explain(f) +
         '<div class="facility-actions">' +
         '<button type="button" class="primary" data-action="book" data-id="' + f.id + '">Book</button>' +
         '<button type="button" data-action="details" data-id="' + f.id + '">Details &amp; doctors</button>' +

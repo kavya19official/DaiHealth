@@ -4,124 +4,40 @@
 
 const express = require('express');
 
-function calculateDistance(lat1, lon1, lat2, lon2) {
-  const R = 6371;
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLon = (lon2 - lon1) * Math.PI / 180;
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-    Math.sin(dLon / 2) * Math.sin(dLon / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c;
-}
+const { parsePreferences, rankFacilities } = require('./facilityMatching');
 
 module.exports = function (app, { pool, authenticateToken, authorizeRole }) {
   const facilities = express.Router();
   const patient = express.Router();
 
-  // GET /api/facilities/search
+  // Capability filters are SQL eligibility gates; preferences only rank eligible rows.
   facilities.get('/search', async (req, res) => {
+    let preferences;
+    try { preferences = parsePreferences(req.query); }
+    catch (error) { return res.status(400).json({error:error.message}); }
+    const limit=Number(req.query.limit||20);
+    if (!Number.isInteger(limit)||limit<1||limit>100) return res.status(400).json({error:'Limit must be between 1 and 100'});
     try {
-      const {
-        city,
-        facility_type,
-        service,
-        capability,
-        language,
-        accessibility,
-        max_distance_km = 50,
-        limit = 20,
-        user_lat,
-        user_lon
-      } = req.query;
-
-      let query = `
-        SELECT
-          f.*,
-          COALESCE(
-            json_agg(DISTINCT jsonb_build_object(
-              'service_name', fs.service_name,
-              'service_category', fs.service_category,
-              'available', fs.available
-            )) FILTER (WHERE fs.service_name IS NOT NULL),
-            '[]'::json
-          ) as services,
-          COALESCE(
-            json_agg(DISTINCT jsonb_build_object(
-              'capability', fc.capability,
-              'available', fc.available
-            )) FILTER (WHERE fc.capability IS NOT NULL),
-            '[]'::json
-          ) as capabilities
-        FROM facilities f
-        LEFT JOIN facility_services fs ON f.id = fs.facility_id AND fs.available = TRUE
-        LEFT JOIN facility_capabilities fc ON f.id = fc.facility_id AND fc.available = TRUE
-        WHERE f.active = TRUE
-      `;
-      const params = [];
-      let n = 0;
-
-      if (city) {
-        n++; query += ` AND LOWER(f.city) = LOWER($${n})`; params.push(city);
-      }
-      if (facility_type) {
-        n++; query += ` AND f.facility_type = $${n}`; params.push(facility_type);
-      }
-      if (service) {
-        n++; query += ` AND EXISTS (
-          SELECT 1 FROM facility_services fs2
-          WHERE fs2.facility_id = f.id AND fs2.available = TRUE
-            AND (fs2.service_name = $${n} OR fs2.service_category = $${n})
-        )`; params.push(service);
-      }
-      if (capability) {
-        n++; query += ` AND EXISTS (
-          SELECT 1 FROM facility_capabilities fc2
-          WHERE fc2.facility_id = f.id AND fc2.capability = $${n} AND fc2.available = TRUE
-        )`; params.push(capability);
-      }
-      if (language) {
-        n++; query += ` AND f.languages ? $${n}`; params.push(language);
-      }
-      if (accessibility) {
-        n++; query += ` AND f.accessibility_features ? $${n}`; params.push(accessibility);
-      }
-
-      n++; query += ` GROUP BY f.id ORDER BY f.name LIMIT $${n}`;
-      params.push(Math.min(parseInt(limit, 10) || 20, 100));
-
-      const result = await pool.query(query, params);
-      let rows = result.rows;
-
-      if (user_lat && user_lon) {
-        const maxD = parseFloat(max_distance_km) || 50;
-        rows = rows.map((f) => {
-          if (f.latitude != null && f.longitude != null) {
-            const distance = calculateDistance(
-              parseFloat(user_lat), parseFloat(user_lon),
-              parseFloat(f.latitude), parseFloat(f.longitude)
-            );
-            return { ...f, distance_km: Math.round(distance * 10) / 10 };
-          }
-          return { ...f, distance_km: null };
-        }).filter((f) => f.distance_km == null || f.distance_km <= maxD);
-        rows.sort((a, b) => {
-          if (a.distance_km == null) return 1;
-          if (b.distance_km == null) return -1;
-          return a.distance_km - b.distance_km;
-        });
-      }
-
-      res.json({
-        facilities: rows,
-        count: rows.length,
-        filters: { city, facility_type, service, capability, language, accessibility, max_distance_km }
-      });
-    } catch (error) {
-      console.error('Facility search error:', error);
-      res.status(500).json({ error: 'Failed to search facilities' });
-    }
+      const params=[];
+      let query=`SELECT f.*,
+        COALESCE((SELECT json_agg(fs) FROM facility_services fs WHERE fs.facility_id=f.id AND fs.available=TRUE),'[]'::json) AS services,
+        COALESCE((SELECT json_agg(fc) FROM facility_capabilities fc WHERE fc.facility_id=f.id AND fc.available=TRUE),'[]'::json) AS capabilities,
+        COALESCE((SELECT json_agg(json_build_object('id',sl.id,'facility_service_id',sl.facility_service_id,'doctor_id',sl.doctor_id,'doctor_name',dp.full_name,'clinician_eligible',(df.active=TRUE AND df.qualification_verified=TRUE AND du.role='doctor' AND dp.full_name IS NOT NULL),'starts_at',sl.starts_at,'ends_at',sl.ends_at,'available_places',sl.available_places,'source',sl.source,'updated_at',sl.updated_at)) FROM facility_service_slots sl JOIN facility_services fs ON fs.id=sl.facility_service_id LEFT JOIN doctor_profiles dp ON dp.user_id=sl.doctor_id LEFT JOIN users du ON du.id=sl.doctor_id LEFT JOIN doctor_facilities df ON df.doctor_id=sl.doctor_id AND df.facility_id=f.id WHERE fs.facility_id=f.id AND fs.available=TRUE),'[]'::json) AS slots
+        FROM facilities f WHERE f.active=TRUE`;
+      function filter(clause,value){params.push(value);query+=' AND '+clause.replaceAll('?', '$'+params.length);}
+      if(req.query.city)filter('LOWER(f.city)=LOWER(?)',String(req.query.city));
+      if(req.query.facility_type)filter('f.facility_type=?',String(req.query.facility_type));
+      if(preferences.service)filter('EXISTS(SELECT 1 FROM facility_services fs WHERE fs.facility_id=f.id AND fs.available=TRUE AND (fs.service_name=? OR fs.service_category=?))',preferences.service);
+      if(preferences.capability)filter('EXISTS(SELECT 1 FROM facility_capabilities fc WHERE fc.facility_id=f.id AND fc.available=TRUE AND fc.capability=?)',preferences.capability);
+      if(preferences.accessibility)filter('jsonb_exists(f.accessibility_features, ?)',preferences.accessibility);
+      // Do not LIMIT alphabetically before ranking; the best match might be last.
+      const result=await pool.query(query,params);
+      const matches=rankFacilities(result.rows,preferences);
+      const warnings=[];
+      if(preferences.user_lat===null)warnings.push('Distance is unknown without coordinates. A city or PIN code is not converted into a precise location; the distance limit cannot be checked.');
+      if(!preferences.service)warnings.push('Choose a required service to see preference matching scores.');
+      res.json({facilities:matches.slice(0,limit),count:Math.min(matches.length,limit),total:matches.length,preferences,warnings,scoring_note:'Preference match, not a clinical safety or hospital-quality score. Unknown evidence earns no points. Required service and capability checks are never traded for a better score.'});
+    }catch(error){console.error('Facility search error:',error.message);res.status(500).json({error:'Failed to search facilities'});}
   });
 
   // Static path BEFORE /:id
