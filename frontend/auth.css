@@ -24,7 +24,6 @@ body.auth-page {--brand:#7950a6;--brand-strong:#633c8e;--brand-pale:#f4eff8;min-
 .auth-page .tabs {padding:0;border:0;background:none;gap:20px;margin:0 0 22px;border-radius:0}
 .auth-page .tabs button {padding:0 0 7px;border-radius:0;font-size:13px;font-weight:700;border-bottom:2px solid transparent}
 .auth-page .tabs button.is-active {background:none;color:#7950a6;border-bottom-color:#7950a6}
-.auth-page[data-workspace="hospital"] .tabs {display:none}
 .auth-page .auth-card label {display:block;font-size:14px;font-weight:750;color:#675271;margin-bottom:9px}
 .auth-page .auth-card input,.auth-page .auth-card select {min-height:52px;border:1px solid #ded8e3;border-radius:6px;padding:10px 12px;font:inherit;font-size:15px;font-weight:600;color:#453a4b;background:#fff;width:100%;box-shadow:0 1px 3px #39254505}
 .auth-page .auth-card input:focus,.auth-page .auth-card select:focus {outline:2px solid #bba1d5;outline-offset:2px;border-color:#9574b1}

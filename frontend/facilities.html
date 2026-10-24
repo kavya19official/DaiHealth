@@ -512,12 +512,12 @@
   <section class="location-setup" id="locationSetup" aria-labelledby="loc-heading">
     <h2 id="loc-heading">📍 Your location</h2>
     <p class="location-hint">
-      Enter city or PIN first. Device location is requested only when you choose “Use my current location”.
+      Enter your Delhi area or PIN code first (the directory currently covers Delhi). Device location is requested only when you choose “Use my current location”.
       You can change city anytime to search elsewhere.
     </p>
     <form class="location-form" id="locationForm" onsubmit="return false;">
       <div class="form-group">
-        <label for="city">City *</label>
+        <label for="city">City</label>
         <input type="text" id="city" required placeholder="e.g. New Delhi" autocomplete="address-level2">
       </div>
       <div class="form-group">
@@ -563,6 +563,7 @@
           <option value="clinic">Clinic</option>
           <option value="diagnostic_lab">Diagnostic lab</option>
           <option value="vaccination_center">Vaccination provider</option>
+          <option value="ivf_centre">IVF / fertility centre</option>
           <option value="phc">PHC</option>
           <option value="chc">CHC</option>
           <option value="nursing_home">Nursing home</option>
@@ -571,12 +572,13 @@
       <div class="filter-group">
         <label for="service">Service</label>
         <select id="service">
-          <option value="">Choose a care need</option>
+          <option value="">Any service</option>
           <option value="obstetrics">Obstetrics</option>
           <option value="gynecology">Gynecology</option>
           <option value="ultrasound">Ultrasound</option>
           <option value="lab_tests">Lab tests</option>
           <option value="vaccination">Vaccination</option>
+          <option value="fertility">Fertility / IVF</option>
           <option value="emergency">Emergency</option>
           <option value="nicu">Newborn / NICU</option>
         </select>
@@ -640,6 +642,20 @@
  <div class="care-preference-actions"><button type="button" id="saveCarePreferences">Remember my preferences</button><button type="button" id="resetCarePreferences">Clear access preferences</button></div>
  <span id="matchingStatus" role="status" aria-live="polite"></span>
 </section>
+<div class="card section-card" style="margin:1rem 0">
+    <div class="section-head"><div class="section-title">Find a doctor nearby</div></div>
+    <div class="location-actions" style="margin-top:.4rem">
+      <select id="doctorSpecialty" aria-label="Specialty">
+        <option value="">Any specialty</option>
+        <option value="obstetrics">Obstetrics</option>
+        <option value="gynecology">Gynaecology</option>
+        <option value="fertility">Fertility / IVF</option>
+        <option value="paediatrics">Paediatrics</option>
+      </select>
+      <button type="button" class="btn btn--primary btn--sm" id="findDoctorsBtn">Find doctors near this place</button>
+    </div>
+    <div id="nearbyDoctors" hidden style="margin-top:.8rem"></div>
+  </div>
 <div id="matchingWarnings" role="status" hidden></div>
   <div class="results-meta" id="resultsMeta" hidden>
     <span id="resultsCount"></span>
@@ -654,7 +670,7 @@
       <p>Checking services and your preferences…</p>
     </div>
     <div class="empty-state" id="emptyState" hidden>
-      <p>No suitable facilities match this search. Try another city or adjust access preferences. Keep the service and capability you need.</p>
+      <p>Nothing suitable was found. Check the area or PIN (the directory covers Delhi), widen the distance, or clear a filter.</p>
     </div>
     <div class="facilities-list" id="facilitiesList"></div>
   </section>

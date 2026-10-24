@@ -320,12 +320,12 @@ function selectRole(role) {
   roleButtons.forEach(function(button){var active=button.dataset.loginRole===selectedRole;button.classList.toggle('is-active',active);button.setAttribute('aria-pressed',String(active));});
   document.getElementById('loginDescription').textContent = selectedRole==='doctor' ? 'Sign in to your clinical workspace.' : selectedRole==='hospital' ? 'Sign in to hospital operations and administration.' : 'Sign in to continue your care journey.';
   var register = document.querySelector('[data-tab="register"]');
-  register.disabled = selectedRole==='hospital';
-  register.title = selectedRole==='hospital' ? 'Hospital staff accounts are managed by an administrator.' : '';
-  var hint=document.getElementById('createAccountHint');
-  if(hint) hint.hidden = selectedRole!=='hospital';
-  if (selectedRole==='hospital') document.querySelector('[data-tab="login"]').click();
-  else document.querySelector('[data-role="'+selectedRole+'"]').click();
+  // Create account stays available for every role. Hospital staff accounts are issued by an administrator,
+  // so for that role the sign-up form offers the patient form (never a silently disabled tab).
+  register.disabled = false;
+  register.title = selectedRole==='hospital' ? 'Hospital staff accounts are managed by an administrator. You can still create a patient or doctor account here.' : '';
+  var registerRole = selectedRole==='hospital' ? 'mother' : selectedRole;
+  document.querySelector('[data-role="'+registerRole+'"]').click();
   ['guestBtn','guestDivider','guestFootnote','guestOptions'].forEach(function(id){document.getElementById(id).hidden=selectedRole==='hospital';});
   document.getElementById('guestBtn').textContent = selectedRole==='doctor' ? 'Open Doctor demo' : 'Open Mother / Patient demo';
   var url = new URL(location.href);url.searchParams.set('role',selectedRole);history.replaceState(null,'',url);

@@ -64,6 +64,7 @@ psql "$DATABASE_URL" -f backend/db/patient_preferences.sql
 psql "$DATABASE_URL" -f backend/db/patient_documents.sql
 psql "$DATABASE_URL" -f backend/db/care_extensions_v4.sql
 psql "$DATABASE_URL" -f backend/db/facility_discovery.sql
+psql "$DATABASE_URL" -f backend/db/delhi_directory.sql   # Delhi facility directory (unverified reference data)
 psql "$DATABASE_URL" -f backend/db/referral_continuity.sql
 psql "$DATABASE_URL" -f backend/db/patient_experience.sql
 psql "$DATABASE_URL" -f backend/db/patient_home.sql
