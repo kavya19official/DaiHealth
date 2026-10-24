@@ -680,3 +680,15 @@ live socket. Hospital administration remains authoritative for resource changes.
 ### Doctor clinic activity
 
 The local launcher additively seeds a linked clinic scenario for existing synthetic doctor–mother assignments: recent and upcoming ANC appointments, today’s queue states, completed follow-ups, clinic measurements and downloadable PNG reports. This runs once (`doctor-activity-v1`) and preserves existing edits, deleted files and revoked consent. Summary/report shares are scoped to the already assigned fictional clinician; patients without summary sharing remain visible only within the existing coordination permissions. It does not create risk labels, change hospital beds, or claim live readiness. Generated report files stay in the ignored local document store and regenerate on a fresh setup. The doctor dashboard uses local illustrations and the existing pregnancy artwork, with no external image service.
+
+## Focused Delhi synthetic network (round-two demo, step 1)
+
+`npm start` now imports a small **local-only** directory fixture once: five fictional facilities across PIN codes **110001, 110017, 110075, 110085 and 110092**, six fictional clinicians and nine clinician–facility affiliations. Names are explicitly prefixed `SYNTHETIC`; the JSON source is `synthetic_data/demo/delhi-network.json`.
+
+Patient dashboard → **Nearby care → Delhi synthetic demo network → Load demo network** shows the isolated scenario with PIN, specialty and required-service filters. It does not replace or relabel the existing Delhi reference directory. Example: Radiology matches South and East; adding obstetrics narrows the scenario to South. The West hospital has the synthetic referral capabilities, while the North child-care centre does not claim maternity services. The same clinician may appear at more than one facility under one identity.
+
+Coordinates are approximate PIN/locality centres from the existing gazetteer, not actual provider premises. Phone numbers, websites, prices and clinic schedules are absent. Credentials are explicitly unverified, logins are disabled, appointment requests to these fixtures are rejected, and no patients or clinical events are created. Services/capabilities are fictional scenario assertions, not current real-world availability or a clinical recommendation. This step establishes the network only; it does not claim a completed booking or referral workflow.
+
+`seed-delhi-demo.cjs` runs only with `DAI_LOCAL=true`, after existing schema initialization, in one transaction. Its seed registry prevents duplicate imports and preserves subsequent edits and deactivations. Reserved identity collisions fail and roll back instead of modifying someone else's data. `GET /api/facilities/demo-network` requires an authenticated patient/doctor account and is unavailable outside local mode.
+
+Checks: `node --test backend/delhiDemoNetwork.test.js` covers local-only seeding, PIN and clinician counts, affiliations, idempotency, preserving edits, API authentication, hard service/capability eligibility and blocking fake bookings. The viewer is also checked in a browser at desktop and mobile widths.
