@@ -69,6 +69,13 @@ test("real SQL search, safe ranking, shared preferences, limits and repeatable l
     assert.equal(r.status, 200, JSON.stringify(data));
     assert.equal(data.total, 4);
     assert.equal(data.facilities.length, 1);
+    assert.ok(data.facilities[0].freshness);
+    const reportUrl = base + '/api/facilities/' + data.facilities[0].id + '/contact-report';
+    const contactBody = { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ outcome: 'reached' }) };
+    assert.equal((await fetch(reportUrl, contactBody)).status, 201);
+    assert.equal((await fetch(reportUrl, contactBody)).status, 429);
+    assert.equal(Number((await pool.query('SELECT count(*) FROM facility_contact_reports')).rows[0].count), 1);
+
     assert.match(data.facilities[0].name, /Seva/);
     assert.equal(
       data.facilities[0].matching.components.find((c) => c.key === "cost")
