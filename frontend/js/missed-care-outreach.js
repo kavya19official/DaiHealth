@@ -11,7 +11,10 @@
     outreachQueue: [],
     currentMissedCareId: null,
     outreachAttempts: [],
-    loading: false
+    missedLoading: false,
+    queueLoading: false,
+    missedError: false,
+    queueError: false
   };
 
   const fmt = value => value ? new Date(String(value).slice(0, 10) + 'T12:00:00').toLocaleDateString(document.documentElement.lang || 'en', {
@@ -38,8 +41,13 @@
     const container = $('missedCareItemsList');
     if (!container) return;
 
-    if (state.loading) {
+    if (state.missedLoading) {
       container.innerHTML = '<div class="empty">Loading missed care items...</div>';
+      return;
+    }
+
+    if (state.missedError) {
+      container.innerHTML = '<div class="empty" role="status">Could not load missed care items. Check your connection and try again. <button type="button" class="link-btn" data-retry-missed>Retry</button></div>';
       return;
     }
 
@@ -86,8 +94,13 @@
     const container = $('outreachQueueList');
     if (!container) return;
 
-    if (state.loading) {
+    if (state.queueLoading) {
       container.innerHTML = '<div class="empty">Loading outreach queue...</div>';
+      return;
+    }
+
+    if (state.queueError) {
+      container.innerHTML = '<div class="empty" role="status">Could not load the outreach queue. <button type="button" class="link-btn" data-retry-queue>Retry</button></div>';
       return;
     }
 
@@ -164,41 +177,55 @@
   };
 
   const loadMissedCareItems = async () => {
-    if (state.loading) return;
-    state.loading = true;
+    if (state.missedLoading) return;
+    state.missedLoading = true;
+    state.missedError = false;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000);
     renderMissedCareItems();
 
     try {
-      const data = await api.apiRequest('/patient/missed-care');
+      const data = await api.apiRequest('/patient/missed-care', { signal: controller.signal });
       if (data) {
         state.missedCareItems = data.missed_care_items || [];
-        renderMissedCareItems();
+      } else {
+        state.missedError = true;
       }
     } catch (error) {
+      state.missedError = true;
       console.error('Failed to load missed care items:', error);
       api.toast('Failed to load missed care items. Please try again.');
     } finally {
-      state.loading = false;
+      clearTimeout(timeout);
+      state.missedLoading = false;
+      renderMissedCareItems();
     }
   };
 
   const loadOutreachQueue = async (filters = {}) => {
-    if (state.loading) return;
-    state.loading = true;
+    if (state.queueLoading) return;
+    state.queueLoading = true;
+    state.queueError = false;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000);
     renderOutreachQueue();
 
     try {
       const queryParams = new URLSearchParams(filters).toString();
-      const data = await api.apiRequest('/outreach/queue' + (queryParams ? '?' + queryParams : ''));
+      const data = await api.apiRequest('/outreach/queue' + (queryParams ? '?' + queryParams : ''), { signal: controller.signal });
       if (data) {
         state.outreachQueue = data.queue || [];
-        renderOutreachQueue();
+      } else {
+        state.queueError = true;
       }
     } catch (error) {
+      state.queueError = true;
       console.error('Failed to load outreach queue:', error);
       api.toast('Failed to load outreach queue. Please try again.');
     } finally {
-      state.loading = false;
+      clearTimeout(timeout);
+      state.queueLoading = false;
+      renderOutreachQueue();
     }
   };
 
@@ -342,6 +369,9 @@
         e.preventDefault();
         await loadOutreachAttempts(btn.dataset.viewAttempts);
       }
+
+      if (btn.hasAttribute('data-retry-missed')) await loadMissedCareItems();
+      if (btn.hasAttribute('data-retry-queue')) await loadOutreachQueue();
 
       if (btn.dataset.reschedule) {
         e.preventDefault();

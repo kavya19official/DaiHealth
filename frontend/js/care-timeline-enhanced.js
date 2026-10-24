@@ -11,7 +11,8 @@
     gestationalAge: null,
     currentStage: null,
     pregnancyStatus: null,
-    loading: false
+    loading: false,
+    error: false
   };
 
   const fmt = value => value ? new Date(String(value).slice(0, 10) + 'T12:00:00').toLocaleDateString(document.documentElement.lang || 'en', {
@@ -39,6 +40,11 @@
 
     if (state.loading) {
       container.innerHTML = '<div class="empty">Loading your care timeline...</div>';
+      return;
+    }
+
+    if (state.error) {
+      container.innerHTML = '<div class="empty" role="status">Could not load your care timeline. Check your connection and try again. <button type="button" class="link-btn" data-retry-timeline>Retry</button></div>';
       return;
     }
 
@@ -100,23 +106,30 @@
   const loadTimeline = async () => {
     if (state.loading) return;
     state.loading = true;
+    state.error = false;
     renderTimeline();
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000);
 
     try {
-      const data = await api.apiRequest('/timeline/enhanced');
+      const data = await api.apiRequest('/timeline/enhanced', { signal: controller.signal });
       if (data) {
         state.milestones = data.milestones || [];
         state.gestationalAge = data.gestational_age;
         state.currentStage = data.current_stage;
         state.pregnancyStatus = data.pregnancy_status;
-        renderTimeline();
         renderGestationalAge();
+      } else {
+        state.error = true;
       }
     } catch (error) {
+      state.error = true;
       console.error('Failed to load timeline:', error);
       api.toast('Failed to load your care timeline. Please try again.');
     } finally {
+      clearTimeout(timeout);
       state.loading = false;
+      renderTimeline();
     }
   };
 
@@ -186,6 +199,8 @@
     document.addEventListener('click', async (e) => {
       const btn = e.target.closest('button');
       if (!btn) return;
+
+      if (btn.hasAttribute('data-retry-timeline')) await loadTimeline();
 
       if (btn.dataset.complete) {
         e.preventDefault();
