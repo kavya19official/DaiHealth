@@ -6,6 +6,7 @@ const express = require('express');
 
 const { parsePreferences, rankFacilities } = require('./facilityMatching');
 const { resolveLocation, nearestLocality, suggestLocalities, haversineKm } = require('./delhiGazetteer');
+const { describeFreshness } = require('./facilityFreshness');
 
 const DEFAULT_RADIUS_KM = 25;
 
@@ -27,6 +28,21 @@ function contactRoute(f) {
 module.exports = function (app, { pool, authenticateToken, authorizeRole }) {
   const facilities = express.Router();
   const patient = express.Router();
+
+  // M. Freshness is shown next to each facility and never feeds ranking: it is added AFTER
+  // rankFacilities has already ordered the list, and the order is not touched.
+  async function contactStatsByFacility() {
+    const stats = new Map();
+    try {
+      (await pool.query(`SELECT facility_id,
+          COUNT(*) FILTER (WHERE outcome='reached') AS reached,
+          COUNT(*) FILTER (WHERE outcome='not_reached') AS not_reached
+        FROM facility_contact_reports WHERE created_at > NOW() - INTERVAL '180 days' GROUP BY facility_id`)).rows
+        .forEach((r) => stats.set(r.facility_id, r));
+    } catch (e) { console.warn('Contact reports unavailable:', e.message); }
+    return stats;
+  }
+  const withFreshness = (list, stats) => list.map((f) => ({ ...f, freshness: describeFreshness(f, stats.get(f.id)) }));
 
   // Capability filters are SQL eligibility gates; preferences only rank eligible rows.
   facilities.get('/search', async (req, res) => {
@@ -84,8 +100,10 @@ module.exports = function (app, { pool, authenticateToken, authorizeRole }) {
         }
       }
       matches=matches.map(f=>({...f,contact:contactRoute(f)}));
+      const freshnessStats=await contactStatsByFacility();
+      if(alternatives)alternatives={...alternatives,facilities:withFreshness(alternatives.facilities,freshnessStats)};
       if(!preferences.service)warnings.push('Choose a service to see preference matching scores.');
-      res.json({location,alternatives,facilities:matches.slice(0,limit),count:Math.min(matches.length,limit),total:matches.length,preferences,warnings,scoring_note:'Preference match, not a clinical safety or hospital-quality score. Unknown evidence earns no points. Required service and capability checks are never traded for a better score.'});
+      res.json({location,alternatives,facilities:withFreshness(matches.slice(0,limit),freshnessStats),count:Math.min(matches.length,limit),total:matches.length,preferences,warnings,scoring_note:'Preference match, not a clinical safety or hospital-quality score. Unknown evidence earns no points. Required service and capability checks are never traded for a better score. Confirmation dates, contact reports and reported availability are shown for context only and never change the order.'});
     }catch(error){console.error('Facility search error:',error.message);res.status(500).json({error:'Failed to search facilities'});}
   });
 
@@ -237,6 +255,19 @@ module.exports = function (app, { pool, authenticateToken, authorizeRole }) {
     }
   });
 
+  // A signed-in user reports whether they could reach a facility. One report per user per facility per week.
+  facilities.post('/:id/contact-report', async (req, res) => {
+    try {
+      const id = Number(req.params.id), outcome = req.body?.outcome;
+      if (!Number.isInteger(id) || !['reached', 'not_reached'].includes(outcome)) return res.status(400).json({ error: 'Choose reached or not reached' });
+      if (!(await pool.query('SELECT 1 FROM facilities WHERE id=$1 AND active=TRUE', [id])).rows.length) return res.status(404).json({ error: 'Facility not found' });
+      const recent = await pool.query("SELECT 1 FROM facility_contact_reports WHERE facility_id=$1 AND reporter_id=$2 AND created_at > NOW() - INTERVAL '7 days'", [id, req.user.id]);
+      if (recent.rows.length) return res.status(429).json({ error: 'You already reported this facility in the last 7 days. Thank you.' });
+      await pool.query('INSERT INTO facility_contact_reports(facility_id,reporter_id,outcome) VALUES($1,$2,$3)', [id, req.user.id, outcome]);
+      res.status(201).json({ message: 'Thank you. A summary is shown only once several people have reported.' });
+    } catch (error) { console.error('Contact report error:', error.message); res.status(500).json({ error: 'Could not save your report' }); }
+  });
+
   facilities.get('/:id', async (req, res) => {
     try {
       const result = await pool.query(
@@ -256,7 +287,15 @@ module.exports = function (app, { pool, authenticateToken, authorizeRole }) {
         [req.params.id]
       );
       if (!result.rows.length) return res.status(404).json({ error: 'Facility not found' });
-      res.json({ facility: result.rows[0] });
+      const facility = result.rows[0];
+      try {
+        facility.slots = (await pool.query(
+          `SELECT sl.starts_at, sl.updated_at, sl.source FROM facility_service_slots sl
+             JOIN facility_services fs ON fs.id = sl.facility_service_id
+            WHERE fs.facility_id = $1 AND fs.available = TRUE AND sl.starts_at > NOW()`, [req.params.id])).rows;
+      } catch (e) { facility.slots = []; }
+      facility.freshness = describeFreshness(facility, (await contactStatsByFacility()).get(facility.id));
+      res.json({ facility });
     } catch (error) {
       console.error('Get facility error:', error);
       res.status(500).json({ error: 'Failed to get facility details' });
