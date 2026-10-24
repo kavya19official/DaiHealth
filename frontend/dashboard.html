@@ -440,7 +440,8 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 <link rel="stylesheet" href="nearby-world.css?v=1">
 <link rel="stylesheet" href="patient-support.css?v=1">
 <link rel="stylesheet" href="clinical-dashboard.css?v=1">
-</head>
+<link rel="stylesheet" href="css/care-timeline-enhanced.css"><link rel="stylesheet" href="css/missed-care-outreach.css">
+<style>.low-bandwidth img,.low-bandwidth canvas{display:none!important}.low-bandwidth *{animation:none!important;transition:none!important}</style></head>
 <body class="patient-view">
 <a class="skip-link" href="#main-content" data-i18n="a11y.skip" style="position:absolute;left:1rem;top:-5rem;z-index:500;padding:.7rem 1rem;border-radius:0 0 10px 10px;background:var(--ink);color:#fff">Skip to main content</a>
 <div class="sidebar-backdrop" id="sidebarBackdrop" hidden></div>
@@ -472,7 +473,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 <div class="app">
 <aside class="sidebar" id="sidebar">
   <a class="sidebar__brand patient-brand" href="dashboard.html" aria-label="DAI patient home"><span class="patient-brand__hindi" lang="hi">दाई</span><span class="patient-brand__english">DAI<small>YOUR CARE COMPANION</small></span></a>
-<nav class="sidebar__nav" aria-label="Patient navigation"><span class="nav-caption" data-copy="yourCare">YOUR CARE</span><button type="button" class="nav-item is-active" data-panel="dashboard"><svg aria-hidden="true"><use href="#i-home"/></svg><span data-copy="nav.dashboard">Home</span></button><button type="button" class="nav-item" data-panel="timeline"><svg aria-hidden="true"><use href="#i-clock"/></svg><span data-copy="nav.timeline">Care timeline</span></button><button type="button" class="nav-item" data-panel="gaps"><svg aria-hidden="true"><use href="#i-clipboard"/></svg><span data-copy="nav.gaps">Pending care</span></button><button type="button" class="nav-item" data-panel="appointments"><svg aria-hidden="true"><use href="#i-cal"/></svg><span data-copy="nav.appointments">Appointments</span></button><button type="button" class="nav-item" data-panel="records"><svg aria-hidden="true"><use href="#i-file"/></svg><span data-copy="nav.records">Reports & records</span></button><button type="button" class="nav-item" data-panel="children"><svg aria-hidden="true"><use href="#i-baby"/></svg><span data-copy="nav.children">My children</span></button><button type="button" class="nav-item" data-panel="postpartum"><svg aria-hidden="true"><use href="#i-heart"/></svg><span data-copy="nav.postpartum">After delivery</span></button><button type="button" class="nav-item" data-panel="facilities"><svg aria-hidden="true"><use href="#i-search"/></svg><span data-copy="nav.facilities">Nearby care</span></button><button type="button" class="nav-item" data-panel="companion"><svg aria-hidden="true"><use href="#i-msg"/></svg><span data-copy="nav.companion">Care companion</span></button><button type="button" class="nav-item" data-panel="schemes"><svg aria-hidden="true"><use href="#i-shield"/></svg><span data-copy="nav.schemes">Schemes & support</span></button><button type="button" class="nav-item" data-panel="family"><svg aria-hidden="true"><use href="#i-user"/></svg><span data-copy="nav.family">Family & consent</span></button><button type="button" class="nav-item" data-panel="messages"><svg aria-hidden="true"><use href="#i-bell"/></svg><span data-copy="nav.messages">Updates</span></button><button type="button" class="nav-item" data-panel="settings"><svg aria-hidden="true"><use href="#i-set"/></svg><span data-copy="nav.settings">Settings</span></button></nav><div class="sidebar__footer"><span class="privacy-symbol">♡</span><div><strong data-copy="yourInformation">Your information. Your choice.</strong><button class="link-btn" data-go="family" data-copy="manageSharing">Manage sharing →</button></div></div>
+<nav class="sidebar__nav" aria-label="Patient navigation"><span class="nav-caption" data-copy="yourCare">YOUR CARE</span><button type="button" class="nav-item is-active" data-panel="dashboard"><svg aria-hidden="true"><use href="#i-home"/></svg><span data-copy="nav.dashboard">Home</span></button><button type="button" class="nav-item" data-panel="timeline"><svg aria-hidden="true"><use href="#i-clock"/></svg><span data-copy="nav.timeline">Care timeline</span></button><button type="button" class="nav-item" data-panel="gaps"><svg aria-hidden="true"><use href="#i-clipboard"/></svg><span data-copy="nav.gaps">Pending care</span></button><button type="button" class="nav-item" data-panel="appointments"><svg aria-hidden="true"><use href="#i-cal"/></svg><span data-copy="nav.appointments">Appointments</span></button><button type="button" class="nav-item" data-panel="records"><svg aria-hidden="true"><use href="#i-file"/></svg><span data-copy="nav.records">Reports & records</span></button><button type="button" class="nav-item" data-panel="children"><svg aria-hidden="true"><use href="#i-baby"/></svg><span data-copy="nav.children">My children</span></button><button type="button" class="nav-item" data-panel="postpartum"><svg aria-hidden="true"><use href="#i-heart"/></svg><span data-copy="nav.postpartum">After delivery</span></button><button type="button" class="nav-item" data-panel="facilities"><svg aria-hidden="true"><use href="#i-search"/></svg><span data-copy="nav.facilities">Nearby care</span></button><button type="button" class="nav-item" data-panel="companion"><svg aria-hidden="true"><use href="#i-msg"/></svg><span data-copy="nav.companion">Care companion</span></button><button type="button" class="nav-item" data-panel="schemes"><svg aria-hidden="true"><use href="#i-shield"/></svg><span data-copy="nav.schemes">Schemes & support</span></button><button type="button" class="nav-item" data-panel="outreach"><svg aria-hidden="true"><use href="#i-clipboard"/></svg><span>Outreach queue</span></button><button type="button" class="nav-item" data-panel="family"><svg aria-hidden="true"><use href="#i-user"/></svg><span data-copy="nav.family">Family & consent</span></button><button type="button" class="nav-item" data-panel="messages"><svg aria-hidden="true"><use href="#i-bell"/></svg><span data-copy="nav.messages">Updates</span></button><button type="button" class="nav-item" data-panel="settings"><svg aria-hidden="true"><use href="#i-set"/></svg><span data-copy="nav.settings">Settings</span></button></nav><div class="sidebar__footer"><span class="privacy-symbol">♡</span><div><strong data-copy="yourInformation">Your information. Your choice.</strong><button class="link-btn" data-go="family" data-copy="manageSharing">Manage sharing →</button></div></div>
 </aside>
 
 <div class="main">
@@ -602,8 +603,73 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 <!-- TIMELINE -->
 <div class="panel" id="panel-timeline"><div class="page-section-heading"><h1 data-copy="nav.timeline">Care timeline</h1><p data-copy="timelineIntro">Your visits and milestones, with a plain-language explanation at each step.</p></div>
   <div class="card section-card">
-    <div class="section-head"><div class="section-title"><span><svg width="15" height="15" aria-hidden="true"><use href="#i-clock"/></svg></span> Care Timeline</div></div>
-    <div id="timelineList"></div>
+    <div class="section-head"><div class="section-title"><span><svg width="15" height="15" aria-hidden="true"><use href="#i-clock"/></svg></span> Personalised Care Timeline</div></div>
+    <div id="gestationalAgeDisplay" class="gestational-age-display"></div>
+    <div id="enhancedTimelineList"></div>
+  </div>
+  <div class="card section-card" style="margin-top: 1rem;">
+    <div class="section-head"><div class="section-title"><span><svg width="15" height="15" aria-hidden="true"><use href="#i-clipboard"/></svg></span> Missed Care Items</div></div>
+    <div id="missedCareItemsList"></div>
+  </div>
+</div>
+
+<!-- OUTREACH QUEUE (Staff/Doctor View) -->
+<div class="panel" id="panel-outreach"><div class="page-section-heading"><h1>Missed-Care Outreach Queue</h1><p>Prioritise patients needing follow-up based on urgency, time overdue, and access barriers.</p></div>
+  <div class="outreach-summary">
+    <div class="outreach-summary-card critical">
+      <div class="count" id="outreachCriticalCount">0</div>
+      <div class="label">Critical</div>
+    </div>
+    <div class="outreach-summary-card high">
+      <div class="count" id="outreachHighCount">0</div>
+      <div class="label">High</div>
+    </div>
+    <div class="outreach-summary-card">
+      <div class="count" id="outreachMediumCount">0</div>
+      <div class="label">Medium</div>
+    </div>
+    <div class="outreach-summary-card">
+      <div class="count" id="outreachLowCount">0</div>
+      <div class="label">Low</div>
+    </div>
+  </div>
+  <div class="outreach-filters">
+    <div class="form-group">
+      <label for="outreachStatusFilter">Status</label>
+      <select id="outreachStatusFilter">
+        <option value="pending">Pending</option>
+        <option value="in_progress">In Progress</option>
+        <option value="resolved">Resolved</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="outreachUrgencyFilter">Urgency</label>
+      <select id="outreachUrgencyFilter">
+        <option value="">All</option>
+        <option value="critical">Critical</option>
+        <option value="high">High</option>
+        <option value="medium">Medium</option>
+        <option value="low">Low</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="outreachLimitFilter">Limit</label>
+      <select id="outreachLimitFilter">
+        <option value="25">25</option>
+        <option value="50" selected>50</option>
+        <option value="100">100</option>
+      </select>
+    </div>
+    <button type="button" class="btn btn--primary" id="applyOutreachFilters">Apply Filters</button>
+    <button type="button" class="btn btn--ghost" id="generateMissedCare">Generate Missed Care Items</button>
+  </div>
+  <div class="card section-card">
+    <div class="section-head"><div class="section-title"><span><svg width="15" height="15" aria-hidden="true"><use href="#i-clipboard"/></svg></span> Outreach Queue</div></div>
+    <div id="outreachQueueList"></div>
+  </div>
+  <div class="card section-card" style="margin-top: 1rem;">
+    <div class="section-head"><div class="section-title"><span><svg width="15" height="15" aria-hidden="true"><use href="#i-clock"/></svg></span> Outreach Attempts History</div></div>
+    <div id="outreachAttemptsList"></div>
   </div>
 </div>
 
@@ -700,7 +766,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
         <label><input type="checkbox" id="notif_care" name="notif_care" checked> <span data-i18n="notif.care">Care timeline gaps</span></label>
         <label><input type="checkbox" id="notif_sms" name="notif_sms" checked> <span data-i18n="notif.sms">SMS alerts</span></label>
       </fieldset>
-      <fieldset class="prefs-fieldset"><legend data-copy="readingAndOffline">Reading & offline</legend><label>Appearance<select id="theme" name="theme"><option value="light">Light</option><option value="dark">Dark</option></select></label><label><span data-copy="textSize">Text size</span><select id="text_size" name="text_size"><option value="standard">Standard</option><option value="large">Large</option><option value="extra-large">Extra large</option></select></label><label><input type="checkbox" name="read_aloud" id="read_aloud"><span data-copy="pageVoice">Enable device read-aloud</span></label><p class="setting-note" data-copy="voiceNote">Page read-aloud uses your browser's available voices. Dhruv uses Gemini in Hindi and English.</p><label><input type="checkbox" name="offline_enabled" id="offline_enabled" checked><span data-copy="offlineTimeline">Keep my timeline on this device</span></label><p class="setting-note" data-copy="offlineNote">A saved timeline is available offline. Reports and passwords are never cached. Signing out clears saved care data.</p></fieldset>
+      <fieldset class="prefs-fieldset"><legend data-copy="readingAndOffline">Reading & offline</legend><label>Appearance<select id="theme" name="theme"><option value="light">Light</option><option value="dark">Dark</option></select></label><label><span data-copy="textSize">Text size</span><select id="text_size" name="text_size"><option value="standard">Standard</option><option value="large">Large</option><option value="extra-large">Extra large</option></select></label><label><input type="checkbox" name="read_aloud" id="read_aloud"><span data-copy="pageVoice">Enable device read-aloud</span></label><p class="setting-note" data-copy="voiceNote">Page read-aloud uses your browser's available voices. Dhruv uses Gemini in Hindi and English.</p><label><input type="checkbox" name="offline_enabled" id="offline_enabled"><span data-copy="offlineTimeline">Enable protected offline care</span></label><p class="setting-note" data-copy="offlineNote">Use a private device and a separate passphrase. Signing out deletes saved care and queued updates.</p></fieldset>
       <fieldset class="prefs-fieldset"><legend data-copy="quietHours">Quiet hours</legend><label><input type="checkbox" name="quiet_hours_enabled" id="quiet_hours_enabled"><span data-copy="quietHours">Quiet hours</span></label><label><span data-copy="from">From</span><input type="time" name="quiet_start" id="quiet_start" value="21:00"></label><label><span data-copy="until">Until</span><input type="time" name="quiet_end" id="quiet_end" value="07:00"></label><label><input type="checkbox" id="notif_whatsapp" name="notif_whatsapp"><span>WhatsApp reminders</span></label><p class="setting-note" data-copy="reminderNote">App reminders work here. SMS and WhatsApp are saved preferences; external sending is not connected in this prototype.</p></fieldset>
       <fieldset class="prefs-fieldset">
         <legend data-i18n="settings.privacy">Privacy controls</legend>
@@ -721,13 +787,17 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
       <div class="section-title"><span><svg width="15" height="15" aria-hidden="true"><use href="#i-search"/></svg></span> Find Care</div>
     </div>
     <p style="margin:0 0 1rem;color:var(--ink-muted);font-size:.9rem">
-      Enter city or PIN first. Device location is requested only when you choose “Use my current location” and is used for this search only. Change city anytime to search elsewhere.
+      Enter your Delhi area or PIN code first (the directory currently covers Delhi). Device location is requested only when you choose “Use my current location”. Change city anytime to search elsewhere.
     </p>
     <div class="location-setup" id="locationSetup">
       <form class="location-form" id="locationForm" onsubmit="return false;">
         <div class="form-group">
-          <label for="city">City *</label>
-          <input type="text" id="city" required placeholder="e.g. New Delhi" autocomplete="address-level2">
+          <label for="city">City</label>
+          <input type="text" id="city" placeholder="Delhi" autocomplete="address-level2">
+        </div>
+        <div class="form-group">
+          <label for="locality">Area / locality</label>
+          <input type="text" id="locality" placeholder="e.g. Saket, Rohini, Lajpat Nagar" autocomplete="off">
         </div>
         <div class="form-group">
           <label for="pincode">PIN code</label>
@@ -766,6 +836,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
           <option value="clinic">Clinic</option>
           <option value="diagnostic_lab">Diagnostic lab</option>
           <option value="vaccination_center">Vaccination provider</option>
+          <option value="ivf_centre">IVF / fertility centre</option>
           <option value="phc">PHC</option>
           <option value="chc">CHC</option>
           <option value="nursing_home">Nursing home</option>
@@ -774,12 +845,13 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
       <div class="form-group">
         <label for="service">Service</label>
         <select id="service">
-          <option value="">Choose a care need</option>
+          <option value="">Any service</option>
           <option value="obstetrics">Obstetrics</option>
           <option value="gynecology">Gynecology</option>
           <option value="ultrasound">Ultrasound</option>
           <option value="lab_tests">Lab tests</option>
           <option value="vaccination">Vaccination</option>
+          <option value="fertility">Fertility / IVF</option>
           <option value="emergency">Emergency</option>
           <option value="nicu">Newborn / NICU</option>
         </select>
@@ -843,6 +915,20 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
  <div class="care-preference-actions"><button type="button" id="saveCarePreferences">Remember my preferences</button><button type="button" id="resetCarePreferences">Clear access preferences</button></div>
  <span id="matchingStatus" role="status" aria-live="polite"></span>
 </section>
+<div class="card section-card" style="margin:1rem 0">
+    <div class="section-head"><div class="section-title">Find a doctor nearby</div></div>
+    <div class="location-actions" style="margin-top:.4rem">
+      <select id="doctorSpecialty" aria-label="Specialty">
+        <option value="">Any specialty</option>
+        <option value="obstetrics">Obstetrics</option>
+        <option value="gynecology">Gynaecology</option>
+        <option value="fertility">Fertility / IVF</option>
+        <option value="paediatrics">Paediatrics</option>
+      </select>
+      <button type="button" class="btn btn--primary btn--sm" id="findDoctorsBtn">Find doctors near this place</button>
+    </div>
+    <div id="nearbyDoctors" hidden style="margin-top:.8rem"></div>
+  </div>
 <div id="matchingWarnings" role="status" hidden></div>
   <div class="results-meta" id="resultsMeta" hidden>
     <span id="resultsCount"></span>
@@ -854,7 +940,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
     <p>Checking services and your preferences…</p>
   </div>
   <div class="empty-state" id="emptyState" hidden>
-    <p>No suitable facilities match this search. Try another city or adjust access preferences. Keep the service and capability you need.</p>
+    <p>Nothing suitable was found. Check the area or PIN (the directory covers Delhi), widen the distance, or clear a filter.</p>
   </div>
   <div class="facilities-list" id="facilitiesList"></div>
 
@@ -955,6 +1041,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 <script src="js/patient-support.js?v=1"></script>
 <script src="js/clinical-dashboard.js?v=1"></script>
 <script src="js/patient-dashboard.js?v=4"></script>
+<script src="js/care-timeline-enhanced.js"></script><script src="js/missed-care-outreach.js"></script>
 <script>
 (function () {
 "use strict";

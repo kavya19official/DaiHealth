@@ -64,6 +64,7 @@ psql "$DATABASE_URL" -f backend/db/patient_preferences.sql
 psql "$DATABASE_URL" -f backend/db/patient_documents.sql
 psql "$DATABASE_URL" -f backend/db/care_extensions_v4.sql
 psql "$DATABASE_URL" -f backend/db/facility_discovery.sql
+psql "$DATABASE_URL" -f backend/db/delhi_directory.sql   # Delhi facility directory (unverified reference data)
 psql "$DATABASE_URL" -f backend/db/referral_continuity.sql
 psql "$DATABASE_URL" -f backend/db/patient_experience.sql
 psql "$DATABASE_URL" -f backend/db/patient_home.sql
@@ -591,3 +592,13 @@ The local launcher applies the migration; hosted PostgreSQL needs it applied aft
 existing patient migrations. Tests in `backend/clinicalDashboard.test.js` check
 provenance, dates, role/relationship/verification/consent gates, revocation,
 cross-patient isolation and doctor→patient data/adherence continuity.
+
+## Verified document intake and protected offline care
+
+Doctor → Records → Consented patient reports → **Extract & verify fields** opens the original beside an editable extraction draft. Printed English image reports use local OCR; PDFs use embedded text from the first five pages. Scanned PDFs, HEIC, handwriting and unreadable content require manual transcription. Missing units and ambiguous dates must be checked against the original. Extraction alone writes no clinical record. An actively consented registered doctor must confirm the source and every included value/unit. Saving appends a version and an audit event; it does not generate diagnoses, risk scores or automatically complete milestones. Patients see verified versions under Records → View report. Prototype clinician registration uses the existing account license field; it is not an independent credential registry.
+
+Patient → Settings → Reading & offline → **Set up protected copy** requires online sign-in, a private-device acknowledgement and a separate passphrase of at least 12 characters. Essential appointments, recorded doctor instructions and the care timeline are encrypted in IndexedDB using AES-GCM and PBKDF2 (400,000 iterations). Reports, extracted values, tokens and passwords are excluded. The copy expires after seven days and locks after five minutes idle or one minute in a hidden tab. Signing out or deleting the copy removes unsynchronised changes. A forgotten passphrase is unrecoverable.
+
+Offline only timeline self-reported completion can be queued. Synchronisation requires the same signed-in account, is idempotent and refuses changed or clinician-verified milestones. Conflicting updates can be discarded from Settings after checking the online timeline. Bookings, clinical data, consent changes and report uploads require a connection. Low-bandwidth mode hides illustrations and skips Dhruv's 3D import while retaining text chat. Browser encryption does not protect an unlocked page from compromised scripts or device access.
+
+`npm start` applies the new migration locally. For an existing PostgreSQL deployment, apply `backend/db/document_intake_offline.sql` after the existing migrations before restarting the backend. Run `npm test --prefix backend` and `npm run test:local` for checks.

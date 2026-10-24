@@ -132,6 +132,7 @@
     async function loadAvatar(){
       if(avatarPromise)return avatarPromise;
       const status=avatarHost.querySelector('.daya-avatar-status');
+      if(localStorage.getItem('dai-low-bandwidth')==='true')return Promise.resolve(null);
       avatarPromise=import(asset('js/daya-avatar.mjs')).then(module=>module.createAvatar(avatarHost,base)).then(instance=>{
         avatar=instance;avatar.setVisible(opened);status.hidden=true;if(currentAudio&&!currentAudio.paused)avatar.setTalking(true);
       }).catch(error=>{console.warn('Dhruv 3D preview unavailable:',error);status.textContent=tr('3D view unavailable. Chat and voice still work.','3D उपलब्ध नहीं। चैट और आवाज़ इस्तेमाल करें।');});

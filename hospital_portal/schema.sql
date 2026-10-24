@@ -1218,3 +1218,35 @@ CREATE TABLE sos_abuse_log (
 ALTER TABLE facility ADD COLUMN location geography(Point,4326) GENERATED ALWAYS AS (ST_SetSRID(ST_MakePoint(lng,lat),4326)::geography) STORED;
 
 CREATE INDEX facility_location_idx ON facility USING GIST(location);
+
+-- Green hospital extensions
+CREATE TABLE IF NOT EXISTS sustainability_ticket (
+  id TEXT PRIMARY KEY,
+  source_id TEXT UNIQUE,
+  created_at TIMESTAMP,
+  updated_at TIMESTAMP,
+  facility_id TEXT NOT NULL,
+  opened_by TEXT NOT NULL,
+  kind TEXT NOT NULL,
+  domain TEXT NOT NULL,
+  title TEXT NOT NULL,
+  status TEXT NOT NULL,
+  priority TEXT NOT NULL,
+  details JSON NOT NULL DEFAULT '{}'
+);
+CREATE TABLE IF NOT EXISTS sustainability_waste_stream (
+  id TEXT PRIMARY KEY,
+  source_id TEXT UNIQUE,
+  created_at TIMESTAMP,
+  updated_at TIMESTAMP,
+  facility_id TEXT NOT NULL,
+  recorded_by TEXT NOT NULL,
+  period TEXT NOT NULL,
+  stream TEXT NOT NULL,
+  mass_kg REAL NOT NULL,
+  quality TEXT NOT NULL,
+  source TEXT NOT NULL,
+  evidence TEXT NOT NULL,
+  segregation_compliant INTEGER NOT NULL DEFAULT 0,
+  UNIQUE (facility_id, period, stream)
+);

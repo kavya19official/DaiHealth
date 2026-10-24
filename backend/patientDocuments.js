@@ -115,6 +115,7 @@ async function canAccessDoc(pool, docId, user) {
 
 module.exports = function registerPatientDocuments(app, { pool, authenticateToken, authorizeRole }) {
   ensureDir();
+  require("./documentIntake")(app,{pool,authenticateToken,authorizeRole,canAccessDoc,logEvent,uploadDir:UPLOAD_DIR});
 
   const motherOnly = [authenticateToken, authorizeRole(['mother'])];
   const doctorOnly = [authenticateToken, authorizeRole(['doctor'])];
@@ -285,10 +286,11 @@ module.exports = function registerPatientDocuments(app, { pool, authenticateToke
         });
       }
 
-      await pool.query(
-        `UPDATE patient_documents SET deleted_at = NOW() WHERE id = $1 AND mother_id = $2`,
+      const deleted = await pool.query(
+        `UPDATE patient_documents SET deleted_at = NOW() WHERE id = $1 AND mother_id = $2 AND verification_status NOT IN ('verified','locked') AND deleted_at IS NULL RETURNING id`,
         [id, req.user.id]
       );
+      if(!deleted.rows.length)return res.status(409).json({error:'Document changed; refresh before deleting'});
       await pool.query("UPDATE care_milestones SET result_id=NULL,completed_at=NULL,completion_verification=NULL WHERE result_id=$1 AND completion_verification='awaiting_verification'",[id]);
       await logEvent(pool, id, req.user.id, 'delete', {});
 

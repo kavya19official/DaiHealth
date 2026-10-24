@@ -7,7 +7,9 @@ const { DatabaseSync } = require('node:sqlite');
 const { createLocalPool } = require('../backend/localPool');
 const bcrypt = require('../backend/node_modules/bcrypt');
 const ROOT = path.join(__dirname, '..');
-const migrations = ['auth_and_wellness.sql', 'care_timeline_and_appointments.sql', 'mother_dashboard.sql', 'antenatal_profile.sql', 'child_dashboard.sql', 'child_dashboard_v2.sql', 'child_health_v3.sql', 'hospital_platform.sql', 'patient_preferences.sql', 'patient_documents.sql', 'care_extensions_v4.sql', 'facility_discovery.sql', 'referral_continuity.sql', 'patient_experience.sql', 'patient_home.sql', 'patient_continuity.sql', 'access_matching.sql', 'patient_support.sql', 'clinical_dashboard.sql'];
+const migrations = ['auth_and_wellness.sql', 'care_timeline_and_appointments.sql', 'mother_dashboard.sql', 'antenatal_profile.sql', 'child_dashboard.sql', 'child_dashboard_v2.sql', 'child_health_v3.sql', 'hospital_platform.sql', 'patient_preferences.sql', 'patient_documents.sql', 'care_extensions_v4.sql', 'facility_discovery.sql', 'referral_continuity.sql', 'patient_experience.sql', 'patient_home.sql', 'patient_continuity.sql', 'access_matching.sql', 'patient_support.sql', 'clinical_dashboard.sql', 'document_intake_offline.sql', 'missed_care_outreach.sql'];
+// Reference data (Delhi facility directory). Kept apart from `migrations` so tests that build a bare schema stay small.
+const directories = ['delhi_directory.sql'];
 
 async function seedLocal() {
   if (process.env.DAI_LOCAL !== 'true' || path.resolve(process.env.DAI_LOCAL_DB_DIR || '') !== path.join(ROOT,'.local/patient-db')) throw new Error('Local seed is restricted to the launcher-managed local database.');
@@ -16,7 +18,7 @@ async function seedLocal() {
   let source;
   try {
     await client.query('CREATE TABLE IF NOT EXISTS dai_local_migrations(name TEXT PRIMARY KEY, sha256 TEXT NOT NULL, applied_at TIMESTAMPTZ DEFAULT now())');
-    for (const name of migrations) {
+    for (const name of [...migrations, ...directories]) {
       const sql = fs.readFileSync(path.join(ROOT, 'backend/db', name), 'utf8');
       const sha = crypto.createHash('sha256').update(sql).digest('hex');
       const old = await client.query('SELECT sha256 FROM dai_local_migrations WHERE name=$1', [name]);
@@ -103,4 +105,4 @@ async function seedLocal() {
   }
 }
 if (require.main === module) seedLocal().catch(error=>{ console.error(error.message); process.exitCode=1; });
-module.exports = { seedLocal, migrations };
+module.exports = { seedLocal, migrations, directories };
