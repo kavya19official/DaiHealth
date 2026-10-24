@@ -172,7 +172,7 @@
         `).join('');
 
         const modal = document.createElement('div');
-        modal.className = 'modal-overlay';
+        modal.className = 'modal-overlay care-feature-modal is-open';
         modal.innerHTML = `
           <div class="modal">
             <div class="modal-header">
@@ -221,15 +221,19 @@
     getState: () => state
   };
 
-  // Auto-initialize if the container exists
+  document.addEventListener('toggle', event => {
+    if (event.target.id === 'timelineRecordDetails' && event.target.open) loadTimeline();
+  }, true);
+
+  // Standalone views load immediately; the patient journey loads details on demand.
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
       setup();
-      if ($('enhancedTimelineList')) loadTimeline();
+      if ($('enhancedTimelineList') && !$('timelineRecordDetails')) loadTimeline();
     });
   } else {
     setup();
-    if ($('enhancedTimelineList')) loadTimeline();
+    if ($('enhancedTimelineList') && !$('timelineRecordDetails')) loadTimeline();
   }
 
 })();

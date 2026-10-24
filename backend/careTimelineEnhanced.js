@@ -107,8 +107,9 @@ module.exports = function(app, { pool, authenticateToken, authorizeRole }) {
 
       let milestones = result.rows;
 
-      // Filter by stage if gestational age is known
-      if (gestationalAge && currentStage) {
+      // Keep the full recorded history by default, including antenatal care after birth.
+      // A nearby-stage view must be explicitly requested; it is not the main journey.
+      if (req.query?.scope === 'nearby_stages' && gestationalAge && currentStage) {
         milestones = filterMilestonesByStage(milestones, currentStage);
       }
 

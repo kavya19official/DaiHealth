@@ -374,6 +374,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
   z-index: 200;
   padding: 1rem;
 }
+.modal-overlay[hidden] { display: none !important; }
 .modal-overlay.is-open { display: flex; }
 .modal {
   background: #fff;
@@ -440,7 +441,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 <link rel="stylesheet" href="nearby-world.css?v=1">
 <link rel="stylesheet" href="patient-support.css?v=1">
 <link rel="stylesheet" href="clinical-dashboard.css?v=1">
-<link rel="stylesheet" href="css/care-timeline-enhanced.css"><link rel="stylesheet" href="css/missed-care-outreach.css">
+<link rel="stylesheet" href="css/care-timeline-enhanced.css?v=modal-fix-1"><link rel="stylesheet" href="css/missed-care-outreach.css?v=modal-fix-1">
 <style>.low-bandwidth img,.low-bandwidth canvas{display:none!important}.low-bandwidth *{animation:none!important;transition:none!important}</style></head>
 <body class="patient-view">
 <a class="skip-link" href="#main-content" data-i18n="a11y.skip" style="position:absolute;left:1rem;top:-5rem;z-index:500;padding:.7rem 1rem;border-radius:0 0 10px 10px;background:var(--ink);color:#fff">Skip to main content</a>
@@ -472,7 +473,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 
 <div class="app">
 <aside class="sidebar" id="sidebar">
-  <a class="sidebar__brand patient-brand" href="dashboard.html" aria-label="DAI patient home"><span class="patient-brand__hindi" lang="hi">दाई</span><span class="patient-brand__english">DAI<small>YOUR CARE COMPANION</small></span></a>
+  <a class="sidebar__brand patient-brand" href="auth.html" aria-label="DAI sign in"><span class="patient-brand__hindi" lang="hi">दाई</span><span class="patient-brand__english">DAI<small>YOUR CARE COMPANION</small></span></a>
 <nav class="sidebar__nav" aria-label="Patient navigation"><span class="nav-caption" data-copy="yourCare">YOUR CARE</span><button type="button" class="nav-item is-active" data-panel="dashboard"><svg aria-hidden="true"><use href="#i-home"/></svg><span data-copy="nav.dashboard">Home</span></button><button type="button" class="nav-item" data-panel="timeline"><svg aria-hidden="true"><use href="#i-clock"/></svg><span data-copy="nav.timeline">Care timeline</span></button><button type="button" class="nav-item" data-panel="gaps"><svg aria-hidden="true"><use href="#i-clipboard"/></svg><span data-copy="nav.gaps">Pending care</span></button><button type="button" class="nav-item" data-panel="appointments"><svg aria-hidden="true"><use href="#i-cal"/></svg><span data-copy="nav.appointments">Appointments</span></button><button type="button" class="nav-item" data-panel="records"><svg aria-hidden="true"><use href="#i-file"/></svg><span data-copy="nav.records">Reports & records</span></button><button type="button" class="nav-item" data-panel="children"><svg aria-hidden="true"><use href="#i-baby"/></svg><span data-copy="nav.children">My children</span></button><button type="button" class="nav-item" data-panel="postpartum"><svg aria-hidden="true"><use href="#i-heart"/></svg><span data-copy="nav.postpartum">After delivery</span></button><button type="button" class="nav-item" data-panel="facilities"><svg aria-hidden="true"><use href="#i-search"/></svg><span data-copy="nav.facilities">Nearby care</span></button><button type="button" class="nav-item" data-panel="companion"><svg aria-hidden="true"><use href="#i-msg"/></svg><span data-copy="nav.companion">Care companion</span></button><button type="button" class="nav-item" data-panel="schemes"><svg aria-hidden="true"><use href="#i-shield"/></svg><span data-copy="nav.schemes">Schemes & support</span></button><button type="button" class="nav-item" data-panel="outreach"><svg aria-hidden="true"><use href="#i-clipboard"/></svg><span>Outreach queue</span></button><button type="button" class="nav-item" data-panel="family"><svg aria-hidden="true"><use href="#i-user"/></svg><span data-copy="nav.family">Family & consent</span></button><button type="button" class="nav-item" data-panel="messages"><svg aria-hidden="true"><use href="#i-bell"/></svg><span data-copy="nav.messages">Updates</span></button><button type="button" class="nav-item" data-panel="settings"><svg aria-hidden="true"><use href="#i-set"/></svg><span data-copy="nav.settings">Settings</span></button></nav><div class="sidebar__footer"><span class="privacy-symbol">♡</span><div><strong data-copy="yourInformation">Your information. Your choice.</strong><button class="link-btn" data-go="family" data-copy="manageSharing">Manage sharing →</button></div></div>
 </aside>
 
@@ -602,15 +603,13 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 
 <!-- TIMELINE -->
 <div class="panel" id="panel-timeline"><div class="page-section-heading"><h1 data-copy="nav.timeline">Care timeline</h1><p data-copy="timelineIntro">Your visits and milestones, with a plain-language explanation at each step.</p></div>
-  <div class="card section-card">
-    <div class="section-head"><div class="section-title"><span><svg width="15" height="15" aria-hidden="true"><use href="#i-clock"/></svg></span> Personalised Care Timeline</div></div>
+  <div id="timelineList" aria-live="polite"><p class="empty" role="status">Loading your recorded care journey…</p></div>
+  <details id="timelineRecordDetails" class="card section-card" style="margin-top:1rem">
+    <summary>Clinician notes &amp; edit history</summary>
+    <p>Details from your recorded milestones. Your complete journey stays visible above.</p>
     <div id="gestationalAgeDisplay" class="gestational-age-display"></div>
     <div id="enhancedTimelineList"></div>
-  </div>
-  <div class="card section-card" style="margin-top: 1rem;">
-    <div class="section-head"><div class="section-title"><span><svg width="15" height="15" aria-hidden="true"><use href="#i-clipboard"/></svg></span> Missed Care Items</div></div>
-    <div id="missedCareItemsList"></div>
-  </div>
+  </details>
 </div>
 
 <!-- OUTREACH QUEUE (Staff/Doctor View) -->
@@ -951,7 +950,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 </div>
 
 <!-- Facility modals (shared; outside panel so they overlay the app) -->
-<div class="modal-overlay" id="appointmentModal" role="dialog" aria-modal="true">
+<div class="modal-overlay" id="appointmentModal" hidden role="dialog" aria-modal="true">
   <div class="modal">
     <div class="modal-header">
       <h2 id="apptTitle">Request appointment</h2>
@@ -991,7 +990,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
   </div>
 </div>
 
-<div class="modal-overlay" id="facilityModal" role="dialog" aria-modal="true">
+<div class="modal-overlay" id="facilityModal" hidden role="dialog" aria-modal="true">
   <div class="modal">
     <div class="modal-header">
       <h2 id="facilityModalTitle">Facility</h2>
@@ -1001,7 +1000,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
   </div>
 </div>
 
-<div class="modal-overlay" id="referralModal" role="dialog" aria-modal="true">
+<div class="modal-overlay" id="referralModal" hidden role="dialog" aria-modal="true">
   <div class="modal">
     <div class="modal-header">
       <h2>Create referral</h2>
@@ -1196,6 +1195,7 @@ function renderDemoMessages() {
 function $(id) { return document.getElementById(id); }
 
 function showPanel(id) {
+  window.FacilityDiscovery?.closeModals();
   document.querySelectorAll('.panel').forEach(function (p) { p.classList.remove('is-active'); });
   document.querySelectorAll('.nav-item[data-panel]').forEach(function (n) { n.classList.remove('is-active'); });
   var panel = $('panel-' + id);
@@ -1245,7 +1245,7 @@ document.querySelectorAll('.nav-item[data-panel]').forEach(function (btn) {
   btn.addEventListener('click', function () { showPanel(btn.getAttribute('data-panel')); });
 });
 document.querySelectorAll('[data-go]').forEach(function (el) {
-  el.addEventListener('click', function () { showPanel(el.getAttribute('data-go')); });
+  el.addEventListener('click', function (event) { event.preventDefault(); showPanel(el.getAttribute('data-go')); });
 });
 
 function weeksAlong() {

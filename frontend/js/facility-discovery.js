@@ -420,7 +420,9 @@
       '<button type="button" data-action="refer" data-id="' + f.id + '">Create referral</button>' +
       '</div>';
 
+    closeModals();
     $('facilityModalContent').innerHTML = html;
+    $('facilityModal').hidden = false;
     $('facilityModal').classList.add('is-open');
     loadDoctors(facilityId);
   }
@@ -476,6 +478,7 @@
   }
 
   async function openBook(facilityId) {
+    closeModals();
     $('appointmentFacilityId').value = facilityId;
     $('appointmentDoctorId').innerHTML = '<option value="">Facility / any available</option>';
     $('appointmentType').value = '';
@@ -484,6 +487,7 @@
     $('appointmentReason').value = '';
     const min = new Date();
     $('appointmentDate').min = min.toISOString().slice(0, 10);
+    $('appointmentModal').hidden = false;
     $('appointmentModal').classList.add('is-open');
     loadDoctors(facilityId);
   }
@@ -506,15 +510,18 @@
     if (data && data.appointment) {
       toast('Appointment requested — status: ' + (data.appointment.status || 'pending'));
       $('appointmentModal').classList.remove('is-open');
+    $('appointmentModal').hidden = true;
       loadAppointments();
     }
   }
 
   function openReferral(facilityId) {
+    closeModals();
     $('referralToFacilityId').value = facilityId;
     $('referralReason').value = '';
     $('referralNotes').value = '';
     $('referralUrgency').value = 'routine';
+    $('referralModal').hidden = false;
     $('referralModal').classList.add('is-open');
   }
 
@@ -534,6 +541,7 @@
     if (data && data.referral) {
       toast('Referral created — status: ' + (data.referral.status || 'pending'));
       $('referralModal').classList.remove('is-open');
+    $('referralModal').hidden = true;
     }
   }
 
@@ -584,11 +592,16 @@
 
   function closeModals() {
     $('appointmentModal').classList.remove('is-open');
+    $('appointmentModal').hidden = true;
     $('facilityModal').classList.remove('is-open');
+    $('facilityModal').hidden = true;
     $('referralModal').classList.remove('is-open');
+    $('referralModal').hidden = true;
   }
 
   function init() {
+    closeModals();
+    window.addEventListener('pageshow', closeModals);
     $('deviceLocationBtn').addEventListener('click', getDeviceLocation);
     $('saveLocationBtn').addEventListener('click', function () { saveLocation('manual'); });
     $('changeLocationBtn').addEventListener('click', changeLocation);
@@ -610,6 +623,10 @@
       });
     });
 
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape') closeModals();
+    });
+
     loadSavedLocation();
   }
 
@@ -617,7 +634,8 @@
     bookAppointment: openBook,
     showDetails: showDetails,
     callFacility: callFacility,
-    showDoctors: loadDoctors
+    showDoctors: loadDoctors,
+    closeModals
   };
 
   if (document.readyState === 'loading') {

@@ -602,3 +602,76 @@ Patient → Settings → Reading & offline → **Set up protected copy** require
 Offline only timeline self-reported completion can be queued. Synchronisation requires the same signed-in account, is idempotent and refuses changed or clinician-verified milestones. Conflicting updates can be discarded from Settings after checking the online timeline. Bookings, clinical data, consent changes and report uploads require a connection. Low-bandwidth mode hides illustrations and skips Dhruv's 3D import while retaining text chat. Browser encryption does not protect an unlocked page from compromised scripts or device access.
 
 `npm start` applies the new migration locally. For an existing PostgreSQL deployment, apply `backend/db/document_intake_offline.sql` after the existing migrations before restarting the backend. Run `npm test --prefix backend` and `npm run test:local` for checks.
+
+### Doctor workspace redesign
+
+`doctor.html` now uses the shared DAI wordmark and the existing purple palette
+with an icon sidebar, responsive main grid, reported-capacity rail, calendar,
+record-based charts and a searchable assigned-patient table. Open the Doctor tab
+on the shared sign-in page. Search supports available synthetic name, UHID, ABHA
+and phone fields, with Ctrl/Cmd+K focus. Views cover clinician-marked shared
+summaries, due in 14 days, postpartum, child appointments and overdue Hb follow-up.
+The role/unit controls describe the authenticated assignment; they do not permit
+self-elevation or arbitrary unit switching. Theme and self-reported presence are
+device preferences. No new messages, prescriptions or reservations are sent.
+
+`GET /api/doctor/workspace` requires verified credentials and returns only the
+appointment-linked roster, recorded care milestones, the clinician's appointments,
+and permitted report metadata. Revoked/expired/global-paused report shares are
+excluded. No private report contents or result values enter this dashboard.
+Clinician flags require the new summary consent and a verified recorded validator;
+withheld summaries are shown as Not shared, never low-risk. Every returned patient
+roster/report-metadata read and patient-timeline open is audit-logged.
+
+Local mode reads the doctor-linked facility's ward/bed and latest blood snapshots
+from the hospital database. Capacity is a *reported snapshot*, not proof of live
+readiness, stock reservation or acceptance. Incoming records are limited to the
+assigned panel; ETA and case readiness remain unconfirmed. Empty on-call rosters
+and unavailable resources are not filled with fake clinicians or values. The UI
+polls every 30 seconds while visible; it does not claim WebSocket delivery.
+
+Appointments use recorded statuses, without guessing arrival, waiting time,
+no-shows or tokens. The completion ring counts completed/all recorded milestones;
+charts use actual completion dates. EDD counts are not ML forecasts. No unit
+target, week-over-week improvement, risk score or forecast is fabricated.
+The older unauthenticated demonstration panels are kept separate from the
+authenticated dashboard; an empty authenticated roster stays empty. Tests cover
+record-derived totals, filters, date boundaries, access denial, scope and auditing.
+Browser preview is needed for final layout review on target devices.
+
+### Doctor studio: operational views and queue
+
+The doctor workspace now adds Table/Cards/Stage roster views, field filters,
+explicit-consent quick views, selected-roster export, Day/Week/Month/List unit
+planner, queue lanes, reviewable worklist, protected results inbox, due-date
+columns, reported ward bed tiles, incoming-case list, message-template previews,
+transparent metrics and device display preferences. Purple/lavender tokens are
+preserved; status text/icons use sage, amber, coral and lavender-grey. Animations
+are 300–350 ms and reduced-motion is respected. No counts or activity are invented
+to populate empty views. Children’s clinical records and unshared lab values are
+not pulled into the roster. A shared maternal summary does not grant child access.
+
+`doctor_operations.sql` (applied by the local launcher after existing migrations)
+adds separate queue state, worklist actions and immutable operational events.
+`POST /api/doctor/queue/:id` requires a verified doctor, their own appointment,
+today’s date, an allowed state transition and the current version. A doctor can
+have one active consultation. Completed consultation notes update the existing
+appointment; the hospital bridge is queued. Check-in/no-show state is explicitly
+staff-recorded and does not guess arrival. No new appointment is seeded today just
+to fill the queue. Use the date picker or the next-booked-date shortcut to explore.
+
+`POST /api/doctor/worklist/:id` requires an assigned milestone and a written
+reason. Review/dismiss/reopen affects the doctor’s worklist only, never clinical
+completion. `GET /api/doctor/activity` exposes only the authenticated doctor’s
+recorded reads and actions. The results inbox rechecks active shares and uses the
+existing clinician-review endpoint; no bulk sign-off is added.
+
+The following remain explicitly unconnected rather than pretending to work:
+message delivery/read receipts/voice notes, family and ASHA threads, AI-companion
+handoffs, bulk reminders/bookings, new orders, walk-in intake, draggable surgery
+changes, shift swaps, individual readiness confirmation and reservations, bed
+mutations, predicted bed release, ambulance GPS/routing/ETA and operational ML.
+Templates are previews only. EDD bands are recorded dates, not forecasts. Roster
+sorting is deterministic and explained, not called ML. Ward tiles are not a
+measured architectural floor plan. Status refresh is 30-second polling, not a
+live socket. Hospital administration remains authoritative for resource changes.

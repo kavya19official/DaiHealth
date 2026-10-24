@@ -281,7 +281,7 @@
 
   const showDecisionDialog = (referralId, decision) => {
     const modal = document.createElement('div');
-    modal.className = 'modal-overlay';
+    modal.className = 'modal-overlay care-feature-modal is-open';
     modal.innerHTML = `
       <div class="modal">
         <div class="modal-header">
@@ -341,7 +341,7 @@
 
   const showReturnSummaryDialog = (referralId) => {
     const modal = document.createElement('div');
-    modal.className = 'modal-overlay';
+    modal.className = 'modal-overlay care-feature-modal is-open';
     modal.innerHTML = `
       <div class="modal">
         <div class="modal-header">
@@ -395,7 +395,7 @@
 
   const showCreateReferralDialog = () => {
     const modal = document.createElement('div');
-    modal.className = 'modal-overlay';
+    modal.className = 'modal-overlay care-feature-modal is-open';
     modal.innerHTML = `
       <div class="modal">
         <div class="modal-header">

@@ -295,11 +295,11 @@
 }
 
 /* Modal Form */
-.modal .form-group {
+.care-feature-modal .modal .form-group {
   margin-bottom: 0.85rem;
 }
 
-.modal .form-group label {
+.care-feature-modal .modal .form-group label {
   display: block;
   font-size: 0.85rem;
   font-weight: 600;
@@ -307,9 +307,9 @@
   margin-bottom: 0.35rem;
 }
 
-.modal .form-group select,
-.modal .form-group input,
-.modal .form-group textarea {
+.care-feature-modal .modal .form-group select,
+.care-feature-modal .modal .form-group input,
+.care-feature-modal .modal .form-group textarea {
   width: 100%;
   padding: 0.55rem 0.75rem;
   border: 1px solid var(--line);
@@ -319,9 +319,9 @@
   color: var(--ink);
 }
 
-.modal .form-group select:focus,
-.modal .form-group input:focus,
-.modal .form-group textarea:focus {
+.care-feature-modal .modal .form-group select:focus,
+.care-feature-modal .modal .form-group input:focus,
+.care-feature-modal .modal .form-group textarea:focus {
   outline: 2px solid rgba(124, 58, 237, 0.3);
   border-color: var(--brand);
 }

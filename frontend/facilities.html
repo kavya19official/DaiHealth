@@ -375,6 +375,7 @@
   padding: 1rem;
 }
 
+.modal-overlay[hidden] { display: none !important; }
 .modal-overlay.is-open {
   display: flex;
 }
@@ -682,7 +683,7 @@
 </main>
 
 <!-- Book appointment -->
-<div class="modal-overlay" id="appointmentModal" role="dialog" aria-modal="true" aria-labelledby="apptTitle">
+<div class="modal-overlay" id="appointmentModal" hidden role="dialog" aria-modal="true" aria-labelledby="apptTitle">
   <div class="modal">
     <div class="modal-header">
       <h2 id="apptTitle">Request appointment</h2>
@@ -726,7 +727,7 @@
 </div>
 
 <!-- Facility detail + doctors -->
-<div class="modal-overlay" id="facilityModal" role="dialog" aria-modal="true" aria-labelledby="facilityModalTitle">
+<div class="modal-overlay" id="facilityModal" hidden role="dialog" aria-modal="true" aria-labelledby="facilityModalTitle">
   <div class="modal">
     <div class="modal-header">
       <h2 id="facilityModalTitle">Facility</h2>
@@ -737,7 +738,7 @@
 </div>
 
 <!-- Referral -->
-<div class="modal-overlay" id="referralModal" role="dialog" aria-modal="true" aria-labelledby="refTitle">
+<div class="modal-overlay" id="referralModal" hidden role="dialog" aria-modal="true" aria-labelledby="refTitle">
   <div class="modal">
     <div class="modal-header">
       <h2 id="refTitle">Create referral</h2>

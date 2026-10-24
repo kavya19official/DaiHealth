@@ -206,7 +206,7 @@
 }
 
 /* Modal Styles */
-.modal-overlay {
+.care-feature-modal {
   position: fixed;
   inset: 0;
   background: rgba(30, 27, 75, 0.5);
@@ -217,7 +217,7 @@
   padding: 1rem;
 }
 
-.modal {
+.care-feature-modal .modal {
   background: #fff;
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow);
@@ -227,7 +227,7 @@
   overflow-y: auto;
 }
 
-.modal-header {
+.care-feature-modal .modal-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -235,14 +235,14 @@
   border-bottom: 1px solid var(--line);
 }
 
-.modal-header h2 {
+.care-feature-modal .modal-header h2 {
   font-size: 1.1rem;
   font-weight: 700;
   color: var(--ink);
   margin: 0;
 }
 
-.modal-close {
+.care-feature-modal .modal-close {
   width: 32px;
   height: 32px;
   border-radius: 8px;
@@ -257,12 +257,12 @@
   color: var(--ink-2);
 }
 
-.modal-close:hover {
+.care-feature-modal .modal-close:hover {
   background: var(--ground);
   color: var(--ink);
 }
 
-.modal-body {
+.care-feature-modal .modal-body {
   padding: 1.25rem;
 }
 

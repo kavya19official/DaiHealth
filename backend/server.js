@@ -815,6 +815,7 @@ app.get('/api/doctor/patients', authenticateToken, authorizeRole(['doctor']), as
 // appointment with this doctor
 app.get('/api/doctor/patients/:motherId/timeline', authenticateToken, authorizeRole(['doctor']), async (req, res) => {
   try {
+    if(!await require('./clinicalDashboard').verifiedDoctor(pool,req.user.id))return res.status(403).json({error:'Verified clinician credentials are required'});
     const motherId = parseInt(req.params.motherId, 10);
     if (Number.isNaN(motherId)) {
       return res.status(400).json({ error: 'Invalid patient id' });
@@ -834,7 +835,8 @@ app.get('/api/doctor/patients/:motherId/timeline', authenticateToken, authorizeR
     );
     const milestonesResult = await pool.query(MILESTONE_SELECT, [motherId]);
 
-    res.json({ patient: profileResult.rows[0] || null, milestones: milestonesResult.rows });
+    await pool.query("INSERT INTO patient_access_events(mother_id,event_type,details) VALUES($1,'doctor_timeline_read',jsonb_build_object('doctor_id',$2::int))",[motherId,req.user.id]);
+    res.set('Cache-Control','no-store').json({ patient: profileResult.rows[0] || null, milestones: milestonesResult.rows });
   } catch (error) {
     console.error('Fetch patient timeline error:', error);
     res.status(500).json({ error: 'Failed to fetch patient timeline' });
@@ -1124,6 +1126,8 @@ require('./patientExperience')(app, { pool, authenticateToken, authorizeRole });
 require('./patientHome')(app, { pool, authenticateToken, authorizeRole });
 require('./patientSupport')(app, { pool, authenticateToken, authorizeRole });
 require('./clinicalDashboard')(app, { pool, authenticateToken, authorizeRole });
+require('./doctorWorkspace')(app, { pool, authenticateToken, authorizeRole });
+require('./doctorOperations')(app, { pool, authenticateToken, authorizeRole });
 require('./patientDocuments')(app, { pool, authenticateToken, authorizeRole });
 require('./patientOfflineSync')(app, {pool,authenticateToken,authorizeRole});
 

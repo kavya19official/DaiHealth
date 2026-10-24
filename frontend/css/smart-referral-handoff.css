@@ -245,7 +245,7 @@
 }
 
 /* Modal Styles (reusing from missed-care-outreach.css but included for completeness) */
-.modal-overlay {
+.care-feature-modal {
   position: fixed;
   inset: 0;
   background: rgba(30, 27, 75, 0.5);
@@ -256,7 +256,7 @@
   padding: 1rem;
 }
 
-.modal {
+.care-feature-modal .modal {
   background: #fff;
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow);
@@ -266,7 +266,7 @@
   overflow-y: auto;
 }
 
-.modal-header {
+.care-feature-modal .modal-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -274,14 +274,14 @@
   border-bottom: 1px solid var(--line);
 }
 
-.modal-header h2 {
+.care-feature-modal .modal-header h2 {
   font-size: 1.1rem;
   font-weight: 700;
   color: var(--ink);
   margin: 0;
 }
 
-.modal-close {
+.care-feature-modal .modal-close {
   width: 32px;
   height: 32px;
   border-radius: 8px;
@@ -296,20 +296,20 @@
   color: var(--ink-2);
 }
 
-.modal-close:hover {
+.care-feature-modal .modal-close:hover {
   background: var(--ground);
   color: var(--ink);
 }
 
-.modal-body {
+.care-feature-modal .modal-body {
   padding: 1.25rem;
 }
 
-.modal .form-group {
+.care-feature-modal .modal .form-group {
   margin-bottom: 0.85rem;
 }
 
-.modal .form-group label {
+.care-feature-modal .modal .form-group label {
   display: block;
   font-size: 0.85rem;
   font-weight: 600;
@@ -317,9 +317,9 @@
   margin-bottom: 0.35rem;
 }
 
-.modal .form-group select,
-.modal .form-group input,
-.modal .form-group textarea {
+.care-feature-modal .modal .form-group select,
+.care-feature-modal .modal .form-group input,
+.care-feature-modal .modal .form-group textarea {
   width: 100%;
   padding: 0.55rem 0.75rem;
   border: 1px solid var(--line);
@@ -329,9 +329,9 @@
   color: var(--ink);
 }
 
-.modal .form-group select:focus,
-.modal .form-group input:focus,
-.modal .form-group textarea:focus {
+.care-feature-modal .modal .form-group select:focus,
+.care-feature-modal .modal .form-group input:focus,
+.care-feature-modal .modal .form-group textarea:focus {
   outline: 2px solid rgba(124, 58, 237, 0.3);
   border-color: var(--brand);
 }

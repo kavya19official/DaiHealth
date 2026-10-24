@@ -15,10 +15,10 @@
 a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}img,svg{display:block}button,input,select,textarea{font:inherit}
 .app{display:grid;grid-template-columns:var(--sidebar-w) 1fr;min-height:100vh}
 .sidebar{position:sticky;top:0;height:100vh;display:flex;flex-direction:column;background:linear-gradient(180deg,#faf5ff,#f5f0ff);border-right:1px solid var(--line);padding:1.1rem .85rem 1.25rem;overflow-y:auto}
-.sidebar__brand{display:flex;align-items:center;gap:.65rem;padding:.35rem .55rem 1.25rem}
-.sidebar__brand img{width:40px;height:40px;border-radius:50%;object-fit:cover;box-shadow:0 0 0 2px #fff,0 2px 8px rgba(124,58,237,.15)}
-.sidebar__brand-name{font-family:var(--display);font-weight:800;font-size:1.2rem;color:var(--brand);line-height:1}
-.sidebar__brand-tag{display:block;margin-top:.2rem;font-size:.58rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+.sidebar .patient-brand{display:flex;gap:13px;align-items:center;padding:2px 10px 18px;flex-shrink:0;color:var(--brand)}
+.sidebar .patient-brand__hindi{font-size:47px;font-weight:750;line-height:1.15;letter-spacing:-2px}
+.sidebar .patient-brand__english{font-size:23px;letter-spacing:2px;font-weight:800;line-height:1.2}
+.sidebar .patient-brand__english small{display:block;font-size:7px;line-height:1.6;letter-spacing:1.1px;color:var(--ink-3);margin-top:5px}
 .sidebar__nav{display:flex;flex-direction:column;gap:.2rem;flex:1}
 .nav-item{display:flex;align-items:center;gap:.7rem;padding:.65rem .85rem;border-radius:12px;color:var(--ink-2);font-size:.9rem;font-weight:500;border:0;background:transparent;width:100%;text-align:left}
 .nav-item:hover{background:rgba(124,58,237,.06);color:var(--brand-strong)}
@@ -103,45 +103,28 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 .appointment-layout{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(300px,.75fr);gap:1rem}.appointment-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.75rem;align-items:center;padding:.85rem;border:1px solid var(--line);border-radius:12px;margin-top:.55rem;background:#fff}.appointment-row:hover,.appointment-row.is-selected{border-color:var(--brand);background:var(--brand-pale)}.appointment-row__actions{display:flex;gap:.4rem;flex-wrap:wrap;justify-content:flex-end}.appointment-detail{position:sticky;top:82px;align-self:start}.appointment-detail h2{font-family:var(--display);font-size:1.25rem;margin:0}.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:.65rem;margin:1rem 0}.info-cell{padding:.7rem;border-radius:12px;background:var(--ground);border:1px solid var(--line)}.info-cell small,.info-cell b{display:block}.info-cell small{color:var(--ink-muted);font-size:.7rem;text-transform:uppercase;font-weight:700}.demo-banner{padding:.7rem .85rem;background:var(--brand-soft);color:var(--brand-strong);border-radius:12px;font-size:.8rem;margin-bottom:1rem}.table tr[data-aid]{cursor:pointer}.table tr[data-aid]:hover{background:var(--brand-pale)}@media(max-width:1000px){.appointment-layout{grid-template-columns:1fr}.appointment-detail{position:static}}
 </style>
 <script src="js/dai-api.js"></script>
-<link rel="stylesheet" href="doctor-report-review.css?v=1"></head>
-<link rel="stylesheet" href="smart-referral-handoff.css"></head>
-<body>
+<link rel="stylesheet" href="doctor-report-review.css?v=1">
+<link rel="stylesheet" href="clinical-dashboard.css?v=1">
+<script src="js/clinical-dashboard.js?v=1"></script>
+<link rel="stylesheet" href="css/smart-referral-handoff.css?v=modal-fix-1"><link rel="stylesheet" href="doctor-workspace.css?v=1"><link rel="stylesheet" href="doctor-studio.css?v=1"></head>
+<body class="doctor-workspace">
+<button type="button" class="dw-menu-backdrop" data-dw-close-menu aria-label="Close sidebar"></button>
 <div class="app">
 <aside class="sidebar">
-  <a class="sidebar__brand" href="index.html">
-    <img src="assets/logo-circle.png" alt="" width="40" height="40" onerror="this.src='assets/logo.jpeg'">
-    <span><span class="sidebar__brand-name">दाई</span><span class="sidebar__brand-tag">Doctor Portal</span></span>
-  </a>
-  <nav class="sidebar__nav">
-    <button type="button" class="nav-item is-active" data-panel="dashboard"> Dashboard</button>
-    <button type="button" class="nav-item" data-panel="patients"> Patients</button>
-    <button type="button" class="nav-item" data-panel="appointments"> Appointments</button>
-    <button type="button" class="nav-item" data-panel="timeline"> Care Timeline</button>
-    <button type="button" class="nav-item" data-panel="referrals"> Referrals <span class="badge" id="referralBadge">0</span></button>
-    <button type="button" class="nav-item" data-panel="clinical-review"> Clinical Review <span class="badge" id="reviewBadge">!</span></button>
-    <button type="button" class="nav-item" data-panel="safety"> Safety Monitor <span class="badge" id="safetyBadge" style="display:none">0</span></button>
-    <button type="button" class="nav-item" data-panel="records"> Records</button>
-    <button type="button" class="nav-item" data-panel="messages"> Messages <span class="badge">3</span></button>
-    <button type="button" class="nav-item" data-panel="settings"> Settings</button>
-  </nav>
-  <div class="sidebar__footer">Better care.<br>Healthier tomorrows.</div>
+  <a class="sidebar__brand patient-brand" href="auth.html" aria-label="DAI sign in"><span class="patient-brand__hindi" lang="hi">दाई</span><span class="patient-brand__english">DAI<small>YOUR CARE COMPANION</small></span></a>
+<div class="dw-role"><small>YOUR CLINICAL TEAM</small><select id="dwRoleSelect" aria-label="Your verified role" disabled><option>Verifying account…</option></select><select id="dwUnitSelect" aria-label="Your assigned unit" disabled><option>Loading assigned unit…</option></select></div><nav class="sidebar__nav" aria-label="Doctor navigation"><span class="dw-nav-caption">WORKSPACE</span><button type="button" class="nav-item is-active" data-panel="dashboard" data-dw-nav-icon="grid" data-dw-label="Dashboard">Dashboard</button><button type="button" class="nav-item" data-panel="patients" data-dw-nav-icon="people" data-dw-label="My Patients">My Patients</button><div class="dw-subnav" aria-label="Patient views"><button data-dw-filter="all" aria-pressed="true">All assigned</button><button data-dw-filter="high-risk" aria-pressed="false">Clinician-marked</button><button data-dw-filter="due14" aria-pressed="false">Due in 14 days</button><button data-dw-filter="postpartum" aria-pressed="false">Postpartum</button><button data-dw-filter="newborn" aria-pressed="false">Child appointments</button></div><button type="button" class="nav-item" data-panel="schedule" data-dw-nav-icon="calendar" data-dw-label="Schedule">Schedule</button><button type="button" class="nav-item" data-panel="appointments" data-dw-nav-icon="clock" data-dw-label="Appointments">Appointments</button><button type="button" class="nav-item" data-panel="attention" data-dw-nav-icon="attention" data-dw-label="Needs Attention">Needs Attention</button><button type="button" class="nav-item" data-panel="records" data-dw-nav-icon="file" data-dw-label="Reports & Results">Reports & Results</button><button type="button" class="nav-item" data-panel="readiness" data-dw-nav-icon="heart" data-dw-label="Delivery & Readiness">Delivery & Readiness</button><button type="button" class="nav-item" data-panel="wards" data-dw-nav-icon="bed" data-dw-label="Labour Room & Wards">Labour Room & Wards</button><button type="button" class="nav-item" data-panel="referrals" data-dw-nav-icon="arrow" data-dw-label="Emergency & Referrals">Emergency & Referrals</button><button type="button" class="nav-item" data-panel="messages" data-dw-nav-icon="message" data-dw-label="Messages">Messages</button><button type="button" class="nav-item" data-panel="analytics" data-dw-nav-icon="chart" data-dw-label="Analytics">Analytics</button></nav><div class="dw-nav-bottom"><button type="button" class="nav-item" data-panel="settings" data-dw-nav-icon="settings">Settings</button><button type="button" class="nav-item" id="dwSidebarLogout" aria-label="Log out"><span data-dw-icon="logout"></span><span class="dw-label">Log out</span></button></div>
 </aside>
 
 <div class="main">
 <header class="topbar">
-  <div class="search"><span></span><input type="search" id="searchInput" placeholder="Search patients, appointments, or records..."></div>
-  <div class="topbar__right">
-    <button class="icon-btn" type="button"><span class="badge">3</span></button>
-    <div class="user-chip">
-      <img src="assets/logo-circle.png" alt="" width="34" height="34" onerror="this.src='assets/logo.jpeg'">
-      <div><div class="user-chip__name" id="userName">Doctor</div><div class="user-chip__role">Pediatrician</div></div>
-    </div>
-  </div>
+<button class="icon-btn" id="dwCollapse" aria-label="Toggle sidebar"><span data-dw-icon="menu"></span></button>
+<div class="search"><span data-dw-icon="search"></span><input type="search" id="searchInput" placeholder="Find a patient, UHID, ABHA or phone…" aria-label="Search assigned patients"><kbd class="dw-key">⌘ / Ctrl K</kbd></div>
+<div class="topbar__right"><button class="icon-btn" id="dwTheme" aria-label="Toggle light and dark mode"><span data-dw-icon="moon"></span></button><button class="icon-btn" type="button" data-go="attention" aria-label="Open needs attention"><span data-dw-icon="bell"></span><span class="badge" id="dwNotificationCount">0</span></button><button class="icon-btn" type="button" data-go="messages" aria-label="Messages"><span data-dw-icon="message"></span></button><div class="dw-profile"><span class="dw-avatar" id="dwDoctorInitials">DAI</span><div><strong id="userName">Your clinician workspace</strong><span class="user-chip__role" hidden></span><div class="dw-presence"><i></i><select id="dwPresence" aria-label="My self-reported presence"><option>Online</option><option>In OPD</option><option>In OT</option><option>On call</option></select></div></div></div></div>
 </header>
 
 <div class="content">
 <!-- DASHBOARD -->
-<div class="panel is-active" id="panel-dashboard">
+<div class="panel is-active" id="panel-dashboard"><div id="doctorWorkspace"></div><div id="dwLegacyDashboard" hidden>
   <div class="welcome-row">
     <div class="welcome-card">
       <div class="welcome-card__art" aria-hidden="true">
@@ -252,10 +235,10 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
     <span>Need assistance? Reach out to the support team for any technical or patient-related queries.</span>
     <button type="button" class="btn btn--primary" id="teleBtn2">Contact next patient →</button>
   </div>
-</div>
+</div></div>
 
 <!-- PATIENTS -->
-<div class="panel" id="panel-patients">
+<div class="panel" id="panel-patients"><div id="dwPatients" class="dw-card dw-table-card"></div><div id="dwLegacyPatients" hidden>
   <div class="card section-card" style="margin-bottom:1rem">
     <div class="section-head"><div><div class="section-title">Assigned patients</div><div class="muted">Patients appear after requesting an appointment or being assigned by the hospital.</div></div></div>
     <div style="margin-bottom:.75rem"><input type="search" id="patientFilter" placeholder="Filter patients…" style="width:100%;max-width:320px;padding:.55rem .85rem;border:1px solid var(--line);border-radius:999px"></div>
@@ -271,10 +254,15 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
       <button type="submit" class="btn btn--primary">Save patient</button>
     </form>
   </div>
-</div>
+</div></div>
 
+<section class="panel" id="panel-schedule"><div class="dw-card dw-chart-card" id="dwSchedule"></div></section>
+<section class="panel" id="panel-attention"><div class="dw-card dw-chart-card" id="dwAttention"></div></section>
+<section class="panel" id="panel-readiness"><div class="dw-card dw-chart-card" id="dwReadiness"></div></section>
+<section class="panel" id="panel-wards"><div class="dw-card dw-chart-card" id="dwWards"></div></section>
+<section class="panel" id="panel-analytics"><div class="dw-card dw-chart-card" id="dwAnalytics"></div></section>
 <!-- APPOINTMENTS -->
-<div class="panel" id="panel-appointments">
+<div class="panel" id="panel-appointments"><div id="dsAppointments"></div><div hidden>
   <div class="ops-intro"><div><h1>Appointment requests</h1><p>Patients request visits from their dashboard. Review the details, confirm a slot, contact the patient, or mark the visit complete.</p></div><span class="ops-status">Doctor review required</span></div>
   <div class="appointment-layout">
     <section class="card section-card">
@@ -283,12 +271,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
     </section>
     <aside class="card section-card appointment-detail" id="appointmentDetail"><div class="empty">Select an appointment to see its details.</div></aside>
   </div>
-</div>
-
-<!-- TIMELINE -->
-<div class="panel" id="panel-timeline">
-  <div class="card section-card">
-    <div class="section-title" style="margin-bottom:1rem"> Care Timeline</div>
+</div></div>
 
 <!-- REFERRALS -->
 <div class="panel" id="panel-referrals">
@@ -352,7 +335,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 <div class="panel" id="panel-timeline">
   <div class="card section-card">
     <div class="section-title" style="margin-bottom:1rem"> Care Timeline</div>
-    <div id="docTimeline"></div>
+    <div id="clinicalDashboardDoctor"></div><div id="docTimeline"></div>
   </div>
 </div>
 
@@ -530,7 +513,8 @@ function openAppointment(id) {
 async function setApptStatus(id,status) {
   var a=appointment(id); var data=null;
   if(a && !String(id).startsWith('DEMO-')) data=await api.apiRequest('/appointments/'+id+'/status',{method:'PATCH',body:{status:status}});
-  if(data){await loadAppointments();}else if(a){a.status=status;renderTodayTable();renderAllAppts();openAppointment(id);}
+  if(!data && !String(id).startsWith('DEMO-')){api.toast('Status was not saved. Please retry.');return;}
+  if(data){await loadAppointments();window.DoctorWorkspace?.refresh();}else if(a){a.status=status;renderTodayTable();renderAllAppts();openAppointment(id);}
   api.toast('Appointment '+status);
 }
 
@@ -560,7 +544,7 @@ function demoTimelineForPatient(p) {
 function renderTimeline(items, patientName) {
   var el = $('docTimeline');
   if (!el) return;
-  var rows = (items && items.length) ? items : timelineTemplates;
+  var rows = Array.isArray(items) ? items : [];
   el.innerHTML =
     '<div class="section-head"><div><div class="section-title">' +
     esc(patientName || 'Patient') +
@@ -597,6 +581,12 @@ async function openPatient(id) {
 }
 
 function renderSupportingPanels(){
+  if(currentUser?.id){
+    if($('docRecords'))$('docRecords').innerHTML='<p class="muted">Only explicitly shared reports appear in the consented inbox below. Private or unshared categories remain Not shared.</p>';
+    if($('docMessages'))$('docMessages').innerHTML='<div class="empty">Patient messaging is not connected. Use your hospital’s approved communication channel. No message has been sent.</div>';
+    return;
+  }
+
   var rr=$('recentRecords');var records=$('docRecords');var messages=$('docMessages');var feed=$('msgFeed');var care=$('careFeed');
   var recordRows=[
     ['Asha Nair','Anomaly scan reviewed','Report verified · '+api.fmtDate(addDays(-12))],
@@ -627,18 +617,18 @@ function renderNextAppt(){var next=appointments.filter(function(a){return a.stat
 async function loadPatients() {
   var data = null;
   try { data = await api.apiRequest('/doctor/patients'); } catch (e) {}
-  patients = (data && data.patients && data.patients.length ? data.patients : demoPatients).map(function (p) {
+  patients = (data && data.patients ? data.patients : !currentUser?.id ? demoPatients : []).map(function (p) {
     p.user_id = p.user_id != null ? p.user_id : p.id;
     return p;
   });
-  if (!patients.length) patients = demoPatients.slice();
+
   renderPatients();
 }
 async function loadAppointments() {
   var data = null;
   try { data = await api.apiRequest('/appointments'); } catch (e) {}
-  appointments = ((data && data.appointments && data.appointments.length) ? data.appointments : demoAppointments).map(normalizeAppointment);
-  if (!appointments.length) appointments = demoAppointments.map(normalizeAppointment);
+  appointments = ((data && data.appointments) ? data.appointments : !currentUser?.id ? demoAppointments : []).map(normalizeAppointment);
+
   if (!selectedAppointmentId && appointments.length) selectedAppointmentId = appointments[0].id;
   renderTodayTable();
   renderAllAppts();
@@ -666,9 +656,13 @@ async function boot(){
   renderSupportingPanels();
   if(location.hash&&$('panel-'+location.hash.slice(1)))showPanel(location.hash.slice(1));
 }
+window.DoctorNavigation={showPanel,openPatient,openAppointment};
 boot();
 })();
 </script>
+<script src="js/doctor-workspace-model.js?v=1"></script>
+<script src="js/doctor-workspace.js?v=1"></script>
+<script src="js/doctor-studio.js?v=1"></script>
 <script src="js/doctor-workflows.js"></script>
 <script src="js/smart-referral-handoff.js"></script>
 <script src="js/care-chatbot.js?v=dhruv-ui-1"></script>

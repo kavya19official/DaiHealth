@@ -262,7 +262,7 @@
 
   const showLogAttemptDialog = (missedCareId) => {
     const modal = document.createElement('div');
-    modal.className = 'modal-overlay';
+    modal.className = 'modal-overlay care-feature-modal is-open';
     modal.innerHTML = `
       <div class="modal">
         <div class="modal-header">
