@@ -594,6 +594,36 @@ sustainability_action = table(
     constraints=(CheckConstraint("baseline >= 0 AND target >= 0"),),
 )
 
+
+# --- Green hospital extensions (tickets, waste streams; no invented scores) ---
+sustainability_ticket = table(
+    "sustainability_ticket",
+    ref("facility_id", "facility", False),
+    ref("opened_by", "portal_user", False),
+    text("kind", False),
+    text("domain", False),
+    text("title", False),
+    text("status", False),
+    text("priority", False),
+    data(),
+)
+sustainability_waste_stream = table(
+    "sustainability_waste_stream",
+    ref("facility_id", "facility", False),
+    ref("recorded_by", "portal_user", False),
+    text("period", False),
+    text("stream", False),
+    Column("mass_kg", Float, nullable=False),
+    text("quality", False),
+    text("source", False),
+    text("evidence", False),
+    flag("segregation_compliant", False),
+    constraints=(
+        UniqueConstraint("facility_id", "period", "stream"),
+        CheckConstraint("mass_kg >= 0"),
+    ),
+)
+
 # Additive administration records; corrections are retained in audit history.
 admin_record = table(
     "admin_record",
