@@ -1,0 +1,366 @@
+/* Smart Referral Handoff Styles */
+
+/* Referral Cards */
+.referral-card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1rem 1.15rem;
+  margin-bottom: 0.85rem;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.referral-card:hover {
+  border-color: #c4b5fd;
+  box-shadow: var(--shadow-sm);
+}
+
+.referral-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.referral-priority {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+}
+
+.priority-label {
+  font-weight: 700;
+}
+
+.referral-card-content {
+  margin-bottom: 0.85rem;
+}
+
+.referral-card-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 0 0 0.35rem 0;
+}
+
+.referral-card-patient,
+.referral-card-reason,
+.referral-card-diagnosis {
+  font-size: 0.85rem;
+  color: var(--ink-2);
+  margin: 0.25rem 0;
+}
+
+.referral-card-meta {
+  font-size: 0.8rem;
+  color: var(--ink-muted);
+  margin-top: 0.5rem;
+}
+
+.referral-card-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+/* Referral Detail View */
+.referral-detail-section {
+  background: var(--ground);
+  border-radius: 12px;
+  padding: 1rem 1.15rem;
+  margin-bottom: 1rem;
+}
+
+.referral-detail-section h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0 0 0.75rem 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--line);
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.75rem;
+}
+
+.detail-grid > div {
+  font-size: 0.88rem;
+  color: var(--ink-2);
+}
+
+.detail-grid strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* Communications */
+.communication-item {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.communication-item.is-unread {
+  background: var(--brand-pale);
+  border-color: var(--brand);
+}
+
+.communication-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.communication-header strong {
+  font-size: 0.9rem;
+  color: var(--ink);
+}
+
+.communication-header small {
+  font-size: 0.75rem;
+  color: var(--ink-muted);
+}
+
+.communication-message {
+  font-size: 0.88rem;
+  color: var(--ink-2);
+  margin: 0.5rem 0;
+  line-height: 1.5;
+}
+
+.communication-type {
+  display: inline-block;
+  margin-top: 0.35rem;
+  font-size: 0.75rem;
+  text-transform: capitalize;
+}
+
+.communication-form {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line);
+}
+
+.communication-form textarea {
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  font-size: 0.88rem;
+  background: #fff;
+  color: var(--ink);
+  margin-bottom: 0.5rem;
+}
+
+.communication-form textarea:focus {
+  outline: 2px solid rgba(124, 58, 237, 0.3);
+  border-color: var(--brand);
+}
+
+/* Filter Controls */
+.referral-filters {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.85rem 1.15rem;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.referral-filters .form-group {
+  flex: 1;
+  min-width: 140px;
+  margin: 0;
+}
+
+.referral-filters select {
+  width: 100%;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  font-size: 0.85rem;
+  background: #fff;
+  color: var(--ink);
+}
+
+/* Status Summary */
+.referral-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.referral-summary-card {
+  padding: 0.85rem 1rem;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  text-align: center;
+}
+
+.referral-summary-card .count {
+  font-family: var(--display);
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--brand);
+  line-height: 1.2;
+}
+
+.referral-summary-card .label {
+  font-size: 0.8rem;
+  color: var(--ink-muted);
+  font-weight: 500;
+  margin-top: 0.25rem;
+}
+
+.referral-summary-card.pending .count {
+  color: #6b7280;
+}
+
+.referral-summary-card.accepted .count {
+  color: #10b981;
+}
+
+.referral-summary-card.rejected .count {
+  color: #f43f5e;
+}
+
+.referral-summary-card.completed .count {
+  color: #3b82f6;
+}
+
+/* Modal Styles (reusing from missed-care-outreach.css but included for completeness) */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(30, 27, 75, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  padding: 1rem;
+}
+
+.modal {
+  background: #fff;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  max-width: 500px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.modal-header h2 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0;
+}
+
+.modal-close {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: #fff;
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-2);
+}
+
+.modal-close:hover {
+  background: var(--ground);
+  color: var(--ink);
+}
+
+.modal-body {
+  padding: 1.25rem;
+}
+
+.modal .form-group {
+  margin-bottom: 0.85rem;
+}
+
+.modal .form-group label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ink-2);
+  margin-bottom: 0.35rem;
+}
+
+.modal .form-group select,
+.modal .form-group input,
+.modal .form-group textarea {
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  font-size: 0.88rem;
+  background: #fff;
+  color: var(--ink);
+}
+
+.modal .form-group select:focus,
+.modal .form-group input:focus,
+.modal .form-group textarea:focus {
+  outline: 2px solid rgba(124, 58, 237, 0.3);
+  border-color: var(--brand);
+}
+
+@media (max-width: 768px) {
+  .referral-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .referral-card-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .referral-card-actions .btn {
+    width: 100%;
+  }
+
+  .referral-filters {
+    flex-direction: column;
+  }
+
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .referral-summary {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

@@ -878,9 +878,9 @@ def create_app(engine=None):
     from .coordination import register_coordination
 
     register_coordination(app, engine, require, audit, one, clinical_scope)
-    from .sustainability import register_sustainability
+    from .sustainability import register as register_sustainability
 
-    register_sustainability(app, engine, require, audit, one)
+    register_sustainability(app, engine, require, one, audit, facility_staff)
 
     from .forecasts import register_forecasts
 

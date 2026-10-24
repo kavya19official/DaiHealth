@@ -10,6 +10,8 @@ const riskAssessment = require('./riskAssessment');
 const { runRiskAssessment } = require('./riskService');
 const careTimelineEnhanced = require('./careTimelineEnhanced');
 const missedCareOutreach = require('./missedCareOutreach');
+const greenHospitalDashboard = require('./greenHospitalDashboard');
+const smartReferralHandoff = require('./smartReferralHandoff');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -1128,6 +1130,10 @@ require('./patientOfflineSync')(app, {pool,authenticateToken,authorizeRole});
 // Enhanced care timeline and missed-care outreach
 careTimelineEnhanced(app, { pool, authenticateToken, authorizeRole });
 missedCareOutreach(app, { pool, authenticateToken, authorizeRole });
+
+// Green hospital dashboard and smart referral handoff
+greenHospitalDashboard(app, { pool, authenticateToken, authorizeRole });
+smartReferralHandoff(app, { pool, authenticateToken, authorizeRole });
 
 // Hospital, doctor, and patient continuity workflows
 require('./hospitalPlatform')(app, { authenticateToken });

@@ -103,9 +103,8 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 .appointment-layout{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(300px,.75fr);gap:1rem}.appointment-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.75rem;align-items:center;padding:.85rem;border:1px solid var(--line);border-radius:12px;margin-top:.55rem;background:#fff}.appointment-row:hover,.appointment-row.is-selected{border-color:var(--brand);background:var(--brand-pale)}.appointment-row__actions{display:flex;gap:.4rem;flex-wrap:wrap;justify-content:flex-end}.appointment-detail{position:sticky;top:82px;align-self:start}.appointment-detail h2{font-family:var(--display);font-size:1.25rem;margin:0}.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:.65rem;margin:1rem 0}.info-cell{padding:.7rem;border-radius:12px;background:var(--ground);border:1px solid var(--line)}.info-cell small,.info-cell b{display:block}.info-cell small{color:var(--ink-muted);font-size:.7rem;text-transform:uppercase;font-weight:700}.demo-banner{padding:.7rem .85rem;background:var(--brand-soft);color:var(--brand-strong);border-radius:12px;font-size:.8rem;margin-bottom:1rem}.table tr[data-aid]{cursor:pointer}.table tr[data-aid]:hover{background:var(--brand-pale)}@media(max-width:1000px){.appointment-layout{grid-template-columns:1fr}.appointment-detail{position:static}}
 </style>
 <script src="js/dai-api.js"></script>
-<link rel="stylesheet" href="doctor-report-review.css?v=1"><link rel="stylesheet" href="clinical-dashboard.css?v=1">
-<script src="js/clinical-dashboard.js?v=1"></script>
-</head>
+<link rel="stylesheet" href="doctor-report-review.css?v=1"></head>
+<link rel="stylesheet" href="smart-referral-handoff.css"></head>
 <body>
 <div class="app">
 <aside class="sidebar">
@@ -118,6 +117,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
     <button type="button" class="nav-item" data-panel="patients"> Patients</button>
     <button type="button" class="nav-item" data-panel="appointments"> Appointments</button>
     <button type="button" class="nav-item" data-panel="timeline"> Care Timeline</button>
+    <button type="button" class="nav-item" data-panel="referrals"> Referrals <span class="badge" id="referralBadge">0</span></button>
     <button type="button" class="nav-item" data-panel="clinical-review"> Clinical Review <span class="badge" id="reviewBadge">!</span></button>
     <button type="button" class="nav-item" data-panel="safety"> Safety Monitor <span class="badge" id="safetyBadge" style="display:none">0</span></button>
     <button type="button" class="nav-item" data-panel="records"> Records</button>
@@ -289,7 +289,70 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 <div class="panel" id="panel-timeline">
   <div class="card section-card">
     <div class="section-title" style="margin-bottom:1rem"> Care Timeline</div>
-    <div id="clinicalDashboardDoctor"></div><div id="docTimeline"></div>
+
+<!-- REFERRALS -->
+<div class="panel" id="panel-referrals">
+  <div class="ops-intro"><div><h1>Smart Referral Handoff</h1><p>Refer patients to hospitals, specialists, labs, or NICU facilities. Track acceptance/rejection and return summaries to the care team.</p></div><div class="ops-status">Cross-organisation workflow</div></div>
+  <div class="referral-summary">
+    <div class="referral-summary-card pending">
+      <div class="count" id="referralPendingCount">0</div>
+      <div class="label">Pending</div>
+    </div>
+    <div class="referral-summary-card accepted">
+      <div class="count" id="referralAcceptedCount">0</div>
+      <div class="label">Accepted</div>
+    </div>
+    <div class="referral-summary-card rejected">
+      <div class="count" id="referralRejectedCount">0</div>
+      <div class="label">Rejected</div>
+    </div>
+    <div class="referral-summary-card completed">
+      <div class="count" id="referralCompletedCount">0</div>
+      <div class="label">Completed</div>
+    </div>
+  </div>
+  <div class="referral-filters">
+    <div class="form-group">
+      <label for="referralStatusFilter">Status</label>
+      <select id="referralStatusFilter">
+        <option value="">All</option>
+        <option value="pending">Pending</option>
+        <option value="accepted">Accepted</option>
+        <option value="rejected">Rejected</option>
+        <option value="completed">Completed</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="referralTypeFilter">Type</label>
+      <select id="referralTypeFilter">
+        <option value="">All Types</option>
+        <option value="hospital">Hospital</option>
+        <option value="specialist">Specialist</option>
+        <option value="lab">Laboratory</option>
+        <option value="nicu">NICU</option>
+        <option value="radiology">Radiology</option>
+      </select>
+    </div>
+    <button type="button" class="btn btn--primary" id="createReferralBtn">Create Referral</button>
+  </div>
+  <div class="card section-card">
+    <div class="section-head"><div class="section-title"> Referrals</div></div>
+    <div id="referralsList"></div>
+  </div>
+  <div class="card section-card" style="margin-top: 1rem;" id="referralDetailCard" hidden>
+    <div class="section-head">
+      <div class="section-title"> Referral Details</div>
+      <button type="button" class="link-btn" id="closeReferralDetail">Close</button>
+    </div>
+    <div id="referralDetailContent"></div>
+  </div>
+</div>
+
+<!-- TIMELINE -->
+<div class="panel" id="panel-timeline">
+  <div class="card section-card">
+    <div class="section-title" style="margin-bottom:1rem"> Care Timeline</div>
+    <div id="docTimeline"></div>
   </div>
 </div>
 
@@ -391,8 +454,29 @@ function showPanel(id) {
   var panel = $('panel-' + id); if (panel) panel.classList.add('is-active');
   var nav = document.querySelector('.nav-item[data-panel="' + id + '"]'); if (nav) nav.classList.add('is-active');
   try { history.replaceState(null, '', '#' + id); } catch (e) {}
+
+  // Load referrals panel
+  if (id === 'referrals' && window.SmartReferralHandoff) {
+    window.SmartReferralHandoff.load();
+  }
 }
 document.querySelectorAll('.nav-item[data-panel]').forEach(function (b) { b.addEventListener('click', function () { showPanel(b.dataset.panel); }); });
+
+// Smart Referral Handoff event listeners
+document.addEventListener('click', function(e) {
+  const btn = e.target.closest('button');
+  if (!btn) return;
+
+  if (btn.id === 'createReferralBtn') {
+    if (window.SmartReferralHandoff) {
+      window.SmartReferralHandoff.create();
+    }
+  }
+
+  if (btn.id === 'closeReferralDetail') {
+    $('referralDetailCard').hidden = true;
+  }
+});
 document.querySelectorAll('[data-go]').forEach(function (b) { b.addEventListener('click', function () { showPanel(b.dataset.go); }); });
 
 function normalizeAppointment(a, index) {
@@ -586,6 +670,7 @@ boot();
 })();
 </script>
 <script src="js/doctor-workflows.js"></script>
+<script src="js/smart-referral-handoff.js"></script>
 <script src="js/care-chatbot.js?v=dhruv-ui-1"></script>
 <script src="js/report-intake.js"></script><script src="js/doctor-report-review.js?v=1"></script></body>
 </html>
