@@ -1,0 +1,84 @@
+/* About page only: one aligned canvas and viewport-aware visual frames. */
+body.dai-about {
+  --wrap: min(1320px, calc(100% - clamp(32px, 8vw, 128px)));
+  --about-header: 76px;
+}
+.dai-about main > section { scroll-margin-top: calc(var(--about-header) + 16px); }
+.dai-about .site-header__inner { min-height: var(--about-header); gap: clamp(12px, 2vw, 28px); }
+.dai-about .site-nav a { padding-inline: clamp(8px, .85vw, 14px); white-space: nowrap; }
+.dai-about .header-actions { flex-shrink: 0; }
+body.dai-about .hero {
+  min-height: calc(100svh - var(--about-header));
+  padding-block: clamp(20px, 4svh, 42px) clamp(18px, 3svh, 30px);
+  justify-content: space-between;
+  gap: clamp(20px, 4svh, 42px);
+}
+.dai-about .hero__grid { flex: 1; width: var(--wrap); gap: clamp(28px, 5vw, 76px); }
+.dai-about .hero__copy { max-width: 620px; min-width: 0; }
+body.dai-about .hero__copy h1 {
+  font-size: clamp(34px, 3.5vw, 56px);
+  line-height: 1.12;
+  letter-spacing: -.04em;
+  text-wrap: balance;
+  margin-block: 0 20px;
+}
+.dai-about .hero__copy p { max-width: 46ch; font-size: clamp(15px, 1.2vw, 18px); line-height: 1.7; }
+.dai-about .hero__copy .eyebrow { margin-bottom: 20px; }
+.dai-about .hero__actions { margin-top: 24px; }
+.dai-about .hero__visual { min-height: 0; min-width: 0; }
+body.dai-about .hero__photo-wrap { width: min(100%, 460px, calc((100svh - 230px) * .93)); }
+.dai-about .hero__photo { max-height: min(570px, calc(100svh - 230px)); width: 100%; object-fit: contain; }
+.dai-about .hero__visual-bg { width: min(100%, 460px); }
+.dai-about .trust-strip { margin: 0 auto; gap: 10px; }
+.dai-about .trust-pill { font-size: 12px; padding: 9px 14px; }
+.dai-about .section, .dai-about .scroll-story { padding-block: clamp(40px, 6vw, 76px); }
+.dai-about .scroll-story__head { align-items: center; gap: clamp(24px, 5vw, 72px); }
+.dai-about .scroll-story__head h2, .dai-about .section__head h2, .dai-about .workflow-copy h2 { text-wrap: balance; font-size: clamp(27px, 2.65vw, 40px); line-height: 1.18; }
+.dai-about .scroll-story__head p { max-width: 58ch; font-size: 16px; line-height: 1.75; }
+.dai-about .journey-stage > *, .dai-about .workflow-row > *, .dai-about .module-grid > * { min-width: 0; }
+.dai-about .workflow { gap: clamp(36px, 5vw, 72px); }
+.dai-about .workflow-row { gap: clamp(28px, 5vw, 72px); align-items: center; }
+.dai-about .story-backdrop { min-height: clamp(300px, 46svh, 460px); }
+.dai-about .story-backdrop__content { max-width: min(650px, 100%); }
+.dai-about .module-grid { gap: 16px; align-items: stretch; }
+.dai-about .speciality-card { height: 100%; }
+@media (min-width: 1001px) {
+  .dai-about .hero__grid { grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); }
+}
+@media (min-width: 901px) and (max-width: 1100px) {
+  body.dai-about { --wrap: calc(100% - 64px); }
+  .dai-about .site-header__inner { flex-wrap: nowrap; }
+  .dai-about .site-nav { display: none; }
+  .dai-about .hero__grid { grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr); }
+  .dai-about .hero__copy h1 { font-size: 38px; }
+}
+@media (min-width: 901px) and (max-height: 720px) {
+  body.dai-about .hero { padding-block: 20px; gap: 18px; }
+  body.dai-about .hero__copy h1 { font-size: clamp(32px, 3.1vw, 44px); }
+  .dai-about .hero__copy .eyebrow { margin-bottom: 14px; }
+  .dai-about .hero__actions { margin-top: 18px; }
+}
+@media (max-width: 900px) {
+  body.dai-about { --about-header: 72px; --wrap: calc(100% - 40px); }
+  .dai-about .site-header__inner { flex-wrap: nowrap; padding-block: 10px; }
+  .dai-about .header-actions { width: auto; margin-left: auto; }
+  body.dai-about .hero { min-height: auto; padding-block: 36px 24px; gap: 24px; }
+  .dai-about .hero__grid { grid-template-columns: 1fr; gap: 22px; }
+  .dai-about .hero__copy { max-width: 620px; }
+  .dai-about .hero__visual { order: 0; }
+  body.dai-about .hero__photo-wrap { width: min(280px, 65vw); }
+  .dai-about .hero__photo { max-height: 300px; }
+  .dai-about .trust-strip { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .dai-about .trust-pill { justify-content: center; text-align: center; }
+  .dai-about .scroll-story__head { gap: 16px; }
+}
+@media (max-width: 480px) {
+  body.dai-about { --wrap: calc(100% - 32px); }
+  .dai-about .brand__tag { font-size: 8px; letter-spacing: .08em; }
+  .dai-about .brand__mark { width: 36px; height: 36px; }
+  .dai-about .header-actions .btn { padding: 10px 14px; font-size: 12px; min-height: 40px; }
+  body.dai-about .hero__copy h1 { font-size: 34px; }
+  .dai-about .hero__copy .eyebrow { font-size: 9px; }
+  .dai-about .trust-pill { font-size: 10px; padding: 8px; gap: 5px; }
+  .dai-about .hero__actions .btn { min-height: 44px; }
+}
