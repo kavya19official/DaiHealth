@@ -1,6 +1,7 @@
 'use strict';
 const {PREFIX,fixture}=require('../scripts/seed-delhi-demo.cjs');
 module.exports=function(app,{pool,authenticateToken}){
+ require('./delhiPatientJourney').register(app,{pool,authenticateToken});
  app.get('/api/facilities/demo-network',authenticateToken,async(req,res)=>{
   res.set('Cache-Control','private, no-store');if(process.env.DAI_LOCAL!=='true')return res.status(404).json({error:'Synthetic demo network is available in local mode only'});
   if(!['mother','doctor'].includes(req.user?.role))return res.status(403).json({error:'Patient or doctor account required'});
