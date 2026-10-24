@@ -251,7 +251,7 @@ app.post('/api/auth/register/mother', async (req, res) => {
       return res.status(400).json({ error: 'Password must be at least 8 characters' });
     }
 
-    const existingUser = await pool.query('SELECT id FROM users WHERE email = $1', [email]);
+    const existingUser = await pool.query('SELECT id FROM users WHERE lower(email) = lower($1)', [String(email).trim()]);
     if (existingUser.rows.length > 0) {
       return res.status(400).json({ error: 'User with this email already exists' });
     }
@@ -309,9 +309,10 @@ app.post('/api/auth/register/mother', async (req, res) => {
     try {
       await client.query('BEGIN');
 
+      const normalizedEmail = String(email).trim().toLowerCase();
       const userResult = await client.query(
         'INSERT INTO users (email, password_hash, role) VALUES ($1, $2, $3) RETURNING id',
-        [email, password_hash, 'mother']
+        [normalizedEmail, password_hash, 'mother']
       );
       const userId = userResult.rows[0].id;
 
@@ -344,7 +345,7 @@ app.post('/api/auth/register/mother', async (req, res) => {
 
       await client.query('COMMIT');
 
-      const token = jwt.sign({ id: userId, email, role: 'mother' }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+      const token = jwt.sign({ id: userId, email: normalizedEmail, role: 'mother' }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
       res.cookie('token', token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
@@ -354,7 +355,7 @@ app.post('/api/auth/register/mother', async (req, res) => {
 
       res.status(201).json({
         message: 'Mother registered successfully',
-        user: { id: userId, email, role: 'mother', full_name },
+        user: { id: userId, email: normalizedEmail, role: 'mother', full_name },
         risk: riskResult ? { risk_level: riskResult.risk_level, factors: riskResult.factors } : null,
         child_added: wantsChild
       });
@@ -366,7 +367,21 @@ app.post('/api/auth/register/mother', async (req, res) => {
     }
   } catch (error) {
     console.error('Mother registration error:', error);
-    res.status(500).json({ error: 'Registration failed' });
+    const msg = String((error && error.message) || error || '');
+    if (/unique|duplicate|already exists/i.test(msg)) {
+      return res.status(400).json({ error: 'User with this email already exists' });
+    }
+    if (/column|does not exist|relation .* does not exist/i.test(msg)) {
+      return res.status(500).json({
+        error: 'Database schema is incomplete. Run npm start once so migrations apply (backend/db).'
+      });
+    }
+    if (/Database is not configured/i.test(msg)) {
+      return res.status(503).json({
+        error: 'Database is not configured. Use npm start for local mode, or set DATABASE_URL.'
+      });
+    }
+    res.status(500).json({ error: 'Registration failed. Check the server terminal for details.' });
   }
 });
 // Register Doctor
@@ -384,7 +399,7 @@ app.post('/api/auth/register/doctor', async (req, res) => {
     }
 
     // Check if user already exists
-    const existingUser = await pool.query('SELECT id FROM users WHERE email = $1', [email]);
+    const existingUser = await pool.query('SELECT id FROM users WHERE lower(email) = lower($1)', [String(email).trim()]);
     if (existingUser.rows.length > 0) {
       return res.status(400).json({ error: 'User with this email already exists' });
     }
@@ -398,9 +413,10 @@ app.post('/api/auth/register/doctor', async (req, res) => {
       await client.query('BEGIN');
 
       // Insert user
+      const normalizedEmail = String(email).trim().toLowerCase();
       const userResult = await client.query(
         'INSERT INTO users (email, password_hash, role) VALUES ($1, $2, $3) RETURNING id',
-        [email, password_hash, 'doctor']
+        [normalizedEmail, password_hash, 'doctor']
       );
 
       const userId = userResult.rows[0].id;
@@ -445,7 +461,16 @@ app.post('/api/auth/register/doctor', async (req, res) => {
     }
   } catch (error) {
     console.error('Doctor registration error:', error);
-    res.status(500).json({ error: 'Registration failed' });
+    const msg = String((error && error.message) || error || '');
+    if (/unique|duplicate|already exists/i.test(msg)) {
+      return res.status(400).json({ error: 'User with this email already exists' });
+    }
+    if (/column|does not exist|relation .* does not exist/i.test(msg)) {
+      return res.status(500).json({
+        error: 'Database schema is incomplete. Run npm start once so migrations apply (backend/db).'
+      });
+    }
+    res.status(500).json({ error: 'Registration failed. Check the server terminal for details.' });
   }
 });
 
@@ -487,7 +512,7 @@ app.post('/api/auth/login', async (req, res) => {
     res.cookie('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
     });
 
@@ -905,7 +930,7 @@ app.post('/api/doctor/colleagues', authenticateToken, authorizeRole(['doctor']),
       return res.status(400).json({ error: 'Password must be at least 8 characters' });
     }
 
-    const existingUser = await pool.query('SELECT id FROM users WHERE email = $1', [email]);
+    const existingUser = await pool.query('SELECT id FROM users WHERE lower(email) = lower($1)', [String(email).trim()]);
     if (existingUser.rows.length > 0) {
       return res.status(400).json({ error: 'A user with this email already exists' });
     }
