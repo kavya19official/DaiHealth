@@ -40,8 +40,8 @@ const faqs = [
       "hi": "मैं हिंदी या अपनी क्षेत्रीय भाषा कैसे चुनूँ?"
     },
     "answer": {
-      "en": "For Dr. Daya, use the English / हिंदी switch above. For the app, open Settings → Language and choose an available language. Other regional languages are not supported by this assistant yet.",
-      "hi": "Dr. Daya के लिए ऊपर English / हिंदी चुनें। ऐप में Settings → Language में उपलब्ध भाषा चुनें। इस असिस्टेंट में अभी दूसरी क्षेत्रीय भाषाएँ उपलब्ध नहीं हैं।"
+      "en": "For Dhruv, use the English / हिंदी switch above. For the app, open Settings → Language and choose an available language. Other regional languages are not supported by this assistant yet.",
+      "hi": "Dhruv के लिए ऊपर English / हिंदी चुनें। ऐप में Settings → Language में उपलब्ध भाषा चुनें। इस असिस्टेंट में अभी दूसरी क्षेत्रीय भाषाएँ उपलब्ध नहीं हैं।"
     },
     "pattern": "language|hindi|regional|भाषा|हिंदी|bhasha",
     "sources": [],
@@ -222,8 +222,8 @@ const faqs = [
       "hi": "हाई-रिस्क गर्भावस्था का मतलब क्या है?"
     },
     "answer": {
-      "en": "It means a clinician has identified a reason for closer monitoring or specialist care. It does not mean a complication is certain. Only a clinician can assign or change this status; Dr. Daya cannot assess your personal risk.",
-      "hi": "इसका अर्थ है कि डॉक्टर ने अधिक निगरानी या specialist care की वजह पहचानी है। इसका मतलब जटिलता निश्चित होना नहीं है। यह status केवल डॉक्टर तय या बदल सकते हैं; Dr. Daya आपका risk नहीं आँकता।"
+      "en": "It means a clinician has identified a reason for closer monitoring or specialist care. It does not mean a complication is certain. Only a clinician can assign or change this status; Dhruv cannot assess your personal risk.",
+      "hi": "इसका अर्थ है कि डॉक्टर ने अधिक निगरानी या specialist care की वजह पहचानी है। इसका मतलब जटिलता निश्चित होना नहीं है। यह status केवल डॉक्टर तय या बदल सकते हैं; Dhruv आपका risk नहीं आँकता।"
     },
     "pattern": "high.?risk|हाई.?रिस्क|उच्च जोखिम",
     "sources": [],
@@ -306,8 +306,8 @@ const faqs = [
       "hi": "गर्भनिरोध के विकल्प कहाँ जानूँ?"
     },
     "answer": {
-      "en": "Ask your postnatal or family-planning clinic for counselling on options that fit your health, breastfeeding and preferences. Dr. Daya can explain where to get counselling, but cannot select or prescribe a method.",
-      "hi": "postnatal या family-planning clinic में अपनी सेहत, स्तनपान और पसंद के अनुसार विकल्पों की counselling लें। Dr. Daya तरीका चुन या prescribe नहीं कर सकता।"
+      "en": "Ask your postnatal or family-planning clinic for counselling on options that fit your health, breastfeeding and preferences. Dhruv can explain where to get counselling, but cannot select or prescribe a method.",
+      "hi": "postnatal या family-planning clinic में अपनी सेहत, स्तनपान और पसंद के अनुसार विकल्पों की counselling लें। Dhruv तरीका चुन या prescribe नहीं कर सकता।"
     },
     "pattern": "contracep|family planning|गर्भनिरोध|परिवार नियोजन",
     "sources": [
@@ -340,8 +340,8 @@ const faqs = [
       "hi": "कोई टीका छूट गया तो क्या करूँ?"
     },
     "answer": {
-      "en": "Take the baby’s vaccination card to the immunisation clinic or ANM and ask for a catch-up plan. They will confirm the next eligible dose and date; Dr. Daya does not choose a catch-up dose.",
-      "hi": "बच्चे का vaccination card लेकर immunisation clinic या ANM से catch-up plan पूछें। वे अगली उपयुक्त खुराक और तारीख़ बताएँगे; Dr. Daya catch-up dose नहीं चुनता।"
+      "en": "Take the baby’s vaccination card to the immunisation clinic or ANM and ask for a catch-up plan. They will confirm the next eligible dose and date; Dhruv does not choose a catch-up dose.",
+      "hi": "बच्चे का vaccination card लेकर immunisation clinic या ANM से catch-up plan पूछें। वे अगली उपयुक्त खुराक और तारीख़ बताएँगे; Dhruv catch-up dose नहीं चुनता।"
     },
     "pattern": "(miss|late|छूट|छुट|chhut|miss ho).*(vaccin|टीक)|vaccin.*(miss|late|छूट|छुट)",
     "sources": [

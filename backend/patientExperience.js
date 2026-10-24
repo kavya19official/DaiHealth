@@ -2,18 +2,18 @@
 const path=require('node:path');
 const fs=require('node:fs');
 const bcrypt=require('bcrypt');
-function clinicalSnapshot(visits){
+function clinicalSnapshot(visits,limit=2){
  const valid=visits.filter(v=>v.doctor_verified && v.doctor_id && v.visit_date).sort((a,b)=>String(b.visit_date).localeCompare(String(a.visit_date)));
  return [
   {type:'weight',unit:'kg',field:'weight_kg'},
   {type:'blood_pressure',unit:'mmHg',field:'bp_systolic'},
   {type:'haemoglobin',unit:'g/dL',field:'hb'}
  ].map(metric=>{
-  const rows=valid.filter(v=>v[metric.field]!=null).slice(0,2);
+  const rows=valid.filter(v=>v[metric.field]!=null).slice(0,limit);
   return {...metric,readings:rows.map(v=>({value:Number(v[metric.field]),diastolic:metric.type==='blood_pressure'?Number(v.bp_diastolic):undefined,date:v.visit_date,doctor:v.doctor_name,source:'clinician_record'}))};
  }).concat([{type:'blood_glucose',unit:'mg/dL',readings:[]}]);
 }
-function sourceOverview(link){
+function sourceOverview(link,limit=2){
  const portal=path.resolve(__dirname,'../.local/portal.db'),source=path.resolve(process.env.DAI_HOSPITAL_DB||path.join(__dirname,'data/dai-hospital.db'));
  if(!link||!fs.existsSync(portal)||!fs.existsSync(source))return null;
  const {DatabaseSync}=require('node:sqlite');let p,s;
@@ -30,7 +30,7 @@ function sourceOverview(link){
   const unit=mother.assigned_unit_id?p.prepare('SELECT code,anc_day FROM unit WHERE id=?').get(mother.assigned_unit_id):null;
   const care_team={doctor_name:doctor?.verified?doctor.name:null,unit:unit?.code||null,anc_day:unit?.anc_day||null,asha_name:null};
   const readiness={status:'unconfirmed',message:'Hospital readiness has not been confirmed for this case.'};
-  return {care_team,readiness,metrics:clinicalSnapshot(visits),clinician_status:marked?{marked_by_doctor:true,doctor:validating.name,reason:mother.high_risk_reason_by_clinician}:null,registered_facility:facilities.find(f=>f.id===mother.registered_facility_id)||null,facilities,assigned_doctor_uuid:mother.assigned_doctor_id,data_label:'Simulated on synthetic data'};
+  return {care_team,readiness,metrics:clinicalSnapshot(visits,limit),clinician_status:marked?{marked_by_doctor:true,doctor:validating.name,reason:mother.high_risk_reason_by_clinician}:null,registered_facility:facilities.find(f=>f.id===mother.registered_facility_id)||null,facilities,assigned_doctor_uuid:mother.assigned_doctor_id,data_label:'Simulated on synthetic data'};
  }finally{p?.close();s?.close();}
 }
 module.exports=function registerPatientExperience(app,{pool,authenticateToken,authorizeRole}){
@@ -71,15 +71,16 @@ module.exports=function registerPatientExperience(app,{pool,authenticateToken,au
   try{
    const events=(await pool.query(`SELECT event_type,details,created_at FROM (SELECT event_type,details,created_at FROM patient_access_events WHERE mother_id=$1 AND event_type<>'self_view' UNION ALL SELECT e.event_type,jsonb_build_object('document_title',CASE WHEN d.is_sensitive THEN 'Private screening report' ELSE d.title END) AS details,e.created_at FROM patient_document_events e JOIN patient_documents d ON d.id=e.document_id WHERE d.mother_id=$1 AND e.event_type IN ('share','revoke_share')) events ORDER BY created_at DESC LIMIT 30`,[req.user.id])).rows;
    const shares=(await pool.query(`SELECT d.id AS document_id,CASE WHEN d.is_sensitive THEN 'Private screening report' ELSE d.title END AS title,s.doctor_id,dp.full_name AS doctor_name,s.shared_at,s.expires_at FROM patient_documents d JOIN patient_document_shares s ON s.document_id=d.id LEFT JOIN doctor_profiles dp ON dp.user_id=s.doctor_id WHERE d.mother_id=$1 AND d.deleted_at IS NULL AND s.revoked_at IS NULL AND (s.expires_at IS NULL OR s.expires_at>NOW())`,[req.user.id])).rows;
-   res.set('Cache-Control','no-store').json({events,shares});
+   const access=(await pool.query(`SELECT e.event_type,e.created_at,CASE WHEN d.is_sensitive THEN 'Private document' ELSE d.title END AS record_title,COALESCE(dp.full_name,CASE WHEN e.actor_id=$1 THEN 'You' ELSE 'Recorded account' END) AS actor_name FROM patient_document_events e JOIN patient_documents d ON d.id=e.document_id LEFT JOIN doctor_profiles dp ON dp.user_id=e.actor_id WHERE d.mother_id=$1 AND e.event_type IN ('preview','download','doctor_review','share','revoke_share','reveal') ORDER BY e.created_at DESC LIMIT 50`,[req.user.id])).rows;
+   res.set('Cache-Control','no-store').json({events,shares,access});
   }catch(e){res.status(500).json({error:'Could not load sharing history'});}
  });
  app.get('/api/patient/export',...own,async(req,res)=>{
   try{
-   const [profile,timeline,appointments,children,health,documents,checkins,journal,babyLogs]=await Promise.all([
-    pool.query('SELECT * FROM mother_profiles WHERE user_id=$1',[req.user.id]),pool.query('SELECT * FROM care_milestones WHERE mother_id=$1',[req.user.id]),pool.query('SELECT * FROM appointments WHERE mother_id=$1',[req.user.id]),pool.query('SELECT * FROM children WHERE mother_id=$1',[req.user.id]),pool.query('SELECT * FROM health_logs WHERE mother_id=$1',[req.user.id]),pool.query('SELECT id,title,doc_type,uploaded_at,verification_status FROM patient_documents WHERE mother_id=$1 AND deleted_at IS NULL',[req.user.id]),pool.query('SELECT check_date,tasks,mood FROM patient_daily_checkins WHERE mother_id=$1',[req.user.id]),pool.query('SELECT * FROM patient_journal WHERE mother_id=$1',[req.user.id]),pool.query('SELECT * FROM patient_baby_logs WHERE mother_id=$1',[req.user.id])]);
+   const [profile,timeline,appointments,children,health,documents,checkins,journal,babyLogs,support,clinicalEntries,clinicalPlan,clinicalConsent,clinicalAdherence]=await Promise.all([
+    pool.query('SELECT * FROM mother_profiles WHERE user_id=$1',[req.user.id]),pool.query('SELECT * FROM care_milestones WHERE mother_id=$1',[req.user.id]),pool.query('SELECT * FROM appointments WHERE mother_id=$1',[req.user.id]),pool.query('SELECT * FROM children WHERE mother_id=$1',[req.user.id]),pool.query('SELECT * FROM health_logs WHERE mother_id=$1',[req.user.id]),pool.query('SELECT id,title,doc_type,uploaded_at,verification_status FROM patient_documents WHERE mother_id=$1 AND deleted_at IS NULL',[req.user.id]),pool.query('SELECT check_date,tasks,mood FROM patient_daily_checkins WHERE mother_id=$1',[req.user.id]),pool.query('SELECT * FROM patient_journal WHERE mother_id=$1',[req.user.id]),pool.query('SELECT * FROM patient_baby_logs WHERE mother_id=$1',[req.user.id]),pool.query('SELECT * FROM patient_support_progress WHERE mother_id=$1',[req.user.id]),pool.query('SELECT * FROM clinical_dashboard_entries WHERE mother_id=$1',[req.user.id]),pool.query('SELECT * FROM clinical_dashboard_plan WHERE mother_id=$1',[req.user.id]),pool.query('SELECT * FROM clinical_dashboard_consent WHERE mother_id=$1',[req.user.id]),pool.query('SELECT * FROM clinical_dashboard_adherence WHERE mother_id=$1',[req.user.id])]);
    await pool.query("INSERT INTO patient_access_events(mother_id,event_type) VALUES($1,'data_export')",[req.user.id]);
-   res.set({'Cache-Control':'no-store','Content-Disposition':'attachment; filename="dai-my-records.json"'}).json({exported_at:new Date().toISOString(),profile:profile.rows[0],timeline:timeline.rows,appointments:appointments.rows,children:children.rows,self_entered_health_logs:health.rows,documents:documents.rows,personal_checkins:checkins.rows,journal:journal.rows,baby_logs:babyLogs.rows,document_files:'Download individual documents from Reports and records.'});
+   res.set({'Cache-Control':'no-store','Content-Disposition':'attachment; filename="dai-my-records.json"'}).json({exported_at:new Date().toISOString(),profile:profile.rows[0],timeline:timeline.rows,appointments:appointments.rows,children:children.rows,self_entered_health_logs:health.rows,documents:documents.rows,personal_checkins:checkins.rows,journal:journal.rows,baby_logs:babyLogs.rows,support_checklists:support.rows,clinical_entries:clinicalEntries.rows,clinical_plan:clinicalPlan.rows,clinical_summary_consent:clinicalConsent.rows,clinical_adherence:clinicalAdherence.rows,document_files:'Download individual documents from Reports and records.'});
   }catch(e){res.status(500).json({error:'Could not export your records'});}
  });
  app.post('/api/patient/deletion-request',...own,async(req,res)=>{
@@ -93,3 +94,4 @@ module.exports=function registerPatientExperience(app,{pool,authenticateToken,au
  });
 };
 module.exports.clinicalSnapshot=clinicalSnapshot;
+module.exports.sourceOverview=sourceOverview;

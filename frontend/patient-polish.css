@@ -142,3 +142,7 @@
 @keyframes care-chart-draw{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
 @keyframes care-dot-fill{from{transform:scale(.7)}to{transform:scale(1)}}
 @media(prefers-reduced-motion:reduce){.care-sparkline polyline,.pending-loop .is-recorded::before{animation:none!important}}
+
+/* Requested heading colour; keep the existing accessible ink in dark mode. */
+#panel-timeline .page-section-heading h1,#panel-timeline .journey-intro h2{color:#000!important}
+.patient-view[data-home-theme=dark] #panel-timeline :is(.page-section-heading h1,.journey-intro h2){color:var(--ink)!important}

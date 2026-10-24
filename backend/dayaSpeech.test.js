@@ -60,12 +60,12 @@ function browserVoice(fetchImpl){
  }
  const context=vm.createContext({fetch:fetchImpl,URL,AbortController,AbortSignal,DOMException,Audio:MockAudio,setTimeout,clearTimeout,console,gestures,
   window:{},appBase:new URL('http://localhost:3001/'),speechSynthesis:{cancel(){}}});
- vm.runInContext(`let language='en',voice=true,utterance=null,speechId=0,opened=true,speechAbort=null,currentAudio=null,audioUrl=null;
+ vm.runInContext(`let language='en',voice=true,slow=false,utterance=null,speechId=0,opened=true,speechAbort=null,currentAudio=null,audioUrl=null;
  const input={addEventListener(){}},knowledge={faqs:[]};
  const errorBox={hidden:true,textContent:''},root={querySelector:()=>errorBox};
  const state={},help={},avatar={setTalking:value=>gestures.push(value)},tr=(en,hi)=>language==='hi'?hi:en;
  ${functions}
- globalThis.voiceTest={speak,stop,setLanguage:value=>{language=value;stop();},status:()=>({text:state.textContent,help:help.textContent})};`,context);
+ globalThis.voiceTest={speak,stop,setSlow:value=>{slow=value;},setLanguage:value=>{language=value;stop();},status:()=>({text:state.textContent,help:help.textContent})};`,context);
  return {api:context.voiceTest,audios,gestures};
 }
 const wavResponse=()=>({ok:true,blob:async()=>new Blob([Buffer.from([0,0])],{type:'audio/wav'}),headers:{get:name=>name==='X-DAI-TTS-Provider'?'gemini':'Charon'}});
@@ -96,3 +96,5 @@ test('approved voice cache survives handler restarts and separates voice configu
 test('widget replays an already prepared reply without another network fetch',async()=>{
  let calls=0;const h=browserVoice(async()=>{calls++;return wavResponse();});await h.api.speak('same approved reply');h.api.stop();await h.api.speak('same approved reply');assert.equal(calls,1);assert.equal(h.audios.length,2);h.api.stop();
 });
+
+test('slow playback changes only client playback speed and keeps the Gemini voice',async()=>{const h=browserVoice(async()=>wavResponse());h.api.setSlow(true);await h.api.speak('prepared answer');assert.equal(h.audios[0].playbackRate,.85);assert.match(h.api.status().help,/Charon/);h.api.stop();});

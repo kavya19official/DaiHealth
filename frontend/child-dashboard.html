@@ -8,7 +8,7 @@
 <link rel="icon" href="assets/logo.jpeg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root {
   --brand: #7c3aed;
@@ -942,6 +942,10 @@ button, input { font: inherit; }
 <script src="/shared/who-growth-standards.js"></script>
 <script src="/shared/child-reference.js"></script>
 <script src="js/dai-api.js"></script>
+<script src="js/patient-prefs.js"></script>
+<link rel="stylesheet" href="little-world.css?v=1">
+<script src="js/little-world-model.js?v=1"></script>
+<script src="js/little-world.js?v=1"></script>
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
@@ -973,7 +977,7 @@ button, input { font: inherit; }
     <a class="sidebar__brand" href="index.html">
       <img src="assets/logo-circle.png" alt="" width="40" height="40">
       <span>
-        <span class="sidebar__brand-name">दाई</span>
+        <span class="sidebar__brand-name">दाई <span class="lw-brand-latin">DAI</span></span>
         <span class="sidebar__brand-tag">Hospital Workflow</span>
       </span>
     </a>
@@ -1045,6 +1049,7 @@ button, input { font: inherit; }
     <div class="content">
       <div class="child-tabs" id="childTabs"></div>
 
+      <div id="babyWorld"></div><div id="twinCompare"></div>
       <!-- Welcome + Next vax -->
       <div class="welcome-row">
         <div class="welcome-card">
@@ -1056,7 +1061,7 @@ button, input { font: inherit; }
           </div>
           <div>
             <div class="welcome-card__hello">Hello, <span id="childGreet">Child</span></div>
-            <div class="welcome-card__title">Growing healthy, one milestone at a time</div>
+            <div class="welcome-card__title">Every little moment matters</div>
             <div class="welcome-card__sub"><span data-child-name>—</span> · <span data-child-age>—</span></div>
           </div>
         </div>
@@ -1089,7 +1094,7 @@ button, input { font: inherit; }
             <svg width="18" height="18"><use href="#i-shield"/></svg>
           </div>
           <div>
-            <div class="status-card__label">Health Status</div>
+            <div class="status-card__label">Vaccination record</div>
             <div class="status-card__value" id="statusHealth">—</div>
           </div>
           <span class="status-card__chevron">›</span>
@@ -1106,6 +1111,7 @@ button, input { font: inherit; }
         </a>
       </div>
 
+      <div id="babyExtras"></div>
       <!-- Growth + sidebar panels -->
       <div class="main-grid">
         <div>
@@ -1248,7 +1254,7 @@ button, input { font: inherit; }
               </div>
             </div>
             <div id="milestoneNote"></div>
-            <div class="ms-all" id="milestoneAll" style="display:none"></div>
+            <div class="ms-all" id="milestoneAll" tabindex="-1" style="display:none"></div>
           </div>
 
           <!-- Medical profile -->
@@ -1421,14 +1427,14 @@ function childAvatarHTML(c, size) {
   if (c && c.has_photo) {
     return '<img src="' + api.API_BASE + '/children/' + c.id + '/photo?v=' + (c.photo_v || 0) + '" alt="" style="width:' + size + 'px;height:' + size + 'px">';
   }
-  return '<span class="avatar-fallback" style="width:' + size + 'px;height:' + size + 'px;font-size:' + Math.round(size * 0.38) + 'px">' + esc(initialsOf(c ? c.name : '')) + '</span>';
+  return '<span class="avatar-fallback" style="width:' + size + 'px;height:' + size + 'px;font-size:' + Math.round(size * 0.38) + 'px">' + (window.LittleWorld ? window.LittleWorld.face() : esc(initialsOf(c ? c.name : ''))) + '</span>';
 }
 function renderChildTabs() {
   var host = $id('childTabs');
   if (!host) return;
   host.innerHTML = children.map(function (c) {
     return '<button type="button" class="child-tab' + (c.id === activeChildId ? ' is-active' : '') + '" data-select-child="' + c.id + '">' +
-      childAvatarHTML(c, 26) + '<span>' + esc(c.name) + '</span></button>';
+      childAvatarHTML(c, 44) + '<span>' + esc(c.name) + '</span></button>';
   }).join('') + '<button type="button" class="child-tab child-tab--add" id="addChildTabBtn">+ Add child</button>';
 
   host.querySelectorAll('[data-select-child]').forEach(function (btn) {
@@ -1581,8 +1587,7 @@ if (photoInput) {
     if (data) {
       var c = activeChild();
       c.has_photo = data.has_photo; c.photo_v = data.photo_v;
-      renderChildHeader();
-      renderChildTabs();
+      renderAll();
       api.toast('Photo saved');
     }
   });
@@ -1685,7 +1690,7 @@ function renderVaccinations() {
       var code = btn.getAttribute('data-mark-vax');
       var dateInput = host.querySelector('[data-vax-date="' + code + '"]');
       var data = await api.apiRequest('/children/' + c.id + '/vaccinations/' + code, { method: 'PUT', body: { given_on: dateInput.value } });
-      if (data) { api.toast('Recorded'); await loadChildren(); renderAll(); }
+      if (data) { api.toast('Recorded for '+c.name); await loadChildren(); renderAll(); if(activeChildId===c.id)window.LittleWorld?.stamp(code); }
     });
   });
   host.querySelectorAll('[data-undo-vax]').forEach(function (btn) {
@@ -1901,7 +1906,7 @@ function buildReferenceChartSVG(c, metric, pts, end) {
   var path = ptsInWindow.map(function (p, i) { return (i ? 'L' : 'M') + xy(p); }).join(' ');
   var dots = ptsInWindow.map(function (p, i) {
     var a = Ref.growthAssess(GROWTH_INDICATOR[metric], c.sex, p.m, p.v);
-    var color = !a || a.status === 'ok' ? '#7c3aed' : a.status === 'severe' ? '#dc2626' : '#f59e0b';
+    var color = '#7c3aed';
     var isLast = i === ptsInWindow.length - 1;
     return '<circle cx="' + x(p.m).toFixed(1) + '" cy="' + y(p.v).toFixed(1) + '" r="' + (isLast ? 5.5 : 4) + '" fill="' + (isLast ? color : '#fff') + '" stroke="' + color + '" stroke-width="2.2">' +
       '<title>' + p.v + ' ' + unit + ' · ' + esc(api.fmtDate(p.date)) + (a ? ' · ' + percentileText(a.percentile) : '') + '</title></circle>';
@@ -1928,15 +1933,10 @@ function growthReadingHTML(c, metric, pts) {
   var a = Ref.growthAssess(GROWTH_INDICATOR[metric], c.sex, p.m, p.v);
   if (!a) return { cls: '', html: 'That measurement is outside the 0–60 month range of the WHO standard.' + foot };
   var lead = '<strong>Latest ' + info.label.toLowerCase() + ': ' + p.v + ' ' + info.unit + '</strong> on ' + esc(api.fmtDate(p.date)) + ' — ' + percentileText(a.percentile) + ' (z-score ' + a.z.toFixed(1).replace('-', '−') + '). ';
-  var msg = {
-    ok: 'This is within the expected range (between −2 and +2 SD).',
-    low: 'This is below the −2 SD line. Worth mentioning to your paediatrician at the next visit.',
-    severe: 'This is well below the −3 SD line. Please show this to your paediatrician soon.',
-    high: 'This is above the usual range. Worth mentioning to your paediatrician at the next visit.'
-  }[a.status];
+  var msg = 'Your paediatrician interprets the pattern alongside your child’s history.';
   var corrected = c.born_at_weeks && c.born_at_weeks < 37 && Ref.daysBetween(c.date_of_birth, todayISO()) < 730
     ? '<small>Plotted on corrected age because ' + esc(c.name.split(/\s+/)[0]) + ' was born at ' + c.born_at_weeks + ' weeks.</small>' : '';
-  return { cls: a.status === 'low' || a.status === 'high' ? 'growth-reading--low' : a.status === 'severe' ? 'growth-reading--severe' : '', html: lead + msg + corrected + foot };
+  return { cls: '', html: lead + msg + corrected + foot };
 }
 
 function renderGrowth() {
@@ -2452,6 +2452,7 @@ function renderAll() {
   renderHistory();
   renderFeed();
   renderNotifications();
+  if(window.LittleWorld) window.LittleWorld.childUpdate({child:activeChild(),children:children,user:currentUser,guest:IS_GUEST,reload:async function(){await loadChildren();renderAll();}});
 }
 
 // Growth metric tabs
@@ -2515,7 +2516,7 @@ async function boot() {
 boot();
 })();
 </script>
-<script src="js/care-chatbot.js?v=daya-3d-1"></script>
+<script src="js/care-chatbot.js?v=dhruv-ui-1"></script>
 
 </body>
 </html>

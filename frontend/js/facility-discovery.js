@@ -72,7 +72,7 @@
       const parts = [userLocation.city];
       if (userLocation.pincode) parts.push(userLocation.pincode);
       if (userLocation.latitude != null && userLocation.longitude != null) {
-        parts.push('coords saved');
+        parts.push('distance enabled for this search');
       }
       chip.textContent = 'Searching near: ' + parts.join(' · ');
       changeBtn.style.display = 'inline-block';
@@ -106,13 +106,13 @@
       pincode: $('pincode').value.trim() || null,
       district: $('district').value.trim() || null,
       state: $('state').value.trim() || null,
-      latitude: userLocation && userLocation.latitude != null ? userLocation.latitude : null,
-      longitude: userLocation && userLocation.longitude != null ? userLocation.longitude : null,
+      latitude: null,
+      longitude: null,
       location_source: source || 'manual'
     };
     const data = await api('/patient/location', { method: 'POST', body });
     if (data && data.location) {
-      userLocation = data.location;
+      userLocation = Object.assign({},data.location,{latitude:userLocation?.latitude??null,longitude:userLocation?.longitude??null});
       updateLocationUI();
       toast('Location saved');
     }
@@ -136,7 +136,8 @@
         userLocation = Object.assign({}, userLocation || {}, { latitude, longitude });
         btn.disabled = false;
         btn.innerHTML = prev.replace('Use my current location', 'Location detected ✓');
-        toast('Coordinates saved. Confirm city / PIN and press Save location.');
+        toast('Location used for this search only. Saving an area saves city/PIN, not these coordinates.');
+        window.NearbyWorld?.update(facilities,userLocation);
         if (!$('city').value.trim()) {
           $('city').focus();
         }
@@ -155,6 +156,7 @@
   }
 
   function changeLocation() {
+    window.NearbyWorld?.update([],null);
     userLocation = null; // Coordinates from the previous city must not follow a new manual location.
     $('city').value = '';
     $('pincode').value = '';
@@ -185,12 +187,13 @@
       const data=await api('/facilities/search?'+params.toString());
       if(!data)return;
       facilities=data.facilities||[];
+      window.NearbyWorld?.update([],userLocation);
       $('resultsMeta').hidden=false;
       $('resultsCount').textContent=facilities.length+' suitable '+(facilities.length===1?'facility':'facilities')+' · ranked by your stated preferences';
       const warnings=data.warnings||[];
       if(warnings.length){$('matchingWarnings').hidden=false;$('matchingWarnings').className='matching-warning';$('matchingWarnings').textContent=warnings.join(' ');}
       window.FacilityMatchUI.announce(data.scoring_note);
-      if(!facilities.length){$('emptyState').hidden=false;return;}
+      if(!facilities.length){$('emptyState').hidden=false;window.NearbyWorld?.update([],userLocation);return;}
       renderFacilities(facilities);
     } finally {$('loadingState').hidden=true;$('searchBtn').disabled=false;}
   }
@@ -245,7 +248,7 @@
         '<div class="facility-contact">' + phone + '</div>' +
         '<div class="services-list">' + renderServiceTags(f.services, f.capabilities) + '</div>' +
         verificationBlock(f) +
-        window.FacilityMatchUI.explain(f) +
+        '<details class="nw-why"><summary>Why this place appears</summary>' + window.FacilityMatchUI.explain(f) + '</details>' +
         '<div class="facility-actions">' +
         '<button type="button" class="primary" data-action="book" data-id="' + f.id + '">Book</button>' +
         '<button type="button" data-action="details" data-id="' + f.id + '">Details &amp; doctors</button>' +
@@ -254,6 +257,7 @@
         '</div></article>'
       );
     }).join('');
+    window.NearbyWorld?.update(list,userLocation);
   }
 
   function hoursText(hours) {

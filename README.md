@@ -423,3 +423,171 @@ Checks: `npm test --prefix backend` includes matching gates, preferences,
 unknown/partial evidence, IST timing, transport weights and actual PostgreSQL
 queries through PGlite. Browser checks cover both patient entry points, preference
 persistence, strict matches, changes in ranking and mobile overflow.
+
+### Little worlds: baby, recovery and Nearby Care
+
+The patient workspace keeps the existing DAI purple palette. The child page now
+has illustrated/photo avatars, distinct sibling accents within the same theme,
+a calendar-age hero and a time-based ring toward the next vaccine due date.
+Each child has its own vaccine passport, recorded-dose stamp animation, PNG
+export and optional device share, dated keepsake notes and feed/sleep logs.
+The side-by-side view shows independent records, not a development competition.
+Original photo uploads and add-child forms remain available. Memories use the
+existing child-owned health-events API; feed/sleep notes use the owned personal
+log API. Photo and voice attachments to memories are not connected. A keepsake
+export intentionally includes the child's name/DOB only after the user opens
+its export flow. It is not a clinical vaccination certificate.
+
+Postpartum has Mother/Baby lanes, a six-week time ring, the existing postnatal
+follow-ups and private mood notes. Passing day 42 never claims recovery is
+complete. A welcome moment can be replayed; automatic display requires a linked
+hospital-source delivery in the first 42 days and is remembered once per account
+and delivery on that device. No diagnosis, mood-triggered notification, lactation
+staff contact channel or caregiver access is invented. The existing clinical
+check-in and emergency flow remain available below the recovery scene.
+Growth uses the existing WHO reference data and recorded measurements, with
+neutral wording. New editorial copy is primarily English; card read-aloud uses
+available device voices. Full regional localization and clinician-reviewed
+education authoring remain future work.
+
+Nearby Care places the existing directory search results on a Leaflet map with
+custom markers, clustering, category chips, a radius control and an accessible
+button/keyboard/pointer-operated bottom sheet. Required clinical service and
+capability filters stay in the existing matching API. The pending-care shortcut
+suggests a service category; patients must confirm that the exact test is offered.
+The new map never claims live readiness or free government services without
+source evidence. Emergency chips only filter an explicit `emergency_24x7`
+directory field; they do not replace SOS or rank hospitals by a fabricated ETA.
+
+Map dependencies are vendored (Leaflet 1.9.4, MarkerCluster 1.5.3) with their
+licences under `frontend/vendor/leaflet/`. OpenStreetMap attribution remains
+visible. Tiles load on demand and are not bulk-prefetched/offline-packaged.
+`window.DAI_MAP_TILE_URL` can select another compatible tile provider. The list
+still works when tiles fail. Route preview sends coordinates to public OSRM only
+on an explicit request, labels its modelled estimate without live traffic and
+falls back to a dashed straight line with no ETA on failure. Directions opens
+the user's maps app. Geolocation is explicitly requested for the current search;
+Save location now saves area fields without coordinates. Previously stored
+location records are retained until the user changes/saves their area. PostGIS,
+live hospital readiness sync, moderated reviews, offline map packs and automatic
+emergency routing are not claimed by this interface update.
+
+Check `node --test backend/littleWorld.test.js` for date/age boundaries, vaccine
+ring sources, missing coordinates, emergency filtering, separate sibling renders
+and recovery wording. `npm test --prefix backend` includes it alongside the
+existing ownership and patient/hospital continuity checks.
+
+### Companion presentation: Dhruv
+
+The visible AI companion is now named **Dhruv**, without a clinician title.
+The header and launcher identify him as an AI care companion; the introduction
+states that medical decisions belong to the real clinician. The frontend adds
+softer reply cards, optional slow playback (0.85×) and a replay button on each
+answer. This reuses the existing approved English/Hindi responses and Gemini
+Charon audio. The avatar, camera, FBX model, textures and animation files are
+unchanged; internal `daya` asset paths remain for compatibility. No new diagnosis,
+report interpretation, conversational memory, lip-sync or live handoff capability
+is claimed. Hospital public assets are copied by the existing sync script.
+
+### Support, consent and the patient inbox
+
+Schemes & support now offers seven official information pathways with category
+chips, a horizontal card shelf, a guided conversation checklist and private
+preparation steps. `patient_support.sql` and `patientSupport.js` persist each
+mother's step/document ticks and optional app-reminder date. Steps are explicitly
+self-reported; they do not submit an application, prove eligibility or unlock a
+payment. The short questionnaire does not reproduce all scheme criteria and
+returns only “Might be eligible” or a help-desk next step. Answers are not saved.
+Source URLs and a 24 October 2026 review date appear with the catalogue. No scheme
+ID or official deadline is invented. The personal wallet is a checklist summary.
+
+The camera/file action saves an original privately through the existing document
+API, with `is_sensitive=true`, no report milestone and no automatic sharing.
+There is no OCR or identity verification. Help requests are private journal notes;
+ASHA/care-team messaging, official office locations, group directories and benefit
+application APIs remain unconnected and are described as such in the UI.
+
+Family & consent has a sharing circle based on *effective uploaded-report shares*,
+not emergency contacts or family assumptions. The working global pause, per-report
+revocation and existing explicit/sensitive/expiring doctor-consent flow remain in
+force. Family, ASHA and invitation previews never grant permissions. Legacy
+hospital records follow hospital access rules, separately from uploaded reports.
+Report file access/consent events are exposed only to their owner; sensitive names
+stay redacted. This is not a complete cross-hospital access or break-glass ledger.
+Export includes the support checklists. Password-confirmed deletion still creates
+a review request rather than erasing retained clinical records.
+
+Updates reads the actual notifications API, groups by day in India time and has
+category filters, read/read-all, archive and persisted 24-hour snooze. Danger-level
+items cannot be snoozed and bypass a prior snooze if severity changes. Report-review
+updates require an actual `reviewed_by` value. Scheme reminders use only dates the
+mother chose and are labelled as personal reminders. No invented hospital sender,
+verified facility message or weekly performance percentage is rendered. The ring
+summarises actual timeline completion. Per-message read-aloud uses device voices.
+SMS, WhatsApp, voice-call delivery and caregiver copies remain unconnected.
+
+Published call links are checked against official WCD, NHA and MoHFW/PIB listings:
+112, 181, 1098, 14555 and general mental-health support via Tele-MANAS 14416. Sources
+are available beside every number. External availability can change; reverify the
+catalogue before a real deployment. English/Hindi category labels are included;
+longer editorial copy remains primarily English. Existing dark/large-text settings
+and reduced-motion preferences are respected. No report files, consent histories
+or support answers are cached by the service worker.
+
+Checks: `backend/patientSupport.test.js` covers conservative guidance, actual
+care-team schema rendering, effective recipient counts, account/role isolation,
+checklist validation, notification snooze persistence and danger-level bypass.
+Hosted PostgreSQL deployments must apply `backend/db/patient_support.sql` after
+the existing patient migrations; the local launcher applies it automatically.
+
+### Shared pregnancy illustration and clinical dashboard
+
+The patient Home and a selected doctor's patient Timeline now share a dashboard
+with an on-demand Three.js viewer, record hotspots, source-separated Hb/BP/weight/
+glucose cards, dated trends, clinician-entered targets, care-plan adherence, a
+week/month appointment strip and Pending Care links. Missing targets, tokens,
+pulse, scan notes and lab ranges remain missing. Readings never receive an
+algorithmic good/bad verdict or risk score. Only existing clinician-validated
+status is shown. Source/dates accompany clinic entries; self entries stay separate.
+
+The supplied `output.fbx` (copied as `assets/pregnancy/uterus.fbx`) contains one
+static 61,635-vertex mesh and no animations. It is not a separable fetal-growth
+model. The Uterus tab shows the supplied anatomy and texture without deforming
+it; the week slider switches to a separate procedural, stylised baby illustration.
+Its qualitative scale is **not a fetal size lookup, scan or development simulation**.
+Postpartum defaults to a separate recovery illustration. Conceptual hotspots
+organise records; their positions do not locate a scan finding. Rotate, pinch/zoom,
+reset and browser-supported fullscreen are available. Save-data/low-memory devices
+use an SVG fallback with manual 3D loading. The FBX is about 2.4 MB plus a 1.4 MB
+texture, not a claimed sub-3-MB combined download. No external model service is
+used. Licence/creator information was not supplied; see the asset README before
+redistributing the supplied files. Existing Dhruv assets are unchanged.
+
+`clinical_dashboard.sql` adds clinician entries/plans, patient adherence and an
+explicit expiring consent for this new clinical-summary view. It is separate from
+uploaded-report sharing and does not share files or child records. Patients can
+choose a verified connected doctor for 1, 7 or 30 days, or revoke access from
+Family & consent. A doctor needs the doctor role, recorded clinical credentials,
+verified status, an appointment relationship and an unexpired summary consent to
+read or write. In local mode verified status comes from the existing hospital
+source mapping; hosted deployments must establish `credential_verified` through
+their credential-verification process, never from a self-entered licence alone.
+No summaries are auto-shared by the seed. Every new clinician read/write and
+consent change is audit-logged. Revocation is enforced on every request.
+
+Verified clinicians can manually record measurements, clinic-scan notes/heartbeat,
+targets and care-plan instructions. Heartbeat and scan notes require an explicit
+clinic-scan source; an ANC fetal-heart-rate value is not silently called a scan.
+The patient can record today's adherence only for their own clinician plan.
+The two pages refresh the same records using 30-second polling, not WebSockets.
+No automatic diagnosis, prescribing, high-risk assignment, investigation ordering,
+new referral or hospital-capacity reservation is introduced by this dashboard.
+Readiness remains explicitly unconfirmed until a resource integration provides it.
+
+Routes: `GET /api/patient/dashboard`, `PUT /api/patient/dashboard/consent`,
+`PUT /api/patient/dashboard/plan/:id/today`, and the connected clinician's
+`GET /api/doctor/patients/:id/dashboard`, `POST .../entries`, `POST .../plan`.
+The local launcher applies the migration; hosted PostgreSQL needs it applied after
+existing patient migrations. Tests in `backend/clinicalDashboard.test.js` check
+provenance, dates, role/relationship/verification/consent gates, revocation,
+cross-patient isolation and doctor→patient data/adherence continuity.

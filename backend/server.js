@@ -1092,6 +1092,8 @@ require('./patientPreferences')(app, { pool, authenticateToken });
 require('./patientContinuity')(app, { pool, authenticateToken, authorizeRole });
 require('./patientExperience')(app, { pool, authenticateToken, authorizeRole });
 require('./patientHome')(app, { pool, authenticateToken, authorizeRole });
+require('./patientSupport')(app, { pool, authenticateToken, authorizeRole });
+require('./clinicalDashboard')(app, { pool, authenticateToken, authorizeRole });
 require('./patientDocuments')(app, { pool, authenticateToken, authorizeRole });
 
 // Hospital, doctor, and patient continuity workflows

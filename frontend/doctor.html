@@ -103,7 +103,9 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 .appointment-layout{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(300px,.75fr);gap:1rem}.appointment-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.75rem;align-items:center;padding:.85rem;border:1px solid var(--line);border-radius:12px;margin-top:.55rem;background:#fff}.appointment-row:hover,.appointment-row.is-selected{border-color:var(--brand);background:var(--brand-pale)}.appointment-row__actions{display:flex;gap:.4rem;flex-wrap:wrap;justify-content:flex-end}.appointment-detail{position:sticky;top:82px;align-self:start}.appointment-detail h2{font-family:var(--display);font-size:1.25rem;margin:0}.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:.65rem;margin:1rem 0}.info-cell{padding:.7rem;border-radius:12px;background:var(--ground);border:1px solid var(--line)}.info-cell small,.info-cell b{display:block}.info-cell small{color:var(--ink-muted);font-size:.7rem;text-transform:uppercase;font-weight:700}.demo-banner{padding:.7rem .85rem;background:var(--brand-soft);color:var(--brand-strong);border-radius:12px;font-size:.8rem;margin-bottom:1rem}.table tr[data-aid]{cursor:pointer}.table tr[data-aid]:hover{background:var(--brand-pale)}@media(max-width:1000px){.appointment-layout{grid-template-columns:1fr}.appointment-detail{position:static}}
 </style>
 <script src="js/dai-api.js"></script>
-<link rel="stylesheet" href="doctor-report-review.css?v=1"></head>
+<link rel="stylesheet" href="doctor-report-review.css?v=1"><link rel="stylesheet" href="clinical-dashboard.css?v=1">
+<script src="js/clinical-dashboard.js?v=1"></script>
+</head>
 <body>
 <div class="app">
 <aside class="sidebar">
@@ -287,7 +289,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 <div class="panel" id="panel-timeline">
   <div class="card section-card">
     <div class="section-title" style="margin-bottom:1rem"> Care Timeline</div>
-    <div id="docTimeline"></div>
+    <div id="clinicalDashboardDoctor"></div><div id="docTimeline"></div>
   </div>
 </div>
 
@@ -505,8 +507,9 @@ async function openPatient(id) {
   if (p && !String(p.user_id).startsWith('DEMO-')) {
     try { data = await api.apiRequest('/doctor/patients/' + p.user_id + '/timeline'); } catch (e) {}
   }
-  var items = (data && data.milestones && data.milestones.length) ? data.milestones : demoTimelineForPatient(p);
+  var items = data?.milestones || (String(p?.user_id).startsWith('DEMO-')?demoTimelineForPatient(p):[]);
   renderTimeline(items, p && p.full_name);
+  if(p&&Number.isInteger(Number(p.user_id)))window.ClinicalDashboard?.openDoctor(Number(p.user_id));
 }
 
 function renderSupportingPanels(){
@@ -583,6 +586,6 @@ boot();
 })();
 </script>
 <script src="js/doctor-workflows.js"></script>
-<script src="js/care-chatbot.js?v=daya-3d-1"></script>
+<script src="js/care-chatbot.js?v=dhruv-ui-1"></script>
 <script src="js/doctor-report-review.js?v=1"></script></body>
 </html>

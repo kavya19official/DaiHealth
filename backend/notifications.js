@@ -21,7 +21,7 @@
 // ============================================================================
 const Ref = require('../shared/child-reference.js');
 
-const NOTIF_COLUMNS = 'id, dedupe_key, severity, category, title, body, route, route_sub, child_id, event_date, created_at, read_at';
+const NOTIF_COLUMNS = 'id, dedupe_key, severity, category, title, body, route, route_sub, child_id, event_date, created_at, read_at, snoozed_until';
 
 function todayISOOf(pool) {
   return pool.query(`SELECT to_char(CURRENT_DATE, 'YYYY-MM-DD') AS d`).then((r) => r.rows[0].d);
@@ -121,6 +121,12 @@ module.exports = function registerNotificationRoutes(app, { pool, authenticateTo
         route: 'appointments', route_sub: null, child_id: null, event_date: a.requested_date });
     });
 
+    const reviewed=(await pool.query("SELECT id,CASE WHEN is_sensitive THEN 'Private report' ELSE title END AS title FROM patient_documents WHERE mother_id=$1 AND deleted_at IS NULL AND reviewed_by IS NOT NULL ORDER BY uploaded_at DESC LIMIT 15",[motherId])).rows;
+    reviewed.forEach(d=>out.push({dedupe_key:'report-reviewed:'+d.id,severity:'info',category:'report',title:d.title+' · review recorded',body:'A clinician has recorded a review. Open Reports & records to read the note and original file.',route:'records',route_sub:null,child_id:null,event_date:null}));
+
+    const reminders=(await pool.query("SELECT scheme_id,to_char(reminder_on,'YYYY-MM-DD') AS reminder_on FROM patient_support_progress WHERE mother_id=$1 AND step<4 AND reminder_on IS NOT NULL AND reminder_on<=($2::date+2)",[motherId,today])).rows;
+    reminders.forEach(r=>out.push({dedupe_key:'scheme:'+r.scheme_id+':'+r.reminder_on,severity:'info',category:'scheme',title:'Your '+r.scheme_id.toUpperCase()+' checklist reminder',body:'A date you chose for your personal checklist. This is not an official deadline or approval.',route:'schemes',route_sub:null,child_id:null,event_date:r.reminder_on}));
+
     return out;
   }
 
@@ -178,13 +184,19 @@ module.exports = function registerNotificationRoutes(app, { pool, authenticateTo
       await sync(req.user.id, fresh);
 
       const rows = (await pool.query(
-        `SELECT ${NOTIF_COLUMNS} FROM notifications WHERE user_id = $1 AND dismissed_at IS NULL
+        `SELECT ${NOTIF_COLUMNS} FROM notifications WHERE user_id = $1 AND dismissed_at IS NULL AND (severity='danger' OR snoozed_until IS NULL OR snoozed_until<=NOW())
           ORDER BY (read_at IS NULL) DESC, event_date ASC NULLS LAST, created_at DESC LIMIT 50`, [req.user.id])).rows;
       res.json({ notifications: rows, unread_count: rows.filter((r) => !r.read_at).length });
     } catch (error) {
       console.error('Load notifications error:', error);
       res.status(500).json({ error: 'Failed to load notifications' });
     }
+  });
+
+  app.patch('/api/notifications/:id/snooze', authenticateToken, async(req,res)=>{
+    const id=Number(req.params.id),hours=req.body?.hours;
+    if(!Number.isInteger(id)||id<=0||![1,24].includes(hours))return res.status(400).json({error:'Choose 1 or 24 hours'});
+    try{const r=await pool.query("UPDATE notifications SET snoozed_until=NOW()+($3 * INTERVAL '1 hour') WHERE id=$1 AND user_id=$2 AND severity<>'danger' RETURNING id",[id,req.user.id,hours]);if(!r.rowCount)return res.status(404).json({error:'Message unavailable or cannot be snoozed'});res.json({message:'Snoozed'});}catch{res.status(500).json({error:'Could not snooze message'});}
   });
 
   app.patch('/api/notifications/:id/read', authenticateToken, async (req, res) => {

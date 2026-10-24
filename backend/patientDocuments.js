@@ -75,7 +75,7 @@ function docRow(r) {
   };
 }
 
-function redact(row){return row.is_sensitive?{...row,title:'Private screening report',original_filename:'Private file',notes:null,doctor_note:null}:row;}
+function redact(row){return row.is_sensitive?{...row,title:row.report_category==='documents'?'Private document':'Private screening report',original_filename:'Private file',notes:null,doctor_note:null}:row;}
 
 async function logEvent(pool, documentId, actorId, eventType, detail) {
   await pool.query(
