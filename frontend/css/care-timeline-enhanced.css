@@ -1,0 +1,288 @@
+/* Enhanced Care Timeline Styles */
+
+/* Gestational Age Display */
+.gestational-age-display {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 1.15rem;
+  background: linear-gradient(135deg, #faf5ff, #f3e8ff);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  margin-bottom: 1rem;
+}
+
+.stage-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.85rem;
+  background: var(--brand);
+  color: #fff;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.stage-label {
+  font-size: 0.88rem;
+  color: var(--ink-2);
+  font-weight: 500;
+}
+
+.stage-unknown {
+  font-size: 0.85rem;
+  color: var(--ink-muted);
+  font-style: italic;
+}
+
+/* Timeline Stages */
+.timeline-stage {
+  margin-bottom: 1.5rem;
+}
+
+.timeline-stage-title {
+  font-family: var(--display);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 0.85rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--line);
+}
+
+/* Timeline Items */
+.timeline-item {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem 1.15rem;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  margin-bottom: 0.75rem;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.timeline-item:hover {
+  border-color: #c4b5fd;
+  box-shadow: var(--shadow-sm);
+}
+
+.timeline-item-marker {
+  flex-shrink: 0;
+}
+
+.timeline-item-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--ground);
+  border: 2px solid var(--line);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--ink-3);
+}
+
+.timeline-item.is-completed .timeline-item-icon {
+  background: var(--green-soft);
+  border-color: var(--green);
+  color: var(--green);
+}
+
+.timeline-item.is-overdue .timeline-item-icon {
+  background: #fef3c7;
+  border-color: #f59e0b;
+  color: #b45309;
+}
+
+.timeline-item.is-upcoming .timeline-item-icon {
+  background: var(--brand-soft);
+  border-color: var(--brand);
+  color: var(--brand);
+}
+
+.timeline-item-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.timeline-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.35rem;
+}
+
+.timeline-item-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.timeline-item-status {
+  flex-shrink: 0;
+}
+
+.timeline-item-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.8rem;
+  color: var(--ink-muted);
+  margin-bottom: 0.35rem;
+}
+
+.timeline-item-edits {
+  color: var(--brand);
+  font-weight: 500;
+  cursor: help;
+}
+
+.timeline-item-guidance {
+  font-size: 0.85rem;
+  color: var(--ink-2);
+  margin: 0.5rem 0;
+  line-height: 1.5;
+}
+
+.timeline-item-verification {
+  font-size: 0.8rem;
+  color: var(--green);
+  margin: 0.35rem 0;
+  font-weight: 500;
+}
+
+.timeline-item-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+/* Edit History Modal */
+.edit-history-item {
+  padding: 0.85rem;
+  background: var(--ground);
+  border-radius: 12px;
+  margin-bottom: 0.75rem;
+}
+
+.edit-history-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.edit-history-header strong {
+  font-size: 0.9rem;
+  color: var(--ink);
+}
+
+.edit-history-header small {
+  font-size: 0.75rem;
+  color: var(--ink-muted);
+}
+
+.edit-history-changes p {
+  font-size: 0.85rem;
+  color: var(--ink-2);
+  margin: 0.25rem 0;
+}
+
+.edit-history-author {
+  font-size: 0.8rem;
+  color: var(--ink-muted);
+  margin-top: 0.5rem;
+}
+
+.edit-history-reason {
+  font-size: 0.8rem;
+  color: var(--brand);
+  font-style: italic;
+  margin-top: 0.35rem;
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(30, 27, 75, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  padding: 1rem;
+}
+
+.modal {
+  background: #fff;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  max-width: 500px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.modal-header h2 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0;
+}
+
+.modal-close {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: #fff;
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-2);
+}
+
+.modal-close:hover {
+  background: var(--ground);
+  color: var(--ink);
+}
+
+.modal-body {
+  padding: 1.25rem;
+}
+
+@media (max-width: 640px) {
+  .timeline-item {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .timeline-item-marker {
+    align-self: flex-start;
+  }
+
+  .timeline-item-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.35rem;
+  }
+
+  .timeline-item-actions {
+    flex-wrap: wrap;
+  }
+}

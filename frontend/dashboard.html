@@ -433,7 +433,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 <script src="js/form-validation.js"></script>
 <script src="js/patient-prefs.js"></script>
 <link rel="stylesheet" href="facility-matching.css">
-<link rel="stylesheet" href="patient-dashboard.css?v=patient-2"><link rel="stylesheet" href="patient-home.css?v=warm-1"><link rel="stylesheet" href="patient-journey.css?v=3"><link rel="stylesheet" href="patient-pending.css?v=1"><link rel="stylesheet" href="patient-connected.css?v=1"><link rel="stylesheet" href="patient-polish.css?v=1">
+<link rel="stylesheet" href="patient-dashboard.css?v=patient-2"><link rel="stylesheet" href="patient-home.css?v=warm-1"><link rel="stylesheet" href="patient-journey.css?v=3"><link rel="stylesheet" href="patient-pending.css?v=1"><link rel="stylesheet" href="patient-connected.css?v=1"><link rel="stylesheet" href="patient-polish.css?v=1"><link rel="stylesheet" href="care-timeline-enhanced.css"><link rel="stylesheet" href="missed-care-outreach.css">
 <style>.low-bandwidth img,.low-bandwidth canvas{display:none!important}.low-bandwidth *{animation:none!important;transition:none!important}</style></head>
 <body class="patient-view">
 <a class="skip-link" href="#main-content" data-i18n="a11y.skip" style="position:absolute;left:1rem;top:-5rem;z-index:500;padding:.7rem 1rem;border-radius:0 0 10px 10px;background:var(--ink);color:#fff">Skip to main content</a>
@@ -466,7 +466,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 <div class="app">
 <aside class="sidebar" id="sidebar">
   <a class="sidebar__brand patient-brand" href="dashboard.html" aria-label="DAI patient home"><span class="patient-brand__hindi" lang="hi">दाई</span><span class="patient-brand__english">DAI<small>YOUR CARE COMPANION</small></span></a>
-<nav class="sidebar__nav" aria-label="Patient navigation"><span class="nav-caption" data-copy="yourCare">YOUR CARE</span><button type="button" class="nav-item is-active" data-panel="dashboard"><svg aria-hidden="true"><use href="#i-home"/></svg><span data-copy="nav.dashboard">Home</span></button><button type="button" class="nav-item" data-panel="timeline"><svg aria-hidden="true"><use href="#i-clock"/></svg><span data-copy="nav.timeline">Care timeline</span></button><button type="button" class="nav-item" data-panel="gaps"><svg aria-hidden="true"><use href="#i-clipboard"/></svg><span data-copy="nav.gaps">Pending care</span></button><button type="button" class="nav-item" data-panel="appointments"><svg aria-hidden="true"><use href="#i-cal"/></svg><span data-copy="nav.appointments">Appointments</span></button><button type="button" class="nav-item" data-panel="records"><svg aria-hidden="true"><use href="#i-file"/></svg><span data-copy="nav.records">Reports & records</span></button><button type="button" class="nav-item" data-panel="children"><svg aria-hidden="true"><use href="#i-baby"/></svg><span data-copy="nav.children">My children</span></button><button type="button" class="nav-item" data-panel="postpartum"><svg aria-hidden="true"><use href="#i-heart"/></svg><span data-copy="nav.postpartum">After delivery</span></button><button type="button" class="nav-item" data-panel="facilities"><svg aria-hidden="true"><use href="#i-search"/></svg><span data-copy="nav.facilities">Nearby care</span></button><button type="button" class="nav-item" data-panel="companion"><svg aria-hidden="true"><use href="#i-msg"/></svg><span data-copy="nav.companion">Care companion</span></button><button type="button" class="nav-item" data-panel="schemes"><svg aria-hidden="true"><use href="#i-shield"/></svg><span data-copy="nav.schemes">Schemes & support</span></button><button type="button" class="nav-item" data-panel="family"><svg aria-hidden="true"><use href="#i-user"/></svg><span data-copy="nav.family">Family & consent</span></button><button type="button" class="nav-item" data-panel="messages"><svg aria-hidden="true"><use href="#i-bell"/></svg><span data-copy="nav.messages">Updates</span></button><button type="button" class="nav-item" data-panel="settings"><svg aria-hidden="true"><use href="#i-set"/></svg><span data-copy="nav.settings">Settings</span></button></nav><div class="sidebar__footer"><span class="privacy-symbol">♡</span><div><strong data-copy="yourInformation">Your information. Your choice.</strong><button class="link-btn" data-go="family" data-copy="manageSharing">Manage sharing →</button></div></div>
+<nav class="sidebar__nav" aria-label="Patient navigation"><span class="nav-caption" data-copy="yourCare">YOUR CARE</span><button type="button" class="nav-item is-active" data-panel="dashboard"><svg aria-hidden="true"><use href="#i-home"/></svg><span data-copy="nav.dashboard">Home</span></button><button type="button" class="nav-item" data-panel="timeline"><svg aria-hidden="true"><use href="#i-clock"/></svg><span data-copy="nav.timeline">Care timeline</span></button><button type="button" class="nav-item" data-panel="gaps"><svg aria-hidden="true"><use href="#i-clipboard"/></svg><span data-copy="nav.gaps">Pending care</span></button><button type="button" class="nav-item" data-panel="appointments"><svg aria-hidden="true"><use href="#i-cal"/></svg><span data-copy="nav.appointments">Appointments</span></button><button type="button" class="nav-item" data-panel="records"><svg aria-hidden="true"><use href="#i-file"/></svg><span data-copy="nav.records">Reports & records</span></button><button type="button" class="nav-item" data-panel="children"><svg aria-hidden="true"><use href="#i-baby"/></svg><span data-copy="nav.children">My children</span></button><button type="button" class="nav-item" data-panel="postpartum"><svg aria-hidden="true"><use href="#i-heart"/></svg><span data-copy="nav.postpartum">After delivery</span></button><button type="button" class="nav-item" data-panel="facilities"><svg aria-hidden="true"><use href="#i-search"/></svg><span data-copy="nav.facilities">Nearby care</span></button><button type="button" class="nav-item" data-panel="companion"><svg aria-hidden="true"><use href="#i-msg"/></svg><span data-copy="nav.companion">Care companion</span></button><button type="button" class="nav-item" data-panel="schemes"><svg aria-hidden="true"><use href="#i-shield"/></svg><span data-copy="nav.schemes">Schemes & support</span></button><button type="button" class="nav-item" data-panel="outreach"><svg aria-hidden="true"><use href="#i-clipboard"/></svg><span>Outreach queue</span></button><button type="button" class="nav-item" data-panel="family"><svg aria-hidden="true"><use href="#i-user"/></svg><span data-copy="nav.family">Family & consent</span></button><button type="button" class="nav-item" data-panel="messages"><svg aria-hidden="true"><use href="#i-bell"/></svg><span data-copy="nav.messages">Updates</span></button><button type="button" class="nav-item" data-panel="settings"><svg aria-hidden="true"><use href="#i-set"/></svg><span data-copy="nav.settings">Settings</span></button></nav><div class="sidebar__footer"><span class="privacy-symbol">♡</span><div><strong data-copy="yourInformation">Your information. Your choice.</strong><button class="link-btn" data-go="family" data-copy="manageSharing">Manage sharing →</button></div></div>
 </aside>
 
 <div class="main">
@@ -595,8 +595,73 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 <!-- TIMELINE -->
 <div class="panel" id="panel-timeline"><div class="page-section-heading"><h1 data-copy="nav.timeline">Care timeline</h1><p data-copy="timelineIntro">Your visits and milestones, with a plain-language explanation at each step.</p></div>
   <div class="card section-card">
-    <div class="section-head"><div class="section-title"><span><svg width="15" height="15" aria-hidden="true"><use href="#i-clock"/></svg></span> Care Timeline</div></div>
-    <div id="timelineList"></div>
+    <div class="section-head"><div class="section-title"><span><svg width="15" height="15" aria-hidden="true"><use href="#i-clock"/></svg></span> Personalised Care Timeline</div></div>
+    <div id="gestationalAgeDisplay" class="gestational-age-display"></div>
+    <div id="enhancedTimelineList"></div>
+  </div>
+  <div class="card section-card" style="margin-top: 1rem;">
+    <div class="section-head"><div class="section-title"><span><svg width="15" height="15" aria-hidden="true"><use href="#i-clipboard"/></svg></span> Missed Care Items</div></div>
+    <div id="missedCareItemsList"></div>
+  </div>
+</div>
+
+<!-- OUTREACH QUEUE (Staff/Doctor View) -->
+<div class="panel" id="panel-outreach"><div class="page-section-heading"><h1>Missed-Care Outreach Queue</h1><p>Prioritise patients needing follow-up based on urgency, time overdue, and access barriers.</p></div>
+  <div class="outreach-summary">
+    <div class="outreach-summary-card critical">
+      <div class="count" id="outreachCriticalCount">0</div>
+      <div class="label">Critical</div>
+    </div>
+    <div class="outreach-summary-card high">
+      <div class="count" id="outreachHighCount">0</div>
+      <div class="label">High</div>
+    </div>
+    <div class="outreach-summary-card">
+      <div class="count" id="outreachMediumCount">0</div>
+      <div class="label">Medium</div>
+    </div>
+    <div class="outreach-summary-card">
+      <div class="count" id="outreachLowCount">0</div>
+      <div class="label">Low</div>
+    </div>
+  </div>
+  <div class="outreach-filters">
+    <div class="form-group">
+      <label for="outreachStatusFilter">Status</label>
+      <select id="outreachStatusFilter">
+        <option value="pending">Pending</option>
+        <option value="in_progress">In Progress</option>
+        <option value="resolved">Resolved</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="outreachUrgencyFilter">Urgency</label>
+      <select id="outreachUrgencyFilter">
+        <option value="">All</option>
+        <option value="critical">Critical</option>
+        <option value="high">High</option>
+        <option value="medium">Medium</option>
+        <option value="low">Low</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="outreachLimitFilter">Limit</label>
+      <select id="outreachLimitFilter">
+        <option value="25">25</option>
+        <option value="50" selected>50</option>
+        <option value="100">100</option>
+      </select>
+    </div>
+    <button type="button" class="btn btn--primary" id="applyOutreachFilters">Apply Filters</button>
+    <button type="button" class="btn btn--ghost" id="generateMissedCare">Generate Missed Care Items</button>
+  </div>
+  <div class="card section-card">
+    <div class="section-head"><div class="section-title"><span><svg width="15" height="15" aria-hidden="true"><use href="#i-clipboard"/></svg></span> Outreach Queue</div></div>
+    <div id="outreachQueueList"></div>
+  </div>
+  <div class="card section-card" style="margin-top: 1rem;">
+    <div class="section-head"><div class="section-title"><span><svg width="15" height="15" aria-hidden="true"><use href="#i-clock"/></svg></span> Outreach Attempts History</div></div>
+    <div id="outreachAttemptsList"></div>
   </div>
 </div>
 
@@ -944,7 +1009,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 <script src="/shared/emergency-triage.js"></script>
 <script src="/shared/postpartum-rules.js"></script>
 <script src="js/care-extensions.js"></script>
-<script src="/shared/who-growth-standards.js"></script><script src="/shared/child-reference.js"></script><script src="js/patient-visuals.js?v=1"></script><script src="js/patient-polish.js?v=1"></script><script src="js/patient-home-model.js?v=1"></script><script src="js/patient-home.js?v=1"></script><script src="js/patient-model.js?v=2"></script><script src="js/patient-offline.js?v=2"></script><script src="js/patient-copy.js?v=2"></script><script src="js/patient-journey.js?v=1"></script><script src="js/patient-pending-model.js?v=1"></script><script src="js/patient-pending.js?v=1"></script><script src="js/patient-connected.js?v=1"></script><script src="js/patient-dashboard.js?v=4"></script>
+<script src="/shared/who-growth-standards.js"></script><script src="/shared/child-reference.js"></script><script src="js/patient-visuals.js?v=1"></script><script src="js/patient-polish.js?v=1"></script><script src="js/patient-home-model.js?v=1"></script><script src="js/patient-home.js?v=1"></script><script src="js/patient-model.js?v=2"></script><script src="js/patient-offline.js?v=2"></script><script src="js/patient-copy.js?v=2"></script><script src="js/patient-journey.js?v=1"></script><script src="js/patient-pending-model.js?v=1"></script><script src="js/patient-pending.js?v=1"></script><script src="js/patient-connected.js?v=1"></script><script src="js/patient-dashboard.js?v=4"></script><script src="js/care-timeline-enhanced.js"></script><script src="js/missed-care-outreach.js"></script>
 <script>
 (function () {
 "use strict";

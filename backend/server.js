@@ -8,6 +8,8 @@ const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const riskAssessment = require('./riskAssessment');
 const { runRiskAssessment } = require('./riskService');
+const careTimelineEnhanced = require('./careTimelineEnhanced');
+const missedCareOutreach = require('./missedCareOutreach');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -1094,6 +1096,10 @@ require('./patientExperience')(app, { pool, authenticateToken, authorizeRole });
 require('./patientHome')(app, { pool, authenticateToken, authorizeRole });
 require('./patientDocuments')(app, { pool, authenticateToken, authorizeRole });
 require('./patientOfflineSync')(app, {pool,authenticateToken,authorizeRole});
+
+// Enhanced care timeline and missed-care outreach
+careTimelineEnhanced(app, { pool, authenticateToken, authorizeRole });
+missedCareOutreach(app, { pool, authenticateToken, authorizeRole });
 
 // Hospital, doctor, and patient continuity workflows
 require('./hospitalPlatform')(app, { authenticateToken });
