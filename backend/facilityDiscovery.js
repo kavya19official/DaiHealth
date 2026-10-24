@@ -103,7 +103,7 @@ module.exports = function (app, { pool, authenticateToken, authorizeRole }) {
       const freshnessStats=await contactStatsByFacility();
       if(alternatives)alternatives={...alternatives,facilities:withFreshness(alternatives.facilities,freshnessStats)};
       if(!preferences.service)warnings.push('Choose a service to see preference matching scores.');
-      res.json({location,alternatives,facilities:withFreshness(matches.slice(0,limit),freshnessStats),count:Math.min(matches.length,limit),total:matches.length,preferences,warnings,scoring_note:'Preference match, not a clinical safety or hospital-quality score. Unknown evidence earns no points. Required service and capability checks are never traded for a better score. Confirmation dates, contact reports and reported availability are shown for context only and never change the order.'});
+      res.json({location,alternatives,facilities:withFreshness(matches.slice(0,limit),freshnessStats),count:Math.min(matches.length,limit),total:matches.length,preferences,warnings,scoring_note:'Preference match, not a clinical safety or hospital-quality score. Unknown evidence earns no points. Required service and capability checks are never traded for a better score. Rule matching uses your stated access preferences. Optional patient ML may reorder eligible results using reported access freshness; contact-reliability counts never influence ordering. This is not a hospital-quality rating.'});
     }catch(error){console.error('Facility search error:',error.message);res.status(500).json({error:'Failed to search facilities'});}
   });
 

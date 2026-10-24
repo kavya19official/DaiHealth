@@ -1,0 +1,536 @@
+{
+  "barrier": {
+    "name": "barrier",
+    "version": "patient-assistance-v2-seed142",
+    "trained_at": "2026-10-24T17:02:07.376911+00:00",
+    "data_label": "synthetic",
+    "sha256": "7006003f8f040a7ea570723a827e434561c713e525a5afc90c5967298d7cf89e",
+    "features": [
+      "age",
+      "week",
+      "distance_km",
+      "caregiver_support",
+      "prior_missed_visits",
+      "digital_literacy",
+      "preferred_channel"
+    ],
+    "metrics": {
+      "accuracy": {
+        "baseline": {
+          "mean": 0.5441333333333334,
+          "std": 0.010278348332511601,
+          "runs": 5
+        },
+        "model": {
+          "mean": 0.5550666666666666,
+          "std": 0.014334108506170382,
+          "runs": 5
+        },
+        "improvement": {
+          "mean": 0.01093333333333335,
+          "std": 0.010610267563910765,
+          "runs": 5
+        },
+        "logistic_regression": {
+          "mean": 0.5568,
+          "std": 0.016515312759846697,
+          "runs": 5
+        },
+        "improvement_over_logistic": {
+          "mean": -0.001733333333333298,
+          "std": 0.009575431524943877,
+          "runs": 5
+        }
+      },
+      "precision": {
+        "baseline": {
+          "mean": 0.0,
+          "std": 0.0,
+          "runs": 5
+        },
+        "model": {
+          "mean": 0.555001718698781,
+          "std": 0.04528544668213751,
+          "runs": 5
+        },
+        "improvement": {
+          "mean": 0.555001718698781,
+          "std": 0.04528544668213751,
+          "runs": 5
+        },
+        "logistic_regression": {
+          "mean": 0.5339317686641886,
+          "std": 0.044158089557176254,
+          "runs": 5
+        },
+        "improvement_over_logistic": {
+          "mean": 0.021069950034592576,
+          "std": 0.03995885741809212,
+          "runs": 5
+        }
+      },
+      "recall": {
+        "baseline": {
+          "mean": 0.0,
+          "std": 0.0,
+          "runs": 5
+        },
+        "model": {
+          "mean": 0.1502410710196958,
+          "std": 0.09882688552098583,
+          "runs": 5
+        },
+        "improvement": {
+          "mean": 0.1502410710196958,
+          "std": 0.09882688552098583,
+          "runs": 5
+        },
+        "logistic_regression": {
+          "mean": 0.20442792153013123,
+          "std": 0.06930047872165676,
+          "runs": 5
+        },
+        "improvement_over_logistic": {
+          "mean": -0.054186850510435404,
+          "std": 0.06942592610206234,
+          "runs": 5
+        }
+      },
+      "f1": {
+        "baseline": {
+          "mean": 0.0,
+          "std": 0.0,
+          "runs": 5
+        },
+        "model": {
+          "mean": 0.22238232366081717,
+          "std": 0.11204802892754927,
+          "runs": 5
+        },
+        "improvement": {
+          "mean": 0.22238232366081717,
+          "std": 0.11204802892754927,
+          "runs": 5
+        },
+        "logistic_regression": {
+          "mean": 0.2914391868947246,
+          "std": 0.07100455806572853,
+          "runs": 5
+        },
+        "improvement_over_logistic": {
+          "mean": -0.06905686323390743,
+          "std": 0.09080828796688772,
+          "runs": 5
+        }
+      },
+      "roc_auc": {
+        "baseline": {
+          "mean": 0.5,
+          "std": 0.0,
+          "runs": 5
+        },
+        "model": {
+          "mean": 0.5542470002244068,
+          "std": 0.01989081825721581,
+          "runs": 5
+        },
+        "improvement": {
+          "mean": 0.05424700022440676,
+          "std": 0.01989081825721581,
+          "runs": 5
+        },
+        "logistic_regression": {
+          "mean": 0.5585259833748623,
+          "std": 0.017361428696725262,
+          "runs": 5
+        },
+        "improvement_over_logistic": {
+          "mean": -0.004278983150455562,
+          "std": 0.006439621638196539,
+          "runs": 5
+        }
+      },
+      "pr_auc": {
+        "baseline": {
+          "mean": 0.45586666666666664,
+          "std": 0.010278348332511624,
+          "runs": 5
+        },
+        "model": {
+          "mean": 0.5034158929136513,
+          "std": 0.018220299219343983,
+          "runs": 5
+        },
+        "improvement": {
+          "mean": 0.047549226246984586,
+          "std": 0.020239669397283933,
+          "runs": 5
+        },
+        "logistic_regression": {
+          "mean": 0.5047166360890385,
+          "std": 0.017794732069572203,
+          "runs": 5
+        },
+        "improvement_over_logistic": {
+          "mean": -0.0013007431753872534,
+          "std": 0.0022484984570283204,
+          "runs": 5
+        }
+      },
+      "brier_score": {
+        "baseline": {
+          "mean": 0.25181344880952383,
+          "std": 0.0021831707217537977,
+          "runs": 5
+        },
+        "model": {
+          "mean": 0.24615335478314454,
+          "std": 0.0021979821227317235,
+          "runs": 5
+        },
+        "improvement": {
+          "mean": 0.0056600940263792756,
+          "std": 0.001915716588391704,
+          "runs": 5
+        },
+        "logistic_regression": {
+          "mean": 0.24553574665752803,
+          "std": 0.0019006733613343343,
+          "runs": 5
+        },
+        "improvement_over_logistic": {
+          "mean": -0.0006176081256165144,
+          "std": 0.0007843727969294378,
+          "runs": 5
+        }
+      }
+    },
+    "selected_model": "logistic-C1"
+  },
+  "reminders": {
+    "name": "reminders",
+    "version": "patient-assistance-v2-seed142",
+    "trained_at": "2026-10-24T17:02:08.440607+00:00",
+    "data_label": "synthetic",
+    "sha256": "91e9a7abf87f0f7e4db9ea3f8a45a68eff6befca6fc0062302042557b12cf4c5",
+    "features": [
+      "age",
+      "week",
+      "distance_km",
+      "caregiver_support",
+      "prior_missed_visits",
+      "digital_literacy",
+      "preferred_channel",
+      "hour",
+      "channel"
+    ],
+    "metrics": {
+      "accuracy": {
+        "baseline": {
+          "mean": 0.5752,
+          "std": 0.002844097201026888,
+          "runs": 5
+        },
+        "model": {
+          "mean": 0.5803999999999999,
+          "std": 0.009962150593342996,
+          "runs": 5
+        },
+        "improvement": {
+          "mean": 0.005200000000000005,
+          "std": 0.009084785816591001,
+          "runs": 5
+        }
+      },
+      "precision": {
+        "baseline": {
+          "mean": 0.0,
+          "std": 0.0,
+          "runs": 5
+        },
+        "model": {
+          "mean": 0.51618223501093,
+          "std": 0.02772203134380113,
+          "runs": 5
+        },
+        "improvement": {
+          "mean": 0.51618223501093,
+          "std": 0.02772203134380113,
+          "runs": 5
+        }
+      },
+      "recall": {
+        "baseline": {
+          "mean": 0.0,
+          "std": 0.0,
+          "runs": 5
+        },
+        "model": {
+          "mean": 0.16715826187106067,
+          "std": 0.07984486427317349,
+          "runs": 5
+        },
+        "improvement": {
+          "mean": 0.16715826187106067,
+          "std": 0.07984486427317349,
+          "runs": 5
+        }
+      },
+      "f1": {
+        "baseline": {
+          "mean": 0.0,
+          "std": 0.0,
+          "runs": 5
+        },
+        "model": {
+          "mean": 0.24286713129280915,
+          "std": 0.10963084028249057,
+          "runs": 5
+        },
+        "improvement": {
+          "mean": 0.24286713129280915,
+          "std": 0.10963084028249057,
+          "runs": 5
+        }
+      },
+      "roc_auc": {
+        "baseline": {
+          "mean": 0.5,
+          "std": 0.0,
+          "runs": 5
+        },
+        "model": {
+          "mean": 0.5619861363836579,
+          "std": 0.013003007997756848,
+          "runs": 5
+        },
+        "improvement": {
+          "mean": 0.06198613638365793,
+          "std": 0.01300300799775685,
+          "runs": 5
+        }
+      },
+      "pr_auc": {
+        "baseline": {
+          "mean": 0.4248,
+          "std": 0.0028440972010268678,
+          "runs": 5
+        },
+        "model": {
+          "mean": 0.4830588104289209,
+          "std": 0.01341041386735635,
+          "runs": 5
+        },
+        "improvement": {
+          "mean": 0.05825881042892089,
+          "std": 0.013387944713234136,
+          "runs": 5
+        }
+      },
+      "brier_score": {
+        "baseline": {
+          "mean": 0.24435534532312922,
+          "std": 0.00044124277893658066,
+          "runs": 5
+        },
+        "model": {
+          "mean": 0.2417368193426821,
+          "std": 0.0016294860690374156,
+          "runs": 5
+        },
+        "improvement": {
+          "mean": 0.002618525980447145,
+          "std": 0.001501087662467369,
+          "runs": 5
+        }
+      },
+      "offline_completion_rate": {
+        "baseline": {
+          "mean": 0.3841181039991947,
+          "std": 0.026530250725043263,
+          "runs": 5
+        },
+        "model": {
+          "mean": 0.5392208974390235,
+          "std": 0.03319699703506971,
+          "runs": 5
+        },
+        "random": {
+          "mean": 0.46273073231359907,
+          "std": 0.030125823638895877,
+          "runs": 5
+        },
+        "improvement": {
+          "mean": 0.15510279343982866,
+          "std": 0.05275910264241921,
+          "runs": 5
+        },
+        "relative_lift": {
+          "mean": 0.4116378861512615,
+          "std": 0.1590185988686022,
+          "runs": 5
+        }
+      },
+      "offline_app_completion_rate": {
+        "baseline": {
+          "mean": 0.3841181039991947,
+          "std": 0.026530250725043263,
+          "runs": 5
+        },
+        "model": {
+          "mean": 0.4969483246145173,
+          "std": 0.00572274795405587,
+          "runs": 5
+        },
+        "random_time_app": {
+          "mean": 0.41192429233619166,
+          "std": 0.04890905949028352,
+          "runs": 5
+        },
+        "improvement": {
+          "mean": 0.11283022061532252,
+          "std": 0.03182786331264528,
+          "runs": 5
+        }
+      }
+    },
+    "selected_model": "lightgbm-leaves7-trees65-engineeredFalse"
+  },
+  "gaps": {
+    "name": "gaps",
+    "version": "patient-assistance-v2-seed142",
+    "trained_at": "2026-10-24T17:02:15.225838+00:00",
+    "data_label": "synthetic",
+    "sha256": "85bc4e8d3bbfbd19a433e2c688a7025d3c8a424e9069b51a45b3619b3a703954",
+    "features": [
+      "days_overdue",
+      "gap_type",
+      "stage",
+      "clinician_priority",
+      "distance_km",
+      "caregiver_support"
+    ],
+    "metrics": {
+      "ndcg@3": {
+        "baseline": {
+          "mean": 0.5135055648841036,
+          "std": 0.008785179557655976,
+          "runs": 5
+        },
+        "model": {
+          "mean": 0.6214361080471283,
+          "std": 0.005791955291162308,
+          "runs": 5
+        },
+        "improvement": {
+          "mean": 0.10793054316302483,
+          "std": 0.013958539883881075,
+          "runs": 5
+        }
+      },
+      "mrr": {
+        "baseline": {
+          "mean": 0.6378112515616061,
+          "std": 0.006756948519645071,
+          "runs": 5
+        },
+        "model": {
+          "mean": 0.7257655753648791,
+          "std": 0.006507799493989603,
+          "runs": 5
+        },
+        "improvement": {
+          "mean": 0.08795432380327292,
+          "std": 0.008821750896096669,
+          "runs": 5
+        }
+      },
+      "top1_accuracy": {
+        "baseline": {
+          "mean": 0.4111921588286429,
+          "std": 0.010636924818289935,
+          "runs": 5
+        },
+        "model": {
+          "mean": 0.5374210229445109,
+          "std": 0.012052188444776046,
+          "runs": 5
+        },
+        "improvement": {
+          "mean": 0.12622886411586798,
+          "std": 0.01141984854728904,
+          "runs": 5
+        }
+      }
+    },
+    "selected_model": "lightgbm-leaves7-trees65-engineeredFalse"
+  },
+  "facilities": {
+    "name": "facilities",
+    "version": "patient-assistance-v2-seed142",
+    "trained_at": "2026-10-24T17:02:22.556323+00:00",
+    "data_label": "synthetic",
+    "sha256": "cfd9fa356ef0fb370fc92c8d16eea4ef6ffe766fc5a863ad6c2f884722a39f46",
+    "features": [
+      "distance_km",
+      "open_now",
+      "offers_service",
+      "days_since_confirmed",
+      "appointment_availability"
+    ],
+    "metrics": {
+      "ndcg@5": {
+        "baseline": {
+          "mean": 0.5908533810133488,
+          "std": 0.005495893161711519,
+          "runs": 5
+        },
+        "model": {
+          "mean": 0.6261882456033284,
+          "std": 0.0033796131732840586,
+          "runs": 5
+        },
+        "improvement": {
+          "mean": 0.03533486458997963,
+          "std": 0.007047427874709152,
+          "runs": 5
+        }
+      },
+      "mrr": {
+        "baseline": {
+          "mean": 0.4812355555555555,
+          "std": 0.005761389150046361,
+          "runs": 5
+        },
+        "model": {
+          "mean": 0.5251866666666667,
+          "std": 0.002819414613963679,
+          "runs": 5
+        },
+        "improvement": {
+          "mean": 0.04395111111111112,
+          "std": 0.006981813235068876,
+          "runs": 5
+        }
+      },
+      "top1_accuracy": {
+        "baseline": {
+          "mean": 0.22440000000000002,
+          "std": 0.008361286450727012,
+          "runs": 5
+        },
+        "model": {
+          "mean": 0.282,
+          "std": 0.0031622776601683764,
+          "runs": 5
+        },
+        "improvement": {
+          "mean": 0.057600000000000005,
+          "std": 0.01064163730092528,
+          "runs": 5
+        }
+      }
+    },
+    "selected_model": "lightgbm-leaves7-trees160-engineeredTrue"
+  }
+}

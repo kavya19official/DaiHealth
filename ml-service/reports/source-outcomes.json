@@ -1,0 +1,830 @@
+{
+  "leakage_audit": {
+    "patient_overlap": 0,
+    "features_allowlisted": true,
+    "accuracy_above_095": [
+      {
+        "seed": 243,
+        "family": "fixed_05_model",
+        "accuracy": 0.95625
+      },
+      {
+        "seed": 243,
+        "family": "baseline",
+        "accuracy": 0.95625
+      },
+      {
+        "seed": 244,
+        "family": "fixed_05_model",
+        "accuracy": 0.9707792207792207
+      },
+      {
+        "seed": 244,
+        "family": "baseline",
+        "accuracy": 0.9707792207792207
+      },
+      {
+        "seed": 245,
+        "family": "fixed_05_model",
+        "accuracy": 0.9583333333333334
+      },
+      {
+        "seed": 245,
+        "family": "baseline",
+        "accuracy": 0.9583333333333334
+      }
+    ],
+    "investigation": "Missed outcomes are rare. Majority and 0.5-threshold models can exceed 95% by predicting attendance. This is class imbalance, not evidence of useful missed-visit detection. No status, dropout_probability, outcome labels or identifiers enter predictors."
+  },
+  "data_label": "synthetic",
+  "statement": "Metrics are measured on original synthetic appointment outcomes and are not real-world performance.",
+  "source_sha256": "57a7ceea43a2b8682da6e23b783d8bfeb743909d972b3e0cbb244e25c6b4943f",
+  "target": "Original attended versus missed maternal appointments; no replacement labels. Booked/cancelled/rescheduled excluded.",
+  "features": [
+    "age",
+    "distance_km",
+    "digital_literacy",
+    "literacy_level",
+    "income_band",
+    "caregiver_support",
+    "week",
+    "weekday",
+    "scheduled_hour"
+  ],
+  "excluded_features": [
+    "dropout_probability",
+    "current_stage",
+    "outcome",
+    "outcome_date",
+    "conditions",
+    "confirmed_high_risk",
+    "identifiers",
+    "status",
+    "future attendance"
+  ],
+  "split": "70/15/15 disjoint patients, train first16 months, validation next4, test last4; wrong time/cohort cells discarded.",
+  "selection": "Validation average precision; threshold by validation balanced accuracy, never test tuned.",
+  "summary": {
+    "accuracy": {
+      "model": {
+        "mean": 0.5992120594922319,
+        "std": 0.2062141659906734,
+        "runs": 5
+      },
+      "baseline": {
+        "mean": 0.9522752613534038,
+        "std": 0.01416912822931744,
+        "runs": 5
+      },
+      "improvement": {
+        "mean": -0.35306320186117185,
+        "std": 0.20931394082229224,
+        "runs": 5
+      }
+    },
+    "precision": {
+      "model": {
+        "mean": 0.08010962044256066,
+        "std": 0.03353422985323274,
+        "runs": 5
+      },
+      "baseline": {
+        "mean": 0.0,
+        "std": 0.0,
+        "runs": 5
+      },
+      "improvement": {
+        "mean": 0.08010962044256066,
+        "std": 0.03353422985323274,
+        "runs": 5
+      }
+    },
+    "recall": {
+      "model": {
+        "mean": 0.6156468093310199,
+        "std": 0.19488815002743454,
+        "runs": 5
+      },
+      "baseline": {
+        "mean": 0.0,
+        "std": 0.0,
+        "runs": 5
+      },
+      "improvement": {
+        "mean": 0.6156468093310199,
+        "std": 0.19488815002743454,
+        "runs": 5
+      }
+    },
+    "f1": {
+      "model": {
+        "mean": 0.1356474403117355,
+        "std": 0.044051829257932475,
+        "runs": 5
+      },
+      "baseline": {
+        "mean": 0.0,
+        "std": 0.0,
+        "runs": 5
+      },
+      "improvement": {
+        "mean": 0.1356474403117355,
+        "std": 0.044051829257932475,
+        "runs": 5
+      }
+    },
+    "roc_auc": {
+      "model": {
+        "mean": 0.6833178045315906,
+        "std": 0.054241909346012813,
+        "runs": 5
+      },
+      "baseline": {
+        "mean": 0.5,
+        "std": 0.0,
+        "runs": 5
+      },
+      "improvement": {
+        "mean": 0.18331780453159058,
+        "std": 0.054241909346012813,
+        "runs": 5
+      }
+    },
+    "pr_auc": {
+      "model": {
+        "mean": 0.14968586199171177,
+        "std": 0.05875149547549504,
+        "runs": 5
+      },
+      "baseline": {
+        "mean": 0.04772473864659626,
+        "std": 0.014169128229317447,
+        "runs": 5
+      },
+      "improvement": {
+        "mean": 0.10196112334511549,
+        "std": 0.060233035411206275,
+        "runs": 5
+      }
+    },
+    "brier_score": {
+      "model": {
+        "mean": 0.044700914493542535,
+        "std": 0.012470324845961835,
+        "runs": 5
+      },
+      "baseline": {
+        "mean": 0.045500962303741246,
+        "std": 0.012975646375219446,
+        "runs": 5
+      },
+      "improvement": {
+        "mean": 0.0008000478101987077,
+        "std": 0.000872041849388269,
+        "runs": 5
+      }
+    },
+    "balanced_accuracy": {
+      "model": {
+        "mean": 0.6076104336836934,
+        "std": 0.031144298691367575,
+        "runs": 5
+      },
+      "baseline": {
+        "mean": 0.5,
+        "std": 0.0,
+        "runs": 5
+      },
+      "improvement": {
+        "mean": 0.1076104336836935,
+        "std": 0.031144298691367575,
+        "runs": 5
+      }
+    }
+  },
+  "runs": [
+    {
+      "importance_method": "absolute standardized coefficient",
+      "feature_importance": {
+        "age": 0.08037427386932926,
+        "distance_km": 0.029682796167410666,
+        "digital_literacy": 0.2642372682546872,
+        "literacy_level": 0.008703648694562359,
+        "income_band": 0.32692004719973544,
+        "caregiver_support": 0.14280867027647035,
+        "week": 0.09402307567195924,
+        "weekday": 0.05325021986584534,
+        "scheduled_hour": 0.0
+      },
+      "seed": 242,
+      "counts": {
+        "train": {
+          "rows": 887,
+          "missed": 37,
+          "patients": 887
+        },
+        "validation": {
+          "rows": 88,
+          "missed": 7,
+          "patients": 88
+        },
+        "test": {
+          "rows": 319,
+          "missed": 20,
+          "patients": 319
+        }
+      },
+      "patient_overlap": 0,
+      "selected_model": "logistic-C1",
+      "threshold": 0.07938418279477896,
+      "validation_trials": [
+        {
+          "model": "logistic-C0.01",
+          "validation_pr_auc": 0.19871485317290757
+        },
+        {
+          "model": "logistic-C0.1",
+          "validation_pr_auc": 0.18072581582522143
+        },
+        {
+          "model": "logistic-C1",
+          "validation_pr_auc": 0.20064598783810605
+        },
+        {
+          "model": "lightgbm-3",
+          "validation_pr_auc": 0.15686210150215663
+        },
+        {
+          "model": "lightgbm-7",
+          "validation_pr_auc": 0.09544258498191452
+        },
+        {
+          "model": "lightgbm-15",
+          "validation_pr_auc": 0.0856398632327425
+        }
+      ],
+      "model": {
+        "accuracy": 0.7962382445141066,
+        "precision": 0.13114754098360656,
+        "recall": 0.4,
+        "f1": 0.19753086419753085,
+        "roc_auc": 0.6155518394648829,
+        "pr_auc": 0.22176783940760275,
+        "brier_score": 0.05710421829767429,
+        "confusion_matrix": [
+          [
+            246,
+            53
+          ],
+          [
+            12,
+            8
+          ]
+        ],
+        "threshold": 0.07938418279477896,
+        "balanced_accuracy": 0.611371237458194
+      },
+      "fixed_05_model": {
+        "accuracy": 0.9373040752351097,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "roc_auc": 0.6155518394648829,
+        "pr_auc": 0.22176783940760275,
+        "brier_score": 0.05710421829767429,
+        "confusion_matrix": [
+          [
+            299,
+            0
+          ],
+          [
+            20,
+            0
+          ]
+        ],
+        "threshold": 0.5
+      },
+      "baseline": {
+        "accuracy": 0.9373040752351097,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "roc_auc": 0.5,
+        "pr_auc": 0.06269592476489028,
+        "brier_score": 0.05920540199427036,
+        "confusion_matrix": [
+          [
+            299,
+            0
+          ],
+          [
+            20,
+            0
+          ]
+        ],
+        "threshold": 0.5,
+        "balanced_accuracy": 0.5
+      }
+    },
+    {
+      "importance_method": "absolute standardized coefficient",
+      "feature_importance": {
+        "age": 0.01934178759311884,
+        "distance_km": 0.021462367931012142,
+        "digital_literacy": 0.1707816413987728,
+        "literacy_level": 0.008418609063664768,
+        "income_band": 0.36250213731384734,
+        "caregiver_support": 0.16962195255584314,
+        "week": 0.1895784378660571,
+        "weekday": 0.058293066277683936,
+        "scheduled_hour": 0.0
+      },
+      "seed": 243,
+      "counts": {
+        "train": {
+          "rows": 875,
+          "missed": 41,
+          "patients": 875
+        },
+        "validation": {
+          "rows": 63,
+          "missed": 2,
+          "patients": 63
+        },
+        "test": {
+          "rows": 320,
+          "missed": 14,
+          "patients": 320
+        }
+      },
+      "patient_overlap": 0,
+      "selected_model": "logistic-C1",
+      "threshold": 0.08532601468994318,
+      "validation_trials": [
+        {
+          "model": "logistic-C0.01",
+          "validation_pr_auc": 0.0883777239709443
+        },
+        {
+          "model": "logistic-C0.1",
+          "validation_pr_auc": 0.08755760368663594
+        },
+        {
+          "model": "logistic-C1",
+          "validation_pr_auc": 0.09972677595628415
+        },
+        {
+          "model": "lightgbm-3",
+          "validation_pr_auc": 0.06203007518796992
+        },
+        {
+          "model": "lightgbm-7",
+          "validation_pr_auc": 0.05028248587570622
+        },
+        {
+          "model": "lightgbm-15",
+          "validation_pr_auc": 0.041245791245791245
+        }
+      ],
+      "model": {
+        "accuracy": 0.771875,
+        "precision": 0.08450704225352113,
+        "recall": 0.42857142857142855,
+        "f1": 0.1411764705882353,
+        "roc_auc": 0.6568627450980393,
+        "pr_auc": 0.07783006243965769,
+        "brier_score": 0.04199283531165804,
+        "confusion_matrix": [
+          [
+            241,
+            65
+          ],
+          [
+            8,
+            6
+          ]
+        ],
+        "threshold": 0.08532601468994318,
+        "balanced_accuracy": 0.6080765639589168
+      },
+      "fixed_05_model": {
+        "accuracy": 0.95625,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "roc_auc": 0.6568627450980393,
+        "pr_auc": 0.07783006243965769,
+        "brier_score": 0.04199283531165804,
+        "confusion_matrix": [
+          [
+            306,
+            0
+          ],
+          [
+            14,
+            0
+          ]
+        ],
+        "threshold": 0.5
+      },
+      "baseline": {
+        "accuracy": 0.95625,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "roc_auc": 0.5,
+        "pr_auc": 0.04375,
+        "brier_score": 0.04184559183673468,
+        "confusion_matrix": [
+          [
+            306,
+            0
+          ],
+          [
+            14,
+            0
+          ]
+        ],
+        "threshold": 0.5,
+        "balanced_accuracy": 0.5
+      }
+    },
+    {
+      "importance_method": "absolute standardized coefficient",
+      "feature_importance": {
+        "age": 0.012330213272344884,
+        "distance_km": 0.0001072425019396765,
+        "digital_literacy": 0.1423236016312378,
+        "literacy_level": 0.10446175361424155,
+        "income_band": 0.297199681828772,
+        "caregiver_support": 0.07697450274858415,
+        "week": 0.2428704155568095,
+        "weekday": 0.12373258884607041,
+        "scheduled_hour": 0.0
+      },
+      "seed": 244,
+      "counts": {
+        "train": {
+          "rows": 869,
+          "missed": 38,
+          "patients": 869
+        },
+        "validation": {
+          "rows": 72,
+          "missed": 5,
+          "patients": 72
+        },
+        "test": {
+          "rows": 308,
+          "missed": 9,
+          "patients": 308
+        }
+      },
+      "patient_overlap": 0,
+      "selected_model": "logistic-C0.01",
+      "threshold": 0.053007047334892796,
+      "validation_trials": [
+        {
+          "model": "logistic-C0.01",
+          "validation_pr_auc": 0.20482111557892566
+        },
+        {
+          "model": "logistic-C0.1",
+          "validation_pr_auc": 0.18731331168831167
+        },
+        {
+          "model": "logistic-C1",
+          "validation_pr_auc": 0.18398268398268397
+        },
+        {
+          "model": "lightgbm-3",
+          "validation_pr_auc": 0.08258799171842651
+        },
+        {
+          "model": "lightgbm-7",
+          "validation_pr_auc": 0.06686643765591134
+        },
+        {
+          "model": "lightgbm-15",
+          "validation_pr_auc": 0.08405158403020338
+        }
+      ],
+      "model": {
+        "accuracy": 0.6298701298701299,
+        "precision": 0.05128205128205128,
+        "recall": 0.6666666666666666,
+        "f1": 0.09523809523809523,
+        "roc_auc": 0.7313266443701226,
+        "pr_auc": 0.19267534269849443,
+        "brier_score": 0.02833974695737526,
+        "confusion_matrix": [
+          [
+            188,
+            111
+          ],
+          [
+            3,
+            6
+          ]
+        ],
+        "threshold": 0.053007047334892796,
+        "balanced_accuracy": 0.6477146042363433
+      },
+      "fixed_05_model": {
+        "accuracy": 0.9707792207792207,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "roc_auc": 0.7313266443701226,
+        "pr_auc": 0.19267534269849443,
+        "brier_score": 0.02833974695737526,
+        "confusion_matrix": [
+          [
+            299,
+            0
+          ],
+          [
+            9,
+            0
+          ]
+        ],
+        "threshold": 0.5
+      },
+      "baseline": {
+        "accuracy": 0.9707792207792207,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "roc_auc": 0.5,
+        "pr_auc": 0.02922077922077922,
+        "brier_score": 0.028577397024324235,
+        "confusion_matrix": [
+          [
+            299,
+            0
+          ],
+          [
+            9,
+            0
+          ]
+        ],
+        "threshold": 0.5,
+        "balanced_accuracy": 0.5
+      }
+    },
+    {
+      "importance_method": "absolute standardized coefficient",
+      "feature_importance": {
+        "age": 0.014017469500005568,
+        "distance_km": 0.044779922977554835,
+        "digital_literacy": 0.28316566760989365,
+        "literacy_level": 0.06151643562638298,
+        "income_band": 0.37349000715672914,
+        "caregiver_support": 0.09811585158082789,
+        "week": 0.1153588782739398,
+        "weekday": 0.009555767274666165,
+        "scheduled_hour": 0.0
+      },
+      "seed": 245,
+      "counts": {
+        "train": {
+          "rows": 878,
+          "missed": 36,
+          "patients": 878
+        },
+        "validation": {
+          "rows": 78,
+          "missed": 3,
+          "patients": 78
+        },
+        "test": {
+          "rows": 312,
+          "missed": 13,
+          "patients": 312
+        }
+      },
+      "patient_overlap": 0,
+      "selected_model": "logistic-C0.1",
+      "threshold": 0.03298462077812518,
+      "validation_trials": [
+        {
+          "model": "logistic-C0.01",
+          "validation_pr_auc": 0.152014652014652
+        },
+        {
+          "model": "logistic-C0.1",
+          "validation_pr_auc": 0.20243601603453593
+        },
+        {
+          "model": "logistic-C1",
+          "validation_pr_auc": 0.20096371882086167
+        },
+        {
+          "model": "lightgbm-3",
+          "validation_pr_auc": 0.09851055806938161
+        },
+        {
+          "model": "lightgbm-7",
+          "validation_pr_auc": 0.08220679576178297
+        },
+        {
+          "model": "lightgbm-15",
+          "validation_pr_auc": 0.07633477633477634
+        }
+      ],
+      "model": {
+        "accuracy": 0.2980769230769231,
+        "precision": 0.04824561403508772,
+        "recall": 0.8461538461538461,
+        "f1": 0.0912863070539419,
+        "roc_auc": 0.7458193979933111,
+        "pr_auc": 0.14632623070912876,
+        "brier_score": 0.03878847713504303,
+        "confusion_matrix": [
+          [
+            82,
+            217
+          ],
+          [
+            2,
+            11
+          ]
+        ],
+        "threshold": 0.03298462077812518,
+        "balanced_accuracy": 0.560200668896321
+      },
+      "fixed_05_model": {
+        "accuracy": 0.9583333333333334,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "roc_auc": 0.7458193979933111,
+        "pr_auc": 0.14632623070912876,
+        "brier_score": 0.03878847713504303,
+        "confusion_matrix": [
+          [
+            299,
+            0
+          ],
+          [
+            13,
+            0
+          ]
+        ],
+        "threshold": 0.5
+      },
+      "baseline": {
+        "accuracy": 0.9583333333333334,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "roc_auc": 0.5,
+        "pr_auc": 0.041666666666666664,
+        "brier_score": 0.03993099696798308,
+        "confusion_matrix": [
+          [
+            299,
+            0
+          ],
+          [
+            13,
+            0
+          ]
+        ],
+        "threshold": 0.5,
+        "balanced_accuracy": 0.5
+      }
+    },
+    {
+      "importance_method": "split count",
+      "feature_importance": {
+        "age": 0.05,
+        "distance_km": 0.21666666666666667,
+        "digital_literacy": 0.1625,
+        "literacy_level": 0.0,
+        "income_band": 0.3125,
+        "caregiver_support": 0.0,
+        "week": 0.1625,
+        "weekday": 0.09583333333333334,
+        "scheduled_hour": 0.0
+      },
+      "seed": 246,
+      "counts": {
+        "train": {
+          "rows": 878,
+          "missed": 36,
+          "patients": 878
+        },
+        "validation": {
+          "rows": 68,
+          "missed": 4,
+          "patients": 68
+        },
+        "test": {
+          "rows": 310,
+          "missed": 19,
+          "patients": 310
+        }
+      },
+      "patient_overlap": 0,
+      "selected_model": "lightgbm-3",
+      "threshold": 0.030326144898351552,
+      "validation_trials": [
+        {
+          "model": "logistic-C0.01",
+          "validation_pr_auc": 0.10878317588843904
+        },
+        {
+          "model": "logistic-C0.1",
+          "validation_pr_auc": 0.10703961744617888
+        },
+        {
+          "model": "logistic-C1",
+          "validation_pr_auc": 0.1054258556527159
+        },
+        {
+          "model": "lightgbm-3",
+          "validation_pr_auc": 0.18827815506508205
+        },
+        {
+          "model": "lightgbm-7",
+          "validation_pr_auc": 0.12417559096251796
+        },
+        {
+          "model": "lightgbm-15",
+          "validation_pr_auc": 0.10519246835036308
+        }
+      ],
+      "model": {
+        "accuracy": 0.5,
+        "precision": 0.08536585365853659,
+        "recall": 0.7368421052631579,
+        "f1": 0.15300546448087432,
+        "roc_auc": 0.667028395731597,
+        "pr_auc": 0.10982983470367519,
+        "brier_score": 0.057279294765962045,
+        "confusion_matrix": [
+          [
+            141,
+            150
+          ],
+          [
+            5,
+            14
+          ]
+        ],
+        "threshold": 0.030326144898351552,
+        "balanced_accuracy": 0.6106890938686923
+      },
+      "fixed_05_model": {
+        "accuracy": 0.9387096774193548,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "roc_auc": 0.667028395731597,
+        "pr_auc": 0.10982983470367519,
+        "brier_score": 0.057279294765962045,
+        "confusion_matrix": [
+          [
+            291,
+            0
+          ],
+          [
+            19,
+            0
+          ]
+        ],
+        "threshold": 0.5
+      },
+      "baseline": {
+        "accuracy": 0.9387096774193548,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "roc_auc": 0.5,
+        "pr_auc": 0.06129032258064516,
+        "brier_score": 0.05794542369539385,
+        "confusion_matrix": [
+          [
+            291,
+            0
+          ],
+          [
+            19,
+            0
+          ]
+        ],
+        "threshold": 0.5,
+        "balanced_accuracy": 0.5
+      }
+    }
+  ],
+  "deployed": false,
+  "limitations": [
+    "One observed appointment per mother in this source; longitudinal response history unavailable.",
+    "Rare missed outcomes produce small validation/test positive counts and unstable estimates.",
+    "Different outcome target and sample from the simulated interaction experiments; do not compare accuracies directly.",
+    "High majority accuracy reflects class imbalance, not evidence of a useful model. Any accuracy above .95 must be inspected against class balance.",
+    "Richer features in this experiment are not yet a serving contract; no automatic promotion."
+  ]
+}

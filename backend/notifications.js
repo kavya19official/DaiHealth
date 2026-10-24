@@ -186,7 +186,9 @@ module.exports = function registerNotificationRoutes(app, { pool, authenticateTo
       const rows = (await pool.query(
         `SELECT ${NOTIF_COLUMNS} FROM notifications WHERE user_id = $1 AND dismissed_at IS NULL AND (severity='danger' OR snoozed_until IS NULL OR snoozed_until<=NOW())
           ORDER BY (read_at IS NULL) DESC, event_date ASC NULLS LAST, created_at DESC LIMIT 50`, [req.user.id])).rows;
-      res.json({ notifications: rows, unread_count: rows.filter((r) => !r.read_at).length });
+      let assistance_reminder = null;
+      if(req.user.role==='mother') { try { assistance_reminder = await require('./reminderScheduler').plan(pool,req.user.id); } catch (_) { /* Older schemas or unavailable ML must not break the existing inbox. */ } }
+      res.json({ notifications: rows, unread_count: rows.filter((r) => !r.read_at).length, assistance_reminder });
     } catch (error) {
       console.error('Load notifications error:', error);
       res.status(500).json({ error: 'Failed to load notifications' });

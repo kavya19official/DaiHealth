@@ -680,3 +680,7 @@ live socket. Hospital administration remains authoritative for resource changes.
 ### Doctor clinic activity
 
 The local launcher additively seeds a linked clinic scenario for existing synthetic doctor–mother assignments: recent and upcoming ANC appointments, today’s queue states, completed follow-ups, clinic measurements and downloadable PNG reports. This runs once (`doctor-activity-v1`) and preserves existing edits, deleted files and revoked consent. Summary/report shares are scoped to the already assigned fictional clinician; patients without summary sharing remain visible only within the existing coordination permissions. It does not create risk labels, change hospital beds, or claim live readiness. Generated report files stay in the ignored local document store and regenerate on a fresh setup. The doctor dashboard uses local illustrations and the existing pregnancy artwork, with no external image service.
+
+### Patient access ML
+
+The opt-in patient assistance service reuses the existing synthetic cohort. Setup, training, five-seed measured evaluation, consent controls and rule fallbacks are documented in `ml-service/README.md`. Run `make ml-install ml-data ml-train ml-eval ml-test`, then `ML_ENABLED=true npm start`. Patient Settings contains separate permissions. The default remains rule-based; no clinical label or patient-facing risk score is generated.

@@ -1,0 +1,2443 @@
+{
+  "data_label": "synthetic",
+  "statement": "Metrics are measured on synthetic data and are not real-world performance.",
+  "seeds": [
+    42,
+    43,
+    44,
+    45,
+    46
+  ],
+  "standard_deviation": "sample (ddof=1); paired differences for improvement",
+  "summary": {
+    "barrier": {
+      "accuracy": {
+        "baseline": {
+          "mean": 0.5365333333333334,
+          "std": 0.012990594888439686,
+          "runs": 5
+        },
+        "model": {
+          "mean": 0.5405333333333333,
+          "std": 0.012617448236470033,
+          "runs": 5
+        },
+        "improvement": {
+          "mean": 0.003999999999999959,
+          "std": 0.012806248474865698,
+          "runs": 5
+        },
+        "logistic_regression": {
+          "mean": 0.5553333333333333,
+          "std": 0.015238839267549915,
+          "runs": 5
+        },
+        "improvement_over_logistic": {
+          "mean": -0.014800000000000035,
+          "std": 0.005236623169774791,
+          "runs": 5
+        }
+      },
+      "precision": {
+        "baseline": {
+          "mean": 0.0,
+          "std": 0.0,
+          "runs": 5
+        },
+        "model": {
+          "mean": 0.5422368686739084,
+          "std": 0.08308444521757814,
+          "runs": 5
+        },
+        "improvement": {
+          "mean": 0.5422368686739084,
+          "std": 0.08308444521757814,
+          "runs": 5
+        },
+        "logistic_regression": {
+          "mean": 0.5589997650766937,
+          "std": 0.0424936170696608,
+          "runs": 5
+        },
+        "improvement_over_logistic": {
+          "mean": -0.01676289640278531,
+          "std": 0.04216631616433345,
+          "runs": 5
+        }
+      },
+      "recall": {
+        "baseline": {
+          "mean": 0.0,
+          "std": 0.0,
+          "runs": 5
+        },
+        "model": {
+          "mean": 0.0991981149148357,
+          "std": 0.0681156723190284,
+          "runs": 5
+        },
+        "improvement": {
+          "mean": 0.0991981149148357,
+          "std": 0.0681156723190284,
+          "runs": 5
+        },
+        "logistic_regression": {
+          "mean": 0.19505760845862044,
+          "std": 0.046705138236466485,
+          "runs": 5
+        },
+        "improvement_over_logistic": {
+          "mean": -0.09585949354378474,
+          "std": 0.042539132525258996,
+          "runs": 5
+        }
+      },
+      "f1": {
+        "baseline": {
+          "mean": 0.0,
+          "std": 0.0,
+          "runs": 5
+        },
+        "model": {
+          "mean": 0.15881185212091575,
+          "std": 0.08818186495094953,
+          "runs": 5
+        },
+        "improvement": {
+          "mean": 0.15881185212091575,
+          "std": 0.08818186495094953,
+          "runs": 5
+        },
+        "logistic_regression": {
+          "mean": 0.2866588246171352,
+          "std": 0.0518176796916211,
+          "runs": 5
+        },
+        "improvement_over_logistic": {
+          "mean": -0.1278469724962194,
+          "std": 0.0625239993408336,
+          "runs": 5
+        }
+      },
+      "roc_auc": {
+        "baseline": {
+          "mean": 0.5,
+          "std": 0.0,
+          "runs": 5
+        },
+        "model": {
+          "mean": 0.5571672371334516,
+          "std": 0.018200003953263353,
+          "runs": 5
+        },
+        "improvement": {
+          "mean": 0.05716723713345169,
+          "std": 0.01820000395326335,
+          "runs": 5
+        },
+        "logistic_regression": {
+          "mean": 0.5612935500665542,
+          "std": 0.017820079240406017,
+          "runs": 5
+        },
+        "improvement_over_logistic": {
+          "mean": -0.004126312933102505,
+          "std": 0.006040593645897005,
+          "runs": 5
+        }
+      },
+      "pr_auc": {
+        "baseline": {
+          "mean": 0.4634666666666667,
+          "std": 0.0129905948884397,
+          "runs": 5
+        },
+        "model": {
+          "mean": 0.5095545279170967,
+          "std": 0.02242622351773857,
+          "runs": 5
+        },
+        "improvement": {
+          "mean": 0.04608786125043003,
+          "std": 0.022433997199445013,
+          "runs": 5
+        },
+        "logistic_regression": {
+          "mean": 0.5202141139453829,
+          "std": 0.021299291776595192,
+          "runs": 5
+        },
+        "improvement_over_logistic": {
+          "mean": -0.010659586028286205,
+          "std": 0.0077800272328178615,
+          "runs": 5
+        }
+      },
+      "brier_score": {
+        "baseline": {
+          "mean": 0.2532124328231292,
+          "std": 0.002317541428252889,
+          "runs": 5
+        },
+        "model": {
+          "mean": 0.2471279489120791,
+          "std": 0.0019883805215275205,
+          "runs": 5
+        },
+        "improvement": {
+          "mean": 0.00608448391105017,
+          "std": 0.0013604446572692166,
+          "runs": 5
+        },
+        "logistic_regression": {
+          "mean": 0.2460265043829569,
+          "std": 0.0020466194147481433,
+          "runs": 5
+        },
+        "improvement_over_logistic": {
+          "mean": -0.0011014445291222196,
+          "std": 0.000534921281585525,
+          "runs": 5
+        }
+      }
+    },
+    "reminders": {
+      "accuracy": {
+        "baseline": {
+          "mean": 0.5764,
+          "std": 0.017253663057127583,
+          "runs": 5
+        },
+        "model": {
+          "mean": 0.5824,
+          "std": 0.012423991128279011,
+          "runs": 5
+        },
+        "improvement": {
+          "mean": 0.0060000000000000496,
+          "std": 0.00586893895388634,
+          "runs": 5
+        }
+      },
+      "precision": {
+        "baseline": {
+          "mean": 0.0,
+          "std": 0.0,
+          "runs": 5
+        },
+        "model": {
+          "mean": 0.5496940461774741,
+          "std": 0.04823540340180167,
+          "runs": 5
+        },
+        "improvement": {
+          "mean": 0.5496940461774741,
+          "std": 0.04823540340180167,
+          "runs": 5
+        }
+      },
+      "recall": {
+        "baseline": {
+          "mean": 0.0,
+          "std": 0.0,
+          "runs": 5
+        },
+        "model": {
+          "mean": 0.08586039535087278,
+          "std": 0.02583596455747333,
+          "runs": 5
+        },
+        "improvement": {
+          "mean": 0.08586039535087278,
+          "std": 0.02583596455747333,
+          "runs": 5
+        }
+      },
+      "f1": {
+        "baseline": {
+          "mean": 0.0,
+          "std": 0.0,
+          "runs": 5
+        },
+        "model": {
+          "mean": 0.14698422981113296,
+          "std": 0.03904832840555721,
+          "runs": 5
+        },
+        "improvement": {
+          "mean": 0.14698422981113296,
+          "std": 0.03904832840555721,
+          "runs": 5
+        }
+      },
+      "roc_auc": {
+        "baseline": {
+          "mean": 0.5,
+          "std": 0.0,
+          "runs": 5
+        },
+        "model": {
+          "mean": 0.5577774347689395,
+          "std": 0.022394973001288482,
+          "runs": 5
+        },
+        "improvement": {
+          "mean": 0.05777743476893944,
+          "std": 0.02239497300128848,
+          "runs": 5
+        }
+      },
+      "pr_auc": {
+        "baseline": {
+          "mean": 0.4236,
+          "std": 0.01725366305712758,
+          "runs": 5
+        },
+        "model": {
+          "mean": 0.47658264741883266,
+          "std": 0.028772545218157686,
+          "runs": 5
+        },
+        "improvement": {
+          "mean": 0.05298264741883267,
+          "std": 0.018888041648268093,
+          "runs": 5
+        }
+      },
+      "brier_score": {
+        "baseline": {
+          "mean": 0.24418121556122446,
+          "std": 0.0026988628646657784,
+          "runs": 5
+        },
+        "model": {
+          "mean": 0.24172259875806335,
+          "std": 0.0028248221225184657,
+          "runs": 5
+        },
+        "improvement": {
+          "mean": 0.0024586168031611177,
+          "std": 0.0016148849349799617,
+          "runs": 5
+        }
+      },
+      "offline_completion_rate": {
+        "baseline": {
+          "mean": 0.3814569221990045,
+          "std": 0.05083379311073451,
+          "runs": 5
+        },
+        "model": {
+          "mean": 0.5440870716331278,
+          "std": 0.04189232656946177,
+          "runs": 5
+        },
+        "random": {
+          "mean": 0.4318008517191666,
+          "std": 0.05971907848800832,
+          "runs": 5
+        },
+        "improvement": {
+          "mean": 0.1626301494341232,
+          "std": 0.07707286665329013,
+          "runs": 5
+        },
+        "relative_lift": {
+          "mean": 0.45202037870304324,
+          "std": 0.2576778328925068,
+          "runs": 5
+        }
+      },
+      "offline_app_completion_rate": {
+        "baseline": {
+          "mean": 0.3814569221990045,
+          "std": 0.05083379311073451,
+          "runs": 5
+        },
+        "model": {
+          "mean": 0.4413239943577022,
+          "std": 0.039708884276718,
+          "runs": 5
+        },
+        "random_time_app": {
+          "mean": 0.43856749597152883,
+          "std": 0.03668665553592881,
+          "runs": 5
+        },
+        "improvement": {
+          "mean": 0.05986707215869773,
+          "std": 0.08216821102036463,
+          "runs": 5
+        }
+      }
+    },
+    "gaps": {
+      "ndcg@3": {
+        "baseline": {
+          "mean": 0.5227213494960836,
+          "std": 0.007575736560093137,
+          "runs": 5
+        },
+        "model": {
+          "mean": 0.6185161603132038,
+          "std": 0.007795127565575653,
+          "runs": 5
+        },
+        "improvement": {
+          "mean": 0.09579481081712016,
+          "std": 0.010848310214169038,
+          "runs": 5
+        }
+      },
+      "mrr": {
+        "baseline": {
+          "mean": 0.6441396408272522,
+          "std": 0.009397959809938634,
+          "runs": 5
+        },
+        "model": {
+          "mean": 0.7283098619036422,
+          "std": 0.00982444709977422,
+          "runs": 5
+        },
+        "improvement": {
+          "mean": 0.08417022107639008,
+          "std": 0.01215567857255145,
+          "runs": 5
+        }
+      },
+      "top1_accuracy": {
+        "baseline": {
+          "mean": 0.42009293316745194,
+          "std": 0.015070101442604499,
+          "runs": 5
+        },
+        "model": {
+          "mean": 0.5469779587898074,
+          "std": 0.019886671265366317,
+          "runs": 5
+        },
+        "improvement": {
+          "mean": 0.12688502562235554,
+          "std": 0.023164137210936672,
+          "runs": 5
+        }
+      }
+    },
+    "facilities": {
+      "ndcg@5": {
+        "baseline": {
+          "mean": 0.6011557795398912,
+          "std": 0.01243277418342648,
+          "runs": 5
+        },
+        "model": {
+          "mean": 0.6250828833965627,
+          "std": 0.011659944787276375,
+          "runs": 5
+        },
+        "improvement": {
+          "mean": 0.023927103856671537,
+          "std": 0.010117037642401433,
+          "runs": 5
+        }
+      },
+      "mrr": {
+        "baseline": {
+          "mean": 0.4938447587280409,
+          "std": 0.013639135190254887,
+          "runs": 5
+        },
+        "model": {
+          "mean": 0.5224742658068342,
+          "std": 0.015272447348181468,
+          "runs": 5
+        },
+        "improvement": {
+          "mean": 0.028629507078793248,
+          "std": 0.014766821046015984,
+          "runs": 5
+        }
+      },
+      "top1_accuracy": {
+        "baseline": {
+          "mean": 0.240567133644652,
+          "std": 0.01949525839903645,
+          "runs": 5
+        },
+        "model": {
+          "mean": 0.27789975539248385,
+          "std": 0.022882826275326035,
+          "runs": 5
+        },
+        "improvement": {
+          "mean": 0.037332621747831876,
+          "std": 0.02582566153797704,
+          "runs": 5
+        }
+      }
+    }
+  },
+  "runs": [
+    {
+      "seed": 42,
+      "source": {
+        "seed": 42,
+        "source_sha256": "57a7ceea43a2b8682da6e23b783d8bfeb743909d972b3e0cbb244e25c6b4943f",
+        "source_path": "synthetic_data/output/dai.db",
+        "mother_count": 5000,
+        "source_counts": {
+          "appointments": 12252,
+          "care_gaps": 16804,
+          "hospitals": 12
+        },
+        "start": "2024-10-21",
+        "end": "2026-10-20",
+        "validation_start": "2026-02-21",
+        "test_start": "2026-06-21",
+        "label_flip_probability": 0.18,
+        "outcome_maturity_days": 7,
+        "label_provenance": "Source identities and attributes; separately simulated interaction outcomes, not untouched original appointment outcomes."
+      },
+      "split_audit": {
+        "patient_overlap": 0,
+        "patient_counts": {
+          "train": 3500,
+          "validation": 750,
+          "test": 750
+        },
+        "time_ranges": {
+          "train": {
+            "min": "2024-12-01",
+            "max": "2026-02-20"
+          },
+          "validation": {
+            "min": "2026-04-01",
+            "max": "2026-06-20"
+          },
+          "test": {
+            "min": "2026-08-01",
+            "max": "2026-10-13"
+          }
+        }
+      },
+      "feature_importance": {
+        "barrier": [
+          {
+            "feature": "digital_literacy",
+            "gain_share": 0.3260934431170493
+          },
+          {
+            "feature": "prior_missed_visits",
+            "gain_share": 0.2514987137961489
+          },
+          {
+            "feature": "distance_km",
+            "gain_share": 0.20779385104463774
+          },
+          {
+            "feature": "caregiver_support",
+            "gain_share": 0.08626430743184148
+          },
+          {
+            "feature": "age",
+            "gain_share": 0.0777737629088438
+          },
+          {
+            "feature": "week",
+            "gain_share": 0.0428486226276219
+          },
+          {
+            "feature": "preferred_channel",
+            "gain_share": 0.007727299073856858
+          }
+        ],
+        "reminders": [
+          {
+            "feature": "preferred_channel",
+            "gain_share": 0.27805814830855885
+          },
+          {
+            "feature": "hour",
+            "gain_share": 0.21291907230618984
+          },
+          {
+            "feature": "distance_km",
+            "gain_share": 0.18671537649746361
+          },
+          {
+            "feature": "channel",
+            "gain_share": 0.11143835980143409
+          },
+          {
+            "feature": "age",
+            "gain_share": 0.07176524937963276
+          },
+          {
+            "feature": "prior_missed_visits",
+            "gain_share": 0.05438875304675042
+          },
+          {
+            "feature": "week",
+            "gain_share": 0.047666762002095
+          },
+          {
+            "feature": "caregiver_support",
+            "gain_share": 0.019745472708630744
+          },
+          {
+            "feature": "digital_literacy",
+            "gain_share": 0.017302805949244687
+          }
+        ],
+        "gaps": [
+          {
+            "feature": "days_overdue",
+            "gain_share": 0.9126592831596335
+          },
+          {
+            "feature": "gap_type",
+            "gain_share": 0.040078922584080474
+          },
+          {
+            "feature": "distance_km",
+            "gain_share": 0.037068904207348166
+          },
+          {
+            "feature": "stage",
+            "gain_share": 0.004689738862148938
+          },
+          {
+            "feature": "clinician_priority",
+            "gain_share": 0.0031785284374767314
+          },
+          {
+            "feature": "caregiver_support",
+            "gain_share": 0.0023246227493121468
+          }
+        ],
+        "facilities": [
+          {
+            "feature": "offers_service",
+            "gain_share": 0.3877350683839383
+          },
+          {
+            "feature": "distance_km",
+            "gain_share": 0.26829415955106684
+          },
+          {
+            "feature": "days_since_confirmed",
+            "gain_share": 0.22382161060677322
+          },
+          {
+            "feature": "appointment_availability",
+            "gain_share": 0.12014916145822163
+          },
+          {
+            "feature": "open_now",
+            "gain_share": 0.0
+          }
+        ]
+      },
+      "selected_parameters": {
+        "barrier": {
+          "num_leaves": 7,
+          "validation_objective": -0.6668417917175172,
+          "threshold": 0.5
+        },
+        "reminders": {
+          "num_leaves": 15,
+          "validation_objective": -0.6742711240592301,
+          "threshold": 0.5
+        },
+        "gaps": {
+          "num_leaves": 7,
+          "validation_objective": 0.6227275521824573,
+          "threshold": null
+        },
+        "facilities": {
+          "num_leaves": 15,
+          "validation_objective": 0.628260110493878,
+          "threshold": null
+        }
+      },
+      "results": {
+        "barrier": {
+          "model": {
+            "accuracy": 0.5346666666666666,
+            "precision": 0.5873015873015873,
+            "recall": 0.05218617771509168,
+            "f1": 0.09585492227979274,
+            "roc_auc": 0.5668531201688958,
+            "pr_auc": 0.5251578297432719,
+            "brier_score": 0.24846962903061576,
+            "confusion_matrix": [
+              [
+                765,
+                26
+              ],
+              [
+                672,
+                37
+              ]
+            ],
+            "threshold": 0.5
+          },
+          "baseline": {
+            "accuracy": 0.5273333333333333,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "roc_auc": 0.5,
+            "pr_auc": 0.4726666666666667,
+            "brier_score": 0.25526282993197286,
+            "confusion_matrix": [
+              [
+                791,
+                0
+              ],
+              [
+                709,
+                0
+              ]
+            ],
+            "threshold": 0.5
+          },
+          "test_rows": 1500,
+          "positive_count": 709,
+          "positive_fraction": 0.4726666666666667,
+          "patients": 750,
+          "logistic_regression": {
+            "accuracy": 0.554,
+            "precision": 0.5826446280991735,
+            "recall": 0.19887165021156558,
+            "f1": 0.29652996845425866,
+            "roc_auc": 0.5618283260731181,
+            "pr_auc": 0.5277790873094927,
+            "brier_score": 0.24735533053961892,
+            "confusion_matrix": [
+              [
+                690,
+                101
+              ],
+              [
+                568,
+                141
+              ]
+            ],
+            "threshold": 0.5
+          }
+        },
+        "reminders": {
+          "model": {
+            "accuracy": 0.5813333333333334,
+            "precision": 0.5546875,
+            "recall": 0.11059190031152648,
+            "f1": 0.18441558441558442,
+            "roc_auc": 0.5384760618405479,
+            "pr_auc": 0.4706315580616258,
+            "brier_score": 0.24353742032848566,
+            "confusion_matrix": [
+              [
+                801,
+                57
+              ],
+              [
+                571,
+                71
+              ]
+            ],
+            "threshold": 0.5
+          },
+          "baseline": {
+            "accuracy": 0.572,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "roc_auc": 0.5,
+            "pr_auc": 0.428,
+            "brier_score": 0.2448340625,
+            "confusion_matrix": [
+              [
+                858,
+                0
+              ],
+              [
+                642,
+                0
+              ]
+            ],
+            "threshold": 0.5
+          },
+          "test_rows": 1500,
+          "positive_count": 642,
+          "positive_fraction": 0.428,
+          "patients": 750,
+          "offline_policy_estimate": {
+            "policy": {
+              "completion_rate": 0.5729166666666666,
+              "matched_actions": 96,
+              "effective_sample_size": 96.0
+            },
+            "fixed": {
+              "completion_rate": 0.3978494623655914,
+              "matched_actions": 93,
+              "effective_sample_size": 93.0
+            },
+            "random": {
+              "completion_rate": 0.42696629213483145,
+              "matched_actions": 89,
+              "effective_sample_size": 89.0
+            },
+            "app_only": {
+              "completion_rate": 0.3939393939393939,
+              "matched_actions": 99,
+              "effective_sample_size": 99.0
+            },
+            "random_time_app": {
+              "completion_rate": 0.40816326530612246,
+              "matched_actions": 98,
+              "effective_sample_size": 98.0
+            },
+            "absolute_lift": 0.17506720430107525,
+            "relative_lift": 0.44003378378378377,
+            "method": "Self-normalized inverse propensity scoring on held-out uniformly randomized logged actions. Only factual matches used; not a causal real-world trial."
+          }
+        },
+        "gaps": {
+          "model": {
+            "ndcg@3": 0.631737768780716,
+            "mrr": 0.7378503590456336,
+            "top1_accuracy": 0.5642807505211953,
+            "evaluated_queries": 1439,
+            "no_relevant_queries_excluded": 61,
+            "single_candidate_queries_excluded": 0
+          },
+          "baseline": {
+            "ndcg@3": 0.5194164437136861,
+            "mrr": 0.6372828353022932,
+            "top1_accuracy": 0.4100069492703266,
+            "evaluated_queries": 1439,
+            "no_relevant_queries_excluded": 61,
+            "single_candidate_queries_excluded": 0
+          },
+          "guarded_baseline": {
+            "ndcg@3": 0.5227141961411778,
+            "mrr": 0.6401899467222607,
+            "top1_accuracy": 0.41487143849895763,
+            "evaluated_queries": 1439,
+            "no_relevant_queries_excluded": 61,
+            "single_candidate_queries_excluded": 0
+          },
+          "test_rows": 7500,
+          "eligible_test_rows": 7500,
+          "patients": 750,
+          "positive_count": 3536
+        },
+        "facilities": {
+          "model": {
+            "ndcg@5": 0.6128967942119108,
+            "mrr": 0.5094,
+            "top1_accuracy": 0.2633333333333333,
+            "evaluated_queries": 1500,
+            "no_relevant_queries_excluded": 0,
+            "single_candidate_queries_excluded": 0
+          },
+          "baseline": {
+            "ndcg@5": 0.5886718935683917,
+            "mrr": 0.4819444444444445,
+            "top1_accuracy": 0.22466666666666665,
+            "evaluated_queries": 1500,
+            "no_relevant_queries_excluded": 0,
+            "single_candidate_queries_excluded": 0
+          },
+          "guarded_baseline": {
+            "ndcg@5": 0.5886718935683917,
+            "mrr": 0.4819444444444445,
+            "top1_accuracy": 0.22466666666666665,
+            "evaluated_queries": 1500,
+            "no_relevant_queries_excluded": 0,
+            "single_candidate_queries_excluded": 0
+          },
+          "test_rows": 9000,
+          "eligible_test_rows": 7905,
+          "patients": 750,
+          "positive_count": 1500
+        }
+      }
+    },
+    {
+      "seed": 43,
+      "source": {
+        "seed": 43,
+        "source_sha256": "57a7ceea43a2b8682da6e23b783d8bfeb743909d972b3e0cbb244e25c6b4943f",
+        "source_path": "synthetic_data/output/dai.db",
+        "mother_count": 5000,
+        "source_counts": {
+          "appointments": 12252,
+          "care_gaps": 16804,
+          "hospitals": 12
+        },
+        "start": "2024-10-21",
+        "end": "2026-10-20",
+        "validation_start": "2026-02-21",
+        "test_start": "2026-06-21",
+        "label_flip_probability": 0.18,
+        "outcome_maturity_days": 7,
+        "label_provenance": "Source identities and attributes; separately simulated interaction outcomes, not untouched original appointment outcomes."
+      },
+      "split_audit": {
+        "patient_overlap": 0,
+        "patient_counts": {
+          "train": 3500,
+          "validation": 750,
+          "test": 750
+        },
+        "time_ranges": {
+          "train": {
+            "min": "2024-12-01",
+            "max": "2026-02-20"
+          },
+          "validation": {
+            "min": "2026-04-01",
+            "max": "2026-06-20"
+          },
+          "test": {
+            "min": "2026-08-01",
+            "max": "2026-10-13"
+          }
+        }
+      },
+      "feature_importance": {
+        "barrier": [
+          {
+            "feature": "distance_km",
+            "gain_share": 0.33949783816406676
+          },
+          {
+            "feature": "digital_literacy",
+            "gain_share": 0.1673509938145046
+          },
+          {
+            "feature": "prior_missed_visits",
+            "gain_share": 0.16618924538562796
+          },
+          {
+            "feature": "age",
+            "gain_share": 0.12844346837273637
+          },
+          {
+            "feature": "week",
+            "gain_share": 0.08245212792532544
+          },
+          {
+            "feature": "caregiver_support",
+            "gain_share": 0.07638334820332833
+          },
+          {
+            "feature": "preferred_channel",
+            "gain_share": 0.03968297813441051
+          }
+        ],
+        "reminders": [
+          {
+            "feature": "preferred_channel",
+            "gain_share": 0.3264850901903687
+          },
+          {
+            "feature": "distance_km",
+            "gain_share": 0.18786826118824168
+          },
+          {
+            "feature": "hour",
+            "gain_share": 0.18546815687596943
+          },
+          {
+            "feature": "age",
+            "gain_share": 0.09710468951677877
+          },
+          {
+            "feature": "channel",
+            "gain_share": 0.08502016194798147
+          },
+          {
+            "feature": "prior_missed_visits",
+            "gain_share": 0.04560348514412196
+          },
+          {
+            "feature": "week",
+            "gain_share": 0.044268761788922036
+          },
+          {
+            "feature": "digital_literacy",
+            "gain_share": 0.0205224329400142
+          },
+          {
+            "feature": "caregiver_support",
+            "gain_share": 0.007658960407601769
+          }
+        ],
+        "gaps": [
+          {
+            "feature": "days_overdue",
+            "gain_share": 0.9270757952622976
+          },
+          {
+            "feature": "distance_km",
+            "gain_share": 0.03107983079342675
+          },
+          {
+            "feature": "gap_type",
+            "gain_share": 0.020441830251756433
+          },
+          {
+            "feature": "clinician_priority",
+            "gain_share": 0.017368661995838714
+          },
+          {
+            "feature": "stage",
+            "gain_share": 0.0029397302748789683
+          },
+          {
+            "feature": "caregiver_support",
+            "gain_share": 0.0010941514218015883
+          }
+        ],
+        "facilities": [
+          {
+            "feature": "offers_service",
+            "gain_share": 0.4310655564720002
+          },
+          {
+            "feature": "distance_km",
+            "gain_share": 0.2519663734462928
+          },
+          {
+            "feature": "appointment_availability",
+            "gain_share": 0.1643049404191876
+          },
+          {
+            "feature": "days_since_confirmed",
+            "gain_share": 0.15266312966251944
+          },
+          {
+            "feature": "open_now",
+            "gain_share": 0.0
+          }
+        ]
+      },
+      "selected_parameters": {
+        "barrier": {
+          "num_leaves": 15,
+          "validation_objective": -0.6863804213201187,
+          "threshold": 0.5
+        },
+        "reminders": {
+          "num_leaves": 15,
+          "validation_objective": -0.6719554928299073,
+          "threshold": 0.5
+        },
+        "gaps": {
+          "num_leaves": 7,
+          "validation_objective": 0.6202012937558868,
+          "threshold": null
+        },
+        "facilities": {
+          "num_leaves": 15,
+          "validation_objective": 0.633025655069305,
+          "threshold": null
+        }
+      },
+      "results": {
+        "barrier": {
+          "model": {
+            "accuracy": 0.5473333333333333,
+            "precision": 0.5263157894736842,
+            "recall": 0.04398826979472141,
+            "f1": 0.08119079837618404,
+            "roc_auc": 0.5726541381955847,
+            "pr_auc": 0.5096908827035703,
+            "brier_score": 0.24507043701112577,
+            "confusion_matrix": [
+              [
+                791,
+                27
+              ],
+              [
+                652,
+                30
+              ]
+            ],
+            "threshold": 0.5
+          },
+          "baseline": {
+            "accuracy": 0.5453333333333333,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "roc_auc": 0.5,
+            "pr_auc": 0.45466666666666666,
+            "brier_score": 0.2514329162414966,
+            "confusion_matrix": [
+              [
+                818,
+                0
+              ],
+              [
+                682,
+                0
+              ]
+            ],
+            "threshold": 0.5
+          },
+          "test_rows": 1500,
+          "positive_count": 682,
+          "positive_fraction": 0.45466666666666666,
+          "patients": 750,
+          "logistic_regression": {
+            "accuracy": 0.5586666666666666,
+            "precision": 0.5595238095238095,
+            "recall": 0.1378299120234604,
+            "f1": 0.2211764705882353,
+            "roc_auc": 0.5793653069857818,
+            "pr_auc": 0.5328849474133883,
+            "brier_score": 0.24362516042077492,
+            "confusion_matrix": [
+              [
+                744,
+                74
+              ],
+              [
+                588,
+                94
+              ]
+            ],
+            "threshold": 0.5
+          }
+        },
+        "reminders": {
+          "model": {
+            "accuracy": 0.5933333333333334,
+            "precision": 0.4766355140186916,
+            "recall": 0.08429752066115702,
+            "f1": 0.14325842696629212,
+            "roc_auc": 0.5602520892007941,
+            "pr_auc": 0.4510943305403671,
+            "brier_score": 0.2384423455645905,
+            "confusion_matrix": [
+              [
+                839,
+                56
+              ],
+              [
+                554,
+                51
+              ]
+            ],
+            "threshold": 0.5
+          },
+          "baseline": {
+            "accuracy": 0.5966666666666667,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "roc_auc": 0.5,
+            "pr_auc": 0.4033333333333333,
+            "brier_score": 0.2409960459183673,
+            "confusion_matrix": [
+              [
+                895,
+                0
+              ],
+              [
+                605,
+                0
+              ]
+            ],
+            "threshold": 0.5
+          },
+          "test_rows": 1500,
+          "positive_count": 605,
+          "positive_fraction": 0.4033333333333333,
+          "patients": 750,
+          "offline_policy_estimate": {
+            "policy": {
+              "completion_rate": 0.5212765957446809,
+              "matched_actions": 94,
+              "effective_sample_size": 94.0
+            },
+            "fixed": {
+              "completion_rate": 0.42574257425742573,
+              "matched_actions": 101,
+              "effective_sample_size": 101.0
+            },
+            "random": {
+              "completion_rate": 0.38144329896907214,
+              "matched_actions": 97,
+              "effective_sample_size": 97.0
+            },
+            "app_only": {
+              "completion_rate": 0.42857142857142855,
+              "matched_actions": 91,
+              "effective_sample_size": 91.0
+            },
+            "random_time_app": {
+              "completion_rate": 0.4380952380952381,
+              "matched_actions": 105,
+              "effective_sample_size": 105.0
+            },
+            "absolute_lift": 0.09553402148725515,
+            "relative_lift": 0.2243938644235528,
+            "method": "Self-normalized inverse propensity scoring on held-out uniformly randomized logged actions. Only factual matches used; not a causal real-world trial."
+          }
+        },
+        "gaps": {
+          "model": {
+            "ndcg@3": 0.6180925355722822,
+            "mrr": 0.7234691528545121,
+            "top1_accuracy": 0.5366022099447514,
+            "evaluated_queries": 1448,
+            "no_relevant_queries_excluded": 52,
+            "single_candidate_queries_excluded": 0
+          },
+          "baseline": {
+            "ndcg@3": 0.5251823332212979,
+            "mrr": 0.6414709944751381,
+            "top1_accuracy": 0.4136740331491713,
+            "evaluated_queries": 1448,
+            "no_relevant_queries_excluded": 52,
+            "single_candidate_queries_excluded": 0
+          },
+          "guarded_baseline": {
+            "ndcg@3": 0.5286830842043079,
+            "mrr": 0.6461441068139963,
+            "top1_accuracy": 0.4205801104972376,
+            "evaluated_queries": 1448,
+            "no_relevant_queries_excluded": 52,
+            "single_candidate_queries_excluded": 0
+          },
+          "test_rows": 7500,
+          "eligible_test_rows": 7500,
+          "patients": 750,
+          "positive_count": 3508
+        },
+        "facilities": {
+          "model": {
+            "ndcg@5": 0.6169054856433177,
+            "mrr": 0.5069935512563931,
+            "top1_accuracy": 0.24816544362908605,
+            "evaluated_queries": 1499,
+            "no_relevant_queries_excluded": 0,
+            "single_candidate_queries_excluded": 1
+          },
+          "baseline": {
+            "ndcg@5": 0.6090362709297018,
+            "mrr": 0.5023571269735378,
+            "top1_accuracy": 0.25350233488992663,
+            "evaluated_queries": 1499,
+            "no_relevant_queries_excluded": 0,
+            "single_candidate_queries_excluded": 1
+          },
+          "guarded_baseline": {
+            "ndcg@5": 0.6090362709297018,
+            "mrr": 0.5023571269735378,
+            "top1_accuracy": 0.25350233488992663,
+            "evaluated_queries": 1499,
+            "no_relevant_queries_excluded": 0,
+            "single_candidate_queries_excluded": 1
+          },
+          "test_rows": 9000,
+          "eligible_test_rows": 7900,
+          "patients": 750,
+          "positive_count": 1500
+        }
+      }
+    },
+    {
+      "seed": 44,
+      "source": {
+        "seed": 44,
+        "source_sha256": "57a7ceea43a2b8682da6e23b783d8bfeb743909d972b3e0cbb244e25c6b4943f",
+        "source_path": "synthetic_data/output/dai.db",
+        "mother_count": 5000,
+        "source_counts": {
+          "appointments": 12252,
+          "care_gaps": 16804,
+          "hospitals": 12
+        },
+        "start": "2024-10-21",
+        "end": "2026-10-20",
+        "validation_start": "2026-02-21",
+        "test_start": "2026-06-21",
+        "label_flip_probability": 0.18,
+        "outcome_maturity_days": 7,
+        "label_provenance": "Source identities and attributes; separately simulated interaction outcomes, not untouched original appointment outcomes."
+      },
+      "split_audit": {
+        "patient_overlap": 0,
+        "patient_counts": {
+          "train": 3500,
+          "validation": 750,
+          "test": 750
+        },
+        "time_ranges": {
+          "train": {
+            "min": "2024-12-01",
+            "max": "2026-02-20"
+          },
+          "validation": {
+            "min": "2026-04-01",
+            "max": "2026-06-20"
+          },
+          "test": {
+            "min": "2026-08-01",
+            "max": "2026-10-13"
+          }
+        }
+      },
+      "feature_importance": {
+        "barrier": [
+          {
+            "feature": "digital_literacy",
+            "gain_share": 0.2756220603235283
+          },
+          {
+            "feature": "distance_km",
+            "gain_share": 0.2711628714517427
+          },
+          {
+            "feature": "prior_missed_visits",
+            "gain_share": 0.2475870764943439
+          },
+          {
+            "feature": "caregiver_support",
+            "gain_share": 0.10695340280871142
+          },
+          {
+            "feature": "age",
+            "gain_share": 0.0449715442669772
+          },
+          {
+            "feature": "week",
+            "gain_share": 0.03738891647238625
+          },
+          {
+            "feature": "preferred_channel",
+            "gain_share": 0.016314128182310168
+          }
+        ],
+        "reminders": [
+          {
+            "feature": "preferred_channel",
+            "gain_share": 0.40409710339218147
+          },
+          {
+            "feature": "hour",
+            "gain_share": 0.2867317468440041
+          },
+          {
+            "feature": "channel",
+            "gain_share": 0.09675457569205798
+          },
+          {
+            "feature": "distance_km",
+            "gain_share": 0.08842976992389734
+          },
+          {
+            "feature": "age",
+            "gain_share": 0.08047955302983954
+          },
+          {
+            "feature": "prior_missed_visits",
+            "gain_share": 0.016801658475545142
+          },
+          {
+            "feature": "digital_literacy",
+            "gain_share": 0.014574898301743067
+          },
+          {
+            "feature": "week",
+            "gain_share": 0.012130694340731387
+          },
+          {
+            "feature": "caregiver_support",
+            "gain_share": 0.0
+          }
+        ],
+        "gaps": [
+          {
+            "feature": "days_overdue",
+            "gain_share": 0.9144554314788841
+          },
+          {
+            "feature": "distance_km",
+            "gain_share": 0.03652448946596422
+          },
+          {
+            "feature": "gap_type",
+            "gain_share": 0.02886555462712251
+          },
+          {
+            "feature": "clinician_priority",
+            "gain_share": 0.016896453855634524
+          },
+          {
+            "feature": "caregiver_support",
+            "gain_share": 0.002688379448862861
+          },
+          {
+            "feature": "stage",
+            "gain_share": 0.0005696911235317699
+          }
+        ],
+        "facilities": [
+          {
+            "feature": "offers_service",
+            "gain_share": 0.39604396805274883
+          },
+          {
+            "feature": "days_since_confirmed",
+            "gain_share": 0.22428193493695153
+          },
+          {
+            "feature": "distance_km",
+            "gain_share": 0.19809114042860268
+          },
+          {
+            "feature": "appointment_availability",
+            "gain_share": 0.18158295658169693
+          },
+          {
+            "feature": "open_now",
+            "gain_share": 0.0
+          }
+        ]
+      },
+      "selected_parameters": {
+        "barrier": {
+          "num_leaves": 7,
+          "validation_objective": -0.6785231810222158,
+          "threshold": 0.5
+        },
+        "reminders": {
+          "num_leaves": 7,
+          "validation_objective": -0.6713257142486357,
+          "threshold": 0.5
+        },
+        "gaps": {
+          "num_leaves": 7,
+          "validation_objective": 0.6054336038946597,
+          "threshold": null
+        },
+        "facilities": {
+          "num_leaves": 7,
+          "validation_objective": 0.6293623670782216,
+          "threshold": null
+        }
+      },
+      "results": {
+        "barrier": {
+          "model": {
+            "accuracy": 0.5326666666666666,
+            "precision": 0.42424242424242425,
+            "recall": 0.10355029585798817,
+            "f1": 0.16646848989298454,
+            "roc_auc": 0.5363215947607285,
+            "pr_auc": 0.47566295200123376,
+            "brier_score": 0.24704344010775967,
+            "confusion_matrix": [
+              [
+                729,
+                95
+              ],
+              [
+                606,
+                70
+              ]
+            ],
+            "threshold": 0.5
+          },
+          "baseline": {
+            "accuracy": 0.5493333333333333,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "roc_auc": 0.5,
+            "pr_auc": 0.45066666666666666,
+            "brier_score": 0.2507854336734694,
+            "confusion_matrix": [
+              [
+                824,
+                0
+              ],
+              [
+                676,
+                0
+              ]
+            ],
+            "threshold": 0.5
+          },
+          "test_rows": 1500,
+          "positive_count": 676,
+          "positive_fraction": 0.45066666666666666,
+          "patients": 750,
+          "logistic_regression": {
+            "accuracy": 0.55,
+            "precision": 0.5022421524663677,
+            "recall": 0.16568047337278108,
+            "f1": 0.24916573971078976,
+            "roc_auc": 0.5381958407537197,
+            "pr_auc": 0.48588888916606776,
+            "brier_score": 0.24686020420617896,
+            "confusion_matrix": [
+              [
+                713,
+                111
+              ],
+              [
+                564,
+                112
+              ]
+            ],
+            "threshold": 0.5
+          }
+        },
+        "reminders": {
+          "model": {
+            "accuracy": 0.5713333333333334,
+            "precision": 0.5413533834586466,
+            "recall": 0.11009174311926606,
+            "f1": 0.18297331639135958,
+            "roc_auc": 0.5368002689396404,
+            "pr_auc": 0.47022611601438735,
+            "brier_score": 0.24511350836675722,
+            "confusion_matrix": [
+              [
+                785,
+                61
+              ],
+              [
+                582,
+                72
+              ]
+            ],
+            "threshold": 0.5
+          },
+          "baseline": {
+            "accuracy": 0.564,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "roc_auc": 0.5,
+            "pr_auc": 0.436,
+            "brier_score": 0.245991556122449,
+            "confusion_matrix": [
+              [
+                846,
+                0
+              ],
+              [
+                654,
+                0
+              ]
+            ],
+            "threshold": 0.5
+          },
+          "test_rows": 1500,
+          "positive_count": 654,
+          "positive_fraction": 0.436,
+          "patients": 750,
+          "offline_policy_estimate": {
+            "policy": {
+              "completion_rate": 0.5,
+              "matched_actions": 80,
+              "effective_sample_size": 80.0
+            },
+            "fixed": {
+              "completion_rate": 0.4260869565217391,
+              "matched_actions": 115,
+              "effective_sample_size": 115.0
+            },
+            "random": {
+              "completion_rate": 0.47674418604651164,
+              "matched_actions": 86,
+              "effective_sample_size": 86.0
+            },
+            "app_only": {
+              "completion_rate": 0.42696629213483145,
+              "matched_actions": 89,
+              "effective_sample_size": 89.0
+            },
+            "random_time_app": {
+              "completion_rate": 0.5,
+              "matched_actions": 106,
+              "effective_sample_size": 106.0
+            },
+            "absolute_lift": 0.07391304347826089,
+            "relative_lift": 0.17346938775510212,
+            "method": "Self-normalized inverse propensity scoring on held-out uniformly randomized logged actions. Only factual matches used; not a causal real-world trial."
+          }
+        },
+        "gaps": {
+          "model": {
+            "ndcg@3": 0.6141578853616134,
+            "mrr": 0.7175462962962962,
+            "top1_accuracy": 0.5229166666666667,
+            "evaluated_queries": 1440,
+            "no_relevant_queries_excluded": 60,
+            "single_candidate_queries_excluded": 0
+          },
+          "baseline": {
+            "ndcg@3": 0.5272861705698049,
+            "mrr": 0.6505671296296296,
+            "top1_accuracy": 0.43194444444444446,
+            "evaluated_queries": 1440,
+            "no_relevant_queries_excluded": 60,
+            "single_candidate_queries_excluded": 0
+          },
+          "guarded_baseline": {
+            "ndcg@3": 0.5307469161286693,
+            "mrr": 0.6546412037037037,
+            "top1_accuracy": 0.4375,
+            "evaluated_queries": 1440,
+            "no_relevant_queries_excluded": 60,
+            "single_candidate_queries_excluded": 0
+          },
+          "test_rows": 7500,
+          "eligible_test_rows": 7500,
+          "patients": 750,
+          "positive_count": 3500
+        },
+        "facilities": {
+          "model": {
+            "ndcg@5": 0.6425132597042642,
+            "mrr": 0.5435666666666666,
+            "top1_accuracy": 0.30666666666666664,
+            "evaluated_queries": 1500,
+            "no_relevant_queries_excluded": 0,
+            "single_candidate_queries_excluded": 0
+          },
+          "baseline": {
+            "ndcg@5": 0.6153024947114192,
+            "mrr": 0.5084666666666666,
+            "top1_accuracy": 0.262,
+            "evaluated_queries": 1500,
+            "no_relevant_queries_excluded": 0,
+            "single_candidate_queries_excluded": 0
+          },
+          "guarded_baseline": {
+            "ndcg@5": 0.6153024947114192,
+            "mrr": 0.5084666666666666,
+            "top1_accuracy": 0.262,
+            "evaluated_queries": 1500,
+            "no_relevant_queries_excluded": 0,
+            "single_candidate_queries_excluded": 0
+          },
+          "test_rows": 9000,
+          "eligible_test_rows": 7826,
+          "patients": 750,
+          "positive_count": 1500
+        }
+      }
+    },
+    {
+      "seed": 45,
+      "source": {
+        "seed": 45,
+        "source_sha256": "57a7ceea43a2b8682da6e23b783d8bfeb743909d972b3e0cbb244e25c6b4943f",
+        "source_path": "synthetic_data/output/dai.db",
+        "mother_count": 5000,
+        "source_counts": {
+          "appointments": 12252,
+          "care_gaps": 16804,
+          "hospitals": 12
+        },
+        "start": "2024-10-21",
+        "end": "2026-10-20",
+        "validation_start": "2026-02-21",
+        "test_start": "2026-06-21",
+        "label_flip_probability": 0.18,
+        "outcome_maturity_days": 7,
+        "label_provenance": "Source identities and attributes; separately simulated interaction outcomes, not untouched original appointment outcomes."
+      },
+      "split_audit": {
+        "patient_overlap": 0,
+        "patient_counts": {
+          "train": 3500,
+          "validation": 750,
+          "test": 750
+        },
+        "time_ranges": {
+          "train": {
+            "min": "2024-12-01",
+            "max": "2026-02-20"
+          },
+          "validation": {
+            "min": "2026-04-01",
+            "max": "2026-06-20"
+          },
+          "test": {
+            "min": "2026-08-01",
+            "max": "2026-10-13"
+          }
+        }
+      },
+      "feature_importance": {
+        "barrier": [
+          {
+            "feature": "distance_km",
+            "gain_share": 0.286605892329479
+          },
+          {
+            "feature": "prior_missed_visits",
+            "gain_share": 0.21174912862613424
+          },
+          {
+            "feature": "age",
+            "gain_share": 0.15548391800566919
+          },
+          {
+            "feature": "digital_literacy",
+            "gain_share": 0.14221846889665493
+          },
+          {
+            "feature": "week",
+            "gain_share": 0.07518677067221881
+          },
+          {
+            "feature": "caregiver_support",
+            "gain_share": 0.0705910203777708
+          },
+          {
+            "feature": "preferred_channel",
+            "gain_share": 0.05816480109207304
+          }
+        ],
+        "reminders": [
+          {
+            "feature": "hour",
+            "gain_share": 0.3571050230597397
+          },
+          {
+            "feature": "preferred_channel",
+            "gain_share": 0.2906602863903509
+          },
+          {
+            "feature": "channel",
+            "gain_share": 0.10258236733761923
+          },
+          {
+            "feature": "distance_km",
+            "gain_share": 0.0963984790450836
+          },
+          {
+            "feature": "week",
+            "gain_share": 0.051214658603165535
+          },
+          {
+            "feature": "age",
+            "gain_share": 0.04760997043567144
+          },
+          {
+            "feature": "prior_missed_visits",
+            "gain_share": 0.034749829192884336
+          },
+          {
+            "feature": "digital_literacy",
+            "gain_share": 0.01843752968590253
+          },
+          {
+            "feature": "caregiver_support",
+            "gain_share": 0.0012418562495827158
+          }
+        ],
+        "gaps": [
+          {
+            "feature": "days_overdue",
+            "gain_share": 0.7826684302944784
+          },
+          {
+            "feature": "distance_km",
+            "gain_share": 0.10182461717246123
+          },
+          {
+            "feature": "gap_type",
+            "gain_share": 0.05634993943516749
+          },
+          {
+            "feature": "stage",
+            "gain_share": 0.026607620944123996
+          },
+          {
+            "feature": "clinician_priority",
+            "gain_share": 0.023511922950337216
+          },
+          {
+            "feature": "caregiver_support",
+            "gain_share": 0.009037469203431653
+          }
+        ],
+        "facilities": [
+          {
+            "feature": "offers_service",
+            "gain_share": 0.46851059169611814
+          },
+          {
+            "feature": "distance_km",
+            "gain_share": 0.25448587991498456
+          },
+          {
+            "feature": "days_since_confirmed",
+            "gain_share": 0.20523011880190536
+          },
+          {
+            "feature": "appointment_availability",
+            "gain_share": 0.07177340958699192
+          },
+          {
+            "feature": "open_now",
+            "gain_share": 0.0
+          }
+        ]
+      },
+      "selected_parameters": {
+        "barrier": {
+          "num_leaves": 15,
+          "validation_objective": -0.6782782357538892,
+          "threshold": 0.5
+        },
+        "reminders": {
+          "num_leaves": 7,
+          "validation_objective": -0.6783334673980679,
+          "threshold": 0.5
+        },
+        "gaps": {
+          "num_leaves": 15,
+          "validation_objective": 0.6165680490184983,
+          "threshold": null
+        },
+        "facilities": {
+          "num_leaves": 7,
+          "validation_objective": 0.621032095749607,
+          "threshold": null
+        }
+      },
+      "results": {
+        "barrier": {
+          "model": {
+            "accuracy": 0.5286666666666666,
+            "precision": 0.5255972696245734,
+            "recall": 0.21329639889196675,
+            "f1": 0.30344827586206896,
+            "roc_auc": 0.5384598266739776,
+            "pr_auc": 0.503549450149019,
+            "brier_score": 0.24970225735252097,
+            "confusion_matrix": [
+              [
+                639,
+                139
+              ],
+              [
+                568,
+                154
+              ]
+            ],
+            "threshold": 0.5
+          },
+          "baseline": {
+            "accuracy": 0.5186666666666667,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "roc_auc": 0.5,
+            "pr_auc": 0.48133333333333334,
+            "brier_score": 0.25600782100340136,
+            "confusion_matrix": [
+              [
+                778,
+                0
+              ],
+              [
+                722,
+                0
+              ]
+            ],
+            "threshold": 0.5
+          },
+          "test_rows": 1500,
+          "positive_count": 722,
+          "positive_fraction": 0.48133333333333334,
+          "patients": 750,
+          "logistic_regression": {
+            "accuracy": 0.536,
+            "precision": 0.5371428571428571,
+            "recall": 0.26038781163434904,
+            "f1": 0.35074626865671643,
+            "roc_auc": 0.5494012988770125,
+            "pr_auc": 0.514621901364099,
+            "brier_score": 0.24820732065147535,
+            "confusion_matrix": [
+              [
+                616,
+                162
+              ],
+              [
+                534,
+                188
+              ]
+            ],
+            "threshold": 0.5
+          }
+        },
+        "reminders": {
+          "model": {
+            "accuracy": 0.5966666666666667,
+            "precision": 0.5660377358490566,
+            "recall": 0.049019607843137254,
+            "f1": 0.09022556390977443,
+            "roc_auc": 0.5613030309721486,
+            "pr_auc": 0.46488898561100855,
+            "brier_score": 0.239257721116716,
+            "confusion_matrix": [
+              [
+                865,
+                23
+              ],
+              [
+                582,
+                30
+              ]
+            ],
+            "threshold": 0.5
+          },
+          "baseline": {
+            "accuracy": 0.592,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "roc_auc": 0.5,
+            "pr_auc": 0.408,
+            "brier_score": 0.2418012244897959,
+            "confusion_matrix": [
+              [
+                888,
+                0
+              ],
+              [
+                612,
+                0
+              ]
+            ],
+            "threshold": 0.5
+          },
+          "test_rows": 1500,
+          "positive_count": 612,
+          "positive_fraction": 0.408,
+          "patients": 750,
+          "offline_policy_estimate": {
+            "policy": {
+              "completion_rate": 0.524390243902439,
+              "matched_actions": 82,
+              "effective_sample_size": 82.0
+            },
+            "fixed": {
+              "completion_rate": 0.3119266055045872,
+              "matched_actions": 109,
+              "effective_sample_size": 109.0
+            },
+            "random": {
+              "completion_rate": 0.36752136752136755,
+              "matched_actions": 117,
+              "effective_sample_size": 117.0
+            },
+            "app_only": {
+              "completion_rate": 0.45714285714285713,
+              "matched_actions": 105,
+              "effective_sample_size": 105.0
+            },
+            "random_time_app": {
+              "completion_rate": 0.41284403669724773,
+              "matched_actions": 109,
+              "effective_sample_size": 109.0
+            },
+            "absolute_lift": 0.21246363839785187,
+            "relative_lift": 0.6811334289813487,
+            "method": "Self-normalized inverse propensity scoring on held-out uniformly randomized logged actions. Only factual matches used; not a causal real-world trial."
+          }
+        },
+        "gaps": {
+          "model": {
+            "ndcg@3": 0.6168902184153614,
+            "mrr": 0.7396298882681565,
+            "top1_accuracy": 0.5705307262569832,
+            "evaluated_queries": 1432,
+            "no_relevant_queries_excluded": 68,
+            "single_candidate_queries_excluded": 0
+          },
+          "baseline": {
+            "ndcg@3": 0.5304741241713208,
+            "mrr": 0.6569366852886406,
+            "top1_accuracy": 0.4399441340782123,
+            "evaluated_queries": 1432,
+            "no_relevant_queries_excluded": 68,
+            "single_candidate_queries_excluded": 0
+          },
+          "guarded_baseline": {
+            "ndcg@3": 0.5352912108920799,
+            "mrr": 0.6604515828677839,
+            "top1_accuracy": 0.4448324022346369,
+            "evaluated_queries": 1432,
+            "no_relevant_queries_excluded": 68,
+            "single_candidate_queries_excluded": 0
+          },
+          "test_rows": 7500,
+          "eligible_test_rows": 7500,
+          "patients": 750,
+          "positive_count": 3459
+        },
+        "facilities": {
+          "model": {
+            "ndcg@5": 0.6233614096241439,
+            "mrr": 0.5212222222222223,
+            "top1_accuracy": 0.2806666666666667,
+            "evaluated_queries": 1500,
+            "no_relevant_queries_excluded": 0,
+            "single_candidate_queries_excluded": 0
+          },
+          "baseline": {
+            "ndcg@5": 0.5875898339412798,
+            "mrr": 0.4769777777777778,
+            "top1_accuracy": 0.216,
+            "evaluated_queries": 1500,
+            "no_relevant_queries_excluded": 0,
+            "single_candidate_queries_excluded": 0
+          },
+          "guarded_baseline": {
+            "ndcg@5": 0.5875898339412798,
+            "mrr": 0.4769777777777778,
+            "top1_accuracy": 0.216,
+            "evaluated_queries": 1500,
+            "no_relevant_queries_excluded": 0,
+            "single_candidate_queries_excluded": 0
+          },
+          "test_rows": 9000,
+          "eligible_test_rows": 7880,
+          "patients": 750,
+          "positive_count": 1500
+        }
+      }
+    },
+    {
+      "seed": 46,
+      "source": {
+        "seed": 46,
+        "source_sha256": "57a7ceea43a2b8682da6e23b783d8bfeb743909d972b3e0cbb244e25c6b4943f",
+        "source_path": "synthetic_data/output/dai.db",
+        "mother_count": 5000,
+        "source_counts": {
+          "appointments": 12252,
+          "care_gaps": 16804,
+          "hospitals": 12
+        },
+        "start": "2024-10-21",
+        "end": "2026-10-20",
+        "validation_start": "2026-02-21",
+        "test_start": "2026-06-21",
+        "label_flip_probability": 0.18,
+        "outcome_maturity_days": 7,
+        "label_provenance": "Source identities and attributes; separately simulated interaction outcomes, not untouched original appointment outcomes."
+      },
+      "split_audit": {
+        "patient_overlap": 0,
+        "patient_counts": {
+          "train": 3500,
+          "validation": 750,
+          "test": 750
+        },
+        "time_ranges": {
+          "train": {
+            "min": "2024-12-01",
+            "max": "2026-02-20"
+          },
+          "validation": {
+            "min": "2026-04-01",
+            "max": "2026-06-20"
+          },
+          "test": {
+            "min": "2026-08-01",
+            "max": "2026-10-13"
+          }
+        }
+      },
+      "feature_importance": {
+        "barrier": [
+          {
+            "feature": "distance_km",
+            "gain_share": 0.28323990778518593
+          },
+          {
+            "feature": "digital_literacy",
+            "gain_share": 0.22787608383536107
+          },
+          {
+            "feature": "prior_missed_visits",
+            "gain_share": 0.1731277328287237
+          },
+          {
+            "feature": "age",
+            "gain_share": 0.1383422532659351
+          },
+          {
+            "feature": "caregiver_support",
+            "gain_share": 0.07843982579861505
+          },
+          {
+            "feature": "preferred_channel",
+            "gain_share": 0.05652310496796199
+          },
+          {
+            "feature": "week",
+            "gain_share": 0.04245109151821717
+          }
+        ],
+        "reminders": [
+          {
+            "feature": "preferred_channel",
+            "gain_share": 0.265181609888047
+          },
+          {
+            "feature": "hour",
+            "gain_share": 0.2146946295636371
+          },
+          {
+            "feature": "distance_km",
+            "gain_share": 0.18215796857488006
+          },
+          {
+            "feature": "channel",
+            "gain_share": 0.12246156805096518
+          },
+          {
+            "feature": "age",
+            "gain_share": 0.07209601886690069
+          },
+          {
+            "feature": "week",
+            "gain_share": 0.056109570011524286
+          },
+          {
+            "feature": "prior_missed_visits",
+            "gain_share": 0.03655913896973745
+          },
+          {
+            "feature": "digital_literacy",
+            "gain_share": 0.033695639874039146
+          },
+          {
+            "feature": "caregiver_support",
+            "gain_share": 0.0170438562002691
+          }
+        ],
+        "gaps": [
+          {
+            "feature": "days_overdue",
+            "gain_share": 0.8119577728615057
+          },
+          {
+            "feature": "distance_km",
+            "gain_share": 0.11370552683176706
+          },
+          {
+            "feature": "gap_type",
+            "gain_share": 0.04291130695384219
+          },
+          {
+            "feature": "stage",
+            "gain_share": 0.015910134746265434
+          },
+          {
+            "feature": "clinician_priority",
+            "gain_share": 0.010930590955207937
+          },
+          {
+            "feature": "caregiver_support",
+            "gain_share": 0.004584667651411699
+          }
+        ],
+        "facilities": [
+          {
+            "feature": "offers_service",
+            "gain_share": 0.42046954420804
+          },
+          {
+            "feature": "distance_km",
+            "gain_share": 0.25359509290066284
+          },
+          {
+            "feature": "days_since_confirmed",
+            "gain_share": 0.21386365507182636
+          },
+          {
+            "feature": "appointment_availability",
+            "gain_share": 0.11207170781947076
+          },
+          {
+            "feature": "open_now",
+            "gain_share": 0.0
+          }
+        ]
+      },
+      "selected_parameters": {
+        "barrier": {
+          "num_leaves": 15,
+          "validation_objective": -0.6887022191930142,
+          "threshold": 0.5
+        },
+        "reminders": {
+          "num_leaves": 15,
+          "validation_objective": -0.6799497822622332,
+          "threshold": 0.5
+        },
+        "gaps": {
+          "num_leaves": 15,
+          "validation_objective": 0.6176363214489974,
+          "threshold": null
+        },
+        "facilities": {
+          "num_leaves": 15,
+          "validation_objective": 0.634025475464408,
+          "threshold": null
+        }
+      },
+      "results": {
+        "barrier": {
+          "model": {
+            "accuracy": 0.5593333333333333,
+            "precision": 0.6477272727272727,
+            "recall": 0.08296943231441048,
+            "f1": 0.14709677419354839,
+            "roc_auc": 0.5715475058680718,
+            "pr_auc": 0.5337115249883886,
+            "brier_score": 0.24535398105837336,
+            "confusion_matrix": [
+              [
+                782,
+                31
+              ],
+              [
+                630,
+                57
+              ]
+            ],
+            "threshold": 0.5
+          },
+          "baseline": {
+            "accuracy": 0.542,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "roc_auc": 0.5,
+            "pr_auc": 0.458,
+            "brier_score": 0.25257316326530616,
+            "confusion_matrix": [
+              [
+                813,
+                0
+              ],
+              [
+                687,
+                0
+              ]
+            ],
+            "threshold": 0.5
+          },
+          "test_rows": 1500,
+          "positive_count": 687,
+          "positive_fraction": 0.458,
+          "patients": 750,
+          "logistic_regression": {
+            "accuracy": 0.578,
+            "precision": 0.6134453781512605,
+            "recall": 0.21251819505094613,
+            "f1": 0.31567567567567567,
+            "roc_auc": 0.5776769776431389,
+            "pr_auc": 0.5398957444738667,
+            "brier_score": 0.24408450609673626,
+            "confusion_matrix": [
+              [
+                721,
+                92
+              ],
+              [
+                541,
+                146
+              ]
+            ],
+            "threshold": 0.5
+          }
+        },
+        "reminders": {
+          "model": {
+            "accuracy": 0.5693333333333334,
+            "precision": 0.6097560975609756,
+            "recall": 0.07530120481927711,
+            "f1": 0.13404825737265416,
+            "roc_auc": 0.5920557228915663,
+            "pr_auc": 0.5260722468667745,
+            "brier_score": 0.2422619984137674,
+            "confusion_matrix": [
+              [
+                804,
+                32
+              ],
+              [
+                614,
+                50
+              ]
+            ],
+            "threshold": 0.5
+          },
+          "baseline": {
+            "accuracy": 0.5573333333333333,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "roc_auc": 0.5,
+            "pr_auc": 0.44266666666666665,
+            "brier_score": 0.24728318877551017,
+            "confusion_matrix": [
+              [
+                836,
+                0
+              ],
+              [
+                664,
+                0
+              ]
+            ],
+            "threshold": 0.5
+          },
+          "test_rows": 1500,
+          "positive_count": 664,
+          "positive_fraction": 0.44266666666666665,
+          "patients": 750,
+          "offline_policy_estimate": {
+            "policy": {
+              "completion_rate": 0.6018518518518519,
+              "matched_actions": 108,
+              "effective_sample_size": 108.0
+            },
+            "fixed": {
+              "completion_rate": 0.345679012345679,
+              "matched_actions": 81,
+              "effective_sample_size": 81.0
+            },
+            "random": {
+              "completion_rate": 0.5063291139240507,
+              "matched_actions": 79,
+              "effective_sample_size": 79.0
+            },
+            "app_only": {
+              "completion_rate": 0.5,
+              "matched_actions": 96,
+              "effective_sample_size": 96.0
+            },
+            "random_time_app": {
+              "completion_rate": 0.43373493975903615,
+              "matched_actions": 83,
+              "effective_sample_size": 83.0
+            },
+            "absolute_lift": 0.25617283950617287,
+            "relative_lift": 0.7410714285714286,
+            "method": "Self-normalized inverse propensity scoring on held-out uniformly randomized logged actions. Only factual matches used; not a causal real-world trial."
+          }
+        },
+        "gaps": {
+          "model": {
+            "ndcg@3": 0.6117023934360455,
+            "mrr": 0.723053613053613,
+            "top1_accuracy": 0.5405594405594406,
+            "evaluated_queries": 1430,
+            "no_relevant_queries_excluded": 70,
+            "single_candidate_queries_excluded": 0
+          },
+          "baseline": {
+            "ndcg@3": 0.511247675804308,
+            "mrr": 0.6344405594405594,
+            "top1_accuracy": 0.4048951048951049,
+            "evaluated_queries": 1430,
+            "no_relevant_queries_excluded": 70,
+            "single_candidate_queries_excluded": 0
+          },
+          "guarded_baseline": {
+            "ndcg@3": 0.5093168388182374,
+            "mrr": 0.6374941724941724,
+            "top1_accuracy": 0.4132867132867133,
+            "evaluated_queries": 1430,
+            "no_relevant_queries_excluded": 70,
+            "single_candidate_queries_excluded": 0
+          },
+          "test_rows": 7500,
+          "eligible_test_rows": 7500,
+          "patients": 750,
+          "positive_count": 3441
+        },
+        "facilities": {
+          "model": {
+            "ndcg@5": 0.6297374677991769,
+            "mrr": 0.5311888888888888,
+            "top1_accuracy": 0.2906666666666667,
+            "evaluated_queries": 1500,
+            "no_relevant_queries_excluded": 0,
+            "single_candidate_queries_excluded": 0
+          },
+          "baseline": {
+            "ndcg@5": 0.6051784045486633,
+            "mrr": 0.4994777777777778,
+            "top1_accuracy": 0.24666666666666667,
+            "evaluated_queries": 1500,
+            "no_relevant_queries_excluded": 0,
+            "single_candidate_queries_excluded": 0
+          },
+          "guarded_baseline": {
+            "ndcg@5": 0.6051784045486633,
+            "mrr": 0.4994777777777778,
+            "top1_accuracy": 0.24666666666666667,
+            "evaluated_queries": 1500,
+            "no_relevant_queries_excluded": 0,
+            "single_candidate_queries_excluded": 0
+          },
+          "test_rows": 9000,
+          "eligible_test_rows": 7906,
+          "patients": 750,
+          "positive_count": 1500
+        }
+      }
+    }
+  ],
+  "leakage_audit": {
+    "suspected_above_095": [],
+    "patient_disjoint": true,
+    "feature_allowlist": true,
+    "excluded": [
+      "patient_id",
+      "cohort",
+      "timestamp",
+      "source_status",
+      "missed",
+      "opened",
+      "action_completed",
+      "closed_7d",
+      "chosen",
+      "completed",
+      "relevance",
+      "source_gap_id"
+    ],
+    "notes": [
+      "Time/patient cohorts discard crossing cells instead of random row splitting.",
+      "Reminder opened/action-completed labels and choice outcomes never enter predictors.",
+      "Only pre-event missed counts are used. Eighteen percent independent target-flip noise plus latent access preferences.",
+      "Gap and facility policy constraints are applied equally in held-out scoring and serving."
+    ]
+  }
+}

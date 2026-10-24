@@ -33,3 +33,10 @@ hospital_portal/web/.next-local/
 
 # Generated copy of the shared Dr. Daya assistant for Next.js
 hospital_portal/web/public/daya/
+
+# Reproducible patient interaction scenario (source cohort remains unchanged)
+ml-service/data/generated/
+ml-service/reports/seed-*/
+ml-service/.pytest_cache/
+
+ml-service/reports/predictability-checkpoint.json

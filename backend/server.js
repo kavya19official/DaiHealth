@@ -386,6 +386,7 @@ app.post('/api/auth/register/mother', async (req, res) => {
     res.status(500).json({ error: 'Registration failed. Check the server terminal for details.' });
   }
 });
+app.use(require('./patientMLEvents')(pool));
 // Register Doctor
 app.post('/api/auth/register/doctor', async (req, res) => {
   try {
@@ -1125,6 +1126,7 @@ require('./patientContinuity')(app, { pool, authenticateToken, authorizeRole });
 require('./patientExperience')(app, { pool, authenticateToken, authorizeRole });
 require('./patientHome')(app, { pool, authenticateToken, authorizeRole });
 require('./patientSupport')(app, { pool, authenticateToken, authorizeRole });
+require('./patientML')(app, { pool, authenticateToken, authorizeRole });
 require('./clinicalDashboard')(app, { pool, authenticateToken, authorizeRole });
 require('./doctorWorkspace')(app, { pool, authenticateToken, authorizeRole });
 require('./doctorOperations')(app, { pool, authenticateToken, authorizeRole });

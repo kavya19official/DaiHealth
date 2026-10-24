@@ -1,0 +1,100 @@
+{
+  "data_label": "synthetic",
+  "summary": {
+    "barrier": {
+      "optimistic_expected_accuracy_mean": 0.6113333542897508,
+      "std": 0.0015835138193478013
+    },
+    "reminders": {
+      "optimistic_expected_accuracy_mean": 0.6240199187732763,
+      "std": 0.002102534178038847
+    }
+  },
+  "runs": [
+    {
+      "seed": 242,
+      "models": {
+        "barrier": {
+          "rows": 1500,
+          "expected_accuracy_with_hidden_simulator_information": 0.6090531972133081,
+          "minimum_expected_error_with_hidden_information": 0.3909468027866919
+        },
+        "reminders": {
+          "rows": 1500,
+          "expected_accuracy_with_hidden_simulator_information": 0.6223893978079762,
+          "minimum_expected_error_with_hidden_information": 0.3776106021920238
+        }
+      }
+    },
+    {
+      "seed": 243,
+      "models": {
+        "barrier": {
+          "rows": 1500,
+          "expected_accuracy_with_hidden_simulator_information": 0.6116973694141423,
+          "minimum_expected_error_with_hidden_information": 0.3883026305858577
+        },
+        "reminders": {
+          "rows": 1500,
+          "expected_accuracy_with_hidden_simulator_information": 0.62457480885559,
+          "minimum_expected_error_with_hidden_information": 0.37542519114441
+        }
+      }
+    },
+    {
+      "seed": 244,
+      "models": {
+        "barrier": {
+          "rows": 1500,
+          "expected_accuracy_with_hidden_simulator_information": 0.6106808412355472,
+          "minimum_expected_error_with_hidden_information": 0.38931915876445283
+        },
+        "reminders": {
+          "rows": 1500,
+          "expected_accuracy_with_hidden_simulator_information": 0.6212929821401765,
+          "minimum_expected_error_with_hidden_information": 0.3787070178598235
+        }
+      }
+    },
+    {
+      "seed": 245,
+      "models": {
+        "barrier": {
+          "rows": 1500,
+          "expected_accuracy_with_hidden_simulator_information": 0.6133154185640677,
+          "minimum_expected_error_with_hidden_information": 0.3866845814359323
+        },
+        "reminders": {
+          "rows": 1500,
+          "expected_accuracy_with_hidden_simulator_information": 0.626079561300279,
+          "minimum_expected_error_with_hidden_information": 0.3739204386997211
+        }
+      }
+    },
+    {
+      "seed": 246,
+      "models": {
+        "barrier": {
+          "rows": 1500,
+          "expected_accuracy_with_hidden_simulator_information": 0.6119199450216882,
+          "minimum_expected_error_with_hidden_information": 0.3880800549783118
+        },
+        "reminders": {
+          "rows": 1500,
+          "expected_accuracy_with_hidden_simulator_information": 0.6257628437623601,
+          "minimum_expected_error_with_hidden_information": 0.37423715623763987
+        }
+      }
+    }
+  ],
+  "interpretation": "Optimistic expected Bayes accuracy using hidden latent noise and generating probabilities. A deployable model has less information and cannot be expected to achieve this bound. This is an expectation under the unchanged simulator, not a hard finite-test accuracy cap or a deployable prediction.",
+  "generator_changes": "Only optional diagnostics were added; generating probabilities, outcomes, RNG calls and 18% independent label flips unchanged.",
+  "oracle_used_in_training": false,
+  "recommendations": [
+    "Retain weak support predictions as experimental; do not show patient scores.",
+    "Build additional predictors only from consented pre-appointment attendance and reminder-response history.",
+    "Audit original attended/missed outcomes separately; booked, cancelled and rescheduled appointments are not observed missed-visit labels.",
+    "Use precision, recall, calibration and rule-baseline comparisons alongside accuracy.",
+    "Do not reduce label noise or choose test seeds merely to publish larger metrics."
+  ]
+}

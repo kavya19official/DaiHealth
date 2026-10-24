@@ -72,7 +72,7 @@ function describeFreshness(facility, contactStats, now = Date.now()) {
     },
     contact: contact(contactStats),
     availability: availability(facility.slots, now),
-    note: 'These indicators show how recent and well-sourced the information is. They are not a quality rating and are never used to rank facilities.'
+    note: 'These indicators show how recent and well-sourced the information is. They are not a hospital-quality rating. Optional access assistance may use reported freshness within eligible search results.'
   };
 }
 

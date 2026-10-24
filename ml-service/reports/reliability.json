@@ -1,0 +1,13 @@
+{
+  "policy_version": "support-release-v1",
+  "prediction_enabled": false,
+  "reasons": [
+    "At least one run does not meet the precision requirement.",
+    "At least one run does not meet the recall requirement.",
+    "At least one run does not meet the roc_auc requirement.",
+    "Accuracy gain is not stable across runs."
+  ],
+  "data_label": "synthetic",
+  "mode": "rules",
+  "artifact_sha256": "7006003f8f040a7ea570723a827e434561c713e525a5afc90c5967298d7cf89e"
+}

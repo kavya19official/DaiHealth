@@ -139,10 +139,12 @@ def dependencies():
         ROOT / "hospital_portal/requirements.txt",
         ROOT / "synthetic_data/requirements.txt",
     ]
+    if os.environ.get("ML_ENABLED") == "true":
+        reqs.append(ROOT / "ml-service/requirements.txt")
     signature = hashlib.sha256(b"".join(p.read_bytes() for p in reqs)).hexdigest()
     marker = STATE / "python-dependencies"
     if not marker.exists() or marker.read_text() != signature:
-        run([PY, "-m", "pip", "install", "-r", reqs[0], "-r", reqs[1]])
+        run([PY, "-m", "pip", "install", *[arg for req in reqs for arg in ("-r", req)]])
         marker.write_text(signature)
     for folder in ["backend", "hospital_portal/web"]:
         lock = ROOT / folder / "package-lock.json"
@@ -343,6 +345,8 @@ def main():
                 env | {"DATABASE_URL": "", "DB_SSL": "false"},
             ),
         ]
+        if env.get("ML_ENABLED") == "true":
+            commands.insert(0, ([PY, ROOT / "ml-service/run.py", "-m", "uvicorn", "api.main:app", "--host", "127.0.0.1", "--port", "8200"], ROOT, env))
         for args, cwd, child_env in commands:
             processes.append(
                 subprocess.Popen(
@@ -352,17 +356,18 @@ def main():
                     start_new_session=not WIN,
                 )
             )
+        required_processes = processes[1:] if env.get("ML_ENABLED") == "true" else processes
         for url in [
             "http://127.0.0.1:8100/api/health",
             "http://127.0.0.1:3104/hospital-admin",
             f"http://localhost:{env['PORT']}/api/health",
         ]:
-            ready(url, processes)
+            ready(url, required_processes)
         print(
             f"\nDAI ready → http://localhost:{env['PORT']}\nPatient • Doctor • Hospital/Admin — all from this address.\nCtrl+C stops the three apps; local database and edits are preserved.\n",
             flush=True,
         )
-        while all(p.poll() is None for p in processes):
+        while all(p.poll() is None for p in required_processes):
             if (STATE / "stop-request").exists():
                 print("DAI stopped. Local data is preserved.")
                 return

@@ -1,0 +1,12 @@
+{
+  "version": "support-release-v1",
+  "purpose": "Conservative prototype engineering gate for optional access-support prediction; not clinical validation or a guarantee of real-world reliability.",
+  "required_runs": 5,
+  "minimum_test_positives_per_run": 100,
+  "minimum_precision_per_run": 0.60,
+  "minimum_recall_per_run": 0.50,
+  "minimum_roc_auc_per_run": 0.70,
+  "require_brier_better_than_baseline_every_run": true,
+  "require_paired_accuracy_lower_bound_above_zero": true,
+  "confidence_standard_error_multiplier": 2.776
+}

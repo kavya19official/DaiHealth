@@ -246,7 +246,7 @@
       window.FacilityMatchUI.announce(data.scoring_note);
       if(!shown.length){$('emptyState').hidden=false;window.NearbyWorld?.update([],userLocation);return;}
       if(!facilities.length)renderAlternatives(alt);
-      renderFacilities(shown);
+      renderFacilities(window.PatientML?await window.PatientML.rankFacilities(shown,service):shown);
     } finally {$('loadingState').hidden=true;$('searchBtn').disabled=false;}
   }
 
@@ -378,6 +378,8 @@
         (f.phone ? '' : ' <span class="field-missing">Phone not available</span>') + '</div>' +
         (f.contact && f.contact.advice ? '<div class="field-missing" style="margin:.2rem 0">' + escapeHtml(f.contact.advice) + '</div>' : '') +
         '<div class="services-list">' + renderServiceTags(f.services, f.capabilities) + '</div>' +
+        (f.ml_best?'<span class="patient-ml-match">Best match for this search</span>':'') +
+        (f.ml_source==='ml'?(window.PatientML?.badge('ml')||'')+'<p class="patient-ml-reason">'+escapeHtml(f.ml_reason)+'</p>':'') +
         verificationBlock(f) +
         freshnessBlock(f) +
         '<details class="nw-why"><summary>Why this place appears</summary>' + window.FacilityMatchUI.explain(f) + '</details>' +
