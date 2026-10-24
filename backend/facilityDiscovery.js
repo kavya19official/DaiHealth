@@ -26,6 +26,7 @@ function contactRoute(f) {
 }
 
 module.exports = function (app, { pool, authenticateToken, authorizeRole }) {
+  require('./delhiDemoNetwork')(app,{pool,authenticateToken});
   const facilities = express.Router();
   const patient = express.Router();
 
@@ -238,6 +239,8 @@ module.exports = function (app, { pool, authenticateToken, authorizeRole }) {
     try {
       const userId = req.user.id;
       const facilityId = req.params.id;
+      const focusedDemoFacility = (await pool.query('SELECT verification_source FROM facilities WHERE id=$1',[facilityId])).rows[0];
+      if(focusedDemoFacility?.verification_source==='synthetic_delhi_focused_v1')return res.status(409).json({error:'This fictional directory fixture is not enabled for appointments'});
       const { doctor_id, appointment_type, requested_date, preferred_time, reason } = req.body || {};
       if (!appointment_type || !requested_date) {
         return res.status(400).json({ error: 'Appointment type and date are required' });

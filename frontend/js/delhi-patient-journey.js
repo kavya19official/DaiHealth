@@ -1,0 +1,35 @@
+(function(){'use strict';
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function setup(){
+ const panel=document.getElementById('panel-facilities');if(!panel)return;
+ const section=document.createElement('section');section.className='card demo-patient-journey';section.setAttribute('aria-labelledby','demoJourneyTitle');
+ section.innerHTML=`<h2 id="demoJourneyTitle">Find care — synthetic Delhi journey</h2><p>Fictional facilities only. This demonstration cannot book care or confirm clinical suitability. For an emergency, seek immediate medical help.</p><form><fieldset><legend>1. Set your location</legend><label for="demoPatientPin">Delhi PIN code</label><div class="demo-journey-controls"><input id="demoPatientPin" name="pincode" inputmode="numeric" autocomplete="postal-code" maxlength="6" placeholder="For example, 110017" aria-describedby="demoLocationHelp"><button type="button" data-use-pin>Use PIN code</button><button type="button" data-use-device>Use my device location</button></div><p id="demoLocationHelp">Location is requested only when you press the device-location button. It is sent for this search, not saved to your patient profile. PINs use approximate locality centres.</p><p role="status" data-location-status>No location selected.</p><button type="button" data-clear-location>Clear location and results</button></fieldset><fieldset><legend>2. Select a care need</legend><label for="demoCareNeed">Care need</label><select id="demoCareNeed" required><option value="">Choose a care need</option><option value="antenatal">Pregnancy check-up</option><option value="gynaecology">Gynaecology consultation</option><option value="ultrasound">Ultrasound</option><option value="laboratory">Laboratory tests</option><option value="vaccination">Child vaccination</option></select></fieldset><button type="submit">Find fictional facilities</button></form><p role="status" aria-live="polite" data-search-status></p><div data-journey-results></div>`;
+ const style=document.createElement('link');style.rel='stylesheet';style.href='/delhi-patient-journey.css';document.head.appendChild(style);panel.prepend(section);
+ const q=s=>section.querySelector(s),pin=q('#demoPatientPin'),need=q('#demoCareNeed'),status=q('[data-location-status]'),message=q('[data-search-status]'),results=q('[data-journey-results]');
+ let location=null,generation=0,locationGeneration=0;
+ function invalidate(){generation++;results.replaceChildren();message.textContent='';}
+ function clear(){invalidate();locationGeneration++;location=null;status.textContent='No location selected.';}
+ pin.addEventListener('input',clear);need.addEventListener('change',invalidate);
+ q('[data-clear-location]').onclick=()=>{clear();pin.value='';};
+ q('[data-use-pin]').onclick=()=>{clear();const value=pin.value.trim();if(!/^110\d{3}$/.test(value)){status.textContent='Enter a six-digit Delhi PIN beginning with 110.';pin.focus();return;}location={source:'manual_pin',pincode:value};status.textContent='PIN '+value+' selected. The server will check coverage when you search.';};
+ q('[data-use-device]').onclick=()=>{
+  clear();if(!window.isSecureContext||!navigator.geolocation){status.textContent='Device location is unavailable here. Enter a Delhi PIN instead.';return;}
+  const request=locationGeneration;status.textContent='Waiting for location permission…';
+  navigator.geolocation.getCurrentPosition(position=>{
+   if(request!==locationGeneration)return;
+   location={source:'device',consent:true,latitude:position.coords.latitude,longitude:position.coords.longitude,accuracy:position.coords.accuracy};pin.value='';status.textContent='Device location selected (reported accuracy approximately '+Math.round(location.accuracy)+' metres). Delhi coverage is checked when you search.';
+  },error=>{if(request!==locationGeneration)return;status.textContent=error.code===1?'Location permission denied. You can enter a Delhi PIN instead.':error.code===3?'Location request timed out. Retry or enter a Delhi PIN.':'Location could not be determined. Enter a Delhi PIN instead.';},{enableHighAccuracy:false,timeout:10000,maximumAge:0});
+ };
+ q('form').onsubmit=async event=>{
+  event.preventDefault();invalidate();if(!location){message.textContent='Set your location first using one of the location buttons.';return;}if(!need.value){message.textContent='Select a care need.';need.focus();return;}
+  const request=generation,button=q('[type="submit"]');button.disabled=true;message.textContent='Searching fictional facilities…';
+  try{const raw=await fetch((window.DaiAPI?.API_BASE||'/api')+'/facilities/demo-journey/search',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({location,need:need.value})});const response=await raw.json();if(!raw.ok)throw Error(response.error||'Sign in as a patient and retry.');
+   if(request!==generation)return;if(!response){message.textContent='Search unavailable. Check your sign-in and retry.';return;}
+   status.textContent=response.location.label+' · '+(response.location.source==='manual_pin'?'approximate PIN centre':'device-reported position');
+   message.textContent=response.facilities.length+' fictional facilities match '+response.need.label+'. '+response.notice;
+   results.innerHTML=response.facilities.map(f=>'<article><h3>'+esc(f.name)+'</h3><p>PIN '+esc(f.pincode)+' · '+(f.distance_km===null?'Distance unavailable':Number(f.distance_km).toFixed(1)+' km approximate straight-line distance')+'</p><p>Scenario services: '+f.services.map(s=>esc(s.name)).join(', ')+'</p><p>Linked synthetic clinicians: '+f.clinicians.map(d=>esc(d.name)+' ('+esc(d.specialty)+')').join(', ')+'</p><p>Unverified credentials · No live availability · Not bookable</p></article>').join('')||'<p>No fictional facility offers this scenario service. Choose a different care need.</p>';
+  }catch(error){if(request===generation)message.textContent=error.message||'Could not search. Please retry.';}finally{button.disabled=false;}
+ };
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setup);else setup();
+})();

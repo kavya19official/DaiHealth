@@ -684,3 +684,15 @@ The local launcher additively seeds a linked clinic scenario for existing synthe
 ### Patient access ML
 
 The opt-in patient assistance service reuses the existing synthetic cohort. Setup, training, five-seed measured evaluation, consent controls and rule fallbacks are documented in `ml-service/README.md`. Run `make ml-install ml-data ml-train ml-eval ml-test`, then `ML_ENABLED=true npm start`. Patient Settings contains separate permissions. The default remains rule-based; no clinical label or patient-facing risk score is generated.
+
+## Focused Delhi synthetic network (round-two demo, step 1)
+
+`npm start` now imports a small **local-only** directory fixture once: five fictional facilities across PIN codes **110001, 110017, 110075, 110085 and 110092**, six fictional clinicians and nine clinician–facility affiliations. Names are explicitly prefixed `SYNTHETIC`; the JSON source is `synthetic_data/demo/delhi-network.json`.
+
+Patient dashboard → **Nearby care → Delhi synthetic demo network → Load demo network** shows the isolated scenario with PIN, specialty and required-service filters. It does not replace or relabel the existing Delhi reference directory. Example: Radiology matches South and East; adding obstetrics narrows the scenario to South. The West hospital has the synthetic referral capabilities, while the North child-care centre does not claim maternity services. The same clinician may appear at more than one facility under one identity.
+
+Coordinates are approximate PIN/locality centres from the existing gazetteer, not actual provider premises. Phone numbers, websites, prices and clinic schedules are absent. Credentials are explicitly unverified, logins are disabled, appointment requests to these fixtures are rejected, and no patients or clinical events are created. Services/capabilities are fictional scenario assertions, not current real-world availability or a clinical recommendation. This step establishes the network only; it does not claim a completed booking or referral workflow.
+
+`seed-delhi-demo.cjs` runs only with `DAI_LOCAL=true`, after existing schema initialization, in one transaction. Its seed registry prevents duplicate imports and preserves subsequent edits and deactivations. Reserved identity collisions fail and roll back instead of modifying someone else's data. `GET /api/facilities/demo-network` requires an authenticated patient/doctor account and is unavailable outside local mode.
+
+Checks: `node --test backend/delhiDemoNetwork.test.js` covers local-only seeding, PIN and clinician counts, affiliations, idempotency, preserving edits, API authentication, hard service/capability eligibility and blocking fake bookings. The viewer is also checked in a browser at desktop and mobile widths.

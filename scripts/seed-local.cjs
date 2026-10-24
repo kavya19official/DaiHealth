@@ -32,6 +32,7 @@ async function seedLocal() {
       }
     }
     await require('./seed-matching-demo.cjs').seedMatchingDemo(client);
+    await require('./seed-delhi-demo.cjs').seedDelhiDemo(client);
     source = new DatabaseSync(path.join(ROOT, '.local/portal.db'), { readOnly: true });
     const manifest = source.prepare('SELECT source_sha256 FROM seed_manifest LIMIT 1').get();
     if (!manifest) throw new Error('Hospital cohort has not been imported. Run npm start from the root.');

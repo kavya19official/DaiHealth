@@ -1,0 +1,19 @@
+{
+  "version": "delhi-focused-v1",
+  "label": "SYNTHETIC DEMO ONLY — fictional facilities and clinicians; not a care directory",
+  "facilities": [
+    {"code":"CENTRAL","name":"SYNTHETIC Central Care Clinic","type":"clinic","locality":"Connaught Place","pincode":"110001","services":[["Antenatal consultation","obstetrics"],["Gynaecology consultation","gynecology"]],"capabilities":[],"languages":["hindi","english"]},
+    {"code":"SOUTH","name":"SYNTHETIC South Mother Care Centre","type":"maternity_centre","locality":"Malviya Nagar","pincode":"110017","services":[["Antenatal consultation","obstetrics"],["Obstetric ultrasound","ultrasound"],["Laboratory testing","lab_tests"]],"capabilities":["high_risk_pregnancy"],"languages":["hindi","english"]},
+    {"code":"WEST","name":"SYNTHETIC West Referral Hospital","type":"hospital","locality":"Dwarka","pincode":"110075","services":[["Maternity care","obstetrics"],["Emergency maternity","emergency"],["Neonatal intensive care","nicu"],["Blood bank","blood_bank"]],"capabilities":["high_risk_pregnancy","emergency_maternity","c_section_24x7","blood_transfusion"],"languages":["hindi","english"]},
+    {"code":"NORTH","name":"SYNTHETIC North Child Care Centre","type":"clinic","locality":"Rohini","pincode":"110085","services":[["Child vaccination","vaccination"],["Neonatal care","nicu"],["Laboratory testing","lab_tests"]],"capabilities":[],"languages":["hindi","english","punjabi"]},
+    {"code":"EAST","name":"SYNTHETIC East Diagnostic Centre","type":"diagnostic_lab","locality":"Preet Vihar","pincode":"110092","services":[["Laboratory testing","lab_tests"],["Ultrasound imaging","ultrasound"]],"capabilities":[],"languages":["hindi","english"]}
+  ],
+  "clinicians": [
+    {"code":"D001","name":"SYNTHETIC Dr Demo 001","specialty":"Obstetrics and Gynaecology","facilities":["CENTRAL","SOUTH"],"languages":["hindi","english"]},
+    {"code":"D002","name":"SYNTHETIC Dr Demo 002","specialty":"Gynaecology","facilities":["CENTRAL"],"languages":["hindi"]},
+    {"code":"D003","name":"SYNTHETIC Dr Demo 003","specialty":"Obstetrics","facilities":["WEST"],"languages":["hindi","english"]},
+    {"code":"D004","name":"SYNTHETIC Dr Demo 004","specialty":"Paediatrics","facilities":["NORTH"],"languages":["hindi","english","punjabi"]},
+    {"code":"D005","name":"SYNTHETIC Dr Demo 005","specialty":"Radiology","facilities":["EAST","SOUTH"],"languages":["hindi","english"]},
+    {"code":"D006","name":"SYNTHETIC Dr Demo 006","specialty":"Neonatology","facilities":["WEST","NORTH"],"languages":["hindi","english"]}
+  ]
+}

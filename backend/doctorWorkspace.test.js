@@ -7,6 +7,8 @@ const fs=require('node:fs/promises'),path=require('node:path'),os=require('node:
 test('workspace API denies wrong roles and unverified doctors, scopes records and logs every roster read',async()=>{
  const dir=await fs.mkdtemp(path.join(os.tmpdir(),'dai-doctor-workspace-')),pool=createLocalPool(dir);let server;
  try{for(const name of migrations)await pool.query(await fs.readFile(path.join(__dirname,'db',name),'utf8'));
+ // The application uses India calendar dates; CURRENT_DATE fixtures must use the same timezone.
+ await pool.query("SET TIME ZONE 'Asia/Kolkata'");
  const ids=[];for(const role of ['mother','mother','doctor','doctor'])ids.push((await pool.query('INSERT INTO users(email,password_hash,role) VALUES($1,$2,$3) RETURNING id',[role+ids.length+'@dai-synthetic.invalid','fake',role])).rows[0].id);const [mother,other,doctor,unverified]=ids;
  for(const id of [mother,other])await pool.query("INSERT INTO mother_profiles(user_id,full_name,care_start_date) VALUES($1,$2,'2026-04-01')",[id,'SYNTHETIC Mother '+id]);
  for(const id of [doctor,unverified])await pool.query("INSERT INTO doctor_profiles(user_id,full_name,specialization,medical_license_number,credential_verified) VALUES($1,'SYNTHETIC Clinician','OBG','NMC-FAKE-TEST',$2)",[id,id===doctor]);
