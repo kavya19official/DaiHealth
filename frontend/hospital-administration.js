@@ -267,7 +267,7 @@
       base = await api("/" + encodeURIComponent(currentHospital));
       if (token !== requestId) return;
       $("snapshotBadge").textContent =
-        "Simulated on synthetic data · " + fmt(base.as_of_date);
+        "Snapshot · " + fmt(base.as_of_date);
       const role = base.roles.find(
         (r) => r.role_name === "Medical Superintendent",
       );
@@ -422,7 +422,7 @@
         ])}</div>`,
       )}${card(
         "Facility leadership",
-        "Named ownership in the synthetic organisation",
+        "Leadership and responsibilities",
         `<div class="hs-card-body">${base.roles
           .slice(0, 3)
           .map(
@@ -636,7 +636,7 @@
     return (
       card(
         "Weekly special clinics",
-        "Rooms, timings and in-charge units are synthetic configurable records",
+        "Rooms, timings and in-charge units",
         table(
           ["Clinic", "Day", "Time", "Room", "In-charge unit"],
           extra.clinics.map((c) => [
@@ -762,7 +762,7 @@
     if (staffTab === "posts")
       content = card(
         "Staff establishment",
-        "Configured synthetic sanctioned and in-position posts",
+        "Sanctioned and in-position posts",
         table(
           ["Cadre", "Sanctioned", "In position", "Vacant", "Filled"],
           extra.posts.map((p) => [
@@ -980,7 +980,7 @@
     const f = base.facility;
     dialog(
       "Edit facility master",
-      `<form id="facilityForm" class="hs-form"><label class="hs-field">Synthetic facility name<input name="name" maxlength="180" required value="${esc(f.name)}"></label><label class="hs-field">Fictional address<textarea name="address" maxlength="500" required>${esc(f.address)}</textarea></label><label class="hs-field">NABL status<select name="nabl_status">${["Accredited (synthetic)", "Not accredited", "Application pending"].map((s) => `<option ${f.nabl_status === s ? "selected" : ""}>${s}</option>`).join("")}</select></label>${[
+      `<form id="facilityForm" class="hs-form"><label class="hs-field">Facility name<input name="name" maxlength="180" required value="${esc(f.name)}"></label><label class="hs-field">Fictional address<textarea name="address" maxlength="500" required>${esc(f.address)}</textarea></label><label class="hs-field">NABL status<select name="nabl_status">${["Accredited (synthetic)", "Not accredited", "Application pending"].map((s) => `<option ${f.nabl_status === s ? "selected" : ""}>${s}</option>`).join("")}</select></label>${[
         ["nabh_accredited", "NABH accredited"],
         ["emergency_24x7", "24×7 emergency service"],
         ["is_sos_participating", "Participates in SOS network"],

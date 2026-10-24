@@ -675,3 +675,7 @@ Templates are previews only. EDD bands are recorded dates, not forecasts. Roster
 sorting is deterministic and explained, not called ML. Ward tiles are not a
 measured architectural floor plan. Status refresh is 30-second polling, not a
 live socket. Hospital administration remains authoritative for resource changes.
+
+### Doctor clinic activity
+
+The local launcher additively seeds a linked clinic scenario for existing synthetic doctor–mother assignments: recent and upcoming ANC appointments, today’s queue states, completed follow-ups, clinic measurements and downloadable PNG reports. This runs once (`doctor-activity-v1`) and preserves existing edits, deleted files and revoked consent. Summary/report shares are scoped to the already assigned fictional clinician; patients without summary sharing remain visible only within the existing coordination permissions. It does not create risk labels, change hospital beds, or claim live readiness. Generated report files stay in the ignored local document store and regenerate on a fresh setup. The doctor dashboard uses local illustrations and the existing pregnancy artwork, with no external image service.

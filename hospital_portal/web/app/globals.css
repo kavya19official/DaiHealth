@@ -2742,3 +2742,5 @@ select {
 .admin-manager input:not([type=checkbox]), .admin-manager select, .admin-manager textarea { width:100%; min-width:0; box-sizing:border-box; padding:10px; border:1px solid #bccfcb; border-radius:8px; }
 .admin-manager .toolbar { display:flex; flex-wrap:wrap; gap:10px; }
 @media(max-width:800px){ .admin-manager-grid { grid-template-columns:minmax(0,1fr); } }
+
+.demo-info{position:relative;font-size:12px;color:var(--muted,#776c80)}.demo-info summary{cursor:pointer;white-space:nowrap}.demo-info p{position:absolute;right:0;top:24px;z-index:30;width:min(300px,70vw);padding:16px;border:1px solid var(--border,#e8e0ef);border-radius:16px;background:var(--surface,#fff);box-shadow:0 8px 24px #35214a14;line-height:1.6}

@@ -778,7 +778,7 @@ export function SnapshotView({
     },
     census: {
       title: "Daily delivery census",
-      hint: "Actual recorded events from the synthetic dataset; these are not model forecasts.",
+      hint: "Recorded events from the operating ledger; these are not model forecasts.",
       headers: [
         "Date",
         "Admissions",

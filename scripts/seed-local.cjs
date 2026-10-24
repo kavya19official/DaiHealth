@@ -40,6 +40,7 @@ async function seedLocal() {
     if (previous.rows.length) {
       if (previous.rows[0].source_sha256 !== manifest.source_sha256) throw new Error('Synthetic source changed. Existing local edits were preserved; use a separate checkout for a different dataset.');
       console.log('Patient/doctor cohort already imported:', previous.rows[0].counts);
+      await require('./seed-doctor-activity.cjs').seedDoctorActivity(client,source);
       return;
     }
     const mothers = source.prepare('SELECT m.*,p.name FROM mother m JOIN patient p ON p.id=m.patient_id ORDER BY m.source_id').all();
@@ -95,6 +96,7 @@ async function seedLocal() {
     await client.query("INSERT INTO dai_local_seed VALUES('cohort-v1',$1,$2)",[manifest.source_sha256,JSON.stringify(counts)]);
     await client.query('COMMIT');
     console.log('Imported shared synthetic patient/doctor cohort:',counts);
+    await require('./seed-doctor-activity.cjs').seedDoctorActivity(client,source);
   } catch (error) {
     await client.query('ROLLBACK').catch(()=>{});
     throw error;

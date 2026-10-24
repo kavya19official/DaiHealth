@@ -10,12 +10,16 @@
       window.dispatchEvent(new CustomEvent('dai:local-ready', {detail:status}));
       return;
     }
-    var banner = document.createElement('aside');
-    banner.className = 'local-workspace-banner';
-    banner.setAttribute('aria-label', 'Local synthetic demo');
-    banner.innerHTML = '<strong>Local DAI · Simulated on synthetic data</strong><span>Patient, Doctor and Hospital/Admin are running together. Local changes stay on this laptop.</span>';
+    // Keep provenance accessible once without repeating a banner above every page.
+    var info = document.createElement('details');
+    info.className = 'local-demo-info';
+    info.innerHTML = '<summary>About this demo</summary><p>This local prototype uses fictional people, facilities and synthetic records. Forecasts are demonstrations, not validated clinical guidance. Changes stay on this laptop.</p>';
+    var sidebar = document.querySelector('.sidebar, .hs-sidebar');
     var main = document.querySelector('main');
-    if (main) main.prepend(banner);
+    if (!document.querySelector('.local-demo-info')) {
+      if (sidebar) sidebar.appendChild(info);
+      else if (main) main.appendChild(info);
+    }
     document.querySelectorAll('a[href="hospital.html"]').forEach(function(a){ a.href='/auth.html?role=hospital'; });
   } catch (_) { /* Hosted and manually served apps keep their existing behaviour. */ }
 })();

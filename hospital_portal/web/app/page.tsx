@@ -612,7 +612,7 @@ export default function Home() {
                   />
                 </label>
                 <div className="notice">
-                  <strong>Local synthetic demo account</strong>
+                  <strong>Local demo account</strong>
                   <span>hospital_admin@dai-synthetic.invalid</span>
                   <span>Password: Dai-Synthetic-2026!</span>
                 </div>
@@ -729,7 +729,7 @@ export default function Home() {
           ))}
         </nav>
         <footer>
-          <span className="dot" /> Synthetic care network
+          <span className="dot" /> Connected care network
           <p>
             Connected records.
             <br />
@@ -762,7 +762,7 @@ export default function Home() {
               {facility ? compact(facility.name) : "Loading facility…"}
             </strong>
           </div>
-          <Pill>{label}</Pill>
+          <details className="demo-info"><summary>About this demo</summary><p>Fictional people, facilities and synthetic records. Forecasts are demonstrations and are not validated on real hospital activity.</p></details>
           <button
             className="icon-button"
             onClick={load}
@@ -790,7 +790,7 @@ export default function Home() {
               ))}
             </div>
             <span className="snapshot-caption">
-              <i /> Connected · recorded synthetic workspace
+              <i /> Connected · recorded workspace
             </span>
           </div>
           <div className="page-heading">
@@ -1088,7 +1088,7 @@ export default function Home() {
                   <div className="card-head">
                     <div>
                       <h2>Special clinics</h2>
-                      <p>Schedules are configurable synthetic placeholders.</p>
+                      <p>Unit days, rooms and timings.</p>
                     </div>
                     {canEdit && (
                       <button
@@ -1359,7 +1359,7 @@ export default function Home() {
           >
             <div className="card-head">
               <div>
-                <div className="eyebrow">AUDITED SYNTHETIC RECORD</div>
+                <div className="eyebrow">AUDITED PATIENT RECORD</div>
                 <h2 id="patient-title">
                   {compact(patient.mother.details.name)}
                 </h2>
