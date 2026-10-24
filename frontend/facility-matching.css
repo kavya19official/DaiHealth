@@ -233,3 +233,13 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* M. Freshness indicators: plain, neutral, never a rating. */
+.freshness{margin:.75rem 0;padding:.75rem .85rem;border:1px dashed var(--line,#d8d2c8);border-radius:12px;font-size:.84rem;line-height:1.45}
+.freshness-row{margin:.35rem 0}
+.freshness small{display:block;margin-top:.5rem;opacity:.8}
+.fresh-chip{display:inline-block;padding:.05rem .5rem;border-radius:999px;border:1px solid currentColor;font-size:.74rem;font-weight:600}
+.fresh-chip--recent,.fresh-chip--ageing{color:#475569}
+.fresh-chip--stale,.fresh-chip--unconfirmed{color:#92400e}
+.fresh-chip--synthetic{color:#6b21a8}
+.freshness-report button{margin-left:.25rem;padding:.15rem .7rem;border:1px solid currentColor;border-radius:999px;background:transparent;cursor:pointer}

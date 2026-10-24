@@ -314,6 +314,33 @@
     return tags.join('');
   }
 
+  // M. Freshness indicators: how recent and well-sourced the information is. Deliberately plain text
+  // with no stars, scores or "best" wording, and the order of results never depends on it.
+  function freshnessBlock(f) {
+    const x = f && f.freshness;
+    if (!x) return '';
+    const conf = x.confirmation || {}, av = x.availability || {}, ct = x.contact || {};
+    const chip = { recent: 'Recently confirmed', ageing: 'Confirmed a while ago', stale: 'Confirmation out of date', unconfirmed: 'Not confirmed', synthetic: 'Demo data' }[conf.status] || 'Unknown';
+    const avText = av.reported_at ? escapeHtml(av.label) + ' Reported ' + escapeHtml(formatDate(av.reported_at)) + (av.sources && av.sources.length ? ' by ' + escapeHtml(av.sources.join(', ')) : '') + '.' : escapeHtml(av.label || '');
+    return (
+      '<div class="freshness" aria-label="How recent this information is">' +
+      '<div class="freshness-row"><strong>Last confirmed</strong> <span class="fresh-chip fresh-chip--' + escapeHtml(conf.status || 'unknown') + '">' + escapeHtml(chip) + '</span><br>' + escapeHtml(conf.label || '') + '</div>' +
+      '<div class="freshness-row"><strong>Services</strong><br>' + escapeHtml((x.services && x.services.basis) || '') + '</div>' +
+      '<div class="freshness-row"><strong>Reaching them</strong><br>' + escapeHtml(ct.label || '') + '</div>' +
+      '<div class="freshness-row"><strong>Appointments</strong><br>' + avText + '</div>' +
+      '<div class="freshness-report">Did you manage to reach this facility? ' +
+      '<button type="button" data-action="report-contact" data-id="' + escapeHtml(String(f.id)) + '" data-outcome="reached">Yes</button> ' +
+      '<button type="button" data-action="report-contact" data-id="' + escapeHtml(String(f.id)) + '" data-outcome="not_reached">No</button></div>' +
+      '<small>' + escapeHtml(x.note || '') + '</small></div>'
+    );
+  }
+
+  async function reportContact(id, outcome) {
+    if (localStorage.getItem('dai_guest') === '1') { toast('Sign in to share a report.'); return; }
+    const r = await API.apiRequest('/facilities/' + encodeURIComponent(id) + '/contact-report', { method: 'POST', body: { outcome: outcome } });
+    if (r && r.message) toast(r.message);
+  }
+
   function verificationBlock(f) {
     if (f.verification_source === 'synthetic_fixture') return '<div class="verification-badge unverified">Synthetic demo · Fictional facility, not a verified provider</div>';
     const verified = !!f.verified_at;
@@ -352,6 +379,7 @@
         (f.contact && f.contact.advice ? '<div class="field-missing" style="margin:.2rem 0">' + escapeHtml(f.contact.advice) + '</div>' : '') +
         '<div class="services-list">' + renderServiceTags(f.services, f.capabilities) + '</div>' +
         verificationBlock(f) +
+        freshnessBlock(f) +
         '<details class="nw-why"><summary>Why this place appears</summary>' + window.FacilityMatchUI.explain(f) + '</details>' +
         '<div class="facility-actions">' +
         '<button type="button" class="primary" data-action="book" data-id="' + f.id + '">Book</button>' +
@@ -413,6 +441,7 @@
       '<div style="margin:1rem 0;"><strong>Capabilities</strong><div class="services-list" style="margin-top:0.4rem;">' +
       renderServiceTags([], f.capabilities) + '</div></div>' +
       verificationBlock(f) +
+      freshnessBlock(f) +
       '<div id="doctorsBlock" style="margin-top:1.25rem;"><p class="field-missing">Loading doctors…</p></div>' +
       '<div class="facility-actions" style="margin-top:1.25rem;">' +
       '<button type="button" class="primary" data-action="book" data-id="' + f.id + '">Book appointment</button>' +
@@ -588,6 +617,7 @@
     else if (action === 'details') showDetails(id);
     else if (action === 'call') callFacility(btn.getAttribute('data-phone'));
     else if (action === 'refer') openReferral(id);
+    else if (action === 'report-contact') reportContact(id, btn.getAttribute('data-outcome'));
   }
 
   function closeModals() {
