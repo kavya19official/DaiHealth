@@ -1093,6 +1093,7 @@ require('./patientContinuity')(app, { pool, authenticateToken, authorizeRole });
 require('./patientExperience')(app, { pool, authenticateToken, authorizeRole });
 require('./patientHome')(app, { pool, authenticateToken, authorizeRole });
 require('./patientDocuments')(app, { pool, authenticateToken, authorizeRole });
+require('./patientOfflineSync')(app, {pool,authenticateToken,authorizeRole});
 
 // Hospital, doctor, and patient continuity workflows
 require('./hospitalPlatform')(app, { authenticateToken });
