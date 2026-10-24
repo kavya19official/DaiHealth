@@ -941,9 +941,10 @@ app.post('/api/doctor/colleagues', authenticateToken, authorizeRole(['doctor']),
     try {
       await client.query('BEGIN');
 
+      const normalizedEmail = String(email).trim().toLowerCase();
       const userResult = await client.query(
         'INSERT INTO users (email, password_hash, role) VALUES ($1, $2, $3) RETURNING id',
-        [email, password_hash, 'doctor']
+        [normalizedEmail, password_hash, 'doctor']
       );
       const userId = userResult.rows[0].id;
 

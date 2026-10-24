@@ -322,6 +322,8 @@ function selectRole(role) {
   var register = document.querySelector('[data-tab="register"]');
   register.disabled = selectedRole==='hospital';
   register.title = selectedRole==='hospital' ? 'Hospital staff accounts are managed by an administrator.' : '';
+  var hint=document.getElementById('createAccountHint');
+  if(hint) hint.hidden = selectedRole!=='hospital';
   if (selectedRole==='hospital') document.querySelector('[data-tab="login"]').click();
   else document.querySelector('[data-role="'+selectedRole+'"]').click();
   ['guestBtn','guestDivider','guestFootnote','guestOptions'].forEach(function(id){document.getElementById(id).hidden=selectedRole==='hospital';});
@@ -379,7 +381,7 @@ async function submitAuth(path, payload, btn) {
     localStorage.removeItem('dai_guest');
     window.location.href = redirectForUser(data && data.user);
   } catch (err) {
-    showError('Network error \u2014 is the दाई server running?');
+    showError('Network error — open http://localhost:3001 (not Live Server) and keep npm start running.');
   } finally {
     btn.disabled = false;
   }
