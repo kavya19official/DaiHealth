@@ -20,6 +20,8 @@
 // Doctors get: pending appointment requests and today's confirmed appointments.
 // ============================================================================
 const Ref = require('../shared/child-reference.js');
+const PP = require('../shared/postpartum-rules.js');
+const { REASONS } = require('./followThrough');
 
 const NOTIF_COLUMNS = 'id, dedupe_key, severity, category, title, body, route, route_sub, child_id, event_date, created_at, read_at, snoozed_until';
 
@@ -37,6 +39,14 @@ module.exports = function registerNotificationRoutes(app, { pool, authenticateTo
   // Builds today's candidate notifications for a mother: [{ dedupe_key, severity, category, title, body, route, route_sub, child_id, event_date }]
   async function computeMotherNotifications(motherId, today) {
     const out = [];
+
+    // Reasons the mother recorded for delayed visits/vaccines (ignored once the item is completed).
+    // A recorded reason never hides an overdue item unless she also gave a future target date.
+    const delayRows = (await pool.query(
+      `SELECT d.kind, d.item_code, d.child_id, d.reason, to_char(d.new_target,'YYYY-MM-DD') AS new_target
+         FROM follow_through_delays d WHERE d.mother_id = $1`, [motherId])).rows;
+    const delayOf = (kind, code, childId) => delayRows.find((d) => d.kind === kind && d.item_code === code && (d.child_id || 0) === (childId || 0));
+    const delayNote = (d) => (d ? ` You noted: ${REASONS[d.reason] || 'a delay'}.` : '');
 
     // Children: vaccines due/missed, growth flags
     const kids = (await pool.query(
@@ -56,8 +66,17 @@ module.exports = function registerNotificationRoutes(app, { pool, authenticateTo
         const sched = Ref.vaccineSchedule(k.date_of_birth, given, today);
         sched.forEach((v) => {
           if (v.status === 'missed') {
+            const dl = delayOf('vaccine', v.code, k.id);
+            if (dl && dl.new_target && dl.new_target >= today) {
+              if (Ref.daysBetween(today, dl.new_target) <= Ref.REMINDER_LEAD_DAYS) {
+                out.push({ dedupe_key: `vax:${k.id}:${v.code}:resched:${dl.new_target}`, severity: 'info', category: 'vaccine',
+                  title: `${v.name} for ${k.name}: your planned date is ${relDays(Ref.daysBetween(today, dl.new_target))}`, body: `Planned for ${dl.new_target}.${delayNote(dl)}`,
+                  route: 'child', route_sub: 'vaccines', child_id: k.id, event_date: dl.new_target });
+              }
+              return;
+            }
             out.push({ dedupe_key: `vax:${k.id}:${v.code}:missed`, severity: 'warn', category: 'vaccine',
-              title: `${v.name} is overdue for ${k.name}`, body: `Due ${v.dueDate} · ${v.stage}. A late dose can usually still be given — ask your ASHA worker or health centre.`,
+              title: `${v.name} is overdue for ${k.name}`, body: `Due ${v.dueDate} · ${v.stage}. A late dose can usually still be given — ask your ASHA worker or health centre.${delayNote(dl)}`,
               route: 'child', route_sub: 'vaccines', child_id: k.id, event_date: v.dueDate });
           } else if (v.status === 'upcoming' && v.daysUntil <= Ref.REMINDER_LEAD_DAYS) {
             out.push({ dedupe_key: `vax:${k.id}:${v.code}:soon`, severity: 'info', category: 'vaccine',
@@ -91,6 +110,25 @@ module.exports = function registerNotificationRoutes(app, { pool, authenticateTo
             route: 'child', route_sub: 'growth', child_id: k.id, event_date: last.measured_on });
         });
       });
+    }
+
+    // Postnatal visits: open now or overdue, from the shared contact schedule
+    const del = (await pool.query("SELECT to_char(delivery_date,'YYYY-MM-DD') AS d FROM postpartum_profile WHERE mother_id = $1", [motherId])).rows[0];
+    if (del) {
+      const doneMap = {};
+      (await pool.query("SELECT contact_code, to_char(completed_on,'YYYY-MM-DD') AS d FROM postpartum_contacts WHERE mother_id = $1", [motherId])).rows.forEach((r) => { doneMap[r.contact_code] = r.d; });
+      const daysPP = Ref.daysBetween(del.d, today);
+      if (daysPP >= 0 && daysPP <= 70) {
+        PP.schedule(del.d, today, doneMap).forEach((c) => {
+          if (c.status !== 'open' && c.status !== 'overdue') return;
+          const dl = delayOf('postpartum_contact', c.code, null);
+          if (dl && dl.new_target && dl.new_target >= today) return;
+          out.push({ dedupe_key: `pp:${c.code}:${c.status}`, severity: c.status === 'overdue' ? 'warn' : 'info', category: 'postpartum',
+            title: c.status === 'overdue' ? `${c.title} has not been recorded` : `${c.title} is due now`,
+            body: (c.status === 'overdue' ? `The window ended ${c.window_end}. If it happened, mark it done; if not, book it or tell us why it was delayed.` : `Best between ${c.window_start} and ${c.window_end}.`) + delayNote(dl),
+            route: 'postpartum', route_sub: null, child_id: null, event_date: c.window_end });
+        });
+      }
     }
 
     // Care timeline: due soon or overdue, not completed
