@@ -105,7 +105,8 @@ async function canAccessDoc(pool, docId, user) {
          INNER JOIN patient_document_shares s
            ON s.document_id = d.id AND s.doctor_id = $2 AND s.revoked_at IS NULL AND (s.expires_at IS NULL OR s.expires_at>NOW())
         WHERE d.id = $1 AND d.deleted_at IS NULL
-          AND COALESCE((SELECT (preferences->>'privacy_share_doctors')::boolean FROM patient_preferences WHERE user_id=d.mother_id),TRUE)`,
+          AND COALESCE((SELECT (preferences->>'privacy_share_doctors')::boolean FROM patient_preferences WHERE user_id=d.mother_id),TRUE)
+          AND NOT ${require('./accessControl').revokedSql('d.mother_id','s.doctor_id')}`,
       [docId, user.id]
     );
     return r.rows[0] || null;
@@ -444,6 +445,7 @@ if (!linked.rows.length) {
            LEFT JOIN mother_profiles mp ON mp.user_id = d.mother_id
           WHERE d.deleted_at IS NULL
             AND COALESCE((SELECT (preferences->>'privacy_share_doctors')::boolean FROM patient_preferences WHERE user_id=d.mother_id),TRUE)
+          AND NOT ${require('./accessControl').revokedSql('d.mother_id','s.doctor_id')}
           ORDER BY s.shared_at DESC`,
         [req.user.id]
       );
