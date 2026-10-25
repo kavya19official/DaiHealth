@@ -90,7 +90,7 @@ class Support(Strict):
     data_label:str
 _cache={}
 def load(name):
-    if os.getenv('ML_ENABLED','true').lower()!='true':return None
+    if name not in {'gaps','facilities'} or os.getenv('ML_ENABLED')!='true' or os.getenv('PATIENT_ML_RANKING_ENABLED')!='true':return None
     try:
         registry=json.loads((MODELS/'model_registry.json').read_text());entry=registry[name];file=MODELS/(name+'.joblib');sha=hashlib.sha256(file.read_bytes()).hexdigest()
         if sha!=entry['sha256']:return None
@@ -143,30 +143,23 @@ def rank_facilities(b:Facilities):
     return Ranked(items=items,source=source,data_label=label(source))
 @app.post('/best-send-time',response_model=SendTime)
 def best_send_time(b:Patient):
-    channels=b.consent.allowed_channels or ['app'];choices=[(h,c) for h in HOURS for c in range(4) if CHANNELS[c] in channels]
-    rows=[{**profile(b),'hour':h,'channel':c} for h,c in choices]
-    p=predict('reminders',rows) if b.features and b.consent.personalization and b.consent.reminders else None;source='ml' if p is not None else 'rules'
-    hour,channel=choices[int(np.argmax(p))] if p is not None else (9,CHANNELS.index('app' if 'app' in channels else channels[0]))
-    return SendTime(hour=hour,channel=CHANNELS[channel],reason='A suggested time from your allowed channels and synthetic response patterns; you can change it.' if source=='ml' else 'A 9 AM reminder using an allowed channel. Your quiet hours still apply.',source=source,data_label=label(source))
+    return SendTime(hour=9,channel='app',reason='A 9 AM app reminder; your quiet hours still apply.',source='rules',data_label=label('rules'))
 @app.post('/support-suggestions',response_model=Support)
 def support(b:Patient):
     values=profile(b);known=set(b.known_features if b.known_features is not None else b.features.model_fields_set if b.features else [])
     if not b.consent.location:known.discard('distance_km')
-    release=support_gate(MODELS);p=None;actions=[]
-    if b.features and b.consent.personalization and release['prediction_enabled'] and set(FEATURES['barrier'])<=known and 15<=values['age']<=45 and 0<=values['distance_km']<=80:
-        p=predict('barrier',[values])
-    source='ml' if p is not None else 'rules'
+    actions=[];source='rules'
     if b.consent.personalization and 'distance_km' in known and values['distance_km']>=5:
         actions.append(SupportAction(action='nearby',reason=f"Your recorded journey is {values['distance_km']:g} km. You can look for a closer centre offering the planned service."))
     missed='prior_missed_visits' in known and values['prior_missed_visits']>0
     no_support='caregiver_support' in known and not values['caregiver_support']
-    if b.consent.personalization and (missed or no_support or p is not None and p[0]>=.5):
+    if b.consent.personalization and (missed or no_support):
         reason='A previous visit is recorded as missed. You can ask your ASHA or care team for help planning the next visit.' if missed else 'You reported needing caregiver support. You can ask your ASHA or care team for help planning the visit.' if no_support else 'Optional help planning your next visit is available from your ASHA or care team.'
         actions.append(SupportAction(action='asha',reason=reason))
     actions.append(SupportAction(action='schemes',reason='Check official maternity and transport support information; eligibility needs confirmation.'))
     return Support(actions=actions,source=source,data_label=label(source))
 @app.get('/health')
-def health():return {'status':'ok','models_available':{name:load(name) is not None for name in FEATURES},'support_prediction_enabled':os.getenv('ML_ENABLED','true').lower()=='true' and support_gate(MODELS)['prediction_enabled'],'data_label':'synthetic'}
+def health():return {'status':'ok','models_available':{name:load(name) is not None for name in FEATURES},'support_prediction_enabled':False,'simple_tasks_policy':'deterministic-rules','data_label':'synthetic'}
 @app.get('/model-info')
 def model_info():
     try:return {'models':json.loads((MODELS/'model_registry.json').read_text()),'support_release':support_gate(MODELS),'statement':'Metrics are measured on synthetic data and are not real-world performance.'}

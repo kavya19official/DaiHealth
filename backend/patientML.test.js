@@ -1,5 +1,7 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs/promises'),path=require('node:path'),os=require('node:os'),express=require('express'),vm=require('node:vm');
+const rankingEnv=process.env.PATIENT_ML_RANKING_ENABLED;process.env.PATIENT_ML_RANKING_ENABLED='true';
+test.after(()=>{if(rankingEnv===undefined)delete process.env.PATIENT_ML_RANKING_ENABLED;else process.env.PATIENT_ML_RANKING_ENABLED=rankingEnv;});
 const ML=require('./patientML'),{applyQuiet,plan}=require('./reminderScheduler'),{createLocalPool}=require('./localPool'),{migrations}=require('../scripts/seed-local.cjs');
 test('rules, service failures and invalid model output never suppress gaps or return probabilities',async()=>{
  const body={patient_id:'1',consent:{personalization:true},gaps:[{id:'1',days_overdue:10,clinician_priority:false,bucket:'overdue'},{id:'2',days_overdue:1,clinician_priority:true,bucket:'overdue'}]};
@@ -69,4 +71,25 @@ test('support fallbacks use recorded facts, respect provenance, and reject legac
 
 test('record-based help renders with ML disabled and does not carry an ML badge',async()=>{
  const v=frontend(false,true,{source:'rules',actions:[{action:'asha',reason:'A previous visit is recorded as missed.'}]});await v.window.PatientML.refresh();const html=v.window.PatientML.supportHTML();assert.ok(html.includes('Recorded information and simple rules'));assert.ok(html.includes('recorded as missed'));assert.ok(!html.includes('Simulated on synthetic data'));assert.equal(v.window.PatientML.isActive(),false);
+});
+
+// Even an available, consenting ML service must not receive simple workflow tasks.
+test('simple tasks make zero model requests with all model switches on',async()=>{
+ const before=process.env.ML_ENABLED;process.env.ML_ENABLED='true';let calls=0;
+ try{for(const kind of ['best-send-time','support-suggestions']){
+  const body={consent:{personalization:true,location:true,reminders:true},features:{distance_km:12},known_features:['distance_km']};
+  const result=await ML.request(kind,body,async()=>{calls++;throw Error('Unnecessary inference');});
+  assert.deepEqual(result,ML.rules(kind,body));assert.equal(result.source,'rules');
+ }assert.equal(calls,0);}finally{if(before===undefined)delete process.env.ML_ENABLED;else process.env.ML_ENABLED=before;}
+});
+test('ranking requires separate opt-in and location consent before transport',async()=>{
+ const old=process.env.ML_ENABLED,oldRank=process.env.PATIENT_ML_RANKING_ENABLED;process.env.ML_ENABLED='true';let calls=0;
+ try{delete process.env.PATIENT_ML_RANKING_ENABLED;
+  const body={consent:{personalization:true},gaps:[{id:'a',days_overdue:2,bucket:'overdue',clinician_priority:false}]};
+  assert.equal((await ML.request('rank-gaps',body,async()=>{calls++;})).source,'rules');
+  process.env.PATIENT_ML_RANKING_ENABLED='true';
+  assert.equal((await ML.request('rank-facilities',{consent:{personalization:true,location:false},candidates:[]},async()=>{calls++;})).source,'rules');assert.equal(calls,0);
+  const out=await ML.request('rank-gaps',body,async()=>{calls++;return {ok:true,json:async()=>({source:'ml',items:[{id:'a',source:'ml',reason:'Synthetic access order'}]})};});
+  assert.equal(out.source,'ml');assert.equal(calls,1);
+ }finally{if(old===undefined)delete process.env.ML_ENABLED;else process.env.ML_ENABLED=old;if(oldRank===undefined)delete process.env.PATIENT_ML_RANKING_ENABLED;else process.env.PATIENT_ML_RANKING_ENABLED=oldRank;}
 });

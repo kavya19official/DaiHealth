@@ -2,7 +2,7 @@
 const EVENTS=new Set(['reminder_opened','action_started','action_completed','facility_viewed','facility_chosen']);
 const CLASSES=new Set(['rank-gaps','rank-facilities','best-send-time','support-suggestions']);
 const label=source=>source==='ml'?'Simulated on synthetic data':'Rule-based assistance';
-const enabled=()=>process.env.ML_ENABLED==='true';
+const enabled=()=>process.env.ML_ENABLED==='true' && process.env.PATIENT_ML_RANKING_ENABLED==='true';
 const SUPPORT_POLICY='support-release-v1';
 function knownFields(b){return new Set(Array.isArray(b.known_features)?b.known_features:Object.keys(b.features||{}));}
 const gapOrder=(a,b)=>({overdue:0,week:1,upcoming:2}[a.bucket||'overdue']-{overdue:0,week:1,upcoming:2}[b.bucket||'overdue'])||Number(b.clinician_priority)-Number(a.clinician_priority)||b.days_overdue-a.days_overdue;
@@ -37,7 +37,9 @@ function validResponse(kind,out,b){
 }
 async function request(kind,b,transport=fetch){
  const fallback=rules(kind,b);
- if(!enabled()||!b.consent?.personalization)return fallback;
+ // Simple scheduling and support never leave this process, even when ML is enabled.
+ if(!['rank-gaps','rank-facilities'].includes(kind)||!enabled()||!b.consent?.personalization)return fallback;
+ if(kind==='rank-facilities'&&!b.consent?.location)return fallback;
  try{
   const url=process.env.PATIENT_ML_URL||'http://127.0.0.1:8200';
   const r=await transport(url+'/'+kind,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(b),signal:AbortSignal.timeout(1500)});

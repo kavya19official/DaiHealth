@@ -46,7 +46,8 @@ def test_invalid_and_duplicate_inputs():
     assert client.post('/rank-gaps',json={'patient_id':'p','gaps':[{'id':'a','days_overdue':1}]*2}).status_code==422
     assert client.post('/support-suggestions',json={'patient_id':'p','features':{'diagnosis':'x'}}).status_code==422
 
-def test_models_and_reports_are_real_when_available():
+def test_models_and_reports_are_real_when_available(monkeypatch):
+    monkeypatch.setenv("ML_ENABLED","true");monkeypatch.setenv("PATIENT_ML_RANKING_ENABLED","true")
     registry=ROOT/'models/model_registry.json'
     if not registry.exists():pytest.skip('Training has not completed')
     r=client.get('/model-info');assert len(r.json()['models'])==4
@@ -114,3 +115,18 @@ def test_streamlined_diagnostics_preserve_factual_classification_rows():
     lean,_=generate(42,limit=20,diagnostics=True,diagnostics_only=True)
     for name in ['patients','appointments','reminders']:
         pd.testing.assert_frame_equal(full[name],lean[name])
+
+@pytest.mark.parametrize('route', ['best-send-time','support-suggestions'])
+def test_simple_tasks_never_infer_or_read_model_files(route,monkeypatch):
+    monkeypatch.setenv('ML_ENABLED','true');monkeypatch.setenv('PATIENT_ML_RANKING_ENABLED','true')
+    def forbidden(*args):raise AssertionError('Simple task invoked ML')
+    monkeypatch.setattr(main,'predict',forbidden);monkeypatch.setattr(main,'load',forbidden);monkeypatch.setattr(main,'support_gate',forbidden)
+    r=client.post('/'+route,json={'patient_id':'p','consent':{'personalization':True,'location':True,'reminders':True},'features':{'distance_km':12,'prior_missed_visits':1}})
+    assert r.status_code==200 and r.json()['source']=='rules'
+    if route=='best-send-time':assert r.json()['hour']==9 and r.json()['channel']=='app'
+
+def test_loader_restricts_models_and_requires_ranking_opt_in(monkeypatch):
+    monkeypatch.setenv('ML_ENABLED','true');monkeypatch.delenv('PATIENT_ML_RANKING_ENABLED',raising=False)
+    assert main.load('gaps') is None
+    monkeypatch.setenv('PATIENT_ML_RANKING_ENABLED','true')
+    assert main.load('reminders') is None and main.load('barrier') is None

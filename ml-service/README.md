@@ -1,3 +1,5 @@
+> Current runtime policy: reminders and support suggestions always use rules, including when ML is enabled. Only optional access rankers may load, and only with both `ML_ENABLED=true` and `PATIENT_ML_RANKING_ENABLED=true`. Historical reminder/barrier training and release-gate sections below describe offline experiments, not live serving. See [the model-selection policy](../docs/AI-MODEL-SELECTION.md).
+
 # Patient access assistance
 
 ML decides **how to help**, not a condition. The rules engine owns gap membership, due status, clinician priority and service eligibility. No diagnosis, medication advice, inferred high-risk flag or patient-facing probability is produced. All four models and all evaluation data are synthetic. Every learned patient output has a reason and the badge **Simulated on synthetic data**.

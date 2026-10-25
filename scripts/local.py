@@ -139,7 +139,7 @@ def dependencies():
         ROOT / "hospital_portal/requirements.txt",
         ROOT / "synthetic_data/requirements.txt",
     ]
-    if os.environ.get("ML_ENABLED") == "true":
+    if os.environ.get("ML_ENABLED") == "true" and os.environ.get("PATIENT_ML_RANKING_ENABLED") == "true":
         reqs.append(ROOT / "ml-service/requirements.txt")
     signature = hashlib.sha256(b"".join(p.read_bytes() for p in reqs)).hexdigest()
     marker = STATE / "python-dependencies"
@@ -345,7 +345,7 @@ def main():
                 env | {"DATABASE_URL": "", "DB_SSL": "false"},
             ),
         ]
-        if env.get("ML_ENABLED") == "true":
+        if env.get("ML_ENABLED") == "true" and env.get("PATIENT_ML_RANKING_ENABLED") == "true":
             commands.insert(0, ([PY, ROOT / "ml-service/run.py", "-m", "uvicorn", "api.main:app", "--host", "127.0.0.1", "--port", "8200"], ROOT, env))
         for args, cwd, child_env in commands:
             processes.append(
@@ -356,7 +356,7 @@ def main():
                     start_new_session=not WIN,
                 )
             )
-        required_processes = processes[1:] if env.get("ML_ENABLED") == "true" else processes
+        required_processes = processes[1:] if env.get("ML_ENABLED") == "true" and env.get("PATIENT_ML_RANKING_ENABLED") == "true" else processes
         for url in [
             "http://127.0.0.1:8100/api/health",
             "http://127.0.0.1:3104/hospital-admin",

@@ -264,3 +264,12 @@ Run a single file with `node --test backend/<name>.test.js`.
 - [`ml-service/README.md`](ml-service/README.md): the demonstration prediction service
 - [`synthetic_data/README.md`](synthetic_data/README.md): how the synthetic data is generated
 - [`FEATURE_IMPLEMENTATION.md`](FEATURE_IMPLEMENTATION.md) and [`SMART_REFERRAL_IMPLEMENTATION.md`](SMART_REFERRAL_IMPLEMENTATION.md)
+
+## Lower-impact patient assistance
+
+Patient reminder timing and support suggestions always use deterministic rules.
+Optional learned access ranking requires both `ML_ENABLED=true` and
+`PATIENT_ML_RANKING_ENABLED=true`, in addition to patient consent. The Delhi demo
+shortlist, eligibility checks, appointment/referral transitions and follow-up
+workflow use rules. See [model-selection policy](docs/AI-MODEL-SELECTION.md) for
+scope, evaluation requirements and local verification.

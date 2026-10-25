@@ -52,13 +52,13 @@ def test_quality_gate_requires_matching_artifacts_and_all_runs(tmp_path):
     assert not support_gate(tmp_path,report)['prediction_enabled']
 
 
-def test_prediction_also_requires_complete_provenance_and_supported_inputs(monkeypatch):
+def test_support_stays_rule_based_even_if_offline_release_gate_passes(monkeypatch):
     monkeypatch.setattr(main,'support_gate',lambda *a:{'prediction_enabled':True})
     calls=[]
     monkeypatch.setattr(main,'predict',lambda *a:calls.append(a) or np.array([.9]))
     features={k:0 for k in FEATURES['barrier']};features['age']=26
     body={'patient_id':'p','consent':{'personalization':True,'location':True},'features':features,'known_features':list(features)}
-    out=client.post('/support-suggestions',json=body).json();assert out['source']=='ml';assert len(calls)==1
+    out=client.post('/support-suggestions',json=body).json();assert out['source']=='rules';assert not calls
     calls.clear();body['known_features']=[]
     assert client.post('/support-suggestions',json=body).json()['source']=='rules';assert not calls
     body['known_features']=list(features);body['features']['age']=55
