@@ -201,10 +201,7 @@ module.exports = function(app, { pool, authenticateToken, authorizeRole }) {
       }
 
       // Verify the doctor has a relationship with this mother (via appointments)
-      const hasRelationship = await pool.query(
-        `SELECT 1 FROM appointments WHERE doctor_id = $1 AND mother_id = $2 LIMIT 1`,
-        [req.user.id, mother_id]
-      );
+      const hasRelationship = { rows: (await require('./accessControl').hasDoctorAccess(pool, req.user.id, mother_id)) ? [1] : [] };
 
       if (hasRelationship.rows.length === 0) {
         return res.status(403).json({ error: 'You can only add milestones for your own patients' });
