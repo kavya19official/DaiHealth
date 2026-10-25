@@ -4,6 +4,7 @@ const path = require('path');
 const { Pool } = require('pg');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const access = require('./accessControl');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const riskAssessment = require('./riskAssessment');
@@ -802,6 +803,7 @@ app.get('/api/doctor/patients', authenticateToken, authorizeRole(['doctor']), as
        FROM appointments a
        JOIN mother_profiles mp ON mp.user_id = a.mother_id
        WHERE a.doctor_id = $1
+         AND NOT ${access.revokedSql('a.mother_id', 'a.doctor_id', 'a.facility_uuid')}
        ORDER BY mp.full_name ASC`,
       [req.user.id]
     );
@@ -817,18 +819,8 @@ app.get('/api/doctor/patients', authenticateToken, authorizeRole(['doctor']), as
 app.get('/api/doctor/patients/:motherId/timeline', authenticateToken, authorizeRole(['doctor']), async (req, res) => {
   try {
     if(!await require('./clinicalDashboard').verifiedDoctor(pool,req.user.id))return res.status(403).json({error:'Verified clinician credentials are required'});
-    const motherId = parseInt(req.params.motherId, 10);
-    if (Number.isNaN(motherId)) {
-      return res.status(400).json({ error: 'Invalid patient id' });
-    }
-
-    const relation = await pool.query(
-      'SELECT 1 FROM appointments WHERE doctor_id = $1 AND mother_id = $2 LIMIT 1',
-      [req.user.id, motherId]
-    );
-    if (relation.rows.length === 0) {
-      return res.status(403).json({ error: 'You do not have access to this patient' });
-    }
+    const motherId = await access.gateDoctor(pool, req, res, 'timeline');
+    if (motherId == null) return;
 
     const profileResult = await pool.query(
       'SELECT full_name, phone, care_start_date FROM mother_profiles WHERE user_id = $1',
@@ -851,18 +843,8 @@ app.get('/api/doctor/patients/:motherId/timeline', authenticateToken, authorizeR
 // own app out loud over the phone.
 app.get('/api/doctor/patients/:motherId/wellness', authenticateToken, authorizeRole(['doctor']), async (req, res) => {
   try {
-    const motherId = parseInt(req.params.motherId, 10);
-    if (Number.isNaN(motherId)) {
-      return res.status(400).json({ error: 'Invalid patient id' });
-    }
-
-    const relation = await pool.query(
-      'SELECT 1 FROM appointments WHERE doctor_id = $1 AND mother_id = $2 LIMIT 1',
-      [req.user.id, motherId]
-    );
-    if (relation.rows.length === 0) {
-      return res.status(403).json({ error: 'You do not have access to this patient' });
-    }
+    const motherId = await access.gateDoctor(pool, req, res, 'wellness');
+    if (motherId == null) return;
 
     const [adherence, recentContractions, allRecent] = await Promise.all([
       pool.query(
@@ -1152,6 +1134,8 @@ require('./facilityDiscovery')(app, { pool, authenticateToken, authorizeRole });
 
 // Smart referral handoff and mother-newborn continuity
 require('./referralContinuity')(app, { pool, authenticateToken, authorizeRole });
+require('./accessControl')(app, { pool, authenticateToken, authorizeRole });
+require('./followThrough')(app, { pool, authenticateToken, authorizeRole });
 
 // Gemini receives approved Dr. Daya answers only; the API key remains server-side.
 app.post('/api/tts', require('./dayaSpeech').createSpeechHandler());
