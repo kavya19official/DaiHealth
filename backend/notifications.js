@@ -112,6 +112,15 @@ module.exports = function registerNotificationRoutes(app, { pool, authenticateTo
       });
     }
 
+    // Visit summaries the clinician approved that she has not opened yet
+    (await pool.query(
+      `SELECT s.id, to_char(a.requested_date,'YYYY-MM-DD') AS visit_date, to_char(s.approved_at,'YYYY-MM-DD') AS approved_on
+         FROM visit_summaries s JOIN appointments a ON a.id = s.appointment_id
+        WHERE s.mother_id = $1 AND s.status = 'approved' AND s.patient_seen_at IS NULL AND s.approved_at > NOW() - INTERVAL '30 days'`, [motherId])).rows
+      .forEach((v) => out.push({ dedupe_key: `visit:${v.id}:ready`, severity: 'info', category: 'care_plan',
+        title: 'Your visit summary is ready', body: `Your clinician confirmed the summary of your visit on ${v.visit_date}. Open Appointments to read it.`,
+        route: 'appointments', route_sub: null, child_id: null, event_date: v.approved_on }));
+
     // Postnatal visits: open now or overdue, from the shared contact schedule
     const del = (await pool.query("SELECT to_char(delivery_date,'YYYY-MM-DD') AS d FROM postpartum_profile WHERE mother_id = $1", [motherId])).rows[0];
     if (del) {
