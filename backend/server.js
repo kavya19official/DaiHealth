@@ -1136,6 +1136,8 @@ require('./facilityDiscovery')(app, { pool, authenticateToken, authorizeRole });
 require('./referralContinuity')(app, { pool, authenticateToken, authorizeRole });
 require('./accessControl')(app, { pool, authenticateToken, authorizeRole });
 require('./followThrough')(app, { pool, authenticateToken, authorizeRole });
+require('./privacyAnalytics')(app, { pool, authenticateToken, authorizeRole });
+require('./visitSummary')(app, { pool, authenticateToken, authorizeRole });
 
 // Gemini receives approved Dr. Daya answers only; the API key remains server-side.
 app.post('/api/tts', require('./dayaSpeech').createSpeechHandler());
