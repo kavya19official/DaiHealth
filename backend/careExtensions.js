@@ -35,6 +35,7 @@
 const { analyseTrend } = require('./riskTrend');
 const { ageFrom } = require('./riskService');
 const PP = require('../shared/postpartum-rules');
+const access = require('./accessControl');
 const EM = require('../shared/emergency-triage');
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
@@ -73,16 +74,8 @@ module.exports = function registerCareExtensions(app, { pool, authenticateToken,
     return diff <= 1 ? clientDate : null;
   };
 
-  const hasAccess = async (doctorId, motherId) => {
-    const r = await pool.query('SELECT 1 FROM appointments WHERE doctor_id = $1 AND mother_id = $2 LIMIT 1', [doctorId, motherId]);
-    return r.rows.length > 0;
-  };
-  const doctorGate = async (req, res) => {
-    const motherId = parseInt(req.params.motherId, 10);
-    if (Number.isNaN(motherId)) { res.status(400).json({ error: 'Invalid patient id' }); return null; }
-    if (!(await hasAccess(req.user.id, motherId))) { res.status(403).json({ error: 'You do not have access to this patient' }); return null; }
-    return motherId;
-  };
+  // K: relationship + the mother's revocations, and every view is logged (see accessControl.js)
+  const doctorGate = async (req, res, resource) => access.gateDoctor(pool, req, res, resource || 'clinical_record');
 
   // ==========================================================================
   // Predictive risk monitoring
@@ -129,7 +122,7 @@ module.exports = function registerCareExtensions(app, { pool, authenticateToken,
 
   app.get('/api/doctor/patients/:motherId/risk-trend', ...doctorOnly, async (req, res) => {
     try {
-      const motherId = await doctorGate(req, res); if (motherId == null) return;
+      const motherId = await doctorGate(req, res, 'risk_trend'); if (motherId == null) return;
       res.json(await buildTrend(motherId, clampDays(req.query.days)));
     } catch (e) { fail(res, 'Doctor risk trend', e, 'Failed to load risk trend'); }
   });
@@ -289,7 +282,7 @@ module.exports = function registerCareExtensions(app, { pool, authenticateToken,
 
   app.get('/api/doctor/patients/:motherId/postpartum', ...doctorOnly, async (req, res) => {
     try {
-      const motherId = await doctorGate(req, res); if (motherId == null) return;
+      const motherId = await doctorGate(req, res, 'postpartum'); if (motherId == null) return;
       res.json(await buildPostpartum(motherId));
     } catch (e) { fail(res, 'Doctor postpartum', e, 'Failed to load postpartum details'); }
   });
@@ -473,7 +466,7 @@ module.exports = function registerCareExtensions(app, { pool, authenticateToken,
            FROM emergency_events e
            JOIN mother_profiles mp ON mp.user_id = e.mother_id
           WHERE e.created_at > NOW() - INTERVAL '72 hours'
-            AND EXISTS (SELECT 1 FROM appointments a WHERE a.doctor_id = $1 AND a.mother_id = e.mother_id)
+            AND ${access.activeRelationshipSql('e.mother_id', '$1::int')}
           ORDER BY (e.status = 'active') DESC, e.created_at DESC LIMIT 50`, [req.user.id]);
       res.json({ events: r.rows });
     } catch (e) { fail(res, 'Doctor emergencies', e, 'Failed to load emergencies'); }
