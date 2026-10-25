@@ -1,5 +1,5 @@
 'use strict';
-const fs=require('node:fs'),path=require('node:path');
+const fs=require('node:fs'),path=require('node:path'),access=require('./accessControl');
 const M=require('../frontend/js/patient-model'),{verifiedDoctor}=require('./clinicalDashboard');
 const iso=value=>value instanceof Date?value.toISOString().slice(0,10):value?String(value).slice(0,10):null;
 const json=value=>{try{return JSON.parse(value||'{}');}catch{return {};}};
@@ -45,22 +45,22 @@ module.exports=function(app,{pool,authenticateToken,authorizeRole}){
   const id=req.user.id,date=M.today();
   const [profile,patients,milestones,appointments,reports,postpartum,consents]=await Promise.all([
    pool.query('SELECT user_id,full_name,specialization,facility_name,medical_license_number FROM doctor_profiles WHERE user_id=$1',[id]),
-   pool.query(`SELECT mp.user_id AS id,mp.full_name,mp.phone,mp.care_start_date,mp.lmp_date,mp.edd_date,mp.pregnancy_status FROM mother_profiles mp WHERE EXISTS(SELECT 1 FROM appointments a WHERE a.mother_id=mp.user_id AND a.doctor_id=$1) ORDER BY mp.full_name`,[id]),
-   pool.query(`SELECT cm.id,cm.mother_id,cm.title,cm.category,cm.stage,cm.due_date,cm.completed_at,CASE WHEN cm.completed_at IS NOT NULL THEN 'completed' ELSE 'upcoming' END AS status FROM care_milestones cm WHERE EXISTS(SELECT 1 FROM appointments a WHERE a.mother_id=cm.mother_id AND a.doctor_id=$1) ORDER BY cm.due_date`,[id]),
-   pool.query('SELECT id,mother_id,requested_date,requested_time,status,unit_label,room,child_id,reason FROM appointments WHERE doctor_id=$1 ORDER BY requested_date',[id]),
-   pool.query(`SELECT d.id,d.mother_id,d.reviewed_by,d.uploaded_at,d.is_sensitive FROM patient_documents d JOIN patient_document_shares s ON s.document_id=d.id WHERE s.doctor_id=$1 AND s.revoked_at IS NULL AND (s.expires_at IS NULL OR s.expires_at>NOW()) AND d.deleted_at IS NULL AND COALESCE((SELECT (preferences->>'privacy_share_doctors')::boolean FROM patient_preferences WHERE user_id=d.mother_id),TRUE)`,[id]),
-   pool.query('SELECT p.mother_id,p.delivery_date FROM postpartum_profile p WHERE EXISTS(SELECT 1 FROM appointments a WHERE a.mother_id=p.mother_id AND a.doctor_id=$1)',[id]),
-   pool.query('SELECT mother_id FROM clinical_dashboard_consent WHERE doctor_id=$1 AND revoked_at IS NULL AND expires_at>NOW()',[id])]);
+   pool.query(`SELECT mp.user_id AS id,mp.full_name,mp.phone,mp.care_start_date,mp.lmp_date,mp.edd_date,mp.pregnancy_status FROM mother_profiles mp WHERE ${access.activeRelationshipSql('mp.user_id','$1::int')} ORDER BY mp.full_name`,[id]),
+   pool.query(`SELECT cm.id,cm.mother_id,cm.title,cm.category,cm.stage,cm.due_date,cm.completed_at,CASE WHEN cm.completed_at IS NOT NULL THEN 'completed' ELSE 'upcoming' END AS status FROM care_milestones cm WHERE ${access.activeRelationshipSql('cm.mother_id','$1::int')} ORDER BY cm.due_date`,[id]),
+   pool.query(`SELECT a.id,a.mother_id,a.requested_date,a.requested_time,a.status,a.unit_label,a.room,a.child_id,a.reason FROM appointments a WHERE a.doctor_id=$1 AND NOT ${access.revokedSql('a.mother_id','a.doctor_id','a.facility_uuid')} ORDER BY a.requested_date`,[id]),
+   pool.query(`SELECT d.id,d.mother_id,d.reviewed_by,d.uploaded_at,d.is_sensitive FROM patient_documents d JOIN patient_document_shares s ON s.document_id=d.id WHERE s.doctor_id=$1 AND s.revoked_at IS NULL AND (s.expires_at IS NULL OR s.expires_at>NOW()) AND d.deleted_at IS NULL AND NOT ${access.revokedSql('d.mother_id','s.doctor_id')} AND COALESCE((SELECT (preferences->>'privacy_share_doctors')::boolean FROM patient_preferences WHERE user_id=d.mother_id),TRUE)`,[id]),
+   pool.query(`SELECT p.mother_id,p.delivery_date FROM postpartum_profile p WHERE ${access.activeRelationshipSql('p.mother_id','$1::int')}`,[id]),
+   pool.query(`SELECT c.mother_id FROM clinical_dashboard_consent c WHERE c.doctor_id=$1 AND c.revoked_at IS NULL AND c.expires_at>NOW() AND NOT ${access.revokedSql('c.mother_id','c.doctor_id')}`,[id])]);
   // Date-only strings keep all aggregates independent of host timezone.
   for(const p of patients.rows)for(const k of ['care_start_date','lmp_date','edd_date'])p[k]=iso(p[k]);
   const shared=new Set(consents.rows.map(r=>r.mother_id));let snapshot=null;
-  if(process.env.DAI_LOCAL==='true'&&(await pool.query("SELECT to_regclass('public.dai_local_source_link') AS found")).rows[0]?.found){const links=(await pool.query("SELECT entity,target_id,portal_uuid FROM dai_local_source_link WHERE (entity='doctor' AND target_id=$1) OR (entity='mother' AND target_id IN (SELECT mother_id FROM appointments WHERE doctor_id=$1))",[id])).rows;snapshot=hospitalSnapshot(links.find(l=>l.entity==='doctor'),links.filter(l=>l.entity==='mother'),shared,date);}
+  if(process.env.DAI_LOCAL==='true'&&(await pool.query("SELECT to_regclass('public.dai_local_source_link') AS found")).rows[0]?.found){const links=(await pool.query(`SELECT l.entity,l.target_id,l.portal_uuid FROM dai_local_source_link l WHERE (l.entity='doctor' AND l.target_id=$1) OR (l.entity='mother' AND ${access.activeRelationshipSql('l.target_id','$1::int')})`,[id])).rows;snapshot=hospitalSnapshot(links.find(l=>l.entity==='doctor'),links.filter(l=>l.entity==='mother'),shared,date);}
   // Every roster read is audited; record contents and private result values are not logged.
-  await pool.query(`INSERT INTO patient_access_events(mother_id,event_type,details) SELECT DISTINCT mother_id,'doctor_workspace_read',jsonb_build_object('doctor_id',$1::int,'scope','assigned roster and care coordination') FROM appointments WHERE doctor_id=$1`,[id]);
+  await pool.query(`INSERT INTO patient_access_events(mother_id,event_type,details) SELECT DISTINCT a.mother_id,'doctor_workspace_read',jsonb_build_object('doctor_id',$1::int,'scope','assigned roster and care coordination') FROM appointments a WHERE a.doctor_id=$1 AND NOT ${access.revokedSql('a.mother_id','a.doctor_id','a.facility_uuid')}`,[id]);
   const assignedIds=new Set(patients.rows.map(p=>p.id));
   for(const motherId of new Set(reports.rows.map(r=>r.mother_id)))if(!assignedIds.has(motherId))await pool.query("INSERT INTO patient_access_events(mother_id,event_type,details) VALUES($1,'doctor_workspace_read',jsonb_build_object('doctor_id',$2::int,'scope','explicitly shared report metadata'))",[motherId,id]);
   const response=assemble({profile:profile.rows[0],patients:patients.rows,milestones:milestones.rows,appointments:appointments.rows,reports:reports.rows,postpartum:postpartum.rows,shared,snapshot,date});
-  const [queue,actions]=await Promise.all([pool.query('SELECT * FROM doctor_queue_state WHERE doctor_id=$1',[id]),pool.query('SELECT * FROM doctor_worklist_action WHERE doctor_id=$1',[id])]);
+  const [queue,actions]=await Promise.all([pool.query(`SELECT q.* FROM doctor_queue_state q JOIN appointments a ON a.id=q.appointment_id WHERE q.doctor_id=$1 AND a.doctor_id=q.doctor_id AND NOT ${access.revokedSql('a.mother_id','a.doctor_id','a.facility_uuid')}`,[id]),pool.query(`SELECT w.* FROM doctor_worklist_action w JOIN care_milestones cm ON cm.id=w.milestone_id WHERE w.doctor_id=$1 AND ${access.activeRelationshipSql('cm.mother_id','w.doctor_id')}`,[id])]);
   response.queue=queue.rows;response.worklistActions=actions.rows;
   res.set('Cache-Control','no-store').json(response);
  }catch(e){console.error('Doctor workspace:',e.message);res.status(500).json({error:'Could not load your assigned workspace.'});}});

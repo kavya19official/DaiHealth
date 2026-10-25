@@ -44,6 +44,26 @@ test('workspace API denies wrong roles and unverified doctors, scopes records an
  const future=(await pool.query("INSERT INTO appointments(mother_id,doctor_id,requested_date,status) VALUES($1,$2,CURRENT_DATE+1,'confirmed') RETURNING id",[mother,doctor])).rows[0].id;
  assert.equal((await change('/queue/'+future,{state:'waiting',version:0})).status,409);
 
+ // Revocations must remove every appointment-derived workspace surface, not just the roster.
+ const reportId=(await pool.query("INSERT INTO patient_documents(mother_id,title,doc_type,original_filename,mime_type,size_bytes,storage_key) VALUES($1,'Synthetic shared result','lab_report','fake.txt','text/plain',1,'workspace-revocation-test') RETURNING id",[mother])).rows[0].id;
+ await pool.query('INSERT INTO patient_document_shares(document_id,doctor_id,shared_by) VALUES($1,$2,$3)',[reportId,doctor,mother]);
+ const workspace=async()=>{const result=await fetch(url,{headers:{'x-user':String(doctor)}});assert.equal(result.status,200);return result.json();};
+ assert.equal((await workspace()).reports.length,1);
+ await pool.query("UPDATE appointments SET facility_uuid='workspace-test-site' WHERE doctor_id=$1",[doctor]);
+ await pool.query("INSERT INTO patient_access_controls(mother_id,grantee_type,grantee_ref,state) VALUES($1,'doctor',$2,'revoked')",[mother,String(doctor)]);
+ const blocked=await workspace();
+ for(const key of ['patients','appointments','milestones','reports','queue','worklist','worklistActions'])assert.deepEqual(blocked[key],[],key+' must respect doctor revocation');
+ await pool.query("UPDATE patient_access_controls SET state='granted' WHERE mother_id=$1 AND grantee_type='doctor'",[mother]);
+ assert.equal((await workspace()).patients.length,1);
+ await pool.query("INSERT INTO patient_access_controls(mother_id,grantee_type,grantee_ref,state) VALUES($1,'facility','workspace-test-site','revoked')",[mother]);
+ const facilityBlocked=await workspace();
+ for(const key of ['patients','appointments','milestones','queue','worklist','worklistActions'])assert.deepEqual(facilityBlocked[key],[],key+' must respect facility revocation');
+ // An independently shared report uses its own share permission plus doctor revocation.
+ assert.equal(facilityBlocked.reports.length,1);
+ await pool.query("UPDATE patient_access_controls SET state='granted' WHERE mother_id=$1 AND grantee_type='facility'",[mother]);
+ assert.equal((await workspace()).patients.length,1);
+
+
 
  }finally{await new Promise(resolve=>server?server.close(resolve):resolve());await pool.end();await fs.rm(dir,{recursive:true,force:true});}
 });
