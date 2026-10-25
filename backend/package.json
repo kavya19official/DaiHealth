@@ -4,7 +4,7 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "test": "node --test hospitalPlatform.test.js hospitalAdministration.test.js childReference.test.js childHealth.test.js careRules.test.js dayaAssistant.test.js dayaSpeech.test.js patientExperience.test.js patientHome.test.js patientJourney.test.js patientPending.test.js patientContinuity.test.js patientConnected.test.js patientVisuals.test.js facilityMatching.test.js facilityDiscovery.test.js littleWorld.test.js patientSupport.test.js clinicalDashboard.test.js documentIntake.test.js delhiDirectory.test.js patientTimelineLoading.test.js modalIsolation.test.js doctorWorkspace.test.js doctorActivitySeed.test.js facilityFreshness.test.js patientML.test.js delhiDemoNetwork.test.js delhiPatientJourney.test.js",
+    "test": "node --test hospitalPlatform.test.js hospitalAdministration.test.js childReference.test.js childHealth.test.js careRules.test.js dayaAssistant.test.js dayaSpeech.test.js patientExperience.test.js patientHome.test.js patientJourney.test.js patientPending.test.js patientContinuity.test.js patientConnected.test.js patientVisuals.test.js facilityMatching.test.js facilityDiscovery.test.js littleWorld.test.js patientSupport.test.js clinicalDashboard.test.js documentIntake.test.js delhiDirectory.test.js patientTimelineLoading.test.js modalIsolation.test.js doctorWorkspace.test.js doctorActivitySeed.test.js facilityFreshness.test.js patientML.test.js delhiDemoNetwork.test.js delhiPatientJourney.test.js patientTimelineIntegration.test.js",
     "start": "node server.js",
     "hospital:seed": "python3 ../synthetic_data/build_hospital_admin.py"
   },
