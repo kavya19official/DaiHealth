@@ -6,6 +6,7 @@ import { CarePanel, PatientCoordination } from "./care";
 import { AdministrationPanel, AffiliationSwitcher, InvitationAcceptance, PatientStaffRecords, ReferralInbox, CreateReferral } from "./administration";
 import { SustainabilityPanel } from "./sustainability";
 import { PatientRequestsPanel } from "./patient-requests";
+import { FollowupRiskPanel } from "./followup-risk";
 type Row = Record<string, any>;
 type User = {
   id: string;
@@ -26,6 +27,7 @@ const days = [
   "Sunday",
 ];
 const operationNav = [
+  ["followupRisk", "Follow-up & risk demo", "✓"],
   ["patientRequests", "Patient requests", "⇄"],
   ["handoffs", "Facility handoffs", "⇄"],
   ["overview", "Today’s overview", "◈"],
@@ -64,6 +66,7 @@ const workspacePermissions: Record<string, string> = {
   handoffs: "care.read",
   careTasks: "care.read",
   careReviews: "care.read",
+  followupRisk: "coordination.read",
   patientRequests: "coordination.read",
   sustainability: "green.read",
   forecasts: "forecast.read",
@@ -112,6 +115,7 @@ const titles: Record<string, [string, string]> = {
     "Clinical review & summaries",
     "Recorded concerns, human acknowledgement and clinician-approved next steps.",
   ],
+  followupRisk: ["Follow-up & risk demo", "Shared follow-up state and separately reviewed synthetic risk flags."],
   patientRequests: ["Patient requests", "Synthetic appointment and referral coordination with facility-scoped staff review."],
   sustainability: [
     "Green hospital",
@@ -329,7 +333,7 @@ export default function Home() {
     setBusy(true);
     setError("");
     try {
-      if (view === "patientRequests") { const structure = await api("/facilities/" + user.facility_id + "/structure"); if (sequence === loadSequence.current) setData(structure); return; }
+      if (view === "patientRequests" || view === "followupRisk") { const structure = await api("/facilities/" + user.facility_id + "/structure"); if (sequence === loadSequence.current) setData(structure); return; }
       const params = new URLSearchParams();
       Object.entries(filters).forEach(([key, value]) => {
         if (value) params.set(key, String(value));
@@ -872,6 +876,7 @@ export default function Home() {
             </div>
           )}
           {view === "patientRequests" && <PatientRequestsPanel key={user.id+user.facility_id} api={api} permissions={user.permissions}/>}
+          {view === "followupRisk" && <FollowupRiskPanel key={user.id+user.facility_id} api={api} permissions={user.permissions} userId={user.id}/>}
           {data && (
             <>
               {view === "handoffs" && <ReferralInbox key={user.id+user.facility_id} api={api} role={user.role} facilityId={user.facility_id}/>}

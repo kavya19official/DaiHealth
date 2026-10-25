@@ -205,3 +205,5 @@ def register_demo_requests(app, engine, require, audit, secret):
             history(c,after,{'type':'staff','id':u['id']},body.public_note)
             audit(c,u,'demo_request_'+body.status,'demo_care_request',identifier,{'before_status':row['status'],'before_clinician_id':row['clinician_id'],'after_status':body.status,'clinician_id':clinician,'version':after['version']})
             return {'request':output(c,after)}
+
+    return patient

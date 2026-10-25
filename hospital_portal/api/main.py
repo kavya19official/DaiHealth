@@ -61,6 +61,7 @@ def create_app(engine=None):
                             )
                         )
         seed_demo_requests(engine)
+        seed_followup_risk(engine)
         yield
 
     app = FastAPI(
@@ -887,7 +888,9 @@ def create_app(engine=None):
 
     register_forecasts(app, engine, require, audit)
     from .demo_requests import register_demo_requests, seed_demo_requests
-    register_demo_requests(app, engine, require, audit, secret)
+    from .demo_followup_risk import register_followup_risk, seed_followup_risk
+    patient_request_auth = register_demo_requests(app, engine, require, audit, secret)
+    register_followup_risk(app, engine, require, audit, patient_request_auth)
     return app
 
 

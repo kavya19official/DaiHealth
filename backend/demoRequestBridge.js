@@ -40,4 +40,12 @@ module.exports=function(app,{pool,authenticateToken}){
   if(!/^[\da-f-]{36}$/i.test(req.params.id))return res.status(400).json({error:'Invalid request identifier.'});
   return forward(req,res,'/api/demo-coordination/patient/requests/'+req.params.id+'/cancel','POST',req.body);
  });
+
+ const updates='/api/facilities/demo-journey/';
+ app.get(updates+'followups',authenticateToken,patient,(req,res)=>forward(req,res,'/api/demo-coordination/patient/followups','GET'));
+ app.get(updates+'risk-flags',authenticateToken,patient,(req,res)=>forward(req,res,'/api/demo-coordination/patient/risk-flags','GET'));
+ app.post(updates+'followups/:id/actions',authenticateToken,patient,(req,res)=>{
+  if(!/^[\da-f-]{36}$/i.test(req.params.id))return res.status(400).json({error:'Invalid follow-up identifier.'});
+  return forward(req,res,'/api/demo-coordination/patient/followups/'+req.params.id+'/actions','POST',req.body);
+ });
 };
