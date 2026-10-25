@@ -942,6 +942,7 @@ button, input { font: inherit; }
 <script src="/shared/who-growth-standards.js"></script>
 <script src="/shared/child-reference.js"></script>
 <script src="js/dai-api.js"></script>
+<script src="js/follow-through.js"></script>
 <script src="js/patient-prefs.js"></script>
 <link rel="stylesheet" href="little-world.css?v=1">
 <script src="js/little-world-model.js?v=1"></script>
@@ -1663,7 +1664,7 @@ function renderVaccinations() {
     var tagText = status === 'completed' ? 'Given' : status === 'optional' ? 'Optional' : status === 'missed' ? 'Overdue' : status === 'due' ? 'Due' : 'Upcoming';
     var meta = status === 'completed'
       ? 'Given ' + api.fmtDate(v.givenOn)
-      : (v.stage + ' \u00b7 due ' + api.fmtDate(v.dueDate));
+      : (v.stage + ' \u00b7 due ' + api.fmtDate(v.dueDate) + (window.DaiDelay && DaiDelay.note('vaccine', v.code, c.id) ? ' \u00b7 ' + DaiDelay.note('vaccine', v.code, c.id) : ''));
     var cert = byCode[v.code] && byCode[v.code].has_certificate;
     var actions = '';
     if (status === 'completed') {
@@ -1673,7 +1674,8 @@ function renderVaccinations() {
           : '<button type="button" class="mini-btn" data-upload-cert="' + v.code + '">Add certificate</button>');
     } else {
       actions = '<input type="date" data-vax-date="' + v.code + '" max="' + todayISO() + '" min="' + c.date_of_birth + '" value="' + todayISO() + '">' +
-        '<button type="button" class="mini-btn" data-mark-vax="' + v.code + '">Mark given</button>';
+        '<button type="button" class="mini-btn" data-mark-vax="' + v.code + '">Mark given</button>' +
+        (!IS_GUEST && window.DaiDelay && status === 'missed' ? '<button type="button" class="mini-btn" data-delay-vax="' + v.code + '" data-delay-name="' + esc(v.name) + '">Why delayed?</button>' : '');
     }
     return '<div class="vax-row">' +
       '<span class="vax-row__dot vax-row__dot--' + dotCls + '"><svg width="16" height="16"><use href="#i-syringe"/></svg></span>' +
@@ -1684,6 +1686,11 @@ function renderVaccinations() {
       '</div>';
   }).join('');
 
+  host.querySelectorAll('[data-delay-vax]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      DaiDelay.open({ kind: 'vaccine', code: btn.getAttribute('data-delay-vax'), childId: c.id, title: btn.getAttribute('data-delay-name') + ' for ' + c.name, onSaved: renderAll });
+    });
+  });
   host.querySelectorAll('[data-mark-vax]').forEach(function (btn) {
     btn.addEventListener('click', async function () {
       if (IS_GUEST) { api.toast('Sign in to record vaccinations'); return; }
@@ -2432,6 +2439,7 @@ async function loadChildren() {
   if (IS_GUEST) { children = []; legacyGrowthCount = 0; return; }
   var data = await api.apiRequest('/children');
   children = (data && data.children) || [];
+  if (window.DaiDelay) { try { await DaiDelay.load(); } catch (e) { /* reasons are optional */ } }
   legacyGrowthCount = (data && data.legacy_growth_count) || 0;
   if (!children.some(function (c) { return c.id === activeChildId; })) {
     var saved = Number(localStorage.getItem('dai_active_child'));
