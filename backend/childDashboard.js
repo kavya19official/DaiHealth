@@ -580,10 +580,8 @@ module.exports = function registerChildDashboardRoutes(app, { pool, authenticate
   // ==========================================================================
   app.get('/api/doctor/patients/:motherId/children', ...doctorOnly, async (req, res) => {
     try {
-      const motherId = parseId(req.params.motherId);
-      if (!motherId) return res.status(400).json({ error: 'Invalid patient id' });
-      const relation = await pool.query('SELECT 1 FROM appointments WHERE doctor_id = $1 AND mother_id = $2 LIMIT 1', [req.user.id, motherId]);
-      if (!relation.rows.length) return res.status(403).json({ error: 'You do not have access to this patient' });
+      const motherId = await require('./accessControl').gateDoctor(pool, req, res, 'children');
+      if (motherId == null) return;
 
       const today = await todayISO();
       const kids = (await pool.query(`${CHILD_SELECT} WHERE c.mother_id = $1 ORDER BY c.date_of_birth DESC, c.id`, [motherId])).rows.map(shapeChild);
