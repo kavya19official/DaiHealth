@@ -60,6 +60,7 @@ def create_app(engine=None):
                                 source_id=role + ":" + permission,
                             )
                         )
+        seed_demo_requests(engine)
         yield
 
     app = FastAPI(
@@ -885,6 +886,8 @@ def create_app(engine=None):
     from .forecasts import register_forecasts
 
     register_forecasts(app, engine, require, audit)
+    from .demo_requests import register_demo_requests, seed_demo_requests
+    register_demo_requests(app, engine, require, audit, secret)
     return app
 
 

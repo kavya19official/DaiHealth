@@ -1,0 +1,17 @@
+'use strict';
+const test=require('node:test'),assert=require('node:assert/strict'),express=require('express'),jwt=require('jsonwebtoken'),crypto=require('node:crypto');
+test('patient bridge scopes identity, rechecks service, binds signed payload, handles JSON failures and enforces local mode',async()=>{
+ const old={};for(const k of ['DAI_LOCAL','DAI_DEMO','JWT_SECRET','DAI_PORTAL_API_ORIGIN'])old[k]=process.env[k];let upstream,server,eligible=true,requests=0,unexpected=false;
+ try{
+  process.env.DAI_LOCAL='true';process.env.DAI_DEMO='true';process.env.JWT_SECRET='synthetic-bridge-test-secret-at-least-forty-characters';
+  const portal=express();portal.use(express.text({type:'*/*'}));portal.all('/api/demo-coordination/patient/requests', (req,res)=>{requests++;const p=jwt.verify(req.headers['x-dai-coordination'],process.env.JWT_SECRET,{algorithms:['HS256'],issuer:'dai-patient-coordination',audience:'dai-hospital-coordination'});assert.equal(p.sub,'node-mother:7');assert.equal(p.method,req.method);assert.equal(p.path,req.path);assert.equal(p.body_sha256,crypto.createHash('sha256').update(req.body||'').digest('hex'));if(unexpected)return res.status(404).send('<html>not a JSON API</html>');if(req.method==='POST'){const b=JSON.parse(req.body);assert.equal(b.directory_code,'SOUTH');assert.equal(b.service,'obstetrics');return res.json({request:{id:'synthetic-request',status:'requested'}});}res.json({requests:[]});});
+  upstream=await new Promise(r=>{const s=portal.listen(0,'127.0.0.1',()=>r(s));});process.env.DAI_PORTAL_API_ORIGIN='http://127.0.0.1:'+upstream.address().port;
+  const app=express();app.use(express.json());require('./demoRequestBridge')(app,{pool:{query:async sql=>({rows:sql.includes('u.email')?[{email:'mother@dai-synthetic.invalid',full_name:'SYNTHETIC Test Patient'}]:eligible?[{facility_code:'DAI-DELHI-FOCUSED-SOUTH'}]:[]})},authenticateToken:(req,res,next)=>{if(!req.headers['x-role'])return res.sendStatus(401);req.user={id:7,role:req.headers['x-role']};next();}});
+  server=await new Promise(r=>{const s=app.listen(0,'127.0.0.1',()=>r(s));});const url='http://127.0.0.1:'+server.address().port+'/api/facilities/demo-journey/requests';
+  async function call(method='GET',body,role='mother'){const r=await fetch(url,{method,headers:{'Content-Type':'application/json',...(role?{'x-role':role}:{})},body:body?JSON.stringify(body):undefined});return {status:r.status,body:r.headers.get('content-type')?.includes('json')?await r.json():null};}
+  assert.equal((await call('GET',null,null)).status,401);assert.equal((await call('GET',null,'doctor')).status,403);assert.equal((await call()).status,200);
+  const body={facility_id:1,need:'antenatal',kind:'appointment',consent:true,request_key:crypto.randomUUID(),patient_note:'Synthetic test only',requested_date:''};
+  assert.equal((await call('POST',{...body,consent:false})).status,400);assert.equal((await call('POST',body)).body.request.status,'requested');eligible=false;const prior=requests;assert.equal((await call('POST',body)).status,409);assert.equal(requests,prior);
+  unexpected=true;assert.equal((await call()).status,502);process.env.DAI_LOCAL='false';assert.equal((await call()).status,404);
+ }finally{if(server)await new Promise(r=>server.close(r));if(upstream)await new Promise(r=>upstream.close(r));for(const [k,v]of Object.entries(old)){if(v===undefined)delete process.env[k];else process.env[k]=v;}}
+});

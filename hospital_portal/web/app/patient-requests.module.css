@@ -1,0 +1,12 @@
+.panel { color:var(--ink,#26163f); line-height:1.6; }
+.panel header { margin-bottom:20px; }
+.panel button { min-height:44px; padding:10px 16px; border:1px solid #d8cce9; border-radius:10px; background:#fff; color:#623695; font:inherit; font-weight:600; cursor:pointer; }
+.panel button[type=submit] { background:#7545a4; color:white; justify-self:start; }
+.panel button:disabled { opacity:.6; cursor:wait; }
+.panel label { display:grid; gap:7px; font-weight:600; }
+.panel select,.panel input,.panel textarea { font:inherit; color:inherit; background:var(--surface,#fff); border:1px solid #d8cce9; border-radius:9px; padding:10px 12px; min-height:44px; width:100%; box-sizing:border-box; }
+.panel textarea { min-height:90px; resize:vertical; }
+.panel article { overflow-wrap:anywhere; }
+.panel form { max-width:650px; }
+.panel :focus-visible { outline:3px solid #9a71ce; outline-offset:3px; }
+@media(max-width:600px){.panel button{width:100%}.panel article{padding:14px!important}}
