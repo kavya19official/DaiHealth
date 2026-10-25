@@ -281,9 +281,9 @@
     d.schedule.forEach(function (c) {
       var lvl = c.status === 'done' ? 'ok' : (c.status === 'overdue' ? 'urgent' : (c.status === 'open' ? 'watch' : 'info'));
       var txt = { done: 'Done', overdue: 'Not marked done', open: 'Due now', upcoming: 'Coming up' }[c.status];
-      h.push('<div class="cx-row"><div><div style="font-weight:600;font-size:.9rem">' + esc(c.title) + '</div><div class="cx-sub" style="margin:0">' + esc(c.why) + '<br>' + esc(fmtShort(c.window_start)) + ' – ' + esc(fmtShort(c.window_end)) + (c.done_on ? ' · done ' + esc(fmtShort(c.done_on)) : '') + '</div></div>' +
+      h.push('<div class="cx-row"><div><div style="font-weight:600;font-size:.9rem">' + esc(c.title) + '</div><div class="cx-sub" style="margin:0">' + esc(c.why) + '<br>' + esc(fmtShort(c.window_start)) + ' – ' + esc(fmtShort(c.window_end)) + (c.done_on ? ' · done ' + esc(fmtShort(c.done_on)) : '') + (window.DaiDelay && c.status !== 'done' && DaiDelay.note('postpartum_contact', c.code) ? '<br><em>' + esc(DaiDelay.note('postpartum_contact', c.code)) + '</em>' : '') + '</div></div>' +
         '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:.3rem">' + chip(lvl, txt) +
-        (c.status === 'done' ? '<button type="button" class="link-btn" data-undo="' + esc(c.code) + '">Undo</button>' : (c.status !== 'upcoming' ? '<button type="button" class="btn btn--ghost btn--sm" data-done="' + esc(c.code) + '">Mark done</button>' : '')) +
+        (c.status === 'done' ? '<button type="button" class="link-btn" data-undo="' + esc(c.code) + '">Undo</button>' : (c.status !== 'upcoming' ? '<button type="button" class="btn btn--ghost btn--sm" data-done="' + esc(c.code) + '">Mark done</button>' + (window.DaiDelay && c.status === 'overdue' ? '<button type="button" class="link-btn" data-delay="' + esc(c.code) + '" data-delay-title="' + esc(c.title) + '">Why delayed?</button>' : '') : '')) +
         '</div></div>');
     });
     h.push('</div>');
@@ -307,6 +307,7 @@
     var ppSos = $('ppSos');
     if (ppSos) ppSos.addEventListener('click', openSOS);
     Array.prototype.forEach.call(root.querySelectorAll('[data-done]'), function (b) { b.addEventListener('click', function () { markContact(b.getAttribute('data-done'), true); }); });
+    Array.prototype.forEach.call(root.querySelectorAll('[data-delay]'), function (b) { b.addEventListener('click', function () { DaiDelay.open({ kind: 'postpartum_contact', code: b.getAttribute('data-delay'), title: b.getAttribute('data-delay-title'), onSaved: loadPostpartum }); }); });
     Array.prototype.forEach.call(root.querySelectorAll('[data-undo]'), function (b) { b.addEventListener('click', function () { markContact(b.getAttribute('data-undo'), false); }); });
     var again = $('ppAgain');
     if (again) again.addEventListener('click', function () {
@@ -407,6 +408,7 @@
   }
 
   async function loadPostpartum() {
+    if (window.DaiDelay && localStorage.getItem('dai_guest') !== '1') { try { await DaiDelay.load(); } catch (e) { /* reasons are optional */ } }
     if (state.guest) { renderPostpartum(); return; }
     var d = await api.apiRequest('/postpartum');
     if (d) { state.pp = d; renderPostpartum(); }
