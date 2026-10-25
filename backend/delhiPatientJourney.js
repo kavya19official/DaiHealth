@@ -1,5 +1,6 @@
 'use strict';
-const {resolveLocation,inDelhiBox,haversineKm}=require('./demoLocationGazetteer');
+const {resolveLocation,inDelhiBox}=require('./demoLocationGazetteer');
+const {preferences,rank}=require('./demoCareRanking');
 const NEEDS=Object.freeze({antenatal:{label:'Pregnancy check-up',service:'obstetrics'},gynaecology:{label:'Gynaecology consultation',service:'gynecology'},ultrasound:{label:'Ultrasound',service:'ultrasound'},laboratory:{label:'Laboratory tests',service:'lab_tests'},vaccination:{label:'Child vaccination',service:'vaccination'}});
 function validate(body){
  if(!body||!Object.hasOwn(NEEDS,body.need))throw Error('Select a supported care need.');
@@ -21,16 +22,16 @@ function register(app,{pool,authenticateToken}){
   res.set('Cache-Control','private, no-store');
   if(process.env.DAI_LOCAL!=='true')return res.status(404).json({error:'Synthetic journey is available in local mode only.'});
   if(req.user?.role!=='mother')return res.status(403).json({error:'Patient account required.'});
-  let location;try{location=validate(req.body);}catch(e){return res.status(400).json({error:e.message});}
+  let location,prefs;try{location=validate(req.body);prefs=preferences(req.body.preferences);}catch(e){return res.status(400).json({error:e.message});}
   try{
    const need=NEEDS[req.body.need];
-   const rows=(await pool.query(`SELECT f.id,f.name,f.pincode,f.facility_type,f.latitude,f.longitude,
-    COALESCE((SELECT json_agg(json_build_object('name',s.service_name,'category',s.service_category)) FROM facility_services s WHERE s.facility_id=f.id AND s.available=TRUE),'[]'::json) AS services,
+   const rows=(await pool.query(`SELECT f.id,f.name,f.pincode,f.facility_type,f.latitude,f.longitude,f.active,f.languages,
+    COALESCE((SELECT json_agg(json_build_object('id',s.id,'name',s.service_name,'category',s.service_category,'available',s.available)) FROM facility_services s WHERE s.facility_id=f.id),'[]'::json) AS services,
     COALESCE((SELECT json_agg(json_build_object('name',p.full_name,'specialty',d.specialization)) FROM doctor_facilities d JOIN doctor_profiles p ON p.user_id=d.doctor_id WHERE d.facility_id=f.id AND d.active=TRUE),'[]'::json) AS clinicians
-    FROM facilities f WHERE f.facility_code LIKE 'DAI-DELHI-FOCUSED-%' AND f.verification_source='synthetic_delhi_focused_v1' AND f.active=TRUE
-    AND EXISTS(SELECT 1 FROM facility_services s WHERE s.facility_id=f.id AND s.available=TRUE AND s.service_category=$1)`,[need.service])).rows;
-   const facilities=rows.map(f=>({...f,distance_km:f.latitude!=null&&f.longitude!=null?haversineKm(location.latitude,location.longitude,Number(f.latitude),Number(f.longitude)):null})).sort((a,b)=>(a.distance_km??Infinity)-(b.distance_km??Infinity)||a.name.localeCompare(b.name));
-   res.json({synthetic:true,not_bookable:true,need:{id:req.body.need,...need},location,facilities,notice:'Fictional scenario services only. Distances are straight-line estimates to approximate locality centres, not travel distances or verified clinical suitability.'});
+    ,COALESCE((SELECT json_agg(json_build_object('facility_service_id',sl.facility_service_id,'doctor_id',sl.doctor_id,'starts_at',sl.starts_at,'ends_at',sl.ends_at,'available_places',sl.available_places,'source',sl.source,'updated_at',sl.updated_at,'clinician_eligible',EXISTS(SELECT 1 FROM doctor_facilities df WHERE df.facility_id=f.id AND df.doctor_id=sl.doctor_id AND df.active=TRUE AND df.qualification_verified=TRUE AND df.accepts_new_patients=TRUE))) FROM facility_service_slots sl JOIN facility_services ss ON ss.id=sl.facility_service_id WHERE ss.facility_id=f.id),'[]'::json) AS slots
+    FROM facilities f WHERE f.facility_code LIKE 'DAI-DELHI-FOCUSED-%' AND f.verification_source='synthetic_delhi_focused_v1' AND f.active=TRUE`,[])).rows;
+   const ranking=rank(rows,need.service,location,prefs);
+   res.json({synthetic:true,not_bookable:true,need:{id:req.body.need,...need},location,preferences:prefs,...ranking,notice:'Fictional scenario service matches only. Ranking is not clinical advice, a reservation or proof of live availability. Distances are approximate straight-line distances to locality centres.'});
   }catch(e){console.error('Demo journey search failed:',e.message);res.status(500).json({error:'Could not search the synthetic network. Please retry.'});}
  });
 }

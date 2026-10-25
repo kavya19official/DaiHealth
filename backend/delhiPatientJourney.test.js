@@ -15,6 +15,17 @@ test('real seeded database search, access, coverage and service filtering',async
   async function call(payload=body,role='mother'){const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json',...(role?{'x-role':role}:{})},body:JSON.stringify(payload)});return {status:r.status,data:r.headers.get('content-type')?.includes('json')?await r.json():null,cache:r.headers.get('cache-control')};}
   process.env.DAI_LOCAL='true';assert.equal((await call(body,null)).status,401);assert.equal((await call(body,'doctor')).status,403);
   const result=await call();assert.equal(result.status,200);assert.equal(result.cache,'private, no-store');assert.equal(result.data.not_bookable,true);assert.equal(result.data.facilities.length,3);assert.equal(result.data.facilities[0].pincode,'110017');assert.ok(result.data.facilities.every(f=>f.services.some(s=>s.category==='obstetrics')));
+
+  assert.equal(result.data.excluded.required_service,2);
+  assert.ok(result.data.facilities.every(f=>f.ranking.availability==='unknown'));
+  assert.equal((await call({...body,preferences:{max_distance_km:5}})).data.facilities.length,1);
+  assert.equal((await call({...body,preferences:{max_distance_km:-2}})).status,400);
+  const west=(await pool.query("SELECT s.id FROM facility_services s JOIN facilities f ON f.id=s.facility_id WHERE f.pincode='110075' AND s.service_category='obstetrics'")).rows[0];
+  const start=new Date(Date.now()+86400000),end=new Date(start.getTime()+3600000);
+  await pool.query('INSERT INTO facility_service_slots(facility_service_id,starts_at,ends_at,available_places,source) VALUES($1,$2,$3,2,$4)',[west.id,start.toISOString(),end.toISOString(),'SYNTHETIC AUTOMATED TEST REPORT']);
+  const reported=await call();assert.equal(reported.data.facilities[0].pincode,'110075');assert.equal(reported.data.facilities[0].ranking.availability,'reported_available');assert.equal(reported.data.facilities[0].ranking.matching_slots[0].source,'SYNTHETIC AUTOMATED TEST REPORT');
+  await pool.query("UPDATE facility_service_slots SET updated_at=NOW()-INTERVAL '8 days'");
+  assert.ok((await call()).data.facilities.every(f=>f.ranking.availability==='unknown'));
   assert.equal((await call({...body,location:{source:'manual_pin',pincode:'110999'}})).status,400);
   const device=await call({need:'vaccination',location:{source:'device',consent:true,latitude:28.715,longitude:77.12,accuracy:75}});assert.equal(device.status,200);assert.equal(device.data.facilities.length,1);assert.equal(device.data.facilities[0].pincode,'110085');
   await pool.query("UPDATE facility_services SET available=FALSE WHERE service_category='vaccination'");assert.equal((await call({need:'vaccination',location:body.location})).data.facilities.length,0);
