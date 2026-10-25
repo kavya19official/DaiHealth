@@ -19,6 +19,22 @@
 
 module.exports = function(app, { pool, authenticateToken, authorizeRole }) {
   const router = require('express').Router();
+  const access = require('./accessControl');
+
+  // A mother may read only her own continuity record; a doctor only through the same relationship
+  // and revocation check as every other clinician view, and the view is logged.
+  async function canReadMother(req, res, motherId, resource) {
+    const id = Number(motherId);
+    if (!Number.isInteger(id)) { res.status(400).json({ error: 'Invalid patient id' }); return false; }
+    if (req.user.role === 'mother') { if (id === req.user.id) return true; }
+    else if (req.user.role === 'doctor') {
+      const ok = await access.hasDoctorAccess(pool, req.user.id, id);
+      await access.logAccess(pool, id, req.user.id, resource, ok);
+      if (ok) return true;
+    }
+    res.status(403).json({ error: 'You do not have access to this patient' });
+    return false;
+  }
 
   // ==================== SMART REFERRAL HANDOFF ====================
 
@@ -292,6 +308,7 @@ module.exports = function(app, { pool, authenticateToken, authorizeRole }) {
   router.get('/consent/:motherId/:childId', async (req, res) => {
     try {
       const { motherId, childId } = req.params;
+      if (!(await canReadMother(req, res, motherId, 'continuity_consent'))) return;
 
       const result = await pool.query(
         'SELECT * FROM mother_child_consent WHERE mother_id = $1 AND child_id = $2',
@@ -374,6 +391,7 @@ module.exports = function(app, { pool, authenticateToken, authorizeRole }) {
   router.get('/timeline/:motherId', async (req, res) => {
     try {
       const { motherId } = req.params;
+      if (!(await canReadMother(req, res, motherId, 'continuity_timeline'))) return;
       const { include_children = true } = req.query;
 
       let query = `
@@ -411,6 +429,7 @@ module.exports = function(app, { pool, authenticateToken, authorizeRole }) {
   router.get('/timeline/:motherId/:childId', async (req, res) => {
     try {
       const { motherId, childId } = req.params;
+      if (!(await canReadMother(req, res, motherId, 'continuity_timeline'))) return;
 
       // Verify linkage exists and is verified
       const linkageResult = await pool.query(
