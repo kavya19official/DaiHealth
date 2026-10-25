@@ -76,9 +76,18 @@ module.exports = function(app, { pool, authenticateToken, authorizeRole }) {
       `;
       const params = [status];
 
+      // A mother sees only her own items; a doctor only mothers whose access the mother has not turned off.
+      if (req.user.role === 'mother') {
+        params.push(req.user.id);
+        query += ` AND mci.mother_id = $${params.length}`;
+      } else {
+        params.push(req.user.id);
+        query += ` AND ${require('./accessControl').activeRelationshipSql('mci.mother_id', `$${params.length}::int`)}`;
+      }
+
       if (urgency) {
-        query += ` AND mci.urgency_level = $2`;
         params.push(urgency);
+        query += ` AND mci.urgency_level = $${params.length}`;
       }
 
       query += `
