@@ -1,4 +1,5 @@
 'use strict';
+const access=require('./accessControl');
 const {verifiedDoctor}=require('./clinicalDashboard'),M=require('../frontend/js/patient-model');
 const iso=x=>x instanceof Date?x.toISOString().slice(0,10):String(x).slice(0,10);
 const transitions={booked:['waiting','no_show'],waiting:['in_consult','no_show','booked'],in_consult:['done','waiting'],no_show:['waiting'],done:[]};
@@ -17,7 +18,7 @@ module.exports=function(app,{pool,authenticateToken,authorizeRole}){
   const b=req.body||{},id=Number(req.params.id);if(!Number.isInteger(id)||!Number.isInteger(b.version)||b.version<0||!Object.hasOwn(transitions,b.state))return res.status(400).json({error:'Choose a valid queue state and version'});
   const c=await pool.connect();let appointment;
   try{await c.query('BEGIN');await c.query('SELECT user_id FROM doctor_profiles WHERE user_id=$1 FOR UPDATE',[req.user.id]);
-   appointment=(await c.query('SELECT * FROM appointments WHERE id=$1 AND doctor_id=$2 FOR UPDATE',[id,req.user.id])).rows[0];
+   appointment=(await c.query('SELECT ap.* FROM appointments ap WHERE ap.id=$1 AND ap.doctor_id=$2 AND NOT '+access.revokedSql('ap.mother_id','ap.doctor_id','ap.facility_uuid')+' FOR UPDATE',[id,req.user.id])).rows[0];
    if(!appointment)throw Object.assign(Error('Appointment not found'),{status:404});
    if(appointment.status==='cancelled')throw Object.assign(Error('Cancelled appointments cannot enter the queue'),{status:409});
    const old=(await c.query('SELECT * FROM doctor_queue_state WHERE appointment_id=$1',[id])).rows[0],state=old?.state||(appointment.status==='completed'?'done':'booked');
@@ -34,7 +35,7 @@ module.exports=function(app,{pool,authenticateToken,authorizeRole}){
  app.post('/api/doctor/worklist/:id',...guards,async(req,res)=>{
   if(!await verifiedDoctor(pool,req.user.id))return res.status(403).json({error:'Verified doctor required'});
   const b=req.body||{},id=Number(req.params.id);if(!Number.isInteger(id)||!['reviewed','dismissed','reopened'].includes(b.state)||typeof b.reason!=='string'||b.reason.trim().length<3||b.reason.length>1000)return res.status(400).json({error:'Choose an action and enter a reason (3–1,000 characters)'});
-  const c=await pool.connect();try{await c.query('BEGIN');const m=(await c.query('SELECT cm.* FROM care_milestones cm WHERE cm.id=$1 AND EXISTS(SELECT 1 FROM appointments a WHERE a.mother_id=cm.mother_id AND a.doctor_id=$2)',[id,req.user.id])).rows[0];if(!m)throw Object.assign(Error('Assigned care item not found'),{status:404});
+  const c=await pool.connect();try{await c.query('BEGIN');const m=(await c.query('SELECT cm.* FROM care_milestones cm WHERE cm.id=$1 AND '+access.activeRelationshipSql('cm.mother_id','$2::int'),[id,req.user.id])).rows[0];if(!m)throw Object.assign(Error('Assigned care item not found'),{status:404});
    await c.query(`INSERT INTO doctor_worklist_action(doctor_id,milestone_id,state,reason) VALUES($1,$2,$3,$4) ON CONFLICT(doctor_id,milestone_id) DO UPDATE SET state=EXCLUDED.state,reason=EXCLUDED.reason,updated_at=NOW()`,[req.user.id,id,b.state,b.reason.trim()]);
    await c.query('INSERT INTO doctor_operations_event(doctor_id,mother_id,action,entity_id,detail) VALUES($1,$2,$3,$4,$5::jsonb)',[req.user.id,m.mother_id,'worklist_'+b.state,id,JSON.stringify({reason:b.reason.trim()})]);await c.query('COMMIT');res.json({saved:true,message:'Worklist review saved. The clinical care gap remains unchanged.'});
   }catch(e){await c.query('ROLLBACK');res.status(e.status||500).json({error:e.status?e.message:'Worklist action failed'});}finally{c.release();}
