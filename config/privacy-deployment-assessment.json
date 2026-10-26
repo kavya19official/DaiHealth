@@ -1,0 +1,21 @@
+{
+  "revision": "privacy-deployment-review-v1",
+  "decision": "Keep deterministic local rules for fixed tasks. No new local or self-hosted text model is approved or enabled by this assessment.",
+  "options": [
+    {"name":"Deterministic local FAQs and validation","status":"Active for supported fixed tasks","evidence":"Existing bilingual FAQ, validation and workflow tests; no learned model needed."},
+    {"name":"Hosted generic drafting","status":"Optional; user-approved and explicitly configured","evidence":"Only fixed non-personal tasks and language leave the backend. General drafts still need user review."},
+    {"name":"On-device lightweight text model","status":"Not evaluated; not enabled","evidence":null},
+    {"name":"Self-hosted lightweight text model","status":"Not evaluated; not enabled","evidence":null}
+  ],
+  "required_evidence": [
+    "Accuracy and task usefulness on held-out English/Hindi tasks, including refusals and clinically unsafe output; compare against rules and the current hosted baseline.",
+    "Security and privacy review: device/server isolation, encryption, access controls, logging, retention, telemetry/egress, model provenance, licence and prompt-injection boundaries.",
+    "Maintenance ownership: signed model/version, updates, patch cadence, monitoring, incident response and rollback.",
+    "Accessibility and reliability on target devices: screen reader, language quality, voice compatibility, offline failure messages, latency, memory and battery/thermal behaviour.",
+    "Measured compute/energy and financial cost for a defined task, hardware, workload and baseline. Include uncertainty and system boundaries before environmental comparisons."
+  ],
+  "reviewer": null,
+  "reviewed_at": null,
+  "measured_results": null,
+  "environmental_claim": "No measured water or carbon savings. Smaller/local is not automatically greener, safer or more private."
+}

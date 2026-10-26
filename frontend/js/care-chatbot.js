@@ -22,7 +22,7 @@
       <p>FAQs and form checks run locally. Typed questions are not sent to a language model. Prepared public answers can be reused; patient records and this conversation are never shared-cache content.</p>
       <button type="button" class="daya-directory">View reusable facility metadata</button><p class="daya-directory-status" role="status"></p>
       <label>Optional longer draft <select class="daya-complex-task"><option value="visit-questions">Questions to ask before a visit</option><option value="sharing-checklist">Record-sharing discussion checklist</option></select></label>
-      <p>This optional task uses an external Google AI service. Only the selected generic task and language are sent. Your typed questions, identity and records are excluded. Drafts may be wrong; check before use. Each draft uses one bounded request with no automatic retries. Clinical decisions belong in the clinician-review workflow.</p><button type="button" class="daya-human-review">Open clinician review requests</button>
+      <p>This optional task uses an external Google AI service. Only the selected generic task and language are sent. Your typed questions, identity and records are excluded. Drafts may be wrong; check before use. Each draft uses one bounded request with no automatic retries. Clinical decisions belong in the clinician-review workflow.</p><button type="button" class="daya-human-review">Open clinician review requests</button><button type="button" class="daya-open-usage">View AI usage & deployment</button>
       <label><input class="daya-complex-approval" type="checkbox"> I approve sending this generic task to external AI for this request.</label>
       <button type="button" class="daya-complex-run">Generate optional draft</button><p class="daya-complex-status" role="status"></p>
       </details>
@@ -154,6 +154,7 @@
     root.querySelector('.daya-clear').addEventListener('click',()=>{stop();stopListening();feed.replaceChildren();lastReply='';intro();input.focus();});
     let complexBusy=false,directoryBusy=false;
     const approval=root.querySelector('.daya-complex-approval');
+    root.querySelector('.daya-open-usage').onclick=()=>{close();if(window.DaiAIUsage)window.DaiAIUsage.open();else location.href='/dashboard.html#settings';};
     root.querySelector('.daya-human-review').onclick=()=>{const isDoctor=location.pathname.endsWith('/doctor.html'),target=document.querySelector(isDoctor?'[data-panel=dashboard]':'[data-panel=timeline]');if(target)target.click();else if(!isDoctor)location.href='/dashboard.html#timeline';close();requestAnimationFrame(()=>document.querySelector('.clinical-review-panel')?.scrollIntoView({block:'start'}));};
     root.querySelector('.daya-complex-task').addEventListener('change',()=>{approval.checked=false;});
     root.querySelector('.daya-header-actions select').addEventListener('change',()=>{approval.checked=false;});
@@ -169,7 +170,7 @@
       const task=root.querySelector('.daya-complex-task').value,requestedLanguage=language;
       approval.checked=false;complexBusy=true;event.currentTarget.disabled=true;status.textContent='Generating a general draft…';
       try{const r=await fetch(new URL('api/assistance/complex',appBase),{method:'POST',credentials:'same-origin',cache:'no-store',signal:AbortSignal.timeout(20000),headers:{'Content-Type':'application/json'},body:JSON.stringify({task,language:requestedLanguage,approved:true})});
-        const d=await r.json();if(!r.ok)throw Error(d.error||'Draft unavailable');message('bot',d.notice+'\n\n'+d.text);root.querySelector('.daya-routing').open=false;requestAnimationFrame(()=>{feed.scrollTop=feed.scrollHeight;});status.textContent='External AI draft · not cached · check before use.';
+        const d=await r.json();if(!r.ok)throw Error(d.error||'Draft unavailable');message('bot',d.notice+'\n\n'+d.text);window.dispatchEvent(new Event('dai-ai-usage-updated'));if(d.usage?.recorded===false)message('bot','The draft was returned, but usage metadata could not be recorded. Usage totals may be incomplete.');root.querySelector('.daya-routing').open=false;requestAnimationFrame(()=>{feed.scrollTop=feed.scrollHeight;});status.textContent='External AI draft · not cached · check before use.';
       }catch(error){status.textContent=error.message||'Draft unavailable. Local FAQs still work.';}finally{complexBusy=false;root.querySelector('.daya-complex-run').disabled=false;}
     });
     const Recognition=window.SpeechRecognition||window.webkitSpeechRecognition;

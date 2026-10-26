@@ -35,15 +35,19 @@ function validResponse(kind,out,b){
  if(out.source==='ml'&&out.policy_version!==SUPPORT_POLICY)return false;
  return Array.isArray(out.actions)&&out.actions.every(a=>['nearby','asha','schemes'].includes(a.action)&&typeof a.reason==='string'&&a.reason.length);
 }
-async function request(kind,b,transport=fetch){
+async function request(kind,b,transport=fetch,usageTracker=null){
  const fallback=rules(kind,b);
  // Simple scheduling and support never leave this process, even when ML is enabled.
  if(!['rank-gaps','rank-facilities'].includes(kind)||!enabled()||!b.consent?.personalization)return fallback;
  if(kind==='rank-facilities'&&!b.consent?.location)return fallback;
+ let usage=null,providerStatus=null;
  try{
+  usage=await usageTracker?.start({owner_id:Number(b.patient_id),kind:'access_rank',task_key:kind,provider:'patient-ml-service',model:'Artifact/version not reported by service',provider_called:true});usage?.sent();
   const url=process.env.PATIENT_ML_URL||'http://127.0.0.1:8200';
   const r=await transport(url+'/'+kind,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(b),signal:AbortSignal.timeout(1500)});
-  if(!r.ok)return fallback;const out=await r.json();if(!validResponse(kind,out,b))return fallback;
+  providerStatus=r.status??null;
+  if(!r.ok){await usage?.finish({outcome:'failed',http_status:providerStatus});return fallback;}const out=await r.json();usage?.received();if(!validResponse(kind,out,b)){await usage?.finish({outcome:'failed',http_status:providerStatus});return fallback;}
+  await usage?.finish({outcome:out.source==='ml'?'returned':'fallback',http_status:providerStatus});
   // Explicit response allowlist: even an unexpected service field cannot expose a score.
   if(kind.startsWith('rank-')){
    let items=out.items.map(x=>({id:x.id,reason:x.reason.slice(0,500),source:out.source}));
@@ -52,7 +56,7 @@ async function request(kind,b,transport=fetch){
   }
   if(kind==='best-send-time')return {hour:out.hour,channel:out.channel,reason:out.reason.slice(0,500),source:out.source,data_label:label(out.source)};
   return {actions:out.actions.map(a=>({action:a.action,reason:a.reason.slice(0,500)})),source:out.source,data_label:label(out.source)};
- }catch{return fallback;}
+ }catch(error){await usage?.finish({outcome:['TimeoutError','AbortError'].includes(error?.name)?'timeout':'failed',http_status:providerStatus});return fallback;}
 }
 async function context(pool,id){
  const settings=(await pool.query('SELECT * FROM patient_ml_settings WHERE patient_id=$1',[id])).rows[0]||{};
@@ -73,7 +77,7 @@ async function context(pool,id){
  }
  return {patient_id:String(id),consent,features,known_features,prefs};
 }
-module.exports=function(app,{pool,authenticateToken,authorizeRole}){
+module.exports=function(app,{pool,authenticateToken,authorizeRole,usageTracker=null}){
  const own=[authenticateToken,authorizeRole(['mother'])];
  app.get('/api/patient/ml/settings',...own,async(req,res)=>{try{const c=await context(pool,req.user.id);res.set('Cache-Control','no-store').json({enabled:enabled(),consent:c.consent});}catch{res.status(503).json({error:'Assistance settings unavailable',enabled:false});}});
  app.put('/api/patient/ml/settings',...own,async(req,res)=>{const b=req.body||{},keys=['personalization','location','reminders','events'];if(Object.keys(b).some(k=>!keys.includes(k))||keys.some(k=>typeof b[k]!=='boolean'))return res.status(400).json({error:'Explicitly choose all assistance and event-sharing settings'});try{await pool.query(`INSERT INTO patient_ml_settings(patient_id,personalization,location,reminders,events) VALUES($1,$2,$3,$4,$5) ON CONFLICT(patient_id) DO UPDATE SET personalization=$2,location=$3,reminders=$4,events=$5,updated_at=NOW()`,[req.user.id,...keys.map(k=>b[k])]);await pool.query("UPDATE patient_reminder_plans SET state='cancelled' WHERE patient_id=$1 AND state IN ('scheduled','ready')",[req.user.id]);res.json({saved:true});}catch{res.status(500).json({error:'Settings were not saved'});}});
@@ -92,7 +96,7 @@ module.exports=function(app,{pool,authenticateToken,authorizeRole}){
    const rows=(await pool.query(`SELECT f.id,f.verified_at,f.emergency_24x7,f.operating_hours,EXISTS(SELECT 1 FROM facility_services s WHERE s.facility_id=f.id AND s.available=TRUE AND ($2='' OR (s.service_name=$2 OR s.service_category=$2))) AS offers_service,(SELECT COUNT(*)::int FROM facility_service_slots s JOIN facility_services ss ON ss.id=s.facility_service_id WHERE ss.facility_id=f.id AND s.available_places>0 AND s.starts_at>NOW()) AS slots FROM facilities f WHERE f.active=TRUE AND f.id=ANY($1::int[])`,[ids,String(req.body.needed_service||'').slice(0,100)])).rows;
    const distance=new Map(input.map(x=>[String(x.id),Number(x.distance_km)]));b.candidates=rows.map(f=>({id:String(f.id),distance_km:c.consent.location&&Number.isFinite(distance.get(String(f.id)))?Math.max(0,Math.min(20000,distance.get(String(f.id)))):null,offers_service:f.offers_service,open_now:reportedOpen(f,b.needed_service||String(req.body.needed_service||'')),days_since_confirmed:f.verified_at?Math.max(0,Math.floor((Date.now()-new Date(f.verified_at))/86400000)):10000,appointment_availability:f.slots}));b.needed_service=String(req.body.needed_service||'').slice(0,100);
   }
-  const out=await request(kind,b);res.set('Cache-Control','no-store').json(out);
+  const out=await request(kind,b,fetch,usageTracker);res.set('Cache-Control','no-store').json(out);
  }catch(e){console.error('Patient assistance:',e.message);res.status(503).json({error:'Assistance unavailable; keep the existing rule order',source:'rules'});}});
  app.post('/api/patient/ml-events',...own,async(req,res)=>{const b=req.body||{};if(!EVENTS.has(b.event_type)||typeof b.entity_id!=='string'||!/^[\w:.-]{1,120}$/.test(b.entity_id))return res.status(400).json({error:'Invalid event'});try{const c=await context(pool,req.user.id);if(!c.consent.events)return res.status(403).json({error:'Interaction logging needs your permission'});await pool.query("INSERT INTO events(patient_id,event_type,channel,entity_id) VALUES($1,$2,'app',$3)",[req.user.id,b.event_type,b.entity_id]);if(b.event_type==='reminder_opened'&&/^reminder-\d+$/.test(b.entity_id))await pool.query("UPDATE patient_reminder_plans SET state='opened' WHERE id=$1 AND patient_id=$2 AND state='ready'",[Number(b.entity_id.slice(9)),req.user.id]);res.status(201).json({saved:true});}catch{res.status(500).json({error:'Interaction was not logged'});}});
 };

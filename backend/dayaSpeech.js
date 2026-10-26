@@ -10,7 +10,7 @@ function pcmToWav(pcm,sampleRate=24000){
   header.writeUInt32LE(sampleRate*2,28);header.writeUInt16LE(2,32);header.writeUInt16LE(16,34);
   header.write('data',36);header.writeUInt32LE(pcm.length,40);return Buffer.concat([header,pcm]);
 }
-function createSpeechHandler({env=process.env,fetchImpl=(...args)=>fetch(...args),now=Date.now}={}){
+function createSpeechHandler({env=process.env,fetchImpl=(...args)=>fetch(...args),now=Date.now,usageTracker=null}={}){
   const cache=new Map(),requests=new Map(),inflight=new Map();
   const diskDir=env.DAI_TTS_CACHE_DIR || (env===process.env?path.join(__dirname,'../.local/tts-cache'):null);
   const approved=Object.fromEntries(['en','hi'].map(lang=>[lang,new Set([...faqs.map(f=>f.answer[lang]),respond('',lang).text])]));
@@ -29,7 +29,10 @@ function createSpeechHandler({env=process.env,fetchImpl=(...args)=>fetch(...args
     const voice=env.GEMINI_TTS_VOICE||'Charon';
     const cacheKey=JSON.stringify(['v2',model,voice,language,text]);
     const diskPath=diskDir?path.join(diskDir,crypto.createHash('sha256').update(cacheKey).digest('hex')+'.wav'):null;
-    function send(audio,cached){
+    let usage=null,providerResponse=null,providerStatus=null;
+    async function track(outcome,called){if(!usage)usage=await usageTracker?.start({owner_id:req.user?.id,kind:'prepared_speech',task_key:'prepared-speech',model,provider_called:called});const receipt=await usage?.finish({outcome,response:providerResponse,http_status:providerStatus});if(receipt?.event_id)res.set({'X-DAI-Usage-ID':receipt.event_id});}
+    async function send(audio,cached){
+      await track(cached?'cache_hit':'returned',!cached);
       res.set({'Content-Type':'audio/wav','Content-Length':audio.length,'Cache-Control':'no-store',
         'X-DAI-TTS-Provider':'gemini','X-DAI-TTS-Voice':voice,'X-DAI-TTS-Model':model,
         'X-DAI-TTS-Language':language,'X-DAI-TTS-Cache':cached?'hit':'miss'});
@@ -37,15 +40,16 @@ function createSpeechHandler({env=process.env,fetchImpl=(...args)=>fetch(...args
     }
     if(cache.has(cacheKey))return send(cache.get(cacheKey),true);
     if(diskPath){try{const bytes=await fs.readFile(diskPath);if(bytes.length>44&&bytes.length<=8*1024*1024&&bytes.toString('ascii',0,4)==='RIFF'){cache.set(cacheKey,bytes);return send(bytes,true);}}catch{}}
-    if(inflight.has(cacheKey)){const result=await inflight.get(cacheKey);return result.audio?send(result.audio,true):res.status(result.code).json({error:result.error});}
+    if(inflight.has(cacheKey)){const result=await inflight.get(cacheKey);await track('coalesced',false);return result.audio?send(result.audio,true):res.status(result.code).json({error:result.error});}
 
     const time=now();for(const [ip,entry] of requests)if(entry.expires<=time)requests.delete(ip);
     const ip=req.ip||'local',entry=requests.get(ip)||{count:0,expires:time+600000};
     if(entry.count>=30||requests.size>10000)return res.status(429).json({error:'Voice request limit reached. Please try later.'});
     entry.count++;requests.set(ip,entry);
     let settle;inflight.set(cacheKey,new Promise(resolve=>{settle=resolve;}));
-    function failure(code,error){settle({code,error});inflight.delete(cacheKey);return res.status(code).json({error});}
+    async function failure(code,error){await track(code===504?'timeout':'failed',true);settle({code,error});inflight.delete(cacheKey);return res.status(code).json({error});}
     try{
+      if(usageTracker){usage=await usageTracker.start({owner_id:req.user?.id,kind:'prepared_speech',task_key:'prepared-speech',model,provider_called:true});usage.sent();}
       const response=await fetchImpl(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,{
         method:'POST',signal:AbortSignal.timeout(30000),
         headers:{'Content-Type':'application/json','x-goog-api-key':key},
@@ -56,9 +60,10 @@ function createSpeechHandler({env=process.env,fetchImpl=(...args)=>fetch(...args
           '', 'Transcript:',text
         ].join('\n')}]}],generationConfig:{responseModalities:['AUDIO'],speechConfig:{voiceConfig:{prebuiltVoiceConfig:{voiceName:voice}}}}})
       });
+      providerStatus=response.status??null;
       if(!response.ok){
         // Return actionable categories, never Google's raw body or credentials.
-        const detail=await response.json().catch(()=>({}));
+        const detail=await response.json().catch(()=>({}));providerResponse=detail;usage?.received();
         const reasons=(detail.error?.details||[]).map(d=>d.reason);
         let message=`Google rejected the Gemini voice request (HTTP ${response.status}). Check GEMINI_TTS_MODEL, GEMINI_TTS_VOICE and the API key in backend/.env, then restart DAI.`;
         if(reasons.includes('API_KEY_INVALID'))message='The running backend has an invalid Gemini API key. Update backend/.env and restart DAI; clear any older exported GEMINI_API_KEY first.';
@@ -67,7 +72,7 @@ function createSpeechHandler({env=process.env,fetchImpl=(...args)=>fetch(...args
         else if(response.status===404)message='This Gemini TTS model is unavailable to the running backend. Check GEMINI_TTS_MODEL in backend/.env and restart DAI.';
         return failure(response.status===429?429:502,message);
       }
-      const data=await response.json();
+      const data=await response.json();providerResponse=data;usage?.received();
       const audioPart=data.candidates?.[0]?.content?.parts?.find(p=>p.inlineData?.data)?.inlineData;
       if(!audioPart||!/^audio\/L16(?:;|$)/i.test(audioPart.mimeType||''))return failure(502,'Gemini returned no supported PCM audio');
       const rate=Number((audioPart.mimeType.match(/rate=(\d+)/)||[])[1]||24000);

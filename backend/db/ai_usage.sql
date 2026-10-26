@@ -1,0 +1,27 @@
+CREATE TABLE IF NOT EXISTS ai_usage_events (
+ id UUID PRIMARY KEY,
+ owner_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+ kind TEXT NOT NULL CHECK(kind IN ('general_draft','prepared_speech','access_rank')),
+ task_key TEXT NOT NULL,
+ provider TEXT NOT NULL DEFAULT 'google',
+ requested_model TEXT NOT NULL,
+ reported_model_version TEXT,
+ provider_response_id TEXT,
+ provider_called BOOLEAN NOT NULL,
+ outcome TEXT NOT NULL CHECK(outcome IN ('started','returned','failed','timeout','cache_hit','coalesced','fallback')),
+ provider_http_status INTEGER,
+ latency_ms INTEGER,
+ provider_latency_ms INTEGER,
+ input_tokens BIGINT CHECK(input_tokens>=0),
+ output_tokens BIGINT CHECK(output_tokens>=0),
+ total_tokens BIGINT CHECK(total_tokens>=0),
+ cached_input_tokens BIGINT CHECK(cached_input_tokens>=0),
+ thought_tokens BIGINT CHECK(thought_tokens>=0),
+ provider_reported_cost NUMERIC,
+ cost_currency TEXT,
+ feedback_useful BOOLEAN,
+ feedback_at TIMESTAMPTZ,
+ created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+ completed_at TIMESTAMPTZ
+);
+CREATE INDEX IF NOT EXISTS ai_usage_owner_time ON ai_usage_events(owner_id,created_at DESC);

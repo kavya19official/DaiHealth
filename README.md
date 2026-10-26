@@ -283,3 +283,9 @@ review requests** now expose a human review queue. General AI drafts use one bou
 request, no automatic retries and duplicate-call guards. Automatic prototype risk
 classification has been replaced by review requests; existing deterministic safety
 signals remain. See [bounded calls and clinical review](docs/BOUNDED-AI-AND-CLINICIAN-REVIEW.md).
+
+Patient and Doctor **Settings → AI usage & deployment** show account-scoped usage,
+provider-reported token data where present, measured latency and optional usefulness
+feedback. Missing cost/compute remain unknown; no water/carbon savings are inferred.
+The local/self-hosted text-model assessment remains unapproved pending evidence.
+See [AI usage and deployment](docs/AI-USAGE-AND-DEPLOYMENT.md).

@@ -5,7 +5,7 @@ const TASKS=Object.freeze({
  'visit-questions':'Draft a structured list of non-medical logistical questions someone can ask a care centre before a visit: booking, accessibility, language support, opening times, costs to confirm and how to ask about follow-up. Do not invent answers or eligibility. Do not provide medical advice.',
  'sharing-checklist':'Draft a detailed plain-language checklist for discussing record sharing with a care team: purpose, recipient, minimum necessary documents, duration, withdrawal and questions to ask. Do not claim legal compliance, access to records or actions performed.'
 });
-function register(app,{pool,authenticateToken,env=process.env,fetchImpl=fetch,now=Date.now}){
+function register(app,{pool,authenticateToken,env=process.env,fetchImpl=fetch,now=Date.now,usageTracker=null}){
  const education={revision:'prepared-faq-v1',scope:'Prepared general information; no patient records',faqs:faqs.map(f=>({id:f.id,category:f.category,question:f.question,answer:f.answer,sources:f.sources,navigation:f.navigation}))};
  let directory=null,pending=null;const rates=new Map(),inflight=new Set(),recent=new Map();
  function publicJson(req,res,value,ttl){
@@ -52,16 +52,21 @@ function register(app,{pool,authenticateToken,env=process.env,fetchImpl=fetch,no
   if(inflight.has(id))return res.status(409).json({error:'A draft is already in progress. No second model call was made.'});
   const last=recent.get(id);if(last?.task===b.task&&last.language===b.language)return res.status(409).json({error:'This draft was just requested. Read the existing result or wait 30 seconds before approving another attempt.'});
   rate.count++;rates.set(id,rate);inflight.add(id);recent.set(id,{task:b.task,language:b.language,at:time});
+  const usage=await usageTracker?.start({owner_id:req.user.id,kind:'general_draft',task_key:b.task,model:env.DAI_COMPLEX_AI_MODEL,provider_called:true});let providerResponse=null,providerStatus=null;
   try{
+   usage?.sent();
    const result=await fetchImpl(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(env.DAI_COMPLEX_AI_MODEL)}:generateContent`,{
     method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':env.GEMINI_API_KEY},signal:AbortSignal.timeout(15000),
     body:JSON.stringify({contents:[{parts:[{text:TASKS[b.task]+` Write in ${b.language==='hi'?'Hindi':'English'}. This is a general draft, not an official instruction. Do not ask for or infer personal health information.`}]}],generationConfig:{temperature:0.2,maxOutputTokens:700}})
    });
+   providerStatus=result.status??null;
+   const value=await result.json();providerResponse=value;usage?.received();
    if(!result.ok)throw Error('Provider unavailable');
-   const value=await result.json(),text=value.candidates?.[0]?.content?.parts?.map(p=>typeof p.text==='string'?p.text:'').join('\n').trim();
+   const text=value.candidates?.[0]?.content?.parts?.map(p=>typeof p.text==='string'?p.text:'').join('\n').trim();
    if(!text)throw Error('No draft');
-   return res.json({text:text.slice(0,6000),source:'external-ai',task:b.task,notice:'AI-generated general draft. Check it before use. No patient records or conversation were sent. This draft is not cached.'});
-  }catch{return res.status(502).json({error:'External drafting unavailable. No automatic retry was made. Wait 30 seconds before approving another attempt; local FAQs still work.'});}finally{inflight.delete(id);}
+   const usageReceipt=await usage?.finish({outcome:'returned',response:providerResponse,http_status:providerStatus});
+   return res.json({usage:usageReceipt||{recorded:false},text:text.slice(0,6000),source:'external-ai',task:b.task,notice:'AI-generated general draft. Check it before use. No patient records or conversation were sent. This draft is not cached.'});
+  }catch(error){await usage?.finish({outcome:['AbortError','TimeoutError'].includes(error?.name)?'timeout':'failed',response:providerResponse,http_status:providerStatus});return res.status(502).json({error:'External drafting unavailable. No automatic retry was made. Wait 30 seconds before approving another attempt; local FAQs still work.'});}finally{inflight.delete(id);}
  });
 }
 module.exports={register,TASKS};

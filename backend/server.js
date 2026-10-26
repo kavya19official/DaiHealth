@@ -1099,7 +1099,8 @@ require('./patientContinuity')(app, { pool, authenticateToken, authorizeRole });
 require('./patientExperience')(app, { pool, authenticateToken, authorizeRole });
 require('./patientHome')(app, { pool, authenticateToken, authorizeRole });
 require('./patientSupport')(app, { pool, authenticateToken, authorizeRole });
-require('./patientML')(app, { pool, authenticateToken, authorizeRole });
+const aiUsageTracker=require('./aiUsage').register(app,{pool,authenticateToken});
+require('./patientML')(app, { pool, authenticateToken, authorizeRole,usageTracker:aiUsageTracker });
 require('./clinicalDashboard')(app, { pool, authenticateToken, authorizeRole });
 require('./doctorWorkspace')(app, { pool, authenticateToken, authorizeRole });
 require('./doctorOperations')(app, { pool, authenticateToken, authorizeRole });
@@ -1132,8 +1133,8 @@ require('./visitSummary')(app, { pool, authenticateToken, authorizeRole });
 
 // Gemini receives approved Dr. Daya answers only; the API key remains server-side.
 require('./clinicalReview').register(app,{pool,authenticateToken,authorizeRole});
-require('./assistanceRouting').register(app,{pool,authenticateToken});
-app.post('/api/tts', require('./dayaSpeech').createSpeechHandler());
+require('./assistanceRouting').register(app,{pool,authenticateToken,usageTracker:aiUsageTracker});
+app.post('/api/tts',(req,res,next)=>{try{req.user=jwt.verify(req.cookies.token,JWT_SECRET);}catch{}next();},require('./dayaSpeech').createSpeechHandler({usageTracker:aiUsageTracker}));
 
 // Local-only diagnostics. No secrets or patient identifiers are returned.
 if (process.env.DAI_LOCAL === 'true') {
