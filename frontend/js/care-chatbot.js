@@ -18,11 +18,19 @@
       <div class="daya-body"><aside class="daya-character" aria-label="Animated AI companion"><span class="daya-badge">AI CARE COMPANION</span><div class="daya-avatar"><span class="daya-avatar-status" role="status">Loading your companion…</span></div><span class="dhruv-eyebrow">A LITTLE CLARITY. A LITTLE CARE.</span><h3>Here with you.</h3><p>I explain and guide.<br>Your real doctor makes the medical decisions.</p><span class="daya-state" role="status">Ready when you are</span><span class="dhruv-journey" hidden></span><a class="daya-credit" href="https://sketchfab.com/3d-models/doctor-sketchfab-weekly-13-mar23-9c89a438a5e940e59a0f9a07c22d6ade" target="_blank" rel="noopener noreferrer">Avatar: BrushDip · CC BY · adapted</a></aside>
       <div class="daya-conversation"><p class="care-chatbot__notice"></p><p class="daya-voice-error" role="status" hidden></p><div class="care-chatbot__feed" role="log" aria-live="polite" aria-label="Conversation"></div>
       <details class="daya-topics"><summary>Explore questions</summary><div class="daya-categories" aria-label="Question topics"></div><div class="care-chatbot__chips"></div></details>
+      <details class="daya-routing"><summary>How assistance works · local first</summary>
+      <p>FAQs and form checks run locally. Typed questions are not sent to a language model. Prepared public answers can be reused; patient records and this conversation are never shared-cache content.</p>
+      <button type="button" class="daya-directory">View reusable facility metadata</button><p class="daya-directory-status" role="status"></p>
+      <label>Optional longer draft <select class="daya-complex-task"><option value="visit-questions">Questions to ask before a visit</option><option value="sharing-checklist">Record-sharing discussion checklist</option></select></label>
+      <p>This optional task uses an external Google AI service. Only the selected generic task and language are sent. Your typed questions, identity and records are excluded. Drafts may be wrong; check before use.</p>
+      <label><input class="daya-complex-approval" type="checkbox"> I approve sending this generic task to external AI for this request.</label>
+      <button type="button" class="daya-complex-run">Generate optional draft</button><p class="daya-complex-status" role="status"></p>
+      </details>
       <form class="care-chatbot__form"><input type="text" maxlength="1500" aria-label="Ask Dhruv" placeholder="Type your question…" autocomplete="off"><button type="submit">Send</button></form>
       <div class="daya-tools"><button type="button" class="daya-mic" aria-pressed="false">◉ Speak</button><button type="button" class="care-chatbot__voice" aria-pressed="false">Voice: Off</button><button type="button" class="dhruv-slow" aria-pressed="false">Speak slowly</button><button type="button" class="daya-clear">Clear</button><span class="daya-help-status" role="status">English · text or voice</span></div></div></div></section>`;
     document.body.appendChild(root);
     if(matchMedia("(max-height: 650px)").matches)root.querySelector(".daya-topics").open=false;
-    const panel=root.querySelector('section'),launcher=root.querySelector('.care-chatbot__launcher'),feed=root.querySelector('.care-chatbot__feed'),input=root.querySelector('input'),mic=root.querySelector('.daya-mic'),voiceButton=root.querySelector('.care-chatbot__voice'),state=root.querySelector('.daya-state'),help=root.querySelector('.daya-help-status'),avatarHost=root.querySelector('.daya-avatar');
+    const panel=root.querySelector('section'),launcher=root.querySelector('.care-chatbot__launcher'),feed=root.querySelector('.care-chatbot__feed'),input=root.querySelector('.care-chatbot__form input'),mic=root.querySelector('.daya-mic'),voiceButton=root.querySelector('.care-chatbot__voice'),state=root.querySelector('.daya-state'),help=root.querySelector('.daya-help-status'),avatarHost=root.querySelector('.daya-avatar');
     const tr=(en,hi)=>language==='hi'?hi:en;
     let activeCategory='app';
     const preparedAudio=new Map(),preparingAudio=new Map();
@@ -96,7 +104,7 @@
           result.sources.forEach((source,i)=>{const u=new URL(source);if(u.protocol!=='https:')return;links.appendChild(el('a',{href:u.href,target:'_blank',rel:'noopener noreferrer'},tr('Official / clinical source','आधिकारिक / चिकित्सा स्रोत')+(result.sources.length>1?' '+(i+1):'')+' ↗'));});row.appendChild(links);
         }
       }
-      if(who==='bot'&&result){const actions=el('div',{class:'dhruv-reply-actions'});const replay=el('button',{type:'button'},tr('↻ Listen again','↻ फिर सुनें'));replay.addEventListener('click',()=>{voice=true;voiceButton.setAttribute('aria-pressed','true');voiceButton.textContent=tr('Voice: On','आवाज़: चालू');speak(text);});actions.appendChild(replay);row.appendChild(actions);}
+      if(who==='bot'&&result){row.appendChild(el('small',{class:'daya-route-label'},tr('Local prepared answer · no language-model request','स्थानीय तैयार जवाब · भाषा मॉडल को अनुरोध नहीं')));const actions=el('div',{class:'dhruv-reply-actions'});const replay=el('button',{type:'button'},tr('↻ Listen again','↻ फिर सुनें'));replay.addEventListener('click',()=>{voice=true;voiceButton.setAttribute('aria-pressed','true');voiceButton.textContent=tr('Voice: On','आवाज़: चालू');speak(text);});actions.appendChild(replay);row.appendChild(actions);}
       feed.appendChild(row);feed.scrollTop=feed.scrollHeight;
     }
     function intro(){message('bot',tr('Hello, I’m Dhruv, your AI care companion. I can explain your care journey and help you prepare questions. For medical decisions, talk to your real doctor. What’s on your mind?','नमस्ते, मैं ध्रुव हूँ, आपका AI care companion। मैं देखभाल के पड़ाव समझा सकता हूँ और डॉक्टर के लिए प्रश्न तैयार करने में मदद कर सकता हूँ। चिकित्सा के फ़ैसले आपके असली डॉक्टर करेंगे। आप क्या पूछना चाहेंगी?'));}
@@ -143,10 +151,29 @@
     launcher.addEventListener('click',open);root.querySelector('.care-chatbot__close').addEventListener('click',close);
     root.addEventListener('keydown',event=>{if(event.key==='Escape')close();});
     root.querySelector('form').addEventListener('submit',event=>{event.preventDefault();ask(input.value);});
-    root.querySelector('select').addEventListener('change',event=>{stopListening();language=event.target.value;stop();lastReply='';labels();intro();});
+    root.querySelector('.daya-header-actions select').addEventListener('change',event=>{stopListening();language=event.target.value;stop();lastReply='';labels();intro();});
     voiceButton.addEventListener('click',()=>{voice=!voice;voiceButton.setAttribute('aria-pressed',String(voice));labels();if(voice&&lastReply)speak(lastReply);else stop();});
     root.querySelector('.dhruv-slow').addEventListener('click',event=>{slow=!slow;event.currentTarget.setAttribute('aria-pressed',String(slow));if(currentAudio)currentAudio.playbackRate=slow?.85:1;});
     root.querySelector('.daya-clear').addEventListener('click',()=>{stop();stopListening();feed.replaceChildren();lastReply='';intro();input.focus();});
+    let complexBusy=false,directoryBusy=false;
+    const approval=root.querySelector('.daya-complex-approval');
+    root.querySelector('.daya-complex-task').addEventListener('change',()=>{approval.checked=false;});
+    root.querySelector('.daya-header-actions select').addEventListener('change',()=>{approval.checked=false;});
+    root.querySelector('.daya-directory').addEventListener('click',async()=>{
+      if(directoryBusy)return;directoryBusy=true;const status=root.querySelector('.daya-directory-status');status.textContent='Loading public metadata…';
+      try{const r=await fetch(new URL('api/public/facility-metadata',appBase),{credentials:'omit',cache:'no-store'});if(!r.ok)throw Error('Directory unavailable');const d=await r.json();
+        status.textContent=d.facilities.slice(0,12).map(f=>f.name+' — '+f.city).join('; ')+'. Public metadata fetched '+d.fetched_at+'. Up to 60 seconds of server reuse. Services and slots require live search.';
+      }catch{status.textContent='Public directory unavailable. Use Nearby care to search.';}finally{directoryBusy=false;}
+    });
+    root.querySelector('.daya-complex-run').addEventListener('click',async event=>{
+      const status=root.querySelector('.daya-complex-status');if(complexBusy)return;
+      if(!approval.checked){status.textContent='Approve this external task first. Nothing was sent.';return;}
+      const task=root.querySelector('.daya-complex-task').value,requestedLanguage=language;
+      approval.checked=false;complexBusy=true;event.currentTarget.disabled=true;status.textContent='Generating a general draft…';
+      try{const r=await fetch(new URL('api/assistance/complex',appBase),{method:'POST',credentials:'same-origin',cache:'no-store',headers:{'Content-Type':'application/json'},body:JSON.stringify({task,language:requestedLanguage,approved:true})});
+        const d=await r.json();if(!r.ok)throw Error(d.error||'Draft unavailable');message('bot',d.notice+'\n\n'+d.text);status.textContent='External AI draft · not cached · check before use.';
+      }catch(error){status.textContent=error.message||'Draft unavailable. Local FAQs still work.';}finally{complexBusy=false;root.querySelector('.daya-complex-run').disabled=false;}
+    });
     const Recognition=window.SpeechRecognition||window.webkitSpeechRecognition;
     if(!Recognition){mic.disabled=true;mic.title='Speech recognition is not supported in this browser. You can type instead.';}
     mic.addEventListener('click',()=>{

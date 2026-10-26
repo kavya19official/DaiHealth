@@ -273,3 +273,7 @@ Optional learned access ranking requires both `ML_ENABLED=true` and
 shortlist, eligibility checks, appointment/referral transitions and follow-up
 workflow use rules. See [model-selection policy](docs/AI-MODEL-SELECTION.md) for
 scope, evaluation requirements and local verification.
+
+Patient dashboard → Ask Dhruv → **How assistance works · local first** shows local
+FAQ routing, reusable public metadata and explicitly approved optional general
+drafting. See [routing and cache boundaries](docs/ASSISTANCE-ROUTING-AND-CACHE.md).

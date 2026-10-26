@@ -29,3 +29,5 @@ python3 -m pytest ml-service/tests/test_patient_ml.py -q
 ```
 
 For the normal deterministic demo, run `npm start` without either ML switch. In Nearby care, the synthetic shortlist still explains its rule scores. In Care timeline and Hospital/Admin > Follow-up & risk demo, updates still use the existing authenticated workflow. Reminder plans remain app inbox/on-refresh only; no SMS delivery is implied.
+
+The [assistance routing and cache policy](ASSISTANCE-ROUTING-AND-CACHE.md) adds a separate, disabled-by-default external drafting path for fixed, non-personal tasks with explicit per-request approval. Typed FAQ questions still never trigger that path. Public educational assets and basic facility metadata are the only new shared reusable content.

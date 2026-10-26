@@ -20,11 +20,13 @@ test('complete backend starts and patient timeline APIs authenticate, isolate re
   assert.ok(ready,'Backend did not start. '+logs.slice(-2500));
   const login=async email=>{const r=await fetch(base+'/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password:'Synthetic-Timeline-Test-2026!'})});assert.equal(r.status,200);return r.headers.get('set-cookie').split(';')[0];};
   const mother=await login('mother0@dai-synthetic.invalid'),doctor=await login('doctor2@dai-synthetic.invalid');
-  const request=async(url,cookie,method='GET',body)=>{const r=await fetch(base+url,{method,headers:{'Content-Type':'application/json',...(cookie?{Cookie:cookie}:{})},body:body?JSON.stringify(body):undefined});return {status:r.status,body:await r.json()};};
+  const request=async(url,cookie,method='GET',body)=>{const r=await fetch(base+url,{method,headers:{'Content-Type':'application/json',...(cookie?{Cookie:cookie}:{})},body:body?JSON.stringify(body):undefined});return {status:r.status,cacheControl:r.headers.get('cache-control'),body:await r.json()};};
   for(const url of ['/api/timeline','/api/timeline/enhanced']){
    assert.equal((await request(url)).status,401);assert.equal((await request(url,doctor)).status,403);
-   const r=await request(url,mother);assert.equal(r.status,200);assert.equal(r.body.milestones.length,1);assert.equal(r.body.milestones[0].id,mine);assert.doesNotMatch(JSON.stringify(r.body),/PRIVATE other patient/);
+   const r=await request(url,mother);assert.match(r.cacheControl,/no-store/);assert.equal(r.status,200);assert.equal(r.body.milestones.length,1);assert.equal(r.body.milestones[0].id,mine);assert.doesNotMatch(JSON.stringify(r.body),/PRIVATE other patient/);
   }
+  const catalogue=await request('/api/public/assistance-content');assert.equal(catalogue.status,200);assert.match(catalogue.cacheControl,/public/);assert.equal(catalogue.body.faqs.length,40);
+  const unapproved=await request('/api/assistance/complex',mother,'POST',{task:'visit-questions',language:'en',approved:false});assert.equal(unapproved.status,409);assert.match(unapproved.cacheControl,/no-store/);
   assert.equal((await request('/api/timeline/'+other+'/complete',mother,'PATCH')).status,404);
   assert.equal((await request('/api/timeline/'+mine+'/complete',mother,'PATCH')).status,200);
   for(const url of ['/api/timeline','/api/timeline/enhanced']){const r=await request(url,mother);assert.equal(r.body.milestones[0].status,'completed');assert.equal(r.body.milestones[0].completion_verification,'self_reported');}

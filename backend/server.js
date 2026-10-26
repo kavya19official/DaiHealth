@@ -48,6 +48,8 @@ app.use((req, res, next) => {
 // ceiling so uploads work locally without allowing unbounded request bodies.
 app.use(express.json({ limit: '8mb' }));
 app.use(cookieParser());
+// Private by default. Only explicitly public catalogues may opt into reuse.
+app.use('/api', (req,res,next)=>{res.set('Cache-Control','private, no-store');next();});
 
 // Database connection. Render Postgres exposes a DATABASE_URL; local development
 // can still use DB_* values from backend/.env.
@@ -1140,6 +1142,7 @@ require('./privacyAnalytics')(app, { pool, authenticateToken, authorizeRole });
 require('./visitSummary')(app, { pool, authenticateToken, authorizeRole });
 
 // Gemini receives approved Dr. Daya answers only; the API key remains server-side.
+require('./assistanceRouting').register(app,{pool,authenticateToken});
 app.post('/api/tts', require('./dayaSpeech').createSpeechHandler());
 
 // Local-only diagnostics. No secrets or patient identifiers are returned.
