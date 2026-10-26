@@ -46,3 +46,8 @@ node --test backend/assistanceRouting.test.js backend/dayaAssistant.test.js back
 ```
 
 The tests cover zero model calls for FAQ/invalid/unapproved tasks, two identities receiving independently generated drafts, cache projection/expiry/failure, public ETags, consent, role/session checks, provider payload allowlists, budgets and existing bilingual FAQ/voice behaviour. Use an incognito window or reload once after installation for the updated widget shell. If external drafting is unconfigured, the unavailable message is expected.
+
+The [bounded-call and clinical-review update](BOUNDED-AI-AND-CLINICIAN-REVIEW.md)
+adds a 1 KB body limit, one in-flight request per user, a 30-second same-task pause,
+zero automatic retries, and explicit clinician-review routing for high-stakes tasks.
+It also removes speculative voice generation and automatically reveals completed drafts.

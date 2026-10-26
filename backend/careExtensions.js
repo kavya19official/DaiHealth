@@ -82,18 +82,7 @@ module.exports = function registerCareExtensions(app, { pool, authenticateToken,
   // ==========================================================================
   async function buildTrend(motherId, days) {
     const since = new Date(Date.now() - days * 86400000).toISOString();
-    const [logs, ass, latest] = await Promise.all([
-      pool.query(
-        `SELECT log_type, data, logged_at FROM health_logs
-          WHERE mother_id = $1 AND log_type IN ('blood_pressure', 'blood_glucose', 'weight') AND logged_at >= $2
-          ORDER BY logged_at ASC`, [motherId, since]),
-      pool.query(
-        `SELECT risk_level, trigger, assessed_at FROM risk_assessments
-          WHERE mother_id = $1 AND assessed_at >= $2 ORDER BY assessed_at ASC`, [motherId, since]),
-      pool.query(
-        `SELECT risk_level, knn_level, factors, explanation, trigger, assessed_at FROM risk_assessments
-          WHERE mother_id = $1 ORDER BY assessed_at DESC, id DESC LIMIT 1`, [motherId]),
-    ]);
+    const logs = await pool.query(`SELECT log_type,data,logged_at FROM health_logs WHERE mother_id=$1 AND log_type IN ('blood_pressure','blood_glucose','weight') AND logged_at >= $2 ORDER BY logged_at ASC`,[motherId,since]);
     const data = { bp: [], glucose: [], weight: [], assessments: [] };
     logs.rows.forEach((r) => {
       const d = r.data || {};
@@ -101,18 +90,11 @@ module.exports = function registerCareExtensions(app, { pool, authenticateToken,
       else if (r.log_type === 'blood_glucose') data.glucose.push({ at: r.logged_at, mg_dl: Number(d.mg_dl), context: d.context });
       else data.weight.push({ at: r.logged_at, kg: Number(d.kg) });
     });
-    ass.rows.forEach((r) => data.assessments.push({ at: r.assessed_at, risk_level: r.risk_level, trigger: r.trigger }));
-    const trend = analyseTrend(data);
-    const l = latest.rows[0] || null;
-    return {
-      window_days: days,
-      ...trend,
-      latest_assessment: l ? {
-        risk_level: l.risk_level, knn_level: l.knn_level, factors: l.factors || [], explanation: l.explanation || null,
-        trigger: l.trigger, assessed_at: l.assessed_at
-      } : null
-    };
+    // Keep recorded vital trends and existing deterministic safety signals; do not
+    // present historical model classifications as clinician-approved decisions.
+    return {window_days:days,...analyseTrend(data),latest_assessment:null,review_required:true};
   }
+
   const clampDays = (v) => Math.min(365, Math.max(14, parseInt(v, 10) || 90));
 
   app.get('/api/risk/trend', ...motherOnly, async (req, res) => {

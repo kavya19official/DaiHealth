@@ -27,6 +27,11 @@ test('complete backend starts and patient timeline APIs authenticate, isolate re
   }
   const catalogue=await request('/api/public/assistance-content');assert.equal(catalogue.status,200);assert.match(catalogue.cacheControl,/public/);assert.equal(catalogue.body.faqs.length,40);
   const unapproved=await request('/api/assistance/complex',mother,'POST',{task:'visit-questions',language:'en',approved:false});assert.equal(unapproved.status,409);assert.match(unapproved.cacheControl,/no-store/);
+  const risk=await request('/api/risk/assess',mother,'POST',{});assert.equal(risk.status,202);assert.equal(risk.body.review_required,true);
+  const log=await request('/api/health-logs',mother,'POST',{log_type:'blood_pressure',data:{systolic:120,diastolic:80}});assert.equal(log.status,201);assert.equal(log.body.risk_update.review_required,true);
+  assert.equal((await request('/api/health-logs',mother,'POST',{log_type:'blood_pressure',data:{systolic:170,diastolic:110}})).status,201);
+  const trend=await request('/api/risk/trend',mother);assert.equal(trend.status,200);assert.equal(trend.body.latest_assessment,null);assert.equal(trend.body.bp.count,2);assert.ok(trend.body.signals.some(s=>s.level==='urgent'));
+  const signup=await request('/api/auth/register/mother',null,'POST',{email:'registration@dai-synthetic.invalid',password:'Synthetic-Timeline-Test-2026!',full_name:'Synthetic Signup',date_of_birth:'2000-01-01',systolic:120,diastolic:80});assert.equal(signup.status,201);assert.equal(signup.body.risk,null);
   assert.equal((await request('/api/timeline/'+other+'/complete',mother,'PATCH')).status,404);
   assert.equal((await request('/api/timeline/'+mine+'/complete',mother,'PATCH')).status,200);
   for(const url of ['/api/timeline','/api/timeline/enhanced']){const r=await request(url,mother);assert.equal(r.body.milestones[0].status,'completed');assert.equal(r.body.milestones[0].completion_verification,'self_reported');}

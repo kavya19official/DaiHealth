@@ -7,7 +7,6 @@ const jwt = require('jsonwebtoken');
 const access = require('./accessControl');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
-const riskAssessment = require('./riskAssessment');
 const { runRiskAssessment } = require('./riskService');
 const careTimelineEnhanced = require('./careTimelineEnhanced');
 const missedCareOutreach = require('./missedCareOutreach');
@@ -208,8 +207,7 @@ const seedCareMilestones = async (client, motherId, careStartDate) => {
 // row is created too (backend/db/child_dashboard.sql — same table childDashboard.js
 // and the Child dashboard use).
 //
-// If enough vitals are present (age from DOB, plus systolic/diastolic), an initial
-// maternal risk assessment runs and is stored on mother_profiles (riskAssessment.js).
+// Submitted measurements are preserved for review; no risk classification runs at signup.
 const DATE_ONLY_RE = /^\d{4}-\d{2}-\d{2}$/;
 const isPlainDate = (s) => typeof s === 'string' && DATE_ONLY_RE.test(s) && !Number.isNaN(new Date(`${s}T00:00:00Z`).getTime());
 const cleanupStr = (v, max) => (typeof v === 'string' && v.trim() ? v.trim().slice(0, max) : null);
@@ -292,21 +290,8 @@ app.post('/api/auth/register/mother', async (req, res) => {
       return res.status(400).json({ error: 'Enter a valid date of birth for your child' });
     }
 
-    // ---- Initial risk assessment (only when we have enough to score) --------------
-    let riskResult = null;
-    if (dateOfBirth && systolic != null && diastolic != null) {
-      riskResult = riskAssessment.assessRisk({
-        age: ageFromDob(dateOfBirth),
-        systolic,
-        diastolic,
-        blood_sugar: bloodSugarMmol == null ? undefined : bloodSugarMmol,
-        previous_complications: !!previousComplications,
-        preexisting_diabetes: /diabetes/i.test(medicalConditions || ''),
-        medical_conditions: medicalConditions,
-        gravida,
-      });
-      if (riskResult.error) riskResult = null; // missing/invalid vitals — skip silently, not a signup blocker
-    }
+    // Risk classification is a human clinical decision, never a signup prediction.
+    const riskResult = null;
 
     const password_hash = await bcrypt.hash(password, 10);
 
@@ -337,6 +322,10 @@ app.post('/api/auth/register/mother', async (req, res) => {
          riskResult ? new Date() : null]
       );
 
+      // Preserve submitted measurements for the clinician without classifying them.
+      if(systolic!=null&&diastolic!=null)await client.query("INSERT INTO health_logs(mother_id,log_type,data) VALUES($1,'blood_pressure',$2)",[userId,JSON.stringify({systolic,diastolic,source:'self_reported_registration'})]);
+      if(bloodSugarMmol!=null)await client.query("INSERT INTO health_logs(mother_id,log_type,data) VALUES($1,'blood_glucose',$2)",[userId,JSON.stringify({mg_dl:bloodSugarMmol*18.0182,context:'unspecified',source:'self_reported_registration',original_unit:'mmol/L',original_value:bloodSugarMmol})]);
+      if(systolic!=null&&diastolic!=null||bloodSugarMmol!=null)await require('./clinicalReview').requestReview(client,userId,'pregnancy_risk','Review the self-reported measurements saved at registration. No automatic risk level was assigned.');
       await seedCareMilestones(client, userId, careStartDate);
 
       if (wantsChild) {
@@ -1080,7 +1069,7 @@ app.get('/api/risk', authenticateToken, authorizeRole(['mother']), async (req, r
     );
     if (!r.rows.length) return res.status(404).json({ error: 'Profile not found' });
     const row = r.rows[0];
-    res.json({ risk_level: row.risk_level, risk_factors: row.risk_factors || [], risk_assessed_at: row.risk_assessed_at });
+    res.json({risk_level:null,risk_factors:[],risk_assessed_at:null,review_required:true,historical_record_present:!!row.risk_assessed_at,message:'Use clinician review decisions in Care timeline. Historical automated labels are not clinical approval.'});
   } catch (error) {
     console.error('Fetch risk error:', error);
     res.status(500).json({ error: 'Failed to load risk assessment' });
@@ -1142,6 +1131,7 @@ require('./privacyAnalytics')(app, { pool, authenticateToken, authorizeRole });
 require('./visitSummary')(app, { pool, authenticateToken, authorizeRole });
 
 // Gemini receives approved Dr. Daya answers only; the API key remains server-side.
+require('./clinicalReview').register(app,{pool,authenticateToken,authorizeRole});
 require('./assistanceRouting').register(app,{pool,authenticateToken});
 app.post('/api/tts', require('./dayaSpeech').createSpeechHandler());
 

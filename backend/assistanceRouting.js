@@ -7,7 +7,7 @@ const TASKS=Object.freeze({
 });
 function register(app,{pool,authenticateToken,env=process.env,fetchImpl=fetch,now=Date.now}){
  const education={revision:'prepared-faq-v1',scope:'Prepared general information; no patient records',faqs:faqs.map(f=>({id:f.id,category:f.category,question:f.question,answer:f.answer,sources:f.sources,navigation:f.navigation}))};
- let directory=null,pending=null;const rates=new Map();
+ let directory=null,pending=null;const rates=new Map(),inflight=new Set(),recent=new Map();
  function publicJson(req,res,value,ttl){
   const etag='"'+crypto.createHash('sha256').update(JSON.stringify(value)).digest('hex')+'"';
   res.set({'Cache-Control':`public, max-age=${ttl}, must-revalidate`,ETag:etag,'X-DAI-Cache-Scope':'public-non-personal'});
@@ -40,12 +40,18 @@ function register(app,{pool,authenticateToken,env=process.env,fetchImpl=fetch,no
   res.set('Cache-Control','private, no-store');
   if(!['mother','doctor'].includes(req.user?.role))return res.status(403).json({error:'Patient or doctor account required.'});
   const b=req.body||{};
+  if(['pregnancy_risk','clinical_recommendation','document_interpretation'].includes(b.task))return res.status(422).json({error:'This task requires a clinician-approved workflow. Open Care timeline → Clinician review requests or share the original report in Records.',review_required:true});
+  if(Buffer.byteLength(JSON.stringify(b),'utf8')>1024)return res.status(413).json({error:'Use only a task ID, language and approval. Context is limited to 1 KB; histories and documents are not accepted.'});
   if(Object.keys(b).some(k=>!['task','language','approved'].includes(k))||!Object.hasOwn(TASKS,b.task)||!['en','hi'].includes(b.language))return res.status(400).json({error:'Choose a supported general drafting task and language. Patient details and free-text prompts are not accepted.'});
   if(b.approved!==true)return res.status(409).json({error:'Approve this external AI task before sending it. Nothing has been sent.'});
   if(env.DAI_COMPLEX_AI_ENABLED!=='true'||!env.DAI_COMPLEX_AI_MODEL||!env.GEMINI_API_KEY)return res.status(503).json({error:'Optional external drafting is not configured. Local FAQ answers remain available.'});
   const time=now();for(const [id,v]of rates)if(v.expires<=time)rates.delete(id);
   const id=String(req.user.id),rate=rates.get(id)||{count:0,expires:time+600000};
-  if(rate.count>=5||rates.size>=10000)return res.status(429).json({error:'Drafting limit reached. Try later.'});rate.count++;rates.set(id,rate);
+  if(rate.count>=5||rates.size>=10000)return res.status(429).json({error:'Drafting limit reached. Try later.'});
+  for(const [key,value]of recent)if(time-value.at>=30000)recent.delete(key);
+  if(inflight.has(id))return res.status(409).json({error:'A draft is already in progress. No second model call was made.'});
+  const last=recent.get(id);if(last?.task===b.task&&last.language===b.language)return res.status(409).json({error:'This draft was just requested. Read the existing result or wait 30 seconds before approving another attempt.'});
+  rate.count++;rates.set(id,rate);inflight.add(id);recent.set(id,{task:b.task,language:b.language,at:time});
   try{
    const result=await fetchImpl(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(env.DAI_COMPLEX_AI_MODEL)}:generateContent`,{
     method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':env.GEMINI_API_KEY},signal:AbortSignal.timeout(15000),
@@ -55,7 +61,7 @@ function register(app,{pool,authenticateToken,env=process.env,fetchImpl=fetch,no
    const value=await result.json(),text=value.candidates?.[0]?.content?.parts?.map(p=>typeof p.text==='string'?p.text:'').join('\n').trim();
    if(!text)throw Error('No draft');
    return res.json({text:text.slice(0,6000),source:'external-ai',task:b.task,notice:'AI-generated general draft. Check it before use. No patient records or conversation were sent. This draft is not cached.'});
-  }catch{return res.status(502).json({error:'External drafting unavailable. No draft was saved; local FAQ answers still work.'});}
+  }catch{return res.status(502).json({error:'External drafting unavailable. No automatic retry was made. Wait 30 seconds before approving another attempt; local FAQs still work.'});}finally{inflight.delete(id);}
  });
 }
 module.exports={register,TASKS};

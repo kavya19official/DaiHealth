@@ -41,6 +41,7 @@ test('original reports enforce ownership, private reveal, explicit expiring cons
   assert.equal((await call('/documents/'+id+'/share',1,'POST',{doctor_id:3,sensitive_consent:true,expires_at:new Date(Date.now()+3600000).toISOString()})).status,200);
   assert.equal((await call('/documents/'+id+'/download?reveal=1',3)).status,200);
   const pending=(await pool.query('SELECT result_id,completion_verification FROM care_milestones WHERE id=$1',[milestone])).rows[0];assert.equal(pending.result_id,id);assert.equal(pending.completion_verification,'awaiting_verification');
+  await pool.query('UPDATE doctor_profiles SET credential_verified=TRUE WHERE user_id=3');
   assert.equal((await call('/documents/'+id+'/review',3,'PATCH',{doctor_note:'Synthetic clinician review only; discuss at follow-up.'})).status,200);
   const checked=(await pool.query('SELECT completion_verification,verified_facility_name FROM care_milestones WHERE id=$1',[milestone])).rows[0];assert.equal(checked.completion_verification,'verified');assert.equal(checked.verified_facility_name,'SYNTHETIC Care Centre');
   assert.equal((await call('/documents/'+id,1,'DELETE')).status,403);

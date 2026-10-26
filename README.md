@@ -277,3 +277,9 @@ scope, evaluation requirements and local verification.
 Patient dashboard → Ask Dhruv → **How assistance works · local first** shows local
 FAQ routing, reusable public metadata and explicitly approved optional general
 drafting. See [routing and cache boundaries](docs/ASSISTANCE-ROUTING-AND-CACHE.md).
+
+Patient **Care timeline → Clinician review requests** and Doctor **Home → Clinician
+review requests** now expose a human review queue. General AI drafts use one bounded
+request, no automatic retries and duplicate-call guards. Automatic prototype risk
+classification has been replaced by review requests; existing deterministic safety
+signals remain. See [bounded calls and clinical review](docs/BOUNDED-AI-AND-CLINICIAN-REVIEW.md).

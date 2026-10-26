@@ -425,9 +425,9 @@ if (!linked.rows.length) {
   });
   app.patch('/api/documents/:id/review',...doctorOnly,async(req,res)=>{
     try{const row=await canAccessDoc(pool,Number(req.params.id),req.user);if(!row)return res.status(404).json({error:'Shared report not found'});
-      const credentials=(await pool.query('SELECT medical_license_number,facility_name FROM doctor_profiles WHERE user_id=$1',[req.user.id])).rows[0];if(!credentials?.medical_license_number)return res.status(403).json({error:'A registered clinical account is required'});
+      const credentials=(await pool.query('SELECT medical_license_number,facility_name FROM doctor_profiles WHERE user_id=$1',[req.user.id])).rows[0];if(!credentials?.medical_license_number||!await require('./clinicalDashboard').verifiedDoctor(pool,req.user.id))return res.status(403).json({error:'Verified clinical credentials are required'});
       const note=cleanStr(req.body?.doctor_note,2000);if(!note)return res.status(400).json({error:'Enter your review note'});
-      const client=await pool.connect();try{await client.query('BEGIN');await client.query("UPDATE patient_documents SET reviewed_by=$1,doctor_note=$2,verification_status='verified' WHERE id=$3",[req.user.id,note,row.id]);if(row.milestone_id)await client.query("UPDATE care_milestones SET completion_verification='verified',verified_facility_name=$1 WHERE id=$2 AND mother_id=$3 AND result_id=$4",[credentials.facility_name||null,row.milestone_id,row.mother_id,row.id]);await logEvent(client,row.id,req.user.id,'verify',{});await client.query('COMMIT');}catch(e){await client.query('ROLLBACK');throw e;}finally{client.release();}
+      const client=await pool.connect();try{await client.query('BEGIN');await client.query('LOCK TABLE patient_access_controls,doctor_profiles,patient_document_shares,patient_preferences IN SHARE MODE');if(!await canAccessDoc(client,row.id,req.user)||!await require('./clinicalDashboard').verifiedDoctor(client,req.user.id)){await client.query('ROLLBACK');return res.status(403).json({error:'Clinical credentials or document access changed. Refresh before review.'});}await client.query("UPDATE patient_documents SET reviewed_by=$1,doctor_note=$2,verification_status='verified' WHERE id=$3",[req.user.id,note,row.id]);if(row.milestone_id)await client.query("UPDATE care_milestones SET completion_verification='verified',verified_facility_name=$1 WHERE id=$2 AND mother_id=$3 AND result_id=$4",[credentials.facility_name||null,row.milestone_id,row.mother_id,row.id]);await logEvent(client,row.id,req.user.id,'verify',{});await client.query('COMMIT');}catch(e){await client.query('ROLLBACK');throw e;}finally{client.release();}
       res.json({message:'Clinician review recorded'});
     }catch(e){res.status(500).json({error:'Could not save the review'});}
   });
@@ -464,3 +464,5 @@ if (!linked.rows.length) {
     }
   });
 };
+
+Object.assign(module.exports,{canAccessDoc});

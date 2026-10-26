@@ -143,6 +143,7 @@
       '<div class="cx-seg" role="group" aria-label="Time window">' +
       [30, 90].map(function (n) { return '<button type="button" data-days="' + n + '" class="' + (state.trendDays === n ? 'is-on' : '') + '">' + n + ' days</button>'; }).join(' ') + '</div></div>');
 
+    if(d.review_required)html.push('<p class="cx-sub">Risk escalation and clinical interpretation require human review. Open Care timeline → Clinician review requests. Recorded vital trends and safety notices remain available.</p>');
     // Signals
     if (d.signals.length) {
       d.signals.forEach(function (s) {

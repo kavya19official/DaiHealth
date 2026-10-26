@@ -358,15 +358,14 @@ module.exports = function registerMotherDashboardRoutes(app, { pool, authenticat
          VALUES ($1, $2, $3, $4) RETURNING id, log_type, data, logged_at`,
         [req.user.id, log_type, JSON.stringify(result.data), when.toISOString()]
       );
-      // Predictive monitoring: a new blood pressure or glucose reading re-screens
-      // her risk automatically, so the trend view never depends on remembering to
-      // tap "Reassess". Best-effort — a failed or impossible re-screen (e.g. no
-      // date of birth yet) must never fail the log itself.
+      // Queue human review without inferring a medical risk level.
       let risk_update = null;
       if (log_type === 'blood_pressure' || log_type === 'blood_glucose') {
         try {
           const out = await runRiskAssessment(pool, req.user.id, {}, 'auto_log');
-          if (out.status === 200) {
+          if (out.status === 202) {
+            risk_update = out.body;
+          } else if (out.status === 200) {
             risk_update = {
               risk_level: out.body.assessment.risk_level,
               previous_level: out.body.previous_level,
