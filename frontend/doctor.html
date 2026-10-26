@@ -106,13 +106,13 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 <link rel="stylesheet" href="doctor-report-review.css?v=1">
 <link rel="stylesheet" href="clinical-dashboard.css?v=1">
 <script src="js/clinical-dashboard.js?v=1"></script>
-<link rel="stylesheet" href="css/smart-referral-handoff.css?v=modal-fix-1"><link rel="stylesheet" href="doctor-workspace.css?v=1"><link rel="stylesheet" href="doctor-studio.css?v=1"></head>
+<link rel="stylesheet" href="css/smart-referral-handoff.css?v=modal-fix-1"><link rel="stylesheet" href="css/missed-care-outreach.css?v=modal-fix-1"><link rel="stylesheet" href="doctor-workspace.css?v=1"><link rel="stylesheet" href="doctor-studio.css?v=1"></head>
 <body class="doctor-workspace">
 <button type="button" class="dw-menu-backdrop" data-dw-close-menu aria-label="Close sidebar"></button>
 <div class="app">
 <aside class="sidebar">
   <a class="sidebar__brand patient-brand" href="auth.html" aria-label="DAI sign in"><span class="patient-brand__hindi" lang="hi">दाई</span><span class="patient-brand__english">DAI<small>YOUR CARE COMPANION</small></span></a>
-<div class="dw-role"><small>YOUR CLINICAL TEAM</small><select id="dwRoleSelect" aria-label="Your verified role" disabled><option>Verifying account…</option></select><select id="dwUnitSelect" aria-label="Your assigned unit" disabled><option>Loading assigned unit…</option></select></div><nav class="sidebar__nav" aria-label="Doctor navigation"><span class="dw-nav-caption">WORKSPACE</span><button type="button" class="nav-item is-active" data-panel="dashboard" data-dw-nav-icon="grid" data-dw-label="Dashboard">Dashboard</button><button type="button" class="nav-item" data-panel="patients" data-dw-nav-icon="people" data-dw-label="My Patients">My Patients</button><div class="dw-subnav" aria-label="Patient views"><button data-dw-filter="all" aria-pressed="true">All assigned</button><button data-dw-filter="high-risk" aria-pressed="false">Clinician-marked</button><button data-dw-filter="due14" aria-pressed="false">Due in 14 days</button><button data-dw-filter="postpartum" aria-pressed="false">Postpartum</button><button data-dw-filter="newborn" aria-pressed="false">Child appointments</button></div><button type="button" class="nav-item" data-panel="schedule" data-dw-nav-icon="calendar" data-dw-label="Schedule">Schedule</button><button type="button" class="nav-item" data-panel="appointments" data-dw-nav-icon="clock" data-dw-label="Appointments">Appointments</button><button type="button" class="nav-item" data-panel="attention" data-dw-nav-icon="attention" data-dw-label="Needs Attention">Needs Attention</button><button type="button" class="nav-item" data-panel="records" data-dw-nav-icon="file" data-dw-label="Reports & Results">Reports & Results</button><button type="button" class="nav-item" data-panel="readiness" data-dw-nav-icon="heart" data-dw-label="Delivery & Readiness">Delivery & Readiness</button><button type="button" class="nav-item" data-panel="wards" data-dw-nav-icon="bed" data-dw-label="Labour Room & Wards">Labour Room & Wards</button><button type="button" class="nav-item" data-panel="referrals" data-dw-nav-icon="arrow" data-dw-label="Emergency & Referrals">Emergency & Referrals</button><button type="button" class="nav-item" data-panel="messages" data-dw-nav-icon="message" data-dw-label="Messages">Messages</button><button type="button" class="nav-item" data-panel="analytics" data-dw-nav-icon="chart" data-dw-label="Analytics">Analytics</button>
+<div class="dw-role"><small>YOUR CLINICAL TEAM</small><select id="dwRoleSelect" aria-label="Your verified role" disabled><option>Verifying account…</option></select><select id="dwUnitSelect" aria-label="Your assigned unit" disabled><option>Loading assigned unit…</option></select></div><nav class="sidebar__nav" aria-label="Doctor navigation"><span class="dw-nav-caption">WORKSPACE</span><button type="button" class="nav-item is-active" data-panel="dashboard" data-dw-nav-icon="grid" data-dw-label="Dashboard">Dashboard</button><button type="button" class="nav-item" data-panel="patients" data-dw-nav-icon="people" data-dw-label="My Patients">My Patients</button><div class="dw-subnav" aria-label="Patient views"><button data-dw-filter="all" aria-pressed="true">All assigned</button><button data-dw-filter="high-risk" aria-pressed="false">Clinician-marked</button><button data-dw-filter="due14" aria-pressed="false">Due in 14 days</button><button data-dw-filter="postpartum" aria-pressed="false">Postpartum</button><button data-dw-filter="newborn" aria-pressed="false">Child appointments</button></div><button type="button" class="nav-item" data-panel="schedule" data-dw-nav-icon="calendar" data-dw-label="Schedule">Schedule</button><button type="button" class="nav-item" data-panel="appointments" data-dw-nav-icon="clock" data-dw-label="Appointments">Appointments</button><button type="button" class="nav-item" data-panel="attention" data-dw-nav-icon="attention" data-dw-label="Needs Attention">Needs Attention</button><button type="button" class="nav-item" data-panel="outreach" data-dw-nav-icon="clipboard" data-dw-label="Outreach Queue">Outreach Queue</button><button type="button" class="nav-item" data-panel="records" data-dw-nav-icon="file" data-dw-label="Reports & Results">Reports & Results</button><button type="button" class="nav-item" data-panel="readiness" data-dw-nav-icon="heart" data-dw-label="Delivery & Readiness">Delivery & Readiness</button><button type="button" class="nav-item" data-panel="wards" data-dw-nav-icon="bed" data-dw-label="Labour Room & Wards">Labour Room & Wards</button><button type="button" class="nav-item" data-panel="referrals" data-dw-nav-icon="arrow" data-dw-label="Emergency & Referrals">Emergency & Referrals</button><button type="button" class="nav-item" data-panel="messages" data-dw-nav-icon="message" data-dw-label="Messages">Messages</button><button type="button" class="nav-item" data-panel="analytics" data-dw-nav-icon="chart" data-dw-label="Analytics">Analytics</button>
 <button type="button" class="nav-item" data-panel="population" data-dw-nav-icon="chart" data-dw-label="Population analytics">Population analytics</button>
 <button type="button" class="nav-item" data-panel="visitsummary" data-dw-nav-icon="records" data-dw-label="Visit summaries">Visit summaries</button></nav><details class="local-demo-info"><summary>About this demo</summary><p>Fictional people, facilities and synthetic records. Operational snapshots are for demonstration.</p></details><div class="dw-nav-bottom"><button type="button" class="nav-item" data-panel="settings" data-dw-nav-icon="settings">Settings</button><button type="button" class="nav-item" id="dwSidebarLogout" aria-label="Log out"><span data-dw-icon="logout"></span><span class="dw-label">Log out</span></button></div>
 </aside>
@@ -265,6 +265,65 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 <section class="panel" id="panel-analytics"><div class="dw-card dw-chart-card" id="dwAnalytics"></div></section>
 <section class="panel" id="panel-population"><div class="dw-card dw-chart-card" id="dwPopulation"></div></section>
 <section class="panel" id="panel-visitsummary"><div class="dw-card dw-chart-card" id="dwVisitSummaries"></div></section>
+<!-- OUTREACH QUEUE -->
+<div class="panel" id="panel-outreach"><div class="page-section-heading"><h1>Missed-Care Outreach Queue</h1><p>Prioritise patients needing follow-up based on urgency, time overdue, and access barriers.</p></div>
+  <div class="outreach-summary">
+    <div class="outreach-summary-card critical">
+      <div class="count" id="outreachCriticalCount">0</div>
+      <div class="label">Critical</div>
+    </div>
+    <div class="outreach-summary-card high">
+      <div class="count" id="outreachHighCount">0</div>
+      <div class="label">High</div>
+    </div>
+    <div class="outreach-summary-card">
+      <div class="count" id="outreachMediumCount">0</div>
+      <div class="label">Medium</div>
+    </div>
+    <div class="outreach-summary-card">
+      <div class="count" id="outreachLowCount">0</div>
+      <div class="label">Low</div>
+    </div>
+  </div>
+  <div class="outreach-filters">
+    <div class="form-group">
+      <label for="outreachStatusFilter">Status</label>
+      <select id="outreachStatusFilter">
+        <option value="pending">Pending</option>
+        <option value="in_progress">In Progress</option>
+        <option value="resolved">Resolved</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="outreachUrgencyFilter">Urgency</label>
+      <select id="outreachUrgencyFilter">
+        <option value="">All</option>
+        <option value="critical">Critical</option>
+        <option value="high">High</option>
+        <option value="medium">Medium</option>
+        <option value="low">Low</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="outreachLimitFilter">Limit</label>
+      <select id="outreachLimitFilter">
+        <option value="25">25</option>
+        <option value="50" selected>50</option>
+        <option value="100">100</option>
+      </select>
+    </div>
+    <button type="button" class="btn btn--primary" id="applyOutreachFilters">Apply Filters</button>
+    <button type="button" class="btn btn--ghost" id="generateMissedCare">Generate Missed Care Items</button>
+  </div>
+  <div class="card section-card">
+    <div class="section-head"><div class="section-title"><span><svg width="15" height="15" aria-hidden="true"><use href="#i-clipboard"/></svg></span> Outreach Queue</div></div>
+    <div id="outreachQueueList"></div>
+  </div>
+  <div class="card section-card" style="margin-top: 1rem;">
+    <div class="section-head"><div class="section-title"><span><svg width="15" height="15" aria-hidden="true"><use href="#i-clock"/></svg></span> Outreach Attempts History</div></div>
+    <div id="outreachAttemptsList"></div>
+  </div>
+</div>
 <!-- APPOINTMENTS -->
 <div class="panel" id="panel-appointments"><div id="dsAppointments"></div><div hidden>
   <div class="ops-intro"><div><h1>Appointment requests</h1><p>Patients request visits from their dashboard. Review the details, confirm a slot, contact the patient, or mark the visit complete.</p></div><span class="ops-status">Doctor review required</span></div>

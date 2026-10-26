@@ -57,8 +57,8 @@ module.exports = function(app, { pool, authenticateToken, authorizeRole }) {
   // Public API: Staff (Doctor/Hospital) - Outreach queue
   // ============================================================================
 
-  // Get prioritized outreach queue (for hospital staff and community health workers)
-  app.get('/api/outreach/queue', authenticateToken, authorizeRole(['doctor', 'mother']), async (req, res) => {
+  // Get prioritized outreach queue (for hospital staff and community health workers only)
+  app.get('/api/outreach/queue', authenticateToken, authorizeRole(['doctor']), async (req, res) => {
     try {
       const { status = 'pending', urgency, limit = 50 } = req.query;
       const limitNum = Math.min(parseInt(limit, 10) || 50, 200);
@@ -76,14 +76,9 @@ module.exports = function(app, { pool, authenticateToken, authorizeRole }) {
       `;
       const params = [status];
 
-      // A mother sees only her own items; a doctor only mothers whose access the mother has not turned off.
-      if (req.user.role === 'mother') {
-        params.push(req.user.id);
-        query += ` AND mci.mother_id = $${params.length}`;
-      } else {
-        params.push(req.user.id);
-        query += ` AND ${require('./accessControl').activeRelationshipSql('mci.mother_id', `$${params.length}::int`)}`;
-      }
+      // Doctor only sees mothers whose access the mother has not turned off
+      params.push(req.user.id);
+      query += ` AND ${require('./accessControl').activeRelationshipSql('mci.mother_id', `$${params.length}::int`)}`;
 
       if (urgency) {
         params.push(urgency);
@@ -126,8 +121,8 @@ module.exports = function(app, { pool, authenticateToken, authorizeRole }) {
     }
   });
 
-  // Log an outreach attempt
-  app.post('/api/outreach/:missedCareId/attempts', authenticateToken, authorizeRole(['doctor', 'mother']), async (req, res) => {
+  // Log an outreach attempt (staff only)
+  app.post('/api/outreach/:missedCareId/attempts', authenticateToken, authorizeRole(['doctor']), async (req, res) => {
     try {
       const missedCareId = parseInt(req.params.missedCareId, 10);
       const { attempt_type, outcome, notes, next_action, next_action_date } = req.body;
@@ -175,8 +170,8 @@ module.exports = function(app, { pool, authenticateToken, authorizeRole }) {
     }
   });
 
-  // Update missed care item status
-  app.patch('/api/outreach/:missedCareId/status', authenticateToken, authorizeRole(['doctor', 'mother']), async (req, res) => {
+  // Update missed care item status (staff only)
+  app.patch('/api/outreach/:missedCareId/status', authenticateToken, authorizeRole(['doctor']), async (req, res) => {
     try {
       const missedCareId = parseInt(req.params.missedCareId, 10);
       const { status, access_barriers } = req.body;
