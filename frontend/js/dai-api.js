@@ -128,7 +128,13 @@
     return new Date(start.getTime() + 280 * 86400000);
   }
 
+  // Background refresh runs only on a visible tab and never in low-bandwidth mode; navigation still loads data.
+  function lowBandwidth() { try { return localStorage.getItem('dai-low-bandwidth') === 'true'; } catch (e) { return false; } }
+  function backgroundAllowed() { return !(typeof document !== 'undefined' && document.hidden) && !lowBandwidth(); }
+
   global.DaiAPI = {
+    lowBandwidth: lowBandwidth,
+    backgroundAllowed: backgroundAllowed,
     API_BASE: API_BASE,
     apiRequest: apiRequest,
     fetchCurrentUser: fetchCurrentUser,

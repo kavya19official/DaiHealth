@@ -26,5 +26,5 @@ document.addEventListener('click',async e=>{const b=e.target.closest('button');i
 document.addEventListener('change',e=>{if(!e.target.dataset.supportDoc)return;const id=e.target.dataset.scheme;save(id,{...blank(id),documents:{...blank(id).documents,[e.target.dataset.supportDoc]:e.target.checked}});});
 async function loadProgress(){if(!owner||state.user?.guest||state.offline)return;const requested=owner;const r=await api().apiRequest('/patient/support');if(requested!==owner)return;if(!r){loadError=true;renderSchemes();return;}progress=Object.fromEntries(r.progress.map(p=>[p.scheme_id,p]));loaded=true;loadError=false;renderSchemes();}
 window.PatientSupport={update(next,p){const changed=owner!==next.user?.id;state=next;prefs=p||{};if(changed){owner=next.user?.id;progress={};sharing={shares:[],events:[],access:[]};messages=[];loaded=false;schemeFilter='all';inboxFilter='all';if(owner&&!state.user?.guest&&!state.offline){loadError=false;loadProgress();refreshSharing();refreshInbox();}}renderSchemes();renderFamily();inbox();},sharing(next,p){sharing=next;if(p)prefs=p;renderFamily();},refreshInbox};
-setInterval(()=>{if(!document.hidden&&location.hash==='#messages')refreshInbox();},30000);
+setInterval(()=>{if(!document.hidden&&!(window.DaiAPI&&window.DaiAPI.lowBandwidth&&window.DaiAPI.lowBandwidth())&&location.hash==='#messages')refreshInbox();},30000);
 })();

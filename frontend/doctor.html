@@ -114,7 +114,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
   <a class="sidebar__brand patient-brand" href="auth.html" aria-label="DAI sign in"><span class="patient-brand__hindi" lang="hi">दाई</span><span class="patient-brand__english">DAI<small>YOUR CARE COMPANION</small></span></a>
 <div class="dw-role"><small>YOUR CLINICAL TEAM</small><select id="dwRoleSelect" aria-label="Your verified role" disabled><option>Verifying account…</option></select><select id="dwUnitSelect" aria-label="Your assigned unit" disabled><option>Loading assigned unit…</option></select></div><nav class="sidebar__nav" aria-label="Doctor navigation"><span class="dw-nav-caption">WORKSPACE</span><button type="button" class="nav-item is-active" data-panel="dashboard" data-dw-nav-icon="grid" data-dw-label="Dashboard">Dashboard</button><button type="button" class="nav-item" data-panel="patients" data-dw-nav-icon="people" data-dw-label="My Patients">My Patients</button><div class="dw-subnav" aria-label="Patient views"><button data-dw-filter="all" aria-pressed="true">All assigned</button><button data-dw-filter="high-risk" aria-pressed="false">Clinician-marked</button><button data-dw-filter="due14" aria-pressed="false">Due in 14 days</button><button data-dw-filter="postpartum" aria-pressed="false">Postpartum</button><button data-dw-filter="newborn" aria-pressed="false">Child appointments</button></div><button type="button" class="nav-item" data-panel="schedule" data-dw-nav-icon="calendar" data-dw-label="Schedule">Schedule</button><button type="button" class="nav-item" data-panel="appointments" data-dw-nav-icon="clock" data-dw-label="Appointments">Appointments</button><button type="button" class="nav-item" data-panel="attention" data-dw-nav-icon="attention" data-dw-label="Needs Attention">Needs Attention</button><button type="button" class="nav-item" data-panel="outreach" data-dw-nav-icon="clipboard" data-dw-label="Outreach Queue">Outreach Queue</button><button type="button" class="nav-item" data-panel="records" data-dw-nav-icon="file" data-dw-label="Reports & Results">Reports & Results</button><button type="button" class="nav-item" data-panel="readiness" data-dw-nav-icon="heart" data-dw-label="Delivery & Readiness">Delivery & Readiness</button><button type="button" class="nav-item" data-panel="wards" data-dw-nav-icon="bed" data-dw-label="Labour Room & Wards">Labour Room & Wards</button><button type="button" class="nav-item" data-panel="referrals" data-dw-nav-icon="arrow" data-dw-label="Emergency & Referrals">Emergency & Referrals</button><button type="button" class="nav-item" data-panel="messages" data-dw-nav-icon="message" data-dw-label="Messages">Messages</button><button type="button" class="nav-item" data-panel="analytics" data-dw-nav-icon="chart" data-dw-label="Analytics">Analytics</button>
 <button type="button" class="nav-item" data-panel="population" data-dw-nav-icon="chart" data-dw-label="Population analytics">Population analytics</button>
-<button type="button" class="nav-item" data-panel="visitsummary" data-dw-nav-icon="records" data-dw-label="Visit summaries">Visit summaries</button></nav><details class="local-demo-info"><summary>About this demo</summary><p>Fictional people, facilities and synthetic records. Operational snapshots are for demonstration.</p></details><div class="dw-nav-bottom"><button type="button" class="nav-item" data-panel="settings" data-dw-nav-icon="settings">Settings</button><button type="button" class="nav-item" id="dwSidebarLogout" aria-label="Log out"><span data-dw-icon="logout"></span><span class="dw-label">Log out</span></button></div>
+<button type="button" class="nav-item" data-panel="visitsummary" data-dw-nav-icon="records" data-dw-label="Visit summaries">Visit summaries</button><button type="button" class="nav-item" data-panel="coordination" data-dw-nav-icon="clipboard" data-dw-label="Care coordination">Care coordination</button></nav><details class="local-demo-info"><summary>About this demo</summary><p>Fictional people, facilities and synthetic records. Operational snapshots are for demonstration.</p></details><div class="dw-nav-bottom"><button type="button" class="nav-item" data-panel="settings" data-dw-nav-icon="settings">Settings</button><button type="button" class="nav-item" id="dwSidebarLogout" aria-label="Log out"><span data-dw-icon="logout"></span><span class="dw-label">Log out</span></button></div>
 </aside>
 
 <div class="main">
@@ -265,6 +265,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 <section class="panel" id="panel-analytics"><div class="dw-card dw-chart-card" id="dwAnalytics"></div></section>
 <section class="panel" id="panel-population"><div class="dw-card dw-chart-card" id="dwPopulation"></div></section>
 <section class="panel" id="panel-visitsummary"><div class="dw-card dw-chart-card" id="dwVisitSummaries"></div></section>
+<section class="panel" id="panel-coordination"><div class="dw-card dw-chart-card" id="dwCareCoordination" aria-live="polite"></div></section>
 <!-- OUTREACH QUEUE -->
 <div class="panel" id="panel-outreach"><div class="page-section-heading"><h1>Missed-Care Outreach Queue</h1><p>Prioritise patients needing follow-up based on urgency, time overdue, and access barriers.</p></div>
   <div class="outreach-summary">
@@ -503,6 +504,7 @@ function showPanel(id) {
 
   if (id === 'population' && window.PrivacyAnalytics) { window.PrivacyAnalytics.load(); }
   if (id === 'visitsummary' && window.VisitSummaryDoctor) { window.VisitSummaryDoctor.load(); }
+  if (id === 'coordination' && window.CareCoordinationDoctor) { window.CareCoordinationDoctor.load(); }
   // Load referrals panel
   if (id === 'referrals' && window.SmartReferralHandoff) {
     window.SmartReferralHandoff.load();
@@ -732,6 +734,7 @@ boot();
 <script src="js/privacy-analytics.js"></script>
 <script src="/shared/plain-language.js"></script>
 <script src="js/visit-summary-doctor.js"></script>
+<script src="js/care-coordination-doctor.js?v=1"></script>
 <script src="js/smart-referral-handoff.js"></script>
 <script src="js/care-chatbot.js?v=ai-needed-1"></script>
 <script src="js/report-intake.js"></script><script src="js/doctor-report-review.js?v=1"></script><script src="js/clinical-review.js?v=1"></script><script src="js/ai-usage.js?v=2"></script></body>

@@ -289,3 +289,28 @@ provider-reported token data where present, measured latency and optional useful
 feedback. Missing cost/compute remain unknown; no water/carbon savings are inferred.
 The local/self-hosted text-model assessment remains unapproved pending evidence.
 See [AI usage and deployment](docs/AI-USAGE-AND-DEPLOYMENT.md).
+
+## Sustainability-aware care coordination
+
+Patient **Visit instructions** and Doctor **Care coordination** (`backend/careCoordination.js`,
+`backend/db/care_coordination.sql`):
+
+- **Digital-first, in person when needed.** Clinicians write visit instructions, test preparation
+  and follow-up summaries; patients see them only after the clinician verifies them. A pack marked
+  "in-person visit clinically necessary" must say why, and the patient is told to attend.
+  Patients can say whether a pack saved a trip or paperwork (self-reported, never inferred).
+- **Right facility first.** `GET /api/care-coordination/facility-match` excludes facilities without
+  the required clinical capability, then orders by distance, then reported availability. Referral
+  journeys record prior searches, whether the facility listed the capability, and whether the visit
+  happened first time, was redirected or failed (and why).
+- **Less duplicate work.** Verified, connected clinicians see reports the patient explicitly shared,
+  referral status, pending tests and earlier test decisions. Unshared reports are only counted.
+  Test decisions are recorded; repeating a test needs a clinical reason and is always the
+  clinician's call. Access is logged and stops immediately on revocation.
+- **Preventive follow-up, evaluated.** The queue combines missed-care items with approved follow-ups
+  now due. Clinicians record reminders/contacts and outcomes (including reported emergency use).
+  The evaluation endpoint reports counts only (`prevention_claim: "not_evaluated"`); no travel,
+  carbon or cost savings are calculated.
+- **Low bandwidth.** Static text assets are served Brotli/gzip-compressed with ETags
+  (`backend/staticCompression.js`). Background polling stops on hidden tabs and in low-bandwidth
+  mode, which also turns off map tiles; data still loads when you navigate.

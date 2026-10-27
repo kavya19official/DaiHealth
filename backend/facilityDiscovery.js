@@ -9,6 +9,12 @@ const { resolveLocation, nearestLocality, suggestLocalities, haversineKm } = req
 const { describeFreshness } = require('./facilityFreshness');
 
 const DEFAULT_RADIUS_KM = 25;
+// Active facilities with their available services, capabilities and reported slots (input to rankFacilities).
+const FACILITY_ROWS_SQL = `SELECT f.*,
+  COALESCE((SELECT json_agg(fs) FROM facility_services fs WHERE fs.facility_id=f.id AND fs.available=TRUE),'[]'::json) AS services,
+  COALESCE((SELECT json_agg(fc) FROM facility_capabilities fc WHERE fc.facility_id=f.id AND fc.available=TRUE),'[]'::json) AS capabilities,
+  COALESCE((SELECT json_agg(json_build_object('id',sl.id,'facility_service_id',sl.facility_service_id,'doctor_id',sl.doctor_id,'doctor_name',dp.full_name,'clinician_eligible',(df.active=TRUE AND df.qualification_verified=TRUE AND du.role='doctor' AND dp.full_name IS NOT NULL),'starts_at',sl.starts_at,'ends_at',sl.ends_at,'available_places',sl.available_places,'source',sl.source,'updated_at',sl.updated_at)) FROM facility_service_slots sl JOIN facility_services fs ON fs.id=sl.facility_service_id LEFT JOIN doctor_profiles dp ON dp.user_id=sl.doctor_id LEFT JOIN users du ON du.id=sl.doctor_id LEFT JOIN doctor_facilities df ON df.doctor_id=sl.doctor_id AND df.facility_id=f.id WHERE fs.facility_id=f.id AND fs.available=TRUE),'[]'::json) AS slots
+  FROM facilities f WHERE f.active=TRUE`;
 
 // How the person can actually reach a facility: never just "closest".
 function contactRoute(f) {
@@ -68,11 +74,7 @@ module.exports = function (app, { pool, authenticateToken, authorizeRole }) {
     if (coordsKnown && preferences.max_distance_km===null) preferences.max_distance_km=DEFAULT_RADIUS_KM;
     try {
       const params=[];
-      let query=`SELECT f.*,
-        COALESCE((SELECT json_agg(fs) FROM facility_services fs WHERE fs.facility_id=f.id AND fs.available=TRUE),'[]'::json) AS services,
-        COALESCE((SELECT json_agg(fc) FROM facility_capabilities fc WHERE fc.facility_id=f.id AND fc.available=TRUE),'[]'::json) AS capabilities,
-        COALESCE((SELECT json_agg(json_build_object('id',sl.id,'facility_service_id',sl.facility_service_id,'doctor_id',sl.doctor_id,'doctor_name',dp.full_name,'clinician_eligible',(df.active=TRUE AND df.qualification_verified=TRUE AND du.role='doctor' AND dp.full_name IS NOT NULL),'starts_at',sl.starts_at,'ends_at',sl.ends_at,'available_places',sl.available_places,'source',sl.source,'updated_at',sl.updated_at)) FROM facility_service_slots sl JOIN facility_services fs ON fs.id=sl.facility_service_id LEFT JOIN doctor_profiles dp ON dp.user_id=sl.doctor_id LEFT JOIN users du ON du.id=sl.doctor_id LEFT JOIN doctor_facilities df ON df.doctor_id=sl.doctor_id AND df.facility_id=f.id WHERE fs.facility_id=f.id AND fs.available=TRUE),'[]'::json) AS slots
-        FROM facilities f WHERE f.active=TRUE`;
+      let query=FACILITY_ROWS_SQL;
       function filter(clause,value){params.push(value);query+=' AND '+clause.replaceAll('?', '$'+params.length);}
       // With coordinates, distance decides. Exact-text city matching ("Delhi" vs "New Delhi") hid real results.
       if(req.query.city&&!coordsKnown)filter('LOWER(f.city)=LOWER(?)',String(req.query.city));
@@ -363,3 +365,4 @@ module.exports = function (app, { pool, authenticateToken, authorizeRole }) {
   app.use('/api/facilities', authenticateToken, authorizeRole(['mother', 'doctor']), facilities);
   app.use('/api/patient', authenticateToken, authorizeRole(['mother']), patient);
 };
+module.exports.FACILITY_ROWS_SQL = FACILITY_ROWS_SQL;
