@@ -1133,6 +1133,7 @@ require('./visitSummary')(app, { pool, authenticateToken, authorizeRole });
 
 // Gemini receives approved Dr. Daya answers only; the API key remains server-side.
 require('./clinicalReview').register(app,{pool,authenticateToken,authorizeRole});
+require('./careCoordination')(app, { pool, authenticateToken, authorizeRole });
 require('./assistanceRouting').register(app,{pool,authenticateToken,usageTracker:aiUsageTracker});
 app.post('/api/tts',(req,res,next)=>{try{req.user=jwt.verify(req.cookies.token,JWT_SECRET);}catch{}next();},require('./dayaSpeech').createSpeechHandler({usageTracker:aiUsageTracker}));
 
@@ -1164,9 +1165,10 @@ app.get(['/', '/index.html'], (req, res) => {
   const query = req.originalUrl.includes('?') ? req.originalUrl.slice(req.originalUrl.indexOf('?')) : '';
   res.redirect('/auth.html' + query);
 });
-app.use('/shared', express.static(path.join(__dirname, '..', 'shared')));
-app.use('/frontend', express.static(frontendPath));
-app.use(express.static(frontendPath));
+const { staticCompression } = require('./staticCompression');
+app.use('/shared', staticCompression(path.join(__dirname, '..', 'shared')), express.static(path.join(__dirname, '..', 'shared')));
+app.use('/frontend', staticCompression(frontendPath), express.static(frontendPath));
+app.use(staticCompression(frontendPath), express.static(frontendPath));
 
 // Start server
 const server = app.listen(PORT, process.env.DAI_LOCAL === 'true' ? '127.0.0.1' : undefined, () => {

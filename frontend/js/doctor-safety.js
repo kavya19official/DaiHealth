@@ -207,7 +207,7 @@
     var nav = document.querySelector('.nav-item[data-panel="safety"]');
     if (nav) nav.addEventListener('click', function () { loadEvents(); loadPatients(); });
     clearInterval(st.timer);
-    st.timer = setInterval(loadEvents, 60000);
+    st.timer = setInterval(function () { if (!document.hidden && !(window.DaiAPI&&window.DaiAPI.lowBandwidth&&window.DaiAPI.lowBandwidth())) loadEvents(); }, 60000);
     document.addEventListener('click', function (e) {
       var b = e.target.closest && e.target.closest('[data-safe]');
       if (b) openPatient(b.getAttribute('data-safe'));
