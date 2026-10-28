@@ -7,7 +7,7 @@ const { DatabaseSync } = require('node:sqlite');
 const { createLocalPool } = require('../backend/localPool');
 const bcrypt = require('../backend/node_modules/bcrypt');
 const ROOT = path.join(__dirname, '..');
-const migrations = ['auth_and_wellness.sql', 'care_timeline_and_appointments.sql', 'mother_dashboard.sql', 'antenatal_profile.sql', 'child_dashboard.sql', 'child_dashboard_v2.sql', 'child_health_v3.sql', 'hospital_platform.sql', 'patient_preferences.sql', 'patient_documents.sql', 'care_extensions_v4.sql', 'facility_discovery.sql', 'referral_continuity.sql', 'patient_experience.sql', 'patient_home.sql', 'patient_continuity.sql', 'access_matching.sql', 'patient_support.sql', 'clinical_dashboard.sql', 'document_intake_offline.sql', 'missed_care_outreach.sql', 'green_hospital_dashboard.sql', 'smart_referral_handoff.sql', 'doctor_operations.sql', 'facility_freshness.sql', 'patient_ml.sql', 'patient_access_controls.sql', 'follow_through.sql', 'privacy_analytics.sql', 'privacy_analytics_snapshots.sql', 'visit_summaries.sql', 'clinical_review_requests.sql', 'ai_usage.sql', 'care_coordination.sql'];
+const migrations = ['auth_and_wellness.sql', 'care_timeline_and_appointments.sql', 'mother_dashboard.sql', 'antenatal_profile.sql', 'child_dashboard.sql', 'child_dashboard_v2.sql', 'child_health_v3.sql', 'hospital_platform.sql', 'patient_preferences.sql', 'patient_documents.sql', 'care_extensions_v4.sql', 'facility_discovery.sql', 'referral_continuity.sql', 'patient_experience.sql', 'patient_home.sql', 'patient_continuity.sql', 'access_matching.sql', 'patient_support.sql', 'clinical_dashboard.sql', 'document_intake_offline.sql', 'missed_care_outreach.sql', 'green_hospital_dashboard.sql', 'smart_referral_handoff.sql', 'doctor_operations.sql', 'facility_freshness.sql', 'patient_ml.sql', 'patient_access_controls.sql', 'follow_through.sql', 'privacy_analytics.sql', 'privacy_analytics_snapshots.sql', 'demo_care_messages.sql', 'visit_summaries.sql', 'clinical_review_requests.sql', 'ai_usage.sql', 'care_coordination.sql'];
 // Reference data (Delhi facility directory). Kept apart from `migrations` so tests that build a bare schema stay small.
 const directories = ['delhi_directory.sql'];
 
@@ -40,6 +40,8 @@ async function seedLocal() {
     const previous = await client.query("SELECT * FROM dai_local_seed WHERE version='cohort-v1'");
     if (previous.rows.length) {
       if (previous.rows[0].source_sha256 !== manifest.source_sha256) throw new Error('Synthetic source changed. Existing local edits were preserved; use a separate checkout for a different dataset.');
+      await require('./seed-doctor-activity.cjs').seedDoctorActivity(client,source);
+      await require('./seed-doctor-demo-day.cjs').seedDoctorDemoDay(client,source);
       console.log('Patient/doctor cohort already imported:', previous.rows[0].counts);
       return;
     }
@@ -95,6 +97,8 @@ async function seedLocal() {
     const counts = {mothers:mothers.length,doctors:doctors.length,children:children.length,appointments,milestones};
     await client.query("INSERT INTO dai_local_seed VALUES('cohort-v1',$1,$2)",[manifest.source_sha256,JSON.stringify(counts)]);
     await client.query('COMMIT');
+    await require('./seed-doctor-activity.cjs').seedDoctorActivity(client,source);
+    await require('./seed-doctor-demo-day.cjs').seedDoctorDemoDay(client,source);
     console.log('Imported shared synthetic patient/doctor cohort:',counts);
   } catch (error) {
     await client.query('ROLLBACK').catch(()=>{});

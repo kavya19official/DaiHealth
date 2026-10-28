@@ -27,7 +27,7 @@ async function seedDoctorActivity(client,source,{date=new Intl.DateTimeFormat('e
   const hospitalDoctor=source.prepare('SELECT * FROM portal_user WHERE id=? AND verified=1').get(d.portal_uuid);
   if(!hospitalDoctor||!['consultant','resident'].includes(hospitalDoctor.role))continue;
   const unit=hospitalDoctor.unit_id?source.prepare('SELECT code,room FROM unit WHERE id=?').get(hospitalDoctor.unit_id):null;
-  const patients=(await client.query(`SELECT DISTINCT mp.* FROM mother_profiles mp JOIN appointments a ON a.mother_id=mp.user_id JOIN dai_local_source_link l ON l.entity='mother' AND l.target_id=mp.user_id WHERE a.doctor_id=$1 ORDER BY mp.user_id`,[d.user_id])).rows;
+  const patients=(await client.query(`SELECT DISTINCT mp.* FROM mother_profiles mp JOIN appointments a ON a.mother_id=mp.user_id JOIN dai_local_source_link l ON l.entity='mother' AND l.target_id=mp.user_id WHERE a.doctor_id=$1 AND ${require('../backend/accessControl').activeRelationshipSql('mp.user_id','$1::int')} ORDER BY mp.user_id`,[d.user_id])).rows;
   let slot=0;
   for(const [i,p] of patients.entries()){
    const lmp=iso(p.lmp_date||p.care_start_date),edd=iso(p.edd_date);
@@ -38,7 +38,7 @@ async function seedDoctorActivity(client,source,{date=new Intl.DateTimeFormat('e
    for(const [offset,visitIndex] of [[-12,0],[-6,1],[0,2],[4+(index%3),3]]){
     const day=add(date,offset);if(day<lmp||day>edd)continue;
     const historical=offset<0,finished=historical||index<2&&offset===0;
-    const appointment=(await client.query(`INSERT INTO appointments(mother_id,doctor_id,requested_date,requested_time,status,reason,unit_label,room,visit_type) VALUES($1,$2,$3,$4,$5,$6,$7,$8,'ANC') RETURNING id`,[p.user_id,d.user_id,day,time,finished?'completed':'confirmed',visitIndex===0?'Antenatal review':visitIndex===1?'Investigation follow-up':visitIndex===2?'ANC clinic review':'Planned antenatal follow-up',unit?'Unit '+unit.code:null,unit?.room||null])).rows[0].id;
+    const appointment=(await client.query(`INSERT INTO appointments(mother_id,doctor_id,requested_date,requested_time,status,reason,unit_label,room,facility_uuid,visit_type) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,'ANC') RETURNING id`,[p.user_id,d.user_id,day,time,finished?'completed':'confirmed',visitIndex===0?'Antenatal review':visitIndex===1?'Investigation follow-up':visitIndex===2?'ANC clinic review':'Planned antenatal follow-up',unit?'Unit '+unit.code:null,unit?.room||null,hospitalDoctor.facility_id||null])).rows[0].id;
     counts.appointments++;
     if(offset===0){const state=index<2?'done':index<6?'waiting':'booked';await client.query(`INSERT INTO doctor_queue_state(appointment_id,doctor_id,state,checked_in_at,completed_at) VALUES($1,$2,$3,$4,$5)`,[appointment,d.user_id,state,state==='booked'?null:day+'T08:00:00+05:30',state==='done'?day+'T08:40:00+05:30':null]);}
     if(!finished)continue;
