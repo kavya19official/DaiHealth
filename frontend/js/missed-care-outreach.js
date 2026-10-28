@@ -1,430 +1,269 @@
-/* Missed-Care Outreach Queue - Patient & Staff UI */
-(function() {
+/* Missed-care outreach: one script, two views.
+   Mother (#missedCareItemsList): her own overdue care, what is in the way, how to rebook.
+   Doctor (#outreachQueueList): prioritised patients to contact, attempt log and history. */
+(function () {
   'use strict';
 
   const api = window.DaiAPI;
   const $ = id => document.getElementById(id);
-  const E = window.PatientModel ? window.PatientModel.escape : (s => String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#x27;'}[m])));
+  const E = window.PatientModel ? window.PatientModel.escape : (s => String(s == null ? '' : s).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', '\'': '&#x27;' }[m])));
 
-  let state = {
-    missedCareItems: [],
-    outreachQueue: [],
-    currentMissedCareId: null,
-    outreachAttempts: [],
-    missedLoading: false,
-    queueLoading: false,
-    missedError: false,
-    queueError: false
+  const state = {
+    missedCareItems: [], outreachQueue: [], summary: null, barrierOptions: [], outreachAttempts: [],
+    currentMissedCareId: null, missedLoading: false, queueLoading: false, missedError: false, queueError: false,
+    missedAt: 0, queueAt: 0, openBarriers: null
   };
 
-  const fmt = value => value ? new Date(String(value).slice(0, 10) + 'T12:00:00').toLocaleDateString(document.documentElement.lang || 'en', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric'
-  }) : 'Date not recorded';
+  const isGuest = () => { try { return !!localStorage.getItem('dai_guest'); } catch (e) { return false; } };
+  const fmt = v => v ? new Date(String(v).slice(0, 10) + 'T12:00:00').toLocaleDateString(document.documentElement.lang || 'en', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Date not recorded';
+  const fmtTime = v => v ? new Date(v).toLocaleString(document.documentElement.lang || 'en', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' }) : '';
 
-  const urgencyColors = {
-    critical: '#f43f5e',
-    high: '#f59e0b',
-    medium: '#3b82f6',
-    low: '#10b981'
+  // Urgency is always written out as well as coloured, so it never relies on colour alone.
+  const URGENCY = {
+    critical: { label: 'Urgent', hint: 'More than 30 days overdue' },
+    high: { label: 'High', hint: '15 to 30 days overdue' },
+    medium: { label: 'Medium', hint: '8 to 14 days overdue' },
+    low: { label: 'Low', hint: 'Up to a week overdue' }
   };
-
-  const urgencyLabels = {
-    critical: 'Critical',
-    high: 'High',
-    medium: 'Medium',
-    low: 'Low'
+  const STATUS = { pending: 'Not yet contacted', in_progress: 'In progress', resolved: 'Resolved', deferred: 'Deferred' };
+  const BARRIER = {
+    transport: 'Transport', cost: 'Cost', time_off_work: 'Time off work', childcare: 'Childcare',
+    distance: 'Too far', language: 'Language', family_permission: 'Family permission', other: 'Something else'
   };
+  const TYPE = { call: 'Phone call', visit: 'In-person visit', message: 'Message', other: 'Other' };
+  const OUTCOME = {
+    no_answer: 'No answer', reached: 'Reached', left_message: 'Left message', agreed_followup: 'Agreed to follow up',
+    declined: 'Declined', wrong_number: 'Wrong number', rescheduled: 'Rescheduled'
+  };
+  const days = n => (Number(n) || 0) === 1 ? '1 day overdue' : (Number(n) || 0) + ' days overdue';
+  const skeleton = (label, rows) => '<div class="oq-skeleton" role="status" aria-live="polite"><span class="oq-sr">' + label + '</span>' +
+    Array.from({ length: rows || 3 }, () => '<div class="oq-skeleton-row"><i></i><i></i></div>').join('') + '</div>';
+  const barrierChips = list => (list && list.length) ? '<ul class="oq-chips" aria-label="What is in the way">' + list.map(b => '<li>' + E(BARRIER[b] || b) + '</li>').join('') + '</ul>' : '';
 
+  // ---------- Mother view ----------
   const renderMissedCareItems = () => {
-    const container = $('missedCareItemsList');
-    if (!container) return;
-
-    if (state.missedLoading) {
-      container.innerHTML = '<div class="empty">Loading missed care items...</div>';
-      return;
-    }
-
-    if (state.missedError) {
-      container.innerHTML = '<div class="empty" role="status">Could not load missed care items. Check your connection and try again. <button type="button" class="link-btn" data-retry-missed>Retry</button></div>';
-      return;
-    }
-
-    if (state.missedCareItems.length === 0) {
-      container.innerHTML = '<div class="empty">No missed care items. Great job staying on track with your care plan!</div>';
-      return;
-    }
-
-    container.innerHTML = state.missedCareItems.map(item => renderMissedCareItem(item)).join('');
+    const box = $('missedCareItemsList');
+    if (!box) return;
+    if (state.missedLoading) { box.innerHTML = skeleton('Loading missed care items', 3); return; }
+    if (isGuest()) { box.innerHTML = '<div class="oq-empty"><strong>Sign in to see your follow-up care</strong><p>Guest mode does not keep health records, so there is nothing to follow up here.</p><a class="oq-btn oq-btn--primary" href="auth.html">Sign in</a></div>'; return; }
+    if (state.missedError) { box.innerHTML = '<div class="oq-empty oq-empty--error" role="alert"><strong>We could not load your follow-up items</strong><p>Check your connection and try again. Your records are not affected.</p><button type="button" class="oq-btn oq-btn--primary" data-retry-missed>Try again</button></div>'; return; }
+    const summary = $('missedCareSummary');
+    if (summary) summary.textContent = state.missedCareItems.length ? (state.missedCareItems.length === 1 ? '1 item needs your attention' : state.missedCareItems.length + ' items need your attention') : '';
+    if (!state.missedCareItems.length) { box.innerHTML = '<div class="oq-empty oq-empty--ok"><strong>You are up to date</strong><p>No visits or tests are overdue. We will show anything that slips here, with a simple way to rebook.</p></div>'; return; }
+    box.innerHTML = state.missedCareItems.map(renderMissedCareItem).join('');
   };
 
-  const renderMissedCareItem = (item) => {
-    const urgencyColor = urgencyColors[item.urgency_level] || '#6b7280';
-    const urgencyLabel = urgencyLabels[item.urgency_level] || item.urgency_level;
-
-    return `
-      <div class="missed-care-item" data-id="${E(item.id)}">
-        <div class="missed-care-item-header">
-          <div class="missed-care-item-urgency" style="background-color: ${urgencyColor}">
-            <span class="urgency-label">${E(urgencyLabel)}</span>
-            <span class="overdue-days">${item.overdue_days}d overdue</span>
-          </div>
-          <span class="tag tag--${item.status === 'pending' ? 'pending' : item.status === 'resolved' ? 'ok' : 'info'}">${E(item.status)}</span>
-        </div>
-        <div class="missed-care-item-content">
-          <h4 class="missed-care-item-title">${E(item.title)}</h4>
-          <p class="missed-care-item-due">Due: ${E(fmt(item.due_date))}</p>
-          ${item.access_barriers && item.access_barriers.length > 0 ? `
-            <div class="missed-care-item-barriers">
-              <strong>Access barriers:</strong>
-              <ul>${item.access_barriers.map(b => `<li>${E(b)}</li>`).join('')}</ul>
-            </div>
-          ` : ''}
-        </div>
-        <div class="missed-care-item-actions">
-          <button type="button" class="btn btn--sm btn--primary" data-reschedule="${E(item.id)}">Reschedule</button>
-          <button type="button" class="link-btn" data-mark-resolved="${E(item.id)}">Mark resolved</button>
-        </div>
+  const renderMissedCareItem = item => {
+    const u = URGENCY[item.urgency_level] || { label: item.urgency_level || 'Open', hint: '' };
+    const attempts = Number(item.attempt_count) || 0;
+    const open = state.openBarriers === item.id;
+    const chosen = item.access_barriers || [];
+    return `<article class="oq-card oq-card--${E(item.urgency_level || 'low')}" data-id="${E(item.id)}">
+      <header class="oq-card-head">
+        <span class="oq-badge oq-badge--${E(item.urgency_level || 'low')}" title="${E(u.hint)}">${E(u.label)}</span>
+        <span class="oq-overdue">${E(days(item.overdue_days))}</span>
+        <span class="oq-status">${E(STATUS[item.status] || item.status)}</span>
+      </header>
+      <h3 class="oq-title">${E(item.title)}</h3>
+      <p class="oq-meta">Was due ${E(fmt(item.due_date))}</p>
+      ${attempts ? `<p class="oq-note">Your care team has tried to reach you${item.last_attempt_at ? ' (last on ' + E(fmtTime(item.last_attempt_at)) + ')' : ''}.</p>` : ''}
+      ${barrierChips(chosen)}
+      <div class="oq-actions">
+        <button type="button" class="oq-btn oq-btn--primary" data-reschedule="${E(item.id)}">Book this visit</button>
+        <button type="button" class="oq-btn oq-btn--ghost" data-toggle-barriers="${E(item.id)}" aria-expanded="${open}" aria-controls="barriers-${E(item.id)}">Something is in the way</button>
       </div>
-    `;
+      ${open ? `<form class="oq-barriers" id="barriers-${E(item.id)}" data-barrier-form="${E(item.id)}">
+        <fieldset><legend>What is making this hard? Your care team will see this and can help.</legend>
+          <div class="oq-checks">${(state.barrierOptions.length ? state.barrierOptions : Object.keys(BARRIER)).map(b => `<label><input type="checkbox" value="${E(b)}" ${chosen.includes(b) ? 'checked' : ''}> ${E(BARRIER[b] || b)}</label>`).join('')}</div>
+        </fieldset>
+        <div class="oq-actions"><button type="submit" class="oq-btn oq-btn--primary">Share with my care team</button><button type="button" class="oq-btn oq-btn--ghost" data-toggle-barriers="${E(item.id)}">Cancel</button></div>
+      </form>` : ''}
+    </article>`;
   };
 
+  // ---------- Doctor view ----------
   const renderOutreachQueue = () => {
-    const container = $('outreachQueueList');
-    if (!container) return;
-
-    if (state.queueLoading) {
-      container.innerHTML = '<div class="empty">Loading outreach queue...</div>';
-      return;
-    }
-
-    if (state.queueError) {
-      container.innerHTML = '<div class="empty" role="status">Could not load the outreach queue. <button type="button" class="link-btn" data-retry-queue>Retry</button></div>';
-      return;
-    }
-
-    if (state.outreachQueue.length === 0) {
-      container.innerHTML = '<div class="empty">No patients need follow-up at this time.</div>';
-    } else {
-      container.innerHTML = state.outreachQueue.map(item => renderQueueItem(item)).join('');
-    }
-
-    // Update summary counts
-    const criticalCount = state.outreachQueue.filter(i => i.urgency_level === 'critical').length;
-    const highCount = state.outreachQueue.filter(i => i.urgency_level === 'high').length;
-    const mediumCount = state.outreachQueue.filter(i => i.urgency_level === 'medium').length;
-    const lowCount = state.outreachQueue.filter(i => i.urgency_level === 'low').length;
-
-    if ($('outreachCriticalCount')) $('outreachCriticalCount').textContent = criticalCount;
-    if ($('outreachHighCount')) $('outreachHighCount').textContent = highCount;
-    if ($('outreachMediumCount')) $('outreachMediumCount').textContent = mediumCount;
-    if ($('outreachLowCount')) $('outreachLowCount').textContent = lowCount;
+    const box = $('outreachQueueList');
+    if (!box) return;
+    if (state.queueLoading) { box.innerHTML = skeleton('Loading outreach queue', 3); return; }
+    if (state.queueError) { box.innerHTML = '<div class="oq-empty oq-empty--error" role="alert"><strong>The outreach queue did not load</strong><p>Check your connection and try again. Nothing was changed.</p><button type="button" class="oq-btn oq-btn--primary" data-retry-queue>Try again</button></div>'; return; }
+    const counts = state.summary || ['critical', 'high', 'medium', 'low'].reduce((o, k) => (o[k] = state.outreachQueue.filter(i => i.urgency_level === k).length, o), {});
+    [['Critical', 'critical'], ['High', 'high'], ['Medium', 'medium'], ['Low', 'low']].forEach(([n, k]) => { const el = $('outreach' + n + 'Count'); if (el) el.textContent = counts[k] || 0; });
+    box.innerHTML = state.outreachQueue.length
+      ? state.outreachQueue.map(renderQueueItem).join('')
+      : '<div class="oq-empty oq-empty--ok"><strong>No patients need follow-up here</strong><p>Try another status or urgency. Only patients who have not turned off your access appear.</p></div>';
   };
 
-  const renderQueueItem = (item) => {
-    const urgencyColor = urgencyColors[item.urgency_level] || '#6b7280';
-    const urgencyLabel = urgencyLabels[item.urgency_level] || item.urgency_level;
-
-    return `
-      <div class="outreach-queue-item" data-id="${E(item.id)}">
-        <div class="outreach-queue-priority" style="border-left: 4px solid ${urgencyColor}">
-          <div class="priority-badge">${E(urgencyLabel)}</div>
-          <div class="priority-score">Score: ${item.priority_score}</div>
-        </div>
-        <div class="outreach-queue-content">
-          <h4 class="outreach-queue-title">${E(item.title)}</h4>
-          <p class="outreach-queue-patient">
-            <strong>${E(item.full_name)}</strong>
-            ${item.phone ? `<span> · ${E(item.phone)}</span>` : ''}
-          </p>
-          <p class="outreach-queue-due">Due: ${E(fmt(item.due_date))} · ${item.overdue_days}d overdue</p>
-          ${item.address ? `<p class="outreach-queue-address">${E(item.address)}</p>` : ''}
-          <p class="outreach-queue-attempts">${item.attempt_count} outreach attempt(s) logged</p>
-        </div>
-        <div class="outreach-queue-actions">
-          <button type="button" class="btn btn--sm btn--primary" data-log-attempt="${E(item.id)}">Log attempt</button>
-          <button type="button" class="link-btn" data-view-attempts="${E(item.id)}">View history</button>
-        </div>
+  const renderQueueItem = item => {
+    const u = URGENCY[item.urgency_level] || { label: item.urgency_level || 'Open' };
+    return `<article class="oq-card oq-card--${E(item.urgency_level || 'low')}" data-id="${E(item.id)}">
+      <header class="oq-card-head">
+        <span class="oq-badge oq-badge--${E(item.urgency_level || 'low')}">${E(u.label)}</span>
+        <span class="oq-overdue">${E(days(item.overdue_days))}</span>
+        <span class="oq-status">${E(STATUS[item.status] || item.status)}</span>
+      </header>
+      <h3 class="oq-title">${E(item.full_name)} <span class="oq-sub">· ${E(item.title)}</span></h3>
+      <p class="oq-meta">Due ${E(fmt(item.due_date))}${item.phone ? ' · <a href="tel:' + E(String(item.phone).replace(/[^\d+]/g, '')) + '">' + E(item.phone) + '</a>' : ''}${item.address ? ' · ' + E(item.address) : ''}</p>
+      ${barrierChips(item.access_barriers)}
+      <p class="oq-note">${Number(item.attempt_count) ? E(item.attempt_count + (item.attempt_count === 1 ? ' attempt' : ' attempts')) + (item.last_attempt_at ? ', last ' + E(fmtTime(item.last_attempt_at)) : '') : 'No contact attempts yet'}</p>
+      <div class="oq-actions">
+        <button type="button" class="oq-btn oq-btn--primary" data-log-attempt="${E(item.id)}">Log attempt</button>
+        <button type="button" class="oq-btn oq-btn--ghost" data-view-attempts="${E(item.id)}">View history</button>
+        ${item.status !== 'resolved' ? `<button type="button" class="oq-btn oq-btn--ghost" data-mark-resolved="${E(item.id)}">Mark resolved</button>` : ''}
       </div>
-    `;
+    </article>`;
   };
 
   const renderOutreachAttempts = () => {
-    const container = $('outreachAttemptsList');
-    if (!container) return;
+    const box = $('outreachAttemptsList');
+    if (!box) return;
+    if (!state.currentMissedCareId) { box.innerHTML = '<div class="oq-empty"><p>Choose “View history” on a patient to see every contact attempt here.</p></div>'; return; }
+    if (!state.outreachAttempts.length) { box.innerHTML = '<div class="oq-empty"><p>No contact attempts have been logged for this item.</p></div>'; return; }
+    box.innerHTML = '<ol class="oq-history">' + state.outreachAttempts.map(a => `<li>
+      <div class="oq-history-head"><strong>${E(TYPE[a.attempt_type] || a.attempt_type)}</strong><span class="oq-outcome oq-outcome--${['reached', 'agreed_followup', 'rescheduled'].includes(a.outcome) ? 'good' : 'open'}">${E(OUTCOME[a.outcome] || a.outcome)}</span><time>${E(fmtTime(a.attempt_date))}</time></div>
+      ${a.attempted_by_name ? `<p class="oq-meta">By ${E(a.attempted_by_name)}</p>` : ''}
+      ${a.notes ? `<p>${E(a.notes)}</p>` : ''}
+      ${a.next_action ? `<p class="oq-note"><strong>Next:</strong> ${E(a.next_action)}${a.next_action_date ? ' by ' + E(fmt(a.next_action_date)) : ''}</p>` : ''}
+    </li>`).join('') + '</ol>';
+  };
 
-    if (state.outreachAttempts.length === 0) {
-      container.innerHTML = '<div class="empty">No outreach attempts logged yet.</div>';
-      return;
-    }
-
-    container.innerHTML = state.outreachAttempts.map(attempt => `
-      <div class="outreach-attempt-item">
-        <div class="outreach-attempt-header">
-          <strong>${E(attempt.attempt_type)}</strong>
-          <small>${E(new Date(attempt.attempt_date).toLocaleString())}</small>
-        </div>
-        <div class="outreach-attempt-content">
-          <span class="tag tag--${attempt.outcome === 'reached' || attempt.outcome === 'agreed_followup' ? 'ok' : 'pending'}">${E(attempt.outcome)}</span>
-          ${attempt.attempted_by_name ? `<p>By: ${E(attempted_by_name)}</p>` : ''}
-          ${attempt.notes ? `<p class="attempt-notes">${E(attempt.notes)}</p>` : ''}
-          ${attempt.next_action ? `<p class="attempt-next-action"><strong>Next action:</strong> ${E(attempt.next_action)}</p>` : ''}
-          ${attempt.next_action_date ? `<p class="attempt-next-date"><strong>Due:</strong> ${E(fmt(attempt.next_action_date))}</p>` : ''}
-        </div>
-      </div>
-    `).join('');
+  // ---------- Loading ----------
+  const withTimeout = (path, ms) => {
+    const c = typeof AbortController === 'function' ? new AbortController() : null;
+    const t = c ? setTimeout(() => c.abort(), ms) : null;
+    return api.apiRequest(path, c ? { signal: c.signal } : {}).finally(() => { if (t) clearTimeout(t); });
   };
 
   const loadMissedCareItems = async () => {
     if (state.missedLoading) return;
-    state.missedLoading = true;
-    state.missedError = false;
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 15000);
-    renderMissedCareItems();
-
+    if (isGuest()) { renderMissedCareItems(); return; }
+    state.missedLoading = true; state.missedError = false; renderMissedCareItems();
     try {
-      const data = await api.apiRequest('/patient/missed-care', { signal: controller.signal });
-      if (data) {
-        state.missedCareItems = data.missed_care_items || [];
-      } else {
-        state.missedError = true;
-      }
-    } catch (error) {
-      state.missedError = true;
-      console.error('Failed to load missed care items:', error);
-      api.toast('Failed to load missed care items. Please try again.');
-    } finally {
-      clearTimeout(timeout);
-      state.missedLoading = false;
-      renderMissedCareItems();
-    }
+      const data = await withTimeout('/patient/missed-care', 15000);
+      if (data) { state.missedCareItems = data.missed_care_items || []; state.barrierOptions = data.barrier_options || []; state.missedAt = Date.now(); }
+      else state.missedError = true;
+    } catch (e) { state.missedError = true; console.error('Missed care load failed:', e); }
+    state.missedLoading = false; renderMissedCareItems();
   };
 
-  const loadOutreachQueue = async (filters = {}) => {
+  const loadOutreachQueue = async (filters) => {
     if (state.queueLoading) return;
-    state.queueLoading = true;
-    state.queueError = false;
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 15000);
-    renderOutreachQueue();
-
+    if (filters) state.lastFilters = filters;
+    const f = state.lastFilters || {};
+    state.queueLoading = true; state.queueError = false; renderOutreachQueue();
     try {
-      const queryParams = new URLSearchParams(filters).toString();
-      const data = await api.apiRequest('/outreach/queue' + (queryParams ? '?' + queryParams : ''), { signal: controller.signal });
-      if (data) {
-        state.outreachQueue = data.queue || [];
-      } else {
-        state.queueError = true;
-      }
-    } catch (error) {
-      state.queueError = true;
-      console.error('Failed to load outreach queue:', error);
-      api.toast('Failed to load outreach queue. Please try again.');
-    } finally {
-      clearTimeout(timeout);
-      state.queueLoading = false;
-      renderOutreachQueue();
-    }
+      const q = new URLSearchParams(Object.entries(f).filter(([, v]) => v)).toString();
+      const data = await withTimeout('/outreach/queue' + (q ? '?' + q : ''), 15000);
+      if (data) { state.outreachQueue = data.queue || []; state.summary = data.summary || null; state.queueAt = Date.now(); }
+      else state.queueError = true;
+    } catch (e) { state.queueError = true; console.error('Outreach queue load failed:', e); }
+    state.queueLoading = false; renderOutreachQueue();
   };
 
-  const loadOutreachAttempts = async (missedCareId) => {
+  const loadOutreachAttempts = async (id) => {
+    state.currentMissedCareId = id; state.outreachAttempts = [];
+    const box = $('outreachAttemptsList');
+    if (box) { box.innerHTML = skeleton('Loading history', 2); try { box.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } catch (e) { /* not essential */ } }
     try {
-      const data = await api.apiRequest('/outreach/' + encodeURIComponent(missedCareId) + '/attempts');
-      if (data) {
-        state.outreachAttempts = data.attempts || [];
-        state.currentMissedCareId = missedCareId;
-        renderOutreachAttempts();
-      }
-    } catch (error) {
-      console.error('Failed to load outreach attempts:', error);
-      api.toast('Failed to load outreach attempts. Please try again.');
-    }
+      const data = await api.apiRequest('/outreach/' + encodeURIComponent(id) + '/attempts');
+      if (data) state.outreachAttempts = data.attempts || [];
+      else if (box) { box.innerHTML = '<div class="oq-empty oq-empty--error" role="alert"><p>The history did not load.</p><button type="button" class="oq-btn oq-btn--primary" data-view-attempts="' + E(id) + '">Try again</button></div>'; return; }
+    } catch (e) { console.error('Attempts load failed:', e); }
+    renderOutreachAttempts();
   };
 
-  const markResolved = async (id) => {
-    try {
-      const r = await api.apiRequest('/outreach/' + encodeURIComponent(id) + '/status', {
-        method: 'PATCH',
-        body: { status: 'resolved' }
-      });
-
-      if (r) {
-        api.toast('Marked as resolved!');
-        await loadMissedCareItems();
-      }
-    } catch (error) {
-      console.error('Failed to mark resolved:', error);
-      api.toast('Failed to update status. Please try again.');
-    }
+  // Refresh when a panel is opened, but not on every re-render.
+  const refresh = (maxAgeMs) => {
+    const age = maxAgeMs == null ? 20000 : maxAgeMs;
+    if ($('missedCareItemsList') && Date.now() - state.missedAt > age) loadMissedCareItems();
+    if ($('outreachQueueList') && Date.now() - state.queueAt > age) loadOutreachQueue();
   };
 
-  const showLogAttemptDialog = (missedCareId) => {
-    const modal = document.createElement('div');
-    modal.className = 'modal-overlay care-feature-modal is-open';
-    modal.innerHTML = `
-      <div class="modal">
-        <div class="modal-header">
-          <h2>Log Outreach Attempt</h2>
-          <button type="button" class="modal-close" aria-label="Close">×</button>
-        </div>
-        <div class="modal-body">
-          <form id="outreachAttemptForm">
-            <div class="form-group">
-              <label for="attemptType">Attempt Type</label>
-              <select id="attemptType" required>
-                <option value="">Select type...</option>
-                <option value="call">Phone call</option>
-                <option value="visit">In-person visit</option>
-                <option value="message">Message/SMS</option>
-                <option value="other">Other</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="attemptOutcome">Outcome</label>
-              <select id="attemptOutcome" required>
-                <option value="">Select outcome...</option>
-                <option value="no_answer">No answer</option>
-                <option value="reached">Reached patient</option>
-                <option value="left_message">Left message</option>
-                <option value="agreed_followup">Agreed to follow-up</option>
-                <option value="declined">Declined</option>
-                <option value="wrong_number">Wrong number</option>
-                <option value="rescheduled">Rescheduled</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="attemptNotes">Notes</label>
-              <textarea id="attemptNotes" rows="3" placeholder="Any additional notes..."></textarea>
-            </div>
-            <div class="form-group">
-              <label for="nextAction">Next Action</label>
-              <input type="text" id="nextAction" placeholder="e.g., Call back in 3 days">
-            </div>
-            <div class="form-group">
-              <label for="nextActionDate">Next Action Date</label>
-              <input type="date" id="nextActionDate">
-            </div>
-            <button type="submit" class="btn btn--primary">Log Attempt</button>
-          </form>
-        </div>
-      </div>
-    `;
+  // ---------- Actions ----------
+  const markResolved = async id => {
+    const r = await api.apiRequest('/outreach/' + encodeURIComponent(id) + '/status', { method: 'PATCH', body: { status: 'resolved' } });
+    if (r) { api.toast('Marked as resolved'); await loadOutreachQueue(); }
+  };
 
-    document.body.appendChild(modal);
+  const saveBarriers = async (id, list) => {
+    const r = await api.apiRequest('/patient/missed-care/' + encodeURIComponent(id) + '/barriers', { method: 'POST', body: { barriers: list } });
+    if (r) { api.toast(list.length ? 'Shared with your care team' : 'Saved'); state.openBarriers = null; await loadMissedCareItems(); }
+  };
 
-    const form = modal.querySelector('#outreachAttemptForm');
-    form.onsubmit = async (e) => {
+  const showLogAttemptDialog = (id, opener) => {
+    const overlay = document.createElement('div');
+    overlay.className = 'oq-overlay';
+    const opt = (map) => Object.keys(map).map(k => `<option value="${k}">${E(map[k])}</option>`).join('');
+    overlay.innerHTML = `<form class="oq-dialog" role="dialog" aria-modal="true" aria-labelledby="oqDlgTitle">
+      <h2 id="oqDlgTitle">Log contact attempt</h2>
+      <label>How did you reach out?<select name="attempt_type" required><option value="">Choose…</option>${opt(TYPE)}</select></label>
+      <label>What happened?<select name="outcome" required><option value="">Choose…</option>${opt(OUTCOME)}</select></label>
+      <label>Notes <small>(optional)</small><textarea name="notes" rows="3" maxlength="2000"></textarea></label>
+      <label>Next step <small>(optional)</small><input name="next_action" maxlength="255" placeholder="For example, call again on Monday"></label>
+      <label>Next step date <small>(optional)</small><input type="date" name="next_action_date"></label>
+      <p class="oq-error" role="alert" hidden></p>
+      <div class="oq-actions"><button type="submit" class="oq-btn oq-btn--primary">Save attempt</button><button type="button" class="oq-btn oq-btn--ghost" data-close>Cancel</button></div>
+    </form>`;
+    document.body.appendChild(overlay);
+    const form = overlay.firstElementChild;
+    const close = () => { document.removeEventListener('keydown', onKey); overlay.remove(); if (opener && opener.focus) opener.focus(); };
+    const onKey = e => { if (e.key === 'Escape') close(); };
+    document.addEventListener('keydown', onKey);
+    overlay.addEventListener('click', e => { if (e.target === overlay || e.target.hasAttribute('data-close')) close(); });
+    form.querySelector('select').focus();
+    form.addEventListener('submit', async e => {
       e.preventDefault();
-      const attemptType = document.getElementById('attemptType').value;
-      const outcome = document.getElementById('attemptOutcome').value;
-      const notes = document.getElementById('attemptNotes').value;
-      const nextAction = document.getElementById('nextAction').value;
-      const nextActionDate = document.getElementById('nextActionDate').value;
-
-      try {
-        const r = await api.apiRequest('/outreach/' + encodeURIComponent(missedCareId) + '/attempts', {
-          method: 'POST',
-          body: {
-            attempt_type: attemptType,
-            outcome: outcome,
-            notes: notes,
-            next_action: nextAction,
-            next_action_date: nextActionDate
-          }
-        });
-
-        if (r) {
-          api.toast('Outreach attempt logged!');
-          modal.remove();
-          await loadOutreachQueue();
-        }
-      } catch (error) {
-        console.error('Failed to log attempt:', error);
-        api.toast('Failed to log attempt. Please try again.');
-      }
-    };
-
-    modal.querySelector('.modal-close').onclick = () => modal.remove();
-    modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+      const btn = form.querySelector('[type=submit]'), err = form.querySelector('.oq-error');
+      btn.disabled = true; btn.textContent = 'Saving…'; err.hidden = true;
+      const body = Object.fromEntries(new FormData(form).entries());
+      const r = await api.apiRequest('/outreach/' + encodeURIComponent(id) + '/attempts', { method: 'POST', body });
+      if (r) { api.toast('Attempt logged'); close(); await loadOutreachQueue(); if (state.currentMissedCareId === id) await loadOutreachAttempts(id); }
+      else { btn.disabled = false; btn.textContent = 'Save attempt'; err.textContent = 'This was not saved. Check your connection or access and try again.'; err.hidden = false; }
+    });
   };
 
   const setup = () => {
-    document.addEventListener('click', async (e) => {
-      const btn = e.target.closest('button');
+    document.addEventListener('click', async e => {
+      const btn = e.target.closest && e.target.closest('button');
       if (!btn) return;
-
-      if (btn.dataset.markResolved) {
-        e.preventDefault();
-        await markResolved(btn.dataset.markResolved);
-      }
-
-      if (btn.dataset.logAttempt) {
-        e.preventDefault();
-        showLogAttemptDialog(btn.dataset.logAttempt);
-      }
-
-      if (btn.dataset.viewAttempts) {
-        e.preventDefault();
-        await loadOutreachAttempts(btn.dataset.viewAttempts);
-      }
-
-      if (btn.hasAttribute('data-retry-missed')) await loadMissedCareItems();
-      if (btn.hasAttribute('data-retry-queue')) await loadOutreachQueue();
-
-      if (btn.dataset.reschedule) {
-        e.preventDefault();
-        // Navigate to appointments page with pre-filled data
-        window.location.hash = '#appointments';
-        api.toast('Please book a new appointment for this care item.');
-      }
-
-      if (btn.id === 'applyOutreachFilters') {
-        e.preventDefault();
-        const status = document.getElementById('outreachStatusFilter').value;
-        const urgency = document.getElementById('outreachUrgencyFilter').value;
-        const limit = document.getElementById('outreachLimitFilter').value;
-        await loadOutreachQueue({ status, urgency, limit });
-      }
-
-      if (btn.id === 'generateMissedCare') {
-        e.preventDefault();
-        try {
-          const r = await api.apiRequest('/outreach/generate', {
-            method: 'POST'
-          });
-          if (r) {
-            api.toast(`Generated ${r.milestones_added} milestone and ${r.appointments_added} appointment missed care items.`);
-            await loadOutreachQueue();
-          }
-        } catch (error) {
-          console.error('Failed to generate missed care items:', error);
-          api.toast('Failed to generate missed care items. You may not have permission.');
+      const d = btn.dataset;
+      try {
+        if (d.markResolved) { e.preventDefault(); await markResolved(d.markResolved); }
+        else if (d.logAttempt) { e.preventDefault(); showLogAttemptDialog(d.logAttempt, btn); }
+        else if (d.viewAttempts) { e.preventDefault(); await loadOutreachAttempts(d.viewAttempts); }
+        else if (btn.hasAttribute('data-retry-missed')) await loadMissedCareItems();
+        else if (btn.hasAttribute('data-retry-queue')) await loadOutreachQueue();
+        else if (d.toggleBarriers) { e.preventDefault(); const id = Number(d.toggleBarriers); state.openBarriers = state.openBarriers === id ? null : id; renderMissedCareItems(); }
+        else if (d.reschedule) {
+          e.preventDefault();
+          const nav = document.querySelector('.nav-item[data-panel="appointments"]');
+          if (nav) nav.click(); else window.location.hash = '#appointments';
+        } else if (btn.id === 'applyOutreachFilters') {
+          e.preventDefault();
+          await loadOutreachQueue({ status: $('outreachStatusFilter').value, urgency: $('outreachUrgencyFilter').value, limit: $('outreachLimitFilter').value });
+        } else if (btn.id === 'generateMissedCare') {
+          e.preventDefault();
+          btn.disabled = true;
+          const r = await api.apiRequest('/outreach/generate', { method: 'POST' });
+          btn.disabled = false;
+          if (r) { api.toast(r.milestones_added + r.appointments_added ? 'Added ' + (r.milestones_added + r.appointments_added) + ' new follow-up item(s)' : 'Already up to date'); await loadOutreachQueue(); }
         }
-      }
+      } catch (err) { console.error('Outreach action failed:', err); api.toast('That did not work. Please try again.'); }
+    });
+    document.addEventListener('submit', async e => {
+      const form = e.target.closest && e.target.closest('[data-barrier-form]');
+      if (!form) return;
+      e.preventDefault();
+      const list = [...form.querySelectorAll('input[type=checkbox]:checked')].map(i => i.value);
+      const b = form.querySelector('[type=submit]'); if (b) { b.disabled = true; b.textContent = 'Sharing…'; }
+      try { await saveBarriers(form.dataset.barrierForm, list); } catch (err) { api.toast('That did not save. Please try again.'); }
     });
   };
 
-  // Public API
   window.PatientMissedCareOutreach = {
-    loadMissedCare: loadMissedCareItems,
-    loadQueue: loadOutreachQueue,
-    loadAttempts: loadOutreachAttempts,
-    getState: () => state
+    loadMissedCare: loadMissedCareItems, loadQueue: loadOutreachQueue, loadAttempts: loadOutreachAttempts,
+    refresh, getState: () => state
   };
 
-  // Auto-initialize if containers exist
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
-      setup();
-      if ($('missedCareItemsList')) loadMissedCareItems();
-      if ($('outreachQueueList')) loadOutreachQueue();
-    });
-  } else {
-    setup();
-    if ($('missedCareItemsList')) loadMissedCareItems();
-    if ($('outreachQueueList')) loadOutreachQueue();
-  }
-
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setup); else setup();
 })();

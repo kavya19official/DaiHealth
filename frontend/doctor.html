@@ -106,7 +106,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 <link rel="stylesheet" href="doctor-report-review.css?v=1">
 <link rel="stylesheet" href="clinical-dashboard.css?v=1">
 <script src="js/clinical-dashboard.js?v=1"></script>
-<link rel="stylesheet" href="css/smart-referral-handoff.css?v=modal-fix-1"><link rel="stylesheet" href="css/missed-care-outreach.css?v=modal-fix-1"><link rel="stylesheet" href="doctor-workspace.css?v=1"><link rel="stylesheet" href="doctor-studio.css?v=1"></head>
+<link rel="stylesheet" href="css/smart-referral-handoff.css?v=modal-fix-1"><link rel="stylesheet" href="css/missed-care-outreach.css?v=2"><link rel="stylesheet" href="doctor-workspace.css?v=1"><link rel="stylesheet" href="doctor-studio.css?v=1"></head>
 <body class="doctor-workspace">
 <button type="button" class="dw-menu-backdrop" data-dw-close-menu aria-label="Close sidebar"></button>
 <div class="app">
@@ -267,62 +267,28 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 <section class="panel" id="panel-visitsummary"><div class="dw-card dw-chart-card" id="dwVisitSummaries"></div></section>
 <section class="panel" id="panel-coordination"><div class="dw-card dw-chart-card" id="dwCareCoordination" aria-live="polite"></div></section>
 <!-- OUTREACH QUEUE -->
-<div class="panel" id="panel-outreach"><div class="page-section-heading"><h1>Missed-Care Outreach Queue</h1><p>Prioritise patients needing follow-up based on urgency, time overdue, and access barriers.</p></div>
-  <div class="outreach-summary">
-    <div class="outreach-summary-card critical">
-      <div class="count" id="outreachCriticalCount">0</div>
-      <div class="label">Critical</div>
-    </div>
-    <div class="outreach-summary-card high">
-      <div class="count" id="outreachHighCount">0</div>
-      <div class="label">High</div>
-    </div>
-    <div class="outreach-summary-card">
-      <div class="count" id="outreachMediumCount">0</div>
-      <div class="label">Medium</div>
-    </div>
-    <div class="outreach-summary-card">
-      <div class="count" id="outreachLowCount">0</div>
-      <div class="label">Low</div>
-    </div>
+<div class="panel" id="panel-outreach"><div class="page-section-heading"><h1>Missed-Care Outreach Queue</h1><p>Patients who missed a visit or test, most urgent first. Only patients who have not turned off your access are listed.</p></div>
+  <div class="oq-summary" role="group" aria-label="Queue by urgency">
+    <div class="oq-tile oq-tile--critical"><div class="count" id="outreachCriticalCount">0</div><div class="label">Urgent · over 30 days</div></div>
+    <div class="oq-tile oq-tile--high"><div class="count" id="outreachHighCount">0</div><div class="label">High · 15 to 30 days</div></div>
+    <div class="oq-tile oq-tile--medium"><div class="count" id="outreachMediumCount">0</div><div class="label">Medium · 8 to 14 days</div></div>
+    <div class="oq-tile oq-tile--low"><div class="count" id="outreachLowCount">0</div><div class="label">Low · up to 7 days</div></div>
   </div>
-  <div class="outreach-filters">
-    <div class="form-group">
-      <label for="outreachStatusFilter">Status</label>
-      <select id="outreachStatusFilter">
-        <option value="pending">Pending</option>
-        <option value="in_progress">In Progress</option>
-        <option value="resolved">Resolved</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label for="outreachUrgencyFilter">Urgency</label>
-      <select id="outreachUrgencyFilter">
-        <option value="">All</option>
-        <option value="critical">Critical</option>
-        <option value="high">High</option>
-        <option value="medium">Medium</option>
-        <option value="low">Low</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label for="outreachLimitFilter">Limit</label>
-      <select id="outreachLimitFilter">
-        <option value="25">25</option>
-        <option value="50" selected>50</option>
-        <option value="100">100</option>
-      </select>
-    </div>
-    <button type="button" class="btn btn--primary" id="applyOutreachFilters">Apply Filters</button>
-    <button type="button" class="btn btn--ghost" id="generateMissedCare">Generate Missed Care Items</button>
+  <div class="oq-filters">
+    <label for="outreachStatusFilter">Status<select id="outreachStatusFilter"><option value="pending">Not yet contacted</option><option value="in_progress">In progress</option><option value="resolved">Resolved</option><option value="deferred">Deferred</option></select></label>
+    <label for="outreachUrgencyFilter">Urgency<select id="outreachUrgencyFilter"><option value="">All</option><option value="critical">Urgent</option><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option></select></label>
+    <label for="outreachLimitFilter">Show<select id="outreachLimitFilter"><option value="25">25</option><option value="50" selected>50</option><option value="100">100</option></select></label>
+    <button type="button" class="oq-btn oq-btn--primary" id="applyOutreachFilters">Apply filters</button>
+    <span class="oq-spacer"></span>
+    <button type="button" class="oq-btn oq-btn--ghost" id="generateMissedCare">Check for new missed care</button>
   </div>
   <div class="card section-card">
-    <div class="section-head"><div class="section-title"><span><svg width="15" height="15" aria-hidden="true"><use href="#i-clipboard"/></svg></span> Outreach Queue</div></div>
-    <div id="outreachQueueList"></div>
+    <div class="section-head"><div class="section-title"><span><svg width="15" height="15" aria-hidden="true"><use href="#i-clipboard"/></svg></span> Queue</div></div>
+    <div id="outreachQueueList" aria-live="polite"></div>
   </div>
   <div class="card section-card" style="margin-top: 1rem;">
-    <div class="section-head"><div class="section-title"><span><svg width="15" height="15" aria-hidden="true"><use href="#i-clock"/></svg></span> Outreach Attempts History</div></div>
-    <div id="outreachAttemptsList"></div>
+    <div class="section-head"><div class="section-title"><span><svg width="15" height="15" aria-hidden="true"><use href="#i-clock"/></svg></span> Contact history</div></div>
+    <div id="outreachAttemptsList"><div class="oq-empty"><p>Choose “View history” on a patient to see every contact attempt here.</p></div></div>
   </div>
 </div>
 <!-- APPOINTMENTS -->
@@ -505,6 +471,7 @@ function showPanel(id) {
   if (id === 'population' && window.PrivacyAnalytics) { window.PrivacyAnalytics.load(); }
   if (id === 'visitsummary' && window.VisitSummaryDoctor) { window.VisitSummaryDoctor.load(); }
   if (id === 'coordination' && window.CareCoordinationDoctor) { window.CareCoordinationDoctor.load(); }
+  if (id === 'outreach' && window.PatientMissedCareOutreach) { window.PatientMissedCareOutreach.refresh(0); }
   // Load referrals panel
   if (id === 'referrals' && window.SmartReferralHandoff) {
     window.SmartReferralHandoff.load();
@@ -735,7 +702,7 @@ boot();
 <script src="/shared/plain-language.js"></script>
 <script src="js/visit-summary-doctor.js"></script>
 <script src="js/care-coordination-doctor.js?v=1"></script>
-<script src="js/smart-referral-handoff.js"></script>
+<script src="js/smart-referral-handoff.js"></script><script src="js/missed-care-outreach.js?v=2"></script>
 <script src="js/care-chatbot.js?v=ai-needed-1"></script>
 <script src="js/report-intake.js"></script><script src="js/doctor-report-review.js?v=1"></script><script src="js/clinical-review.js?v=1"></script><script src="js/ai-usage.js?v=2"></script></body>
 </html>

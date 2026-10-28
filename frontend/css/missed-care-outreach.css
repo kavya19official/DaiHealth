@@ -1,364 +1,89 @@
-/* Missed-Care Outreach Queue Styles */
+/* Missed-care outreach: shared by the mother's "Follow-up help" and the doctor's outreach queue.
+   Everything is namespaced oq-*, with fallbacks so it works with either page's colour variables. */
+.oq-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
-/* Missed Care Items (Patient View) */
-.missed-care-item {
-  background: #fff;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 1rem 1.15rem;
-  margin-bottom: 0.85rem;
-  transition: border-color 0.15s, box-shadow 0.15s;
+/* Summary tiles */
+.oq-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .75rem; margin: 0 0 1rem; }
+.oq-tile { background: var(--surface, #fff); border: 1px solid var(--line, #e5e7eb); border-radius: 14px; padding: .8rem 1rem; border-top: 4px solid #9ca3af; }
+.oq-tile .count { font-size: 1.7rem; font-weight: 800; line-height: 1.1; color: var(--ink, #1f2937); }
+.oq-tile .label { font-size: .82rem; font-weight: 600; color: var(--ink-2, #4b5563); }
+.oq-tile--critical { border-top-color: #e11d48; } .oq-tile--high { border-top-color: #d97706; }
+.oq-tile--medium { border-top-color: #2563eb; } .oq-tile--low { border-top-color: #059669; }
+
+/* Filters */
+.oq-filters { display: flex; flex-wrap: wrap; align-items: flex-end; gap: .75rem; margin: 0 0 1rem; padding: .9rem 1rem; background: var(--surface, #fff); border: 1px solid var(--line, #e5e7eb); border-radius: 14px; }
+.oq-filters label { display: grid; gap: .25rem; font-size: .8rem; font-weight: 600; color: var(--ink-2, #4b5563); }
+.oq-filters select { min-width: 9rem; padding: .5rem .65rem; border: 1px solid var(--line, #d1d5db); border-radius: 10px; background: #fff; color: var(--ink, #111827); }
+.oq-filters .oq-spacer { flex: 1 1 auto; }
+
+/* Buttons */
+.oq-btn { display: inline-flex; align-items: center; justify-content: center; min-height: 40px; padding: .5rem 1rem; border-radius: 999px; border: 1px solid transparent; font-weight: 600; font-size: .9rem; cursor: pointer; text-decoration: none; }
+.oq-btn:focus-visible, .oq-card a:focus-visible, .oq-checks input:focus-visible { outline: 3px solid #93c5fd; outline-offset: 2px; }
+.oq-btn--primary { background: var(--brand, #5b21b6); color: #fff; }
+.oq-btn--primary:hover { filter: brightness(1.08); }
+.oq-btn--ghost { background: #fff; color: var(--brand-strong, #4c1d95); border-color: var(--line, #d1d5db); }
+.oq-btn--ghost:hover { background: var(--brand-pale, #f5f3ff); }
+.oq-btn[disabled] { opacity: .6; cursor: progress; }
+
+/* Cards */
+.oq-card { background: var(--surface, #fff); border: 1px solid var(--line, #e5e7eb); border-left: 5px solid #9ca3af; border-radius: 14px; padding: 1rem 1.15rem; margin: 0 0 .8rem; display: grid; gap: .45rem; }
+.oq-card--critical { border-left-color: #e11d48; } .oq-card--high { border-left-color: #d97706; }
+.oq-card--medium { border-left-color: #2563eb; } .oq-card--low { border-left-color: #059669; }
+.oq-card-head { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem .75rem; }
+.oq-badge { padding: .15rem .65rem; border-radius: 999px; font-size: .78rem; font-weight: 700; }
+.oq-badge--critical { background: #ffe4e6; color: #9f1239; } .oq-badge--high { background: #fef3c7; color: #92400e; }
+.oq-badge--medium { background: #dbeafe; color: #1e40af; } .oq-badge--low { background: #d1fae5; color: #065f46; }
+.oq-overdue { font-size: .85rem; font-weight: 600; color: var(--ink-2, #4b5563); }
+.oq-status { margin-left: auto; font-size: .78rem; font-weight: 600; color: var(--ink-2, #4b5563); background: var(--line-soft, #f3f4f6); padding: .15rem .6rem; border-radius: 999px; }
+.oq-title { margin: 0; font-size: 1.05rem; line-height: 1.3; color: var(--ink, #111827); }
+.oq-sub { font-weight: 500; color: var(--ink-2, #4b5563); }
+.oq-meta, .oq-note { margin: 0; font-size: .88rem; color: var(--ink-2, #4b5563); }
+.oq-note { color: var(--ink, #374151); }
+.oq-meta a { color: var(--brand-strong, #4c1d95); font-weight: 600; }
+.oq-chips { display: flex; flex-wrap: wrap; gap: .35rem; margin: 0; padding: 0; list-style: none; }
+.oq-chips li { padding: .15rem .6rem; border-radius: 999px; background: #fff7ed; color: #9a3412; font-size: .8rem; font-weight: 600; border: 1px solid #fed7aa; }
+.oq-actions { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .25rem; }
+
+/* Barrier form (mother) */
+.oq-barriers { margin-top: .5rem; padding: .85rem 1rem; background: var(--brand-pale, #faf5ff); border-radius: 12px; }
+.oq-barriers fieldset { border: 0; margin: 0; padding: 0; }
+.oq-barriers legend { font-weight: 600; margin-bottom: .5rem; }
+.oq-checks { display: grid; grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr)); gap: .4rem .75rem; }
+.oq-checks label { display: flex; align-items: center; gap: .5rem; min-height: 36px; font-size: .9rem; }
+.oq-checks input { width: 18px; height: 18px; }
+
+/* Empty / error / loading */
+.oq-empty { padding: 1.4rem 1.2rem; border-radius: 14px; background: var(--line-soft, #f9fafb); border: 1px dashed var(--line, #d1d5db); text-align: center; display: grid; gap: .4rem; justify-items: center; }
+.oq-empty p { margin: 0; color: var(--ink-2, #4b5563); max-width: 46ch; }
+.oq-empty--ok { background: #ecfdf5; border-color: #a7f3d0; }
+.oq-empty--error { background: #fff1f2; border-color: #fecdd3; }
+.oq-skeleton-row { display: grid; gap: .5rem; padding: 1rem; margin-bottom: .8rem; border-radius: 14px; border: 1px solid var(--line, #e5e7eb); background: var(--surface, #fff); }
+.oq-skeleton-row i { display: block; height: 14px; border-radius: 7px; background: linear-gradient(90deg, #eee 25%, #f7f7f7 37%, #eee 63%); background-size: 400% 100%; animation: oq-shimmer 1.4s ease infinite; }
+.oq-skeleton-row i:first-child { width: 55%; } .oq-skeleton-row i:last-child { width: 80%; }
+@keyframes oq-shimmer { 0% { background-position: 100% 50%; } 100% { background-position: 0 50%; } }
+@media (prefers-reduced-motion: reduce) { .oq-skeleton-row i { animation: none; } }
+
+/* Attempt history */
+.oq-history { list-style: none; margin: 0; padding: 0; display: grid; gap: .6rem; }
+.oq-history li { padding: .8rem 1rem; border: 1px solid var(--line, #e5e7eb); border-radius: 12px; background: var(--surface, #fff); display: grid; gap: .25rem; }
+.oq-history p { margin: 0; }
+.oq-history-head { display: flex; flex-wrap: wrap; gap: .5rem .75rem; align-items: center; }
+.oq-history-head time { margin-left: auto; font-size: .82rem; color: var(--ink-2, #6b7280); }
+.oq-outcome { padding: .1rem .55rem; border-radius: 999px; font-size: .78rem; font-weight: 700; }
+.oq-outcome--good { background: #d1fae5; color: #065f46; } .oq-outcome--open { background: #fef3c7; color: #92400e; }
+
+/* Log attempt dialog (own classes; does not style the facility .modal dialogs) */
+.oq-overlay { position: fixed; inset: 0; z-index: 400; display: grid; place-items: center; padding: 1rem; background: rgba(17, 24, 39, .55); }
+.oq-dialog { width: min(32rem, 100%); max-height: 92vh; overflow: auto; display: grid; gap: .8rem; padding: 1.3rem; border-radius: 18px; background: #fff; box-shadow: 0 24px 60px rgba(0, 0, 0, .3); }
+.oq-dialog h2 { margin: 0; font-size: 1.2rem; }
+.oq-dialog label { display: grid; gap: .3rem; font-weight: 600; font-size: .9rem; }
+.oq-dialog small { font-weight: 400; color: #6b7280; }
+.oq-dialog select, .oq-dialog input, .oq-dialog textarea { padding: .55rem .7rem; border: 1px solid #d1d5db; border-radius: 10px; font: inherit; width: 100%; }
+.oq-error { margin: 0; color: #b91c1c; font-weight: 600; }
+
+@media (max-width: 640px) {
+  .oq-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .oq-actions .oq-btn { flex: 1 1 100%; }
+  .oq-status { margin-left: 0; }
 }
-
-.missed-care-item:hover {
-  border-color: #c4b5fd;
-  box-shadow: var(--shadow-sm);
-}
-
-.missed-care-item-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  margin-bottom: 0.75rem;
-}
-
-.missed-care-item-urgency {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.35rem 0.75rem;
-  border-radius: 999px;
-  color: #fff;
-}
-
-.urgency-label {
-  font-weight: 600;
-  font-size: 0.85rem;
-  text-transform: uppercase;
-}
-
-.overdue-days {
-  font-size: 0.8rem;
-  opacity: 0.9;
-}
-
-.missed-care-item-content {
-  margin-bottom: 0.85rem;
-}
-
-.missed-care-item-title {
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: var(--ink);
-  margin: 0 0 0.35rem 0;
-}
-
-.missed-care-item-due {
-  font-size: 0.82rem;
-  color: var(--ink-muted);
-  margin: 0;
-}
-
-.missed-care-item-barriers {
-  margin-top: 0.75rem;
-  padding: 0.75rem;
-  background: var(--ground);
-  border-radius: 10px;
-  font-size: 0.85rem;
-}
-
-.missed-care-item-barriers strong {
-  display: block;
-  color: var(--ink);
-  margin-bottom: 0.35rem;
-}
-
-.missed-care-item-barriers ul {
-  margin: 0;
-  padding-left: 1.25rem;
-  color: var(--ink-2);
-}
-
-.missed-care-item-barriers li {
-  margin-bottom: 0.25rem;
-}
-
-.missed-care-item-actions {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-
-/* Outreach Queue (Staff View) */
-.outreach-queue-item {
-  display: flex;
-  gap: 1rem;
-  background: #fff;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 1rem 1.15rem;
-  margin-bottom: 0.85rem;
-  transition: border-color 0.15s, box-shadow 0.15s;
-}
-
-.outreach-queue-item:hover {
-  border-color: #c4b5fd;
-  box-shadow: var(--shadow-sm);
-}
-
-.outreach-queue-priority {
-  flex-shrink: 0;
-  padding: 0.5rem 0.75rem;
-  border-radius: 10px;
-  background: var(--ground);
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-  min-width: 80px;
-}
-
-.priority-badge {
-  font-weight: 700;
-  font-size: 0.85rem;
-  text-transform: uppercase;
-  color: var(--ink);
-}
-
-.priority-score {
-  font-size: 0.75rem;
-  color: var(--ink-muted);
-}
-
-.outreach-queue-content {
-  flex: 1;
-  min-width: 0;
-}
-
-.outreach-queue-title {
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: var(--ink);
-  margin: 0 0 0.35rem 0;
-}
-
-.outreach-queue-patient {
-  font-size: 0.85rem;
-  color: var(--ink-2);
-  margin: 0 0 0.35rem 0;
-}
-
-.outreach-queue-patient span {
-  color: var(--ink-muted);
-}
-
-.outreach-queue-due {
-  font-size: 0.82rem;
-  color: var(--ink-muted);
-  margin: 0 0 0.35rem 0;
-}
-
-.outreach-queue-address {
-  font-size: 0.8rem;
-  color: var(--ink-3);
-  margin: 0 0 0.35rem 0;
-  font-style: italic;
-}
-
-.outreach-queue-attempts {
-  font-size: 0.8rem;
-  color: var(--brand);
-  font-weight: 500;
-  margin: 0;
-}
-
-.outreach-queue-actions {
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  align-items: flex-start;
-}
-
-/* Outreach Attempts */
-.outreach-attempt-item {
-  background: var(--ground);
-  border-radius: 12px;
-  padding: 0.85rem 1rem;
-  margin-bottom: 0.75rem;
-}
-
-.outreach-attempt-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 0.5rem;
-}
-
-.outreach-attempt-header strong {
-  font-size: 0.9rem;
-  color: var(--ink);
-  text-transform: capitalize;
-}
-
-.outreach-attempt-header small {
-  font-size: 0.75rem;
-  color: var(--ink-muted);
-}
-
-.outreach-attempt-content {
-  font-size: 0.85rem;
-  color: var(--ink-2);
-}
-
-.outreach-attempt-content p {
-  margin: 0.25rem 0;
-}
-
-.attempt-notes {
-  font-style: italic;
-  color: var(--ink-3);
-}
-
-.attempt-next-action {
-  color: var(--brand);
-  font-weight: 500;
-  margin-top: 0.5rem;
-}
-
-.attempt-next-date {
-  color: var(--ink-muted);
-  font-size: 0.8rem;
-}
-
-/* Filter Controls */
-.outreach-filters {
-  display: flex;
-  gap: 0.75rem;
-  padding: 0.85rem 1.15rem;
-  background: #fff;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  margin-bottom: 1rem;
-  flex-wrap: wrap;
-}
-
-.outreach-filters .form-group {
-  flex: 1;
-  min-width: 140px;
-  margin: 0;
-}
-
-.outreach-filters select,
-.outreach-filters input {
-  font-size: 0.85rem;
-  padding: 0.5rem 0.7rem;
-}
-
-/* Status Summary */
-.outreach-summary {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 0.85rem;
-  margin-bottom: 1rem;
-}
-
-.outreach-summary-card {
-  padding: 0.85rem 1rem;
-  background: #fff;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  text-align: center;
-}
-
-.outreach-summary-card .count {
-  font-family: var(--display);
-  font-size: 1.5rem;
-  font-weight: 800;
-  color: var(--brand);
-  line-height: 1.2;
-}
-
-.outreach-summary-card .label {
-  font-size: 0.8rem;
-  color: var(--ink-muted);
-  font-weight: 500;
-  margin-top: 0.25rem;
-}
-
-.outreach-summary-card.critical .count {
-  color: var(--rose);
-}
-
-.outreach-summary-card.high .count {
-  color: var(--amber);
-}
-
-/* Modal Form */
-.care-feature-modal .modal .form-group {
-  margin-bottom: 0.85rem;
-}
-
-.care-feature-modal .modal .form-group label {
-  display: block;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--ink-2);
-  margin-bottom: 0.35rem;
-}
-
-.care-feature-modal .modal .form-group select,
-.care-feature-modal .modal .form-group input,
-.care-feature-modal .modal .form-group textarea {
-  width: 100%;
-  padding: 0.55rem 0.75rem;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  font-size: 0.88rem;
-  background: #fff;
-  color: var(--ink);
-}
-
-.care-feature-modal .modal .form-group select:focus,
-.care-feature-modal .modal .form-group input:focus,
-.care-feature-modal .modal .form-group textarea:focus {
-  outline: 2px solid rgba(124, 58, 237, 0.3);
-  border-color: var(--brand);
-}
-
-@media (max-width: 768px) {
-  .outreach-queue-item {
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-
-  .outreach-queue-priority {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-  }
-
-  .outreach-queue-actions {
-    flex-direction: row;
-    width: 100%;
-  }
-
-  .outreach-queue-actions .btn {
-    flex: 1;
-  }
-
-  .missed-care-item-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
-  }
-
-  .outreach-filters {
-    flex-direction: column;
-  }
-
-  .outreach-summary {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
+#missedCareSummary { margin: 0 0 .75rem; font-weight: 600; }

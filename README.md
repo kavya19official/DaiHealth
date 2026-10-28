@@ -314,3 +314,7 @@ Patient **Visit instructions** and Doctor **Care coordination** (`backend/careCo
 - **Low bandwidth.** Static text assets are served Brotli/gzip-compressed with ETags
   (`backend/staticCompression.js`). Background polling stops on hidden tabs and in low-bandwidth
   mode, which also turns off map tiles; data still loads when you navigate.
+
+### Missed-care outreach
+
+Mothers see **Follow-up help** (their own overdue visits and tests, a rebook shortcut, and a way to tell the care team what is in the way). Doctors see the **Outreach Queue** (most urgent first, only patients who have not turned off their access, with an attempt log and history). Items are created and re-scored every time either list loads, and close when the care is recorded as done. "Reached" is logged as contact, not as completed care.
