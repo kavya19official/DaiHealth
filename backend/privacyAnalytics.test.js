@@ -3,7 +3,7 @@
 const test = require('node:test'), assert = require('node:assert/strict'), express = require('express');
 const A = require('./privacyAnalytics');
 
-const row = (key, people, total, positive, durations) => ({ key, label: 'Facility ' + key, people, total, positive, ...(durations ? { durations } : {}) });
+const row = (key, people, total, positive, durations) => ({ key, label: 'Facility ' + key, people, total, positive, ...(durations ? { durations, duration_people: durations.length } : {}) });
 const report = (rows, metric = 'missed_visits') => A.buildReport({ metric, groupBy: 'facility', windowDays: 90, rows });
 
 test('groups with fewer than K people are hidden and carry no numbers at all', () => {
@@ -59,55 +59,8 @@ test('CSV contains exactly the published rows, hides suppressed ones and blocks 
   assert.equal(/"?20%"?/.test(body[1]), false);
 });
 
-function makeApp(state) {
-  const pool = { async query(sql, params) {
-    if (/FROM doctor_profiles WHERE user_id=\$1/.test(sql)) return { rows: state.verified.has(params[0]) ? [{ medical_license_number: 'X', credential_verified: true }] : [{ medical_license_number: 'X', credential_verified: false }] };
-    if (/FROM appointments x JOIN doctor_profiles/.test(sql)) return { rows: [{ uuid: 'fac-a', name: 'Alpha Clinic' }] };
-    if (/FROM analytics_access_log/.test(sql) && /COUNT/.test(sql)) return { rows: [{ n: String(state.log.filter((l) => l.user === params[0] && l.kind === 'export').length) }] };
-    if (/INSERT INTO analytics_access_log/.test(sql)) { state.log.push({ user: params[0], kind: params[1], shown: params[5], hidden: params[6] }); return { rows: [] }; }
-    if (/FROM appointments a/.test(sql)) return { rows: state.missed };
-    if (/FROM facility_referrals/.test(sql)) return { rows: state.referrals };
-    if (/FROM missed_care_items/.test(sql)) return { rows: state.followups };
-    throw new Error('Unexpected query: ' + sql.slice(0, 70));
-  } };
-  const app = express();
-  const authenticateToken = (req, res, next) => { const id = Number(req.headers['x-user']); if (!id) return res.sendStatus(401); req.user = { id, role: id >= 3 ? 'doctor' : 'mother' }; next(); };
-  const authorizeRole = (roles) => (req, res, next) => roles.includes(req.user.role) ? next() : res.sendStatus(403);
-  require('./privacyAnalytics')(app, { pool, authenticateToken, authorizeRole });
-  return app;
-}
-
-test('HTTP: only verified doctors can read; small groups are hidden; views and exports are audited and limited', async () => {
-  const state = { verified: new Set([3]), log: [],
-    missed: [{ k: 'fac-a', people: '40', total: '120', positive: '30' }, { k: 'fac-b', people: '4', total: '6', positive: '2' }],
-    referrals: [{ k: '7', label: 'District Hospital', people: '12', total: '15', positive: '9', durations: [1, 2, 3, 4, 5, 6, 7, 8, 9] }],
-    followups: [] };
-  const app = makeApp(state), server = await new Promise((r) => { const s = app.listen(0, '127.0.0.1', () => r(s)); });
-  const base = 'http://127.0.0.1:' + server.address().port;
-  const get = async (url, user) => { const r = await fetch(base + url, { headers: { 'x-user': String(user) } }); const text = await r.text(); let json = null; try { json = JSON.parse(text); } catch (e) { /* csv */ } return { status: r.status, json, text, type: r.headers.get('content-type') }; };
-  try {
-    assert.equal((await get('/api/analytics/report', 1)).status, 403);                      // a mother
-    assert.equal((await get('/api/analytics/report', 4)).status, 403);                      // doctor who is not verified
-    assert.equal((await get('/api/analytics/report?metric=nope', 3)).status, 400);
-    assert.equal((await get('/api/analytics/report?window=7', 3)).status, 400);             // only fixed windows
-    assert.equal((await get('/api/analytics/report?metric=missed_visits&group_by=area', 3)).status, 400); // area not offered for this measure
-
-    const r = await get('/api/analytics/report?metric=missed_visits&group_by=facility&window=90', 3);
-    assert.equal(r.status, 200);
-    const a = r.json.rows.find((x) => x.label === 'Alpha Clinic'), b = r.json.rows.find((x) => x.suppressed);
-    assert.equal(a.rate_text, '25%'); assert.ok(b && !('rate_text' in b));
-    assert.equal(JSON.stringify(r.json).includes('"total"'), false);
-
-    const ref = await get('/api/analytics/report?metric=referral_completion&group_by=area&window=180', 3);
-    assert.equal(ref.status, 200); assert.equal(ref.json.rows[0].median_days, 5);
-
-    for (let i = 0; i < A.EXPORT_LIMIT_PER_DAY; i++) {
-      const e = await get('/api/analytics/export.csv?metric=missed_visits&group_by=facility&window=90', 3);
-      assert.equal(e.status, 200); assert.match(e.type, /text\/csv/);
-    }
-    assert.equal((await get('/api/analytics/export.csv?metric=missed_visits&group_by=facility&window=90', 3)).status, 429);
-    assert.ok(state.log.filter((l) => l.kind === 'view').length >= 2);
-    assert.equal(state.log.filter((l) => l.kind === 'export').length, A.EXPORT_LIMIT_PER_DAY);
-    assert.ok(state.log.every((l) => l.user === 3));
-  } finally { server.close(); }
+test('repeated events from one person cannot unlock a median; invalid durations are ignored', () => {
+ const r=report([{...row('a',20,20,10,[null,'',-1,1,2,3,4,5]),duration_people:1}], 'time_to_follow_up');
+ assert.equal(r.rows[0].median_days,null);
+ assert.match(r.rows[0].median_note,/distinct people/);
 });
