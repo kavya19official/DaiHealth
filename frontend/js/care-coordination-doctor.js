@@ -66,8 +66,8 @@
     root.innerHTML = '<p>Loading…</p>';
     var res = await Promise.all([api.apiRequest('/doctor/care-coordination/evaluation'), api.apiRequest('/doctor/care-coordination/care-gaps'), api.apiRequest('/doctor/care-coordination/packs'), api.apiRequest('/doctor/patients')]);
     var ev = res[0], gaps = res[1], packs = res[2]; patients = (res[3] && (res[3].patients || res[3])) || [];
-    if (!ev || !gaps || !packs) { root.innerHTML = '<p>Care coordination is limited to verified clinicians.</p>'; return; }
-    root.innerHTML = '<h2 style="margin:0 0 .25rem">Care coordination</h2><p style="margin:0 0 .75rem">Digital-first where appropriate, in person when clinically necessary. You decide whether a test is repeated.</p>' +
+    if (!ev || !gaps || !packs) { root.innerHTML = '<p>Sustainable care tools are limited to verified clinicians.</p>'; return; }
+    root.innerHTML = '<p class="eyebrow" style="margin:0">Sustainability</p><h2 style="margin:0 0 .25rem">Sustainable care</h2><p style="margin:0 0 .75rem">Digital-first where appropriate, in person when clinically necessary. You decide whether a test is repeated.</p>' +
       evaluation(ev) +
       h3('Preventive follow-up queue') + (gaps.gaps.length ? '<div style="overflow-x:auto"><table class="dw-table"><thead><tr><th>Patient</th><th>Care gap</th><th>Due</th><th>Latest</th><th>Record outcome</th></tr></thead><tbody>' + gaps.gaps.map(gapRow).join('') + '</tbody></table></div>' : '<p>No open care gaps for your connected patients.</p>') +
       h3('Instruction packs') + packsTable(packs.packs) +
