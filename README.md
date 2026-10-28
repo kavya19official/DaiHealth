@@ -292,7 +292,7 @@ See [AI usage and deployment](docs/AI-USAGE-AND-DEPLOYMENT.md).
 
 ## Sustainability-aware care coordination
 
-Patient **Visit instructions** and Doctor **Care coordination** (`backend/careCoordination.js`,
+Patient **Sustainable care** and Doctor **Sustainable care** menus, under a "Sustainability" heading (`backend/careCoordination.js`,
 `backend/db/care_coordination.sql`):
 
 - **Digital-first, in person when needed.** Clinicians write visit instructions, test preparation

@@ -60,7 +60,7 @@
     loading = true;
     try {
       var d = await api.apiRequest('/patient/care-coordination');
-      if (!d) { root.innerHTML = '<p>Care coordination is not available right now.</p>'; return; }
+      if (!d) { root.innerHTML = '<p>Sustainable care is not available right now.</p>'; return; }
       render(d);
     } finally { loading = false; }
   }
