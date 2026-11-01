@@ -44,6 +44,19 @@ test('workspace API denies wrong roles and unverified doctors, scopes records an
  const future=(await pool.query("INSERT INTO appointments(mother_id,doctor_id,requested_date,status) VALUES($1,$2,CURRENT_DATE+1,'confirmed') RETURNING id",[mother,doctor])).rows[0].id;
  assert.equal((await change('/queue/'+future,{state:'waiting',version:0})).status,409);
 
+ // Coordination metadata does not establish medical-record access; canonical facility IDs honor revocation.
+ const {scopedCoordinationRequests}=require('./doctorWorkspace');
+ const rawFacility='123456781234123412341234567890ab',canonical='12345678-1234-1234-1234-1234567890ab';
+ const requests=[{id:rawFacility,facility_id:rawFacility,patient_key:'node-mother:'+other,patient_name:'SYNTHETIC Other',status:'scheduled'},{id:'bad',patient_key:'not-a-patient'}];
+ const visible=await scopedCoordinationRequests(pool,doctor,requests,new Set([mother]));
+ assert.equal(visible.length,1);assert.equal(visible[0].id,canonical);assert.equal(visible[0].facility_id,canonical);assert.equal(visible[0].can_open_record,false);assert.equal(visible[0].patient_key,undefined);
+ assert.equal((await pool.query("SELECT COUNT(*)::int n FROM patient_access_events WHERE mother_id=$1 AND event_type='doctor_coordination_request_read'",[other])).rows[0].n,1);
+ await pool.query("INSERT INTO patient_access_controls(mother_id,grantee_type,grantee_ref,state) VALUES($1,'facility',$2,'revoked')",[other,canonical]);
+ assert.deepEqual(await scopedCoordinationRequests(pool,doctor,requests,new Set()),[]);
+ await pool.query("UPDATE patient_access_controls SET state='granted' WHERE mother_id=$1",[other]);
+ await pool.query("INSERT INTO patient_access_controls(mother_id,grantee_type,grantee_ref,state) VALUES($1,'doctor',$2,'revoked')",[other,String(doctor)]);
+ assert.deepEqual(await scopedCoordinationRequests(pool,doctor,requests,new Set()),[]);
+
  // Revocations must remove every appointment-derived workspace surface, not just the roster.
  const reportId=(await pool.query("INSERT INTO patient_documents(mother_id,title,doc_type,original_filename,mime_type,size_bytes,storage_key) VALUES($1,'Synthetic shared result','lab_report','fake.txt','text/plain',1,'workspace-revocation-test') RETURNING id",[mother])).rows[0].id;
  await pool.query('INSERT INTO patient_document_shares(document_id,doctor_id,shared_by) VALUES($1,$2,$3)',[reportId,doctor,mother]);

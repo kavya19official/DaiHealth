@@ -55,7 +55,9 @@ def test_import_integrity_and_provenance(context):
         )
         assert c.scalar(select(func.count()).select_from(s.child)) > 0
         assert c.scalar(select(func.count()).select_from(s.seed_manifest)) == 1
-        assert c.scalar(select(func.count()).select_from(s.facility)) == 12
+        # The local demo may also initialise five separate Delhi coordination fixtures.
+        # Provenance checks concern the twelve imported source hospitals.
+        assert c.scalar(select(func.count()).select_from(s.facility).where(s.facility.c.source_id.like("HOSP-SYN-%"))) == 12
         moms = c.execute(select(s.mother)).mappings()
         for m in moms:
             doc = (

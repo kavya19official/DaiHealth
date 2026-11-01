@@ -10,7 +10,7 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body>{children}<Script src={`${process.env.NEXT_PUBLIC_DAI_BASE_PATH || ""}/daya/js/care-chatbot.js?v=daya-3d-1`} strategy="lazyOnload" /></body>
+      <body>{children}<Script src={`${process.env.NEXT_PUBLIC_DAI_BASE_PATH || ""}/daya/js/care-chatbot.js?v=daya-3d-1`} strategy="lazyOnload" /><Script src={`${process.env.NEXT_PUBLIC_DAI_BASE_PATH || ""}/daya/js/demo-guide.js?v=1`} strategy="afterInteractive" /></body>
     </html>
   );
 }

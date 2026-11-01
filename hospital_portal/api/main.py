@@ -62,6 +62,8 @@ def create_app(engine=None):
                         )
         seed_demo_requests(engine)
         seed_followup_risk(engine)
+        from .demo_video_seed import seed_video_demo
+        seed_video_demo(engine)
         yield
 
     app = FastAPI(

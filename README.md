@@ -68,6 +68,14 @@ Later runs reuse all of that and start much faster.
 
 ---
 
+## Video demo rehearsal
+
+Run `npm run demo` for optional, clearly labelled synthetic video fixtures. Open
+`http://localhost:3001/auth.html?demo=video` for the removable recording guide.
+See the [recording runbook](docs/MVP-DEMO-RUNBOOK.md), [audit and limitations](docs/MVP-DEMO-AUDIT.md)
+and [validation results](docs/MVP-DEMO-VALIDATION.md). With services running, `npm run check:demo`
+verifies a saved cross-interface workflow and creates labelled local test records.
+
 ## Demo accounts
 
 All three use the password `Dai-Synthetic-2026!`. The sign-in page has a **Patient / Doctor / Hospital** toggle.

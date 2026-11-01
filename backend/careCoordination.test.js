@@ -61,6 +61,10 @@ test('care coordination API enforces verified, connected clinicians and records 
  assert.equal((await api('doctor/care-coordination/packs',4,pack)).status,403);
  assert.equal((await api('doctor/care-coordination/packs',5,{...pack,appointment_id:undefined})).status,403);
  assert.equal((await api('doctor/care-coordination/packs',3,{...pack,appointment_id:9999})).status,404);
+ // A different active appointment must not grant access to one at a revoked facility.
+ const blockedAppt=(await pool.query("INSERT INTO appointments(mother_id,doctor_id,requested_date,status,facility_uuid) VALUES(1,3,CURRENT_DATE-11,'completed','SYNTHETIC-REVOKED') RETURNING id")).rows[0].id;
+ await pool.query("INSERT INTO patient_access_controls(mother_id,grantee_type,grantee_ref,state) VALUES(1,'facility','SYNTHETIC-REVOKED','revoked')");
+ assert.equal((await api('doctor/care-coordination/packs',3,{...pack,appointment_id:blockedAppt})).status,404);
  const created=await api('doctor/care-coordination/packs',3,pack);assert.equal(created.status,201);const packId=created.body.pack.id;
  assert.equal((await api('patient/care-coordination',1)).body.packs.length,0);
  assert.equal((await api('doctor/care-coordination/packs/'+packId+'/verify',3,{})).status,400);

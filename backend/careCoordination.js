@@ -235,7 +235,7 @@ module.exports = function registerCareCoordination(app, { pool, authenticateToke
     const p = validatePack(req.body);
     await gateDoctor(req, motherId, 'care_instruction_pack');
     const appt = intOrNull(req.body.appointment_id);
-    if (Number.isNaN(appt) || (appt && !(await pool.query('SELECT 1 FROM appointments WHERE id=$1 AND mother_id=$2 AND doctor_id=$3', [appt, motherId, req.user.id])).rows.length)) throw new Bad(404, 'Appointment not found for this patient');
+    if (Number.isNaN(appt) || (appt && !(await pool.query(`SELECT 1 FROM appointments ca WHERE ca.id=$1 AND ca.mother_id=$2 AND ca.doctor_id=$3 AND NOT ${access.revokedSql('ca.mother_id','ca.doctor_id','ca.facility_uuid')}`, [appt, motherId, req.user.id])).rows.length)) throw new Bad(404, 'Appointment not found for this patient');
     const row = (await pool.query(
       `INSERT INTO care_instruction_packs(mother_id,doctor_id,appointment_id,kind,title,body,in_person_required,in_person_reason)
        VALUES($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,
@@ -305,7 +305,8 @@ module.exports = function registerCareCoordination(app, { pool, authenticateToke
   // ---- Doctor: preventive follow-up queue and evaluation ---------------------------------------------
   app.get('/api/doctor/care-coordination/care-gaps', ...doctor, handle('care gaps', async (req, res) => {
     if (!(await verifiedDoctor(pool, req.user.id))) throw new Bad(403, 'A verified clinician account is required');
-    res.json({ gaps: await careGaps(pool, (col) => access.activeRelationshipSql(col, '$1::int'), [req.user.id]) });
+    const scopes = { 'mci.mother_id': access.activeRelationshipSql('mci.mother_id', '$1::int'), 's.mother_id': access.activeRelationshipSql('s.mother_id', '$1::int') };
+    res.json({ gaps: await careGaps(pool, col => { if (!Object.hasOwn(scopes, col)) throw new Bad(400, 'Unsupported care-gap scope'); return scopes[col]; }, [req.user.id]) });
   }));
   app.post('/api/doctor/care-coordination/care-gaps/events', ...doctor, handle('follow-up event', async (req, res) => {
     const e = validateFollowup(req.body);

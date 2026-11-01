@@ -2744,3 +2744,10 @@ select {
 @media(max-width:800px){ .admin-manager-grid { grid-template-columns:minmax(0,1fr); } }
 
 .demo-info{position:relative;font-size:12px;color:var(--muted,#776c80)}.demo-info summary{cursor:pointer;white-space:nowrap}.demo-info p{position:absolute;right:0;top:24px;z-index:30;width:min(300px,70vw);padding:16px;border:1px solid var(--border,#e8e0ef);border-radius:16px;background:var(--surface,#fff);box-shadow:0 8px 24px #35214a14;line-height:1.6}
+
+.snapshot-caption.needs-attention{color:#a74651}.snapshot-caption.needs-attention i{background:#a74651}
+
+/* Keep long authorised facility names inside the page on narrow screens. */
+.page-heading > div { min-width: 0; max-width: 100%; }
+.page-heading label[for="daiFacilityContext"] { display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
+#daiFacilityContext { min-width:0; max-width:100%; width:min(100%,460px); padding:8px 10px; border:1px solid var(--line); border-radius:8px; background:white; color:var(--ink); }

@@ -483,9 +483,11 @@ export function AffiliationSwitcher({
   }, [api]);
   return items.length ? (
     <div>
-      <label>
+      <label htmlFor="daiFacilityContext">
         Facility context{" "}
         <select
+          id="daiFacilityContext"
+          aria-label="Facility context"
           defaultValue=""
           onChange={async (e) => {
             if (!e.target.value) return;

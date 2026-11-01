@@ -1155,6 +1155,7 @@ function showPanel(id) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
   closeSidebar();
   PatientExperience.route(id);
+  window.dispatchEvent(new CustomEvent("dai:patient-panel", { detail: { panel: id } }));
   // Panel navigation changes history without firing hashchange; load this view explicitly.
   if (id === 'outreach' && window.PatientMissedCareOutreach) {
     window.PatientMissedCareOutreach.refresh();
@@ -1883,7 +1884,7 @@ boot().then(function () { return renderMessagesFromAppts(); });
 <script src="js/care-chatbot.js?v=ai-needed-1"></script>
 <script src="js/delhi-demo-network.js?v=1"></script>
 <script src="js/delhi-patient-journey.js?v=3"></script>
-<script src="js/demo-request-patient.js?v=1"></script>
-<script src="js/patient-followup-state.js?v=1"></script>
-<script src="js/clinical-review.js?v=1"></script><script src="js/ai-usage.js?v=2"></script><script src="js/demo-care-messages.js?v=1"></script></body>
+<script src="js/demo-request-patient.js?v=2"></script>
+<script src="js/patient-followup-state.js?v=2"></script>
+<script src="js/clinical-review.js?v=2"></script><script src="js/ai-usage.js?v=2"></script><script src="js/demo-care-messages.js?v=1"></script><script src="js/demo-guide.js?v=1"></script></body>
 </html>

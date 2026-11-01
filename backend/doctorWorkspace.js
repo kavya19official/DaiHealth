@@ -2,6 +2,7 @@
 const fs=require('node:fs'),path=require('node:path'),access=require('./accessControl');
 const M=require('../frontend/js/patient-model'),{verifiedDoctor}=require('./clinicalDashboard');
 const iso=value=>value instanceof Date?value.toISOString().slice(0,10):value?String(value).slice(0,10):null;
+const uuid=value=>typeof value==='string'&&/^[a-f0-9]{32}$/i.test(value)?value.replace(/^(.{8})(.{4})(.{4})(.{4})(.{12})$/,'$1-$2-$3-$4-$5'):value;
 const json=value=>{try{return JSON.parse(value||'{}');}catch{return {};}};
 function hospitalSnapshot(doctorLink,motherLinks,shared,date){
  const file=process.env.DAI_PORTAL_DB||path.join(__dirname,'../.local/portal.db');
@@ -25,13 +26,25 @@ function hospitalSnapshot(doctorLink,motherLinks,shared,date){
   const blood=db.prepare('SELECT blood_group,component,units,snapshot_at FROM blood_stock_snapshot WHERE facility_id=? ORDER BY snapshot_at DESC').all(doctor.facility_id);const latest=new Map();for(const b of blood){const key=b.blood_group+':'+b.component;if(!latest.has(key))latest.set(key,b);}
   const onCall=db.prepare(`SELECT u.name,u.details,o.day,o.start_time,o.end_time FROM on_call_entry o JOIN portal_user u ON u.id=o.user_id WHERE u.facility_id=? AND u.verified=1`).all(doctor.facility_id).filter(o=>o.day===new Date(date+'T12:00:00Z').toLocaleDateString('en',{weekday:'long',timeZone:'Asia/Kolkata'}));
   const roster=db.prepare(`SELECT u.name,u.details,r.roster_date,r.start_time,r.end_time FROM roster_entry r JOIN portal_user u ON u.id=r.user_id WHERE r.facility_id=? AND u.verified=1 ORDER BY r.roster_date DESC,r.start_time LIMIT 6`).all(doctor.facility_id).map(o=>({...o,specialty:json(o.details).specialty,details:undefined}));
+  const coordinationRequests=db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='demo_care_request'").get()?db.prepare("SELECT r.id,r.patient_key,r.patient_name,r.kind,r.need,r.status,r.scheduled_at,r.public_note,r.version,r.facility_id FROM demo_care_request r WHERE r.clinician_id=? AND (r.facility_id=? OR EXISTS(SELECT 1 FROM staff_affiliation sa WHERE sa.user_id=r.clinician_id AND sa.facility_id=r.facility_id AND sa.active=1 AND sa.verified=1 AND sa.registration_no IS NOT NULL AND sa.department_id IS NOT NULL AND sa.unit_id IS NOT NULL)) ORDER BY r.created_at DESC LIMIT 40").all(doctor.id,doctor.facility_id):[];
   const incoming=[];for(const r of db.prepare('SELECT id,mother_id,status,created_at,details FROM referral WHERE to_facility_id=? ORDER BY created_at DESC LIMIT 100').all(doctor.facility_id)){if(sourceIds.has(r.mother_id)&&!['completed','rejected','cancelled'].includes(r.status))incoming.push({id:r.id,patient_id:sourceIds.get(r.mother_id),type:'Referral',status:r.status,created_at:r.created_at,eta:null});}
   for(const s of db.prepare('SELECT id,mother_id,status,trigger_time FROM sos_request WHERE accepted_facility_id=? AND auth_layer_1_ok=1 AND auth_layer_2_ok=1 ORDER BY trigger_time DESC LIMIT 100').all(doctor.facility_id)){if(sourceIds.has(s.mother_id)&&!['resolved','rejected','closed','completed'].includes(s.status))incoming.push({id:s.id,patient_id:sourceIds.get(s.mother_id),type:'SOS',status:s.status,created_at:s.trigger_time,eta:null});}
   const alerts=db.prepare("SELECT id,type,severity,reason_text,created_at FROM alert WHERE facility_id=? AND status='open' ORDER BY created_at DESC LIMIT 12").all(doctor.facility_id);
   const wardTiles=db.prepare(`SELECT w.id,w.name,w.care_area,w.capacity,b.id AS bed_id,b.label,b.type,b.status,b.has_oxygen,b.has_monitor,b.has_ventilator,b.status_since FROM ward w JOIN bed b ON b.ward_id=w.id WHERE w.facility_id=? ORDER BY w.name,b.label`).all(doctor.facility_id);
   const clinics=unit?db.prepare('SELECT name,day,start_time,end_time,room FROM clinic WHERE facility_id=? AND unit_id=?').all(doctor.facility_id,doctor.unit_id):[];
-  return {facility,unit,role:doctor.role,patients,beds,wardTiles,blood:[...latest.values()],roster,onCall:onCall.filter(o=>{const now=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Kolkata',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date());return o.start_time<=now&&o.end_time>now;}).map(o=>({...o,specialty:json(o.details).specialty,details:undefined})),incoming,alerts,clinics};
+  return {facility,unit,role:doctor.role,patients,beds,coordinationRequests,wardTiles,blood:[...latest.values()],roster,onCall:onCall.filter(o=>{const now=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Kolkata',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date());return o.start_time<=now&&o.end_time>now;}).map(o=>({...o,specialty:json(o.details).specialty,details:undefined})),incoming,alerts,clinics};
  }finally{db.close();}
+}
+async function scopedCoordinationRequests(pool,id,rows,assignedIds){
+  const requests=[];
+  for(const r of rows){
+   const key=String(r.patient_key).match(/^node-mother:([1-9]\d*)$/);const motherId=key?Number(key[1]):NaN;if(!Number.isSafeInteger(motherId))continue;
+   const allowed=(await pool.query(`SELECT u.id FROM users u CROSS JOIN (SELECT $3::text AS facility_uuid) ctx WHERE u.id=$1 AND u.role='mother' AND NOT ${access.revokedSql('u.id','$2::int','ctx.facility_uuid')}`,[motherId,id,uuid(r.facility_id)])).rows.length;
+   if(!allowed)continue;
+   const {patient_key,...value}=r;requests.push({...value,id:uuid(value.id),facility_id:uuid(value.facility_id),mother_id:motherId,can_open_record:assignedIds.has(motherId)});
+   await pool.query("INSERT INTO patient_access_events(mother_id,event_type,details) VALUES($1,'doctor_coordination_request_read',jsonb_build_object('doctor_id',$2::int,'request_id',$3::text))",[motherId,id,r.id]);
+  }
+  return requests;
 }
 function assemble({profile,patients,milestones,appointments,reports,postpartum,shared,snapshot,date}){
  const rows=patients.map(p=>{const source=snapshot?.patients[p.id]||{},post=postpartum.find(r=>r.mother_id===p.id),st=M.stage(p,post?{active:true,delivery:{date:iso(post.delivery_date)}}:{},[],date);const items=milestones.filter(m=>m.mother_id===p.id),relevant=M.gaps(items,st,date);return {id:p.id,name:p.full_name,phone:p.phone||null,age:source.age||null,uhid:source.uhid||null,abha:source.abha||null,unit:source.unit||snapshot?.unit?.code||null,stage:st,edd:st.delivered?null:iso(p.edd_date)||st.edd,clinical_shared:shared.has(p.id),clinicianRisk:shared.has(p.id)?source.clinicianRisk||null:null,open_items:relevant.length,overdue:relevant.filter(m=>M.status(m,date)==='overdue').length,readiness:null,has_child_visit:appointments.some(a=>a.mother_id===p.id&&a.child_id&&a.status!=='cancelled'),status:appointments.some(a=>a.mother_id===p.id&&iso(a.requested_date)===date&&a.status==='confirmed')?'Visit confirmed':'Assigned'};});
@@ -63,9 +76,10 @@ module.exports=function(app,{pool,authenticateToken,authorizeRole}){
   const response=assemble({profile:profile.rows[0],patients:patients.rows,milestones:milestones.rows,appointments:appointments.rows,reports:reports.rows,postpartum:postpartum.rows,shared,snapshot,date});
   const [queue,actions]=await Promise.all([pool.query(`SELECT q.* FROM doctor_queue_state q JOIN appointments a ON a.id=q.appointment_id WHERE q.doctor_id=$1 AND a.doctor_id=q.doctor_id AND NOT ${access.revokedSql('a.mother_id','a.doctor_id','a.facility_uuid')}`,[id]),pool.query(`SELECT w.* FROM doctor_worklist_action w JOIN care_milestones cm ON cm.id=w.milestone_id WHERE w.doctor_id=$1 AND ${access.activeRelationshipSql('cm.mother_id','w.doctor_id')}`,[id])]);
   response.queue=queue.rows;response.worklistActions=actions.rows;
+  response.coordination_requests=await scopedCoordinationRequests(pool,id,snapshot?.coordinationRequests||[],assignedIds);
   response.demo={enabled:process.env.DAI_LOCAL==='true'&&!!snapshot,synthetic_only:process.env.DAI_LOCAL==='true'&&!!snapshot};
   response.label=response.demo.enabled?'Simulated on synthetic data':'Recorded care data';
   res.set('Cache-Control','no-store').json(response);
  }catch(e){console.error('Doctor workspace:',e.message);res.status(500).json({error:'Could not load your assigned workspace.'});}});
 };
-Object.assign(module.exports,{assemble,hospitalSnapshot});
+Object.assign(module.exports,{assemble,hospitalSnapshot,scopedCoordinationRequests});

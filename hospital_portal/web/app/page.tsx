@@ -300,6 +300,9 @@ export default function Home() {
     async (path: string, options: RequestInit = {}, access = token) => {
       const response = await fetch((process.env.NEXT_PUBLIC_DAI_BASE_PATH || "") + "/api" + path, {
         ...options,
+        credentials: "same-origin",
+        signal: options.signal || AbortSignal.timeout(15000),
+        cache: "no-store",
         headers: {
           "Content-Type": "application/json",
           "x-dai-client": "portal",
@@ -307,7 +310,7 @@ export default function Home() {
           ...options.headers,
         },
       });
-      const result = await response.json();
+      const result = await response.json().catch(() => { throw new Error("The hospital service returned an unreadable response. Refresh or restart npm start, then try again."); });
       if (
         !response.ok &&
         response.status === 404 &&
@@ -393,8 +396,11 @@ export default function Home() {
     setChallenge(null);
     setOtp("");
   }
+  const initialRestore = useRef<Promise<void> | null>(null);
   useEffect(() => {
-    api("/auth/refresh", { method: "POST" }, "")
+    // React development effects can run twice. Rotate the refresh cookie only once.
+    if (initialRestore.current) return;
+    initialRestore.current = api("/auth/refresh", { method: "POST" }, "")
       .then((result) => session(result, false))
       .catch(() => {})
       .finally(() => setSessionChecked(true)); /* access tokens stay in memory */
@@ -798,8 +804,8 @@ export default function Home() {
                 </button>
               ))}
             </div>
-            <span className="snapshot-caption">
-              <i /> Connected · recorded workspace
+            <span className={"snapshot-caption" + (error ? " needs-attention" : "")}>
+              <i /> {error ? "Refresh needed · last request failed" : busy ? "Refreshing recorded workspace…" : "Connected · recorded workspace"}
             </span>
           </div>
           <div className="page-heading">
@@ -808,7 +814,7 @@ export default function Home() {
                 HOSPITAL /{" "}
                 {mode === "operations" ? "OPERATIONS" : "ADMINISTRATION"}
               </div>
-              <AffiliationSwitcher api={api} onSwitch={async()=>{setUser(await api("/me"));setPatient(null);setView("overview");setMode("operations");}}/>
+              <AffiliationSwitcher api={api} onSwitch={async()=>{const next=await api("/me");setUser(next);setPatient(null);setData(null);setRecords([]);setWorkspaceData(null);setSummary(null);setNotification("Facility context updated. Showing this facility’s authorised records.");}}/>
               <h1>{titles[view][0]}</h1>
               <p>{titles[view][1]}</p>
             </div>

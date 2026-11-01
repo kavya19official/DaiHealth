@@ -42,6 +42,7 @@ async function seedLocal() {
       if (previous.rows[0].source_sha256 !== manifest.source_sha256) throw new Error('Synthetic source changed. Existing local edits were preserved; use a separate checkout for a different dataset.');
       await require('./seed-doctor-activity.cjs').seedDoctorActivity(client,source);
       await require('./seed-doctor-demo-day.cjs').seedDoctorDemoDay(client,source);
+      await require('./seed-video-demo.cjs').seedVideoDemo(client);
       console.log('Patient/doctor cohort already imported:', previous.rows[0].counts);
       return;
     }
@@ -99,6 +100,7 @@ async function seedLocal() {
     await client.query('COMMIT');
     await require('./seed-doctor-activity.cjs').seedDoctorActivity(client,source);
     await require('./seed-doctor-demo-day.cjs').seedDoctorDemoDay(client,source);
+    await require('./seed-video-demo.cjs').seedVideoDemo(client);
     console.log('Imported shared synthetic patient/doctor cohort:',counts);
   } catch (error) {
     await client.query('ROLLBACK').catch(()=>{});

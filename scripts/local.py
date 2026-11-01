@@ -205,7 +205,7 @@ def build_web(env):
     for folder in ["frontend/assets/dr-daya", "frontend/vendor/three"]:
         files += sorted((ROOT / folder).rglob("*"))
     files += [ROOT / "frontend/js" / name for name in [
-        "care-chatbot.js", "care-chatbot.css", "daya-avatar.mjs", "daya-knowledge.js"
+        "care-chatbot.js", "care-chatbot.css", "daya-avatar.mjs", "daya-knowledge.js", "demo-guide.js"
     ]]
     fingerprint = hashlib.sha256(
         b"".join(
