@@ -14,7 +14,7 @@
     missedAt: 0, queueAt: 0, openBarriers: null
   };
 
-  const isGuest = () => { try { return !!localStorage.getItem('dai_guest'); } catch (e) { return false; } };
+  const isGuest = () => { try { return localStorage.getItem('dai_guest') === '1'; } catch (e) { return false; } };
   const fmt = v => v ? new Date(String(v).slice(0, 10) + 'T12:00:00').toLocaleDateString(document.documentElement.lang || 'en', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Date not recorded';
   const fmtTime = v => v ? new Date(v).toLocaleString(document.documentElement.lang || 'en', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' }) : '';
 
@@ -69,7 +69,7 @@
       ${attempts ? `<p class="oq-note">Your care team has tried to reach you${item.last_attempt_at ? ' (last on ' + E(fmtTime(item.last_attempt_at)) + ')' : ''}.</p>` : ''}
       ${barrierChips(chosen)}
       <div class="oq-actions">
-        <button type="button" class="oq-btn oq-btn--primary" data-reschedule="${E(item.id)}">Book this visit</button>
+        <button type="button" class="oq-btn oq-btn--primary" data-rebook-missed="${E(item.id)}">Book this visit</button>
         <button type="button" class="oq-btn oq-btn--ghost" data-toggle-barriers="${E(item.id)}" aria-expanded="${open}" aria-controls="barriers-${E(item.id)}">Something is in the way</button>
       </div>
       ${open ? `<form class="oq-barriers" id="barriers-${E(item.id)}" data-barrier-form="${E(item.id)}">
@@ -175,7 +175,9 @@
   // Refresh when a panel is opened, but not on every re-render.
   const refresh = (maxAgeMs) => {
     const age = maxAgeMs == null ? 20000 : maxAgeMs;
-    if ($('missedCareItemsList') && Date.now() - state.missedAt > age) loadMissedCareItems();
+    if ($('missedCareItemsList')) {
+      if (isGuest() || !state.missedAt || Date.now() - state.missedAt > age) loadMissedCareItems();
+    }
     if ($('outreachQueueList') && Date.now() - state.queueAt > age) loadOutreachQueue();
   };
 
@@ -223,6 +225,8 @@
   };
 
   const setup = () => {
+    const activePanel = document.querySelector('.panel.is-active');
+    if (activePanel && activePanel.id === 'panel-outreach') refresh();
     document.addEventListener('click', async e => {
       const btn = e.target.closest && e.target.closest('button');
       if (!btn) return;
@@ -234,10 +238,14 @@
         else if (btn.hasAttribute('data-retry-missed')) await loadMissedCareItems();
         else if (btn.hasAttribute('data-retry-queue')) await loadOutreachQueue();
         else if (d.toggleBarriers) { e.preventDefault(); const id = Number(d.toggleBarriers); state.openBarriers = state.openBarriers === id ? null : id; renderMissedCareItems(); }
-        else if (d.reschedule) {
+        else if (d.rebookMissed) {
           e.preventDefault();
           const nav = document.querySelector('.nav-item[data-panel="appointments"]');
           if (nav) nav.click(); else window.location.hash = '#appointments';
+          // Do not reuse data-reschedule: that belongs to an existing appointment's edit action.
+          const item = state.missedCareItems.find(i => String(i.id) === d.rebookMissed);
+          const notes = $('apptNotes');
+          if (item && notes && !notes.value.trim()) notes.value = 'Follow-up: ' + item.title;
         } else if (btn.id === 'applyOutreachFilters') {
           e.preventDefault();
           await loadOutreachQueue({ status: $('outreachStatusFilter').value, urgency: $('outreachUrgencyFilter').value, limit: $('outreachLimitFilter').value });
@@ -257,6 +265,7 @@
       const list = [...form.querySelectorAll('input[type=checkbox]:checked')].map(i => i.value);
       const b = form.querySelector('[type=submit]'); if (b) { b.disabled = true; b.textContent = 'Sharing…'; }
       try { await saveBarriers(form.dataset.barrierForm, list); } catch (err) { api.toast('That did not save. Please try again.'); }
+      finally { if (b && b.isConnected) { b.disabled = false; b.textContent = 'Share with my care team'; } }
     });
   };
 

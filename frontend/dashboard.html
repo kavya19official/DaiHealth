@@ -435,7 +435,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 <script src="js/patient-prefs.js"></script>
 <link rel="stylesheet" href="facility-matching.css">
 <link rel="stylesheet" href="patient-ml.css">
-<link rel="stylesheet" href="patient-dashboard.css?v=patient-2"><link rel="stylesheet" href="patient-home.css?v=warm-1"><link rel="stylesheet" href="patient-journey.css?v=3"><link rel="stylesheet" href="patient-pending.css?v=1"><link rel="stylesheet" href="patient-connected.css?v=1"><link rel="stylesheet" href="patient-polish.css?v=1"><link rel="stylesheet" href="css/missed-care-outreach.css?v=2">
+<link rel="stylesheet" href="patient-dashboard.css?v=patient-3"><link rel="stylesheet" href="patient-home.css?v=warm-1"><link rel="stylesheet" href="patient-journey.css?v=3"><link rel="stylesheet" href="patient-pending.css?v=1"><link rel="stylesheet" href="patient-connected.css?v=1"><link rel="stylesheet" href="patient-polish.css?v=1"><link rel="stylesheet" href="css/missed-care-outreach.css?v=2">
 <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
 <link rel="stylesheet" href="vendor/leaflet/markercluster.css">
 <link rel="stylesheet" href="little-world.css?v=1">
@@ -989,7 +989,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 <script src="js/clinical-dashboard.js?v=1"></script>
 <script src="js/patient-home-open.js?v=1"></script>
 <script src="js/patient-dashboard.js?v=4"></script>
-<script src="js/care-timeline-enhanced.js"></script><script src="js/missed-care-outreach.js?v=2"></script>
+<script src="js/care-timeline-enhanced.js"></script><script src="js/missed-care-outreach.js?v=3"></script>
 <script>
 (function () {
 "use strict";
@@ -1155,6 +1155,10 @@ function showPanel(id) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
   closeSidebar();
   PatientExperience.route(id);
+  // Panel navigation changes history without firing hashchange; load this view explicitly.
+  if (id === 'outreach' && window.PatientMissedCareOutreach) {
+    window.PatientMissedCareOutreach.refresh();
+  }
   // Refresh postpartum data when switching to postpartum panel
   if (id === 'postpartum' && window.CareExt) {
     window.CareExt.refreshPostpartum();
