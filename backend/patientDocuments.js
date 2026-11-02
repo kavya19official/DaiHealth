@@ -11,8 +11,9 @@
  *   DELETE /api/documents/:id/share/:doctorId
  *   GET    /api/documents/:id/history  upload/share/download events
  *
- * Doctor (shared only):
+ * Doctor (shared with them, or added by them for a connected patient):
  *   GET    /api/doctor/documents
+ *   POST   /api/doctor/patients/:motherId/documents  { title, doc_type, filename, mime_type, content_base64, notes?, report_date?, child_id? }
  *   GET    /api/documents/:id/download
  *
  * Files on disk under backend/data/patient-documents/<storage_key>
@@ -70,12 +71,28 @@ function docRow(r) {
     verification_status: r.verification_status,
     notes: r.notes,
     uploaded_at: r.uploaded_at,
-    report_category:r.report_category,report_date:r.report_date,facility_name:r.facility_name,child_id:r.child_id,milestone_id:r.milestone_id,appointment_id:r.appointment_id,is_sensitive:!!r.is_sensitive,viewed_at:r.viewed_at,reviewed_by:r.reviewed_by,doctor_note:r.doctor_note,source:'self_uploaded',
-    can_delete: r.verification_status !== 'locked' && r.verification_status !== 'verified',
+    report_category:r.report_category,report_date:r.report_date,facility_name:r.facility_name,child_id:r.child_id,milestone_id:r.milestone_id,appointment_id:r.appointment_id,is_sensitive:!!r.is_sensitive,viewed_at:r.viewed_at,reviewed_by:r.reviewed_by,doctor_note:r.doctor_note,source:r.uploaded_by_role==='doctor'?'clinician_uploaded':'self_uploaded',uploaded_by_name:r.uploaded_by_role==='doctor'?(r.uploaded_by_name||null):null,
+    can_delete: r.uploaded_by_role!=='doctor' && r.verification_status !== 'locked' && r.verification_status !== 'verified',
   };
 }
 
 function redact(row){return row.is_sensitive?{...row,title:row.report_category==='documents'?'Private document':'Private screening report',original_filename:'Private file',notes:null,doctor_note:null}:row;}
+
+function readUpload(b) {
+  const title = cleanStr(b.title, 200);
+  const docType = cleanStr(b.doc_type, 40);
+  const filename = safeFilename(b.filename || b.original_filename || 'document.pdf');
+  const mime = cleanStr(b.mime_type, 120).toLowerCase();
+  const notes = cleanStr(b.notes, 2000) || null;
+  const b64 = typeof b.content_base64 === 'string' ? b.content_base64.replace(/^data:[^;]+;base64,/, '') : '';
+  if (!title) return { error: { error: 'Title is required' } };
+  if (!DOC_TYPES.has(docType)) return { error: { error: 'Invalid document type', allowed: Array.from(DOC_TYPES) } };
+  if (!ALLOWED_MIME.has(mime)) return { error: { error: 'Unsupported file type. Use PDF, JPEG, PNG or WebP.' } };
+  if (!b64) return { error: { error: 'File content is required' } };
+  const buffer = Buffer.from(b64, 'base64');
+  if (!buffer.length || buffer.length > MAX_BYTES) return { error: { error: 'File must be between 1 byte and 5 MB' } };
+  return { title, docType, filename, mime, notes, buffer };
+}
 
 async function logEvent(pool, documentId, actorId, eventType, detail) {
   await pool.query(
@@ -109,7 +126,15 @@ async function canAccessDoc(pool, docId, user) {
           AND NOT ${require('./accessControl').revokedSql('d.mother_id','s.doctor_id')}`,
       [docId, user.id]
     );
-    return r.rows[0] || null;
+    if (r.rows[0]) return r.rows[0];
+    // A clinician keeps access to reports they added while the care relationship is active.
+    const own = await pool.query(
+      `SELECT d.* FROM patient_documents d
+        WHERE d.id = $1 AND d.deleted_at IS NULL AND d.uploaded_by_role = 'doctor' AND d.uploaded_by = $2
+          AND ${require('./accessControl').activeRelationshipSql('d.mother_id', '$2::int')}`,
+      [docId, user.id]
+    );
+    return own.rows[0] || null;
   }
   return null;
 }
@@ -126,10 +151,11 @@ module.exports = function registerPatientDocuments(app, { pool, authenticateToke
   app.get('/api/documents', ...motherOnly, async (req, res) => {
     try {
       const r = await pool.query(
-        `SELECT *
-           FROM patient_documents
-          WHERE mother_id = $1 AND deleted_at IS NULL
-          ORDER BY uploaded_at DESC, id DESC`,
+        `SELECT d.*, dp.full_name AS uploaded_by_name
+           FROM patient_documents d
+           LEFT JOIN doctor_profiles dp ON dp.user_id = d.uploaded_by AND d.uploaded_by_role = 'doctor'
+          WHERE d.mother_id = $1 AND d.deleted_at IS NULL
+          ORDER BY d.uploaded_at DESC, d.id DESC`,
         [req.user.id]
       );
       await Promise.all(r.rows.map(row=>logEvent(pool,row.id,req.user.id,'metadata_read',{list:true})));
@@ -145,36 +171,9 @@ module.exports = function registerPatientDocuments(app, { pool, authenticateToke
     let writtenFile;
     try {
       const b = req.body || {};
-      const title = cleanStr(b.title, 200);
-      const docType = cleanStr(b.doc_type, 40);
-      const filename = safeFilename(b.filename || b.original_filename || 'document.pdf');
-      const mime = cleanStr(b.mime_type, 120).toLowerCase();
-      const notes = cleanStr(b.notes, 2000) || null;
-      const b64 = typeof b.content_base64 === 'string' ? b.content_base64.replace(/^data:[^;]+;base64,/, '') : '';
-
-      if (!title) return res.status(400).json({ error: 'Title is required' });
-      if (!DOC_TYPES.has(docType)) {
-        return res.status(400).json({
-          error: 'Invalid document type',
-          allowed: Array.from(DOC_TYPES),
-        });
-      }
-      if (!ALLOWED_MIME.has(mime)) {
-        return res.status(400).json({
-          error: 'Unsupported file type. Use PDF, JPEG, PNG or WebP.',
-        });
-      }
-      if (!b64) return res.status(400).json({ error: 'File content is required' });
-
-      let buffer;
-      try {
-        buffer = Buffer.from(b64, 'base64');
-      } catch {
-        return res.status(400).json({ error: 'Invalid file encoding' });
-      }
-      if (!buffer.length || buffer.length > MAX_BYTES) {
-        return res.status(400).json({ error: 'File must be between 1 byte and 5 MB' });
-      }
+      const up = readUpload(b);
+      if (up.error) return res.status(400).json(up.error);
+      const { title, docType, filename, mime, notes, buffer } = up;
 
       const dateValid=require('./patientContinuity').dateValid;
       if(b.report_date&&(!dateValid(b.report_date)||b.report_date>new Date().toLocaleDateString('en-CA',{timeZone:'Asia/Kolkata'})))return res.status(400).json({error:'Choose a valid report date, up to today'});
@@ -189,8 +188,8 @@ module.exports = function registerPatientDocuments(app, { pool, authenticateToke
 
       const r = await client.query(
         `INSERT INTO patient_documents
-           (mother_id, title, doc_type, original_filename, mime_type, size_bytes, storage_key, notes,report_date,facility_name,child_id,milestone_id,appointment_id,is_sensitive,report_category)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8,$9,$10,$11,$12,$13,$14,$15)
+           (mother_id, title, doc_type, original_filename, mime_type, size_bytes, storage_key, notes,report_date,facility_name,child_id,milestone_id,appointment_id,is_sensitive,report_category,uploaded_by)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8,$9,$10,$11,$12,$13,$14,$15,$1)
          RETURNING *`,
         [req.user.id, title, docType, filename, mime, buffer.length, storageKey, notes,b.report_date||null,cleanStr(b.facility_name,200)||null,b.child_id||null,b.milestone_id||null,b.appointment_id||null,b.is_sensitive===true||/\b(hiv|vdrl|syphilis)\b/i.test(title+' '+notes),['blood','urine','screening','vaccination','documents','general'].includes(b.report_category)?b.report_category:null]
       );
@@ -231,6 +230,7 @@ module.exports = function registerPatientDocuments(app, { pool, authenticateToke
         );
         shares = s.rows;
       }
+      if(row.uploaded_by_role==='doctor')row.uploaded_by_name=(await pool.query('SELECT full_name FROM doctor_profiles WHERE user_id=$1',[row.uploaded_by])).rows[0]?.full_name||null;
       const reveal=req.query.reveal==='1';
       await logEvent(pool,id,req.user.id,reveal&&row.is_sensitive?'reveal':'metadata_read',{by_role:req.user.role});
       if(req.user.role==='mother')await pool.query('UPDATE patient_documents SET viewed_at=NOW() WHERE id=$1',[id]);
@@ -287,6 +287,9 @@ module.exports = function registerPatientDocuments(app, { pool, authenticateToke
         });
       }
 
+      if (row.uploaded_by_role === 'doctor') {
+        return res.status(403).json({ error: 'Reports added by your clinician stay in your record. Use “Something doesn’t look right?” to ask for a correction.' });
+      }
       const deleted = await pool.query(
         `UPDATE patient_documents SET deleted_at = NOW() WHERE id = $1 AND mother_id = $2 AND verification_status NOT IN ('verified','locked') AND deleted_at IS NULL RETURNING id`,
         [id, req.user.id]
@@ -432,21 +435,25 @@ if (!linked.rows.length) {
     }catch(e){res.status(500).json({error:'Could not save the review'});}
   });
 
-  // Doctor: list documents shared with me
+  // Doctor: reports patients shared with me, plus reports I added for a connected patient
   app.get('/api/doctor/documents', ...doctorOnly, async (req, res) => {
     try {
+      const { revokedSql, activeRelationshipSql } = require('./accessControl');
       const r = await pool.query(
         `SELECT d.id, d.title, d.doc_type, d.original_filename, d.mime_type, d.size_bytes,
                 d.verification_status, d.notes, d.uploaded_at,d.report_category,d.report_date,d.facility_name,d.child_id,d.milestone_id,d.appointment_id,d.is_sensitive,d.viewed_at,d.reviewed_by,d.doctor_note, d.mother_id,
-                mp.full_name AS mother_name, s.shared_at
+                d.uploaded_by, d.uploaded_by_role, mp.full_name AS mother_name, s.shared_at, dp.full_name AS uploaded_by_name
            FROM patient_documents d
-           INNER JOIN patient_document_shares s
+           LEFT JOIN patient_document_shares s
              ON s.document_id = d.id AND s.doctor_id = $1 AND s.revoked_at IS NULL AND (s.expires_at IS NULL OR s.expires_at>NOW())
            LEFT JOIN mother_profiles mp ON mp.user_id = d.mother_id
+           LEFT JOIN doctor_profiles dp ON dp.user_id = d.uploaded_by AND d.uploaded_by_role = 'doctor'
           WHERE d.deleted_at IS NULL
-            AND COALESCE((SELECT (preferences->>'privacy_share_doctors')::boolean FROM patient_preferences WHERE user_id=d.mother_id),TRUE)
-          AND NOT ${require('./accessControl').revokedSql('d.mother_id','s.doctor_id')}
-          ORDER BY s.shared_at DESC`,
+            AND ((s.id IS NOT NULL
+                  AND COALESCE((SELECT (preferences->>'privacy_share_doctors')::boolean FROM patient_preferences WHERE user_id=d.mother_id),TRUE)
+                  AND NOT ${revokedSql('d.mother_id','s.doctor_id')})
+              OR (d.uploaded_by_role = 'doctor' AND d.uploaded_by = $1 AND ${activeRelationshipSql('d.mother_id','$1::int')}))
+          ORDER BY COALESCE(s.shared_at, d.uploaded_at) DESC, d.id DESC`,
         [req.user.id]
       );
       await Promise.all(r.rows.map(row=>logEvent(pool,row.id,req.user.id,'metadata_read',{list:true,by_role:'doctor'})));
@@ -456,11 +463,59 @@ if (!linked.rows.length) {
           mother_id: row.mother_id,
           mother_name: row.mother_name,
           shared_at: row.shared_at,
+          uploaded_by_me: row.uploaded_by_role === 'doctor' && row.uploaded_by === req.user.id,
         })),
       });
     } catch (err) {
       console.error('GET /api/doctor/documents', err.message);
       res.status(500).json({ error: 'Failed to load shared documents' });
+    }
+  });
+
+  // Doctor: add a report to a connected patient's record. The patient sees it in Reports & records.
+  app.post('/api/doctor/patients/:motherId/documents', ...doctorOnly, async (req, res) => {
+    let writtenFile;
+    try {
+      const { gateDoctor } = require('./accessControl');
+      const motherId = await gateDoctor(pool, req, res, 'documents_upload');
+      if (!motherId) return;
+      if (!await require('./clinicalDashboard').verifiedDoctor(pool, req.user.id)) {
+        return res.status(403).json({ error: 'Verified clinical credentials are required to add reports' });
+      }
+      const b = req.body || {};
+      const up = readUpload(b);
+      if (up.error) return res.status(400).json(up.error);
+      const dateValid = require('./patientContinuity').dateValid;
+      if (b.report_date && (!dateValid(b.report_date) || b.report_date > new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' }))) {
+        return res.status(400).json({ error: 'Choose a valid report date, up to today' });
+      }
+      const childId = b.child_id ? Number(b.child_id) : null;
+      if (childId && !(await pool.query('SELECT id FROM children WHERE id=$1 AND mother_id=$2', [childId, motherId])).rows.length) {
+        return res.status(400).json({ error: 'Baby must belong to this patient' });
+      }
+      const doctor = (await pool.query('SELECT full_name, facility_name FROM doctor_profiles WHERE user_id=$1', [req.user.id])).rows[0] || {};
+      const category = ['blood','urine','screening','vaccination','documents','general'].includes(b.report_category) ? b.report_category : null;
+      const storageKey = `${motherId}_${Date.now()}_${crypto.randomBytes(8).toString('hex')}`;
+      const diskPath = path.join(UPLOAD_DIR, storageKey);
+      fs.writeFileSync(diskPath, up.buffer); writtenFile = diskPath;
+      const client = await pool.connect(); let doc;
+      try {
+        await client.query('BEGIN');
+        doc = (await client.query(
+          `INSERT INTO patient_documents
+             (mother_id, title, doc_type, original_filename, mime_type, size_bytes, storage_key, notes, report_date, facility_name, child_id, is_sensitive, report_category, uploaded_by, uploaded_by_role)
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,'doctor') RETURNING *`,
+          [motherId, up.title, up.docType, up.filename, up.mime, up.buffer.length, storageKey, up.notes, b.report_date || null,
+           cleanStr(b.facility_name, 200) || doctor.facility_name || null, childId, b.is_sensitive === true || /\b(hiv|vdrl|syphilis)\b/i.test(up.title + ' ' + (up.notes || '')), category, req.user.id]
+        )).rows[0];
+        await logEvent(client, doc.id, req.user.id, 'upload', { by_role: 'doctor', filename: up.filename, mime_type: up.mime, size_bytes: up.buffer.length, doc_type: up.docType });
+        await client.query('COMMIT'); writtenFile = null;
+      } catch (error) { await client.query('ROLLBACK'); throw error; } finally { client.release(); }
+      res.status(201).json({ message: 'Report added to the patient’s records', document: { ...docRow({ ...doc, uploaded_by_name: doctor.full_name }), mother_id: motherId, uploaded_by_me: true } });
+    } catch (err) {
+      if (writtenFile) try { fs.unlinkSync(writtenFile); } catch (_) {}
+      console.error('POST /api/doctor/patients/:motherId/documents', err.message);
+      res.status(500).json({ error: 'Failed to add report' });
     }
   });
 };
