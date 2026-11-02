@@ -22,19 +22,20 @@ const attachLocalUpgrade = require('./localGateway').registerLocalGateway(app);
 // Middleware
 
 
-app.use(cors({
-  origin(origin, callback) {
-    if (
-      !origin ||
-      /^http:\/\/(localhost|127\.0\.0\.1):\d+$/.test(origin) ||
-      origin === 'https://daihealth.onrender.com' ||
-      /^https:\/\/[a-z0-9-]+\.vercel\.app$/i.test(origin)
-    ) {
-      return callback(null, true);
-    }
-    return callback(new Error('Not allowed by CORS'));
-  },
-  credentials: true
+const isSameHostOrigin = (origin, req) => {
+  try { return new URL(origin).host === (req.headers['x-forwarded-host'] || req.headers.host); }
+  catch { return false; }
+};
+app.use(cors((req, callback) => {
+  const origin = req.headers.origin;
+  const allowed =
+    !origin ||
+    isSameHostOrigin(origin, req) ||
+    /^http:\/\/(localhost|127\.0\.0\.1):\d+$/.test(origin) ||
+    origin === 'https://daihealth.onrender.com' ||
+    /^https:\/\/[a-z0-9-]+\.vercel\.app$/i.test(origin);
+  if (!allowed) return callback(new Error('Not allowed by CORS'));
+  callback(null, { origin: true, credentials: true });
 }));
 
 // Concise request logging. Do not print cookies, authorization headers, or patient data.
@@ -1135,6 +1136,7 @@ require('./visitSummary')(app, { pool, authenticateToken, authorizeRole });
 // Gemini receives approved Dr. Daya answers only; the API key remains server-side.
 require('./clinicalReview').register(app,{pool,authenticateToken,authorizeRole});
 require('./careCoordination')(app, { pool, authenticateToken, authorizeRole });
+require('./googleAuth')(app, { pool, getUserProfile, seedCareMilestones, jwtSecret: JWT_SECRET, jwtExpiresIn: JWT_EXPIRES_IN });
 require('./assistanceRouting').register(app,{pool,authenticateToken,usageTracker:aiUsageTracker});
 app.post('/api/tts',(req,res,next)=>{try{req.user=jwt.verify(req.cookies.token,JWT_SECRET);}catch{}next();},require('./dayaSpeech').createSpeechHandler({usageTracker:aiUsageTracker}));
 

@@ -68,6 +68,11 @@
         <button type="submit" class="btn btn--primary" id="loginSubmit">Log in</button>
         <button type="button" class="login-back" id="hospitalOtpBack" hidden>Back to sign in</button>
       </form>
+      <div id="googleSignIn" hidden>
+        <div class="divider">or</div>
+        <div id="googleButton" style="display:flex;justify-content:center"></div>
+        <p class="footnote" id="googleNote" style="margin-top:.5rem;text-align:center">New Google users get a patient account. Doctors: register first, then use the same Google email.</p>
+      </div>
     </div>
 
     <div class="panel" id="panelRegister">
@@ -417,6 +422,26 @@ document.getElementById('loginForm').addEventListener('submit', function (e) {
     password: document.getElementById('loginPassword').value
   }, document.getElementById('loginSubmit'));
 });
+
+// Sign in with Google: the Google script loads only when the server has a client ID configured.
+(async function setupGoogle() {
+  var box = document.getElementById('googleSignIn');
+  try {
+    var cfg = await (await fetch(API_BASE + '/auth/google/config', { credentials: 'include' })).json();
+    if (!cfg.enabled) return;
+    var script = document.createElement('script');
+    script.src = 'https://accounts.google.com/gsi/client'; script.async = true;
+    script.onload = function () {
+      google.accounts.id.initialize({ client_id: cfg.client_id, callback: function (r) {
+        submitAuth('/auth/google', { credential: r.credential }, document.getElementById('loginSubmit'));
+      } });
+      google.accounts.id.renderButton(document.getElementById('googleButton'), { theme: 'outline', size: 'large', text: 'signin_with', width: 280 });
+      box.hidden = selectedRole === 'hospital';
+    };
+    document.head.appendChild(script);
+    roleButtons.forEach(function (b) { b.addEventListener('click', function () { box.hidden = b.dataset.loginRole === 'hospital'; }); });
+  } catch (e) { /* Google sign-in stays hidden; email and password still work. */ }
+})();
 
 document.getElementById('mStatus').addEventListener('change', function () {
   var delivered = this.value === 'delivered';

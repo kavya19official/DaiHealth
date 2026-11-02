@@ -326,3 +326,15 @@ Patient **Sustainable care** and Doctor **Sustainable care** menus, under a "Sus
 ### Missed-care outreach
 
 Mothers see **Follow-up help** (their own overdue visits and tests, a rebook shortcut, and a way to tell the care team what is in the way). Doctors see the **Outreach Queue** (most urgent first, only patients who have not turned off their access, with an attempt log and history). Items are created and re-scored every time either list loads, and close when the care is recorded as done. "Reached" is logged as contact, not as completed care.
+
+## Sign in with Google
+
+Set `GOOGLE_CLIENT_ID` (Google Cloud → Credentials → OAuth client ID → Web application; add
+`http://localhost:3001` to Authorized JavaScript origins) in `backend/.env` and a **Sign in with Google**
+button appears on the login page (`backend/googleAuth.js`). The ID token is verified with Google
+(audience, issuer, expiry, verified email). Existing accounts sign in by email; a new Google user gets a
+patient account. Clinicians must still register and be verified.
+
+With `SMTP_USER`/`SMTP_PASS` set (Gmail: an app password), each Google sign-in emails a
+"You have successfully logged in to DAI" notice (`backend/loginMailer.js`). Email failures never block
+sign-in, and synthetic `.invalid` demo addresses are skipped.
