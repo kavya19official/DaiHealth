@@ -16,3 +16,16 @@
 .doctor-workspace[data-dw-theme=dark] :is(.dp-page,.dp-preview) :is(.dp-chip[aria-pressed=true],.dp-icon,.dw-synthetic,.dp-week-strip [aria-pressed=true],.dp-week-strip [aria-pressed=true] strong,.dp-month-days [aria-current=date] strong,.dp-block-icon .dw-icon,.dp-mini-picker>summary .dw-icon){color:var(--dw-text)}.doctor-workspace[data-dw-theme=dark] .dp-page .dw-tabs .dp-chip[aria-pressed=true]{color:var(--dw-text)}.doctor-workspace[data-dw-theme=dark] .dp-calendar-head [aria-current=date] strong{color:var(--dw-text)}
 .dp-tbc-row>span>small{display:block;font-size:8px;color:var(--ink-2);line-height:1.4;margin-bottom:4px}.doctor-workspace[data-dw-theme=dark] :is(.dp-page,.dp-preview) .dd-avatar{color:var(--dw-text)}.doctor-workspace[data-dw-theme=dark] .dp-page input{color-scheme:dark}
 .dp-page .dw-tabs .dp-chip:not([aria-pressed=true]){color:var(--dw-text)}
+/* Match the outreach module's older type scale to the doctor workspace. */
+.doctor-workspace #panel-outreach{font-family:inherit;font-size:12px}
+.doctor-workspace #panel-outreach .page-section-heading h1{font-family:inherit;font-size:30px;font-weight:700;line-height:1.2;letter-spacing:-1px;margin:0 0 12px}
+.doctor-workspace #panel-outreach .page-section-heading>p{font-size:12px;line-height:1.7;color:var(--ink-2);margin:0 0 20px}
+.doctor-workspace #panel-outreach .oq-title{font-family:inherit;font-size:13px;font-weight:700;line-height:1.5}
+.doctor-workspace #panel-outreach :is(.oq-meta,.oq-note,.oq-overdue){font-size:11px;line-height:1.7}
+.doctor-workspace #panel-outreach :is(.oq-badge,.oq-status,.oq-outcome){font-size:10px}
+.doctor-workspace #panel-outreach .oq-btn{font-family:inherit;font-size:11px;font-weight:700}
+.doctor-workspace #panel-outreach :is(.oq-filters label,.oq-tile .label){font-size:11px}
+.doctor-workspace #panel-outreach .oq-filters select{font-family:inherit;font-size:12px}
+.doctor-workspace #panel-outreach .oq-tile .count{font-size:26px;letter-spacing:-.7px}
+.doctor-workspace #panel-outreach .oq-history-head time{font-size:10px}
+@media(max-width:650px){.doctor-workspace #panel-outreach .page-section-heading h1{font-size:26px}}
