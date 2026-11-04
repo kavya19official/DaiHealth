@@ -19,9 +19,9 @@ export async function runDoctorDashboardChecks(tab,browser,{writeFile,outDir}) {
  check('journey filter limits preview',await tab.playwright.locator('.dd-preview-table tbody tr').count()===Math.min(6,available));
  check('journey selection stays keyboard focused',await tab.playwright.evaluate(()=>document.activeElement?.getAttribute('data-dd-stage')==='t2'));
  await tab.playwright.locator('.dd-table-footer [data-dd-viewall]').click();
- check('journey filter reaches the full roster',await tab.playwright.locator('#dsRosterBody tbody tr').count()===available);
+ check('journey filter reaches the full roster',await tab.playwright.locator('#dpRoster [data-patient-key]').count()===available);
  await tab.playwright.locator('.sidebar [data-dw-filter="all"]').click();
- check('sidebar clears the journey restriction',await tab.playwright.locator('#dsRosterBody tbody tr').count()>=available);
+ check('sidebar clears the journey restriction',await tab.playwright.locator('#dpRoster [data-patient-key]').count()>=available&&await tab.playwright.locator('[data-dp-remove="stage"]').count()===0);
  await tab.playwright.locator('.sidebar [data-panel="dashboard"]').click();
  await tab.playwright.locator('[data-dd-stage="all"]').click();
  await tab.playwright.locator('[data-dd-filters]').click();
