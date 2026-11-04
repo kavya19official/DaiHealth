@@ -104,7 +104,7 @@ body[data-home-theme=dark] .patient-view .user-chip,body.patient-view[data-home-
 #panel-dashboard .patient-tour-welcome strong{font-size:12px;color:var(--ink)}
 #panel-dashboard .patient-tour-welcome button{background:transparent!important;color:var(--brand-strong)!important;border:0!important;box-shadow:none!important;min-height:36px;padding:6px;font-size:12px;white-space:normal}
 #panel-dashboard .patient-tour-welcome.is-dismissed{display:flex;justify-content:flex-end;padding:0;border:0;background:none;margin:0 0 8px;min-height:0}
-#panel-dashboard .patient-tour-welcome.is-dismissed>div,#panel-dashboard .patient-tour-welcome [hidden]{display:none!important}
+#panel-dashboard .patient-tour-welcome.is-dismissed>div:not(.home-display-controls),#panel-dashboard .patient-tour-welcome [hidden]{display:none!important}
 #panel-dashboard .patient-tour-welcome.is-dismissed button{font-size:10px;min-height:28px}
 @media(max-width:600px){#panel-dashboard .patient-tour-welcome>div{display:block}#panel-dashboard .patient-tour-welcome strong{display:block;margin-top:4px}}
 
@@ -232,3 +232,62 @@ body[data-home-theme=dark] .patient-view .user-chip,body.patient-view[data-home-
 .oh-info[open]>div{animation:oh-detail-in 140ms ease-out}@keyframes oh-detail-in{from{opacity:.3;transform:translateY(-3px)}to{opacity:1;transform:none}}
 @media(prefers-reduced-motion:reduce){#panel-dashboard.open-home *,#panel-dashboard.open-home *:before,#panel-dashboard.open-home *:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 @media(max-width:700px){.oh-map-card .oh-map{height:160px;min-height:160px}.patient-on-home #daiCareChatbot .care-chatbot__launcher{min-height:42px}.patient-view .content:has(.open-home.is-active){padding-left:18px;padding-right:18px}.oh-map-caption strong{font-size:12px}}
+
+/* Density pass, measured against the previous home at 1440 CSS pixels. */
+#panel-dashboard .patient-tour-welcome{flex-wrap:wrap}
+#panel-dashboard .patient-tour-welcome.is-dismissed{justify-content:space-between;align-items:center;margin-bottom:6px}
+#panel-dashboard .patient-tour-welcome .home-display-controls{display:flex;flex:0 1 auto;gap:6px;margin:0}
+#panel-dashboard .patient-tour-welcome .home-display-controls button{min-height:30px;height:30px;width:30px;border:1px solid var(--line)!important;background:var(--surface,var(--ground))!important;font-size:13px}
+#panel-dashboard .patient-tour-welcome .oh-today{font-size:10px}
+#panel-dashboard.open-home .oh-hero-band{padding-top:16px;padding-bottom:16px;margin-bottom:18px}
+#panel-dashboard.open-home .home-journey{padding:8px 0;min-height:200px}
+#panel-dashboard.open-home .home-heading{margin-bottom:10px}
+#panel-dashboard.open-home .home-heading h1{font-size:clamp(25px,2.2vw,32px)!important;margin-bottom:10px!important}
+#panel-dashboard.open-home .home-next{padding:18px;gap:8px 10px}
+#panel-dashboard.open-home .home-next h2{font-size:23px!important;line-height:1.35!important}
+#panel-dashboard.open-home .home-next .home-next-place{font-size:9px}
+#panel-dashboard.open-home .oh-baby-identity{gap:12px;flex-wrap:wrap}
+#panel-dashboard.open-home .oh-baby-identity .home-share{font-size:9px;margin:0;max-width:105px;line-height:1.6}
+.oh-main-row{margin-bottom:14px}.oh-journey .oh-section-heading{margin-bottom:8px}
+.oh-timeline{min-height:112px;padding-top:8px}.oh-stop-date{height:18px}.oh-stop-dot{width:27px;height:27px;margin-bottom:6px}.oh-stop:nth-child(even){padding-top:7px}.oh-stop strong{font-size:11px;line-height:1.45}.oh-stop small{font-size:9px}
+.oh-journey-meta .oh-timeline-legend{display:inline-flex;margin:0 0 0 auto}.oh-journey-meta{padding-right:30px}
+.oh-main-row .oh-pending-row{display:grid;grid-template-columns:20px minmax(0,1fr) auto;gap:8px}.oh-main-row .oh-pending-row>.oh-row-action{padding:6px;min-height:30px;max-width:68px;white-space:normal}
+.oh-middle-row{padding-top:14px;padding-bottom:14px;gap:20px;margin-bottom:14px}
+#panel-dashboard.open-home .home-health .home-section-head,#panel-dashboard.open-home .home-appointments .home-section-head{margin-bottom:10px}
+#panel-dashboard.open-home .home-health .snapshot-reading h3{min-height:18px;margin-bottom:4px;font-size:10px;max-width:calc(100% - 16px)}
+#panel-dashboard.open-home .home-health .snapshot-reading>strong{font-size:24px;line-height:1.35}
+#panel-dashboard.open-home .home-health .snapshot-reading>span{min-height:16px;margin:0}
+#panel-dashboard.open-home .home-health .home-sparkline{height:26px;margin:6px 0}
+#panel-dashboard.open-home .home-health .snapshot-reading>.oh-info{position:absolute!important;top:0;right:0;margin:0}
+#panel-dashboard.open-home .home-health .snapshot-reading>.oh-info>summary{width:18px;height:18px;font-size:10px}
+#panel-dashboard.open-home .home-health .source-label{margin:0;font-size:9px;line-height:1.5}
+.oh-journey-meta>.home-listen{position:absolute;top:0;right:0}
+.oh-vaccine-row{padding:0}.oh-vaccine-foot{margin-top:8px;padding-top:8px}.oh-vaccine-babies{margin-bottom:8px}
+.oh-map-card .oh-map{height:135px;min-height:135px}
+@media(min-width:1100px){.oh-age-band>div{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.oh-dose-ring{min-height:48px;gap:4px}.oh-dose-picture{width:28px;height:28px}.oh-dose-picture svg{width:16px;height:16px}.oh-dose-ring>b{font-size:7px}.oh-age-band+section{padding-left:8px}.oh-age-band>h3{margin-bottom:8px}}
+@media(max-width:700px){#panel-dashboard .patient-tour-welcome.is-dismissed{gap:8px}.oh-journey-meta{gap:10px}.oh-main-row .oh-pending-row>.oh-row-action{max-width:90px}.oh-timeline{min-height:125px}.oh-stop{flex-basis:115px}.oh-map-card .oh-map{height:160px}}
+
+.oh-map-caption .oh-facility-actions{flex:0 0 auto;min-width:max-content}
+#panel-dashboard.open-home .home-health .home-section-head>.oh-info{flex-shrink:0}
+#panel-dashboard.open-home .home-health .home-section-head>div:first-child{flex:1}
+#panel-dashboard.open-home .home-health .home-section-head>.oh-info>summary{width:23px;height:23px}
+#panel-dashboard.open-home .home-health .home-disclaimer[hidden]{display:none!important}
+#panel-dashboard.open-home .oh-baby-art{position:static!important;float:right;width:54px;height:54px;min-width:54px;margin:0 0 10px 10px;font-size:32px}
+#panel-dashboard.open-home .oh-baby-art>svg{width:34px;height:34px;fill:none;stroke:var(--brand-strong);stroke-width:1.4}
+#panel-dashboard.open-home #homeDevelopment{padding-left:0;min-height:100px}
+#panel-dashboard.open-home #homeDevelopment h3{font-size:18px;line-height:1.5}
+.oh-missing-age{font-size:11px;color:var(--ink-muted)}
+
+.patient-on-home .content{padding-bottom:88px!important}
+
+.oh-trend-empty{display:flex;align-items:center;gap:3px;height:38px;font-size:8px;line-height:1.4}.oh-trend-empty .care-empty-art,.oh-trend-empty svg{width:28px;height:28px;flex-shrink:0}.oh-trend-empty>small{font-size:8px}
+
+.oh-main-row .oh-empty{flex-direction:row;min-height:72px;padding:8px;gap:12px;justify-content:flex-start}.oh-main-row .oh-empty>p{font-size:11px;line-height:1.7;flex:1}.oh-main-row .oh-empty>.link-btn{font-size:10px;max-width:100px}.oh-main-row .oh-empty .care-empty-art{flex-shrink:0}
+.oh-section-heading>.home-listen{position:static!important;flex-shrink:0;width:27px;height:27px;min-height:27px;opacity:.9}.oh-section-heading>.home-listen svg{width:15px;height:15px}
+@media(min-width:1100px){.patient-view .content:has(.open-home.is-active){padding-top:20px}.oh-main-row{margin-bottom:8px}.oh-middle-row{padding-top:10px;padding-bottom:10px}#panel-dashboard.open-home .oh-hero-band{padding-top:12px;padding-bottom:12px}}
+/* Contrast uses existing palette tokens in both themes. */
+#panel-dashboard.open-home :is(.source-label,.home-next-place,.oh-stop-date,.oh-dose-ring small,.oh-vaccine-foot>span,.oh-distance-chip){color:var(--ink-2)!important}
+#panel-dashboard.open-home .oh-dose-picture small{color:var(--ink);border-color:var(--ink-2)}
+#panel-dashboard.open-home .oh-catchup .oh-stop-dot{color:var(--ink-2)}
+body[data-home-theme=dark] #panel-dashboard.open-home .oh-week button[aria-pressed=true],body[data-home-theme=dark] #panel-dashboard.open-home .btn--primary{color:var(--ground)!important}
+#panel-dashboard.open-home .home-next>.care-label{background:var(--amber-soft);color:var(--ink-2)}

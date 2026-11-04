@@ -88,5 +88,11 @@
       intro.querySelector('[data-tour-welcome-start]').onclick=()=>{collapse();start();};intro.querySelector('[data-tour-dismiss]').onclick=collapse;if(seen)collapse();home.prepend(intro);}
     const status=document.createElement('span');status.id='patientTourAnnouncement';status.className='patient-tour-sr';status.setAttribute('role','status');document.body.append(status);
   }
+  function translate(){
+    const hi=document.documentElement.lang==='hi',intro=$('.patient-tour-welcome'),button=$('#patientTourStart');
+    if(button)button.setAttribute('aria-label',hi?'डैशबोर्ड का परिचय शुरू करें':'Start patient dashboard guided tour');
+    if(intro){intro.querySelector('div>span').textContent=hi?'DAI में नए हैं?':'NEW TO DAI?';intro.querySelector('strong').textContent=hi?'देखभाल का छोटा परिचय':'A quick guide to your care';intro.querySelector('[data-tour-welcome-start]').textContent=intro.classList.contains('is-dismissed')?(hi?'त्वरित परिचय ↗':'Quick tour ↗'):(hi?'मुझे समझाएँ ↗':'Show me around ↗');intro.querySelector('[data-tour-dismiss]').setAttribute('aria-label',hi?'परिचय बंद करें':'Dismiss welcome guide');}
+  }
+  window.PatientTour={start,translate};window.addEventListener('dai:lang',translate);
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setup);else setup();
 })();

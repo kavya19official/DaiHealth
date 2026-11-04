@@ -1,0 +1,27 @@
+/* Isolated UI QA only: existing synthetic records; no real API or record writes. */
+const http=require('http'),fs=require('fs'),path=require('path');
+if(process.env.NODE_ENV==='production')throw new Error('QA preview must not run in production');
+const root=path.resolve(__dirname,'../..'),dir=process.env.DAI_HOME_QA_DIR||'/tmp/dai-patient-home-redesign';
+fs.mkdirSync(dir,{recursive:true});
+const baseline=process.env.DAI_HOME_BASELINE||'df74839';
+const originals={'dashboard.before.html':'frontend/dashboard.html','home-open.before.js':'frontend/js/patient-home-open.js','home-open.before.css':'frontend/patient-home-open.css','tour.before.js':'frontend/js/patient-tour.js','tour.before.css':'frontend/patient-tour.css'};
+for(const [dest,src] of Object.entries(originals))if(!fs.existsSync(path.join(dir,dest)))fs.writeFileSync(path.join(dir,dest),require('child_process').execFileSync('git',['show',baseline+':'+src],{cwd:root}));
+const fixtures=JSON.parse(fs.readFileSync(dir+'/fixtures.json'));
+const boot=`window.__fixture=${JSON.stringify(fixtures)};
+window.DaiI18n={registerLocale(){},getLang:()=>document.documentElement.lang,setLang(l){document.documentElement.lang=l;window.dispatchEvent(new Event('dai:lang'));}};
+let prefs={theme:'light',text_size:'standard'};window.DaiPrefs={getPrefs:async()=>prefs,applyAppearance(){},setPrefs:async p=>{Object.assign(prefs,p);window.dispatchEvent(new CustomEvent('dai:prefs',{detail:prefs}));return prefs;}};
+window.PatientOffline={save:async()=>{},load:async()=>null,clear:async()=>{},bind:async()=>{},enabled:()=>false};
+window.DaiAPI={lowBandwidth:()=>false,toast:console.info,fmtDate:x=>x,apiRequest:async p=>p==='/patient/home'?{daily:{tasks:{}},journal:[],baby_logs:[]}:null};`;
+const hydrate=`
+function paint(){const stage=document.getElementById('testStage').value;const state=window.__fixture[stage];prefs.theme=document.getElementById('testTheme').value;prefs.lang=document.getElementById('testLang').value;document.documentElement.lang=prefs.lang;document.getElementById('patientLanguage').value=prefs.lang;document.getElementById('greetName').textContent=state.user.full_name.split(' ')[1]||state.user.full_name;window.PatientExperience.update(state);window.PatientHome.update(state,prefs);}
+document.addEventListener('DOMContentLoaded',()=>{document.querySelectorAll('[data-panel]').forEach(b=>b.onclick=()=>{document.querySelectorAll('.nav-item,.panel').forEach(n=>n.classList.remove('is-active'));b.classList.add('is-active');document.getElementById('panel-'+b.dataset.panel)?.classList.add('is-active');location.hash=b.dataset.panel;});document.querySelectorAll('#testControls select').forEach(s=>s.onchange=paint);paint();});`;
+const server=http.createServer((req,res)=>{res.on('finish',()=>{if(res.statusCode>=400)console.log(JSON.stringify({status:res.statusCode,path:new URL(req.url,'http://localhost').pathname}));});const u=new URL(req.url,'http://localhost');let file;
+ if(u.pathname==='/preview'){let html=fs.readFileSync(u.searchParams.get('revision')==='before'?dir+'/dashboard.before.html':root+'/frontend/dashboard.html','utf8').replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,'').replace('</head>','<script>'+boot+'</script></head>');if(u.searchParams.get('revision')==='before')html=html.replace('patient-home-open.css?v=1','before-open.css').replace('patient-tour.css?v=1','before-tour.css');
+ html=html.replace('<body class="patient-view">','<body class="patient-view"><form id="testControls" style="position:relative;z-index:10000;padding:8px;background:var(--ground);font-size:12px">UI TEST · recorded synthetic source <label>Stage <select id="testStage"><option>pregnancy</option><option selected>postpartum</option><option>child</option></select></label> <label>Theme <select id="testTheme"><option>light</option><option>dark</option></select></label> <label>Language <select id="testLang"><option>en</option><option>hi</option></select></label></form>');
+ const before=u.searchParams.get('revision')==='before';const scripts=['vendor/leaflet/leaflet.js','/shared/who-growth-standards.js','/shared/child-reference.js','js/patient-visuals.js','js/patient-home-model.js','js/patient-home.js','js/patient-model.js','js/patient-copy.js',before?'before-open.js':'js/patient-home-open.js','js/patient-dashboard.js',before?'before-tour.js':'js/patient-tour.js'];
+ html=html.replace('</body>',scripts.map(s=>'<script src="'+s+'"></script>').join('')+'<script>'+hydrate+'</script></body>');res.writeHead(200,{'content-type':'text/html','cache-control':'no-store'});return res.end(html);}
+ const custom={'/before-open.js':'home-open.before.js','/before-open.css':'home-open.before.css','/before-tour.js':'tour.before.js','/before-tour.css':'tour.before.css'};
+ file=custom[u.pathname]?path.join(dir,custom[u.pathname]):path.resolve(root,u.pathname.startsWith('/shared/')?'.'+u.pathname:'frontend/'+u.pathname);
+ if(!file.startsWith(root+'/')&&!file.startsWith(dir+'/')){res.writeHead(403);return res.end();}
+ if(!fs.existsSync(file)){res.writeHead(404);return res.end();}res.writeHead(200,{'content-type':({'js':'text/javascript','mjs':'text/javascript','css':'text/css','svg':'image/svg+xml','png':'image/png'})[file.split('.').pop()]||'application/octet-stream','cache-control':'no-store'});fs.createReadStream(file).pipe(res);
+});server.listen(13201,'127.0.0.1',()=>console.log('Patient component preview on http://127.0.0.1:13201/preview?revision=before'));
