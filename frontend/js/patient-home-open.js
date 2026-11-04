@@ -57,8 +57,8 @@
     document.addEventListener('focusin',e=>e.target.closest('.oh-dose-ring')?.classList.remove('tooltip-dismissed'));
     document.addEventListener('pointerleave',e=>e.target.classList?.remove('tooltip-dismissed'),true);
 
-    const extras=document.createElement('details');extras.className='oh-extras';extras.innerHTML='<summary><span>✧ A little more, just for you</span><span>Personal check-ins, journal & recorded-detail viewer +</span></summary><div class="oh-extras-body"></div>';
-    extras.querySelector('div').append($('homeCheckinCard'),logs,$('homeJournalCard'),$('clinicalDashboardHome'));bottom.after(extras);
+    const extras=document.createElement('details');extras.id='patientPersonalTools';extras.className='oh-extras';extras.innerHTML='<summary><span>Personal tools</span><span>Journal · Check-ins · 3D viewer +</span></summary><div class="oh-extras-body"></div>';
+    extras.querySelector('div').append($('homeCheckinCard'),logs,$('homeJournalCard'),$('clinicalDashboardHome'));$('panel-settings').append(extras);
     extras.addEventListener('toggle',()=>window.dispatchEvent(new Event('resize')));
     const voice=document.createElement('button');voice.type='button';voice.className='oh-header-voice';voice.setAttribute('aria-label','Ask Dhruv by voice');voice.innerHTML='<svg aria-hidden="true"><use href="#i-mic"/></svg>';voice.onclick=()=>window.PatientExperience?.askDaya(null,'voice');root.querySelector('.home-display-controls').prepend(voice);
     const today=document.createElement('span');today.className='oh-today';today.textContent=new Date().toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short',timeZone:'Asia/Kolkata'});root.querySelector('.home-display-controls').prepend(today);
@@ -121,7 +121,7 @@
     $('clinicianStatus').innerHTML=c&&!state.offline?'<details class="oh-clinician-note"><summary>◇ '+T('Marked by your doctor','आपके डॉक्टर द्वारा चिह्नित')+'</summary><div><p>'+E(Array.isArray(c.reason)?c.reason.join(' · '):c.reason||T('Discuss this recorded note with your clinician.','यह दर्ज नोट अपने डॉक्टर से समझें।'))+'</p><small>'+E(c.doctor||T('Clinic record','क्लिनिक रिकॉर्ड'))+'</small></div></details>':'';
     const disclaimer=$('homeHealthCard').querySelector('.home-disclaimer');disclaimer.hidden=false;disclaimer.innerHTML=info(T('Arrows show recorded numerical change only. Your clinician interprets readings; no diagnosis or health verdict is calculated.','तीर केवल दर्ज संख्यात्मक बदलाव बताते हैं। रीडिंग की व्याख्या आपके डॉक्टर करेंगे।'))+(metrics.some(m=>m.type==='blood_glucose')?'<details class="oh-extra-vital"><summary>'+T('Blood sugar','ब्लड शुगर')+'</summary>'+markup('blood_glucose')+'</details>':'');
     const healthHead=$('homeHealthCard').querySelector('.home-section-head');healthHead.querySelector('.oh-info')?.remove();healthHead.append(disclaimer.querySelector('.oh-info'));disclaimer.hidden=!metrics.some(m=>m.type==='blood_glucose');
-    const extra=$('panel-dashboard').querySelector('.oh-extras>summary');extra.innerHTML='<span>✧ '+T('More for you','आपके लिए और')+'</span><span>'+T('Journal · Check-ins · 3D viewer','डायरी · चेक-इन · 3D दृश्य')+' +</span>';
+    const extra=$('patientPersonalTools').querySelector('summary');extra.innerHTML='<span>'+T('Personal tools','व्यक्तिगत टूल')+'</span><span>'+T('Journal · Check-ins · 3D viewer','डायरी · चेक-इन · 3D दृश्य')+' +</span>';
     $('panel-dashboard').querySelector('.home-footer-note').innerHTML='<svg aria-hidden="true"><use href="#i-shield"/></svg> '+T('Synthetic demo · Clinical decisions stay with your care team.','सिंथेटिक डेमो · चिकित्सा निर्णय आपकी देखभाल टीम के पास हैं।');
     document.querySelectorAll('[data-home-nav-label]').forEach(n=>n.textContent=({Care:T('Care','देखभाल'),Records:T('Records','रिकॉर्ड'),Help:T('Help','मदद')})[n.dataset.homeNavLabel]);
   }
