@@ -320,12 +320,17 @@ body[data-home-theme=dark] #panel-dashboard.open-home :is(#homeOpenJourney,#home
 @media(max-width:1100px){#panel-dashboard.open-home .oh-middle-row{grid-template-columns:minmax(0,1.35fr) minmax(0,1fr)}#panel-dashboard.open-home #homeAppointmentCard{grid-column:1/-1}#panel-dashboard.open-home #homeAppointmentCard .oh-week{max-width:440px}#panel-dashboard.open-home .oh-main-row{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr)}#panel-dashboard.open-home .oh-bottom-row{grid-template-columns:minmax(0,1fr)}}
 @media(max-width:700px){.patient-view .content:has(.open-home.is-active){padding-inline:16px}#panel-dashboard.open-home .oh-hero-band{grid-template-columns:minmax(0,1fr);padding:18px;gap:16px;margin-inline:0}#panel-dashboard.open-home .oh-main-row,#panel-dashboard.open-home .oh-middle-row,#panel-dashboard.open-home .oh-bottom-row{grid-template-columns:minmax(0,1fr);gap:16px;margin-block:16px}#panel-dashboard.open-home :is(#homeOpenJourney,#homeOpenPending,#homeHealthCard,#homeDevelopmentCard,#homeAppointmentCard,#homeOpenVaccines){padding:18px!important}#panel-dashboard.open-home #homeAppointmentCard{grid-column:auto}#panel-dashboard.open-home .home-health .snapshot-reading>strong{font-size:22px}#panel-dashboard.open-home .oh-section-heading>.link-btn{max-width:85px}#panel-dashboard.open-home .home-journey-copy{max-width:70%}}
 
-/* Lightweight illustrated stage path; never a clinical completion score. */
-.oh-care-path-graphic{margin:12px 0 14px;padding:8px 12px 10px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(120deg,var(--brand-pale),var(--surface,var(--ground)));min-width:0}
-.oh-care-path-graphic>svg{display:block;width:100%;height:96px;overflow:visible}
-.oh-path-caption{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:10px;line-height:1.7;color:var(--ink-2)}
-.oh-path-caption>strong{font-size:10px;font-weight:650;color:var(--brand-strong)}
-.oh-path-marker{animation:oh-marker-arrive 320ms ease-out both;transform-box:fill-box}
-@keyframes oh-marker-arrive{from{opacity:0}to{opacity:1}}
-@media(max-width:700px){.oh-care-path-graphic{padding:8px 10px}.oh-care-path-graphic>svg{height:80px}.oh-path-caption{font-size:9px}.oh-path-caption>strong{font-size:9px}}
-@media(prefers-reduced-motion:reduce){.oh-path-marker{animation:none}}
+/* Care status donut: recorded counts only, never a health score. */
+.oh-care-donut{display:flex;align-items:center;gap:24px;padding:16px 20px;margin:12px 0 16px;background:linear-gradient(120deg,var(--brand-pale),var(--surface,var(--ground)));border:1px solid var(--line);border-radius:20px;min-width:0}
+.oh-donut-visual{position:relative;width:142px;height:142px;flex:0 0 142px}
+.oh-donut-visual>svg{display:block;width:100%;height:100%;filter:drop-shadow(0 4px 5px var(--brand-soft))}
+.oh-donut-total{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:4px;pointer-events:none;color:var(--ink)}
+.oh-donut-total>strong{font-size:30px;line-height:1;font-weight:800;letter-spacing:-1px}
+.oh-donut-total>span{font-size:10px;max-width:70px;text-align:center;line-height:1.5}
+.oh-donut-legend{flex:1;min-width:0;display:grid;gap:9px;color:var(--ink)}
+.oh-donut-eyebrow{font-size:9px;letter-spacing:1.2px;font-weight:750;color:var(--brand-strong);line-height:1.6}
+.oh-donut-legend>div{display:grid;grid-template-columns:20px minmax(0,1fr) auto;gap:10px;align-items:center;font-size:12px}
+.oh-donut-key{width:19px;height:19px;border-radius:6px;display:grid;place-items:center;color:var(--ink);border-bottom:4px solid var(--slice);background:var(--surface,var(--ground));font-size:10px}
+.oh-donut-legend strong{font-size:17px;font-weight:750}
+.oh-donut-legend>small{font-size:9px;line-height:1.6;color:var(--ink-2);margin-top:1px}
+@media(max-width:700px){.oh-care-donut{gap:14px;padding:14px 12px}.oh-donut-visual{width:112px;height:112px;flex-basis:112px}.oh-donut-total>strong{font-size:25px}.oh-donut-legend>div{font-size:11px;gap:7px}.oh-donut-eyebrow{font-size:8px}.oh-donut-legend{gap:7px}}
