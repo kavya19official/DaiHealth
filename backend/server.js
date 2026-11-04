@@ -578,7 +578,7 @@ const MILESTONE_SELECT = `
 app.get('/api/timeline', authenticateToken, authorizeRole(['mother']), async (req, res) => {
   try {
     const result = await pool.query(MILESTONE_SELECT, [req.user.id]);
-    res.json({ milestones: result.rows });
+    res.json({ milestones: result.rows.map(row=>({...row,workflow_state:require('./careStepMachine').stateOf(row)})) });
   } catch (error) {
     console.error('Fetch timeline error:', error);
     res.status(500).json({ error: 'Failed to fetch timeline' });
@@ -587,22 +587,19 @@ app.get('/api/timeline', authenticateToken, authorizeRole(['mother']), async (re
 
 // Mother: mark one of her own milestones complete
 app.patch('/api/timeline/:id/complete', authenticateToken, authorizeRole(['mother']), async (req, res) => {
+  const client=await pool.connect();
   try {
-    const { id } = req.params;
-    const result = await pool.query(
-      `UPDATE care_milestones SET completed_at = CURRENT_TIMESTAMP, completion_verification=COALESCE(completion_verification,'self_reported')
-       WHERE id = $1 AND mother_id = $2
-       RETURNING id, completed_at`,
-      [id, req.user.id]
-    );
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'Milestone not found' });
+    await client.query('BEGIN');
+    let row=(await client.query('SELECT * FROM care_milestones WHERE id=$1 AND mother_id=$2 FOR UPDATE',[req.params.id,req.user.id])).rows[0];
+    if(!row){await client.query('ROLLBACK');return res.status(404).json({error:'Milestone not found'});}
+    if(require('./careStepMachine').stateOf(row)==='planned'){
+      await require('./careStepMachine').record(client,row,{type:'REPORT',owner:true},req.user.id);
+      row=(await client.query("UPDATE care_milestones SET completed_at=NOW(),completion_verification='self_reported' WHERE id=$1 RETURNING *",[row.id])).rows[0];
     }
-    res.json({ message: 'Milestone marked complete', milestone: result.rows[0] });
-  } catch (error) {
-    console.error('Complete milestone error:', error);
-    res.status(500).json({ error: 'Failed to update milestone' });
-  }
+    await client.query('COMMIT');
+    res.json({message:'Your update is recorded. Clinical confirmation is separate.',milestone:{id:row.id,completed_at:row.completed_at,workflow_state:require('./careStepMachine').stateOf(row)}});
+  }catch(error){await client.query('ROLLBACK');res.status(error.status||500).json({error:'Could not record your update'});}
+  finally{client.release();}
 });
 
 // ============================================================================
@@ -1107,6 +1104,7 @@ require('./clinicalDashboard')(app, { pool, authenticateToken, authorizeRole });
 require('./doctorWorkspace')(app, { pool, authenticateToken, authorizeRole });
 require('./doctorOperations')(app, { pool, authenticateToken, authorizeRole });
 require('./patientDocuments')(app, { pool, authenticateToken, authorizeRole });
+require('./patientTimelineLive')(app, { pool, authenticateToken, authorizeRole });
 require('./patientOfflineSync')(app, {pool,authenticateToken,authorizeRole});
 
 // Enhanced care timeline and missed-care outreach

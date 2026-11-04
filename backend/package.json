@@ -25,7 +25,8 @@
     "jsonwebtoken": "^9.0.3",
     "pdfjs-dist": "^6.4.299",
     "pg": "^8.23.0",
-    "tesseract.js": "^7.0.0"
+    "tesseract.js": "^7.0.0",
+    "xstate": "5.33.3"
   },
   "engines": {
     "node": ">=22.13.0"
