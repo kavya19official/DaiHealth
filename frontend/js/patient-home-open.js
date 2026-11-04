@@ -22,7 +22,7 @@
   function setupNavigation() {
     const nav=document.querySelector('.sidebar__nav');if(!nav)return;
     const find=id=>nav.querySelector('[data-panel="'+id+'"]');
-    const groups=[['Care',['dashboard','mycare','children','hospital-stay']],['Records',['records']],['Help',['facilities','schemes','family','companion','messages','settings']]];
+    const groups=[['Care',['dashboard','mycare','appointments','children','hospital-stay']],['Records',['records']],['Help',['facilities','schemes','family','companion','messages','settings']]];
     nav.querySelectorAll('.nav-caption').forEach(n=>n.remove());
     for(const [title,ids] of groups){const caption=document.createElement('span');caption.className='nav-caption';caption.dataset.homeNavLabel=title;caption.textContent=title;nav.append(caption);for(const id of ids){const item=id==='mycare'?$('homeCareNavigation'):find(id);if(item)nav.append(item);}}
   }
