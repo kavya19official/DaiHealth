@@ -291,3 +291,31 @@ body[data-home-theme=dark] .patient-view .user-chip,body.patient-view[data-home-
 #panel-dashboard.open-home .oh-catchup .oh-stop-dot{color:var(--ink-2)}
 body[data-home-theme=dark] #panel-dashboard.open-home .oh-week button[aria-pressed=true],body[data-home-theme=dark] #panel-dashboard.open-home .btn--primary{color:var(--ground)!important}
 #panel-dashboard.open-home .home-next>.care-label{background:var(--amber-soft);color:var(--ink-2)}
+/* Aligned Home sections: bounded canvas and balanced columns. */
+.patient-view .content:has(.open-home.is-active){max-width:1460px;margin-inline:auto;padding-inline:28px}
+#panel-dashboard.open-home .oh-hero-band{margin-inline:0;padding:22px 24px;border:1px solid var(--line);border-radius:24px;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:24px}
+#panel-dashboard.open-home .oh-main-row{grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:20px;margin-block:20px}
+#panel-dashboard.open-home .oh-middle-row{grid-template-columns:minmax(0,1.45fr) minmax(0,1fr) minmax(0,1.2fr);gap:20px;border:0;padding:0;margin-block:20px;align-items:stretch}
+#panel-dashboard.open-home .oh-bottom-row{grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:20px;margin-block:20px}
+#panel-dashboard.open-home :is(#homeOpenJourney,#homeOpenPending,#homeHealthCard,#homeDevelopmentCard,#homeAppointmentCard,#homeOpenVaccines){background:var(--surface,#fff)!important;border:1px solid var(--line)!important;border-radius:22px!important;padding:20px!important;box-shadow:0 4px 18px rgba(91,33,182,.025)!important;min-width:0;min-height:0}
+#panel-dashboard.open-home .oh-map-card{background:var(--surface,#fff);border:1px solid var(--line);border-radius:22px}
+#panel-dashboard.open-home :is(.oh-section-heading,.home-section-head){display:flex;align-items:center;justify-content:flex-start;gap:10px;min-height:45px;margin-bottom:16px}
+#panel-dashboard.open-home :is(.oh-section-heading,.home-section-head)>div:first-child{flex:1;min-width:0}
+#panel-dashboard.open-home .oh-section-heading>.link-btn{margin-left:auto;white-space:normal;text-align:right;max-width:100px;font-size:11px}
+#panel-dashboard.open-home :is(.oh-section-heading,.home-section-head)>.home-listen{position:static!important;flex:0 0 28px}
+#panel-dashboard.open-home :is(.oh-section-heading h2,.home-section-head h2){font-size:20px!important;line-height:1.4;margin-top:4px}
+#panel-dashboard.open-home .oh-timeline{min-height:130px;gap:4px}
+#panel-dashboard.open-home .oh-stop{flex:1 0 110px;max-width:180px}
+#panel-dashboard.open-home .oh-pending-row{padding:14px 0;grid-template-columns:20px minmax(0,1fr) auto;gap:12px}
+#panel-dashboard.open-home .oh-pending-row strong{font-size:12px;line-height:1.6}
+#panel-dashboard.open-home .oh-pending-row .oh-row-action{padding:7px 10px;max-width:none}
+#panel-dashboard.open-home .home-health .health-snapshot{gap:14px}
+#panel-dashboard.open-home .home-health .snapshot-reading h3{font-size:11px;min-height:34px;line-height:1.5}
+#panel-dashboard.open-home .home-health .snapshot-reading>strong{font-size:clamp(20px,1.8vw,26px)}
+#panel-dashboard.open-home #homeDevelopment{padding:0;min-height:135px}
+#panel-dashboard.open-home .oh-calendar-empty{padding:12px 0;margin:8px 0}
+#panel-dashboard.open-home .oh-week{max-width:none;gap:4px}
+#panel-dashboard.open-home .oh-map-card .oh-section-heading{padding-inline:20px;margin-bottom:12px}
+body[data-home-theme=dark] #panel-dashboard.open-home :is(#homeOpenJourney,#homeOpenPending,#homeHealthCard,#homeDevelopmentCard,#homeAppointmentCard,#homeOpenVaccines,.oh-map-card){background:#211a2c!important}
+@media(max-width:1100px){#panel-dashboard.open-home .oh-middle-row{grid-template-columns:minmax(0,1.35fr) minmax(0,1fr)}#panel-dashboard.open-home #homeAppointmentCard{grid-column:1/-1}#panel-dashboard.open-home #homeAppointmentCard .oh-week{max-width:440px}#panel-dashboard.open-home .oh-main-row{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr)}#panel-dashboard.open-home .oh-bottom-row{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:700px){.patient-view .content:has(.open-home.is-active){padding-inline:16px}#panel-dashboard.open-home .oh-hero-band{grid-template-columns:minmax(0,1fr);padding:18px;gap:16px;margin-inline:0}#panel-dashboard.open-home .oh-main-row,#panel-dashboard.open-home .oh-middle-row,#panel-dashboard.open-home .oh-bottom-row{grid-template-columns:minmax(0,1fr);gap:16px;margin-block:16px}#panel-dashboard.open-home :is(#homeOpenJourney,#homeOpenPending,#homeHealthCard,#homeDevelopmentCard,#homeAppointmentCard,#homeOpenVaccines){padding:18px!important}#panel-dashboard.open-home #homeAppointmentCard{grid-column:auto}#panel-dashboard.open-home .home-health .snapshot-reading>strong{font-size:22px}#panel-dashboard.open-home .oh-section-heading>.link-btn{max-width:85px}#panel-dashboard.open-home .home-journey-copy{max-width:70%}}
