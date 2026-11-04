@@ -168,3 +168,33 @@ body[data-home-theme=dark] .patient-view .user-chip,body.patient-view[data-home-
 .oh-main-row .oh-pending-row{padding:10px 0}.oh-main-row .oh-pending-row strong{font-size:11px}
 .oh-main-row .oh-empty{min-height:110px;padding:10px}.oh-empty .care-empty-art{width:48px;height:48px;display:block}.oh-empty .care-empty-art svg{width:48px;height:48px}
 @media(max-width:900px){.oh-main-row{grid-template-columns:minmax(0,1fr)}.oh-main-row .oh-pending{border-left:0;padding-left:0;border-top:1px solid var(--line);padding-top:14px}.oh-stop{min-width:105px}.oh-timeline{overflow-x:auto}}
+
+/* At a glance: recorded data in open, compact columns. */
+.oh-middle-row{grid-template-columns:minmax(0,1.45fr) minmax(0,1fr) minmax(0,1.1fr);gap:24px;padding:18px 0;margin-bottom:18px;align-items:start}
+.oh-middle-row>section+section{padding-left:22px!important}
+#panel-dashboard.open-home .home-development{background:none!important;border:0;border-radius:0;padding:0;min-height:0;overflow:visible}
+#panel-dashboard.open-home .home-development::after{display:none}
+#panel-dashboard.open-home .home-health .home-section-head,#panel-dashboard.open-home .home-appointments .home-section-head{margin-bottom:14px}
+#panel-dashboard.open-home .home-health h2,#panel-dashboard.open-home .home-appointments h2,#panel-dashboard.open-home .oh-section-heading h2{font-size:20px!important;margin:3px 0 0;line-height:1.4}
+#panel-dashboard.open-home .home-health .snapshot-reading{position:relative;padding:0;gap:0}
+#panel-dashboard.open-home .home-health .snapshot-reading h3{font-size:10px;min-height:30px;margin-bottom:4px}
+#panel-dashboard.open-home .home-health .snapshot-reading>strong{font-size:clamp(18px,1.8vw,26px);line-height:1.4;white-space:normal}
+#panel-dashboard.open-home .home-health .snapshot-reading>strong>span{font-size:12px;font-weight:500;color:var(--ink-muted)}
+#panel-dashboard.open-home .home-health .home-sparkline{height:34px;margin:6px 0}
+#panel-dashboard.open-home .home-health .snapshot-reading .source-label{font-size:10px;line-height:1.6}
+.snapshot-reading>.oh-info{margin-top:5px}.oh-trend-empty{height:40px;display:block;color:var(--ink-muted)}.oh-trend-empty .care-empty-art{width:40px;height:40px;display:block}.oh-trend-empty svg{height:40px;width:40px}
+#panel-dashboard.open-home .home-health .home-disclaimer{margin:8px 0 0;display:flex;align-items:center;justify-content:space-between}
+.oh-clinician-note{font-size:11px;margin-top:10px}.oh-clinician-note>summary{display:inline-block;padding:7px 10px;border:1px solid var(--line);border-radius:18px;background:var(--brand-pale);color:var(--brand-strong);cursor:pointer;list-style:none}.oh-clinician-note>div{font-size:12px;line-height:1.8;padding:12px;border-left:2px solid var(--brand)}.oh-extra-vital{font-size:11px;max-width:150px}.oh-extra-vital summary{cursor:pointer;color:var(--brand-strong)}
+#panel-dashboard.open-home .home-development .home-section-head{margin-bottom:8px;min-height:22px}#panel-dashboard.open-home .home-development .home-kicker{font-size:9px}
+.open-home .oh-baby-art{font-size:35px;line-height:1.3;width:60px;height:60px;display:grid;place-items:center;background:var(--brand-pale);border-radius:50%;margin:0 0 8px}
+#panel-dashboard.open-home #homeDevelopment h3{font-size:18px;line-height:1.4;margin:0 0 5px}
+#panel-dashboard.open-home #homeDevelopment p{font-size:12px;line-height:1.65;margin:0 0 8px}
+#homeDevelopment>.link-btn,#homeDevelopment>.oh-info,#homeDevelopment>.oh-development-source{display:inline-block;vertical-align:middle;margin-right:6px;font-size:10px}
+.oh-week{margin-bottom:8px}.oh-week button{min-height:58px;padding:7px 0;gap:5px}.oh-week small{font-size:9px}.oh-day-appointments{font-size:11px;line-height:1.6}.oh-day-appointments p{margin:5px 0}.oh-calendar-empty{display:flex;gap:10px;align-items:center;font-size:11px;color:var(--ink-muted);margin:6px 0}.oh-calendar-empty svg{width:35px;height:35px;flex-shrink:0;fill:var(--brand-pale);stroke:var(--brand-strong);stroke-width:1.2}
+#panel-dashboard.open-home .home-appointments>.link-btn{min-height:30px;font-size:10px}
+.oh-extras{margin:0 0 12px}.oh-extras>summary{padding:16px 0;font-size:12px}.oh-extras>summary>span:last-child{font-size:10px;white-space:normal;text-align:right}.home-footer-note{padding:10px 0!important;font-size:10px!important}
+#panel-dashboard.open-home :is(.home-section-head,.oh-section-heading){position:relative;padding-right:0;gap:8px}
+#panel-dashboard.open-home .home-section-head .home-listen{position:static;width:28px;height:28px;min-height:28px;flex-shrink:0}
+#panel-dashboard.open-home .oh-info:focus-within{z-index:60}
+@media(max-width:1050px){.oh-middle-row{grid-template-columns:minmax(0,1.4fr) minmax(0,1fr)}.oh-middle-row #homeAppointmentCard{grid-column:1/-1;border-left:0;padding-left:0!important;border-top:1px solid var(--line);padding-top:14px!important}.oh-week{max-width:420px}}
+@media(max-width:700px){.oh-middle-row{grid-template-columns:minmax(0,1fr);gap:20px}.oh-middle-row>section+section{border-left:0;padding-left:0!important;border-top:1px solid var(--line);padding-top:16px!important}.oh-middle-row #homeAppointmentCard{grid-column:auto}#panel-dashboard.open-home .home-health .snapshot-reading>strong{font-size:23px}#homeDevelopment{position:relative;padding-left:76px;min-height:80px}.oh-baby-art{position:absolute;left:0;top:0}.oh-extras>summary{align-items:start;gap:10px}.oh-extras>summary>span:last-child{max-width:150px}}

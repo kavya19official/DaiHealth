@@ -63,13 +63,14 @@
   }
   function renderHero(){
     const st=window.PatientModel.stage(state.user,state.post,state.children),next=relevant()[0],hi=document.documentElement.lang==='hi';
-    $('homeGreetingSub').textContent=st.label;$('homeGreetingSub').className='oh-stage-chip';
+    $('homeGreetingSub').textContent=hi?(!st.delivered?(st.week===null?'आपका देखभाल सफ़र':'गर्भावस्था · सप्ताह '+st.week):st.label.startsWith('Postpartum')?'प्रसव के बाद · दिन '+st.label.match(/\d+/)?.[0]:selectedChild?'बच्चा · '+window.PatientHomeModel.age(selectedChild.date_of_birth,window.PatientModel.today()).days+' दिन':'बच्चे की देखभाल'):st.label;$('homeGreetingSub').className='oh-stage-chip';
     $('nextStepWhy').textContent=next?(hi?'आपकी दर्ज देखभाल में अगला कदम।':'The next item in your recorded care plan.'):(hi?'अपनी देखभाल का प्लान देखें।':'Review your recorded care plan.');
     const detail=$('homeNextDetails').querySelector('div');detail.textContent=next?.guidance||next?.why||(hi?'आगे की देखभाल अपनी टीम से तय करें।':'Discuss your next follow-up with your care team.');
     $('nextStepDirections').innerHTML='<svg aria-hidden="true"><use href="#i-arrow"/></svg>';
     $('nextStepDirections').setAttribute('aria-label',hi?'केंद्र तक रास्ता':'Directions to registered centre');
     $('nextStepDirections').title=hi?'केंद्र तक रास्ता':'Directions to registered centre';
     $('nextStepCard').querySelector('.home-kicker').textContent=hi?'आपका अगला कदम':'YOUR NEXT STEP';
+    if(hi){$('nextStepTitle').textContent=next?(st.delivered?'अगली जाँच की योजना बनाएँ':next.title):'अपना देखभाल प्लान देखें';$('nextStepStatus').textContent=next?(window.PatientModel.status(next)==='overdue'?'बाकी':'आने वाला'):'देखभाल प्लान';$('nextStepBook').querySelector('span').textContent='भेंट बुक करें';}
     const save=$('shareJourney');save.innerHTML='<svg aria-hidden="true"><use href="#i-heart"/></svg> '+(hi?'यादगार कार्ड':'Milestone card')+' ↗';
     const image=$('homeStageImage');image.loading='eager';
   }
@@ -98,12 +99,27 @@
     $('homeDevelopment').innerHTML='<div class="oh-baby-art" aria-hidden="true">'+(st.delivered?'♡':size?.icon||'✿')+'</div><h3>'+E(st.delivered?(selectedChild?T('Growing together','साथ बढ़ते हुए'):T('Your next chapter','आपका अगला अध्याय')):st.week!==null?T('Week ','सप्ताह ')+st.week:T('Your journey','आपका सफ़र'))+'</h3><p>'+E(size?T('About the size of ','लगभग ')+size.label:st.delivered?T('Each baby’s records stay separate.','हर बच्चे के रिकॉर्ड अलग हैं।'):T('Explore your recorded stage.','अपना दर्ज चरण देखें।'))+'</p>'+info(development.text+' '+T('Illustration only, not a measurement of your baby.','यह केवल चित्रण है, आपके बच्चे की माप नहीं।'))+'<button type="button" class="link-btn" data-oh-go="'+(st.delivered?'children':'timeline')+'">'+T('Explore','और देखें')+' ↗</button><a class="oh-development-source" href="'+E(development.source)+'" '+(development.source.startsWith('https:')?'target="_blank" rel="noopener"':'')+' aria-label="'+E(development.sourceLabel)+'">'+T('Source','स्रोत')+' ↗</a>';
     
   }
+  function renderGlance(){
+    const H=window.PatientHomeModel,metrics=state.overview?.metrics||[];
+    const markup=type=>{const metric=metrics.find(m=>m.type===type),rows=(metric?.readings||[]).filter(r=>r.source==='clinician_record'&&r.value!==null&&r.value!==undefined&&r.value!==''&&Number.isFinite(Number(r.value))).slice().sort((a,b)=>String(b.date).localeCompare(String(a.date))),v=rows[0],prev=rows[1],names={weight:T('Weight','वज़न'),blood_pressure:T('Blood pressure','रक्तचाप'),haemoglobin:T('Haemoglobin','हीमोग्लोबिन'),blood_glucose:T('Blood sugar','ब्लड शुगर')},points=H.sparkline(rows),arrow=v&&prev?(Number(v.value)>Number(prev.value)?'↑':Number(v.value)<Number(prev.value)?'↓':'→'):'';
+      return '<div class="snapshot-reading"><h3>'+names[type]+'</h3><strong>'+E(v?String(v.value)+(v.diastolic!=null?'/'+v.diastolic:''):'—')+' <span aria-label="'+T('Recorded change only','केवल दर्ज बदलाव')+'">'+arrow+'</span></strong><span>'+E(v?metric.unit:T('Not recorded','दर्ज नहीं'))+'</span>'+(points?'<svg class="home-sparkline" viewBox="0 0 100 35" role="img" aria-label="'+E(T('Recorded trend: ','दर्ज रुझान: ')+names[type])+'"><polyline points="'+points.map(p=>p.join(',')).join(' ')+'"/></svg>':'<span class="oh-trend-empty" aria-label="'+T('Trend needs two recorded values','रुझान के लिए दो दर्ज मान चाहिए')+'">'+(window.PatientVisuals?.emptyArt('care')||'○')+'</span>')+'<small class="source-label">'+(v?E(dateLabel(v.date)):T('Awaiting clinic entry','क्लिनिक की प्रविष्टि बाकी'))+'</small>'+info(v?T('Recorded by ','दर्ज करने वाले: ')+v.doctor+' · '+dateLabel(v.date):T('No clinician-entered measurement is available.','क्लिनिक द्वारा दर्ज माप उपलब्ध नहीं है।'))+'</div>';
+    };
+    $('homeHealthCard').querySelector('h2').textContent=T('At a glance','एक नज़र में');$('homeHealthCard').querySelector('.home-kicker').textContent=T('RECORDED BY YOUR CLINIC','आपके क्लिनिक द्वारा दर्ज');
+    $('healthSnapshot').innerHTML=state.offline?'<div class="oh-empty">'+(window.PatientVisuals?.emptyArt('care')||'○')+'<p>'+T('Connect for clinic readings.','क्लिनिक की रीडिंग के लिए कनेक्ट करें।')+'</p></div>':['weight','blood_pressure','haemoglobin'].map(markup).join('');
+    const c=state.overview?.clinician_status;
+    $('clinicianStatus').innerHTML=c&&!state.offline?'<details class="oh-clinician-note"><summary>◇ '+T('Marked by your doctor','आपके डॉक्टर द्वारा चिह्नित')+'</summary><div><p>'+E(Array.isArray(c.reason)?c.reason.join(' · '):c.reason||T('Discuss this recorded note with your clinician.','यह दर्ज नोट अपने डॉक्टर से समझें।'))+'</p><small>'+E(c.doctor||T('Clinic record','क्लिनिक रिकॉर्ड'))+'</small></div></details>':'';
+    const disclaimer=$('homeHealthCard').querySelector('.home-disclaimer');disclaimer.innerHTML=info(T('Arrows show recorded numerical change only. Your clinician interprets readings; no diagnosis or health verdict is calculated.','तीर केवल दर्ज संख्यात्मक बदलाव बताते हैं। रीडिंग की व्याख्या आपके डॉक्टर करेंगे।'))+(metrics.some(m=>m.type==='blood_glucose')?'<details class="oh-extra-vital"><summary>'+T('Blood sugar','ब्लड शुगर')+'</summary>'+markup('blood_glucose')+'</details>':'');
+    const extra=$('panel-dashboard').querySelector('.oh-extras>summary');extra.innerHTML='<span>✧ '+T('More for you','आपके लिए और')+'</span><span>'+T('Journal · Check-ins · 3D viewer','डायरी · चेक-इन · 3D दृश्य')+' +</span>';
+    $('panel-dashboard').querySelector('.home-footer-note').innerHTML='<svg aria-hidden="true"><use href="#i-shield"/></svg> '+T('Synthetic demo · Clinical decisions stay with your care team.','सिंथेटिक डेमो · चिकित्सा निर्णय आपकी देखभाल टीम के पास हैं।');
+    document.querySelectorAll('[data-home-nav-label]').forEach(n=>n.textContent=({Care:T('Care','देखभाल'),Records:T('Records','रिकॉर्ड'),Help:T('Help','मदद')})[n.dataset.homeNavLabel]);
+  }
   function renderCalendar(){
     if(!state)return;const M=window.PatientModel,today=M.today();selectedDate=selectedDate||today;
     const days=Array.from({length:7},(_,i)=>{const d=new Date(today+'T12:00:00Z');d.setUTCDate(d.getUTCDate()+i);return d.toISOString().slice(0,10);});
-    $('homeOpenWeek').innerHTML=days.map(d=>{const has=(state.appointments||[]).some(a=>String(a.requested_date).slice(0,10)===d&&a.status!=='cancelled');return '<button type="button" aria-pressed="'+(selectedDate===d)+'" data-oh-date="'+d+'" class="'+(has?'oh-has-visit':'')+'" aria-label="'+E(dateLabel(d)+(has?' · visit recorded':''))+'"><small>'+new Date(d+'T12:00:00').toLocaleDateString(document.documentElement.lang||'en',{weekday:'short'})+'</small><strong>'+d.slice(-2)+'</strong><i aria-hidden="true"></i></button>';}).join('');
+    $('homeOpenWeek').innerHTML=days.map(d=>{const has=(state.appointments||[]).some(a=>String(a.requested_date).slice(0,10)===d&&a.status!=='cancelled');return '<button type="button" aria-pressed="'+(selectedDate===d)+'" data-oh-date="'+d+'" class="'+(has?'oh-has-visit':'')+'" aria-label="'+E(dateLabel(d)+(has?T(' · visit recorded',' · भेंट दर्ज'):''))+'"><small>'+new Date(d+'T12:00:00').toLocaleDateString(document.documentElement.lang||'en',{weekday:'short'})+'</small><strong>'+d.slice(-2)+'</strong><i aria-hidden="true"></i></button>';}).join('');
     const appointments=(state.appointments||[]).filter(a=>String(a.requested_date).slice(0,10)===selectedDate&&a.status!=='cancelled');
-    $('nextAppointmentPreview').innerHTML='<div class="oh-day-appointments"><span class="oh-eyebrow">'+E(dateLabel(selectedDate))+'</span>'+(appointments.length?appointments.map(a=>'<div><strong>'+E(a.requested_time?.slice(0,5)||'Time to confirm')+' · '+E(a.reason||'Care visit')+'</strong><p>'+E(a.doctor_name||'Clinician to confirm')+'</p><small>'+E(a.hospital_name||a.facility_name||'Confirm centre with your care team')+' · '+E(a.status)+'</small></div>').join(''):'<p>No visit recorded for this day.</p><button type="button" class="link-btn" data-oh-go="appointments">Plan your next visit →</button>')+'</div>';
+    $('homeAppointmentCard').querySelector('h2').textContent=T('Your visits','आपकी भेंट');$('homeAppointmentCard').querySelector('.home-kicker').textContent=T('YOUR NEXT HELLO','अगली मुलाकात');$('homeAppointmentCard').querySelector('button[data-go="appointments"]').textContent=T('All visits ↗','सभी भेंट ↗');
+    $('nextAppointmentPreview').innerHTML=appointments.length?appointments.slice(0,1).map(a=>'<div class="oh-day-appointments"><strong>'+E(a.requested_time?.slice(0,5)||T('Time to confirm','समय तय होना बाकी'))+' · '+E(a.reason||T('Care visit','देखभाल भेंट'))+'</strong><p>'+E(a.doctor_name||T('Clinician to confirm','डॉक्टर तय होना बाकी'))+'</p><small>'+E(a.status)+'</small>'+info((a.hospital_name||a.facility_name||T('Confirm centre with your care team','अपनी टीम से केंद्र की पुष्टि करें'))+' · '+dateLabel(selectedDate))+'</div>').join('')+(appointments.length>1?'<button type="button" class="link-btn" data-oh-go="appointments">+'+(appointments.length-1)+' '+T('more visits','और भेंट')+'</button>':''):'<div class="oh-calendar-empty"><svg aria-hidden="true" viewBox="0 0 40 40"><rect x="5" y="9" width="30" height="27" rx="7"/><path d="M5 18h30M13 4v10M27 4v10m-14 13 5 4 9-9"/></svg><p>'+T('No visit recorded','कोई भेंट दर्ज नहीं')+'</p></div>';
   }
   function renderVaccines(){
     const children=state.children||[];selectedChild=children.find(c=>c.id===selectedChild?.id)||children[0];
@@ -141,7 +157,7 @@
       $('homeOpenFacility').innerHTML='<p class="oh-loading-copy">Finding your registered centre…</p>';
       return;
     }
-    $('homeOpenJourney').removeAttribute('aria-busy');renderJourney();renderHero();renderCalendar();renderVaccines();renderMap();
+    $('homeOpenJourney').removeAttribute('aria-busy');renderJourney();renderHero();renderGlance();renderCalendar();renderVaccines();renderMap();
   }
   window.PatientHomeOpen={update};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount);else mount();
