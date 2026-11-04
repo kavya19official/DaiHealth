@@ -319,3 +319,13 @@ body[data-home-theme=dark] #panel-dashboard.open-home .oh-week button[aria-press
 body[data-home-theme=dark] #panel-dashboard.open-home :is(#homeOpenJourney,#homeOpenPending,#homeHealthCard,#homeDevelopmentCard,#homeAppointmentCard,#homeOpenVaccines,.oh-map-card){background:#211a2c!important}
 @media(max-width:1100px){#panel-dashboard.open-home .oh-middle-row{grid-template-columns:minmax(0,1.35fr) minmax(0,1fr)}#panel-dashboard.open-home #homeAppointmentCard{grid-column:1/-1}#panel-dashboard.open-home #homeAppointmentCard .oh-week{max-width:440px}#panel-dashboard.open-home .oh-main-row{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr)}#panel-dashboard.open-home .oh-bottom-row{grid-template-columns:minmax(0,1fr)}}
 @media(max-width:700px){.patient-view .content:has(.open-home.is-active){padding-inline:16px}#panel-dashboard.open-home .oh-hero-band{grid-template-columns:minmax(0,1fr);padding:18px;gap:16px;margin-inline:0}#panel-dashboard.open-home .oh-main-row,#panel-dashboard.open-home .oh-middle-row,#panel-dashboard.open-home .oh-bottom-row{grid-template-columns:minmax(0,1fr);gap:16px;margin-block:16px}#panel-dashboard.open-home :is(#homeOpenJourney,#homeOpenPending,#homeHealthCard,#homeDevelopmentCard,#homeAppointmentCard,#homeOpenVaccines){padding:18px!important}#panel-dashboard.open-home #homeAppointmentCard{grid-column:auto}#panel-dashboard.open-home .home-health .snapshot-reading>strong{font-size:22px}#panel-dashboard.open-home .oh-section-heading>.link-btn{max-width:85px}#panel-dashboard.open-home .home-journey-copy{max-width:70%}}
+
+/* Lightweight illustrated stage path; never a clinical completion score. */
+.oh-care-path-graphic{margin:12px 0 14px;padding:8px 12px 10px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(120deg,var(--brand-pale),var(--surface,var(--ground)));min-width:0}
+.oh-care-path-graphic>svg{display:block;width:100%;height:96px;overflow:visible}
+.oh-path-caption{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:10px;line-height:1.7;color:var(--ink-2)}
+.oh-path-caption>strong{font-size:10px;font-weight:650;color:var(--brand-strong)}
+.oh-path-marker{animation:oh-marker-arrive 320ms ease-out both;transform-box:fill-box}
+@keyframes oh-marker-arrive{from{opacity:0}to{opacity:1}}
+@media(max-width:700px){.oh-care-path-graphic{padding:8px 10px}.oh-care-path-graphic>svg{height:80px}.oh-path-caption{font-size:9px}.oh-path-caption>strong{font-size:9px}}
+@media(prefers-reduced-motion:reduce){.oh-path-marker{animation:none}}
