@@ -18,7 +18,15 @@
     const root=$('panel-dashboard');if(!root||$('homeOpenJourney'))return;
     root.classList.add('open-home');setupNavigation();
     const hero=root.querySelector('.home-hero-grid');hero.classList.add('oh-hero-band');
-    const path=document.createElement('div');path.id='homeHeroPath';path.className='oh-hero-path';$('homeJourneyProgress').after(path);
+    const greeting=root.querySelector('.home-heading'),copy=root.querySelector('.home-journey-copy');
+    copy.prepend(greeting);greeting.querySelector('.eyebrow').hidden=true;
+    root.querySelector('#homeJourneyTitle').hidden=true;root.querySelector('#homeJourneyText').hidden=true;
+    copy.querySelector('.home-kicker').hidden=true;
+    const identity=document.createElement('div');identity.className='oh-baby-identity';identity.append($('homeJourneyProgress'),$('homeBabyTabs'));copy.append(identity,$('shareJourney'));
+    const next=$('nextStepCard');next.querySelector('.home-next-icon').hidden=true;next.querySelector('small').hidden=true;
+    const nextDetails=document.createElement('details');nextDetails.id='homeNextDetails';nextDetails.className='oh-info';nextDetails.innerHTML='<summary aria-label="Why this care step?">i</summary><div></div>';next.append(nextDetails);
+    const actions=document.createElement('div');actions.className='oh-next-actions';actions.append($('nextStepBook'),$('nextStepDirections'));next.append(actions);
+    const path=document.createElement('div');path.id='homeHeroPath';path.className='oh-hero-path';$('homeJourneyProgress').after(path);path.hidden=true;
     const note=document.createElement('span');note.className='oh-photo-note';note.textContent='A little care. A world of possibility.';root.querySelector('.home-illustration').append(note);
     const top=section('homeOpenMain','oh-main-row','');
     top.append(section('homeOpenJourney','oh-open-section oh-journey',header('MY JOURNEY','Every step, connected.','Full timeline','timeline')+'<div class="oh-journey-meta" id="homeOpenCounts">Loading your recorded care plan…</div><div id="homeOpenTimeline" class="oh-timeline" aria-label="Recorded care milestones"></div><div class="oh-timeline-legend"><span class="oh-done">✓ Done</span><span class="oh-late">◷ To catch up</span><span>○ Upcoming</span></div><div class="oh-journey-foot"><span>Small steps. A continuous story of care.</span><button type="button" class="link-btn" data-oh-go="gaps">See what’s next →</button></div>'));
@@ -41,6 +49,18 @@
     function navState(){const n=$('homeCareNavigation');if(n)n.open=!!n.querySelector('.is-active');document.body.classList.toggle('patient-on-home',!location.hash||location.hash==='#dashboard');if(map)setTimeout(()=>map.invalidateSize(),0);}
     window.addEventListener('hashchange',navState);navState();
     document.addEventListener('click',event=>{const button=event.target.closest('button');if(!button)return;if(button.matches('.nav-item'))queueMicrotask(navState);if(button.dataset.ohGo){const nav=document.querySelector('.nav-item[data-panel="'+button.dataset.ohGo+'"]');if(nav)nav.click();else if(button.dataset.ohGo==='profile')document.querySelector('.user-chip')?.click();queueMicrotask(navState);}if(button.dataset.ohDate){selectedDate=button.dataset.ohDate;renderCalendar();}if(button.dataset.ohChild){selectedChild=state?.children?.find(c=>String(c.id)===button.dataset.ohChild);const choice=document.querySelector('[data-home-child="'+button.dataset.ohChild+'"]');if(choice)choice.click();renderVaccines();}if(button.dataset.ohBaby){const c=state?.children?.find(c=>String(c.id)===button.dataset.ohBaby);if(c){localStorage.setItem('dai_active_child',c.id);location.href='child-dashboard.html';}}});
+  }
+  function renderHero(){
+    const st=window.PatientModel.stage(state.user,state.post,state.children),next=relevant()[0],hi=document.documentElement.lang==='hi';
+    $('homeGreetingSub').textContent=st.label;$('homeGreetingSub').className='oh-stage-chip';
+    $('nextStepWhy').textContent=next?(hi?'आपकी दर्ज देखभाल में अगला कदम।':'The next item in your recorded care plan.'):(hi?'अपनी देखभाल का प्लान देखें।':'Review your recorded care plan.');
+    const detail=$('homeNextDetails').querySelector('div');detail.textContent=next?.guidance||next?.why||(hi?'आगे की देखभाल अपनी टीम से तय करें।':'Discuss your next follow-up with your care team.');
+    $('nextStepDirections').innerHTML='<svg aria-hidden="true"><use href="#i-arrow"/></svg>';
+    $('nextStepDirections').setAttribute('aria-label',hi?'केंद्र तक रास्ता':'Directions to registered centre');
+    $('nextStepDirections').title=hi?'केंद्र तक रास्ता':'Directions to registered centre';
+    $('nextStepCard').querySelector('.home-kicker').textContent=hi?'आपका अगला कदम':'YOUR NEXT STEP';
+    const save=$('shareJourney');save.innerHTML='<svg aria-hidden="true"><use href="#i-heart"/></svg> '+(hi?'यादगार कार्ड':'Milestone card')+' ↗';
+    const image=$('homeStageImage');image.loading='eager';
   }
   function relevant() {
     const M=window.PatientModel,st=M.stage(state.user,state.post,state.children),items=M.gaps(state.milestones||[],st);
@@ -108,7 +128,7 @@
       $('homeOpenFacility').innerHTML='<p class="oh-loading-copy">Finding your registered centre…</p>';
       return;
     }
-    $('homeOpenJourney').removeAttribute('aria-busy');renderJourney();renderCalendar();renderVaccines();renderMap();
+    $('homeOpenJourney').removeAttribute('aria-busy');renderJourney();renderHero();renderCalendar();renderVaccines();renderMap();
   }
   window.PatientHomeOpen={update};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount);else mount();
