@@ -886,6 +886,10 @@ def create_app(engine=None):
 
     register_sustainability(app, engine, require, one, audit, facility_staff)
 
+    from .operations_intelligence import register as register_operations_intelligence
+
+    register_operations_intelligence(app, engine, require, audit, one)
+
     from .forecasts import register_forecasts
 
     register_forecasts(app, engine, require, audit)

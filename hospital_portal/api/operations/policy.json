@@ -1,0 +1,20 @@
+{
+  "version": "1.0.0",
+  "seed": 42,
+  "max_jobs": 24,
+  "max_windows": 40,
+  "max_tool_steps": 6,
+  "max_provider_calls": 2,
+  "provider_timeout_seconds": 4,
+  "solver_seconds": 2,
+  "cache_minutes": 15,
+  "resource_change_threshold": 0.25,
+  "duration_minutes": {
+    "leak": 60,
+    "maintenance": 60,
+    "cooling": 90,
+    "other": 45
+  },
+  "priority_points": { "elevated": 100, "routine": 1 },
+  "assumptions": "Durations are editable non-clinical planning placeholders, not engineering or clinical standards. Availability and skills must be declared. Resource changes are review prompts, not proof of inefficiency. No carbon, water or energy saving is inferred from AI usage."
+}

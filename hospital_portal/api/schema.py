@@ -655,3 +655,35 @@ session_scope = table(
     ref("affiliation_id", "staff_affiliation", False),
     constraints=(UniqueConstraint("session_id"),),
 )
+
+# Non-clinical operations plans: declared capacity, drafts and human-approved assignments.
+operations_availability = table(
+    "operations_availability", ref("facility_id", "facility", False),
+    ref("staff_id", "portal_user", False), ref("declared_by", "portal_user", False),
+    Column("starts_at", DateTime(timezone=True), nullable=False),
+    Column("ends_at", DateTime(timezone=True), nullable=False),
+    Column("domains", JSON, nullable=False), text("source", False),
+    flag("active", True), number("version", False),
+    constraints=(CheckConstraint("ends_at > starts_at"),),
+)
+operations_run = table(
+    "operations_run", ref("facility_id", "facility", False),
+    ref("actor_id", "portal_user", False), text("input_hash", False),
+    text("state", False), number("version", False), data("payload"),
+    constraints=(CheckConstraint("state IN ('draft','approved','rejected')"),),
+)
+operations_assignment = table(
+    "operations_assignment", ref("facility_id", "facility", False),
+    ref("run_id", "operations_run", False), ref("ticket_id", "sustainability_ticket", False),
+    ref("staff_id", "portal_user", False), ref("availability_id", "operations_availability", False),
+    Column("starts_at", DateTime(timezone=True), nullable=False),
+    Column("ends_at", DateTime(timezone=True), nullable=False),
+    constraints=(UniqueConstraint("ticket_id"), CheckConstraint("ends_at > starts_at")),
+)
+operations_ai_usage = table(
+    "operations_ai_usage", ref("facility_id", "facility", False),
+    ref("actor_id", "portal_user", False), ref("run_id", "operations_run", False),
+    flag("cache_hit", False), number("provider_attempts", False),
+    number("reported_total_tokens"), number("tool_calls", False),
+    Column("latency_ms", Float, nullable=False), text("source", False),
+)
