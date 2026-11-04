@@ -146,3 +146,25 @@ body[data-home-theme=dark] .patient-view .user-chip,body.patient-view[data-home-
 #panel-dashboard.open-home .home-share{min-height:30px;margin-top:6px}
 @media(max-width:1000px){#panel-dashboard.open-home .oh-hero-band{grid-template-columns:minmax(0,1.3fr) minmax(260px,1fr);gap:16px}}
 @media(max-width:700px){#panel-dashboard.open-home .oh-hero-band{grid-template-columns:minmax(0,1fr);padding:18px;margin-left:-18px;margin-right:-18px;gap:14px}#panel-dashboard.open-home .home-journey{min-height:200px}#panel-dashboard.open-home .home-journey-copy{max-width:72%}#panel-dashboard.open-home .home-heading h1{font-size:26px!important}#panel-dashboard.open-home .home-illustration{height:185px;width:28%}#panel-dashboard.open-home .home-next{padding:18px}#panel-dashboard.open-home .home-next h2{font-size:22px!important}#panel-dashboard.open-home .home-heading .oh-stage-chip{font-size:11px}#panel-dashboard.open-home .home-next .care-label{max-width:110px}.oh-info>div{right:0}}
+
+/* Prioritise near-term care; retain the complete catch-up history inline. */
+.oh-main-row{grid-template-columns:minmax(0,2.4fr) minmax(220px,1fr);gap:24px;margin-bottom:18px}
+.oh-journey .oh-section-heading{margin-bottom:10px}
+.oh-journey-meta{position:relative;gap:16px;padding-right:36px;min-height:28px;flex-wrap:wrap}
+.oh-journey-meta>.home-listen{top:0;right:0;width:28px;height:28px}
+.oh-timeline{min-height:135px;padding:12px 0 0;gap:0;background:none}
+.oh-stop{flex:1 0 100px;max-width:170px;padding-right:12px}
+.oh-stop:not(:last-child)::after{top:38px;border:0;height:15px;background:none;border-top:2px solid var(--line);border-radius:50%;transform:rotate(-5deg)}
+.oh-stop:nth-child(even){padding-top:12px}
+.oh-stop:nth-child(even):not(:last-child)::after{transform:rotate(5deg)}
+.oh-stop-dot{margin-bottom:9px}
+.oh-stop strong{font-size:calc(11px * var(--patient-scale));line-height:1.6;overflow-wrap:anywhere}
+.oh-catchup .oh-stop-dot{color:var(--amber);background:var(--amber-soft);border-color:var(--amber)}
+.oh-timeline-legend{justify-content:flex-end;margin-top:0}
+.oh-catchup-list{border:1px solid var(--line);background:var(--brand-pale);border-radius:14px;padding:14px;font-size:12px;margin-top:12px}
+.oh-catchup-list>div{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
+.oh-catchup-list>div:last-child{border-bottom:0}.oh-catchup-list>div>div{flex:1;min-width:0}.oh-catchup-list b{display:block;font-size:12px;line-height:1.6}.oh-catchup-list small{display:block;color:var(--ink-muted);font-size:10px}
+.oh-main-row .oh-pending{border-left:1px solid var(--line);padding-left:22px}
+.oh-main-row .oh-pending-row{padding:10px 0}.oh-main-row .oh-pending-row strong{font-size:11px}
+.oh-main-row .oh-empty{min-height:110px;padding:10px}.oh-empty .care-empty-art{width:48px;height:48px;display:block}.oh-empty .care-empty-art svg{width:48px;height:48px}
+@media(max-width:900px){.oh-main-row{grid-template-columns:minmax(0,1fr)}.oh-main-row .oh-pending{border-left:0;padding-left:0;border-top:1px solid var(--line);padding-top:14px}.oh-stop{min-width:105px}.oh-timeline{overflow-x:auto}}
