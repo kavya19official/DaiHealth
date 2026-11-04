@@ -5,6 +5,7 @@ import { ForecastPanel } from "./forecasts";
 import { CarePanel, PatientCoordination } from "./care";
 import { AdministrationPanel, AffiliationSwitcher, InvitationAcceptance, PatientStaffRecords, ReferralInbox, CreateReferral } from "./administration";
 import { SustainabilityPanel } from "./sustainability";
+import { OperationsIntelligencePanel } from "./operations-intelligence";
 import { PatientRequestsPanel } from "./patient-requests";
 import { FollowupRiskPanel } from "./followup-risk";
 type Row = Record<string, any>;
@@ -47,6 +48,7 @@ const administrationNav = [
   ["adminOverview", "Administration overview", "◈"],
   ["forecasts", "ML forecasts & stock planning", "⌁"],
   ["sustainability", "Green hospital", "♧"],
+  ["intelligence", "Operations intelligence", "✧"],
   ["facility", "Facility master", "✚"],
   ["organisation", "Organisation & roles", "♧"],
   ["structure", "Departments & units", "▦"],
@@ -69,6 +71,7 @@ const workspacePermissions: Record<string, string> = {
   followupRisk: "coordination.read",
   patientRequests: "coordination.read",
   sustainability: "green.read",
+  intelligence: "operations.read",
   forecasts: "forecast.read",
   beds: "bed.read",
   critical: "bed.read",
@@ -117,6 +120,7 @@ const titles: Record<string, [string, string]> = {
   ],
   followupRisk: ["Follow-up & risk demo", "Shared follow-up state and separately reviewed synthetic risk flags."],
   patientRequests: ["Patient requests", "Synthetic appointment and referral coordination with facility-scoped staff review."],
+  intelligence: ["Operations intelligence", "Bounded agents, explainable maintenance planning and measured AI usage."],
   sustainability: [
     "Green hospital",
     "Resource observations and accountable actions, without unsupported impact claims.",
@@ -897,6 +901,7 @@ export default function Home() {
                   reviews={view === "careReviews"}
                 />
               )}
+              {view === "intelligence" && <OperationsIntelligencePanel key={user.id+user.facility_id} api={api} permissions={user.permissions} onOpenGreen={()=>setView("sustainability")}/>}
               {view === "sustainability" && (
                 <SustainabilityPanel
                   key={user.id}

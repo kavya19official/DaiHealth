@@ -4,6 +4,10 @@ DAI is a hospital readiness and care-coordination layer. All people, facility id
 
 This folder implements the **first phase** of the supplied specification alongside the existing Express prototype. Next.js/TypeScript/Tailwind and FastAPI are the new portal. The existing plain-HTML hospital screen is a separate synthetic administration preview; its header-based demo roles are not secure authentication and it must not receive real data or be publicly deployed.
 
+## Operations intelligence
+
+Administration now includes bounded agent tools, Green Hospital resource comparisons, local-first AI usage controls, actual OR-Tools CP-SAT inspection planning and an explainable decision trail. Plans require explicit human approval. See [scope, configuration, verification and limitations](../docs/OPERATIONS-INTELLIGENCE.md).
+
 ## Run the new portal locally
 
 From `/Users/Dell/Documents/DAI`, using Python 3.11 and Node 22 or newer:
