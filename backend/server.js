@@ -1098,6 +1098,7 @@ require('./notifications')(app, { pool, authenticateToken });
 require('./patientPreferences')(app, { pool, authenticateToken });
 require('./patientContinuity')(app, { pool, authenticateToken, authorizeRole });
 require('./patientExperience')(app, { pool, authenticateToken, authorizeRole });
+require('./patientHospitalStay')(app, { pool, authenticateToken, authorizeRole });
 require('./patientHome')(app, { pool, authenticateToken, authorizeRole });
 require('./patientSupport')(app, { pool, authenticateToken, authorizeRole });
 const aiUsageTracker=require('./aiUsage').register(app,{pool,authenticateToken});

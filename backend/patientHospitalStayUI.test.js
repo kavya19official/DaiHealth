@@ -1,0 +1,26 @@
+'use strict';
+const test=require('node:test'),assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs'),path=require('node:path');
+test('hospital stay display hides outside admissions, renders missing readings and keeps twins separate',async()=>{
+ const nodes=new Map(),events={},clicks={},node=()=>({innerHTML:'',textContent:'',hidden:false,append(){},before(){},prepend(){},className:''});
+ for(const id of ['hospitalStayView','pageTitle','homeJourneyCard','panel-timeline','supportFamily'])nodes.set(id,node());
+ const nav=node();const doc={documentElement:{lang:'en'},getElementById:id=>nodes.get(id),querySelector:()=>nav,createElement:()=>{const n=node();Object.defineProperty(n,'id',{set(id){nodes.set(id,n);}});return n;},addEventListener:(k,f)=>{clicks[k]=f;}};
+ let response={stays:[]};const win={PatientModel:{escape:s=>String(s).replaceAll('<','&lt;')},DaiAPI:{apiRequest:async()=>response,toast(){}},addEventListener:(k,f)=>{events[k]=f;}};
+ const context={window:win,document:doc,location:{hash:'#hospital-stay'},navigator:{onLine:true},Date,setInterval(){}};
+ vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../frontend/js/patient-hospital-stay.js'),'utf8'),context);
+ await events['dai:patient-ready']();assert.equal(nav.hidden,true);assert.match(nodes.get('hospitalStayView').innerHTML,/Your hospital stay, when you need it/);
+ const update=(child,text)=>({id:child,child_id:child,kind:'feeding',text,values:{},recorded_at:'2026-11-01T08:00:00Z',verified_at:'2026-11-01T09:00:00Z',released_at:'2026-11-01T10:00:00Z',recorded_by:'Nurse',verified_by:'Reviewer',released_by:'Clinician'});
+ response={stays:[{id:1,status:'admitted',facility_name:'Demo',ward_name:'Ward 6',bed_label:'Bed 14',children:[{id:1,name:'Baby A'},{id:2,name:'Baby B'}],updates:[update(1,'Baby A feed'),update(2,'Baby B feed')],notes:[]}]};
+ await events['dai:patient-ready']();assert.equal(nav.hidden,false);assert.equal(nodes.get('hospitalStayHome').hidden,false);assert.match(nodes.get('hospitalStayView').innerHTML,/Not recorded/);assert(!nodes.get('hospitalStayView').innerHTML.includes('Baby A feed'));
+ clicks.click({target:{closest:()=>({dataset:{staySubject:'1'},hasAttribute:()=>false})}});
+ let html=nodes.get('hospitalStayView').innerHTML;assert(html.includes('Baby A feed'));assert(!html.includes('Baby B feed'));assert(html.includes('Baby 1'));
+ response.stays[0].status='discharged';await events['dai:patient-ready']();assert.equal(nodes.get('hospitalStayHome').hidden,true);assert.match(nodes.get('hospitalStayView').innerHTML,/Your stay summary/);
+ response.stays[0].updates=[{...update(null,'Original observation'),id:10,kind:'vitals',values:{pulse:80,bp_systolic:116,bp_diastolic:76,temperature_c:36.7}},{...update(null,'Corrected observation'),id:11,kind:'vitals',supersedes_id:10,values:{pulse:78,bp_systolic:118,bp_diastolic:78,temperature_c:36.8}}];
+ clicks.click({target:{closest:()=>({dataset:{staySubject:'mother'},hasAttribute:()=>false})}});
+ await events['dai:patient-ready']();html=nodes.get('hospitalStayView').innerHTML;
+ assert(html.includes('Blood pressure recorded trend in mmHg; 1 released readings'));
+ assert(html.includes('one point, not a trend'));assert(html.includes('1 released updates by category'));
+ assert(html.includes('Original observation'));assert(html.includes('Corrected observation'));
+ assert(html.includes('Read chart values'));assert(!html.includes('NaN'));
+ assert(!html.includes('undefined'));assert(html.includes('Your medicine timeline'));
+ events.offline();assert.equal(nav.hidden,true);assert(!nodes.get('hospitalStayView').innerHTML.includes('Baby A feed'));
+});
