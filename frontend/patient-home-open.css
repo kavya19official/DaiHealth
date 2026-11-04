@@ -219,3 +219,16 @@ body[data-home-theme=dark] .patient-view .user-chip,body.patient-view[data-home-
 .oh-baby-waiting{display:flex;align-items:center;gap:14px;min-height:130px;padding:14px;color:var(--ink-muted)}.oh-baby-waiting svg{width:56px;height:56px}.oh-baby-waiting p{font-size:12px;line-height:1.8;max-width:280px}
 @media(max-width:1000px){.oh-bottom-row{grid-template-columns:minmax(0,1.4fr) minmax(0,1fr)}.oh-age-bands{gap:6px}.oh-age-band+section{padding-left:6px}.oh-dose-ring>b{font-size:8px}}
 @media(max-width:700px){.oh-bottom-row{grid-template-columns:minmax(0,1fr);gap:20px}.oh-age-band>h3{font-size:10px}.oh-dose-tooltip{min-width:130px;max-width:155px}.oh-age-band:nth-child(n+3) .oh-dose-tooltip{left:auto;right:0}.oh-baby-identity{gap:10px}}
+
+/* Lazy neighbourhood map, with recorded distance and source detail. */
+.oh-map-card{overflow:visible;border-radius:22px;box-shadow:none}.oh-map-card .oh-section-heading{padding:16px 18px 0;margin-bottom:12px}.oh-map-card .oh-map{height:150px;min-height:150px;overflow:hidden}.oh-map-caption{padding:12px 14px 0;min-height:56px}.oh-map-caption>div{min-width:0;flex:1}.oh-map-caption strong{font-size:11px;line-height:1.6;white-space:normal;overflow-wrap:anywhere}.oh-map-caption small{display:block;font-size:9px;color:var(--ink-muted);margin-top:3px}.oh-map-caption .oh-facility-actions{display:flex;flex:0;align-items:center;gap:5px}.oh-facility-actions>a{display:grid;place-items:center;text-decoration:none}.oh-facility-icon{width:30px;height:30px;font-size:18px;flex-shrink:0}
+.oh-map-card>.oh-source-note{display:flex;align-items:center;justify-content:space-between;padding:8px 14px 12px;margin:0;gap:12px}.oh-distance-chip{font-size:9px;line-height:1.7;color:var(--ink-muted)}.oh-map-empty{min-height:150px;padding:18px;text-align:center;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;font-size:12px;line-height:1.8;color:var(--ink-muted)}
+.oh-dose-ring.tooltip-dismissed .oh-dose-tooltip{display:none!important}
+.patient-on-home .content{padding-bottom:110px!important}.patient-on-home #daiCareChatbot{bottom:16px;right:16px}.patient-on-home #daiCareChatbot .care-chatbot__launcher{font-size:12px;padding:8px 14px 8px 9px}
+#panel-dashboard.open-home{display:none;min-width:0}#panel-dashboard.open-home.is-active{display:block}
+#panel-dashboard.open-home :is(.oh-main-row,.oh-middle-row,.oh-bottom-row)>*{min-width:0}
+#panel-dashboard.open-home :is(p,h1,h2,h3,strong,b,small,button){overflow-wrap:anywhere}
+#panel-dashboard.open-home .home-illustration img{object-fit:contain}
+.oh-info[open]>div{animation:oh-detail-in 140ms ease-out}@keyframes oh-detail-in{from{opacity:.3;transform:translateY(-3px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){#panel-dashboard.open-home *,#panel-dashboard.open-home *:before,#panel-dashboard.open-home *:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+@media(max-width:700px){.oh-map-card .oh-map{height:160px;min-height:160px}.patient-on-home #daiCareChatbot .care-chatbot__launcher{min-height:42px}.patient-view .content:has(.open-home.is-active){padding-left:18px;padding-right:18px}.oh-map-caption strong{font-size:12px}}

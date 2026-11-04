@@ -11,7 +11,7 @@
   window.PatientHomeLayout=Display;
   const $ = id => document.getElementById(id);
   const E = x => String(x ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  let state, selectedChild, selectedDate, map, markers, mapKey = '',catchupOpen=false;
+  let state, selectedChild, selectedDate, map, markers, mapKey = '',catchupOpen=false,mapReady=false,mapObserver;
   const T=(en,hi)=>document.documentElement.lang==='hi'?hi:en;
   const listen=id=>'<button type="button" class="home-listen" data-listen="'+id+'" aria-label="'+T('Read this section aloud','यह भाग सुनें')+'"><svg aria-hidden="true"><use href="#i-speaker"/></svg></button>';
   const info=(text,name)=>'<details class="oh-info"><summary aria-label="'+E(name||T('About these records','इन रिकॉर्ड के बारे में'))+'">i</summary><div>'+E(text)+'</div></details>';
@@ -50,6 +50,12 @@
     bottom.append(section('homeOpenVaccines','oh-open-section oh-vaccines',header('MY BABY','Little doses. Lasting care.','Baby records','children')+'<div id="homeOpenVaccineBabies" class="oh-vaccine-babies" role="tablist" aria-label="Select baby for vaccine tracker"></div><div id="homeOpenVaccineRows" class="oh-vaccine-row"></div><p class="oh-source-note">Each baby’s recorded doses stay separate. Your care team plans catch-up doses.</p>'));
     bottom.append(section('homeOpenNearby','oh-map-card',header('CARE, CLOSER TO YOU','Your care neighbourhood','Find care','facilities')+'<div id="homeOpenMap" class="oh-map" aria-label="Map of listed care facilities"></div><div id="homeOpenFacility" class="oh-map-caption"></div><p class="oh-source-note">Synthetic facility locations · Availability must be confirmed with the centre.</p>'));
     middle.after(bottom);
+    $('homeOpenMap').innerHTML='<div class="oh-map-empty" aria-label="Map loads when nearby">⌖</div>';
+    if('IntersectionObserver' in window){mapObserver=new IntersectionObserver(entries=>{if(entries.some(e=>e.isIntersecting)){mapReady=true;mapObserver.disconnect();if(state)renderMap();}},{rootMargin:'160px'});mapObserver.observe($('homeOpenMap'));}else mapReady=true;
+    document.addEventListener('keydown',e=>{if(e.key==='Escape'){root.querySelectorAll('.oh-info[open]').forEach(d=>d.open=false);document.activeElement?.closest('.oh-dose-ring')?.classList.add('tooltip-dismissed');}});
+    document.addEventListener('focusin',e=>e.target.closest('.oh-dose-ring')?.classList.remove('tooltip-dismissed'));
+    document.addEventListener('pointerleave',e=>e.target.classList?.remove('tooltip-dismissed'),true);
+
     const extras=document.createElement('details');extras.className='oh-extras';extras.innerHTML='<summary><span>✧ A little more, just for you</span><span>Personal check-ins, journal & recorded-detail viewer +</span></summary><div class="oh-extras-body"></div>';
     extras.querySelector('div').append($('homeCheckinCard'),logs,$('homeJournalCard'),$('clinicalDashboardHome'));bottom.after(extras);
     extras.addEventListener('toggle',()=>window.dispatchEvent(new Event('resize')));
@@ -126,7 +132,7 @@
   function renderVaccines(){
     const children=state.children||[];selectedChild=children.find(c=>String(c.id)===String(selectedChild?.id))||children[0];
     const selector=$('homeBabyTabs');selector.classList.toggle('oh-linked-pair',children.length===2);selector.setAttribute('aria-label',T('Choose child for all home sections','होम के सभी भागों के लिए बच्चा चुनें'));
-    selector.querySelectorAll('[data-home-child]').forEach((button,i)=>{const c=children.find(c=>String(c.id)===button.dataset.homeChild),name=button.textContent;const age=c&&Number.isFinite(Date.parse(c.date_of_birth))&&c.date_of_birth<=window.PatientModel.today()?window.PatientHomeModel.age(c.date_of_birth,window.PatientModel.today()):null;button.innerHTML='<span class="oh-baby-avatar" aria-hidden="true">'+(age?'<svg viewBox="0 0 42 42"><circle cx="21" cy="21" r="18"/><circle class="oh-avatar-arc" cx="21" cy="21" r="18" stroke-dasharray="'+Math.min(113,age.days/365*113)+' 113"/></svg>':'')+'<span>'+E(name.trim().split(/\s+/).map(n=>n[0]).slice(0,2).join(''))+'</span></span><span>'+E(name)+'</span>';});
+    selector.querySelectorAll('[data-home-child]').forEach((button,i)=>{const c=children.find(c=>String(c.id)===button.dataset.homeChild),name=button.dataset.homeBabyName||button.textContent;button.dataset.homeBabyName=name;const age=c&&Number.isFinite(Date.parse(c.date_of_birth))&&c.date_of_birth<=window.PatientModel.today()?window.PatientHomeModel.age(c.date_of_birth,window.PatientModel.today()):null;button.innerHTML='<span class="oh-baby-avatar" aria-hidden="true">'+(age?'<svg viewBox="0 0 42 42"><circle cx="21" cy="21" r="18"/><circle class="oh-avatar-arc" cx="21" cy="21" r="18" stroke-dasharray="'+Math.min(113,age.days/365*113)+' 113"/></svg>':'')+'<span>'+E(name.trim().split(/\s+/).map(n=>n[0]).slice(0,2).join(''))+'</span></span><span>'+E(name)+'</span>';});
     $('homeOpenVaccineBabies').removeAttribute('role');$('homeOpenVaccineBabies').removeAttribute('aria-label');
     $('homeOpenVaccines').querySelector('h2').textContent=T('Vaccine passport','टीकों का पासपोर्ट');$('homeOpenVaccines').querySelector('.oh-eyebrow').textContent=T('MY BABY','मेरा बच्चा');$('homeOpenVaccines').querySelector('.oh-section-heading>.link-btn').textContent=T('All vaccines ↗','सभी टीके ↗');
     $('homeOpenVaccineBabies').innerHTML=selectedChild?'<strong>'+E(selector.querySelector('[aria-selected="true"]')?.textContent||selectedChild.name)+'</strong><button type="button" class="link-btn" data-oh-change-baby>'+T('Change ↑','बदलें ↑')+'</button>'+info(T('The same selected child is used above and here. Each baby’s doses remain separate. Rings show recorded status, not protection or immunity.','ऊपर और यहाँ एक ही बच्चा चुना है। हर बच्चे के टीके अलग हैं। रिंग केवल दर्ज स्थिति दिखाती है।')):'';
@@ -139,19 +145,20 @@
     $('homeOpenVaccines').querySelector('.oh-source-note').hidden=true;
   }
   function renderMap(){
-    const facility=state.overview?.registered_facility;
-    const valid=f=>(f.lat!==null&&f.lng!==null&&Number.isFinite(Number(f.lat))&&Number.isFinite(Number(f.lng)));
-    const facilities=(state.overview?.facilities||[]).filter(valid);const anchor=facility&&valid(facility)?facility:facilities[0];
-    $('homeOpenFacility').innerHTML=anchor?'<span class="oh-facility-icon">✚</span><div><strong>'+E(anchor.name)+'</strong><small>'+(anchor.id===facility?.id?'Your registered centre':'Listed care centre')+' · '+E(anchor.tier||'Facility')+'</small></div><button type="button" class="oh-row-action" data-oh-go="facilities" aria-label="Find nearby care">↗</button>':'<p>No facility location recorded. Choose an area in Nearby care.</p>';
-    const host=$('homeOpenMap');
-    if(!anchor){host.innerHTML='<div class="oh-map-empty"><span>⌖</span>Choose an area to discover care.<button type="button" class="link-btn" data-oh-go="facilities">Open Nearby care →</button></div>';return;}
-    if(!navigator.onLine||window.DaiAPI.lowBandwidth?.()){if(map){map.remove();map=null;mapKey='';}host.innerHTML='<div class="oh-map-empty"><span>⌖</span>Map paused to save data.<button type="button" class="link-btn" data-oh-go="facilities">Browse the facility list →</button></div>';return;}
-    if(!window.L)return;
-    const key=anchor.id+'|'+facilities.map(f=>f.id).join(',');if(map&&key===mapKey)return;
-    if(!map){host.replaceChildren();map=L.map(host,{scrollWheelZoom:false,dragging:!L.Browser.mobile,zoomControl:true});const tiles=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',maxZoom:18});tiles.addTo(map);tiles.on('tileerror',()=>{host.setAttribute('aria-label','Map tiles unavailable. Facility details and Nearby care list remain available.');});markers=L.layerGroup().addTo(map);new ResizeObserver(()=>map?.invalidateSize()).observe(host);}
-    markers.clearLayers();mapKey=key;map.setView([Number(anchor.lat),Number(anchor.lng)],12);
-    for(const f of facilities){L.circleMarker([Number(f.lat),Number(f.lng)],{radius:f.id===anchor.id?10:7,color:'#fff',weight:3,fillColor:f.id===anchor.id?'#6d3fd6':'#9c83c7',fillOpacity:1}).addTo(markers).bindPopup('<strong>'+E(f.name)+'</strong><p>Listed facility · confirm availability</p>');}
-    setTimeout(()=>map.invalidateSize(),0);
+    const facility=state.overview?.registered_facility,facilities=(state.overview?.facilities||[]).filter(f=>Display.validPoint(f)),anchor=Display.validPoint(facility)?facility:facilities[0],host=$('homeOpenMap');
+    $('homeOpenNearby').querySelector('h2').textContent=T('Care neighbourhood','नज़दीकी देखभाल');$('homeOpenNearby').querySelector('.oh-eyebrow').textContent=T('CARE, CLOSER TO YOU','आपके पास देखभाल');$('homeOpenNearby').querySelector('.oh-section-heading>.link-btn').textContent=T('Find care ↗','केंद्र खोजें ↗');
+    const distance=anchor?.distance_km!==null&&anchor?.distance_km!==undefined&&Number.isFinite(Number(anchor.distance_km))?Number(anchor.distance_km):null;
+    $('homeOpenFacility').innerHTML=anchor?'<span class="oh-facility-icon" aria-hidden="true">✚</span><div><strong>'+E(anchor.name)+'</strong><small>'+E(anchor.id===facility?.id?T('Registered centre','दर्ज केंद्र'):T('Listed centre','सूचीबद्ध केंद्र'))+'</small></div><div class="oh-facility-actions"><button type="button" class="oh-row-action" data-oh-go="facilities" aria-label="'+T('Open facility details','केंद्र का विवरण खोलें')+'">↗</button><a class="oh-row-action" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(anchor.lat+','+anchor.lng)+'" aria-label="'+T('Directions to this facility','इस केंद्र तक रास्ता')+'">⌖</a></div>':'<div class="oh-empty"><p>'+T('No facility location recorded.','केंद्र का स्थान दर्ज नहीं है।')+'</p></div>';
+    const note=$('homeOpenNearby').querySelector('.oh-source-note');note.innerHTML='<span class="oh-distance-chip">⌖ '+(distance!==null?E(distance.toFixed(1))+' km':T('Distance not recorded','दूरी दर्ज नहीं'))+'</span>'+info(T('Check availability with the centre. Pins show listed coordinates, not live readiness. Distance is shown only when supplied in your permitted facility records.','उपलब्धता की पुष्टि केंद्र से करें। पिन सूचीबद्ध स्थान दिखाते हैं, लाइव तैयारी नहीं। दूरी केवल उपलब्ध रिकॉर्ड से दिखती है।'));
+    if(!anchor){if(map){map.remove();map=null;mapKey='';}host.innerHTML='<div class="oh-map-empty">⌖ '+T('Choose an area in Nearby care','नज़दीकी देखभाल में क्षेत्र चुनें')+'</div>';return;}
+    if(state.offline||!navigator.onLine||window.DaiAPI.lowBandwidth?.()){if(map){map.remove();map=null;mapKey='';}host.innerHTML='<div class="oh-map-empty">⌖ '+T('Map paused · facility list available','नक्शा रोका गया · केंद्र सूची उपलब्ध')+'</div>';return;}
+    if(!mapReady||!window.L)return;
+    const key=anchor.id+'|'+facilities.map(f=>[f.id,f.lat,f.lng].join(',')).join(';');if(map&&key===mapKey)return;
+    if(!map){host.replaceChildren();map=L.map(host,{scrollWheelZoom:false,dragging:!L.Browser.mobile,zoomControl:true});const tiles=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',maxZoom:18});tiles.addTo(map);tiles.on('tileerror',()=>host.setAttribute('aria-label',T('Map tiles unavailable; facility list remains available.','नक्शे की टाइल उपलब्ध नहीं; केंद्र सूची उपलब्ध है।')));markers=L.layerGroup().addTo(map);new ResizeObserver(()=>map?.invalidateSize()).observe(host);}
+    markers.clearLayers();mapKey=key;map.setView([Number(anchor.lat),Number(anchor.lng)],12);const style=getComputedStyle($('panel-dashboard'));
+    const shown=facilities.some(f=>f.id===anchor.id)?facilities:[anchor,...facilities];
+    for(const f of shown)L.circleMarker([Number(f.lat),Number(f.lng)],{radius:f.id===anchor.id?9:6,color:style.getPropertyValue('--ground').trim(),weight:3,fillColor:style.getPropertyValue('--brand').trim(),fillOpacity:1}).addTo(markers).bindPopup('<strong>'+E(f.name)+'</strong><p>'+T('Confirm availability with the centre','उपलब्धता केंद्र से पुष्ट करें')+'</p>');
+    setTimeout(()=>map?.invalidateSize(),0);
   }
   function update(next,prefs,c){
     mount();if(!next?.user)return;state=next;selectedChild=c||selectedChild;
