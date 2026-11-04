@@ -7,9 +7,16 @@
   const dateLabel = v => v ? new Date(String(v).slice(0,10) + 'T12:00:00').toLocaleDateString(document.documentElement.lang || 'en', {day:'numeric',month:'short'}) : 'Date not recorded';
   const header = (eyebrow, title, action, target) => '<div class="oh-section-heading"><div><span class="oh-eyebrow">'+eyebrow+'</span><h2>'+title+'</h2></div>'+(action?'<button type="button" class="link-btn" data-oh-go="'+target+'">'+action+' ↗</button>':'')+'</div>';
   function section(id, cls, markup) { const el=document.createElement('section');el.id=id;el.className=cls;el.innerHTML=markup;return el; }
+  function setupNavigation() {
+    const nav=document.querySelector('.sidebar__nav');if(!nav)return;
+    const find=id=>nav.querySelector('[data-panel="'+id+'"]');
+    const groups=[['Care',['dashboard','mycare','children','hospital-stay']],['Records',['records']],['Help',['facilities','schemes','family','companion','messages','settings']]];
+    nav.querySelectorAll('.nav-caption').forEach(n=>n.remove());
+    for(const [title,ids] of groups){const caption=document.createElement('span');caption.className='nav-caption';caption.dataset.homeNavLabel=title;caption.textContent=title;nav.append(caption);for(const id of ids){const item=id==='mycare'?$('homeCareNavigation'):find(id);if(item)nav.append(item);}}
+  }
   function mount() {
     const root=$('panel-dashboard');if(!root||$('homeOpenJourney'))return;
-    root.classList.add('open-home');
+    root.classList.add('open-home');setupNavigation();
     const hero=root.querySelector('.home-hero-grid');hero.classList.add('oh-hero-band');
     const path=document.createElement('div');path.id='homeHeroPath';path.className='oh-hero-path';$('homeJourneyProgress').after(path);
     const note=document.createElement('span');note.className='oh-photo-note';note.textContent='A little care. A world of possibility.';root.querySelector('.home-illustration').append(note);
@@ -31,7 +38,7 @@
     const today=document.createElement('span');today.className='oh-today';today.textContent=new Date().toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short',timeZone:'Asia/Kolkata'});root.querySelector('.home-display-controls').prepend(today);
     // Existing privacy, scheme and report pages remain the source of truth.
     root.querySelectorAll('.home-quick,.home-ask-bar,.home-middle-grid,.home-insight-grid,.home-support-grid').forEach(el=>el.hidden=true);
-    function navState(){const n=$('homeCareNavigation');if(n?.querySelector('.is-active'))n.open=true;document.body.classList.toggle('patient-on-home',!location.hash||location.hash==='#dashboard');if(map)setTimeout(()=>map.invalidateSize(),0);}
+    function navState(){const n=$('homeCareNavigation');if(n)n.open=!!n.querySelector('.is-active');document.body.classList.toggle('patient-on-home',!location.hash||location.hash==='#dashboard');if(map)setTimeout(()=>map.invalidateSize(),0);}
     window.addEventListener('hashchange',navState);navState();
     document.addEventListener('click',event=>{const button=event.target.closest('button');if(!button)return;if(button.matches('.nav-item'))queueMicrotask(navState);if(button.dataset.ohGo){const nav=document.querySelector('.nav-item[data-panel="'+button.dataset.ohGo+'"]');if(nav)nav.click();else if(button.dataset.ohGo==='profile')document.querySelector('.user-chip')?.click();queueMicrotask(navState);}if(button.dataset.ohDate){selectedDate=button.dataset.ohDate;renderCalendar();}if(button.dataset.ohChild){selectedChild=state?.children?.find(c=>String(c.id)===button.dataset.ohChild);const choice=document.querySelector('[data-home-child="'+button.dataset.ohChild+'"]');if(choice)choice.click();renderVaccines();}if(button.dataset.ohBaby){const c=state?.children?.find(c=>String(c.id)===button.dataset.ohBaby);if(c){localStorage.setItem('dai_active_child',c.id);location.href='child-dashboard.html';}}});
   }

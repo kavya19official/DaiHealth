@@ -89,3 +89,21 @@ body[data-home-theme=dark] #panel-dashboard.open-home .home-next,body[data-home-
 .oh-loading-line{display:flex;gap:35px;align-items:center;min-height:140px;width:100%;position:relative}.oh-loading-line::before{content:'';position:absolute;left:0;right:0;border-top:2px solid var(--line)}.oh-loading-line span{z-index:1;width:30px;height:30px;border:5px solid var(--ground);border-radius:50%;background:var(--brand-soft)}.oh-loading-copy{font-size:12px;line-height:1.8;color:var(--ink-muted);padding:15px 0}
 body[data-home-theme=dark] #panel-dashboard.open-home .home-next,body[data-home-theme=dark] #panel-dashboard.open-home .oh-map-card{background:#211a2c!important}
 body[data-home-theme=dark] .patient-view .user-chip,body.patient-view[data-home-theme=dark] .user-chip{background:#292033!important;color:var(--ink)}
+
+/* Compact navigation: selected state and keyboard focus are distinct. */
+.patient-view .sidebar__nav>.nav-caption{margin:16px 12px 6px;letter-spacing:1.6px;font-size:10px;color:var(--ink-muted)}
+.patient-view .sidebar__nav>.nav-caption:first-child{margin-top:0}
+.patient-view .nav-item.is-active{box-shadow:none!important;border-color:transparent!important;outline:none}
+.patient-view .nav-item.is-active::after{display:none}
+.patient-view .nav-item:focus:not(:focus-visible){outline:none!important}
+.patient-view .nav-item:focus-visible,.home-care-nav summary:focus-visible{outline:2px solid var(--brand)!important;outline-offset:2px}
+.patient-view .home-care-nav:not([open])>div{display:none}
+.patient-view .patient-tour-launch{width:36px;height:36px;min-height:36px;padding:0;border-radius:50%;font-size:17px;background:var(--brand-pale);border:1px solid var(--line);color:var(--brand-strong)}
+#panel-dashboard .patient-tour-welcome{padding:12px 16px;margin:0 0 16px;gap:12px;background:var(--brand-pale);border:1px solid var(--line);border-radius:16px;box-shadow:none}
+#panel-dashboard .patient-tour-welcome>div{display:flex;align-items:center;gap:14px;flex:1}
+#panel-dashboard .patient-tour-welcome strong{font-size:12px;color:var(--ink)}
+#panel-dashboard .patient-tour-welcome button{background:transparent!important;color:var(--brand-strong)!important;border:0!important;box-shadow:none!important;min-height:36px;padding:6px;font-size:12px;white-space:normal}
+#panel-dashboard .patient-tour-welcome.is-dismissed{display:flex;justify-content:flex-end;padding:0;border:0;background:none;margin:0 0 8px;min-height:0}
+#panel-dashboard .patient-tour-welcome.is-dismissed>div,#panel-dashboard .patient-tour-welcome [hidden]{display:none!important}
+#panel-dashboard .patient-tour-welcome.is-dismissed button{font-size:10px;min-height:28px}
+@media(max-width:600px){#panel-dashboard .patient-tour-welcome>div{display:block}#panel-dashboard .patient-tour-welcome strong{display:block;margin-top:4px}}
