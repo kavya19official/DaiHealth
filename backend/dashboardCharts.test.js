@@ -1,0 +1,13 @@
+'use strict';
+const test=require('node:test'),assert=require('node:assert/strict'),C=require('../frontend/js/dashboard-charts');
+test('maternal graphs use clinician records, never coerce missing values to zero and keep children separate',()=>{
+ const d={milestones:[{status:'completed',completion_verification:'pending'}],overview:{metrics:[{type:'weight',readings:[{date:'2026-11-01',value:60,source:'clinician_record'},{date:'2026-11-02',value:null,source:'clinician_record'},{date:'2026-11-03',value:90,source:'self_report'}]}]},children:[{id:1,name:'SYNTHETIC A',growth:[{measured_on:'2026-11-01',weight_kg:5}],vaccinations:[{given_on:'2026-11-01'}]},{id:2,name:'SYNTHETIC B',growth:[{measured_on:'2026-11-01',weight_kg:6}],vaccinations:[]}]};
+ const charts=C.mother(d,{id:2},'2026-11-05');assert.equal(charts.length,13);assert.deepEqual(charts.find(c=>c.id==='weight').rows.map(r=>r.value),[60]);assert.equal(charts.find(c=>c.id==='child-weight_kg').rows[0].value,6);assert.deepEqual(charts.find(c=>c.id==='vaccines').rows.map(r=>r.value),[1,0]);assert.equal(charts[0].rows[0].label,'Awaiting review');assert.equal(C.number(null),null);assert.equal(C.date('2026-02-30'),null);
+});
+test('doctor graphs scope appointment/plan rows to assigned mothers and separate child mode',()=>{
+ const d={patients:[{id:1,stage:{week:22},clinical_shared:false}],appointments:[{mother_id:1,requested_date:'2026-11-01',status:'confirmed'},{mother_id:1,child_id:8,requested_date:'2026-11-01',status:'pending'},{mother_id:99,requested_date:'2026-11-01'}],milestones:[{id:1,mother_id:1,category:'pregnancy',completed_at:'2026-11-01'},{id:2,mother_id:1,category:'child'}],hospital:{beds:[{care_area:'Labour',available:0,total:3},{care_area:'NICU',available:null,total:5}]}};
+ const graphs=C.doctor(d,'child','2026-11-05');assert.equal(graphs.length,10);assert.equal(graphs.find(c=>c.id==='visits').rows[0].value,1);assert.equal(graphs.find(c=>c.id==='completions').rows.length,0);assert.deepEqual(graphs.find(c=>c.id==='capacity').rows.map(r=>r.value),[0]);assert.equal(graphs.find(c=>c.id==='stages').rows.length,0);
+});
+test('graphs expose exact tables, escape record labels and show missing data honestly',()=>{
+ const html=C.figure({id:'x',title:'<test>',unit:'kg',rows:[{label:'2026-11-01',value:5,source:'<script>'}],note:'Recorded',kind:'line'});assert.ok(html.includes('One measurement; no trend'));assert.ok(html.includes('<table>'));assert.ok(html.includes('&lt;script&gt;'));assert.ok(!html.includes('<polyline'));assert.ok(C.figure({id:'empty',rows:[],title:'No data',unit:'items',note:''}).includes('No matching recorded data'));
+});

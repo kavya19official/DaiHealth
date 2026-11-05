@@ -14,7 +14,7 @@ test('SSE client authenticates with cookies, refreshes after reconnect, closes h
 });
 test('timeline cache includes the new client but continues excluding API and report data',()=>{
  const page=fs.readFileSync(path.join(__dirname,'../frontend/dashboard.html'),'utf8'),sw=fs.readFileSync(path.join(__dirname,'../frontend/patient-sw.js'),'utf8');
- assert.match(page,/js\/patient-timeline-live\.js/);assert.match(sw,/v60-timeline-visual-polish/);assert.match(sw,/FILES\.includes\(u.pathname\)/);
+ assert.match(page,/js\/patient-timeline-live\.js/);assert.match(sw,/v61-merged-timeline-home-recovery-charts/);assert.match(sw,/FILES\.includes\(u.pathname\)/);
  assert.match(page,/id="timelineRecordDetails"/);
 });
 
