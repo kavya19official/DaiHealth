@@ -23,7 +23,7 @@ test('baby world switching never retains a sibling’s doses or memories and esc
  v.window.LittleWorld.childUpdate({child:a,children:[a,b]});assert.match(v.roots.babyWorld.innerHTML,/Baby &lt;A&gt;/);assert.match(v.roots.babyMemoryList.innerHTML,/A smile/);assert.match(v.roots.vaccinePassport.innerHTML,/1 recorded doses/);
  v.window.LittleWorld.childUpdate({child:b,children:[a,b]});assert.doesNotMatch(v.roots.babyWorld.innerHTML,/Baby &lt;A&gt;/);assert.doesNotMatch(v.roots.babyMemoryList.innerHTML,/A smile/);assert.match(v.roots.vaccinePassport.innerHTML,/0 recorded doses/);assert.match(v.roots.vaccinePassport.innerHTML,/first stamp/);
 });
-test('recovery ring remains a time marker after six weeks without claiming recovery is complete',()=>{
+test('recovery fallback stays neutral after six weeks without claiming recovery is complete',()=>{
  const v=screen();v.window.LittleWorld.recoveryUpdate({user:{id:1},post:{active:true,days_postpartum:100,delivery:{date:'2026-07-01'},schedule:[]},children:[]});
- assert.match(v.roots.recoveryWorld.innerHTML,/not a recovery assessment/);assert.doesNotMatch(v.roots.recoveryWorld.innerHTML,/recovered|you are safe/i);assert.match(v.roots.recoveryWorld.innerHTML,/first six-week time marker/);
+ assert.match(v.roots.recoveryWorld.innerHTML,/not a recovery assessment/);assert.doesNotMatch(v.roots.recoveryWorld.innerHTML,/recovered|you are safe/i);assert.doesNotMatch(v.roots.recoveryWorld.innerHTML,/42 days|Celebrate|world/i);assert.match(v.roots.recoveryWorld.innerHTML,/Open recovery check-in/);
 });

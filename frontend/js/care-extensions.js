@@ -249,24 +249,25 @@
         '<p class="cx-sub">' + (d.reason === 'delivery_in_future' ? 'The delivery date on file is in the future. Please correct it.' : 'Recovery after birth is part of your care too. Add your delivery date to unlock a daily check-in, warning signs to watch for, and your postnatal visit schedule.') + '</p>' +
         deliveryFormHtml(null) + '</div>';
       wireDeliveryForm();
+      window.PatientRecovery?.postpartum(d);
       return;
     }
 
     var ph = d.phase;
     var h = [];
-    h.push('<div class="cx-card" style="border-left:4px solid var(--brand)"><div style="display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap"><div>' +
+    h.push('<details class="cx-card rr-education"><summary>Information for this stage</summary><div style="border-left:0"><div style="display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap"><div>' +
       '<div class="cx-sub" style="margin:0">Day ' + d.days_postpartum + ' after delivery · week ' + d.week + '</div>' +
       '<div class="cx-h" style="font-size:1.15rem">' + esc(ph ? ph.title : 'Recovery') + '</div></div>' +
       '<div style="display:flex;gap:.5rem;flex-wrap:wrap">' + callBtn('112', 'Call 112', true) + '<button type="button" class="btn--sos" id="ppSos">Emergency help</button></div></div>' +
       (ph ? '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem;margin-top:.4rem">' +
         '<div><div class="cx-sub" style="margin-bottom:.15rem"><b>What is common now</b></div><ul style="margin:0 0 0 1.1rem;padding:0;font-size:.85rem;color:var(--ink-2)">' + ph.expect.map(function (e) { return '<li>' + esc(e) + '</li>'; }).join('') + '</ul></div>' +
         '<div><div class="cx-sub" style="margin-bottom:.15rem"><b>Focus this stage</b></div><ul style="margin:0 0 0 1.1rem;padding:0;font-size:.85rem;color:var(--ink-2)">' + ph.focus.map(function (e) { return '<li>' + esc(e) + '</li>'; }).join('') + '</ul></div></div>' : '') +
-      '</div>');
+      '</div></details>');
 
     // Today's check-in
-    h.push('<div class="cx-card" id="ppCheckinCard"><div class="cx-h">Today\'s check-in</div>');
+    h.push('<details class="cx-card rr-checkin" id="ppCheckinCard"'+(d.today_checkin&&['emergency','urgent'].includes(d.today_checkin.level)?' open':'')+'><summary>Daily care check-in</summary>');
     if (!d.checkins_open) {
-      h.push('<p class="cx-sub">Daily check-ins cover the first 14 weeks after birth. If anything worries you, speak to your doctor.</p>');
+      h.push('<p class="cx-sub">The daily check-in window has ended. Your follow-up plan and care-team support remain available. Speak to your clinician about any concerns.</p>');
     } else {
       if (d.today_checkin) {
         h.push(resultHtml({ level: d.today_checkin.level, headline: headlineFor(d.today_checkin.level), flags: d.today_checkin.flags || [] }, 'Saved today'));
@@ -275,36 +276,18 @@
         h.push(checkinFormHtml());
       }
     }
-    h.push('<div id="ppResult" aria-live="polite"></div></div>');
+    h.push('<div id="ppResult" aria-live="polite"></div></details>');
 
-    // Schedule
-    h.push('<div class="cx-card"><div class="cx-h">Your postnatal visits</div><p class="cx-sub">Recommended contacts after birth. Tick one off when it has happened — the app cannot know on its own.</p>');
-    d.schedule.forEach(function (c) {
-      var lvl = c.status === 'done' ? 'ok' : (c.status === 'overdue' ? 'urgent' : (c.status === 'open' ? 'watch' : 'info'));
-      var txt = { done: 'Done', overdue: 'Not marked done', open: 'Due now', upcoming: 'Coming up' }[c.status];
-      h.push('<div class="cx-row"><div><div style="font-weight:600;font-size:.9rem">' + esc(c.title) + '</div><div class="cx-sub" style="margin:0">' + esc(c.why) + '<br>' + esc(fmtShort(c.window_start)) + ' – ' + esc(fmtShort(c.window_end)) + (c.done_on ? ' · done ' + esc(fmtShort(c.done_on)) : '') + (window.DaiDelay && c.status !== 'done' && DaiDelay.note('postpartum_contact', c.code) ? '<br><em>' + esc(DaiDelay.note('postpartum_contact', c.code)) + '</em>' : '') + '</div></div>' +
-        '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:.3rem">' + chip(lvl, txt) +
-        (c.status === 'done' ? '<button type="button" class="link-btn" data-undo="' + esc(c.code) + '">Undo</button>' : (c.status !== 'upcoming' ? '<button type="button" class="btn btn--ghost btn--sm" data-done="' + esc(c.code) + '">Mark done</button>' + (window.DaiDelay && c.status === 'overdue' ? '<button type="button" class="link-btn" data-delay="' + esc(c.code) + '" data-delay-title="' + esc(c.title) + '">Why delayed?</button>' : '') : '')) +
-        '</div></div>');
-    });
-    h.push('</div>');
-
-    // Recent check-ins
-    if (d.recent_checkins && d.recent_checkins.length) {
-      h.push('<div class="cx-card"><div class="cx-h">Recent check-ins</div>' + d.recent_checkins.slice(0, 7).map(function (c) {
-        var top = (c.flags && c.flags[0]) ? c.flags[0].label : 'Nothing worrying';
-        return '<div class="cx-row"><div><b style="font-size:.88rem">' + esc(fmtShort(c.checkin_date)) + '</b> <span class="cx-sub" style="margin:0">' + esc(top) + '</span></div>' + chip(c.level) + '</div>';
-      }).join('') + '</div>');
-    }
-
+    // Follow-up rows and dated history are presented once in PatientRecovery.
     // Baby danger signs + delivery details
-    h.push('<div class="cx-card"><details class="cx-details"><summary>Warning signs in your baby — get help the same day</summary><ul>' +
+    h.push('<div class="cx-card rr-birth-details"><details class="cx-details"><summary>Warning signs in your baby — get help the same day</summary><ul>' +
       d.baby_danger_signs.map(function (s) { return '<li>' + esc(s) + '</li>'; }).join('') + '</ul><p class="cx-sub">See the <a href="child-dashboard.html" style="color:var(--brand);font-weight:600">Child section</a> for vaccines, growth and milestones.</p></details>' +
       '<details class="cx-details"><summary>Delivery details</summary>' + deliveryFormHtml(d.delivery) + '</details></div>');
 
     root.innerHTML = h.join('');
     wireDeliveryForm();
     wireCheckinForm();
+    window.PatientRecovery?.postpartum(d);
     var ppSos = $('ppSos');
     if (ppSos) ppSos.addEventListener('click', openSOS);
     Array.prototype.forEach.call(root.querySelectorAll('[data-done]'), function (b) { b.addEventListener('click', function () { markContact(b.getAttribute('data-done'), true); }); });
@@ -319,7 +302,7 @@
   }
 
   function headlineFor(level) {
-    return { emergency: 'Get emergency help now', urgent: 'Please speak to a doctor or visit a facility today', watch: 'Worth keeping an eye on and mentioning to your doctor', ok: 'Nothing worrying in today\'s answers' }[level];
+    return { emergency: 'Get emergency help now', urgent: 'Please speak to a doctor or visit a facility today', watch: 'Discuss these recorded answers with your care team', ok: 'Your answers have been recorded' }[level];
   }
 
   function deliveryFormHtml(cur) {
@@ -328,7 +311,7 @@
       '<div><label for="ppDelDate">Delivery date</label><input id="ppDelDate" type="date" required max="' + today + '" value="' + esc(cur ? cur.date : '') + '"></div>' +
       '<div><label for="ppDelType">Type of delivery</label><select id="ppDelType">' +
       [['unknown', 'Not sure'], ['vaginal', 'Vaginal'], ['caesarean', 'Caesarean (C-section)'], ['assisted', 'Assisted (forceps / vacuum)']].map(function (o) { return '<option value="' + o[0] + '"' + (cur && cur.type === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') +
-      '</select></div><div><button type="submit" class="btn btn--primary">' + (cur ? 'Update' : 'Save delivery date') + '</button></div></form>';
+      '</select></div><div><button type="submit" class="btn btn--primary">' + (cur ? 'Save my birth details' : 'Save delivery date') + '</button></div></form>';
   }
   function wireDeliveryForm() {
     var f = $('ppDeliveryForm');
@@ -344,8 +327,8 @@
     return '<form id="ppForm" novalidate>' +
       '<p class="cx-sub">Takes about a minute. Only fill in what you know — if you have no thermometer or BP machine, leave those blank.</p>' +
       '<div class="cx-grid">' +
-      '<div><label for="ppBleed">Bleeding today</label><select id="ppBleed"><option value="none">None</option><option value="light" selected>Light (spotting)</option><option value="moderate">Moderate (a pad every few hours)</option><option value="heavy">Heavy (a pad soaked in an hour or less)</option></select></div>' +
-      '<div><label for="ppPain">Pain (0 none – 10 worst)</label><input id="ppPain" type="number" min="0" max="10" step="1" value="0" inputmode="numeric"></div>' +
+      '<div><label for="ppBleed">Bleeding today</label><select id="ppBleed"><option value="" selected>Choose a response</option><option value="none">None</option><option value="light">Light (spotting)</option><option value="moderate">Moderate (a pad every few hours)</option><option value="heavy">Heavy (a pad soaked in an hour or less)</option></select></div>' +
+      '<div><label for="ppPain">Your pain rating (required, 0–10)</label><input id="ppPain" type="number" min="0" max="10" step="1" inputmode="numeric" required></div>' +
       '<div><label for="ppTemp">Temperature (°F, optional)</label><input id="ppTemp" type="number" min="90" max="110" step="0.1" inputmode="decimal" placeholder="e.g. 98.6"></div>' +
       '<div><label for="ppSys">BP top number (optional)</label><input id="ppSys" type="number" min="60" max="260" inputmode="numeric" placeholder="e.g. 118"></div>' +
       '<div><label for="ppDia">BP bottom number</label><input id="ppDia" type="number" min="30" max="160" inputmode="numeric" placeholder="e.g. 76"></div></div>' +
@@ -356,13 +339,14 @@
       '<div class="cx-field"><label for="ppQ1">Little interest or pleasure in doing things</label><select id="ppQ1"><option value="">Skip</option>' + PHQ_OPTS.map(function (o, i) { return '<option value="' + i + '">' + o + '</option>'; }).join('') + '</select></div>' +
       '<div class="cx-field" style="margin-top:.5rem"><label for="ppQ2">Feeling down, depressed or hopeless</label><select id="ppQ2"><option value="">Skip</option>' + PHQ_OPTS.map(function (o, i) { return '<option value="' + i + '">' + o + '</option>'; }).join('') + '</select></div>' +
       '<label class="cx-check is-em" style="margin-top:.6rem"><input type="checkbox" data-k="self_harm"><span>I have had thoughts of harming myself or my baby</span></label></details>' +
-      '<div style="margin-top:.9rem"><button type="submit" class="btn btn--primary">Check my recovery</button></div></form>';
+      '<div style="margin-top:.9rem"><button type="submit" class="btn btn--primary">Save check-in</button></div></form>';
   }
   function wireCheckinForm() {
     var f = $('ppForm');
     if (!f) return;
     f.addEventListener('submit', async function (e) {
       e.preventDefault();
+      if (!$('ppBleed').value || $('ppPain').value === '') { api.toast('Choose a bleeding response and enter your own pain rating before saving.'); return; }
       var body = { date: api.localDateStr(), bleeding: $('ppBleed').value, pain: $('ppPain').value, temp_f: $('ppTemp').value, bp_systolic: $('ppSys').value, bp_diastolic: $('ppDia').value, phq2_interest: $('ppQ1').value, phq2_mood: $('ppQ2').value };
       Array.prototype.forEach.call(f.querySelectorAll('input[data-k]'), function (c) { body[c.getAttribute('data-k')] = c.checked; });
       // Same rules the server runs — instant feedback, and tells her about a bad entry before sending.
@@ -373,7 +357,7 @@
       if (!r) {
         // Save failed — still give her the guidance computed on this device.
         var ev = PP.evaluateCheckin(local.answers, { daysPP: state.pp && state.pp.days_postpartum });
-        box.innerHTML = '<p class="cx-sub" style="color:#b45309">We could not save this check-in, but here is what your answers suggest:</p>' + resultHtml(ev) + emergencyNumbersIfNeeded(ev.level);
+        box.innerHTML = '<p class="cx-sub" style="color:#b45309">This entry was not saved. Existing guidance for these answers:</p>' + resultHtml(ev) + emergencyNumbersIfNeeded(ev.level);
         return;
       }
       box.innerHTML = resultHtml(r.evaluation, 'Saved') + ((r.numbers && r.numbers.length) ? '<div class="cx-actions">' + r.numbers.map(function (n) { return callBtn(n.number, n.number + ' · ' + n.label, n.key === 'national'); }).join('') + '</div>' : '');
@@ -383,7 +367,7 @@
       again.addEventListener('click', function () { f.style.display = ''; again.remove(); box.innerHTML = ''; });
       box.appendChild(again);
       var fresh = await api.apiRequest('/postpartum');
-      if (fresh) state.pp = fresh;
+      if (fresh) { state.pp = fresh; window.PatientRecovery?.postpartum(fresh); }
       loadTrend();
     });
   }
@@ -398,14 +382,15 @@
       var fs = LEVEL_STYLE[f.level] || LEVEL_STYLE.info;
       return '<div style="margin:.4rem 0;padding-left:.7rem;border-left:3px solid ' + fs.bd + '"><b style="font-size:.86rem">' + esc(f.label) + '</b><div style="font-size:.84rem;color:var(--ink-2)">' + esc(f.action) + '</div></div>';
     }).join('');
-    return '<div class="cx-banner" role="' + (ev.level === 'emergency' ? 'alert' : 'status') + '" style="background:' + s.bg + ';border-color:' + s.bd + ';color:' + s.fg + '"><div style="display:flex;justify-content:space-between;gap:.5rem"><b>' + esc(ev.headline || headlineFor(ev.level)) + '</b>' + (savedNote ? '<span style="font-size:.74rem">' + esc(savedNote) + '</span>' : '') + '</div>' +
+    return '<div class="cx-banner" role="' + (ev.level === 'emergency' ? 'alert' : 'status') + '" style="background:' + s.bg + ';border-color:' + s.bd + ';color:' + s.fg + '"><div style="display:flex;justify-content:space-between;gap:.5rem"><b>' + esc(headlineFor(ev.level) || 'Recorded check-in') + '</b>' + (savedNote ? '<span style="font-size:.74rem">' + esc(savedNote) + '</span>' : '') + '</div>' +
       '<div style="color:var(--ink);margin-top:.2rem">' + flags + '</div>' +
       '<div style="font-size:.74rem;margin-top:.5rem;color:var(--ink-muted)">This is guidance, not a diagnosis. If you feel something is wrong, trust that and get help.</div></div>';
   }
 
   async function markContact(code, done) {
     var r = await api.apiRequest('/postpartum/contacts/' + encodeURIComponent(code), { method: 'PUT', body: { done: done } });
-    if (r) { var fresh = await api.apiRequest('/postpartum'); if (fresh) { state.pp = fresh; renderPostpartum(); } }
+    if (r) { var fresh = await api.apiRequest('/postpartum'); if (fresh) { state.pp = fresh; renderPostpartum(); return true; } }
+    return false;
   }
 
   async function loadPostpartum() {
@@ -736,5 +721,5 @@
   // Rendering helpers reused by the doctor portal (js/doctor-safety.js).
   var helpers = { esc: esc, chip: chip, fmtShort: fmtShort, lineChart: lineChart, injectStyles: injectStyles, LEVEL_STYLE: LEVEL_STYLE, telHref: telHref };
 
-  window.CareExt = { helpers: helpers, init: init, openSOS: openSOS, refreshRisk: loadTrend, afterHealthLog: afterHealthLog, refreshPostpartum: loadPostpartum };
+  window.CareExt = { helpers: helpers, init: init, openSOS: openSOS, refreshRisk: loadTrend, afterHealthLog: afterHealthLog, refreshPostpartum: loadPostpartum, recordPostnatalContact: markContact, postpartumData: function(){return state.pp;} };
 })();
