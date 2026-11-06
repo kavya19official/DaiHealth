@@ -25,3 +25,196 @@
 @media(max-width:680px){.connected-heading h1{font-size:30px;letter-spacing:-1px}.connected-heading p{font-size:12px}.connected-eyebrow{font-size:8px}.connected-heading>.btn{width:100%;justify-content:center;font-size:12px;min-height:46px}.connected-appointment{padding:20px 17px;border-radius:18px;gap:13px}.appointment-facts h3{font-size:19px}.appointment-facts p{font-size:11px}.appointment-facts>small{font-size:9px}.appointment-date-block>strong{font-size:30px}.appointment-card-actions{grid-column:1/-1;justify-content:flex-start}.connected-status{font-size:8px}.connected-calendar{padding:18px}.connected-calendar>header>strong{font-size:13px}.connected-calendar>div>span{font-size:11px}.connected-tabbar>button{font-size:10px;padding:9px 13px;min-height:42px}.connected-tabbar svg{width:14px;height:14px}.connected-empty{padding:30px 20px}.connected-empty h2{font-size:23px}.connected-empty p{font-size:12px}.record-intro-strip{padding:16px;gap:10px}.record-intro-strip>div>span{font-size:10px}.record-intro-strip>.connected-status{max-width:106px;text-align:center}.patient-view .connected-record-filters input,.patient-view .connected-record-filters select{font-size:16px;min-height:44px}.connected-record-filters label{min-width:120px;font-size:10px}.connected-record-filters label:first-child{flex-basis:100%}.record-file-info h3{font-size:17px}.record-file-info p{font-size:10px}.record-file-icon{width:42px;height:53px}.record-file-actions>.btn{min-height:43px;font-size:11px}.record-file-actions>.link-btn{font-size:10px!important}.connected-upload,.connected-self-notes{padding:19px 17px}.connected-upload form{grid-template-columns:1fr}.connected-upload .form-group input,.connected-upload .form-group select{font-size:16px}.vault-card{padding:22px 19px}.vault-fields dd{font-size:12px}.vault-fields dt{font-size:10px}.vault-card h2{font-size:23px}.emergency-record-card{padding:24px 20px}.emergency-record-card h2{font-size:29px}.emergency-record-card>.vault-fields{grid-template-columns:1fr;gap:12px}.connected-dialog{padding:27px 20px;width:calc(100vw - 20px);max-height:calc(100dvh - 20px);border-radius:20px}.connected-dialog>h2{font-size:27px}.connected-dialog fieldset{padding:15px}.connected-dialog input,.connected-dialog textarea,.connected-dialog select{font-size:16px}.report-preview{height:330px}.report-preview>iframe{min-height:300px}.connected-consent-toggle{gap:14px}.connected-consent-toggle strong{font-size:11px}.connected-dialog .connected-close{top:10px;right:10px}.connected-demo{padding:18px}.connected-links{gap:7px 14px}}
 @media print{body.connected-print>*{display:none!important}body.connected-print>.connected-print-sheet{display:block!important;font:12pt/1.5 sans-serif;color:#111;background:#fff;padding:12mm}.connected-print-sheet button,.connected-print-sheet .connected-links,.connected-print-sheet .connected-eyebrow{display:none!important}.connected-print-sheet h1{font-size:12pt;color:#67419b}.connected-print-sheet h2{font-size:20pt;margin:8mm 0}.connected-print-sheet .vault-fields{display:block}.connected-print-sheet .vault-fields>div{break-inside:avoid;padding:2mm 0;border-bottom:1px solid #ddd}.connected-print-sheet dt{font-size:9pt;color:#555}.connected-print-sheet dd{font-size:11pt;margin:1mm 0}.connected-print-sheet table{width:100%;border-collapse:collapse;font-size:9pt}.connected-print-sheet td,.connected-print-sheet th{padding:2mm;text-align:left;border:1px solid #ccc}.connected-print-sheet p{font-size:9pt}}
 @media(prefers-reduced-motion:reduce){.pending-ring-fill{transition:none}}
+
+/* Boarding-pass appointments: one next visit, a readable week, separate requests. */
+#connectedAppointments { min-width: 0; max-width: 1280px; margin-inline: auto; }
+#connectedAppointments *, .pass-book-form *, .visit-pass * { box-sizing: border-box; }
+.pass-heading { margin-bottom: 18px; }
+.pass-heading h1 { font-size: clamp(27px, 3vw, 38px); margin: 5px 0 0; }
+.pass-heading-actions, .pass-tab-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.pass-heading-actions > .btn { min-height: 44px; }
+.pass-info { position: relative; z-index: 3; }
+.pass-info > summary { list-style: none; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: var(--brand-pale); color: var(--brand); cursor: pointer; font-size: 21px; }
+.pass-info > summary::-webkit-details-marker { display: none; }
+.pass-info > p { position: absolute; right: 0; width: min(310px, 75vw); padding: 18px; border: 1px solid var(--line); border-radius: 16px; background: var(--connected-surface); color: var(--ink-muted); font-size: 12px; line-height: 1.7; box-shadow: var(--shadow); }
+.pass-tab-row { margin-bottom: 20px; }
+.pass-tab-row .connected-tabbar { margin: 0; }
+.pass-request-chip { border: 1px solid var(--line); border-radius: 30px; background: var(--connected-surface); color: var(--brand); font: inherit; font-size: 12px; min-height: 44px; padding: 8px 16px; cursor: pointer; }
+.pass-request-chip[aria-pressed=true] { background: var(--brand-soft); border-color: var(--brand); }
+.pass-poll-status { color: var(--ink-muted); font-size: 10px; margin-left: auto; }
+.visit-pass { display: grid; grid-template-columns: 110px minmax(0, 1fr) 178px; background: var(--connected-surface); border: 1px solid var(--line); border-radius: 26px; box-shadow: 0 8px 32px rgb(70 40 100 / 5%); overflow: hidden; min-width: 0; position: relative; }
+.pass-date { background: var(--brand-pale); display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 7px; padding: 28px 12px; text-align: center; color: var(--brand); border-right: 1px dashed var(--brand-mid, var(--line)); }
+.pass-date small { font-size: 11px; line-height: 1.6; }
+.pass-date > strong { font-size: 45px; line-height: 1; font-weight: 800; letter-spacing: -2px; }
+.pass-date > span { font-size: 12px; line-height: 1.5; }
+.pass-main { padding: 23px 26px; min-width: 0; }
+.pass-topline { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+.pass-demo { display: inline-flex; background: var(--brand-pale); color: var(--brand); border: 1px solid var(--line); border-radius: 20px; padding: 4px 8px; font-size: 9px; font-weight: 650; white-space: nowrap; }
+.pass-countdown { margin-left: auto; font-size: 10px; color: var(--brand); font-weight: 700; }
+.pass-main > h2 { font-size: clamp(20px, 2vw, 26px); letter-spacing: -.7px; margin: 10px 0 16px; line-height: 1.3; }
+.pass-clinician { display: flex; align-items: center; gap: 11px; min-width: 0; }
+.pass-avatar { display: grid; place-items: center; width: 43px; height: 43px; border-radius: 50%; background: var(--brand-soft); color: var(--brand); outline: 3px solid var(--brand-pale); flex-shrink: 0; font-size: 12px; font-weight: 800; }
+.pass-clinician strong { display: block; font-size: 14px; line-height: 1.5; overflow-wrap: anywhere; }
+.pass-clinician small { display: block; font-size: 11px; color: var(--ink-muted); line-height: 1.6; margin-top: 2px; overflow-wrap: anywhere; }
+.pass-room { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--ink-muted); line-height: 1.6; margin: 12px 0 8px; }
+.visit-pass svg { height: 16px; width: 16px; flex-shrink: 0; }
+.pass-subjects { display: flex; flex-wrap: wrap; gap: 6px; margin: 9px 0; }
+.pass-subject { display: inline-flex; align-items: center; gap: 6px; font-size: 10px; padding: 5px 8px; border: 1px solid var(--line); border-radius: 30px; color: var(--ink-2); }
+.pass-subject > span { display: flex; color: var(--brand); }
+.pass-subject svg { height: 13px; width: 13px; }
+.pass-status { font-size: 11px; color: var(--brand); font-weight: 650; display: inline-block; margin: 4px 0; line-height: 1.6; }
+.pass-tracker { display: flex; list-style: none; padding: 0; margin: 17px 0 18px; gap: 0; }
+.pass-tracker > li { flex: 1; min-width: 0; position: relative; display: flex; flex-direction: column; gap: 6px; padding-right: 10px; color: var(--ink-muted); }
+.pass-tracker > li::before { content: ''; position: absolute; height: 1px; top: 12px; left: 28px; right: 0; background: var(--line); }
+.pass-tracker > li:last-child::before { display: none; }
+.pass-tracker > li > span:first-child { position: relative; z-index: 1; display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: var(--connected-surface); border: 1px solid var(--line); font-size: 10px; }
+.pass-tracker > li > small { font-size: 10px; line-height: 1.5; overflow-wrap: anywhere; }
+.pass-tracker .is-current > span:first-child { background: var(--brand); border-color: var(--brand); color: #fff; box-shadow: 0 0 0 4px var(--brand-pale); }
+.pass-tracker .is-done > span:first-child { background: var(--green-soft); color: var(--green); }
+.pass-tracker .is-current > small { color: var(--brand); font-weight: 700; }
+.pass-reported { display: inline-block; border: 1px dashed var(--line); padding: 7px 10px; font-size: 10px; color: var(--ink-muted); border-radius: 10px; margin-bottom: 12px; }
+.pass-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.pass-actions > :is(button,a) { font: inherit; font-size: 11px; min-height: 44px; padding: 10px 12px; border-radius: 12px; white-space: normal; text-align: center; }
+.pass-actions .link-btn { color: var(--brand); }
+.pass-more { margin-top: 14px; font-size: 11px; }
+.pass-more summary { color: var(--ink-muted); cursor: pointer; min-height: 28px; }
+.pass-more p { font-size: 12px; line-height: 1.7; overflow-wrap: anywhere; }
+.pass-more .connected-links { gap: 12px; }
+.pass-stub { display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 12px; padding: 24px 14px; text-align: center; border-left: 2px dashed var(--line); background: linear-gradient(155deg, var(--connected-surface), var(--brand-pale)); min-width: 0; }
+.pass-stub-icon { width: 40px; height: 40px; display: grid; place-items: center; background: var(--brand-soft); color: var(--brand); border-radius: 12px; }
+.pass-stub-icon svg { width: 20px; height: 20px; }
+.pass-stub code { font: inherit; font-size: 10px; font-weight: 700; overflow-wrap: anywhere; }
+.pass-stub small { font-size: 9px; line-height: 1.6; color: var(--ink-muted); }
+.pass-stub [data-pass-qr] { min-height: 112px; display: grid; place-items: center; }
+.pass-stub [data-pass-qr] svg { width: 112px; height: 112px; }
+.pass-stub button { cursor: pointer; font: inherit; font-size: 11px; color: var(--brand); border: 1px solid var(--line); background: var(--connected-surface); border-radius: 12px; min-height: 44px; padding: 10px; }
+.visit-pass-small { grid-template-columns: 80px minmax(0, 1fr); box-shadow: none; margin: 0 0 16px 16px; overflow: visible; }
+.visit-pass-small::before { content: ''; position: absolute; left: -22px; top: 34px; width: 10px; height: 10px; border-radius: 50%; background: var(--brand); border: 3px solid var(--brand-pale); box-sizing: content-box; }
+.visit-pass-small .pass-date { border-radius: 24px 0 0 24px; }
+.visit-pass-small .pass-date > strong { font-size: 32px; }
+.visit-pass-small .pass-main { padding: 18px 22px; }
+.visit-pass-small .pass-main > h2 { font-size: 19px; margin: 8px 0 12px; }
+.pass-visit-list { margin: 20px 0; padding-left: 5px; border-left: 1px solid var(--line); }
+.pass-visit-list:empty { display: none; }
+.pass-section-heading { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 16px; }
+.pass-section-heading h2 { font-size: 18px; margin: 0; }
+.pass-section-heading > span { font-size: 11px; color: var(--ink-muted); }
+.pass-calendar { margin: 22px 0 28px; padding: 20px 24px; border: 1px solid var(--line); border-radius: 24px; background: var(--connected-surface); }
+.pass-calendar header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
+.pass-calendar h2 { font-size: 18px; margin: 5px 0 0; }
+.pass-calendar-controls { display: flex; gap: 6px; align-items: center; }
+.pass-calendar-controls > button { border: 1px solid var(--line); background: var(--brand-pale); color: var(--brand); border-radius: 10px; width: 36px; min-height: 44px; cursor: pointer; font: inherit; font-size: 20px; }
+.pass-calendar-controls .connected-tabbar { margin: 0 0 0 5px; }
+.pass-calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; }
+.pass-calendar-grid > button { background: var(--brand-pale); color: var(--ink); border: 1px solid transparent; border-radius: 16px; min-height: 86px; padding: 9px 3px; display: flex; align-items: center; flex-direction: column; gap: 6px; cursor: pointer; font: inherit; }
+.pass-calendar-grid > button > small { color: var(--ink-muted); font-size: 10px; }
+.pass-calendar-grid > button > strong { font-size: 19px; }
+.pass-calendar-grid > .is-today { border-color: var(--brand); box-shadow: inset 0 0 0 1px var(--brand); }
+.pass-day-dots { display: flex; align-items: center; justify-content: center; gap: 3px; min-height: 16px; color: var(--brand); }
+.pass-day-dots svg, .pass-calendar-legend svg { width: 12px; height: 12px; }
+.pass-calendar-legend { display: flex; align-items: center; justify-content: flex-end; gap: 7px; font-size: 10px; color: var(--ink-muted); margin: 14px 0 0; }
+.pass-calendar-grid.is-month > button { min-height: 62px; background: transparent; border-color: var(--line); border-radius: 10px; }
+.pass-calendar-grid.is-month > small { font-size: 10px; text-align: center; color: var(--ink-muted); }
+.pass-empty { display: flex; align-items: center; flex-direction: column; gap: 12px; padding: 32px 20px; text-align: center; border: 1px solid var(--line); border-radius: 24px; background: var(--connected-surface); }
+.pass-empty > svg { width: 80px; height: 80px; color: var(--brand); }
+.pass-empty h2 { font-size: 22px; margin: 0; }
+.pass-empty p { font-size: 12px; color: var(--ink-muted); margin: 0; }
+.pass-empty.compact { border: 0; padding: 22px; }
+.pass-empty.compact > svg { width: 42px; height: 42px; }
+.pass-footer { font-size: 10px; color: var(--ink-muted); padding: 10px 0; }
+.pass-coordination { background: var(--connected-surface); padding: 24px; border: 1px solid var(--line); border-radius: 24px; }
+.pass-coordination article { padding: 18px 0; border-top: 1px solid var(--line); }
+.pass-coordination article h4 { margin: 0 0 12px; font-size: 15px; }
+.pass-coordination article p, .pass-coordination article li { font-size: 12px; line-height: 1.7; }
+.pass-coordination summary { cursor: pointer; font-size: 12px; }
+.pass-summaries { max-width: 1280px; margin: 28px auto; border: 1px solid var(--line); border-radius: 24px; background: var(--connected-surface); padding: 24px; }
+.pass-summary-heading { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+.pass-summary-heading > span { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 14px; background: var(--brand-pale); color: var(--brand); }
+.pass-summary-heading svg { width: 23px; height: 23px; }
+.pass-summary-heading h2 { font-size: 19px; margin: 5px 0 0; }
+.pass-summary-empty { display: flex; align-items: center; gap: 18px; padding: 12px 0; color: var(--ink-muted); font-size: 12px; }
+.pass-summary-empty svg { width: 48px; height: 48px; color: var(--brand); }
+.pass-summaries > .connected-muted { font-size: 11px; }
+.pass-day-sheet { width: min(670px, calc(100vw - 24px)); max-width: 100%; margin-right: 12px; height: min(860px, calc(100dvh - 24px)); max-height: calc(100dvh - 24px); border-radius: 24px; }
+.pass-day-sheet .visit-pass-small { margin-left: 0; }
+.pass-day-sheet .visit-pass-small::before { display: none; }
+.pass-prep-list { display: grid; gap: 12px; margin: 22px 0; }
+.pass-prep-list label { display: flex; align-items: center; gap: 12px; padding: 14px; background: var(--brand-pale); border-radius: 14px; font-size: 13px; }
+.pass-prep-list input { width: 20px; height: 20px; accent-color: var(--brand); }
+.pass-book-form [hidden], .booking-navigation [hidden] { display: none !important; }
+.connected-booking .booking-stepper { list-style: none; display: flex; gap: 8px; padding: 0; margin: 20px 0; }
+.booking-stepper li { flex: 1; border-bottom: 2px solid var(--line); padding: 10px 0; font-size: 12px; color: var(--ink-muted); }
+.booking-stepper .is-current { color: var(--brand); border-color: var(--brand); font-weight: 750; }
+.pass-book-form { display: block; }
+.pass-book-form fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
+.pass-book-form legend { font-size: 18px; font-weight: 750; margin: 10px 0 20px; }
+.pass-book-form label { display: grid; gap: 8px; margin: 12px 0; font-size: 12px; }
+.pass-book-form :is(select,textarea) { width: 100%; border: 1px solid var(--line); background: var(--connected-surface); color: var(--ink); font: inherit; padding: 13px; border-radius: 12px; min-height: 46px; }
+.pass-book-form .booking-type-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; margin-top: 16px; }
+.booking-type-grid button { display: flex; align-items: center; gap: 10px; border: 1px solid var(--line); background: var(--brand-pale); color: var(--ink); border-radius: 14px; min-height: 58px; padding: 12px; text-align: left; font: inherit; font-size: 12px; cursor: pointer; }
+.booking-type-grid button[aria-pressed=true] { border-color: var(--brand); color: var(--brand); }
+.booking-type-grid svg, .pass-voice svg { width: 20px; height: 20px; flex-shrink: 0; color: var(--brand); }
+.pass-voice { display: flex; align-items: center; gap: 8px; margin: 14px 0; border: 1px solid var(--line); background: var(--brand-pale); color: var(--brand); padding: 12px 16px; border-radius: 12px; min-height: 44px; cursor: pointer; font: inherit; font-size: 12px; }
+.pass-voice:disabled { opacity: .65; cursor: default; }
+.booking-navigation { display: flex; align-items: center; gap: 12px; justify-content: flex-end; padding: 20px 0; border-top: 1px solid var(--line); margin-top: 20px; }
+.booking-earliest { background: var(--brand-pale); border-left: 3px solid var(--brand); border-radius: 10px; padding: 12px; font-size: 12px; margin: 14px 0; }
+.booking-map-canvas { width: 100%; height: 230px; border-radius: 16px; margin: 12px 0; }
+.pass-slot-info { font-size: 11px; color: var(--ink-muted); line-height: 1.7; margin: 12px 0; }
+.pass-slot-info summary { cursor: pointer; }
+:is(#connectedAppointments,.connected-booking,.pass-day-sheet) :is(button,a,select,input,textarea,summary):focus-visible { outline: 3px solid var(--brand); outline-offset: 3px; }
+@keyframes pass-glimmer { from { opacity: .35; } to { opacity: 1; } }
+.visit-pass-today .pass-date { animation: pass-glimmer .35s ease-out; }
+@supports (view-transition-name: appointment-pass) { .visit-pass-hero { view-transition-name: appointment-pass; } }
+@media (max-width: 1024px) {
+  .visit-pass { grid-template-columns: 86px minmax(0,1fr) 145px; }
+  .pass-main { padding: 20px; }
+  .pass-stub { padding: 20px 10px; }
+  .visit-pass-small { grid-template-columns: 74px minmax(0,1fr); }
+}
+@media (max-width: 680px) {
+  .pass-heading { gap: 12px; align-items: flex-start; }
+  .pass-heading h1 { font-size: 27px; }
+  .pass-heading-actions { justify-content: flex-end; gap: 6px; }
+  .pass-heading-actions > .btn { font-size: 11px; padding: 10px; }
+  .pass-info > p { right: -70px; }
+  .pass-tab-row { gap: 8px; }
+  .pass-tab-row .connected-tabbar { flex: 1; min-width: 0; gap: 3px; flex-wrap: wrap; }
+  .pass-tab-row .connected-tabbar button { padding: 9px 10px; min-height: 44px; font-size: 11px; }
+  .pass-poll-status { width: 100%; margin-left: 0; }
+  .visit-pass { grid-template-columns: 65px minmax(0,1fr); border-radius: 20px; }
+  .pass-date { padding: 22px 7px; }
+  .pass-date > strong { font-size: 34px; }
+  .pass-date small,.pass-date > span { font-size: 10px; }
+  .pass-main { padding: 18px 13px; }
+  .pass-main > h2 { font-size: 21px; }
+  .pass-stub { grid-column: 1/-1; border-left: 0; border-top: 2px dashed var(--line); flex-direction: row; flex-wrap: wrap; gap: 10px; padding: 14px; }
+  .pass-stub [data-pass-qr] { min-height: 44px; }
+  .pass-stub .pass-stub-icon { display: none; }
+  .pass-stub small { flex-basis: 100%; }
+  .pass-tracker { margin: 16px 0; }
+  .pass-tracker > li { padding-right: 4px; }
+  .pass-tracker > li > small { font-size: 9px; }
+  .pass-actions { gap: 6px; }
+  .pass-actions > :is(button,a) { font-size: 10px; padding: 9px; flex: 1 1 auto; }
+  .pass-calendar { padding: 18px 12px; }
+  .pass-calendar header { align-items: flex-start; flex-wrap: wrap; }
+  .pass-calendar-controls { margin-left: auto; }
+  .pass-calendar-controls .connected-tabbar button { font-size: 11px; padding: 8px; min-height: 44px; }
+  .pass-calendar-grid { gap: 4px; }
+  .pass-calendar-grid > button { min-height: 79px; border-radius: 12px; }
+  .pass-calendar-grid > button > strong { font-size: 16px; }
+  .pass-day-dots { flex-wrap: wrap; gap: 1px; }
+  .pass-day-dots svg { width: 10px; height: 10px; }
+  .pass-summaries { padding: 19px 16px; }
+  .visit-pass-small { grid-template-columns: 58px minmax(0,1fr); margin-left: 12px; }
+  .visit-pass-small .pass-main { padding: 15px 12px; }
+  .visit-pass-small .pass-date { padding-inline: 5px; }
+  .visit-pass-small .pass-date > strong { font-size: 28px; }
+  .connected-booking { margin: auto 0 0; width: 100%; max-width: 100vw; max-height: 92dvh; border-radius: 24px 24px 0 0; padding: 24px 18px; }
+  .pass-book-form .booking-type-grid { grid-template-columns: minmax(0,1fr); }
+  .pass-day-sheet { margin: auto 0 0; width: 100%; height: 90dvh; max-height: 90dvh; border-radius: 24px 24px 0 0; }
+}
+@media (prefers-reduced-motion: reduce) { .visit-pass, .visit-pass-today .pass-date { animation: none; view-transition-name: none; } }
+.pass-tracker-note { font-size: 10px; color: var(--ink-muted); margin: -6px 0 15px; }
+.pass-tracker-note summary { cursor: pointer; width: fit-content; padding-block: 5px; }
+.pass-tracker-note p { max-width: 65ch; line-height: 1.7; margin: 6px 0; }

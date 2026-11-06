@@ -2,7 +2,7 @@
    clinician; nothing here is generated. All text is escaped before display. */
 (function () {
   'use strict';
-  var api = window.DaiAPI, host;
+  var api = window.DaiAPI, host, lastResponse='';
   function esc(v) { return String(v == null ? '' : v).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function when(d) { return d ? api.fmtDate(d) : ''; }
   function section(title, inner) { return inner ? '<h3 style="margin:.9rem 0 .3rem;font-size:.95rem">' + esc(title) + '</h3>' + inner : ''; }
@@ -35,14 +35,15 @@
 
   async function load() {
     host = document.getElementById('visitSummaries'); if (!host) return;
-    if (localStorage.getItem('dai_guest') === '1') { host.innerHTML = ''; return; }
+    if (localStorage.getItem('dai_guest') === '1') { host.innerHTML = ''; lastResponse=''; return; }
     var r = await api.apiRequest('/patient/visit-summaries');
     if (!r) return;
+    var key=JSON.stringify(r);if(key===lastResponse&&host.childElementCount)return;lastResponse=key;
     if (!r.summaries.length) {
-      host.innerHTML = '<h2 style="margin:0 0 .3rem">After your visit</h2><p class="connected-muted">No visit summary yet. After a visit, your clinician may add a short summary here. You will only see instructions they have confirmed.</p>';
+      host.classList.add('pass-summaries');host.innerHTML = '<div class="pass-summary-heading"><span aria-hidden="true"><svg><use href="#i-clipboard"/></svg></span><div><span class="connected-eyebrow">FROM YOUR CLINICIAN</span><h2>After your visit</h2></div></div><div class="pass-summary-empty"><svg aria-hidden="true"><use href="#i-file"/></svg><p>Your clinician’s released summary will appear here.</p></div>';
       return;
     }
-    host.innerHTML = '<h2 style="margin:0 0 .3rem">After your visit</h2>' +
+    host.classList.add('pass-summaries');host.innerHTML = '<div class="pass-summary-heading"><span aria-hidden="true"><svg><use href="#i-clipboard"/></svg></span><div><span class="connected-eyebrow">RELEASED BY YOUR CLINICIAN</span><h2>After your visit</h2></div></div>' +
       r.summaries.map(function (s, i) { return card(s, i === 0 ? r.next_appointment : null, i === 0); }).join('') +
       '<p class="connected-muted">' + esc(r.notice) + '</p>';
   }
