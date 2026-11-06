@@ -194,5 +194,5 @@ document.addEventListener('input', e => {
 function reveal(id){scope='all';filter='all';const rows=items(),i=rows.findIndex(m=>String(m.id)===String(id));if(i<0)return;windowStart=Math.floor(i/WINDOW_SIZE)*WINDOW_SIZE;expanded.set(stopId(rows[i]),true);render();scrollTo($(stopId(rows[i])));}
 document.addEventListener('dai:patient-panel',scheduleRoad);
 window.addEventListener?.('resize',scheduleRoad);
-window.PatientJourney = { update(next, p) { data = next; prefs = p; render(); }, category, roadGeometry, reveal, getRows:()=>items() };
+window.PatientJourney = { update(next, p) { data = next; prefs = p; render(); }, category, roadGeometry, reveal, help:openHelp, evidence:openEvidence, getRows:()=>items() };
 })();

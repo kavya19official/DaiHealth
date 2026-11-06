@@ -37,5 +37,11 @@ function rows(state,lane='mother',babyId=null,today=M.today()){
  return rows.sort((a,b)=>order(a,b,today));
 }
 function summary(rows,today=M.today()){const out={overdue:0,week:0,upcoming:0,completed:0,queued:0};for(const m of rows)out[status(m,today)]++;return {...out,total:rows.length,attention:out.overdue+out.week,percent:rows.length?Math.round(out.completed/rows.length*100):0};}
-return {category,title,status,priority,order,reason,rows,summary};
+// Presentation projection of the existing authoritative workflow, never a second machine.
+function workflow(m){if(m.workflow_state)return m.workflow_state;if(m.completion_verification==='verified')return 'clinician_confirmed';if(m.result_id)return 'awaiting_review';if(m.completed_at)return m.source==='milestone'?'patient_reported':'recorded';return 'planned';}
+function group(m,today=M.today()){const w=workflow(m);if(w==='clinician_confirmed')return 'completed';if(['patient_reported','evidence_submitted','awaiting_review','recorded'].includes(w)||m.queued||m.status==='queued')return 'review';return ['overdue','week'].includes(status(m,today))?'arrange':'upcoming';}
+function arrangeOrder(a,b,today=M.today()){return priority(b)-priority(a)||order(a,b,today);}
+function groups(items,today=M.today()){const out={arrange:[],review:[],completed:[],upcoming:[]};for(const m of items)out[group(m,today)].push(m);out.arrange.sort((a,b)=>arrangeOrder(a,b,today));out.completed.sort((a,b)=>String(b.completed_at||'').localeCompare(String(a.completed_at||'')));return out;}
+function ranked(items,ranker,today=M.today()){const base=items.slice().sort((a,b)=>arrangeOrder(a,b,today));const output=ranker?ranker(base):base;const rank=new Map(output.map((r,i)=>[r.key,i])),byKey=new Map(output.map(r=>[r.key,r]));return base.map(r=>({...r,...(byKey.get(r.key)||{})})).sort((a,b)=>priority(b)-priority(a)||({overdue:0,week:1,upcoming:2}[status(a,today)]??3)-({overdue:0,week:1,upcoming:2}[status(b,today)]??3)||(rank.get(a.key)??999)-(rank.get(b.key)??999));}
+return {category,title,status,priority,order,reason,rows,summary,workflow,group,groups,arrangeOrder,ranked};
 });
