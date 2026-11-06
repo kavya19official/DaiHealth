@@ -1,7 +1,7 @@
 'use strict';
 const crypto=require('node:crypto'),{flags}=require('./pendingCareFlags'),{stateOf}=require('./careStepMachine');
 const sequence=['explain','find_care','prepare_request','review_request'];
-const signature=m=>JSON.stringify([m.completed_at,m.completion_verification,m.result_id,m.appointment_id]);
+const signature=m=>JSON.stringify([m.title,m.guidance,m.due_date,m.clinician_priority,m.added_by_doctor_id,m.completed_at,m.completion_verification,m.result_id,m.appointment_id]);
 function register(app,{pool,authenticateToken,authorizeRole,env=process.env,now=Date.now}){const sessions=new Map(),rates=new Map();
 app.post('/api/patient/pending-care/:id/assistant',authenticateToken,authorizeRole(['mother']),async(req,res)=>{res.set('Cache-Control','no-store');if(!flags(env).pendingCareAssistant)return res.status(404).json({error:'Assistance prototype is disabled'});try{const b=req.body||{},id=Number(req.params.id);if(!Number.isSafeInteger(id)||!sequence.includes(b.action)||Object.keys(b).some(k=>!['action','consent','session','confirmed'].includes(k)))return res.status(400).json({error:'Choose an allowed guided action'});if(b.action==='explain'&&b.consent!==true)return res.status(400).json({error:'Confirm use of this recorded step for guided help'});
 const row=(await pool.query('SELECT * FROM care_milestones WHERE id=$1 AND mother_id=$2',[id,req.user.id])).rows[0];if(!row)return res.status(404).json({error:'Care step not found'});for(const [key,s]of sessions)if(s.until<=now())sessions.delete(key);let token=b.session,s=token&&sessions.get(token);

@@ -10,9 +10,9 @@ def plan(data):
     candidates = data.get("candidates", [])
     tasks = data.get("task_count", 0)
     if not 2 <= tasks <= 8 or not candidates or len(candidates) > 160:
-        return {"status": "NO_PLAN", "plans": [], "elapsed_ms": 0}
+        return {"status": "NO_PLAN", "plans": [], "elapsed_ms": round((time.monotonic() - started) * 1000, 3)}
     if any(not any(c["task"] == t for c in candidates) for t in range(tasks)):
-        return {"status": "NO_PLAN", "plans": [], "elapsed_ms": 0}
+        return {"status": "NO_PLAN", "plans": [], "elapsed_ms": round((time.monotonic() - started) * 1000, 3)}
     model = cp_model.CpModel()
     chosen = [model.new_bool_var(f"candidate_{i}") for i in range(len(candidates))]
     for t in range(tasks):
@@ -25,6 +25,10 @@ def plan(data):
                 continue
             if a["centre"] != b["centre"] or (a["start"] < b["end"] and b["start"] < a["end"]):
                 model.add(chosen[i] + chosen[j] <= 1)
+    for doctor, date in {(c.get("doctor"), c["date"]) for c in candidates}:
+        ix = [i for i, c in enumerate(candidates) if c.get("doctor") == doctor and c["date"] == date]
+        remaining = min(candidates[i].get("remaining", 160) for i in ix)
+        model.add(sum(chosen[i] for i in ix) <= remaining)
     day_flags = []
     for day in sorted({c["date"] for c in candidates}):
         flag = model.new_bool_var(f"day_{day}")
