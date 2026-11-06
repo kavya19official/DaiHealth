@@ -158,25 +158,7 @@ const getUserProfile = async (userId, role) => {
 // due dates and overdue/upcoming status are always computed from real data,
 // never hard-coded per patient.
 // ============================================================================
-const MILESTONE_TEMPLATE = [
-  { stage: 'Trimester 1', days: 42,  category: 'pregnancy', title: 'First antenatal visit & registration', guidance: null },
-  { stage: 'Trimester 1', days: 70,  category: 'pregnancy', title: 'Blood work: HIV, syphilis & anaemia screening', guidance: 'Complete the pending blood work at the nearest lab — this screens for infections and anaemia that raise risk later in pregnancy.' },
-  { stage: 'Trimester 1', days: 84,  category: 'pregnancy', title: 'Dating ultrasound', guidance: 'Book a dating ultrasound to confirm gestational age and rule out early complications.' },
-  { stage: 'Trimester 2', days: 112, category: 'pregnancy', title: 'Second antenatal visit', guidance: 'Schedule the second antenatal visit — spacing between visits is how early warning signs get caught.' },
-  { stage: 'Trimester 2', days: 140, category: 'pregnancy', title: 'Anomaly scan', guidance: null },
-  { stage: 'Trimester 2', days: 168, category: 'pregnancy', title: 'Glucose tolerance test', guidance: 'Take the glucose tolerance test to screen for gestational diabetes before the third trimester.' },
-  { stage: 'Trimester 2', days: 196, category: 'pregnancy', title: 'Haemoglobin recheck & Anti-D', guidance: "Book a haemoglobin recheck. Anaemia is treatable now but raises delivery risk if it's still low at week 36." },
-  { stage: 'Trimester 3', days: 210, category: 'pregnancy', title: 'Third-trimester check-up', guidance: null },
-  { stage: 'Trimester 3', days: 238, category: 'pregnancy', title: 'Growth scan', guidance: null },
-  { stage: 'Trimester 3', days: 252, category: 'pregnancy', title: 'Birth plan & facility readiness', guidance: 'Confirm the birth plan and facility readiness with your doctor before week 38.' },
-  { stage: 'Delivery',    days: 280, category: 'pregnancy', title: 'Delivery', guidance: null },
-  { stage: 'Postpartum',  days: 287, category: 'pregnancy', title: 'Postpartum check-up (mother)', guidance: null },
-  { stage: 'Postpartum',  days: 322, category: 'pregnancy', title: 'Six-week postnatal visit', guidance: 'Attend the six-week postnatal visit — this is when postpartum recovery and mental health are screened.' },
-  { stage: 'Child (0–1y)', days: 280, category: 'child', title: 'BCG, OPV-0 & Hepatitis-B birth dose', guidance: 'Visit the nearest PHC for the birth-dose vaccines (BCG, OPV-0, Hepatitis-B) — ideally within the first week.' },
-  { stage: 'Child (0–1y)', days: 322, category: 'child', title: 'Penta-1, OPV-1 & Rotavirus-1', guidance: 'Book Penta-1, OPV-1 & Rotavirus-1 — protects against six serious childhood diseases.' },
-  { stage: 'Child (0–1y)', days: 350, category: 'child', title: 'Penta-2, OPV-2 & Rotavirus-2', guidance: null },
-  { stage: 'Child (0–1y)', days: 550, category: 'child', title: 'Measles-Rubella-1 & Vitamin A', guidance: null },
-];
+const MILESTONE_TEMPLATE = require('./timelineRules').milestones;
 
 // Seeds a mother's care timeline from the template above. Runs inside the
 // same transaction as registration so a mother always has a timeline from
@@ -577,8 +559,9 @@ const MILESTONE_SELECT = `
 // Mother: fetch her own care timeline
 app.get('/api/timeline', authenticateToken, authorizeRole(['mother']), async (req, res) => {
   try {
-    const result = await pool.query(MILESTONE_SELECT, [req.user.id]);
-    res.json({ milestones: result.rows.map(row=>({...row,workflow_state:require('./careStepMachine').stateOf(row)})) });
+    const result = await require('./timelineEventStore').current(pool,req.user.id);
+    const allowed=['id','stage','category','title','guidance','due_date','completed_at','sort_order','appointment_id','result_id','completion_verification','verified_facility_name','status','workflow_state','clinician_priority','added_by_doctor_id'];
+    res.set('Cache-Control','no-store').json({milestones:result.rows.map(row=>Object.fromEntries(allowed.filter(k=>row[k]!==undefined).map(k=>[k,row[k]]))),audit_checkpoint:result.checkpoint});
   } catch (error) {
     console.error('Fetch timeline error:', error);
     res.status(500).json({ error: 'Failed to fetch timeline' });
@@ -1105,6 +1088,9 @@ require('./doctorWorkspace')(app, { pool, authenticateToken, authorizeRole });
 require('./doctorOperations')(app, { pool, authenticateToken, authorizeRole });
 require('./patientDocuments')(app, { pool, authenticateToken, authorizeRole });
 require('./patientTimelineLive')(app, { pool, authenticateToken, authorizeRole });
+require('./timelineTrust')(app, { pool, authenticateToken, authorizeRole });
+require('./timelineAccess')(app, { pool, authenticateToken, authorizeRole });
+require('./timelinePush').register(app, { pool, authenticateToken, authorizeRole, startScheduler:true });
 require('./patientOfflineSync')(app, {pool,authenticateToken,authorizeRole});
 
 // Enhanced care timeline and missed-care outreach

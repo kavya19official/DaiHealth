@@ -2,7 +2,8 @@
 (function () {
 'use strict';
 let data, prefs = {}, filter = 'all', lane = 'mother', baby, compact = false;
-let scope = 'now';
+let scope = 'now', roadObserver, roadFrame, windowStart=0;
+const WINDOW_SIZE=40;
 let previous = new Map(), hasRendered = false, contrast = false, lowMotion = false;
 const expanded = new Map();
 try {
@@ -52,10 +53,6 @@ const zones = [
   { id: 'post', symbol: 'heart', label: 'A little care for you, too', short: 'Your recovery', sub: 'After delivery', text: 'There is room in this new chapter for your recovery and support.' },
   { id: 'baby', symbol: 'bloom', label: 'Hello, little one', short: 'Baby’s journey', sub: 'Vaccines & follow-ups', text: 'Small steps for a growing world. This baby’s records stay their own.' }
 ];
-function plant(type) {
-  const petals = type === 'bloom' ? '<g fill="currentColor" opacity=".22"><ellipse cx="60" cy="21" rx="10" ry="18"/><ellipse cx="60" cy="21" rx="10" ry="18" transform="rotate(60 60 21)"/><ellipse cx="60" cy="21" rx="10" ry="18" transform="rotate(120 60 21)"/></g><circle cx="60" cy="21" r="6" fill="currentColor"/>' : type === 'heart' ? '<path d="M60 37C32 20 43 1 60 14C77 1 88 20 60 37Z" fill="currentColor" opacity=".4"/>' : '<ellipse cx="60" cy="23" rx="8" ry="13" fill="currentColor" opacity=".4"/>';
-  return '<svg viewBox="0 0 120 120" class="journey-botanical" aria-hidden="true"><path d="M24 110Q60 100 97 110M60 104Q45 73 60 36" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M56 83Q18 82 23 50Q51 50 56 83ZM56 68Q94 69 98 39Q68 37 56 68Z" fill="currentColor" opacity=".18"/><path d="M56 83L30 58M56 68L90 45" fill="none" stroke="currentColor" stroke-width="1" opacity=".4"/>' + petals + '</svg>';
-}
 function workflow(m) {
   if(m.child||m.post)return m.status==='completed'?'recorded':'planned';
   return m.workflow_state || (m.completion_verification==='verified'?'clinician_confirmed':m.result_id?'awaiting_review':m.completed_at?'patient_reported':'planned');
@@ -65,9 +62,10 @@ function progress(m){
  const keys=['patient_reported','evidence_submitted','awaiting_review','clinician_confirmed'],at=keys.indexOf(workflow(m));
  return '<ol class="care-proof" aria-label="Evidence and review progress">'+keys.map((k,i)=>'<li class="'+(i<=at?'is-reached':'')+'"><span aria-hidden="true">'+(i<=at?'✓':i+1)+'</span>'+['Your update','Evidence','In review','Clinician review'][i]+'</li>').join('')+'</ol>';
 }
+function provenance(m){const w=workflow(m);return m.post?'From recorded delivery date':m.child?'This baby’s recorded schedule':w==='clinician_confirmed'?'Clinician reviewed'+(m.verified_facility_name?' · '+m.verified_facility_name:''):w==='awaiting_review'?'Uploaded evidence · awaiting review':w==='patient_reported'?'Patient reported · not clinician verified':m.added_by_doctor_id?'Added by your clinician':'From your recorded care plan';}
 function details(m,s){
  const linked=!m.child&&!m.post;
- return '<div class="stop-content"><p class="stop-guidance">'+E(m.guidance||'Discuss this recorded step with your care team.')+'</p>'+(linked?progress(m):'')+'<div class="stop-actions">'+(m.child?'<button class="btn btn--primary" data-journey-child="'+E(m.child)+'">Open baby’s record →</button>':m.post?'<button class="btn btn--primary" data-route="postpartum">Open recovery check-in →</button>':'<button class="btn btn--primary" data-step-help="'+E(m.id)+'">Help me with this step ↗</button>')+'<button class="journey-listen" data-journey-listen="'+stopId(m)+'">'+svg('speaker')+' Listen</button></div>'+(linked?'<div class="stop-secondary">'+(workflow(m)==='planned'?'<button class="link-btn" data-finish="'+E(m.id)+'">I have done this</button>':'')+(workflow(m)!=='clinician_confirmed'?'<button class="link-btn" data-step-evidence="'+E(m.id)+'">'+svg('clipboard')+' Add evidence</button>':'')+'<button class="link-btn" data-book="'+E(m.title)+'">Request visit</button></div><details class="stop-details"><summary>Details & preparation</summary><p>'+E(m.verified_facility_name?'Reviewed at '+m.verified_facility_name:'Bring your care card and previous reports. Ask your clinician about preparation.')+'</p><button class="link-btn" data-journey-questions="'+E(m.title)+'">Prepare questions</button> · <button class="link-btn" data-route="schemes">Scheme information</button></details>':'')+'</div>';
+ return '<div class="stop-content"><p class="road-provenance">'+svg('shield')+E(provenance(m))+'</p><p class="stop-guidance">'+E(m.guidance||'Discuss this recorded step with your care team.')+'</p><button type="button" class="link-btn" data-step-explain="'+E(m.id)+'">'+(document.documentElement.lang==='hi'?'आसान भाषा में समझें':'Explain in simple words')+'</button>'+(linked?progress(m):'')+'<div class="stop-actions">'+(m.child?'<button class="btn btn--primary" data-journey-child="'+E(m.child)+'">Open baby’s record →</button>':m.post?'<button class="btn btn--primary" data-route="postpartum">Open recovery check-in →</button>':'<button class="btn btn--primary" data-step-help="'+E(m.id)+'">Help me with this step ↗</button>')+'<button class="journey-listen" data-journey-listen="'+stopId(m)+'">'+svg('speaker')+' Listen</button></div>'+(linked?'<div class="stop-secondary">'+(workflow(m)==='planned'?'<button class="link-btn" data-finish="'+E(m.id)+'">I have done this</button>':'')+(workflow(m)!=='clinician_confirmed'?'<button class="link-btn" data-step-evidence="'+E(m.id)+'">'+svg('clipboard')+' Add evidence</button>':'')+'<button class="link-btn" data-book="'+E(m.title)+'">Request visit</button></div><details class="stop-details"><summary>Details & preparation</summary><p>'+E(m.verified_facility_name?'Reviewed at '+m.verified_facility_name:'Bring your care card and previous reports. Ask your clinician about preparation.')+'</p><button class="link-btn" data-journey-questions="'+E(m.title)+'">Prepare questions</button> · <button class="link-btn" data-route="schemes">Scheme information</button></details>':'')+'</div>';
 }
 function recordChart(all){
  const counts=[all.filter(m=>workflow(m)==='clinician_confirmed').length,all.filter(m=>['evidence_submitted','awaiting_review'].includes(workflow(m))).length,all.filter(m=>workflow(m)==='patient_reported').length];
@@ -76,34 +74,56 @@ function recordChart(all){
  let cursor=0;const slices=counts.map((n,i)=>{const from=cursor;cursor+=all.length?n/all.length*100:0;return colours[i]+' '+from+'% '+cursor+'%';});
  return '<div class="ct-chart" role="img" aria-label="'+E(counts.map((n,i)=>names[i]+': '+n).join(', '))+'" style="--ct-chart:'+ (all.length?'conic-gradient('+slices.join(',')+')':'var(--brand-soft)')+'"><div><strong>'+all.length+'</strong><small>recorded steps</small></div></div><div class="ct-chart-legend">'+names.map((label,i)=>'<div><i style="background:'+colours[i]+'"></i><span>'+label+'</span><strong>'+counts[i]+'</strong></div>').join('')+'</div>';
 }
-function dateTile(m){
- const date=m.due_date&&new Date(String(m.due_date).slice(0,10)+'T12:00:00');
- return date&&!Number.isNaN(date.valueOf())?'<span>'+E(date.toLocaleDateString(document.documentElement.lang||'en',{month:'short'}))+'</span><strong>'+E(date.toLocaleDateString(document.documentElement.lang||'en',{day:'2-digit'}))+'</strong>':svg(icons[category(m)]||'heart');
-}
 function card(m,index,current){
  const s=status(m),id=stopId(m),wf=workflow(m),open=expanded.has(id)?expanded.get(id):current&&!compact;
  const label=wf!=='planned'?flowLabels[wf]:labels[s];
- return '<article id="'+id+'" class="journey-stop stop-'+s+(current?' stop-current':'')+'" data-week="'+(m.child||m.post?'':week(m)??'')+'"><div class="path-node" aria-hidden="true">'+dateTile(m)+'</div><details class="stop-card" data-stop-expand="'+id+'" '+(open?'open':'')+'><summary class="stop-summary"><span class="stop-heading">'+(current?'<span class="you-are-here">FOCUS STEP</span>':'')+'<span class="stop-when">'+svg(icons[category(m)]||'heart')+E(fmt(m.due_date))+(m.child||m.post||week(m)===null?'':' · Week '+week(m))+'</span><strong>'+E(plain(m))+'</strong>'+(m.doctor_name&&m.added_by_doctor_id?'<span class="doctor-note">From '+E(m.doctor_name)+'</span>':'')+'</span><span class="stop-status">'+(wf==='clinician_confirmed'?'✓ ':s==='overdue'?'◷ ':'○ ')+E(label)+'</span><span class="stop-chevron" aria-hidden="true">⌄</span></summary>'+details(m,s)+'</details></article>';
+ return '<article id="'+id+'" class="journey-stop stop-'+s+(current?' stop-current':'')+' road-stop road-stop-'+(index%2?'right':'left')+'" data-week="'+(m.child||m.post?'':week(m)??'')+'"><span class="road-node" aria-hidden="true">'+(wf==='clinician_confirmed'?'✓':String(index+1).padStart(2,'0'))+'</span><details class="stop-card" data-stop-expand="'+id+'" '+(open?'open':'')+'><summary class="stop-summary"><span class="road-card-top"><span class="road-type">'+svg(icons[category(m)]||'heart')+E(m.child?'Baby’s care':m.post?'Recovery':category(m).replace('body','Recovery'))+'</span><span class="road-date">'+E(fmt(m.due_date))+'</span></span>'+(current?'<span class="you-are-here">YOUR NEXT STOP</span>':'')+'<span class="road-title">'+E(plain(m))+'</span><span class="road-card-bottom"><span class="stop-status">'+(wf==='clinician_confirmed'?'✓ ':s==='overdue'?'◷ ':'○ ')+E(label)+'</span><span class="road-open" aria-hidden="true">↗</span></span>'+(m.doctor_name&&m.added_by_doctor_id?'<span class="doctor-note">From '+E(m.doctor_name)+'</span>':'')+'</summary>'+details(m,s)+'</details></article>';
 }
-function deliveryChapter() {
-  return '<aside class="delivery-chapter"><span>YOUR BIRTH CHAPTER</span><h3>Pack a little peace of mind.</h3><div><p><strong>Your hospital</strong>' + E(data.overview?.registered_facility?.name || 'Not selected yet') + '</p><p><strong>Your emergency contact</strong>' + E(data.user.emergency_contact_name || 'Not recorded yet') + '</p></div><p>Discuss your bag and transport plan with your care team. Hospital readiness is not yet confirmed here.</p><button type="button" class="link-btn" data-route="profile">Review my birth & contact details →</button></aside>';
+function roadGeometry(width,points){
+ if(!points.length)return '';const x=points[0].x,first=points[0].y;
+ let d='M '+x+' '+Math.max(0,first-72)+' L '+x+' '+first;
+ for(let i=1;i<points.length;i++){const a=points[i-1],b=points[i],bend=(i%2?1:-1)*Math.min(48,width*.055),dy=(b.y-a.y)*.45;d+=' C '+(x+bend)+' '+(a.y+dy)+', '+(x-bend)+' '+(b.y-dy)+', '+x+' '+b.y;}
+ return d+' L '+x+' '+(points.at(-1).y+72);
+}
+function drawRoad(){
+ const canvas=$('careRoadway'),track=canvas?.querySelector('.road-track');if(!canvas||!track||!canvas.getBoundingClientRect)return;
+ const box=canvas.getBoundingClientRect();if(!box.width)return;
+ const points=Array.from(canvas.querySelectorAll('.road-node')).map(node=>{const r=node.getBoundingClientRect();return{x:r.left-box.left+r.width/2,y:r.top-box.top+r.height/2};});
+ const height=Math.max(canvas.scrollHeight,box.height);track.setAttribute('viewBox','0 0 '+box.width+' '+height);track.setAttribute('height',height);
+ const d=roadGeometry(box.width,points);track.querySelectorAll('path').forEach(p=>p.setAttribute('d',d));
+ window.dispatchEvent?.(new CustomEvent('dai:timeline-road-ready',{detail:{key:[lane,baby,scope,filter,windowStart].join('|')}}));
+}
+function scheduleRoad(){if(typeof requestAnimationFrame!=='function')return;cancelAnimationFrame(roadFrame);roadFrame=requestAnimationFrame(drawRoad);}
+function observeRoad(){
+ roadObserver?.disconnect();const canvas=$('careRoadway');if(!canvas)return;
+ if(window.ResizeObserver){roadObserver=new ResizeObserver(scheduleRoad);roadObserver.observe(canvas);canvas.querySelectorAll('.road-stop').forEach(n=>roadObserver.observe(n));}
+ scheduleRoad();
 }
 function render(){
  if(!data?.user)return;const root=$('timelineList');if(!root)return;
- root.classList.add('care-timeline-v2');root.classList.toggle('journey-high-contrast',contrast);root.classList.toggle('journey-simple',lowMotion);
+ root.classList.add('care-timeline-v2','care-roadway');root.classList.toggle('journey-high-contrast',contrast);root.classList.toggle('journey-simple',lowMotion);
  const all=items(),st=M().stage(data.user,data.post,data.children),activeZone=lane==='baby'?'baby':st.delivered?'post':st.week===null?'t1':st.week<14?'t1':st.week<28?'t2':'t3';
  const inChapter=m=>m.zone===activeZone;
  const current=all.find(m=>inChapter(m)&&status(m)!=='completed'&&workflow(m)==='planned')||all.find(m=>inChapter(m)&&status(m)!=='completed');
- const shown=all.filter(m=>(scope==='all'||(scope==='history'?!inChapter(m):inChapter(m)))&&(filter==='all'||category(m)===filter||(filter==='tests'&&category(m)==='scans')));
+ const matches=all.filter(m=>(scope==='all'||(scope==='history'?!inChapter(m):inChapter(m)))&&(filter==='all'||category(m)===filter||(filter==='tests'&&category(m)==='scans')));
+ windowStart=Math.min(windowStart,Math.max(0,Math.floor((matches.length-1)/WINDOW_SIZE)*WINDOW_SIZE));const shown=matches.slice(windowStart,windowStart+WINDOW_SIZE);
  const connection=document.documentElement.dataset.daiTimelineConnectionState==='live'?'Live updates':'Refresh available';
- root.innerHTML='<header class="ct-hero"><div class="ct-hero-copy"><span class="journey-eyebrow">MY CARE TIMELINE</span><h2>Your care.<br><span>One step closer.</span></h2><p>'+E(lane==='baby'?'A separate journey for each little one.':st.label)+'</p><div class="journey-view-switch"><button data-journey-lane="mother" aria-pressed="'+(lane==='mother')+'">'+svg('heart')+' Mother</button><button data-journey-lane="baby" aria-pressed="'+(lane==='baby')+'" '+(!data.children?.length?'disabled':'')+'>'+svg('baby')+' Baby</button></div></div><section class="ct-overview" aria-label="Recorded care overview"><div class="ct-overview-heading"><span>THE BIG PICTURE</span><span class="ct-live" data-timeline-connection>'+connection+'</span></div><div class="ct-chart-body">'+recordChart(all)+'</div></section></header>'+
- '<div class="ct-controls"><div class="ct-scopes" role="group" aria-label="Care chapters">'+[['now','Current chapter'],['history','Earlier care'],['all','All steps']].map(([k,v])=>'<button data-step-scope="'+k+'" aria-pressed="'+(scope===k)+'">'+v+'</button>').join('')+'</div><details class="journey-options"><summary>Display & export</summary><div><button data-journey-recap>Save my journey</button><button data-journey-compact>Expand / collapse focus</button><button data-journey-contrast aria-pressed="'+contrast+'">High contrast</button><button data-journey-simple aria-pressed="'+lowMotion+'">Low bandwidth</button></div></details></div>'+
+ const chapters=zones.filter(z=>shown.some(m=>m.zone===z.id));let index=windowStart;
+ root.innerHTML='<header class="road-header"><div><span class="journey-eyebrow">MY CARE</span><h2>Your care timeline<span aria-hidden="true">.</span></h2><p>A little guidance at every turn.</p></div><div class="road-header-tools"><button type="button" class="road-jump" data-step-explorer>Explore dates ↔</button><span class="ct-live" data-timeline-connection>'+connection+'</span><details class="journey-options"><summary aria-label="Timeline display and export options">•••</summary><div><button data-journey-recap>Save my journey</button><button data-timeline-history>Event history & verification</button><button data-timeline-fhir>Download FHIR-aligned export</button><button data-timeline-share>Create / revoke summary QR</button><button data-journey-compact>Expand / collapse next stop</button><button data-journey-contrast aria-pressed="'+contrast+'">High contrast</button><button data-journey-simple aria-pressed="'+lowMotion+'">Low bandwidth</button></div></details></div></header>'+
+ '<section class="road-boarding"><div class="road-stage-icon">'+svg(lane==='baby'?'baby':'heart')+'</div><div class="road-stage-copy"><span>YOUR CURRENT CHAPTER</span><strong>'+E(lane==='baby'?'Each baby, their own journey':st.label)+'</strong></div><div class="journey-view-switch"><button data-journey-lane="mother" aria-pressed="'+(lane==='mother')+'">'+svg('heart')+' Mother</button><button data-journey-lane="baby" aria-pressed="'+(lane==='baby')+'" '+(!data.children?.length?'disabled':'')+'>'+svg('baby')+' Baby</button></div></section>'+
+ '<div class="road-toolbar"><div class="ct-scopes" role="group" aria-label="Care chapters">'+[['now','Current chapter'],['history','Earlier care'],['all','All steps']].map(([k,v])=>'<button data-step-scope="'+k+'" aria-pressed="'+(scope===k)+'">'+v+'</button>').join('')+'</div>'+(current?'<button class="road-jump" data-journey-current>'+svg('flag')+' Next stop ↓</button>':'')+'</div>'+
  (lane==='baby'?'<div class="journey-baby-tabs" aria-label="Choose a baby">'+(data.children||[]).map((c,i)=>'<button data-journey-baby="'+E(c.id)+'" aria-pressed="'+(String(baby||data.children[0].id)===String(c.id))+'">'+E(/^CHILD-SYN-/.test(c.name)?'Baby '+(i+1):c.name)+'</button>').join('')+'</div>':'')+
- '<div class="journey-filters" role="group" aria-label="Timeline filters">'+[['all','All'],['visits','Visits'],['tests','Tests & scans'],['nutrition','Nutrition'],['vaccines','Vaccines'],['body','Recovery'],['prep','Birth preparation']].map(([k,v])=>'<button data-journey-filter="'+k+'" aria-pressed="'+(filter===k)+'">'+(icons[k]?svg(icons[k]):svg('clipboard'))+v+'</button>').join('')+'</div><div class="ct-layout"><section class="ct-records"><div class="ct-section-head"><div><span class="journey-eyebrow">'+(scope==='history'?'YOUR EARLIER RECORDS':'YOUR RECORDED PLAN')+'</span><h3>'+E(scope==='history'?'Earlier care':scope==='all'?'The whole picture':zones.find(z=>z.id===activeZone)?.short||'Current care')+'</h3></div><span>'+shown.length+' steps</span></div><div class="ct-step-list">'+(shown.map((m,i)=>card(m,i,current&&String(current.id)===String(m.id))).join('')||'<div class="journey-empty">'+svg('clipboard')+'<h3>No steps in this view</h3><button data-step-scope="all">View all recorded steps →</button></div>')+'</div></section><aside class="ct-rail"><section class="ct-focus"><span class="journey-eyebrow">LET’S TAKE THE NEXT STEP</span><div class="ct-focus-icon">'+svg(current?icons[category(current)]:'shield')+'</div><h3>'+E(current?plain(current):'Your next chapter')+'</h3><p>'+E(current?fmt(current.due_date):'Your care team can help plan what comes next.')+'</p>'+(current?'<button class="btn btn--primary" data-journey-current>Open this step ↗</button>':'<button class="btn btn--primary" data-route="appointments">Request a visit</button>')+'</section><details class="ct-proof-guide"><summary>How your care is reviewed <span aria-hidden="true">＋</span></summary><ol><li><b>01</b><span><strong>You report done</strong><small>Your update, in your words.</small></span></li><li><b>02</b><span><strong>You add evidence</strong><small>A report linked to this step.</small></span></li><li><b>03</b><span><strong>Awaiting review</strong><small>Share with your care team.</small></span></li><li><b>04</b><span><strong>Clinician reviews</strong><small>Only an authorised clinician.</small></span></li></ol><button class="link-btn" data-route="records">My reports & records →</button></details></aside></div><footer class="journey-trust">'+svg('shield')+' Your update and clinician review are separate. Your clinician interprets results. · Synthetic demo</footer>';
- for(const m of all){const wf=workflow(m);if(hasRendered&&previous.has(String(m.id))&&previous.get(String(m.id))!=='clinician_confirmed'&&wf==='clinician_confirmed')window.DaiAPI?.toast('Your clinician reviewed a care step.');previous.set(String(m.id),wf);}hasRendered=true;
+ '<div class="journey-filters" role="group" aria-label="Timeline filters">'+[['all','All stops'],['visits','Visits'],['tests','Tests & scans'],['nutrition','Nutrition'],['vaccines','Vaccines'],['body','Recovery'],['prep','Birth preparation']].map(([k,v])=>'<button data-journey-filter="'+k+'" aria-pressed="'+(filter===k)+'">'+(icons[k]?svg(icons[k]):svg('clipboard'))+v+'</button>').join('')+'</div>'+
+ '<div class="road-context"><span>'+matches.length+' recorded '+(matches.length===1?'step':'steps')+(matches.length>WINDOW_SIZE?' · showing '+(windowStart+1)+'–'+(windowStart+shown.length):'')+'</span><span>Tap a stop to open it '+svg('arrow')+'</span></div><div id="careRoadway" class="road-canvas"><svg class="road-track" aria-hidden="true" preserveAspectRatio="none" viewBox="0 0 1000 1000"><path class="road-edge" d="M500 0 V1000"/><path class="road-surface" d="M500 0 V1000"/><path class="road-markings" d="M500 0 V1000"/></svg>'+
+ chapters.map(z=>'<section class="road-chapter" aria-label="'+E(z.short)+'"><header class="road-chapter-title"><span>'+svg(z.id==='baby'?'baby':z.id==='post'?'heart':'flag')+'</span><div><h3>'+E(z.short)+'</h3><small>'+E(z.sub)+'</small></div>'+(z.id===activeZone?'<span class="road-here">You are here</span>':'')+'</header>'+shown.filter(m=>m.zone===z.id).map(m=>card(m,index++,current&&String(current.id)===String(m.id))).join('')+'</section>').join('')+
+ (!shown.length?'<div class="journey-empty">'+svg('clipboard')+'<h3>No stops in this view</h3><p>Your other recorded steps are still here.</p><button data-step-scope="all">View all recorded steps →</button></div>':'<div class="road-end"><span aria-hidden="true">'+svg('heart')+'</span><strong>Care continues, together.</strong><small>Your next steps appear when recorded.</small></div>')+'</div>'+
+ (matches.length>WINDOW_SIZE?'<nav class="road-pages" aria-label="Timeline record pages"><button data-road-page="previous" '+(!windowStart?'disabled':'')+'>← Earlier stops</button><span>'+(windowStart+1)+'–'+(windowStart+shown.length)+' / '+matches.length+'</span><button data-road-page="next" '+(windowStart+WINDOW_SIZE>=matches.length?'disabled':'')+'>More stops →</button></nav>':'')+
+ '<details class="road-overview"><summary><span>'+svg('clipboard')+' Your recorded progress</span><span>View breakdown +</span></summary><div class="road-chart-body">'+recordChart(all)+'</div></details><details class="ct-proof-guide"><summary>How your care is reviewed <span aria-hidden="true">＋</span></summary><p>Your update → Evidence submitted → Awaiting review → Clinician review.</p><button class="link-btn" data-route="records">My reports & records →</button></details><footer class="journey-trust">'+svg('shield')+' Your update and clinician review are separate. Your clinician interprets results. · Synthetic demo</footer>';
+ observeRoad();window.dispatchEvent?.(new Event('dai:timeline-rendered'));for(const m of all){const wf=workflow(m);if(hasRendered&&previous.has(String(m.id))&&previous.get(String(m.id))!=='clinician_confirmed'&&wf==='clinician_confirmed')window.dispatchEvent?.(new CustomEvent('dai:timeline-reviewed',{detail:{id:m.id}}));previous.set(String(m.id),wf);}hasRendered=true;
 }
 
 function listen(id) {
+  const selected=items().find(m=>stopId(m)===id);if(window.TimelineTools&&selected)return TimelineTools.listen(selected);
   if (!window.speechSynthesis) return window.DaiAPI.toast('Read-aloud is unavailable in this browser.');
   speechSynthesis.cancel();
   const lang = document.documentElement.lang || 'en', voice = speechSynthesis.getVoices().find(v => v.lang.toLowerCase().startsWith(lang));
@@ -122,28 +142,32 @@ async function openEvidence(id){
  $('docTitle')?.focus();$('docUploadForm')?.scrollIntoView({block:'center',behavior:'smooth'});
 }
 async function openHelp(id,opener){
+ if(data?.user?.guest||data?.offline||!navigator.onLine){window.DaiAPI?.toast('Sign in and connect for record-specific help. The saved timeline and prepared explanations remain available.');return;}
  const dialog=document.createElement('dialog');dialog.className='ct-help-dialog';dialog.setAttribute('aria-label','Help with this care step');
  dialog.innerHTML='<button class="ct-dialog-close" aria-label="Close help">×</button><div data-help-content role="status">Preparing your step…</div>';document.body.appendChild(dialog);
  dialog.querySelector('button').onclick=()=>dialog.close();dialog.addEventListener('close',()=>{dialog.remove();opener?.focus();});dialog.showModal();
  const result=await DaiAPI.apiRequest('/patient/timeline/'+encodeURIComponent(id)+'/assist',{method:'POST'});if(!dialog.open)return;
  const host=dialog.querySelector('[data-help-content]');
  if(!result){host.innerHTML='<h2>Let’s try another way</h2><p>You can still request a visit or upload a report.</p><button class="btn" data-book="'+E(items().find(m=>String(m.id)===id)?.title||'Care follow-up')+'">Request a visit</button>';return;}
- host.innerHTML='<span class="journey-eyebrow">DHRUV · GUIDED HELP</span><h2>'+E(result.title)+'</h2><p>'+E(result.explanation)+'</p><div class="ct-agent-tools"><span>✓ Read your step</span><span>✓ Checked listed services</span><span>✓ Prepared questions</span></div><section><h3>Questions to take with you</h3><ul>'+result.questions.map(q=>'<li>'+E(q)+'</li>').join('')+'</ul></section><section><h3>Centres listing this service</h3>'+ (result.facilities.map(f=>'<article><strong>'+E(f.name)+'</strong><p>'+E(f.reason)+(f.verified_at?' Last confirmed '+E(fmt(f.verified_at))+'.':'')+'</p><small>'+E(f.address)+'</small></article>').join('')||'<p>No matching service is recorded. Use Nearby care to check with a centre.</p>')+'</section><div class="ct-draft"><span class="journey-eyebrow">READY FOR YOUR REVIEW</span><h3>Appointment request draft</h3><p>'+E(result.draft.reason)+'</p><p>'+E(result.notice)+'</p><button class="btn btn--primary" data-help-draft>Review request →</button></div>';
+ host.innerHTML='<span class="journey-eyebrow">DHRUV · GUIDED HELP</span><h2>'+E(result.title)+'</h2><p>'+E(result.explanation)+'</p><div class="ct-agent-tools"><span>✓ Read your step</span><span>✓ Checked listed services</span><span>✓ Prepared questions</span></div><section><h3>Questions to take with you</h3><ul>'+result.questions.map(q=>'<li>'+E(q)+'</li>').join('')+'</ul></section><section><h3>Centres listing this service</h3><p>Optional: use your location once to check straight-line distance. Coordinates are not saved.</p><button type="button" class="link-btn" data-near-step="'+E(id)+'">Use location once</button><div data-near-results role="status"></div>'+ (result.facilities.map(f=>'<article><strong>'+E(f.name)+'</strong><p>'+E(f.reason)+(f.verified_at?' Last confirmed '+E(fmt(f.verified_at))+'.':'')+'</p><small>'+E(f.address)+'</small></article>').join('')||'<p>No matching service is recorded. Use Nearby care to check with a centre.</p>')+'</section><div class="ct-draft"><span class="journey-eyebrow">READY FOR YOUR REVIEW</span><h3>Appointment request draft</h3><p>'+E(result.draft.reason)+'</p><p>'+E(result.notice)+'</p><button class="btn btn--primary" data-help-draft>Review request →</button></div>';
  host.querySelector('[data-help-draft]').onclick=()=>{dialog.close();if(window.PatientConnected?.prepareVisit){window.PatientConnected.prepareVisit(result.title,result.questions);return;}document.querySelector('[data-panel="appointments"]')?.click();const input=$('apptNotes');if(input){input.value=result.draft.reason+'\nQuestions: '+result.questions.join(' ');input.focus();}DaiAPI.toast('Draft prepared. Choose a doctor and date, then confirm the request.');};
 }
 function scrollTo(el) { el?.scrollIntoView({ behavior: lowMotion || matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'center' }); }
 document.addEventListener('toggle', e => {
   const id = e.target.dataset?.stopExpand;
-  if (id) expanded.set(id, e.target.open);
+  if (id) { expanded.set(id, e.target.open); scheduleRoad(); }
 }, true);
 document.addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b) return;
-  if (b.dataset.stepScope) { scope=b.dataset.stepScope; render(); }
+  if (b.dataset.stepScope) { scope=b.dataset.stepScope; windowStart=0;render(); }
+  if(b.dataset.roadPage){windowStart=Math.max(0,windowStart+(b.dataset.roadPage==='next'?WINDOW_SIZE:-WINDOW_SIZE));render();$('careRoadway')?.scrollIntoView({block:'start'});}
+  if(b.hasAttribute('data-step-explorer')){const d=document.createElement('dialog');d.className='ct-help-dialog timeline-explorer-dialog';d.setAttribute('aria-label','Explore recorded care by date');d.innerHTML='<button class="ct-dialog-close" aria-label="Close">×</button><h2>Explore your dates</h2><div data-date-explorer></div>';document.body.append(d);d.querySelector('button').onclick=()=>d.close();d.addEventListener('close',()=>d.remove());d.showModal();window.TimelineTools?.explorer(d.querySelector('[data-date-explorer]'),items(),id=>{d.close();reveal(id);});}
+  if(b.dataset.stepExplain){const m=items().find(m=>String(m.id)===b.dataset.stepExplain),answer=window.TimelineTools?.explain(m||{});if(answer){const d=document.createElement('dialog');d.className='ct-help-dialog';d.innerHTML='<button class="ct-dialog-close" aria-label="Close">×</button><h2>'+E(plain(m))+'</h2><small>Prepared educational content · not an interpretation of your result</small><p>'+E(answer.text)+'</p>'+(answer.sources||[]).filter(s=>typeof s.url==='string'&&s.url.startsWith('https://')).map(s=>'<a target="_blank" rel="noopener" href="'+E(s.url)+'">'+E(s.title||'Official source')+'</a>').join('');document.body.append(d);d.querySelector('button').onclick=()=>d.close();d.addEventListener('close',()=>d.remove());d.showModal();}}
   if (b.dataset.stepHelp) openHelp(b.dataset.stepHelp,b);
   if (b.dataset.stepEvidence) openEvidence(b.dataset.stepEvidence);
-  if (b.dataset.journeyFilter) { filter = b.dataset.journeyFilter; render(); }
-  if (b.dataset.journeyLane) { lane = b.dataset.journeyLane; filter = 'all'; render(); }
-  if (b.dataset.journeyBaby) { baby = b.dataset.journeyBaby; render(); }
+  if (b.dataset.journeyFilter) { filter = b.dataset.journeyFilter;windowStart=0; render(); }
+  if (b.dataset.journeyLane) { lane = b.dataset.journeyLane; windowStart=0;filter = 'all'; render(); }
+  if (b.dataset.journeyBaby) { baby = b.dataset.journeyBaby;windowStart=0; render(); }
   if (b.hasAttribute('data-journey-compact')) { compact = !compact; expanded.clear(); render(); }
   if (b.dataset.journeyListen) listen(b.dataset.journeyListen);
   if (b.hasAttribute('data-journey-recap')) recap();
@@ -153,6 +177,7 @@ document.addEventListener('click', e => {
   if (b.dataset.journeyQuestions) window.PatientExperience.askDaya('What should I ask my doctor about ' + b.dataset.journeyQuestions + '?');
   if (b.dataset.journeyChapter) scrollTo($('journey-zone-' + b.dataset.journeyChapter));
   if (b.hasAttribute('data-journey-current')) {
+    if(scope!=='now'||filter!=='all'){scope='now';filter='all';render();}
     const current = document.querySelector('.stop-current');
     if (!current) return window.DaiAPI.toast('No next step is recorded in this view. Try All steps.');
     const detail = current.querySelector('[data-stop-expand]'); if (detail) detail.open = true;
@@ -166,5 +191,8 @@ document.addEventListener('input', e => {
   const target = stops.sort((a, b) => Math.abs(Number(a.dataset.week) - w) - Math.abs(Number(b.dataset.week) - w))[0];
   target?.scrollIntoView({ behavior: 'instant', block: 'center' });
 });
-window.PatientJourney = { update(next, p) { data = next; prefs = p; render(); }, category };
+function reveal(id){scope='all';filter='all';const rows=items(),i=rows.findIndex(m=>String(m.id)===String(id));if(i<0)return;windowStart=Math.floor(i/WINDOW_SIZE)*WINDOW_SIZE;expanded.set(stopId(rows[i]),true);render();scrollTo($(stopId(rows[i])));}
+document.addEventListener('dai:patient-panel',scheduleRoad);
+window.addEventListener?.('resize',scheduleRoad);
+window.PatientJourney = { update(next, p) { data = next; prefs = p; render(); }, category, roadGeometry, reveal, getRows:()=>items() };
 })();

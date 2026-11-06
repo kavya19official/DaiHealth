@@ -111,7 +111,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 <link rel="stylesheet" href="doctor-pages.css?v=3">
 <link rel="stylesheet" href="doctor-home-reference.css?v=1">
 <link rel="stylesheet" href="dashboard-charts.css?v=1">
-</head>
+<link rel="stylesheet" href="patient-journey.css?v=7"></head>
 <body class="doctor-workspace">
 <button type="button" class="dw-menu-backdrop" data-dw-close-menu aria-label="Close sidebar"></button>
 <div class="app">
@@ -439,7 +439,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 <script src="/shared/emergency-triage.js"></script>
 <script src="js/care-extensions.js"></script>
 <script src="js/doctor-safety.js"></script>
-<script>
+<script src="js/timeline-tools.js?v=1"></script><script>
 (function () {
 "use strict";
 var api = window.DaiAPI;
@@ -586,15 +586,15 @@ function demoTimelineForPatient(p) {
   return timelineTemplates.map(function (m) { return Object.assign({}, m); });
 }
 
-function renderTimeline(items, patientName) {
+function renderTimeline(items, patientName, offset) {
   var el = $('docTimeline');
   if (!el) return;
-  var rows = Array.isArray(items) ? items : [];
+  var rows = Array.isArray(items) ? items : [];offset=Math.max(0,Number(offset)||0);
   el.innerHTML =
     '<div class="section-head"><div><div class="section-title">' +
     esc(patientName || 'Patient') +
     ' care timeline</div><div class="muted">Recorded events and upcoming follow-ups</div></div></div>' +
-    rows.map(function (m) {
+    rows.slice(offset,offset+60).map(function (m) {
       var tag = m.status === 'completed' ? 'ok' : m.status === 'overdue' ? 'pending' : 'info';
       return (
         '<div class="list-row"><div style="flex:1"><div class="feed-item__title">' +
@@ -610,6 +610,9 @@ function renderTimeline(items, patientName) {
         '</span></div>'
       );
     }).join('');
+  if(rows.length>60){var pager=document.createElement('nav');pager.className='timeline-zoom-controls';pager.setAttribute('aria-label','Patient history pages');pager.innerHTML='<button type="button" data-history-prev '+(!offset?'disabled':'')+'>Earlier</button><span>'+ (offset+1)+'–'+Math.min(offset+60,rows.length)+' of '+rows.length+'</span><button type="button" data-history-next '+(offset+60>=rows.length?'disabled':'')+'>More</button>';pager.querySelector('[data-history-prev]').onclick=function(){renderTimeline(rows,patientName,offset-60);};pager.querySelector('[data-history-next]').onclick=function(){renderTimeline(rows,patientName,offset+60);};el.append(pager);}
+  if(window.TimelineTools){var dates=document.createElement('details');dates.className='road-overview';dates.innerHTML='<summary>Zoom through recorded dates</summary><div data-doctor-date-explorer></div>';el.prepend(dates);dates.addEventListener('toggle',function(){if(dates.open&&!dates.dataset.loaded){dates.dataset.loaded='1';TimelineTools.explorer(dates.querySelector('[data-doctor-date-explorer]'),rows);}});}
+
 }
 
 async function openPatient(id) {
@@ -719,5 +722,5 @@ boot();
 <script src="js/care-coordination-doctor.js?v=2"></script>
 <script src="js/smart-referral-handoff.js"></script><script src="js/missed-care-outreach.js?v=2"></script>
 <script src="js/care-chatbot.js?v=ai-needed-1"></script>
-<script src="js/report-intake.js"></script><script src="js/doctor-report-review.js?v=2"></script><script src="js/clinical-review.js?v=3"></script><script src="js/ai-usage.js?v=2"></script><script src="js/demo-care-messages.js?v=1"></script><script src="js/demo-guide.js?v=1"></script><script src="js/doctor-coordination-requests.js?v=2"></script></body>
+<script src="js/report-intake.js"></script><script src="js/doctor-report-review.js?v=2"></script><script src="js/clinical-review.js?v=4"></script><script src="js/ai-usage.js?v=2"></script><script src="js/demo-care-messages.js?v=1"></script><script src="js/demo-guide.js?v=1"></script><script src="js/doctor-coordination-requests.js?v=2"></script></body>
 </html>

@@ -21,8 +21,8 @@ test("outreach queue: mother sees her own items, doctor sees only active patient
     const d2 = await user("d2@dai-synthetic.invalid", "doctor");
     await pool.query("INSERT INTO mother_profiles(user_id,full_name) VALUES($1,'SYNTHETIC One'),($2,'SYNTHETIC Two')", [m1, m2]);
     for (const [d, n] of [[d1, "One"], [d2, "Two"]]) await pool.query("INSERT INTO doctor_profiles(user_id,full_name,specialization,medical_license_number) VALUES($1,$2,'Obstetrics',$3)", [d, "Dr " + n, "T-" + n]);
-    const old = (days) => new Date(Date.now() - days * 864e5).toISOString().slice(0, 10);
-    await pool.query("INSERT INTO care_milestones(mother_id,stage,category,title,due_date) VALUES($1,'T2','pregnancy','Glucose test',$2),($1,'T2','pregnancy','Anomaly scan',$3),($1,'T3','pregnancy','Future visit',CURRENT_DATE + 30),($4,'T2','pregnancy','Other mother test',$2)", [m1, old(40), old(3), m2]);
+    // Use the database calendar for both fixture dates and overdue calculations.
+    await pool.query("INSERT INTO care_milestones(mother_id,stage,category,title,due_date) VALUES($1,'T2','pregnancy','Glucose test',CURRENT_DATE - 40),($1,'T2','pregnancy','Anomaly scan',CURRENT_DATE - 3),($1,'T3','pregnancy','Future visit',CURRENT_DATE + 30),($2,'T2','pregnancy','Other mother test',CURRENT_DATE - 40)", [m1, m2]);
     await pool.query("INSERT INTO appointments(mother_id,doctor_id,requested_date,reason,status) VALUES($1,$2,CURRENT_DATE+5,'Review','confirmed'),($3,$4,CURRENT_DATE+5,'Review','confirmed')", [m1, d1, m2, d2]);
 
     let who = { id: m1, role: "mother" };

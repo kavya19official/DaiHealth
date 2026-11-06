@@ -1,0 +1,2 @@
+'use strict';
+const fs=require('node:fs'),path=require('node:path'),root=path.join(__dirname,'..'),target=path.join(root,'frontend/vendor/timeline');fs.mkdirSync(target,{recursive:true});for(const [source,file] of [['d3/dist/d3.min.js','d3.min.js'],['d3/LICENSE','D3-LICENSE'],['lottie-web/build/player/lottie_light.min.js','lottie-light.min.js'],['lottie-web/LICENSE.md','LOTTIE-LICENSE.md']])fs.copyFileSync(path.join(root,'backend/node_modules',source),path.join(target,file));console.log('Optional D3 and Lottie assets copied with licences.');

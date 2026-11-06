@@ -1,0 +1,3 @@
+'use strict';
+const fs=require('node:fs'),path=require('node:path'),{Pool}=require('../backend/node_modules/pg');
+(async()=>{if(!process.env.DATABASE_URL)throw Error('Set DATABASE_URL for the patient API PostgreSQL database. Local PGlite is not modified.');const pool=new Pool({connectionString:process.env.DATABASE_URL});try{await pool.query(fs.readFileSync(path.join(__dirname,'../backend/optional/patient_postgis.sql'),'utf8'));console.log('Patient facility spatial index ready. Set PATIENT_POSTGIS_ENABLED=true on this API.');}finally{await pool.end();}})().catch(e=>{console.error(e.message);process.exitCode=1;});

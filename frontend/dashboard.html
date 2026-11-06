@@ -435,7 +435,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 <script src="js/patient-prefs.js"></script>
 <link rel="stylesheet" href="facility-matching.css">
 <link rel="stylesheet" href="patient-ml.css">
-<link rel="stylesheet" href="patient-dashboard.css?v=patient-3"><link rel="stylesheet" href="patient-home.css?v=warm-1"><link rel="stylesheet" href="patient-journey.css?v=5"><link rel="stylesheet" href="patient-pending.css?v=1"><link rel="stylesheet" href="patient-connected.css?v=2"><link rel="stylesheet" href="patient-polish.css?v=1"><link rel="stylesheet" href="css/missed-care-outreach.css?v=2">
+<link rel="stylesheet" href="patient-dashboard.css?v=patient-3"><link rel="stylesheet" href="patient-home.css?v=warm-1"><link rel="stylesheet" href="patient-journey.css?v=8"><link rel="stylesheet" href="patient-pending.css?v=1"><link rel="stylesheet" href="patient-connected.css?v=2"><link rel="stylesheet" href="patient-polish.css?v=1"><link rel="stylesheet" href="css/missed-care-outreach.css?v=2">
 <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
 <link rel="stylesheet" href="vendor/leaflet/markercluster.css">
 <link rel="stylesheet" href="little-world.css?v=1">
@@ -612,7 +612,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 
 <!-- TIMELINE -->
 <div class="panel" id="panel-timeline"><div class="page-section-heading"><h1 data-copy="nav.timeline">Care timeline</h1><p data-copy="timelineIntro">Your visits and milestones, with a plain-language explanation at each step.</p></div>
-  <div id="timelineList" aria-live="polite"><p class="empty" role="status">Loading your recorded care journey…</p></div>
+  <div id="timelineList" aria-live="polite"><div class="timeline-skeleton" role="status"><span>Loading your recorded care journey…</span><i></i><i></i><i></i></div></div>
   <details id="timelineRecordDetails" class="card section-card" style="margin-top:1rem">
     <summary>Clinician notes &amp; edit history</summary>
     <p>Details from your recorded milestones. Your complete journey stays visible above.</p>
@@ -990,7 +990,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 <script src="js/visit-summary-patient.js?v=2"></script>
 <script src="js/care-coordination-patient.js?v=2"></script>
 <script src="js/care-extensions.js"></script>
-<script src="/shared/who-growth-standards.js"></script><script src="/shared/child-reference.js"></script><script src="js/patient-visuals.js?v=1"></script><script src="js/patient-polish.js?v=1"></script><script src="js/patient-home-model.js?v=1"></script><script src="js/patient-home-reference.js?v=1"></script><script src="js/dashboard-charts.js?v=1"></script><script src="js/patient-home.js?v=graphs-1"></script><script src="js/patient-model.js?v=3"></script><script src="js/patient-offline.js?v=2"></script><script src="js/patient-copy.js?v=3"></script><script src="js/patient-journey.js?v=4"></script><script src="js/patient-pending-model.js?v=1"></script><script src="js/patient-pending.js?v=1"></script><script src="js/patient-appointments-model.js?v=1"></script><script src="js/patient-connected.js?v=4"></script><script src="js/patient-hospital-stay.js?v=1"></script><script src="js/support-model.js?v=1"></script>
+<script src="/shared/who-growth-standards.js"></script><script src="/shared/child-reference.js"></script><script src="js/patient-visuals.js?v=1"></script><script src="js/patient-polish.js?v=1"></script><script src="js/patient-home-model.js?v=1"></script><script src="js/patient-home-reference.js?v=1"></script><script src="js/dashboard-charts.js?v=1"></script><script src="js/patient-home.js?v=graphs-1"></script><script src="js/patient-model.js?v=3"></script><script src="js/patient-offline.js?v=2"></script><script src="js/patient-copy.js?v=3"></script><script src="js/timeline-push.js?v=1"></script><script src="js/timeline-assistance.js?v=2"></script><script src="js/timeline-trust.js?v=1"></script><script src="js/timeline-tools.js?v=1"></script><script src="js/patient-journey.js?v=6"></script><script src="js/patient-pending-model.js?v=1"></script><script src="js/patient-pending.js?v=1"></script><script src="js/patient-appointments-model.js?v=1"></script><script src="js/patient-connected.js?v=4"></script><script src="js/patient-hospital-stay.js?v=1"></script><script src="js/support-model.js?v=1"></script>
 <script src="js/patient-support.js?v=1"></script>
 <script src="js/clinical-dashboard.js?v=1"></script>
 <script src="js/patient-home-open.js?v=6"></script>
@@ -1893,5 +1893,5 @@ boot().then(function () { return renderMessagesFromAppts(); });
 <script src="js/delhi-patient-journey.js?v=3"></script>
 <script src="js/demo-request-patient.js?v=3"></script>
 <script src="js/patient-followup-state.js?v=3"></script>
-<script src="js/clinical-review.js?v=2"></script><script src="js/ai-usage.js?v=2"></script><script src="js/demo-care-messages.js?v=1"></script><script src="js/demo-guide.js?v=1"></script><script src="js/patient-tour.js?v=3"></script></body>
+<script src="js/clinical-review.js?v=4"></script><script src="js/ai-usage.js?v=2"></script><script src="js/demo-care-messages.js?v=1"></script><script src="js/demo-guide.js?v=1"></script><script src="js/patient-tour.js?v=3"></script></body>
 </html>
