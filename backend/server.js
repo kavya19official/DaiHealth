@@ -1090,6 +1090,7 @@ require('./patientDocuments')(app, { pool, authenticateToken, authorizeRole });
 require('./patientTimelineLive')(app, { pool, authenticateToken, authorizeRole });
 require('./timelineTrust')(app, { pool, authenticateToken, authorizeRole });
 require('./timelineAccess')(app, { pool, authenticateToken, authorizeRole });
+require('./pendingCare')(app, { pool, authenticateToken, authorizeRole });
 require('./timelinePush').register(app, { pool, authenticateToken, authorizeRole, startScheduler:true });
 require('./patientOfflineSync')(app, {pool,authenticateToken,authorizeRole});
 
