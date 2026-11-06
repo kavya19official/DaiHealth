@@ -16,6 +16,9 @@ const smartReferralHandoff = require('./smartReferralHandoff');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+const demoGate = require('./hostedDemoGate').hostedDemoGate();
+if (demoGate) app.use(demoGate.middleware);
+
 // One local entry point; proxy before body parsing so uploads/auth stream intact.
 const attachLocalUpgrade = require('./localGateway').registerLocalGateway(app);
 
@@ -1160,13 +1163,14 @@ app.use('/frontend', staticCompression(frontendPath), express.static(frontendPat
 app.use(staticCompression(frontendPath), express.static(frontendPath));
 
 // Start server
-const server = app.listen(PORT, process.env.DAI_LOCAL === 'true' ? '127.0.0.1' : undefined, () => {
+const server = app.listen(PORT, demoGate ? '0.0.0.0' : process.env.DAI_LOCAL === 'true' ? '127.0.0.1' : undefined, () => {
   const address = server.address();
   const port = address ? (typeof address === 'string' ? address : address.port) : PORT;
   console.log(`DAI backend server running on port ${port}`);
 });
 
-if (attachLocalUpgrade) attachLocalUpgrade(server);
+// The hosted demo uses the production Next server and has no dev websocket.
+if (attachLocalUpgrade && !demoGate) attachLocalUpgrade(server);
 
 if (process.env.DAI_LOCAL === 'true') {
   let stopping = false;

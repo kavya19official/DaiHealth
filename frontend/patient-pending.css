@@ -55,3 +55,8 @@
 .pc-info{position:relative;flex-shrink:0;z-index:3}.pc-info>summary{display:grid;place-items:center;min-height:40px;list-style:none;cursor:pointer}.pc-info>summary::-webkit-details-marker{display:none}.pc-info>p{position:absolute;right:0;width:min(280px,75vw);border:1px solid var(--line);background:var(--surface);color:var(--ink-muted);border-radius:14px;padding:15px;box-shadow:var(--shadow);font-size:calc(12px * var(--patient-scale,1));line-height:1.7}.pc-drawer{font:inherit}.patient-view[data-home-theme=dark] .pc-info>p{background:#211a2c}
 
 #allCareGaps,.pc-drawer{--pc-amber-text:color-mix(in srgb,var(--amber) 50%,var(--ink));--pc-green-text:color-mix(in srgb,var(--green) 50%,var(--ink))}.pc-counts button:first-child strong,.pc-row-arrange .pc-type{color:var(--pc-amber-text,var(--ink-2))}.pc-counts button:nth-child(3) strong{color:var(--pc-green-text,var(--ink-2))}
+
+/* Reuse the existing baby illustration in the Start here hero. */
+.pc-hero-art .pc-hero-baby{display:block;width:100%;max-width:190px;height:auto;aspect-ratio:1;object-fit:contain;background:#fff;border:1px solid var(--line);border-radius:50%;box-shadow:0 10px 30px rgb(65 35 90 / 5%)}
+@media(max-width:760px){.pc-hero{grid-template-columns:82px minmax(0,1fr);gap:16px}.pc-hero-art{display:grid;align-self:start;min-height:82px;padding-top:5px}.pc-hero-main h2{font-size:calc(23px * var(--patient-scale,1))}}
+@media(max-width:420px){.pc-hero{grid-template-columns:1fr}.pc-hero-art{justify-self:center;width:112px;min-height:112px;padding-top:0}.pc-hero-main h2{font-size:calc(25px * var(--patient-scale,1))}}

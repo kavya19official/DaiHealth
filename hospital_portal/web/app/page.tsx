@@ -292,7 +292,7 @@ export default function Home() {
   const [busy, setBusy] = useState(false);
   const [challenge, setChallenge] = useState<Row | null>(null);
   const [email, setEmail] = useState("hospital_admin@dai-synthetic.invalid");
-  const [password, setPassword] = useState("Dai-Synthetic-2026!");
+  const [password, setPassword] = useState(process.env.NEXT_PUBLIC_DAI_HOSTED_DEMO === "true" ? "" : "Dai-Synthetic-2026!");
   const [otp, setOtp] = useState("");
   const [records, setRecords] = useState<Row[]>([]);
   const [patientTotal, setPatientTotal] = useState(0);
@@ -633,7 +633,7 @@ export default function Home() {
                 <div className="notice">
                   <strong>Local demo account</strong>
                   <span>hospital_admin@dai-synthetic.invalid</span>
-                  <span>Password: Dai-Synthetic-2026!</span>
+                  <span>{process.env.NEXT_PUBLIC_DAI_HOSTED_DEMO === "true" ? "Use the demo account password provided by the DAI team." : "Password: Dai-Synthetic-2026!"}</span>
                 </div>
               </>
             ) : (

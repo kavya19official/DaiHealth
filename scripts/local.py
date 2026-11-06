@@ -164,7 +164,8 @@ def dependencies():
 
 
 def prepare(env):
-    dependencies()
+    if env.get("DAI_HOSTED_DEMO") != "true":
+        dependencies()
     if not (ROOT / "synthetic_data/output/dai.db").exists():
         run([PY, ROOT / "synthetic_data/generate.py"], env=env)
     if not (ROOT / "backend/data/dai-hospital.db").exists():
@@ -261,7 +262,12 @@ def main():
     if action == "stop":
         stop_launcher()
         return
-    env = environment(config())
+    hosted = os.environ.get("DAI_HOSTED_DEMO") == "true"
+    if hosted:
+        from render_demo import hosted_environment
+        env = hosted_environment()
+    else:
+        env = environment(config())
     if action == "doctor":
         print(
             "Node:",
@@ -281,11 +287,13 @@ def main():
         return
     if action not in ("setup", "run"):
         raise RuntimeError("Use npm start, npm run setup, or npm run doctor.")
+    api_port = int(env["DAI_PORTAL_API_ORIGIN"].rsplit(":", 1)[1])
+    web_port = int(env["DAI_PORTAL_WEB_ORIGIN"].rsplit(":", 1)[1])
     processes = []
     (STATE / "stop-request").unlink(missing_ok=True)
     try:
         if action == "run":
-            for port in [int(env["PORT"]), 3104, 8100]:
+            for port in [int(env["PORT"]), web_port, api_port]:
                 with socket.socket() as check:
                     check.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
                     try:
@@ -295,11 +303,16 @@ def main():
                             f"Port {port} is already in use. Stop the old DAI terminal first (Ctrl+C). The launcher will not kill another process. Set DAI_PORT to change the public port."
                         )
         prepare(env)
-        build_web(env)
-        print(
-            "\nSynthetic demo accounts (local only; never real patient data):\nPatient: mother@dai-synthetic.invalid\nDoctor: doctor@dai-synthetic.invalid\nHospital/Admin: hospital_admin@dai-synthetic.invalid\nPassword: Dai-Synthetic-2026!\nHospital OTP: displayed on the login screen, no SMS required.\n",
-            flush=True,
-        )
+        if hosted:
+            if not (ROOT / "hospital_portal/web/.next-local/BUILD_ID").is_file():
+                raise RuntimeError("Hosted hospital UI must be compiled during the image build.")
+            print("Starting access-gated synthetic DAI demo.", flush=True)
+        else:
+            build_web(env)
+            print(
+                "\nSynthetic demo accounts (local only; never real patient data):\nPatient: mother@dai-synthetic.invalid\nDoctor: doctor@dai-synthetic.invalid\nHospital/Admin: hospital_admin@dai-synthetic.invalid\nPassword: Dai-Synthetic-2026!\nHospital OTP: displayed on the login screen, no SMS required.\n",
+                flush=True,
+            )
         if action == "setup":
             return
         commands = [
@@ -312,14 +325,14 @@ def main():
                     "--host",
                     "127.0.0.1",
                     "--port",
-                    "8100",
+                    str(api_port),
                 ],
                 ROOT,
                 env,
             ),
             (
                 (
-                    [NPM, "run", "dev", "--", "--port", "3104"]
+                    [NPM, "run", "dev", "--", "--port", str(web_port)]
                     if env.get("DAI_DEV") == "true"
                     else [
                         "node",
@@ -328,7 +341,7 @@ def main():
                         "--hostname",
                         "127.0.0.1",
                         "--port",
-                        "3104",
+                        str(web_port),
                     ]
                 ),
                 ROOT / "hospital_portal/web",
@@ -356,17 +369,20 @@ def main():
                     start_new_session=not WIN,
                 )
             )
-        required_processes = processes[1:] if env.get("ML_ENABLED") == "true" and env.get("PATIENT_ML_RANKING_ENABLED") == "true" else processes
+        required_processes = processes[1:] if not hosted and env.get("ML_ENABLED") == "true" and env.get("PATIENT_ML_RANKING_ENABLED") == "true" else processes
         for url in [
-            "http://127.0.0.1:8100/api/health",
-            "http://127.0.0.1:3104/hospital-admin",
-            f"http://localhost:{env['PORT']}/api/health",
+            f"http://127.0.0.1:{api_port}/api/health",
+            f"http://127.0.0.1:{web_port}/hospital-admin",
+            f"http://127.0.0.1:{env['PORT']}/api/health",
         ]:
             ready(url, required_processes)
-        print(
-            f"\nDAI ready → http://localhost:{env['PORT']}\nPatient • Doctor • Hospital/Admin — all from this address.\nCtrl+C stops the three apps; local database and edits are preserved.\n",
-            flush=True,
-        )
+        if hosted:
+            print("Hosted DAI is ready.", flush=True)
+        else:
+            print(
+                f"\nDAI ready → http://localhost:{env['PORT']}\nPatient • Doctor • Hospital/Admin — all from this address.\nCtrl+C stops the three apps; local database and edits are preserved.\n",
+                flush=True,
+            )
         while all(p.poll() is None for p in required_processes):
             if (STATE / "stop-request").exists():
                 print("DAI stopped. Local data is preserved.")
@@ -395,8 +411,16 @@ def main():
                 p.kill()
 
 
+def interrupt_on_shutdown(_signal, _frame):
+    raise KeyboardInterrupt()
+
+
 if __name__ == "__main__":
     try:
+        if os.environ.get("DAI_HOSTED_DEMO") == "true":
+            from render_demo import mount_state
+            mount_state()
+            signal.signal(signal.SIGTERM, interrupt_on_shutdown)
         if len(sys.argv) > 1 and sys.argv[1] in ("doctor", "stop"):
             main()
         else:

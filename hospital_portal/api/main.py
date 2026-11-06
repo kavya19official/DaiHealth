@@ -140,7 +140,7 @@ def create_app(engine=None):
             "dai_refresh",
             refresh,
             httponly=True,
-            secure=not demo,
+            secure=not demo or os.getenv("DAI_HOSTED_DEMO") == "true",
             samesite="strict",
             path="/api/auth",
             max_age=604800,

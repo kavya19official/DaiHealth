@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: dai-healthathon-demo
+    runtime: docker
+    plan: standard
+    numInstances: 1
+    autoDeployTrigger: off
+    healthCheckPath: /api/health
+    disk:
+      name: dai-demo-state
+      mountPath: /var/data
+      sizeGB: 2
+    envVars:
+      - key: JWT_SECRET
+        generateValue: true
+      - key: DAI_DEMO_PASSWORD
+        generateValue: true
+      - key: DAI_DEMO_ACCESS_KEY
+        generateValue: true
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: ML_ENABLED
+        value: "true"
+      - key: PATIENT_ML_RANKING_ENABLED
+        value: "true"
+      - key: PENDING_CARE_ASSISTANT
+        value: "true"
+      - key: PENDING_CARE_PLANNER
+        value: "true"
