@@ -360,7 +360,15 @@ def main():
         ]
         if env.get("ML_ENABLED") == "true" and env.get("PATIENT_ML_RANKING_ENABLED") == "true":
             commands.insert(0, ([PY, ROOT / "ml-service/run.py", "-m", "uvicorn", "api.main:app", "--host", "127.0.0.1", "--port", "8200"], ROOT, env))
-        for args, cwd, child_env in commands:
+        upstream_urls = (
+            f"http://127.0.0.1:{api_port}/api/health",
+            f"http://127.0.0.1:{web_port}/hospital-admin",
+        )
+        for index, (args, cwd, child_env) in enumerate(commands):
+            if hosted and index == len(commands) - 1:
+                # Keep the public port closed until the hospital app can serve requests.
+                for url in upstream_urls:
+                    ready(url, processes)
             processes.append(
                 subprocess.Popen(
                     [str(a) for a in args],
@@ -370,12 +378,10 @@ def main():
                 )
             )
         required_processes = processes[1:] if not hosted and env.get("ML_ENABLED") == "true" and env.get("PATIENT_ML_RANKING_ENABLED") == "true" else processes
-        for url in [
-            f"http://127.0.0.1:{api_port}/api/health",
-            f"http://127.0.0.1:{web_port}/hospital-admin",
-            f"http://127.0.0.1:{env['PORT']}/api/health",
-        ]:
-            ready(url, required_processes)
+        if not hosted:
+            for url in upstream_urls:
+                ready(url, required_processes)
+        ready(f"http://127.0.0.1:{env['PORT']}/api/health", required_processes)
         if hosted:
             print("Hosted DAI is ready.", flush=True)
         else:
