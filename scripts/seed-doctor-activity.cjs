@@ -5,9 +5,12 @@ const fs=require('node:fs'),path=require('node:path');
 const VERSION='doctor-activity-v1';
 const iso=v=>v instanceof Date?v.toISOString().slice(0,10):String(v).slice(0,10);
 const add=(d,n)=>{const x=new Date(d+'T12:00:00Z');x.setUTCDate(x.getUTCDate()+n);return iso(x);};
-function reportImage({name,date,doctor,hb,bp,weight}){
+function createReportCanvas(){
  const {createCanvas}=require('../backend/node_modules/@napi-rs/canvas');
- const canvas=createCanvas(1000,1100),c=canvas.getContext('2d');
+ return createCanvas(1000,1100);
+}
+function reportImage({name,date,doctor,hb,bp,weight},canvas=createReportCanvas()){
+ const c=canvas.getContext('2d');
  c.fillStyle='#fff';c.fillRect(0,0,1000,1100);c.fillStyle='#f1ebfa';c.fillRect(0,0,1000,210);
  c.fillStyle='#654298';c.font='bold 42px sans-serif';c.fillText('DAI | Clinic visit record',64,90);
  c.font='20px sans-serif';c.fillText('A connected record for your care journey',64,139);
@@ -16,10 +19,12 @@ function reportImage({name,date,doctor,hb,bp,weight}){
  c.fillStyle='#766984';c.font='18px sans-serif';c.fillText('Synthetic demonstration record. Not a clinical certificate.',64,990);c.fillText('Your clinician interprets the measurements.',64,1025);
  return canvas.toBuffer('image/png');
 }
-async function seedDoctorActivity(client,source,{date=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Kolkata'}).format(new Date()),uploadDir=path.join(__dirname,'../backend/data/patient-documents')}={}){
+async function seedDoctorActivity(client,source,{date=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Kolkata'}).format(new Date()),uploadDir=process.env.PATIENT_DOCS_DIR || path.join(__dirname,'../backend/data/patient-documents')}={}){
  if((await client.query('SELECT 1 FROM dai_local_seed WHERE version=$1',[VERSION])).rows.length)return {alreadySeeded:true};
  const doctors=(await client.query("SELECT dp.*,l.portal_uuid FROM doctor_profiles dp JOIN dai_local_source_link l ON l.entity='doctor' AND l.target_id=dp.user_id ORDER BY dp.user_id")).rows;
  const counts={appointments:0,entries:0,reports:0,completedSteps:0,summaryShares:0};
+ // Reuse one native pixel buffer for every report in this import.
+ let reportCanvas;
  fs.mkdirSync(uploadDir,{recursive:true});
  await client.query('BEGIN');
  try{
@@ -47,7 +52,9 @@ async function seedDoctorActivity(client,source,{date=new Intl.DateTimeFormat('e
     await client.query(`INSERT INTO care_milestones(mother_id,stage,category,title,due_date,completed_at,appointment_id,completion_verification,verified_facility_name,sort_order) VALUES($1,$2,'pregnancy','Antenatal follow-up',$3,$3::date+INTERVAL '8 hours',$4,'verified',$5,80)`,[p.user_id,Math.floor((new Date(day)-new Date(lmp))/604800000)<13?'Trimester 1':Math.floor((new Date(day)-new Date(lmp))/604800000)<28?'Trimester 2':'Trimester 3',day,appointment,d.facility_name]);counts.completedSteps++;
     if(visitIndex!==1||index>=4)continue;
     const key='dai-clinic-'+VERSION+'-'+d.user_id+'-'+p.user_id+'.png';
-    const bytes=reportImage({name:p.full_name,date:day,doctor:d.full_name,hb,bp:sys+'/'+dia,weight});fs.writeFileSync(path.join(uploadDir,key),bytes);
+    reportCanvas ??= createReportCanvas();
+    const bytes=reportImage({name:p.full_name,date:day,doctor:d.full_name,hb,bp:sys+'/'+dia,weight},reportCanvas);
+    fs.writeFileSync(path.join(uploadDir,key),bytes);
     const doc=(await client.query(`INSERT INTO patient_documents(mother_id,title,doc_type,original_filename,mime_type,size_bytes,storage_key,uploaded_at,report_date,facility_name,appointment_id,report_category,notes) VALUES($1,'ANC visit measurements','lab_report','clinic-visit.png','image/png',$2,$3,$4::date+INTERVAL '9 hours',$4,$5,$6,'blood','Fictional clinic record for the local demonstration.') RETURNING id`,[p.user_id,bytes.length,key,day,d.facility_name,appointment])).rows[0].id;
     await client.query(`INSERT INTO patient_document_shares(document_id,doctor_id,shared_by,shared_at,expires_at) VALUES($1,$2,$3,$4::date+INTERVAL '10 hours',$5::date+INTERVAL '30 days')`,[doc,d.user_id,p.user_id,day,date]);
     await client.query(`INSERT INTO patient_document_events(document_id,actor_id,event_type,detail,created_at) VALUES($1,$2,'upload',$3::jsonb,$4::date+INTERVAL '9 hours'),($1,$2,'share',$3::jsonb,$4::date+INTERVAL '10 hours')`,[doc,p.user_id,JSON.stringify({seed:VERSION,doctor_id:d.user_id}),day]);counts.reports++;

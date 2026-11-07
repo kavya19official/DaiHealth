@@ -302,6 +302,9 @@ def main():
                         raise RuntimeError(
                             f"Port {port} is already in use. Stop the old DAI terminal first (Ctrl+C). The launcher will not kill another process. Set DAI_PORT to change the public port."
                         )
+        if hosted:
+            from render_demo import start_demo_postgres
+            start_demo_postgres(env, processes)
         prepare(env)
         if hosted:
             if not (ROOT / "hospital_portal/web/.next-local/BUILD_ID").is_file():

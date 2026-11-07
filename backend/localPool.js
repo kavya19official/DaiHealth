@@ -1,11 +1,17 @@
 'use strict';
 const path = require('node:path');
-const { PGlite } = require('@electric-sql/pglite');
 
 // Local synthetic preview only. Production still uses node-postgres + PostgreSQL.
 // PGlite has one connection: hold an exclusive lease through a whole transaction,
 // so concurrent HTTP requests cannot read/write inside another request's transaction.
 function createLocalPool(directory = path.join(__dirname, '../.local/patient-db')) {
+  const socket = process.env.DAI_HOSTED_POSTGRES_SOCKET;
+  if (process.env.DAI_HOSTED_DEMO === 'true' && socket) {
+    const { Pool } = require('pg');
+    return new Pool({ host: socket, port: 5432, user: 'postgres', database: 'postgres', max: 3, ssl: false });
+  }
+
+  const { PGlite } = require('@electric-sql/pglite');
   const ready = PGlite.create(directory);
   let tail = Promise.resolve();
   let closed = false;

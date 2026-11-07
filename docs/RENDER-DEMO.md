@@ -10,7 +10,7 @@ This is a single-instance, access-gated Health-a-thon demo. One HTTPS origin ser
 4. Set `ML_ENABLED=false` and `PATIENT_ML_RANKING_ENABLED=false` to skip the optional patient ranker process. The image still includes the hospital forecast artifacts.
 5. Select **Manual Deploy → Deploy latest commit**. Once the service is live, open its URL and use the login instructions below.
 
-Render Free discards local databases and uploads on a restart, redeploy, or idle shutdown. Each fresh start seeds synthetic records. Use this option for a disposable demo.
+The Docker image runs native PostgreSQL over a private Unix socket in this mode to reduce memory usage. It needs no separate database service. Render Free discards local databases and uploads on a restart, redeploy, or idle shutdown. Each fresh start seeds synthetic records. Use this option for a disposable demo.
 
 ## Paid Blueprint with persistent data
 

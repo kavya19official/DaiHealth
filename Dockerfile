@@ -1,7 +1,7 @@
 FROM node:24-bookworm-slim
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    ca-certificates libgomp1 python3 python3-venv tzdata \
+    ca-certificates libgomp1 postgresql-15 python3 python3-venv tzdata util-linux \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -23,6 +23,6 @@ RUN hospital_portal/.venv/bin/python synthetic_data/generate.py \
     && hospital_portal/.venv/bin/python synthetic_data/build_hospital_admin.py \
     && hospital_portal/.venv/bin/python -m hospital_portal.ml_service.train
 
-ENV DAI_HOSTED_DEMO=true DAI_STATE_DIR=/var/data
+ENV DAI_HOSTED_DEMO=true DAI_STATE_DIR=/var/data DAI_POSTGRES_BIN=/usr/lib/postgresql/15/bin
 EXPOSE 10000
 CMD ["python3", "scripts/local.py", "run"]
