@@ -1,0 +1,2 @@
+'use strict';
+module.exports=function(app,options){const {flags}=require('./pendingCareFlags');app.get('/api/patient/pending-care/features',options.authenticateToken,options.authorizeRole(['mother']),(req,res)=>res.set('Cache-Control','no-store').json({flags:flags(options.env),prototype:true}));require('./pendingCarePlanner').register(app,options);require('./pendingCareAssistant').register(app,options);require('./pendingCareReceipts').register(app,options);require('./pendingCareLive').register(app,options);};

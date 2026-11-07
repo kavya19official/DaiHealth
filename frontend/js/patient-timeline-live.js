@@ -1,7 +1,7 @@
 /* Cookie-authenticated SSE. Existing 30s timeline polling is the fallback. */
 (function(){'use strict';
 let source=null,retry=null,ready=false;
-function state(value){document.documentElement.dataset.daiTimelineConnectionState=value;document.querySelectorAll('span[data-timeline-connection]').forEach(el=>el.textContent=value==='live'?'Live updates':value==='offline'?'Saved offline':'Refresh available');}
+function state(value){document.documentElement.dataset.daiTimelineConnectionState=value;document.querySelectorAll('span[data-timeline-connection]').forEach(el=>el.textContent=value==='live'?'Live updates':value==='offline'?'Saved offline':'Refresh available');window.dispatchEvent?.(new CustomEvent('dai:timeline-connection',{detail:{state:value}}));}
 function close(){source?.close();source=null;clearTimeout(retry);}
 function connect(){
  close();if(document.hidden||!navigator.onLine||window.DaiAPI?.lowBandwidth()){state(navigator.onLine?'paused':'offline');return;}

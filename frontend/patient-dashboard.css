@@ -44,3 +44,14 @@
 @media(max-width:680px){.patient-view .read-page{display:inline-flex;padding:4px}.read-page span{display:none}.patient-view .topbar{padding-right:132px}.patient-view .patient-crumb{display:none}.patient-view .journey-ring{display:block;width:125px;margin:auto}.patient-view .journey-ring svg{width:125px;height:125px}.patient-view .journey-ring>div{top:36px}.patient-view .journey-layout{grid-template-columns:1fr}.patient-view .journey-layout .journey-ring{order:-1;margin-bottom:10px}}
 .patient-view .patient-appointment .empty{padding:14px;text-align:left;font-size:12px;line-height:1.7}.patient-view .calendar-grid .is-today{background:var(--brand);color:#fff;font-weight:750}.patient-view .calendar-grid small{font-size:10px;color:var(--ink-2)}.gap-icon{display:grid;place-items:center;width:30px;height:30px;border-radius:10px;flex-shrink:0;background:var(--brand-pale);color:var(--brand);font-size:13px;font-weight:750}.gap-icon.is-overdue{background:var(--amber-soft);color:var(--amber)}.gap-info small{display:block;margin-top:4px;color:var(--ink-3)}.journey-step.is-overdue .journey-dot{background:var(--amber-soft);color:var(--amber)}.patient-view .snapshot-reading strong{white-space:normal;overflow-wrap:anywhere}.patient-view .content{width:100%}
 .patient-view #toast:empty{display:none}.patient-view .toast{transform:translateX(-50%) translateY(calc(100% + 2rem))}
+/* One page-title scale, matching Your appointments across patient sections. */
+body.patient-view{--patient-page-title-size:clamp(calc(27px * var(--patient-scale,1)),calc(3vw * var(--patient-scale,1)),calc(38px * var(--patient-scale,1)))}
+body.patient-view #main-content .panel h1,
+body.patient-view #main-content .panel .road-header h2,
+body.patient-view #main-content .panel .nw-map-head h2{
+  font-size:var(--patient-page-title-size)!important;
+  line-height:1.2!important;
+  letter-spacing:-1.2px;
+  overflow-wrap:break-word;
+}
+@media(max-width:680px){body.patient-view{--patient-page-title-size:calc(27px * var(--patient-scale,1))}}

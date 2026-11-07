@@ -299,7 +299,7 @@ function updateDemoHint() {
   if (!localAccounts) return;
   var email = localAccounts[selectedRole];
   hint.replaceChildren();
-  [['strong','Local demo account'],['span',email],['span','Password: Dai-Synthetic-2026!']].forEach(function(item){var node=document.createElement(item[0]);node.textContent=item[1];hint.appendChild(node);});
+  [['strong','Local demo account'],['span',email],['span',location.protocol==='https:'?'Use the demo account password provided by the DAI team.':'Password: Dai-Synthetic-2026!']].forEach(function(item){var node=document.createElement(item[0]);node.textContent=item[1];hint.appendChild(node);});
   var field = document.getElementById('loginEmail');
   if (!field.value || field.value === automaticEmail) { field.value = email; automaticEmail = email; }
 }
