@@ -474,3 +474,28 @@ def test_admin_assignment_management(context, auth):
     )
     assert back.status_code == 201
     assert back.json()["active"] is True
+
+
+def test_note_retry_binds_beneficiary_and_revocation_hides_worker_notes(context, auth):
+    _, client = context
+    asha = auth("asha")
+    admin = auth("hospital_admin")
+    first, second = client.get("/api/asha/visits", headers=asha).json()["items"][:2]
+    payload = {
+        "mother_id": first["mother_id"],
+        "client_uuid": "note-bound-to-beneficiary",
+        "transcript": "No severe headache or blurred vision; reports poor feeding.",
+    }
+    created = client.post("/api/asha/notes", headers=asha, json=payload)
+    assert created.status_code == 201
+    result = client.post("/api/asha/notes/extract", headers=asha, json={"transcript": payload["transcript"]}).json()
+    assert result["structured"]["danger_signs"] == ["poor feeding"]
+    assert client.post("/api/asha/notes", headers=asha, json={**payload, "mother_id": second["mother_id"]}).status_code == 409
+    url = "/api/asha/assignments/" + first["assignment_id"] + "/status"
+    assert client.post(url, headers=admin, json={"active": False}).status_code == 200
+    try:
+        notes = client.get("/api/asha/notes", headers=asha, params={"mother_id": first["mother_id"]}).json()
+        assert not notes["items"]
+        assert client.post("/api/asha/notes", headers=asha, json=payload).status_code == 404
+    finally:
+        assert client.post(url, headers=admin, json={"active": True}).status_code == 200

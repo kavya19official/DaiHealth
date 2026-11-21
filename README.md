@@ -154,6 +154,8 @@ On Windows PowerShell set variables first, for example `$env:DAI_PORT=3011; npm 
 
 ## Configuration
 
+See [feature audit and setup](docs/FEATURE-AUDIT-SETUP.md) for CareScan, ASHA Copilot and consent receipts.
+
 `npm start` creates its own secrets and databases under `.local/`, so no configuration is needed for the demo.
 
 To run only the Express app by hand, copy `backend/.env.example` to `backend/.env` and set:

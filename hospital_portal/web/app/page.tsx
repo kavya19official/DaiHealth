@@ -339,11 +339,11 @@ export default function Home() {
           "The richer workspace needs the updated backend. Restart your FastAPI terminal once, then refresh.",
         );
       if (!response.ok)
-        throw new Error(
+        throw Object.assign(new Error(
           typeof result.detail === "string"
             ? result.detail
-            : JSON.stringify(result.detail),
-        );
+            : typeof result.error === "string" ? result.error : JSON.stringify(result.detail),
+        ), { status: response.status });
       return result;
     },
     [token],
@@ -402,6 +402,9 @@ export default function Home() {
     setToken(result.access_token);
     const me = await api("/me", {}, result.access_token);
     setUser(me);
+    if (!resetNavigation && me.role === "asha") {
+      setView(current => current === "overview" ? "ashaCopilot" : current);
+    }
     if (resetNavigation) {
       setData(null);
       setRecords([]);
@@ -426,18 +429,30 @@ export default function Home() {
   }, []);
   useEffect(() => {
     if (!user) return;
-    const timer = setInterval(
-      () =>
-        api("/auth/refresh", { method: "POST" })
-          .then((result) => session(result, false))
-          .catch(() => {
-            setUser(null);
-            setToken("");
-            setError("Session expired. Please sign in again.");
-          }),
-      8 * 60 * 1000,
-    );
-    return () => clearInterval(timer);
+    let refreshing = false;
+    async function renew() {
+      if (!navigator.onLine || refreshing) return;
+      refreshing = true;
+      try {
+        const result = await api("/auth/refresh", { method: "POST" });
+        await session(result, false);
+      } catch (error) {
+        const status = (error as { status?: number }).status;
+        if (status === 401 || status === 403) {
+          setUser(null);
+          setToken("");
+          setError("Session expired. Please sign in again.");
+        }
+      } finally {
+        refreshing = false;
+      }
+    }
+    const timer = setInterval(renew, 8 * 60 * 1000);
+    window.addEventListener("online", renew);
+    return () => {
+      clearInterval(timer);
+      window.removeEventListener("online", renew);
+    };
   }, [user, api]);
   useEffect(() => {
     if (sessionChecked && !user && process.env.NEXT_PUBLIC_DAI_BASE_PATH)

@@ -141,11 +141,20 @@ def extract_structured(text):
         v = float(m.group(1))
         if 2 <= v <= 150:
             fields["measurements"]["weight_kg"] = v
+    clauses = re.split(r"[.;!?\n]|\b(?:but|however)\b", text.lower())
+    def affirmed(term):
+        for clause in clauses:
+            for match in re.finditer(r"\b" + re.escape(term) + r"s?\b", clause):
+                prefix = clause[:match.start()]
+                if not re.search(r"\b(?:no|denies|without)\b[^.,;!?]{0,60}$", prefix):
+                    return True
+        return False
+
     for term, label in COMPLAINT_TERMS.items():
-        if term in t and label not in fields["complaints"]:
+        if affirmed(term) and label not in fields["complaints"]:
             fields["complaints"].append(label)
     for term, label in DANGER_TERMS.items():
-        if term in t and label not in fields["danger_signs"]:
+        if affirmed(term) and label not in fields["danger_signs"]:
             fields["danger_signs"].append(label)
     m = re.search(
         r"(?:follow ?up|review|come back|return|next visit|check again)"
@@ -267,7 +276,7 @@ def register_asha(app, engine, require, audit, one):
         except (ValueError, TypeError, AttributeError):
             return False
 
-    def scoped_assignment(c, u, mother_id, write=False):
+    def scoped_assignment(c, u, mother_id):
         if not as_uuid(mother_id):
             raise HTTPException(422, "A valid beneficiary UUID is required")
         row = (
@@ -277,12 +286,14 @@ def register_asha(app, engine, require, audit, one):
                     s.asha_assignment.c.mother_id == str(mother_id),
                     s.asha_assignment.c.facility_id == u["facility_id"],
                     s.asha_assignment.c.active.is_(True),
+                    s.asha_assignment.c.asha_id == u["id"],
                 )
+                .with_for_update()
             )
             .mappings()
             .first()
         )
-        if not row or (write and row["asha_id"] != u["id"]):
+        if not row:
             raise HTTPException(404, "Beneficiary is not assigned to you")
         return dict(row)
 
@@ -642,7 +653,7 @@ def register_asha(app, engine, require, audit, one):
             raise HTTPException(422, "Unsupported visit status")
         if not valid_day(body.visit_date):
             raise HTTPException(422, "visit_date must be YYYY-MM-DD")
-        a = scoped_assignment(c, u, body.mother_id, write=True)
+        a = scoped_assignment(c, u, body.mother_id)
         prior = (
             c.execute(
                 select(s.asha_visit).where(
@@ -658,6 +669,7 @@ def register_asha(app, engine, require, audit, one):
                 prior["mother_id"] == str(body.mother_id)
                 and prior["visit_date"] == body.visit_date
                 and prior["status"] == body.status
+                and prior["outcome"] == (body.outcome or {})
             )
             if not same:
                 raise HTTPException(
@@ -738,7 +750,7 @@ def register_asha(app, engine, require, audit, one):
         return dict(row), False
 
     def record_note(c, u, body):
-        scoped_assignment(c, u, body.mother_id, write=True)
+        scoped_assignment(c, u, body.mother_id)
         prior = (
             c.execute(
                 select(s.asha_note).where(
@@ -750,16 +762,21 @@ def register_asha(app, engine, require, audit, one):
             .first()
         )
         if prior:
-            if prior["transcript"] != body.transcript:
+            if (
+                prior["transcript"] != body.transcript
+                or prior["mother_id"] != body.mother_id
+                or prior["visit_id"] != body.visit_id
+                or prior["camp_update_id"] != body.camp_update_id
+                or prior["structured"].get("client", {}) != (body.structured or {})
+            ):
                 raise HTTPException(
                     409, "client_uuid was already used for a different note"
                 )
             return dict(prior), True
         if body.visit_id:
             visit = one(s.asha_visit, str(body.visit_id), c)
-            if visit["asha_id"] != u["id"] or visit["mother_id"] != str(
-                body.mother_id
-            ):
+            if (visit["asha_id"] != u["id"] or visit["facility_id"] != u["facility_id"]
+                or visit["mother_id"] != str(body.mother_id)):
                 raise HTTPException(422, "Visit does not match this beneficiary")
         if body.camp_update_id:
             cu = one(s.asha_camp_update, str(body.camp_update_id), c)
@@ -794,7 +811,7 @@ def register_asha(app, engine, require, audit, one):
         return dict(row), False
 
     def record_camp_update(c, u, camp, body):
-        scoped_assignment(c, u, body.mother_id, write=True)
+        scoped_assignment(c, u, body.mother_id)
         prior = (
             c.execute(
                 select(s.asha_camp_update).where(
@@ -806,18 +823,27 @@ def register_asha(app, engine, require, audit, one):
             .first()
         )
         if prior:
-            if prior["kind"] != body.kind or prior["payload"] != body.payload:
+            if (prior["camp_id"] != camp["id"] or prior["mother_id"] != body.mother_id
+                or prior["kind"] != body.kind or prior["payload"] != body.payload):
                 raise HTTPException(
                     409, "client_uuid was already used for a different update"
                 )
             return dict(prior), True, None
+        if camp["status"] != "open":
+            raise HTTPException(409, "Open the camp before recording updates")
         payload = dict(body.payload or {})
         child_id = None
         note_transcript = None
-        if body.kind == "immunization":
+        if body.kind == "attendance":
+            if payload.get("status") not in ("present", "absent"):
+                raise HTTPException(422, "Choose present or absent for attendance")
+        elif body.kind == "immunization":
+            if camp["camp_date"] > ist_today().isoformat():
+                raise HTTPException(422, "Record vaccines after they have been given")
             child_id = payload.get("child_id")
-            vaccine = (payload.get("vaccine") or "").strip()
-            if not child_id or not vaccine:
+            raw_vaccine = payload.get("vaccine")
+            vaccine = raw_vaccine.strip() if isinstance(raw_vaccine, str) else ""
+            if not child_id or not 1 <= len(vaccine) <= 120:
                 raise HTTPException(
                     422, "Immunization updates need child_id and vaccine"
                 )
@@ -839,12 +865,24 @@ def register_asha(app, engine, require, audit, one):
             )
             note_transcript = f"Health camp immunization: {vaccine}"
         elif body.kind == "vitals":
-            note_transcript = "Health camp vitals: " + json.dumps(
-                payload, sort_keys=True
-            )[:1500]
+            vitals = payload.get("vitals")
+            if isinstance(vitals, dict):
+                text = vitals.get("text")
+                if not isinstance(text, str) or not 1 <= len(text.strip()) <= 800:
+                    raise HTTPException(422, "Enter the recorded vitals")
+                note_transcript = "Health camp vitals: " + text.strip()
+            else:
+                parts = []
+                for key, label in (("bp", "BP"), ("temp_f", "temperature"), ("weight_kg", "weight")):
+                    if key in payload and isinstance(payload[key], (str, int, float)) and not isinstance(payload[key], bool):
+                        parts.append(f"{label} {payload[key]}")
+                if not parts:
+                    raise HTTPException(422, "Enter the recorded vitals")
+                note_transcript = "Health camp vitals: " + "; ".join(parts)[:800]
         elif body.kind == "referral_flag":
-            reason = (payload.get("reason") or "").strip()
-            if len(reason) < 5:
+            raw_reason = payload.get("reason")
+            reason = raw_reason.strip() if isinstance(raw_reason, str) else ""
+            if not 5 <= len(reason) <= 800:
                 raise HTTPException(422, "Referral flag needs a reason")
             mother = one(s.mother, str(body.mother_id), c)
             c.execute(
@@ -1009,48 +1047,37 @@ def register_asha(app, engine, require, audit, one):
                 .mappings()
                 .first()
             )
-        origin = (
-            (fac["lat"], fac["lng"])
-            if fac and fac["lat"] is not None
-            else (items[0]["lat"], items[0]["lng"])
-            if items
-            else (None, None)
-        )
-        remaining = list(items)
+        def has_coordinates(row):
+            return row and row["lat"] is not None and row["lng"] is not None
+
+        remaining = [item for item in items if has_coordinates(item)]
+        unknown = [item for item in items if not has_coordinates(item)]
+        anchor = fac if has_coordinates(fac) else None
+        origin = (anchor["lat"], anchor["lng"]) if anchor else (None, None)
         stops = []
         cur = origin
         total = 0.0
         while remaining:
-            best = min(
-                remaining,
-                key=lambda i: (
-                    haversine_km(cur[0], cur[1], i["lat"], i["lng"])
-                    if cur[0] is not None and i["lat"] is not None
-                    else 0
-                ),
-            )
-            leg = (
-                haversine_km(cur[0], cur[1], best["lat"], best["lng"])
-                if cur[0] is not None and best["lat"] is not None
-                else 0.0
-            )
-            total += leg
-            stops.append(
-                {
-                    **best,
-                    "leg_km": round(leg, 2),
-                    "leg_minutes": round(leg / 5 * 60),
-                    "cumulative_km": round(total, 2),
-                }
-            )
+            best = min(remaining, key=lambda item: haversine_km(*cur, item["lat"], item["lng"])) if cur[0] is not None else remaining[0]
+            leg = haversine_km(*cur, best["lat"], best["lng"]) if cur[0] is not None else None
+            if leg is not None:
+                total += leg
+            stops.append({
+                **best,
+                "leg_km": round(leg, 2) if leg is not None else None,
+                "leg_minutes": round(leg / 5 * 60) if leg is not None else None,
+                "cumulative_km": round(total, 2) if leg is not None else None,
+            })
             cur = (best["lat"], best["lng"])
             remaining.remove(best)
+        stops.extend({**item, "leg_km": None, "leg_minutes": None, "cumulative_km": None} for item in unknown)
         return {
             "date": visit_date,
             "origin": {"lat": origin[0], "lng": origin[1]},
             "stops": stops,
             "total_km": round(total, 2),
             "total_minutes": round(total / 5 * 60),
+            "estimated_stops": sum(stop["leg_km"] is not None for stop in stops),
             "pace_kmh": 5,
             "data_label": LABEL,
         }
@@ -1058,15 +1085,24 @@ def register_asha(app, engine, require, audit, one):
     @app.get("/api/asha/notes")
     def notes(
         mother_id: str | None = Query(default=None),
-        limit: int = Query(default=50, le=200),
+        limit: int = Query(default=50, ge=1, le=200),
         u=Depends(require("asha.read")),
     ):
         filters = [s.asha_note.c.facility_id == u["facility_id"]]
         if u["role"] == "asha":
-            filters.append(s.asha_note.c.asha_id == u["id"])
+            filters.extend([
+                s.asha_note.c.asha_id == u["id"],
+                s.asha_note.c.mother_id.in_(
+                    select(s.asha_assignment.c.mother_id).where(
+                        s.asha_assignment.c.facility_id == u["facility_id"],
+                        s.asha_assignment.c.asha_id == u["id"],
+                        s.asha_assignment.c.active.is_(True),
+                    )
+                ),
+            ])
         if mother_id:
             filters.append(s.asha_note.c.mother_id == str(mother_id))
-        with engine.connect() as c:
+        with engine.begin() as c:
             rows = (
                 c.execute(
                     select(s.asha_note)
@@ -1077,6 +1113,8 @@ def register_asha(app, engine, require, audit, one):
                 .mappings()
                 .all()
             )
+            audit(c, u, "asha_notes_read", "facility", u["facility_id"],
+                  {"count": len(rows), "mother_id": mother_id})
             return {"items": [note_out(r) for r in rows], "data_label": LABEL}
 
     @app.post("/api/asha/notes/extract")
@@ -1154,8 +1192,8 @@ def register_asha(app, engine, require, audit, one):
         allowed = {"planned": {"open"}, "open": {"closed"}, "closed": {"open"}}
         with engine.begin() as c:
             camp = one(s.asha_camp, identifier, c)
-            if camp["asha_id"] != u["id"]:
-                raise HTTPException(403, "Only the camp owner can change status")
+            if camp["asha_id"] != u["id"] or camp["facility_id"] != u["facility_id"]:
+                raise HTTPException(403, "Only the camp owner in this facility can change status")
             if body.status not in allowed.get(camp["status"], set()):
                 raise HTTPException(
                     409, f"Cannot move camp from {camp['status']} to {body.status}"
@@ -1179,10 +1217,8 @@ def register_asha(app, engine, require, audit, one):
         if not camp_id or not as_uuid(camp_id):
             raise HTTPException(422, "A valid camp UUID is required")
         camp = one(s.asha_camp, str(camp_id), c)
-        if camp["asha_id"] != u["id"]:
-            raise HTTPException(403, "Only the camp owner can record updates")
-        if camp["status"] != "open":
-            raise HTTPException(409, "Open the camp before recording updates")
+        if camp["asha_id"] != u["id"] or camp["facility_id"] != u["facility_id"]:
+            raise HTTPException(403, "Only the camp owner in this facility can record updates")
         if body.kind not in CAMP_KINDS:
             raise HTTPException(422, "Unsupported camp update kind")
         row, dup, note_id = record_camp_update(c, u, camp, body)
@@ -1221,6 +1257,7 @@ def register_asha(app, engine, require, audit, one):
                         "client_uuid": item.client_uuid,
                         "status": "error",
                         "detail": e.detail,
+                        "code": e.status_code,
                     }
                 )
         return {"results": results, "data_label": LABEL}
@@ -1247,6 +1284,7 @@ def register_asha(app, engine, require, audit, one):
                     {
                         "entity": "visit",
                         "client_uuid": item.client_uuid,
+                        "visit_status": row["status"],
                         "status": "duplicate" if dup else "created",
                         "id": row["id"],
                     }
@@ -1258,6 +1296,7 @@ def register_asha(app, engine, require, audit, one):
                         "client_uuid": item.client_uuid,
                         "status": "error",
                         "detail": e.detail,
+                        "code": e.status_code,
                     }
                 )
         for item in body.notes:
@@ -1287,6 +1326,7 @@ def register_asha(app, engine, require, audit, one):
                         "client_uuid": item.client_uuid,
                         "status": "error",
                         "detail": e.detail,
+                        "code": e.status_code,
                     }
                 )
         for item in body.camp_updates:
@@ -1319,6 +1359,7 @@ def register_asha(app, engine, require, audit, one):
                         "client_uuid": item.client_uuid,
                         "status": "error",
                         "detail": e.detail,
+                        "code": e.status_code,
                     }
                 )
         return {"results": results, "data_label": LABEL}

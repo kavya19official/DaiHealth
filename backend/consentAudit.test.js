@@ -62,6 +62,16 @@ test('consent and access events are hash-chained, sealed and tamper-evident', as
     assert.equal(receipt.data.event.event_type, 'record_access');
     assert.equal(receipt.data.event.actor_name, 'SYNTHETIC One');
     assert.equal(receipt.data.chain.algorithm, 'HMAC-SHA256');
+    const changedReceipt = { ...receipt.data, event: { ...receipt.data.event, allowed: false } };
+    assert.equal(registerAudit.verifyReceipt(changedReceipt, pub.data.public_key), false);
+    const originalKey = process.env.CONSENT_RECEIPT_PRIVATE_KEY;
+    try {
+      process.env.CONSENT_RECEIPT_PRIVATE_KEY = crypto.generateKeyPairSync('ed25519').privateKey.export({type:'pkcs8',format:'pem'});
+      const archived = await call('/api/patient/audit/events/' + accessEvent.id + '/receipt', 1);
+      assert.equal(archived.status, 200);
+      assert.equal(archived.data.public_key, pub.data.public_key);
+      assert.equal(archived.data.signature, receipt.data.signature);
+    } finally { process.env.CONSENT_RECEIPT_PRIVATE_KEY = originalKey; }
 
     // Tamper: rewrite a payload behind the triggers' backs -> verification fails closed.
     const eventId = accessEvent.id;
@@ -78,6 +88,8 @@ test('consent and access events are hash-chained, sealed and tamper-evident', as
     await assert.rejects(() => pool.query("UPDATE consent_audit_events SET event_type='x' WHERE mother_id=1"), /append-only/);
     await assert.rejects(() => pool.query('DELETE FROM consent_audit_seals'), /append-only/);
     await assert.rejects(() => pool.query('DELETE FROM consent_receipts'), /append-only/);
+
+    await assert.rejects(() => pool.query('TRUNCATE consent_receipts'), /append-only/);
 
     // Another mother sees none of it.
     assert.equal((await call('/api/patient/audit/events?limit=10', 2)).data.events.length, 0);
@@ -110,8 +122,11 @@ test('revocation produces a receipt with exact timestamps and blocks access imme
     assert.equal(receipt.data.effect.enforcement.includes('Immediate'), true);
     // Exact revocation timestamp and the moment restrictions took effect.
     assert.ok(!Number.isNaN(Date.parse(receipt.data.effect.occurred_at)));
-    assert.ok(!Number.isNaN(Date.parse(receipt.data.effect.effective_at)));
-    assert.equal(receipt.data.event.details.effective_at, receipt.data.effect.effective_at);
+    assert.equal(receipt.data.effect.timestamp_source, 'commit_observed_upper_bound');
+    assert.equal(receipt.data.effect.effective_at, null);
+    assert.ok(Date.parse(receipt.data.effect.effective_by) >= Date.parse(receipt.data.effect.occurred_at));
+    assert.equal(receipt.data.event.actor_id, 1);
+    assert.equal(revoke.data.audit_event_id, revoked.id);
     assert.equal(receipt.data.event.details.grantee_ref, '3');
 
     // Granting again is also receipted.

@@ -43,11 +43,13 @@ test('keeps ambiguous and invalid dates blank and never fills a missing lab unit
   assert.ok(candidates.every(entry => entry.page === 3));
 });
 
-test('uses actual OCR for image-only PDFs', { timeout: 30_000 }, async () => {
+test('uses actual OCR for scanned PDF pages with selectable headers', { timeout: 30_000 }, async () => {
   const scan = makeScan(lines);
   const pdf = new PDFDocument();
-  const page = pdf.beginPage(675, scan.height / 2);
-  page.drawImage(scan, 0, 0, 675, scan.height / 2);
+  const page = pdf.beginPage(675, scan.height / 2 + 40);
+  page.font = '18px sans-serif';
+  page.fillText('Synthetic clinic with a selectable header on this document', 15, 25);
+  page.drawImage(scan, 0, 40, 675, scan.height / 2);
   pdf.endPage();
   const { pages } = await extractPages(pdf.close(), 'application/pdf');
   const { candidates } = parsePages(pages, 'mcp_card', '2026-11-21');

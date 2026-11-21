@@ -195,22 +195,34 @@ async function extractPages(bytes, mime) {
       let pdf;
       try { pdf = await task.promise; } catch { throw sourceError('Use a readable PDF without password protection.'); }
       validated = true;
+      const imageOperators = new Set([
+        pdfjs.OPS.paintImageXObject, pdfjs.OPS.paintImageXObjectRepeat,
+        pdfjs.OPS.paintInlineImageXObject, pdfjs.OPS.paintInlineImageXObjectGroup
+      ].filter(Number.isInteger));
       if (pdf.numPages > MAX_PAGES) warnings.push('CareScan reads the first five pages. You can transcribe entries from later pages.');
       for (let n = 1; n <= Math.min(pdf.numPages, MAX_PAGES); n++) {
         if (Date.now() >= deadline) throw new Error('OCR timed out');
         const page = await pdf.getPage(n);
         const content = await page.getTextContent();
         const plainText = content.items.map(item => (item.str || '') + (item.hasEOL ? '\n' : ' ')).join('').slice(0, 20_000);
-        let text = plainText;
-        if (plainText.replace(/\s/g, '').length < 25) {
+        // Preserve the exact text layer, then try OCR on mixed image/text pages.
+        // A selectable letterhead is common on an otherwise scanned document.
+        const extracted = { page: n, text: plainText };
+        pages.push(extracted);
+        const sparseText = plainText.replace(/\s/g, '').length < 25;
+        const hasImages = sparseText || (await page.getOperatorList()).fnArray.some(op => imageOperators.has(op));
+        if (hasImages) {
           const base = page.getViewport({ scale: 1 });
           const scale = Math.min(3, 2400 / Math.max(base.width, base.height));
           const viewport = page.getViewport({ scale });
           const canvas = createCanvas(Math.max(1, Math.ceil(viewport.width)), Math.max(1, Math.ceil(viewport.height)));
           await page.render({ canvas, canvasContext: canvas.getContext('2d'), viewport }).promise;
-          text = await readImage(canvas) || plainText;
+          const normalizeLine = line => line.trim().replace(/\s+/g, ' ').toLowerCase();
+          const knownLines = new Set(plainText.split(/\r?\n/).map(normalizeLine));
+          const scannedLines = (await readImage(canvas)).split(/\r?\n/).filter(line => !knownLines.has(normalizeLine(line)));
+          extracted.text = [plainText.trim(), ...scannedLines].filter(Boolean).join('\n').slice(0, 20_000);
         }
-        pages.push({ page: n, text });
+
       }
     }
   } catch (error) {

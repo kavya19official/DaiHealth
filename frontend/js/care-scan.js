@@ -11,7 +11,8 @@
   const add = find('careScanAdd');
   const resultActions = find('careScanResult');
   const today = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata' }).format(new Date());
-  const allowed = new Set(['application/pdf', 'image/jpeg', 'image/png', 'image/webp']);
+  const fileTypes = { pdf: 'application/pdf', jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp' };
+  const allowed = new Set(Object.values(fileTypes));
   const editable = ['kind', 'occurred_on', 'label', 'dosage', 'result', 'unit', 'notes'];
   let profiles = [];
   let state;
@@ -63,6 +64,7 @@
 
   function busy(value) {
     pending = value;
+    dialog.setAttribute('aria-busy', String(value));
     for (const form of [uploadForm, reviewForm]) form.querySelector('fieldset').disabled = value;
     dialog.querySelector('[data-scan-close]').disabled = value;
   }
@@ -90,11 +92,12 @@
     if (!selected) return;
     file = undefined;
     find('careScanFilename').textContent = 'No file selected.';
-    if (!allowed.has(selected.type) || !selected.size || selected.size > 5 * 1024 * 1024) {
+    const mime = selected.type || fileTypes[selected.name.toLowerCase().split('.').at(-1)];
+    if (!allowed.has(mime) || !selected.size || selected.size > 5 * 1024 * 1024) {
       setStatus('Choose a PDF, JPEG, PNG or WebP file up to 5 MB.');
       return;
     }
-    file = selected;
+    file = selected.type ? selected : new File([selected], selected.name, { type: mime });
     find('careScanFilename').textContent = file.name;
     setStatus('');
   }

@@ -1,5 +1,6 @@
 "use client";
 import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { loadOutbox, saveOutbox } from "./asha-outbox";
 
 type Row = Record<string, any>;
 type Api = (path: string, options?: RequestInit) => Promise<any>;
@@ -10,16 +11,13 @@ type OutboxItem = {
   queued_at: string;
   attempts: number;
   last_error?: string;
+  needs_review?: boolean;
 };
 
 const label = "Simulated on synthetic data";
-const OUTBOX = "dai-asha-outbox:";
 const KINDS = ["attendance", "vitals", "immunization", "referral_flag"];
 
-const todayLocal = () => {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-};
+const todayLocal = () => new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kolkata" }).format(new Date());
 const uuid = () =>
   typeof crypto !== "undefined" && crypto.randomUUID
     ? crypto.randomUUID()
@@ -46,17 +44,6 @@ function Badge({ status }: { status: string }) {
       {nice(status)}
     </span>
   );
-}
-
-function loadQueue(userId: string): OutboxItem[] {
-  try {
-    return JSON.parse(localStorage.getItem(OUTBOX + userId) || "[]");
-  } catch {
-    return [];
-  }
-}
-function saveQueue(userId: string, items: OutboxItem[]) {
-  localStorage.setItem(OUTBOX + userId, JSON.stringify(items));
 }
 
 function RouteMap({ stops, origin }: { stops: Row[]; origin: Row }) {
@@ -115,7 +102,15 @@ export function AshaCopilot({ api, user }: { api: Api; user: Row }) {
   const [route, setRoute] = useState<Row | null>(null);
   const [camps, setCamps] = useState<Row[]>([]);
   const [notes, setNotes] = useState<Row[]>([]);
-  const [queue, setQueue] = useState<OutboxItem[]>(() => loadQueue(user.id));
+  const [queue, setQueue] = useState<OutboxItem[]>([]);
+  const [queueReady, setQueueReady] = useState(false);
+  const [queueError, setQueueError] = useState("");
+  const queueRef = useRef<OutboxItem[]>([]);
+  const writes = useRef<Promise<void>>(Promise.resolve());
+  const inFlight = useRef(false);
+  const loadVersion = useRef(0);
+  const refreshAfterSync = useRef<(() => Promise<void>) | null>(null);
+  const scope = user.id + ":" + user.facility_id;
   const [online, setOnline] = useState(
     typeof navigator !== "undefined" ? navigator.onLine : true
   );
@@ -126,6 +121,7 @@ export function AshaCopilot({ api, user }: { api: Api; user: Row }) {
   const [actionFor, setActionFor] = useState<Row | null>(null);
   const [noteFor, setNoteFor] = useState<Row | null>(null);
   const [campForm, setCampForm] = useState({ village_id: "", name: "", camp_date: todayLocal() });
+  const [campQuery, setCampQuery] = useState("");
   const [campDrafts, setCampDrafts] = useState<Record<string, Row>>({});
   const [oversight, setOversight] = useState<Row | null>(null);
   const [roster, setRoster] = useState<Row | null>(null);
@@ -133,65 +129,79 @@ export function AshaCopilot({ api, user }: { api: Api; user: Row }) {
   const [motherQuery, setMotherQuery] = useState("");
   const [motherResults, setMotherResults] = useState<Row[]>([]);
 
+  useEffect(() => {
+    if (!isWorker) return;
+    let active = true;
+    loadOutbox<OutboxItem>(scope, user.id).then((items) => {
+      if (!active) return;
+      queueRef.current = items;
+      setQueue(items);
+      setQueueReady(true);
+    }).catch(() => {
+      if (active) setQueueError("This browser could not open protected offline storage. Retry in a supported browser.");
+    });
+    return () => { active = false; };
+  }, [scope, isWorker, user.id]);
+
   const setQ = useCallback(
     (updater: (q: OutboxItem[]) => OutboxItem[]) => {
-      setQueue((prev) => {
-        const next = updater(prev);
-        saveQueue(user.id, next);
-        return next;
-      });
+      const next = updater(queueRef.current);
+      queueRef.current = next;
+      setQueue(next);
+      writes.current = writes.current.catch(() => {}).then(() => saveOutbox(scope, next));
+      void writes.current.then(() => setQueueError(""), () => setQueueError("The queue could not be saved on this device. Keep this page open and sync online."));
     },
-    [user.id]
+    [scope]
   );
 
-  const sync = useCallback(async () => {
-    if (!queue.length || syncing) return;
+  const sync = useCallback(async (retryRejected = false) => {
+    if (!isWorker || !queueReady || !navigator.onLine || inFlight.current) return;
+    const eligible = queueRef.current.filter(item => retryRejected || !item.needs_review);
+    const batch = (entity: OutboxItem["entity"]) => eligible.filter(item => item.entity === entity).slice(0, 100);
+    const visits = batch("visit"), notes = batch("note"), camps = batch("camp_update");
+    const sent = new Set([...visits, ...notes, ...camps].map(item => item.client_uuid));
+    if (!sent.size) return;
+    inFlight.current = true;
     setSyncing(true);
     try {
-      const body = {
-        visits: queue.filter((q) => q.entity === "visit").map((q) => q.payload),
-        notes: queue.filter((q) => q.entity === "note").map((q) => q.payload),
-        camp_updates: queue
-          .filter((q) => q.entity === "camp_update")
-          .map((q) => q.payload),
-      };
-      if (!body.visits.length && !body.notes.length && !body.camp_updates.length) {
-        setSyncing(false);
-        return;
-      }
       const result = await api("/asha/sync", {
         method: "POST",
-        body: JSON.stringify(body),
+        body: JSON.stringify({ visits: visits.map(item => item.payload), notes: notes.map(item => item.payload),
+          camp_updates: camps.map(item => item.payload) }),
       });
-      const outcomes = new Map<string, Row>(
-        ((result.results || []) as Row[]).map((r) => [r.client_uuid, r])
-      );
-      setQ((prev) =>
-        prev
-          .map((item) => {
-            const r = outcomes.get(item.client_uuid);
-            if (!r) return { ...item, attempts: item.attempts + 1, last_error: "No server result" };
-            if (r.status === "created" || r.status === "duplicate") return null;
-            return { ...item, attempts: item.attempts + 1, last_error: r.detail || "Sync failed" };
-          })
-          .filter(Boolean) as OutboxItem[]
-      );
+      const outcomes = new Map<string, Row>(((result.results || []) as Row[])
+        .map(r => [r.entity + ":" + r.client_uuid, r]));
+      setQ(prev => prev.flatMap(item => {
+        if (!sent.has(item.client_uuid)) return [item];
+        const r = outcomes.get(item.entity + ":" + item.client_uuid);
+        if (r?.status === "created" || r?.status === "duplicate") {
+          if (item.entity === "visit") setItems(current => current.map(row =>
+            row.mother_id === item.payload.mother_id && date === item.payload.visit_date
+              ? { ...row, visit_id: r.id, status: r.visit_status || item.payload.status } : row));
+          return [];
+        }
+        return [{ ...item, attempts: item.attempts + 1,
+          needs_review: Number(r?.code) >= 400 && Number(r?.code) < 500,
+          last_error: r?.detail || "No server result" }];
+      }));
       setLastSync(new Date().toISOString());
+      void refreshAfterSync.current?.();
     } catch (e) {
-      setQ((prev) =>
-        prev.map((i) => ({
-          ...i,
-          attempts: i.attempts + 1,
-          last_error: (e as Error).message,
-        }))
-      );
+      setQ(prev => prev.map(item => !sent.has(item.client_uuid) ? item : ({
+        ...item, attempts: item.attempts + 1, last_error: (e as Error).message
+      })));
     } finally {
+      inFlight.current = false;
       setSyncing(false);
     }
-  }, [queue, syncing, api, setQ]);
+  }, [api, date, isWorker, queueReady, setQ]);
 
   const enqueue = useCallback(
     (entity: OutboxItem["entity"], payload: Row) => {
+      if (!queueReady) {
+        setError("Protected offline storage is unavailable. Your change was not queued.");
+        return;
+      }
       const cu = payload.client_uuid || uuid();
       const item: OutboxItem = {
         client_uuid: cu,
@@ -202,7 +212,7 @@ export function AshaCopilot({ api, user }: { api: Api; user: Row }) {
       };
       setQ((prev) => [...prev, item]);
       // Optimistic local echo for visit status.
-      if (entity === "visit" && payload.status) {
+      if (entity === "visit" && payload.status && date === payload.visit_date) {
         setItems((prev) =>
           prev.map((v) =>
             v.mother_id === payload.mother_id
@@ -213,37 +223,40 @@ export function AshaCopilot({ api, user }: { api: Api; user: Row }) {
       }
       return item;
     },
-    [setQ]
+    [date, queueReady, setQ]
   );
 
   const refresh = useCallback(async () => {
+    if (!navigator.onLine) return;
+    const version = ++loadVersion.current;
     setError("");
-    try {
-      const qs = "?date=" + encodeURIComponent(date);
-      const [d, v, r, cp, nt] = await Promise.all([
-        api("/asha/dashboard" + qs),
-        api("/asha/visits" + qs),
-        api("/asha/route" + qs),
-        api("/asha/camps"),
-        api("/asha/notes?limit=20"),
-      ]);
-      setDash(d);
-      setItems(v.items || []);
-      setRoute(r);
-      setCamps(cp.items || []);
-      setNotes(nt.items || []);
-      if (isWorker) {
-        // offline snapshot for field caching
-        api("/asha/state" + qs).catch(() => {});
-      }
-    } catch (e) {
-      setError((e as Error).message);
-    }
-  }, [api, date, isWorker]);
+    const qs = "?date=" + encodeURIComponent(date);
+    const results = await Promise.allSettled([
+      api("/asha/dashboard" + qs), api("/asha/visits" + qs), api("/asha/route" + qs),
+      api("/asha/camps"), api("/asha/notes?limit=20"),
+    ]);
+    if (version !== loadVersion.current) return;
+    const [d, v, r, cp, nt] = results;
+    if (d.status === "fulfilled") setDash(d.value);
+    if (v.status === "fulfilled") setItems((v.value.items || []).map((row: Row) => {
+      const pending = queueRef.current.findLast(item => item.entity === "visit" &&
+        item.payload.mother_id === row.mother_id && item.payload.visit_date === date && !item.needs_review);
+      return pending ? { ...row, status: pending.payload.status } : row;
+    }));
+    if (r.status === "fulfilled") setRoute(r.value);
+    if (cp.status === "fulfilled") setCamps(cp.value.items || []);
+    if (nt.status === "fulfilled") setNotes(nt.value.items || []);
+    if (results.some(item => item.status === "rejected")) setError("Some field data could not load. Reconnect and refresh to try again.");
+  }, [api, date]);
 
   useEffect(() => {
-    refresh();
-  }, [refresh]);
+    refreshAfterSync.current = refresh;
+    if (online) void refresh();
+    return () => {
+      refreshAfterSync.current = null;
+      loadVersion.current++;
+    };
+  }, [refresh, online]);
 
   useEffect(() => {
     if (!isWorker) {
@@ -264,12 +277,12 @@ export function AshaCopilot({ api, user }: { api: Api; user: Row }) {
   }, []);
 
   useEffect(() => {
-    if (online && queue.length) sync();
+    if (online && queue.length) void sync();
   }, [online, queue.length, sync]);
 
   useEffect(() => {
     const t = setInterval(() => {
-      if (online && queue.length) sync();
+      if (online && queue.length) void sync();
     }, 30000);
     return () => clearInterval(t);
   }, [online, queue.length, sync]);
@@ -323,6 +336,10 @@ export function AshaCopilot({ api, user }: { api: Api; user: Row }) {
   }
 
   async function campStatus(camp: Row, status: string) {
+    if (status === "closed" && queueRef.current.some(item => item.entity === "camp_update" && item.payload.camp_id === camp.id)) {
+      setError("Sync or resolve this camp’s queued updates before closing it.");
+      return;
+    }
     try {
       await api("/asha/camps/" + camp.id + "/status", {
         method: "POST",
@@ -352,17 +369,29 @@ export function AshaCopilot({ api, user }: { api: Api; user: Row }) {
   }
 
   function queueCampUpdates(camp: Row) {
+    if (!queueReady) {
+      setError("Protected offline storage is unavailable. Your updates have not been queued.");
+      return;
+    }
     const updates: OutboxItem[] = [];
     for (const item of items) {
       const d = draftFor(camp.id, item.mother_id);
       if (!d.include) continue;
       const payload: Row = { status: "present" };
-      if (d.kind === "vitals") payload.vitals = d.vitals || {};
-      if (d.kind === "immunization") {
-        payload.child_id = d.child_id;
-        payload.vaccine = d.vaccine;
+      if (d.kind === "vitals") {
+        const text = d.vitals?.text?.trim();
+        if (!text) return setError("Add the recorded vitals for " + item.name + ".");
+        payload.vitals = { text };
       }
-      if (d.kind === "referral_flag") payload.reason = d.reason;
+      if (d.kind === "immunization") {
+        if (!d.child_id || !d.vaccine?.trim()) return setError("Choose a child and enter the recorded vaccine for " + item.name + ".");
+        payload.child_id = d.child_id;
+        payload.vaccine = d.vaccine.trim();
+      }
+      if (d.kind === "referral_flag") {
+        if ((d.reason?.trim().length || 0) < 5) return setError("Enter the referral reason for " + item.name + ".");
+        payload.reason = d.reason.trim();
+      }
       const cu = uuid();
       updates.push({
         client_uuid: cu,
@@ -383,7 +412,7 @@ export function AshaCopilot({ api, user }: { api: Api; user: Row }) {
       return;
     }
     setQ((prev) => [...prev, ...updates]);
-    setCampDrafts({});
+    setCampDrafts(prev => Object.fromEntries(Object.entries(prev).filter(([key]) => !key.startsWith(camp.id + "|"))));
   }
 
   const pendingCount = queue.length;
@@ -562,21 +591,24 @@ export function AshaCopilot({ api, user }: { api: Api; user: Row }) {
           )}
           <button
             className="text-button"
-            onClick={sync}
-            disabled={syncing || !pendingCount}
+            onClick={() => void sync(true)}
+            disabled={syncing || !pendingCount || !online || !queueReady}
           >
             {syncing ? "Syncing…" : "Sync now"}
           </button>
         </div>
       </div>
 
+      {queueError && <div role="alert" className="error">{queueError}</div>}
+      {!online && <p role="status" className="small">Changes queue on this device. Keep this page open to use the field list already loaded for this date.</p>}
       <div className="asha-toolbar">
         <label>
           Date
           <input
             type="date"
             value={date}
-            onChange={(e) => setDate(e.target.value)}
+            onChange={(e) => { if (e.target.value) setDate(e.target.value); }}
+            disabled={!online}
           />
         </label>
         <div className="asha-tabs">
@@ -722,8 +754,9 @@ export function AshaCopilot({ api, user }: { api: Api; user: Row }) {
           <div className="asha-route-summary">
             <strong>{route.stops?.length ?? 0} stops</strong>
             <span className="small">
-              ~{route.total_km} km · ~{route.total_minutes} min at {route.pace_kmh} km/h
-              walking pace · synthetic coordinates
+              {route.estimated_stops > 0
+                ? `~${route.total_km} km · ~${route.total_minutes} min for ${route.estimated_stops} estimated legs`
+                : "Distance unavailable"} · straight-line estimates
             </span>
           </div>
           <RouteMap stops={route.stops || []} origin={route.origin} />
@@ -735,8 +768,8 @@ export function AshaCopilot({ api, user }: { api: Api; user: Row }) {
                   <strong>{String(s.name).replace(/^SYNTHETIC /, "")}</strong>
                   <span className="small">
                     {" "}
-                    · {s.village} · {s.household_label} · +{s.leg_km} km (
-                    {s.leg_minutes} min) · priority {s.priority_score}
+                    · {s.village} · {s.household_label} · {s.leg_km == null
+                      ? "Distance unavailable" : `+${s.leg_km} km (${s.leg_minutes} min)`} · priority {s.priority_score}
                   </span>
                   <div className="asha-reasons">
                     {(s.reasons || []).slice(0, 3).map((r: Row, j: number) => (
@@ -760,14 +793,15 @@ export function AshaCopilot({ api, user }: { api: Api; user: Row }) {
             noteFor={noteFor}
             setNoteFor={setNoteFor}
             onSave={(mother_id, transcript, recorded_at, structured) => {
-              enqueue("note", {
+              const queued = enqueue("note", {
                 mother_id,
                 transcript,
                 structured,
                 client_uuid: uuid(),
                 recorded_at,
               });
-              setNoteFor(null);
+              if (queued) setNoteFor(null);
+              return Boolean(queued);
             }}
           />
           <h3>Recorded notes</h3>
@@ -879,7 +913,12 @@ export function AshaCopilot({ api, user }: { api: Api; user: Row }) {
               </div>
               {c.status === "open" && (
                 <div className="asha-camp-grid">
-                  {items.slice(0, 12).map((v) => {
+                  <label>Find a beneficiary
+                    <input type="search" value={campQuery} onChange={event => setCampQuery(event.target.value)}
+                      placeholder="Name or village" />
+                  </label>
+                  {items.filter(v => [v.name, v.village, v.uhid].some(value =>
+                    String(value || "").toLowerCase().includes(campQuery.trim().toLowerCase()))).map((v) => {
                     const d = draftFor(c.id, v.mother_id);
                     return (
                       <div key={v.mother_id} className="asha-camp-row">
@@ -907,7 +946,8 @@ export function AshaCopilot({ api, user }: { api: Api; user: Row }) {
                         </select>
                         {d.kind === "vitals" && (
                           <input
-                            placeholder="BP 120/80, temp 98.4"
+                            placeholder="Recorded BP, temperature or weight"
+                            maxLength={800}
                             value={d.vitals?.text || ""}
                             onChange={(e) =>
                               setDraft(c.id, v.mother_id, {
@@ -933,6 +973,7 @@ export function AshaCopilot({ api, user }: { api: Api; user: Row }) {
                             </select>
                             <input
                               placeholder="Vaccine"
+                              maxLength={120}
                               value={d.vaccine || ""}
                               onChange={(e) =>
                                 setDraft(c.id, v.mother_id, { vaccine: e.target.value })
@@ -969,7 +1010,7 @@ export function AshaCopilot({ api, user }: { api: Api; user: Row }) {
         <div className="asha-sync">
           <div className="asha-sync-head">
             <strong>{pendingCount} pending item{pendingCount === 1 ? "" : "s"}</strong>
-            <button className="primary" onClick={sync} disabled={syncing || !pendingCount}>
+            <button className="primary" onClick={() => void sync(true)} disabled={syncing || !pendingCount || !online || !queueReady}>
               {syncing ? "Syncing…" : "Sync now"}
             </button>
           </div>
@@ -1017,7 +1058,7 @@ function NoteComposer({
   items: Row[];
   noteFor: Row | null;
   setNoteFor: (v: Row | null) => void;
-  onSave: (motherId: string, transcript: string, recordedAt: string, structured: Row | null) => void;
+  onSave: (motherId: string, transcript: string, recordedAt: string, structured: Row | null) => boolean;
 }) {
   const [motherId, setMotherId] = useState("");
   const [transcript, setTranscript] = useState("");
@@ -1025,6 +1066,8 @@ function NoteComposer({
   const [listening, setListening] = useState(false);
   const recogRef = useRef<any>(null);
   const [error, setError] = useState("");
+
+  useEffect(() => () => recogRef.current?.abort(), []);
 
   useEffect(() => {
     if (noteFor) {
@@ -1047,7 +1090,12 @@ function NoteComposer({
       return;
     }
     const rec = new SR();
+    if (!("processLocally" in rec)) {
+      setError("This browser cannot keep dictation on the device. Type the visit note here.");
+      return;
+    }
     rec.lang = "en-IN";
+    rec.processLocally = true;
     rec.interimResults = true;
     rec.onresult = (e: any) => {
       let text = "";
@@ -1055,20 +1103,29 @@ function NoteComposer({
       setTranscript(text.trim());
     };
     rec.onend = () => setListening(false);
-    rec.onerror = () => setListening(false);
+    rec.onerror = () => {
+      setListening(false);
+      setError("On-device dictation could not start. Enable the local English (India) language pack or type the note.");
+    };
     recogRef.current = rec;
-    rec.start();
-    setListening(true);
-    setError("");
+    try {
+      rec.start();
+      setListening(true);
+      setError("");
+    } catch {
+      setError("Allow microphone access to dictate, or type the note.");
+    }
   }
 
   async function preview() {
     try {
+      setStructured(null);
+      const submitted = transcript;
       const r = await api("/asha/notes/extract", {
         method: "POST",
         body: JSON.stringify({ transcript }),
       });
-      setStructured(r.structured || null);
+      setStructured(r.structured ? { transcript: submitted, fields: r.structured } : null);
     } catch (e) {
       setError((e as Error).message);
     }
@@ -1078,9 +1135,7 @@ function NoteComposer({
     <div className="asha-note-composer">
       <h3>Voice / text visit note</h3>
       <p className="small">
-        Dictate or type the visit. Structured fields (BP, temperature, weight,
-        complaints, danger signs, follow-up) are extracted on the device/server
-        for clinician review — nothing is diagnosed automatically.
+        Type a note or dictate with on-device speech recognition. When online, preview the extracted measurements and follow-up before saving.
       </p>
       <label>
         Beneficiary
@@ -1099,7 +1154,8 @@ function NoteComposer({
           rows={4}
           value={transcript}
           onChange={(e) => setTranscript(e.target.value)}
-          placeholder="e.g. Mother has mild headache, BP 130/85, temp 99.1F. Baby feeding well. Review in 7 days."
+          placeholder="Record the visit in your own words"
+          maxLength={4000}
         />
       </label>
       <div className="asha-note-actions">
@@ -1110,7 +1166,7 @@ function NoteComposer({
         >
           {listening ? "■ Stop dictation" : "🎙 Dictate"}
         </button>
-        <button type="button" className="text-button" onClick={preview} disabled={transcript.trim().length < 3}>
+        <button type="button" className="text-button" onClick={preview} disabled={transcript.trim().length < 3 || !navigator.onLine}>
           Preview structure
         </button>
         <button
@@ -1118,7 +1174,7 @@ function NoteComposer({
           className="primary"
           disabled={!motherId || transcript.trim().length < 3}
           onClick={() => {
-            onSave(motherId, transcript.trim(), new Date().toISOString(), structured);
+            if (!onSave(motherId, transcript.trim(), new Date().toISOString(), structured?.transcript === transcript ? structured.fields : null)) return;
             setTranscript("");
             setStructured(null);
             setMotherId("");
@@ -1132,10 +1188,10 @@ function NoteComposer({
           </button>
         )}
       </div>
-      {structured && (
+      {structured?.transcript === transcript && (
         <div className="asha-structured">
           <strong>Extracted structure (review before filing)</strong>
-          <pre>{JSON.stringify(structured, null, 2)}</pre>
+          <pre>{JSON.stringify(structured.fields, null, 2)}</pre>
         </div>
       )}
       {error && <div role="alert" className="error">{error}</div>}

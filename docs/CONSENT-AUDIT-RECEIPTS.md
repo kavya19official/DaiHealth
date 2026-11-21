@@ -1,12 +1,12 @@
 # Tamper-evident consent & access receipts
 
-Every patient consent change, revocation and medical-record access is recorded
-in an append-only, hash-chained audit log. Mothers can verify the chain from
-their dashboard and download digitally signed receipts for any event.
+DaiHealth captures the patient-system consent changes, revocations and record
+access events listed below. Mothers can verify the chain and download signed
+JSON receipts under **Family & consent**. See [setup and offline verification](FEATURE-AUDIT-SETUP.md).
 
 ## What is recorded
 
-Database triggers (`backend/db/consent_audit.sql`) copy each write into
+Database triggers in `consent_audit.sql` and `consent_audit_hardening.sql` capture changes into
 `consent_audit_events`:
 
 | Source table | Events captured |
@@ -18,12 +18,14 @@ Database triggers (`backend/db/consent_audit.sql`) copy each write into
 | `family_access_events` | family grant invite/accept/read/revoke |
 | `continuity_access` | scoped record-access grants and revokes |
 | `patient_stay_access_log` | hospital-stay record views |
+| Sharing state tables and document sharing preference | report, clinical summary, timeline summary, family and remote visit entitlements, captured in the state-change transaction |
 
 ## Integrity model
 
-- **Append-only**: `UPDATE`/`DELETE` on `consent_audit_events`,
-  `consent_audit_seals`, `consent_receipts` and `consent_audit_heads` is
-  rejected by triggers.
+- **Append-only**: triggers reject changing or deleting ledger entries, seals,
+  signer keys and receipts. They also reject truncation. Chain heads allow
+  transactional advancement. Capture counts and capture hashes detect gaps
+  and alterations before the first seal is created.
 - **Hash chain**: each event is sealed with
   `HMAC-SHA256(previous_hash ‖ canonical(event))` per mother, in id order.
   `consent_audit_heads` stores the chain head; sealing takes the head row
@@ -31,9 +33,10 @@ Database triggers (`backend/db/consent_audit.sql`) copy each write into
   verifier never seals across an uncommitted lower-id event.
 - **Verification is real**: `GET /api/patient/audit/verify` recomputes every
   seal from the event rows and fails closed (HTTP 409) on any mismatch —
-  including edits made by disabling the immutability triggers.
-- **Timestamps** come from the database clock (`NOW()` / source-row
-  `created_at`), never the client.
+  including mismatches in the capture counts, event content, seals or checkpoint.
+- **Timestamps** come from the database clock. The database commit is the
+  boundary for new authorizations. PostgreSQL can report the exact commit
+  timestamp when its commit tracking was enabled for that transaction.
 
 ## Signed receipts
 
@@ -53,8 +56,9 @@ Endpoints (mother role only):
 - `GET /api/patient/audit/events/:id/receipt` — downloadable signed receipt
 - `GET /api/patient/receipts` — issued receipts
 
-`PUT /api/patient/access/:type/:ref` now commits the consent row, the choice
-event and the receipt in one transaction, and returns `receipt_id`.
+`PUT /api/patient/access/:type/:ref` commits the consent state and audit event
+together. It then issues a receipt for that specific event. If signing is
+unavailable, access still changes and that event can be receipted later.
 
 ## Keys
 
@@ -66,5 +70,7 @@ event and the receipt in one transaction, and returns `receipt_id`.
 
 ## Coverage note
 
-The log covers access made through DAI. It does not cover access inside a
-hospital's own systems, which remain outside DAI's visibility.
+Coverage begins when the relevant capture migration is applied. Hospital
+portal and ASHA logs remain separate from the patient ledger. Keep downloaded
+signed receipts independently to help detect coordinated rollback of the
+database. Past disclosures cannot be recalled by changing an entitlement.

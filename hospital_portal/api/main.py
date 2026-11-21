@@ -62,8 +62,10 @@ def create_app(engine=None):
                         )
         seed_demo_requests(engine)
         seed_followup_risk(engine)
-        from .asha import seed_asha
-        seed_asha(engine)
+        if demo:
+            from .asha import seed_asha
+
+            seed_asha(engine)
         from .demo_video_seed import seed_video_demo
         seed_video_demo(engine)
         yield
@@ -250,6 +252,8 @@ def create_app(engine=None):
                 not u["verified"] or not u["registration_no"] or not u["department_id"]
             ):
                 raise HTTPException(403, "Clinical credentials require verification")
+            if u["role"] == "asha" and not u["verified"]:
+                raise HTTPException(403, "ASHA accounts require staff verification")
             return {**u, "session_id": session["id"]}
 
     def require(permission):

@@ -33,29 +33,45 @@ async function finish(id){if(state.user.guest){api.toast('Sign in to save your c
 function go(id){bridge.showPanel?.(id);put('pageTitle',id==='profile'?'My profile':PatientCopy.t('nav.'+id));}
 function openDaya(question,action){const launcher=document.querySelector('.care-chatbot__launcher');if(!launcher){api.toast('Dhruv is loading. Please try again in a moment.');return;}launcher.click();const input=document.querySelector('.care-chatbot__form input');if(input&&question){input.value=question;input.focus();if(action==='send')input.closest('form').requestSubmit();}if(action==='voice'){const voice=document.querySelector('.care-chatbot__voice');if(voice?.getAttribute('aria-pressed')==='false')voice.click();document.querySelector('.daya-mic')?.click();}}
 async function accessPanels(){
- const [acc,hist,audit,auditEvents]=await Promise.all([api.apiRequest('/patient/access'),api.apiRequest('/patient/access/history?limit=20'),api.apiRequest('/patient/audit/verify').catch(()=>null),api.apiRequest('/patient/audit/events?limit=15').catch(()=>null)]);
+ const [acc,hist]=await Promise.all([api.apiRequest('/patient/access'),api.apiRequest('/patient/access/history?limit=20'),loadAudit()]);
  if(!acc)return;
  const row=(type,ref,title,sub,revoked)=>'<div class="consent-event"><div><strong>'+E(title)+'</strong><small>'+E(sub)+'</small></div><span class="tag '+(revoked?'tag--cancelled':'tag--ok')+'">'+(revoked?'Access off':'Has access')+'</span><button type="button" class="btn btn--sm '+(revoked?'btn--primary':'btn--ghost')+'" data-access-type="'+E(type)+'" data-access-ref="'+E(ref)+'" data-access-state="'+(revoked?'granted':'revoked')+'">'+(revoked?'Turn access back on':'Turn access off')+'</button></div>';
  const doctors=acc.doctors.map(d=>row('doctor',d.doctor_id,d.name,[d.specialization,d.facility_name,d.bases.includes('clinical_dashboard_consent')?'Dashboard sharing agreed':null,d.last_viewed?'Last viewed your record '+new Date(d.last_viewed).toLocaleString():'No views recorded'].filter(Boolean).join(' \u00b7 '),d.revoked)).join('');
  const facilities=acc.facilities.map(f=>row('facility',f.facility_ref,f.label,'Clinicians: '+f.doctors.join(', '),f.revoked)).join('');
  html('careTeamAccess','<h3>Clinicians</h3>'+(doctors||empty('No clinician is linked to your care yet.'))+'<h3>Facilities</h3>'+(facilities||empty('No facility is recorded on your appointments.'))+'<p class="connected-muted">'+E(acc.note)+'</p>');
  html('recordAccessHistory',(hist&&hist.entries.length?hist.entries.map(e=>'<div class="consent-event">'+E(e.doctor_name||'A clinician')+' \u00b7 '+E(String(e.resource).replaceAll('_',' '))+(e.allowed?'':' \u00b7 <strong>blocked</strong>')+'<small>'+E(new Date(e.created_at).toLocaleString())+'</small></div>').join(''):empty('No record views have been logged yet.'))+(hist?'<p class="connected-muted">'+E(hist.coverage)+'</p>':''));
- auditPanel(audit,auditEvents);
 }
-function auditPanel(audit,events){
- const badge=audit&&audit.valid
-  ?'<span class="tag tag--ok">✓ Audit chain verified</span><small class="connected-muted"> '+E(audit.events)+' sealed events · head '+E(String(audit.head_hash).slice(0,12))+'… · verified '+E(new Date(audit.verified_at).toLocaleString())+'</small>'
-  :'<span class="tag tag--cancelled">Audit verification unavailable</span><small class="connected-muted"> The tamper-evident log could not be verified right now. Your records are unchanged.</small>';
- const rows=(events&&events.events||[]).map(e=>{
+let auditRequest=0;
+async function loadAudit(before){
+ if(state.user?.guest||state.offline||!$('auditEvents'))return;
+ const request=++auditRequest;
+ const badge=$('auditReceipts');
+ badge.setAttribute('role','status');
+ badge.textContent='Checking audit integrity…';
+ const suffix=before?'&before='+encodeURIComponent(before):'';
+ let events,error;
+ try{
+  const response=await fetch(api.API_BASE+'/patient/audit/events?limit=15'+suffix,{credentials:'include',cache:'no-store'});
+  if(response.ok)events=await response.json();
+  else error=response.status===409?'Audit integrity check failed. Receipts are unavailable until the log can be verified.':'Audit verification is temporarily unavailable.';
+ }catch{error='Could not reach DaiHealth to verify the audit log.';}
+ if(request!==auditRequest)return;
+ const checkpoint=events?.checkpoint;
+ if(!checkpoint?.valid){
+  html('auditReceipts','<span class="tag tag--cancelled">'+E(error||'Audit verification unavailable')+'</span> <button type="button" class="link-btn" data-audit-refresh>Retry</button>');
+  html('auditEvents','');
+  return;
+ }
+ const rows=events.events.map(e=>{
   const what=String(e.event_type||'').replaceAll('_',' ');
-  const who=e.actor_name||(e.actor_id?'User '+e.actor_id:null)||(e.subject_ref?'Ref '+e.subject_ref:null)||'You';
-  const when=e.occurred_at?new Date(e.occurred_at).toLocaleString():'—';
-  const fx=e.details&&e.details.effective_at?'<small>Effective '+E(new Date(e.details.effective_at).toLocaleString())+'</small>':'';
-  const rcpt='<a class="link-btn" href="'+E(api.API_BASE+'/audit/events/'+e.id+'/receipt')+'" download>Receipt</a>';
-  return '<div class="consent-event"><div><strong>'+E(what)+'</strong><small>'+E(who)+' · '+E(when)+(e.resource?' · '+E(String(e.resource).replaceAll('_',' ')):'')+(e.allowed===false?' · <strong>blocked</strong>':'')+'</small>'+fx+'</div>'+rcpt+'</div>';
+  const who=e.actor_name||(e.actor_id?'User '+e.actor_id:'Actor unavailable');
+  const when=new Date(e.occurred_at).toLocaleString('en-IN',{timeZone:'Asia/Kolkata'});
+  const resource=e.resource?String(e.resource).replaceAll('_',' '):e.subject_type;
+  const target=e.subject_ref?' · Reference '+e.subject_ref:'';
+  return '<div class="consent-event"><div><strong>'+E(what)+'</strong><small>'+E(who+' · '+when+' IST'+(resource?' · '+resource:'')+target)+(e.allowed===false?' · <strong>Blocked</strong>':'')+'</small></div><button type="button" class="link-btn" data-audit-receipt="'+E(e.id)+'">Download signed receipt</button></div>';
  }).join('');
- html('auditReceipts',badge+(events&&events.checkpoint?'<p class="connected-muted">Chain head '+E(String(events.checkpoint.head_hash).slice(0,12))+'… · '+E(events.checkpoint.sequence)+' events</p>':''));
- html('auditEvents',rows||empty('No audit events recorded yet.'));
+ html('auditReceipts','<span class="tag tag--ok">✓ Audit chain verified</span><p class="connected-muted">'+E(checkpoint.sequence)+' recorded events. Times shown in IST.</p><button type="button" class="link-btn" data-audit-refresh>Refresh audit</button> · <button type="button" class="link-btn" data-audit-key>Download verification key</button>');
+ html('auditEvents',(rows||empty('No audit events recorded yet.'))+(events.next_before?'<button type="button" class="link-btn" data-audit-before="'+E(events.next_before)+'">Older events</button>':''));
 }
 async function sharing(){if(state.user?.guest)return;accessPanels();const data=await api.apiRequest('/patient/sharing');if(!data)return;html('sharingControls','<label class="consent-row"><div>Doctors you share reports with<small>Turning this off blocks doctor access to your uploaded reports. It does not erase hospital records.</small></div><input id="doctorSharing" type="checkbox" '+(prefs.privacy_share_doctors!==false?'checked':'')+'></label><label class="consent-row"><div>Family member<small>Manage scoped family invitations below.</small></div><input type="checkbox" disabled aria-label="Family access is managed below"></label><label class="consent-row"><div>ASHA worker<small>No ASHA account linked.</small></div><input type="checkbox" disabled aria-label="ASHA account not linked"></label>');html('sharingHistory',data.events.map(e=>'<div class="consent-event">'+E(e.event_type.replaceAll('_',' '))+'<small>'+E(new Date(e.created_at).toLocaleString())+'</small></div>').join('')||empty('No sharing changes recorded yet.'));html('activeDocumentShares',data.shares.map(s=>'<div class="consent-event">'+E(s.title)+' → '+E(s.doctor_name)+button('Revoke','data-revoke="'+E(s.document_id)+'" data-doctor="'+E(s.doctor_id)+'"')+'</div>').join('')||empty('No report shares. Share a specific report from Reports & records.'));window.PatientSupport?.sharing(data,prefs);}
 async function init(b){bridge=b;state.user=b.user;await PatientOffline.bind(b.user);state.offline=!!b.offlineOnly;if(b.offlineOnly&&window.CareExt)CareExt.init({guest:true,user:b.user,educationOnly:true,offline:true,cachedPost:state.post});try{prefs=await DaiPrefs.getPrefs();}catch{}applyPrefs(prefs);put('familyEmergencyName','');if($('familyEmergencyName'))$('familyEmergencyName').value=b.user.emergency_contact_name||'';if($('familyEmergencyPhone'))$('familyEmergencyPhone').value=b.user.emergency_contact_phone||'';render();if(!b.user.guest&&navigator.onLine&&!b.offlineOnly){const responses=await Promise.allSettled(['/patient/overview','/children','/postpartum'].map(path=>api.apiRequest(path)));state.overview=responses[0].value||state.overview;state.children=responses[1].value?.children||[];state.post=responses[2].value||{};state.homeLoaded=true;render();await saveCache();sync();sharing();window.PatientTimelineLive?.start();}banner();}
@@ -68,6 +84,13 @@ function setup(){
  if(b.dataset.child){childId=state.children.find(c=>String(c.id)===b.dataset.child)?.id;renderChildren();}
  if(b.dataset.childOpen){localStorage.setItem('dai_active_child',b.dataset.childOpen);location.href='child-dashboard.html';}
  if(b.hasAttribute('data-open-daya'))openDaya();if(b.hasAttribute('data-prepare-questions')){go('companion');$('prepareDoctorQuestions').click();}if(b.dataset.question)openDaya(b.dataset.question);
+ if(b.hasAttribute('data-audit-refresh')||b.dataset.auditBefore){void loadAudit(b.dataset.auditBefore);return;}
+ if(b.hasAttribute('data-audit-key')||b.dataset.auditReceipt){
+  const id=b.dataset.auditReceipt;
+  const r=await api.apiRequest('/patient/audit/'+(id?'events/'+encodeURIComponent(id)+'/receipt':'public-key'));
+  if(r)download(id?JSON.stringify(r,null,2):r.public_key,id?'dai-receipt-'+id+'.json':'dai-receipt-'+r.key_id+'.pem',id?'application/json':'application/x-pem-file');
+  return;
+ }
  if(b.dataset.accessType){const turningOff=b.dataset.accessState==='revoked';if(turningOff&&!confirm('Turn off this access? They will no longer be able to open your record in DAI.'))return;const r=await api.apiRequest('/patient/access/'+b.dataset.accessType+'/'+encodeURIComponent(b.dataset.accessRef),{method:'PUT',body:{state:b.dataset.accessState}});if(r){api.toast(r.message);accessPanels();}return;}
  if(b.dataset.revoke){const r=await api.apiRequest('/documents/'+b.dataset.revoke+'/share/'+b.dataset.doctor,{method:'DELETE'});if(r)sharing();}
  });
@@ -90,7 +113,7 @@ function dialog(content){const d=document.createElement('dialog');d.className='p
 function appointmentDialog(id){const d=dialog('<form><h2>Reschedule appointment</h2><label>Preferred date<input name="date" type="date" min="'+M.today()+'" required></label><label>Preferred time<input name="time" type="time"></label><p>Your doctor will confirm the new slot.</p><button class="btn btn--primary">Request change</button><button type="button" class="link-btn" data-close>Keep current appointment</button><p role="status"></p></form>');d.querySelector('form').onsubmit=async e=>{e.preventDefault();const r=await api.apiRequest('/patient/appointments/'+id,{method:'PATCH',body:{action:'reschedule',requested_date:d.querySelector('[name=date]').value,requested_time:d.querySelector('[name=time]').value||null}});if(r){d.close();bridge.reloadAppointments();}else d.querySelector('[role=status]').textContent='Change not saved. Please try again.';};}
 function deletionDialog(){const d=dialog('<form><h2>Request account deletion</h2><p>This sends a request for review. Hospital records may have retention requirements. Your records are not deleted immediately.</p><label>Current password<input type="password" name="password" autocomplete="current-password" required></label><button class="btn btn--primary">Send deletion request</button><button class="link-btn" type="button" data-close>Cancel</button><p role="status"></p></form>');d.querySelector('form').onsubmit=async e=>{e.preventDefault();const r=await api.apiRequest('/patient/deletion-request',{method:'POST',body:{confirmation:'REQUEST DELETION',password:d.querySelector('input').value}});d.querySelector('[role=status]').textContent=r?.message||'Request not saved. Check your password.';d.querySelector('input').value='';};}
 function renderSchemes(){if(window.PatientSupport)return;const cards=[['PM-JAY','Eligible families can check hospitalisation cover through the official beneficiary system; eligibility is not determined here.','Ask the official portal or help desk which identity and family records apply to you.','https://nha.gov.in/PM-JAY'],['JSY','Support for eligible institutional deliveries. Conditions depend on the state and beneficiary category.','Ask your ASHA or facility for the local registration, bank and eligibility document checklist.','https://nhm.gov.in/nhm/index1.php?lang=1&level=3&lid=309&sublinkid=841'],['PMMVY','For eligible women for the first living child, and the second living child if a girl, subject to scheme conditions.','The official application explains identity, bank, eligibility, ANC, birth and immunisation records required.','https://www.wcd.gov.in/offerings/pradhan-mantri-matru-vandana-yojana']];html('patientSchemes',cards.map(c=>'<article class="card scheme-card"><h2>'+c[0]+'</h2><p>'+c[1]+'</p><small>'+c[2]+'</small><a href="'+c[3]+'" target="_blank" rel="noopener">Official details ↗</a><small>Confirm final eligibility and documents on the official site.</small></article>').join(''));}
-window.PatientExperience={init,async protectOffline(){try{await PatientOffline.enable(state);}catch(e){api.toast(e.message);}},refreshAppointments:()=>bridge.reloadAppointments?.(),refreshTimeline:()=>bridge.reloadTimeline?.(),askDaya:openDaya,requestVisit(name){go('appointments');$('apptNotes').value='Preferred centre: '+name+'. Please confirm the clinic location.';api.toast('Choose a doctor and confirm the centre with the clinic.');},update(data){Object.assign(state,data);render();saveCache();},renderDocs,route(id){if(id==='timeline'&&state.user)window.PatientJourney?.update(state,prefs);put('pageTitle',id==='profile'?'My profile':PatientCopy.t('nav.'+id));},async restore(){const cache=await PatientOffline.load();if(cache){state={...state,...cache,offline:true};render();banner();return cache;}return null;}};
+window.PatientExperience={init,async protectOffline(){try{await PatientOffline.enable(state);}catch(e){api.toast(e.message);}},refreshAppointments:()=>bridge.reloadAppointments?.(),refreshTimeline:()=>bridge.reloadTimeline?.(),askDaya:openDaya,requestVisit(name){go('appointments');$('apptNotes').value='Preferred centre: '+name+'. Please confirm the clinic location.';api.toast('Choose a doctor and confirm the centre with the clinic.');},update(data){Object.assign(state,data);render();saveCache();},renderDocs,route(id){if(id==='family'&&state.user&&!state.user.guest)void loadAudit();if(id==='timeline'&&state.user)window.PatientJourney?.update(state,prefs);put('pageTitle',id==='profile'?'My profile':PatientCopy.t('nav.'+id));},async restore(){const cache=await PatientOffline.load();if(cache){state={...state,...cache,offline:true};render();banner();return cache;}return null;}};
 setup();
 setInterval(async()=>{if(document.hidden||(window.DaiAPI&&window.DaiAPI.lowBandwidth&&window.DaiAPI.lowBandwidth())||!['#timeline','#gaps'].includes(location.hash)||state.offline||!state.user||state.user.guest)return;const result=await api.apiRequest('/timeline');if(result?.milestones&&(JSON.stringify(result.milestones)!==JSON.stringify(state.milestones)||JSON.stringify(result.care_scan_entries||[])!==JSON.stringify(state.careScanEntries))){state.milestones=result.milestones;state.careScanEntries=result.care_scan_entries||[];render();saveCache();}},30000);
 })();
