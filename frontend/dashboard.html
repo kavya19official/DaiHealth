@@ -1802,6 +1802,7 @@ async function boot() {
     appointments = hydrateDemoAppointments();
     healthLogs = hydrateDemoHealthLogs();
     await PatientExperience.init({...patientBridge,user:currentUser});
+    if (window.BirthReadiness) window.BirthReadiness.init({ guest: true });
     renderHeader();
     if (window.CareExt) window.CareExt.init({ guest: true, user: currentUser, educationOnly:true });
     renderAppointments();
@@ -1825,6 +1826,7 @@ async function boot() {
   }
 
   await PatientExperience.init({...patientBridge,user:currentUser});
+  if (window.BirthReadiness) window.BirthReadiness.init({ guest: false });
   renderHeader();
   if (window.CareExt) window.CareExt.init({ guest: false, user: currentUser, educationOnly:true });
   await Promise.all([

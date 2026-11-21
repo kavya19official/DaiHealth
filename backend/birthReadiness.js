@@ -17,10 +17,10 @@ const CATALOGUE = Object.freeze([
 const KEYS = new Set(CATALOGUE.map(item => item.key));
 const iso = value => value instanceof Date ? value.toISOString().slice(0,10) : value ? String(value).slice(0,10) : null;
 
-function buildReadiness(profile={}, saved=[], date=M.today()) {
+function buildReadiness(profile={}, saved=[], date=M.today(), deliveryDate=null) {
   const clean = { ...profile };
   for (const key of ['care_start_date','lmp_date','edd_date']) clean[key] = iso(clean[key]);
-  const stage = M.stage(clean, {}, [], date);
+  const stage = M.stage(clean, deliveryDate?{active:true,delivery:{date:iso(deliveryDate)}}:{}, [], date);
   const values = new Map(saved.map(row => [row.item_key, !!row.completed]));
   const items = CATALOGUE.map(item => ({ ...item, complete:values.get(item.key) || false, confirmable:true, can_confirm:true }));
   const completed = items.filter(item => item.complete).length;
@@ -43,12 +43,13 @@ function buildReadiness(profile={}, saved=[], date=M.today()) {
 }
 
 async function readinessForMother(pool, motherId, date=M.today()) {
-  const [profile, saved] = await Promise.all([
+  const [profile, saved, postpartum] = await Promise.all([
     pool.query('SELECT care_start_date,lmp_date,edd_date,pregnancy_status FROM mother_profiles WHERE user_id=$1',[motherId]),
-    pool.query('SELECT item_key,completed FROM birth_readiness_items WHERE mother_id=$1',[motherId])
+    pool.query('SELECT item_key,completed FROM birth_readiness_items WHERE mother_id=$1',[motherId]),
+    pool.query('SELECT delivery_date FROM postpartum_profile WHERE mother_id=$1',[motherId])
   ]);
   if (!profile.rows[0]) return null;
-  return buildReadiness(profile.rows[0], saved.rows, date);
+  return buildReadiness(profile.rows[0], saved.rows, date, postpartum.rows[0]?.delivery_date);
 }
 
 async function hasConsent(pool, motherId, doctorId) {
@@ -73,13 +74,15 @@ function register(app,{pool,authenticateToken,authorizeRole}) {
   app.put('/api/patient/birth-readiness/items/:key',...mother,async(req,res)=>{
     const key=req.params.key;
     if(!KEYS.has(key)||typeof req.body?.complete!=='boolean')return res.status(400).json({error:'Choose a valid checklist step and completion state'});
-    const client=await pool.connect();
+    let client;
     try{
+      client=await pool.connect();
       await client.query('BEGIN');
       const profile=(await client.query('SELECT care_start_date,lmp_date,edd_date,pregnancy_status FROM mother_profiles WHERE user_id=$1 FOR UPDATE',[req.user.id])).rows[0];
       if(!profile){await client.query('ROLLBACK');return res.status(404).json({error:'Patient profile not found'});}
       const current=(await client.query('SELECT completed FROM birth_readiness_items WHERE mother_id=$1 AND item_key=$2 FOR UPDATE',[req.user.id,key])).rows[0];
-      const readiness=buildReadiness(profile,[],M.today());
+      const postpartum=(await client.query('SELECT delivery_date FROM postpartum_profile WHERE mother_id=$1',[req.user.id])).rows[0];
+      const readiness=buildReadiness(profile,[],M.today(),postpartum?.delivery_date);
       if(!readiness.eligible){await client.query('ROLLBACK');return res.status(409).json({error:'Birth readiness is available from pregnancy week 28'});}
       await client.query(`INSERT INTO birth_readiness_items(mother_id,item_key,completed,updated_by)
         VALUES($1,$2,$3,$1) ON CONFLICT(mother_id,item_key) DO UPDATE SET completed=EXCLUDED.completed,
@@ -87,11 +90,11 @@ function register(app,{pool,authenticateToken,authorizeRole}) {
       await client.query(`INSERT INTO birth_readiness_events(mother_id,actor_id,event_type,item_key,previous_completed,completed,details)
         VALUES($1,$1,'item_updated',$2,$3,$4,'{}'::jsonb)`,[req.user.id,key,current?.completed??false,req.body.complete]);
       const saved=(await client.query('SELECT item_key,completed FROM birth_readiness_items WHERE mother_id=$1',[req.user.id])).rows;
-      const updated=buildReadiness(profile,saved,M.today());
+      const updated=buildReadiness(profile,saved,M.today(),postpartum?.delivery_date);
       await client.query('COMMIT');
       res.set('Cache-Control','no-store').json({readiness:updated});
-    }catch(error){await client.query('ROLLBACK').catch(()=>{});console.error('Birth readiness update:',error.message);res.status(500).json({error:'Could not save this checklist step'});
-    }finally{client.release();}
+    }catch(error){if(client)await client.query('ROLLBACK').catch(()=>{});console.error('Birth readiness update:',error.message);res.status(500).json({error:'Could not save this checklist step'});
+    }finally{client?.release();}
   });
 
   app.get('/api/doctor/patients/:motherId/birth-readiness',...doctor,async(req,res)=>{try{

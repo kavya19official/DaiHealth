@@ -20,6 +20,8 @@ test('birth readiness is a fixed allowlisted preparation catalogue, not a clinic
   ]);
   const delivered=buildReadiness({lmp_date:'2026-01-01',pregnancy_status:'delivered'},[],'2026-11-20');
   assert.equal(delivered.eligible,false);assert.match(delivered.caution,/does not predict/i);assert.match(delivered.methodology,/not a clinical score/i);
+  const recordedDelivery=buildReadiness({lmp_date:'2026-01-01',pregnancy_status:'pregnant'},[],'2026-11-20','2026-10-01');
+  assert.equal(recordedDelivery.eligible,false);assert.equal(recordedDelivery.week,null);
 });
 
 const fs=require('node:fs/promises'),path=require('node:path'),os=require('node:os'),express=require('express');
@@ -48,6 +50,9 @@ test('patient updates persist and only a verified connected doctor with active c
     assert.equal((await call('/doctor/patients/'+mother+'/birth-readiness',unrelated)).status,403);
     await pool.query("INSERT INTO clinical_dashboard_consent(mother_id,doctor_id,expires_at) VALUES($1,$2,NOW()+INTERVAL '7 days')",[mother,doctor]);
     const shared=await call('/doctor/patients/'+mother+'/birth-readiness',doctor);assert.equal(shared.status,200);assert.equal(shared.data.read_only,true);assert.equal(shared.data.readiness.completed,1);
+    await pool.query("INSERT INTO postpartum_profile(mother_id,delivery_date) VALUES($1,CURRENT_DATE-1)",[mother]);
+    own=await call('/patient/birth-readiness');assert.equal(own.status,200);assert.equal(own.data.readiness.eligible,false);
+    assert.equal((await call('/patient/birth-readiness/items/transport_arranged',mother,'PUT',{complete:true})).status,409);
     assert.equal((await call('/patient/birth-readiness',doctor)).status,403);
     assert.equal((await pool.query("SELECT COUNT(*)::int n FROM birth_readiness_events WHERE mother_id=$1 AND event_type='item_updated'",[mother])).rows[0].n,1);
     assert.equal((await pool.query("SELECT COUNT(*)::int n FROM birth_readiness_events WHERE mother_id=$1 AND event_type='doctor_view'",[mother])).rows[0].n,1);
