@@ -27,6 +27,7 @@ CREATE TABLE IF NOT EXISTS users (
   email          VARCHAR(255) NOT NULL UNIQUE,
   password_hash  TEXT NOT NULL,
   role           VARCHAR(10) NOT NULL CHECK (role IN ('mother', 'doctor')),
+  closed_at      TIMESTAMPTZ,
   created_at     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 

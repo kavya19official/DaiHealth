@@ -14,6 +14,8 @@ from . import schema as s
 LABEL = "Simulated on synthetic data"
 SOURCE = Path(__file__).resolve().parents[2] / "backend/data/dai-hospital.db"
 PERMISSIONS = {
+    "quality-board": "quality.read",
+    "capacity": "facility.read",
     "beds": "bed.read",
     "critical": "bed.read",
     "blood": "blood.read",
@@ -249,6 +251,8 @@ def register_workspace(app, engine, require, audit, roles):
             and PERMISSIONS[view] not in roles[u["role"]]
         ):
             raise HTTPException(403, "Permission denied")
+        if view == "capacity" and "facility.write" not in roles[u["role"]] and not all(p in roles[u["role"]] for p in ("bed.read", "blood.read", "facility.read")):
+            raise HTTPException(403, "Capacity board requires bed, blood and facility read permissions")
         with engine.begin() as c, source() as db:
             hid, mothers = context(u, c)
             today = db.execute(
@@ -260,7 +264,31 @@ def register_workspace(app, engine, require, audit, roles):
                 "mode": "Recorded synthetic snapshot · read only",
                 "items": [],
             }
-            if view == "beds":
+            if view == "quality-board":
+                from .quality_board import quality_rows
+                from datetime import datetime, timezone
+                live = []
+                for ref in c.execute(select(s.referral).where(s.referral.c.to_facility_id == u["facility_id"])).mappings():
+                    detail = ref["details"]
+                    if ref["status"] != "completed" or not detail.get("created_at") or not detail.get("completed_at"):
+                        continue
+                    try:
+                        started = datetime.fromisoformat(detail["created_at"])
+                        ended = datetime.fromisoformat(detail["completed_at"])
+                        if started < datetime.now(timezone.utc) - timedelta(days=90):
+                            continue
+                        source_id = c.execute(select(s.mother.c.source_id).where(s.mother.c.id == ref["mother_id"])).scalar_one_or_none()
+                        live.append({"source_mother_id":source_id,"duration_days":(ended-started).total_seconds()/86400})
+                    except (ValueError,TypeError):
+                        continue
+                result["items"] = quality_rows(db,hid,today,live)
+                result["source_notes"] = "Assigned ward cohorts. Missed visits: explicit no_show statuses in the 90 days before ledger date. Vaccine coverage: recorded due child doses as of ledger date, not population coverage. Referral duration: newly timestamped completed handoffs in the last 90 days; missing historical timestamps are excluded."
+                audit(c,u,"read","facility",str(hid),{"view":"suppressed ward quality dashboard"})
+            elif view == "capacity":
+                from .capacity_board import capacity_rows
+                result["items"] = capacity_rows(db, hid, today)
+                audit(c, u, "read", "facility", str(hid), {"view": "capacity board"})
+            elif view == "beds":
                 where = ["w.hospital_id=?"]
                 args = [hid]
                 if status:

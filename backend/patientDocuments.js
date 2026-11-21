@@ -142,6 +142,7 @@ async function canAccessDoc(pool, docId, user) {
 module.exports = function registerPatientDocuments(app, { pool, authenticateToken, authorizeRole }) {
   ensureDir();
   require("./documentIntake")(app,{pool,authenticateToken,authorizeRole,canAccessDoc,logEvent,uploadDir:UPLOAD_DIR});
+  require("./patientReportBirth")(app,{pool,authenticateToken,authorizeRole,canAccessDoc,logEvent,uploadDir:UPLOAD_DIR});
 
   const motherOnly = [authenticateToken, authorizeRole(['mother'])];
   const doctorOnly = [authenticateToken, authorizeRole(['doctor'])];

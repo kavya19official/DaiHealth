@@ -31,3 +31,9 @@ The layout uses responsive columns, 44px controls, visible keyboard focus, nativ
 ## Not yet verified
 
 Native browser access was disabled in Work settings. No real-browser screenshots, pixel/overflow checks at 390/1024/1440px, screen-reader review, or video were captured. DOM checks are not visual QA. Recent-birth form submission and all locale/stage combinations need a browser walkthrough before presenting the UI as fully validated. The existing clinical rules and educational content still require clinical governance; the redesign does not establish clinical effectiveness.
+
+## Recorded-data visual overview
+
+Added a follow-up status donut with labelled counts (patient-recorded, to arrange, upcoming, and unknown where applicable). It measures schedule status, never recovery or clinical completion. A four-week bar chart counts distinct days with loaded, dated check-ins, ending at the latest recorded entry; it labels its date window and partial-data scope. Missing entries produce an explicitly labelled illustration. Existing measured-value charts now include a subtle filled area. No new charting dependency or backend change was introduced.
+
+The visual update passed 13 targeted recovery/cache/startup tests and the signed-in DOM interaction check, including chart rendering and preservation of unfinished forms. Real-browser pixel/layout verification remains unavailable.

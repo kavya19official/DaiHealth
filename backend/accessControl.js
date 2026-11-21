@@ -21,9 +21,10 @@
 const SAFE_REF = /^(\$\d+(::int)?|[A-Za-z_]\w*\.[A-Za-z_]\w*)$/;
 const checkRef = (v) => { if (!SAFE_REF.test(v)) throw new Error('accessControl: unqualified column reference ' + v); return v; };
 const revokedSql = (motherCol, doctorCol, facCol) =>
-  `EXISTS (SELECT 1 FROM patient_access_controls rc WHERE rc.mother_id = ${checkRef(motherCol)} AND rc.state = 'revoked'
+  `(EXISTS (SELECT 1 FROM users closed_account WHERE closed_account.id = ${checkRef(motherCol)} AND closed_account.closed_at IS NOT NULL)
+     OR EXISTS (SELECT 1 FROM patient_access_controls rc WHERE rc.mother_id = ${checkRef(motherCol)} AND rc.state = 'revoked'
      AND ((rc.grantee_type = 'doctor' AND rc.grantee_ref = ${checkRef(doctorCol)}::text)` +
-  (facCol ? ` OR (rc.grantee_type = 'facility' AND ${checkRef(facCol)} IS NOT NULL AND rc.grantee_ref = ${checkRef(facCol)}::text)` : '') + '))';
+  (facCol ? ` OR (rc.grantee_type = 'facility' AND ${checkRef(facCol)} IS NOT NULL AND rc.grantee_ref = ${checkRef(facCol)}::text)` : '') + ')))';
 
 // SQL fragment: the doctor has an appointment with the mother that the mother has not switched off.
 const activeRelationshipSql = (motherCol, doctorCol) =>

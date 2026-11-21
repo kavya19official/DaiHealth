@@ -1,0 +1,47 @@
+
+#panel-daily{padding-bottom:100px;color:var(--ink,#24213e)}
+#panel-daily .page-section-heading h1{font-size:clamp(26px,3vw,34px)}
+#panel-daily p{line-height:1.6;color:var(--ink-muted,#746d89)}
+.daily-toolbar{display:flex;gap:12px;align-items:end;flex-wrap:wrap;margin:20px 0}
+.daily-toolbar label,.daily-card form label{display:grid;gap:8px}
+#panel-daily input[type=date],#panel-daily textarea{font:inherit;color:inherit;background:var(--surface,#fff);border:1px solid var(--line,#ded5ef);border-radius:12px;padding:12px;max-width:100%;box-sizing:border-box}
+.daily-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+.daily-card{padding:24px;background:var(--surface,#fff);border:1px solid var(--line-soft,#e9e1f4);border-radius:24px;min-width:0;box-shadow:0 8px 24px #6d3fd608}
+.daily-card h2{font-size:20px;margin:10px 0 20px;color:inherit}
+.daily-icon{display:grid;place-items:center;background:var(--brand-soft,#ede9fe);color:var(--brand,#6d3fd6);width:44px;height:44px;border-radius:14px;font-size:24px}
+.daily-number{font-size:42px;line-height:1.2;font-weight:750;font-variant-numeric:tabular-nums;margin:14px 0;color:var(--brand,#6d3fd6)}
+.daily-number small{font-size:14px;font-weight:500;color:var(--ink-muted,#746d89)}
+.daily-check{display:flex;gap:12px;align-items:center;padding:16px 0;border-bottom:1px solid var(--line-soft,#e9e1f4);min-height:48px}
+.daily-check input{width:24px;height:24px;accent-color:var(--brand,#6d3fd6);flex-shrink:0}
+.daily-card form{display:grid;gap:12px}
+.daily-card textarea{width:100%;resize:vertical;min-height:88px}
+.daily-history{padding:0;margin:18px 0 0;list-style:none;max-height:220px;overflow:auto}
+.daily-history li{display:grid;gap:4px;padding:12px 0;border-top:1px solid var(--line-soft,#e9e1f4);overflow-wrap:anywhere}
+.daily-history small{color:var(--ink-muted,#746d89)}
+.daily-actions{display:flex;gap:10px;flex-wrap:wrap}
+.daily-counter{display:flex;gap:24px;align-items:center}
+.daily-section-title{margin:32px 0 16px}
+.daily-footer{font-size:13px;margin-top:24px}
+#panel-daily button{min-height:44px;white-space:normal}
+#panel-daily button:disabled{opacity:.5;cursor:not-allowed}
+#panel-daily [hidden]{display:none!important}
+#panel-daily :focus-visible{outline:3px solid var(--brand,#6d3fd6);outline-offset:3px}
+@media(max-width:700px){.daily-grid{grid-template-columns:1fr}.daily-card{padding:18px}.daily-toolbar{align-items:stretch}.daily-actions>*{flex:1 1 130px}}
+.wellbeing-screen,.infant-tracking{margin:24px 0;color:var(--ink,#29223d)}
+.wellbeing-screen fieldset{border:1px solid var(--line,#ede9fe);border-radius:16px;margin:16px 0;padding:16px}
+.wellbeing-screen fieldset label{display:flex;align-items:center;gap:10px;min-height:44px}
+.wellbeing-screen legend{font-weight:650;padding:0 6px}
+.wellbeing-screen input{accent-color:var(--brand,#6d3fd6)}
+.wellbeing-result{padding:20px;background:var(--brand-soft,#f4efff);border-radius:18px;margin-top:20px;display:grid;gap:12px}
+.wellbeing-result p{margin:0}.wellbeing-result label{display:flex;gap:10px;align-items:start}
+.infant-tracking form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:18px 0}
+.infant-tracking label{display:grid;gap:8px}
+.infant-tracking input,.infant-tracking select{padding:12px;border:1px solid var(--line,#ede9fe);border-radius:12px;font:inherit;color:inherit;background:var(--surface,#fff);width:100%;box-sizing:border-box}
+.infant-charts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;margin:24px 0}
+.infant-charts article{min-width:0}.infant-tracking h3{font-size:16px}
+.infant-bars{display:flex;gap:10px;align-items:end;min-height:130px;overflow:auto;padding:8px 0}
+.infant-bars>div{display:grid;gap:4px;min-width:32px;text-align:center;font-size:12px}
+.infant-bars span{display:block;background:linear-gradient(var(--brand,#6d3fd6),var(--brand-soft,#ede9fe));border-radius:7px 7px 0 0;min-width:28px}
+.infant-tracking summary{min-height:44px;cursor:pointer;font-weight:650}.infant-warning{background:var(--amber-soft,#fff8e7);padding:18px;border-radius:18px;margin:20px 0}
+.infant-tracking [hidden]{display:none!important}.wellbeing-screen button,.infant-tracking button{min-height:44px}
+@media(max-width:700px){.infant-charts,.infant-tracking form{grid-template-columns:1fr}}

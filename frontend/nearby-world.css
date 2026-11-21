@@ -8,3 +8,13 @@
 @media(prefers-reduced-motion:reduce){.nw-sheet{transition:none}.nw-route{animation:none}}
 .nw-why{margin:12px 0;border-top:1px solid var(--line);padding-top:12px}.nw-why>summary{font-size:11px;font-weight:700;color:var(--brand);cursor:pointer;min-height:36px;line-height:2}.nw-why .matching-explanation{margin-top:8px}.nw-filter-empty{padding:24px;background:var(--brand-pale);border-radius:18px;color:var(--ink-2);font-size:13px;line-height:1.8}
 .nw-head-actions{display:flex;flex-direction:column;gap:6px;align-items:center;flex-shrink:0}.nw-head-actions .link-btn{min-height:40px;font-size:11px}.nw-search-drawer{margin:18px 0;padding:10px 20px;border:1px solid var(--line);border-radius:20px;background:var(--surface);scroll-margin-top:150px}.nw-search-drawer>summary{cursor:pointer;color:var(--brand);font-size:12px;font-weight:700;padding:13px 0;min-height:44px}.nw-search-drawer[open]>summary{margin-bottom:16px}.nw-search-drawer .card{box-shadow:none!important}.nw-search-drawer #registeredNetwork{margin-top:15px}
+
+/* Map first; search and category controls stay in the existing results sheet. */
+.nearby-world>.nw-map-stage{border-radius:29px 29px 0 0}
+.nw-sheet .nw-map-head{padding:20px 0 12px}
+.nw-sheet .nw-filter-chips{padding:8px 0 20px}
+@media(max-width:850px){.nw-sheet .nw-map-head{padding:18px 0 12px}.nw-sheet .nw-filter-chips{padding:8px 0 18px}}
+
+/* Keep the map above demo/search blocks, not merely above its own controls. */
+#panel-facilities>#nearbyWorld{margin-top:0}
+#panel-facilities:has(>#nearbyWorld)>.page-section-heading{display:none}

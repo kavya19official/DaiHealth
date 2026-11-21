@@ -1,7 +1,7 @@
 'use strict';
 const crypto=require('node:crypto'),access=require('./accessControl');
 const {verifiedDoctor}=require('./clinicalDashboard');
-const KINDS=['pregnancy_risk','clinical_recommendation','document_interpretation'];
+const KINDS=['pregnancy_risk','clinical_recommendation','document_interpretation','postpartum_wellbeing'];
 async function requestReview(db,mother,kind,summary,documentId=null,refresh=false,replaceSummary=false){
  // The partial unique index also prevents concurrent duplicate risk-log requests.
  const row=(await db.query(`INSERT INTO clinical_review_requests(id,mother_id,kind,summary,document_id) VALUES($1,$2,$3,$4,$5) ON CONFLICT DO NOTHING RETURNING *`,[crypto.randomUUID(),mother,kind,summary,documentId])).rows[0];

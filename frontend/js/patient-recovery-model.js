@@ -15,5 +15,7 @@ function observations(checkins,hospital,birthDate,today,source='self'){
 }
 function series(rows,key){const valid=rows.filter(r=>number(r[key])!==null);if(valid.length<2)return null;const values=valid.map(r=>r[key]),min=Math.min(...values),max=Math.max(...values),span=max-min;return {rows:valid,values,min,max,points:values.map((v,i)=>[10+i*380/(values.length-1),span?90-(v-min)/span*70:55])};}
 function followups(post){return (post.schedule||[]).map(r=>({...r,recorded:r.status==='done',label:r.status==='done'?'You recorded this visit':r.status==='overdue'?'Arrange a follow-up':r.status==='open'?'Due in this window':'Upcoming'}));}
-return {date,number,birth,nextVisit,reports,released,history,observations,series,followups};
+function followupSummary(post){const rows=followups(post),counts={recorded:0,arrange:0,upcoming:0,unknown:0};for(const r of rows){if(r.recorded)counts.recorded++;else if(['open','overdue'].includes(r.status))counts.arrange++;else if(r.status==='upcoming')counts.upcoming++;else counts.unknown++;}return {total:rows.length,...counts};}
+function activity(checkins,birthDate,today){if(!birthDate)return null;const dates=[...new Set(history(checkins,birthDate,today).map(c=>date(c.checkin_date)))].sort();if(!dates.length)return null;const end=dates.at(-1),stamp=d=>Date.parse(d+'T00:00:00Z'),shift=n=>new Date(stamp(end)+n*86400000).toISOString().slice(0,10),weeks=Array.from({length:4},(_,i)=>{const start=shift(-27+i*7),finish=shift(-21+i*7);return {start,end:finish,count:dates.filter(d=>d>=start&&d<=finish).length};});return {start:shift(-27),end,weeks,total:weeks.reduce((n,w)=>n+w.count,0)};}
+return {date,number,birth,nextVisit,reports,released,history,observations,series,followups,followupSummary,activity};
 });

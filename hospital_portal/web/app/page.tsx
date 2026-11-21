@@ -38,6 +38,8 @@ const operationNav = [
   ["careTasks", "Follow-up & outreach", "✓"],
   ["careReviews", "Clinical review & summaries", "▤"],
   ["readiness", "Delivery readiness", "✚"],
+  ["capacity", "Capacity & readiness", "▱"],
+  ["quality-board", "Ward quality dashboard", "▥"],
   ["critical", "Critical & neonatal care", "⌁"],
   ["referrals", "Referrals & handovers", "⇄"],
   ["sos", "SOS & emergency inbox", "◉"],
@@ -73,6 +75,8 @@ const workspacePermissions: Record<string, string> = {
   sustainability: "green.read",
   intelligence: "operations.read",
   forecasts: "forecast.read",
+  "quality-board": "quality.read",
+  capacity: "facility.read",
   beds: "bed.read",
   critical: "bed.read",
   blood: "blood.read",
@@ -92,6 +96,8 @@ const workspacePermissions: Record<string, string> = {
   credentials: "user.verify",
 };
 const snapshotViews = new Set([
+  "quality-board",
+  "capacity",
   "beds",
   "critical",
   "blood",
@@ -108,6 +114,8 @@ const snapshotViews = new Set([
   "diagnostics",
 ]);
 const titles: Record<string, [string, string]> = {
+  "quality-board": ["Ward quality dashboard", "Suppressed recorded measures; no hospital ranking."],
+  capacity: ["Capacity & readiness", "Recorded beds, blood and scheduled staff; freshness is shown without ranking facilities."],
   handoffs: ["Facility handoffs", "Consented referral packets, receiving decisions and recorded outcomes."],
   management: ["Facility & staff management", "Onboarding, services, slots and accountable staff access."],
   careTasks: [
@@ -292,7 +300,7 @@ export default function Home() {
   const [busy, setBusy] = useState(false);
   const [challenge, setChallenge] = useState<Row | null>(null);
   const [email, setEmail] = useState("hospital_admin@dai-synthetic.invalid");
-  const [password, setPassword] = useState("Dai-Synthetic-2026!");
+  const [password, setPassword] = useState(process.env.NEXT_PUBLIC_DAI_HOSTED_DEMO === "true" ? "" : "Dai-Synthetic-2026!");
   const [otp, setOtp] = useState("");
   const [records, setRecords] = useState<Row[]>([]);
   const [patientTotal, setPatientTotal] = useState(0);
@@ -633,7 +641,7 @@ export default function Home() {
                 <div className="notice">
                   <strong>Local demo account</strong>
                   <span>hospital_admin@dai-synthetic.invalid</span>
-                  <span>Password: Dai-Synthetic-2026!</span>
+                  <span>{process.env.NEXT_PUBLIC_DAI_HOSTED_DEMO === "true" ? "Use the demo account password provided by the DAI team." : "Password: Dai-Synthetic-2026!"}</span>
                 </div>
               </>
             ) : (
@@ -690,6 +698,7 @@ export default function Home() {
       </main>
     );
   const canOpen = (id: string) => {
+    if(id === "capacity") return user.permissions.includes("facility.write") || ["bed.read","blood.read","facility.read"].every(p=>user.permissions.includes(p));
     const permission = workspacePermissions[id];
     return (
       !permission ||

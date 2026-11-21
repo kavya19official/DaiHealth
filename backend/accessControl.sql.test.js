@@ -15,7 +15,9 @@ test('SQL builders reject bare column names that would bind to the revocation ta
 test('the relationship SQL needs an appointment AND no doctor or facility revocation', () => {
   const sql = access.activeRelationshipSql('m.id', '$1::int').replace(/\s+/g, ' ');
   assert.match(sql, /FROM appointments ra WHERE ra\.mother_id = m\.id AND ra\.doctor_id = \$1::int/);
-  assert.match(sql, /NOT EXISTS \(SELECT 1 FROM patient_access_controls rc/);
+  assert.match(sql, /AND NOT \(EXISTS \(SELECT 1 FROM users closed_account/);
+  assert.match(sql, /closed_account\.closed_at IS NOT NULL/);
+  assert.match(sql, /OR EXISTS \(SELECT 1 FROM patient_access_controls rc/);
   assert.match(sql, /rc\.state = 'revoked'/);
   assert.match(sql, /grantee_type = 'doctor'/); assert.match(sql, /grantee_type = 'facility'/);
   assert.equal(/state = 'granted'/.test(sql), false);                       // a "granted" row never widens access

@@ -776,6 +776,8 @@ export function ReferralInbox({
           </p>
           <p>{r.details.summary}</p>
           <p>{r.details.outcome_notes}</p>
+          {r.sbar && <details><summary>SBAR handover draft</summary><section data-sbar><h3>SBAR · Referral {r.id}</h3><dl>{Object.entries(r.sbar).map(([key,value])=><div key={key}><dt><strong>{key}</strong></dt><dd style={{whiteSpace:"pre-wrap"}}>{String(value)}</dd></div>)}</dl></section><button type="button" onClick={e=>{const section=e.currentTarget.parentElement?.querySelector("[data-sbar]");const win=window.open("","_blank");if(!win||!section)return;win.opener=null;win.document.write("<!doctype html><html><head><title>DAI SBAR</title><style>body{font:12px/1.3 system-ui;margin:24px}dd{white-space:pre-wrap;overflow-wrap:anywhere}@page{size:A4;margin:12mm}</style></head><body>"+section.outerHTML+"</body></html>");win.document.close();win.print();}}>Print / save SBAR</button></details>}
+
           {r.to_facility_id === facilityId &&
             ["hospital_admin", "consultant"].includes(role) && (
               <form

@@ -16,6 +16,9 @@ const smartReferralHandoff = require('./smartReferralHandoff');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+const demoGate = require('./hostedDemoGate').hostedDemoGate();
+if (demoGate) app.use(demoGate.middleware);
+
 // One local entry point; proxy before body parsing so uploads/auth stream intact.
 const attachLocalUpgrade = require('./localGateway').registerLocalGateway(app);
 
@@ -104,21 +107,17 @@ const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-producti
 const JWT_EXPIRES_IN = '7d';
 
 // Authentication middleware
-const authenticateToken = (req, res, next) => {
+const authenticateToken = async (req, res, next) => {
   const token = req.cookies.token;
-
-  if (!token) {
-    return res.status(401).json({ error: 'Authentication required' });
-  }
-
+  if (!token) return res.status(401).json({ error: 'Authentication required' });
+  let decoded;
+  try { decoded=jwt.verify(token,JWT_SECRET); }
+  catch { res.clearCookie('token');return res.status(401).json({error:'Invalid or expired token'}); }
   try {
-    const decoded = jwt.verify(token, JWT_SECRET);
-    req.user = decoded;
-    next();
-  } catch (error) {
-    res.clearCookie('token');
-    return res.status(401).json({ error: 'Invalid or expired token' });
-  }
+    const active=(await pool.query('SELECT id FROM users WHERE id=$1 AND closed_at IS NULL',[decoded.id])).rows[0];
+    if(!active){res.clearCookie('token');return res.status(401).json({error:'Account unavailable'});}
+    req.user=decoded;next();
+  } catch { return res.status(503).json({error:'Sign-in verification is temporarily unavailable. Please retry.'}); }
 };
 
 // Role-based authorization middleware
@@ -471,7 +470,7 @@ app.post('/api/auth/login', async (req, res) => {
     const user = userResult.rows[0];
 
     // Verify password
-    const validPassword = await bcrypt.compare(password, user.password_hash);
+    const validPassword = !user.closed_at && await bcrypt.compare(password, user.password_hash);
     if (!validPassword) {
       return res.status(401).json({ error: 'Invalid email or password' });
     }
@@ -1080,6 +1079,11 @@ require('./patientContinuity')(app, { pool, authenticateToken, authorizeRole });
 require('./patientExperience')(app, { pool, authenticateToken, authorizeRole });
 require('./patientHospitalStay')(app, { pool, authenticateToken, authorizeRole });
 require('./patientHome')(app, { pool, authenticateToken, authorizeRole });
+require('./postpartumInfant')(app, { pool, authenticateToken, authorizeRole });
+require('./clinicalContinuity')(app,{pool,authenticateToken,authorizeRole});
+require('./qualityDashboard')(app,{pool,authenticateToken,authorizeRole});
+require('./platformRights')(app,{pool,authenticateToken,authorizeRole});
+require('./providerNotifications').register(app,{pool,authenticateToken,authorizeRole});
 require('./patientSupport')(app, { pool, authenticateToken, authorizeRole });
 const aiUsageTracker=require('./aiUsage').register(app,{pool,authenticateToken});
 require('./patientML')(app, { pool, authenticateToken, authorizeRole,usageTracker:aiUsageTracker });
@@ -1160,13 +1164,14 @@ app.use('/frontend', staticCompression(frontendPath), express.static(frontendPat
 app.use(staticCompression(frontendPath), express.static(frontendPath));
 
 // Start server
-const server = app.listen(PORT, process.env.DAI_LOCAL === 'true' ? '127.0.0.1' : undefined, () => {
+const server = app.listen(PORT, demoGate ? '0.0.0.0' : process.env.DAI_LOCAL === 'true' ? '127.0.0.1' : undefined, () => {
   const address = server.address();
   const port = address ? (typeof address === 'string' ? address : address.port) : PORT;
   console.log(`DAI backend server running on port ${port}`);
 });
 
-if (attachLocalUpgrade) attachLocalUpgrade(server);
+// The hosted demo uses the production Next server and has no dev websocket.
+if (attachLocalUpgrade && !demoGate) attachLocalUpgrade(server);
 
 if (process.env.DAI_LOCAL === 'true') {
   let stopping = false;

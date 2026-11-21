@@ -418,6 +418,9 @@ export function SnapshotView({
 }) {
   const [tab, setTab] = useState("posts");
   const rows: Row[] = data.items || [];
+  if(view === "quality-board") return <section className="card"><h2>Ward quality</h2><p>{data.source_notes}</p><p>Groups under 10 mothers and sparse outcomes are withheld. Missing values are never shown as zero.</p><div style={{overflowX:"auto"}}><table><thead><tr><th>Recorded ward</th><th>People band</th><th>Recorded missed visits</th><th>Median referral turnaround</th><th>Recorded vaccine coverage</th></tr></thead><tbody>{rows.map((r,i)=><tr key={i}><td>{r.ward}</td><td>{r.suppressed?"Suppressed":r.people_band}</td><td>{r.missed_visit_pct==null?"Withheld / insufficient":r.missed_visit_pct+"%"}</td><td>{r.median_referral_days==null?"Withheld / insufficient":r.median_referral_days.toFixed(1)+" days"}</td><td>{r.recorded_vaccination_coverage_pct==null?"Withheld / insufficient":r.recorded_vaccination_coverage_pct+"%"}</td></tr>)}</tbody></table></div>{!rows.length&&<p>No ward assignments recorded for this facility.</p>}</section>;
+  if(view === "capacity") return <section className="card"><h2>Capacity & readiness</h2><p>Recorded snapshots only. Confirm with the receiving team before travel or transfer. Scheduled staff does not confirm presence.</p><div style={{overflowX:"auto"}}><table><thead><tr><th>Resource</th><th>Ward / component / person</th><th>Recorded quantity</th><th>Last confirmed</th><th>Meaning</th></tr></thead><tbody>{rows.map((r,i)=><tr key={i}><td>{r.resource}</td><td>{r.location}</td><td>{r.recorded_available ?? "Not recorded"}</td><td>{r.last_confirmed || "Not confirmed"}</td><td>{r.basis}</td></tr>)}</tbody></table></div>{!rows.length&&<p>No capacity snapshots recorded for this facility.</p>}</section>;
+
   if (view === "beds")
     return (
       <>

@@ -1,0 +1,6 @@
+'use strict';
+const {JSDOM}=require('jsdom'),fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
+const root=path.join(__dirname,'..'),dom=new JSDOM(fs.readFileSync(path.join(root,'frontend/dashboard.html'),'utf8'),{url:'https://dai.test/dashboard.html#children',runScripts:'outside-only'}),w=dom.window;
+w.DaiAPI={localDateStr:(date=new Date())=>date.toISOString().slice(0,10),apiRequest:async p=>{if(p==='/children')return {children:[{id:1,name:'Synthetic Baby'}]};if(p==='/patient/infant-logs?child_id=1')return {child:{id:1},logs:[{id:1,event_type:'sleep',started_at:new Date().toISOString(),duration_min:null},{id:2,event_type:'feed',started_at:new Date().toISOString()}],growth:[]};throw Error(p);}};
+w.eval(fs.readFileSync(path.join(root,'frontend/js/postpartum-infant.js'),'utf8'));
+setTimeout(()=>{try{const section=[...w.document.querySelectorAll('[data-infant-charts] article')].find(a=>a.querySelector('h3').textContent==='Sleep minutes entered');assert.ok(section);assert.match(section.textContent,/No sleep durations entered/);assert.equal(section.querySelectorAll('strong').length,0);assert.match(w.document.querySelector('[data-infant-entries]').textContent,/Sleep/);console.log('PASS: a sleep entry without a duration is retained in history without a fabricated zero-minute chart.');}finally{dom.window.close();}},30);

@@ -21,11 +21,13 @@ function registerLocalGateway(app, env = process.env) {
     const transport = route.origin.protocol === 'https:' ? https : http;
     const upstream = transport.request(new URL(route.url, route.origin), {
       method: req.method,
-      headers: { ...req.headers, host: route.origin.host, 'x-forwarded-host': req.headers.host, 'x-forwarded-proto': 'http' }
+      headers: { ...req.headers, host: route.origin.host, 'x-forwarded-host': req.headers.host, 'x-forwarded-proto': env.DAI_HOSTED_DEMO === 'true' ? 'https' : 'http' }
     }, response => {
       const headers = { ...response.headers };
       // Scope the hospital refresh cookie to its own API, separate from patient/doctor login.
-      if (headers['set-cookie']) headers['set-cookie'] = headers['set-cookie'].map(cookie => cookie.replace(/Path=\/api\/auth(?=;|$)/i, 'Path=/hospital-admin/api/auth'));
+      const upstreamCookies = (headers['set-cookie'] || []).map(cookie => cookie.replace(/Path=\/api\/auth(?=;|$)/i, 'Path=/hospital-admin/api/auth'));
+      const cookies = [].concat(res.getHeader('set-cookie') || [], upstreamCookies);
+      if (cookies.length) headers['set-cookie'] = cookies;
       res.writeHead(response.statusCode, headers);
       response.pipe(res);
     });

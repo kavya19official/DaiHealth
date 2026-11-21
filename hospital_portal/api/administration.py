@@ -709,7 +709,16 @@ def register_administration(app, engine, require, actor, audit, one, clinical_sc
                     and row["details"].get("assigned_unit_id") != u["unit_id"]
                 ):
                     continue
-                items.append(dict(row))
+                item = dict(row)
+                item["sbar"] = {
+                    "Situation": row["reason"],
+                    "Background": "Only the consented handoff summary is included. The full record is not shared by this packet.",
+                    "Assessment — recorded clinician summary": row["details"].get("summary") or "Not recorded",
+                    "Recommendation — recorded request": row["reason"],
+                    "Status": row["status"],
+                    "Provenance": "Record-derived SBAR draft; clinician review required. No new clinical assessment.",
+                }
+                items.append(item)
                 audit(
                     c,
                     u,
@@ -749,6 +758,7 @@ def register_administration(app, engine, require, actor, audit, one, clinical_sc
                     status="requested",
                     details={
                         "staff_handoff": True,
+                        "created_at": datetime.now(timezone.utc).isoformat(),
                         "summary": body.summary,
                         "version": 1,
                         "created_by": u["id"],
@@ -815,7 +825,10 @@ def register_administration(app, engine, require, actor, audit, one, clinical_sc
                 "version": body.version + 1,
                 "outcome_notes": body.notes,
                 "updated_by": u["id"],
+                "updated_at": datetime.now(timezone.utc).isoformat(),
             }
+            if body.status == "completed":
+                details["completed_at"] = datetime.now(timezone.utc).isoformat()
             if u["role"] == "consultant":
                 details["assigned_unit_id"] = u["unit_id"]
             changed = c.execute(

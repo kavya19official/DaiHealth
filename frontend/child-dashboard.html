@@ -947,6 +947,7 @@ button, input { font: inherit; }
 <link rel="stylesheet" href="little-world.css?v=1">
 <script src="js/little-world-model.js?v=1"></script>
 <script src="js/little-world.js?v=1"></script>
+<link rel="stylesheet" href="child-growth-development.css?v=1">
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
@@ -1130,58 +1131,7 @@ button, input { font: inherit; }
               <button type="button" role="tab" aria-selected="false" data-metric="head">Head Circumference</button>
             </div>
             <div class="growth-body">
-              <div class="chart-wrap">
-                <span class="chart-y-label">Weight (kg)</span>
-                <svg class="chart-svg" viewBox="0 0 400 180" preserveAspectRatio="none" aria-hidden="true">
-                  <!-- grid -->
-                  <g stroke="#ede9fe" stroke-width="1">
-                    <line x1="0" y1="20" x2="400" y2="20"/>
-                    <line x1="0" y1="55" x2="400" y2="55"/>
-                    <line x1="0" y1="90" x2="400" y2="90"/>
-                    <line x1="0" y1="125" x2="400" y2="125"/>
-                    <line x1="0" y1="160" x2="400" y2="160"/>
-                  </g>
-                  <!-- y labels -->
-                  <g fill="#9ca3af" font-size="11" font-family="Inter, sans-serif">
-                    <text x="4" y="24">10</text>
-                    <text x="4" y="59">8</text>
-                    <text x="4" y="94">6</text>
-                    <text x="4" y="129">4</text>
-                    <text x="4" y="164">2</text>
-                  </g>
-                  <!-- line path: birth 3.2, 2mo 4.5, 4mo 5.8, 6mo 6.8, 7mo 8.2 -->
-                  <!-- map: kg 0-10 to y 170-10, x: 40,110,180,250,340 -->
-                  <path d="M40 130 L110 110 L180 88 L250 72 L340 48" fill="none" stroke="#7c3aed" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-                  <path d="M40 130 L110 110 L180 88 L250 72 L340 48 L340 170 L40 170 Z" fill="url(#grad)" opacity=".15"/>
-                  <defs>
-                    <linearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stop-color="#7c3aed"/>
-                      <stop offset="100%" stop-color="#7c3aed" stop-opacity="0"/>
-                    </linearGradient>
-                  </defs>
-                  <!-- dots -->
-                  <g fill="#7c3aed">
-                    <circle cx="40" cy="130" r="4"/>
-                    <circle cx="110" cy="110" r="4"/>
-                    <circle cx="180" cy="88" r="4"/>
-                    <circle cx="250" cy="72" r="4"/>
-                    <circle cx="340" cy="48" r="5.5" fill="#fff" stroke="#7c3aed" stroke-width="2.5"/>
-                  </g>
-                  <!-- tooltip bubble -->
-                  <g transform="translate(310, 18)">
-                    <rect x="0" y="0" width="52" height="22" rx="8" fill="#7c3aed"/>
-                    <text x="26" y="15" text-anchor="middle" fill="#fff" font-size="11" font-weight="700" font-family="Inter, sans-serif" id="chartTip">—</text>
-                  </g>
-                  <!-- x labels -->
-                  <g fill="#9ca3af" font-size="10" font-family="Inter, sans-serif" text-anchor="middle">
-                    <text x="40" y="178">Birth</text>
-                    <text x="110" y="178">2 mo</text>
-                    <text x="180" y="178">4 mo</text>
-                    <text x="250" y="178">6 mo</text>
-                    <text x="340" y="178" id="chartLabelLast">—</text>
-                  </g>
-                </svg>
-              </div>
+              <div class="chart-wrap"><p role="status">Loading recorded measurements…</p></div>
               <div class="stats-panel">
                 <div class="stat-item">
                   <div class="stat-item__label">Current Weight</div>
@@ -1205,6 +1155,7 @@ button, input { font: inherit; }
           </div>
 
           <!-- Vaccinations -->
+          <section id="childGrowthDevelopment" class="child-growth-development" hidden></section>
           <div class="card milestones-card" id="vaxCard">
             <div class="milestones-card__head">
               <div class="growth-card__title">
@@ -1227,33 +1178,7 @@ button, input { font: inherit; }
               </div>
               <button class="link-btn" type="button" id="milestoneAllBtn">View All <span aria-hidden="true">›</span></button>
             </div>
-            <div class="milestones-track">
-              <div class="milestone is-done">
-                <div class="milestone__icon"><span class="milestone__check"></span></div>
-                <div class="milestone__name">Smiles</div>
-                <div class="milestone__range">(0–2 mo)</div>
-              </div>
-              <div class="milestone is-done">
-                <div class="milestone__icon"><span class="milestone__check"></span></div>
-                <div class="milestone__name">Head control</div>
-                <div class="milestone__range">(2–4 mo)</div>
-              </div>
-              <div class="milestone is-done">
-                <div class="milestone__icon"><span class="milestone__check"></span></div>
-                <div class="milestone__name">Rolls over</div>
-                <div class="milestone__range">(4–6 mo)</div>
-              </div>
-              <div class="milestone is-current">
-                <div class="milestone__icon"></div>
-                <div class="milestone__name">Sits without support</div>
-                <div class="milestone__range">(6–8 mo)</div>
-              </div>
-              <div class="milestone is-locked">
-                <div class="milestone__icon"></div>
-                <div class="milestone__name">Crawls</div>
-                <div class="milestone__range">(8–10 mo)</div>
-              </div>
-            </div>
+            <div class="milestones-track" role="status">Loading recorded milestones…</div>
             <div id="milestoneNote"></div>
             <div class="ms-all" id="milestoneAll" tabindex="-1" style="display:none"></div>
           </div>
@@ -1373,6 +1298,7 @@ button, input { font: inherit; }
   </div>
 </div>
 
+<script src="/shared/child-development.js?v=1"></script><script src="js/child-growth-development.js?v=1"></script>
 <script>
 (function () {
 "use strict";
@@ -1953,13 +1879,12 @@ function renderGrowth() {
   var rangeBtn = $id('growthRangeBtn');
   var entries = c ? (c.growth || []) : [];
   var key = metricKey(growthMetric), unit = metricUnit(growthMetric);
-  var hasRef = !!(c && Ref && (c.sex === 'male' || c.sex === 'female'));
+  var chartAge = c ? window.ChildDevelopment.age(c,todayISO()) : null;
+  var hasRef = !!(c && Ref && chartAge && !chartAge.beforeTerm && chartAge.months<=60 && (c.sex === 'male' || c.sex === 'female'));
   var chartHTML = '', readingState = { cls: '', html: '' };
 
   if (hasRef) {
-    var pts = entries.filter(function (g) { return g[key] != null; }).map(function (g) {
-      return { m: Ref.chartAgeMonths(c.date_of_birth, g.measured_on, c.born_at_weeks), v: Number(g[key]), date: g.measured_on };
-    }).filter(function (p) { return p.m <= Ref.GROWTH_MAX_MONTHS; });
+    var pts = window.ChildDevelopment.growthPoints(c, growthMetric, todayISO());
     var ageNow = Ref.chartAgeMonths(c.date_of_birth, todayISO(), c.born_at_weeks);
     var reach = Math.max(Math.min(ageNow, Ref.GROWTH_MAX_MONTHS), pts.length ? pts[pts.length - 1].m : 0);
     var end = growthFullRange ? Ref.GROWTH_MAX_MONTHS : ([6, 12, 24, 36, 48, 60].filter(function (s) { return s >= reach + 0.5; })[0] || Ref.GROWTH_MAX_MONTHS);
@@ -1979,12 +1904,10 @@ function renderGrowth() {
   if (wrap) wrap.innerHTML = '<span class="chart-y-label">' + esc(metricLabel(growthMetric)) + '</span>' + chartHTML;
   if (reading) { reading.className = 'growth-reading ' + readingState.cls; reading.innerHTML = readingState.html; reading.style.display = readingState.html ? '' : 'none'; }
 
-  var last = entries.length ? entries[entries.length - 1] : null;
-  var w = $id('statWeight'), h = $id('statHeight'), hd = $id('statHead');
-  if (w) w.textContent = last && last.weight_kg != null ? Number(last.weight_kg) + ' kg' : '—';
-  if (h) h.textContent = last && last.height_cm != null ? Number(last.height_cm) + ' cm' : '—';
-  if (hd) hd.textContent = last && last.head_cm != null ? Number(last.head_cm) + ' cm' : '—';
-  $all('.stat-item__sub').forEach(function (el) { el.textContent = last ? 'on ' + api.fmtDate(last.measured_on) : '(no data yet)'; });
+  [['statWeight','weight_kg','kg'],['statHeight','height_cm','cm'],['statHead','head_cm','cm']].forEach(function(metric){
+    var element=$id(metric[0]),last=entries.filter(function(g){return g[metric[1]]!=null&&g.measured_on<=todayISO();}).slice().sort(function(a,b){return a.measured_on.localeCompare(b.measured_on)||a.id-b.id;}).pop();
+    if(element){element.textContent=last?Number(last[metric[1]])+' '+metric[2]:'—';var sub=element.parentElement.querySelector('.stat-item__sub');if(sub)sub.textContent=last?'Recorded '+api.fmtDate(last.measured_on):'Not recorded';}
+  });
 
   var list = $id('growthList');
   if (list) {
@@ -2447,6 +2370,7 @@ async function loadChildren() {
   }
 }
 
+function prepareDevelopmentalReview(){if(!activeChild())return;var f=$id('apptForm');f.style.display='';$id('apptReason').value='Developmental review / formal age-appropriate screening';f.scrollIntoView({behavior:'smooth',block:'center'});$id('apptDoctor').focus();}
 function renderAll() {
   renderChildTabs();
   renderChildHeader();
@@ -2454,6 +2378,8 @@ function renderAll() {
   renderVaccinations();
   renderMilestones();
   renderGrowth();
+  window.ChildGrowthDevelopment?.update(activeChild(),{childPage:true,guest:IS_GUEST,book:prepareDevelopmentalReview});
+  if(location.hash==='#development-review'){prepareDevelopmentalReview();history.replaceState(null,'','#childGrowthDevelopment');}
   renderNextVax();
   renderTimeline();
   renderAppointments();

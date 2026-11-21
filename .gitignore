@@ -40,3 +40,6 @@ ml-service/reports/seed-*/
 ml-service/.pytest_cache/
 
 ml-service/reports/predictability-checkpoint.json
+
+# macOS Finder metadata
+.DS_Store

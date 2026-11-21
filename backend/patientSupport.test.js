@@ -31,5 +31,5 @@ test('support screens accept the actual care-team contract and never light unlin
  const document={getElementById:id=>roots[id]||null,documentElement:{lang:'en'},addEventListener(){}};const window={SupportModel:S};
  vm.runInNewContext(syncFs.readFileSync(path.join(__dirname,'../frontend/js/patient-support.js'),'utf8'),{window,document,Intl,Date,Map,Set,location:{hash:''},setInterval:()=>0});
  window.PatientSupport.update({user:{id:88,guest:true,full_name:'SYNTHETIC Mother'},overview:{care_team:{doctor_name:'SYNTHETIC Dr <X>',unit:'I'}},milestones:[]},{privacy_share_doctors:false});
- assert.match(roots.patientSchemes.innerHTML,/SYNTHETIC Dr &lt;X&gt;/);assert.match(roots.supportFamily.innerHTML,/0 connected report recipients/);assert.match(roots.supportFamily.innerHTML,/Not linked/);assert.doesNotMatch(roots.supportFamily.innerHTML,/person-1 is-linked/);assert.match(roots.supportInbox.innerHTML,/All caught up/);
+ assert.match(roots.patientSchemes.innerHTML,/SYNTHETIC Dr &lt;X&gt;/);window.PatientSupport.sharing({shares:[],access:[]},{privacy_share_doctors:false});assert.match(roots.supportFamily.innerHTML,/0 report recipients/);assert.match(roots.supportFamily.innerHTML,/Not linked/);assert.doesNotMatch(roots.supportFamily.innerHTML,/family-orbit-family is-linked/);assert.match(roots.supportInbox.innerHTML,/All caught up/);
 });

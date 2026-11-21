@@ -90,6 +90,7 @@ const GROWTH_SELECT = `SELECT id, child_id, to_char(measured_on, 'YYYY-MM-DD') A
 
 module.exports = function registerChildDashboardRoutes(app, { pool, authenticateToken, authorizeRole }) {
   const motherOnly = [authenticateToken, authorizeRole(['mother'])];
+  require('./childDevelopment')(app,{pool,authenticateToken,authorizeRole});
   const doctorOnly = [authenticateToken, authorizeRole(['doctor'])];
 
   const fail = (res, label, error, msg = 'Something went wrong') => {
