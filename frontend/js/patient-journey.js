@@ -12,17 +12,21 @@ try {
 } catch {}
 const $ = id => document.getElementById(id), M = () => window.PatientModel, E = x => M().escape(x);
 const svg = name => '<svg aria-hidden="true"><use href="#i-' + name + '"/></svg>';
+const scanCategories = { medicine:'nutrition', vaccination:'vaccines', lab_result:'tests', antenatal_visit:'visits', other:'visits' };
+const scanLabels = { medicine:'Medicine', vaccination:'Vaccination', lab_result:'Lab result', antenatal_visit:'Antenatal visit', other:'Medical entry' };
 const icons = { visits: 'clipboard', tests: 'droplet', scans: 'scan', nutrition: 'pill', vaccines: 'shield', body: 'heart', prep: 'flag' };
 const labels = { completed: 'Done', overdue: 'Let’s catch up', due: 'Due soon', upcoming: 'Upcoming', queued: 'Waiting to sync', review: 'Review progress' };
 const fmt = d => d ? new Date(String(d).slice(0, 10) + 'T12:00:00').toLocaleDateString(document.documentElement.lang || 'en', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Date to confirm';
 const stopId = m => 'journey-stop-' + String(m.id).replace(/[^\w-]/g, '');
 function category(m) {
+  if (m.careScan) return scanCategories[m.careScan.kind];
   if (m.child) return 'vaccines';
   const t = (m.title + ' ' + (m.guidance || '')).toLowerCase();
   return /vaccin|bcg|opv|td dose/.test(t) ? 'vaccines' : /nutrition|iron|calcium|supplement/.test(t) ? 'nutrition' : /scan|ultrasound/.test(t) ? 'scans' : /test|blood|glucose|haemoglobin|ogtt/.test(t) ? 'tests' : /birth plan|hospital|transport|bag|readiness/.test(t) ? 'prep' : /mood|breast|recovery|postnatal|pnc|mental/.test(t) ? 'body' : 'visits';
 }
 function plain(m) {
   const t = m.title;
+  if (m.careScan) return t;
   return /glucose|ogtt/i.test(t) ? 'Your sugar test' : /haemoglobin|\bhb\b/i.test(t) ? 'Your blood count check' : /anomaly/i.test(t) ? 'Your baby’s detailed scan' : /first antenatal/i.test(t) ? 'Your first pregnancy visit' : t;
 }
 function week(m) {
@@ -35,16 +39,31 @@ function status(m) {
   const s = M().status(m);
   return s === 'upcoming' && m.due_date && M().days(m.due_date, M().today()) <= 7 ? 'due' : s;
 }
+function scanItems(childId, zone) {
+  const delivery = data.post?.delivery?.date;
+  return (data.careScanEntries || []).filter(entry => String(entry.child_id) === String(childId)).map(entry => {
+    const row = { id: 'care-scan-' + entry.id, title: entry.label, due_date: entry.occurred_on,
+      status: 'completed', careScan: entry };
+    const scanWeek = week(row);
+    row.zone = zone || (delivery && row.due_date >= String(delivery).slice(0, 10) ? 'post' :
+      scanWeek < 14 ? 't1' : scanWeek < 28 ? 't2' : 't3');
+    return row;
+  });
+}
+const byDate = (a, b) => String(a.due_date).slice(0,10).localeCompare(String(b.due_date).slice(0,10));
+
 function items() {
   if (lane === 'baby') {
     const c = (data.children || []).find(c => String(c.id) === String(baby)) || data.children?.[0];
-    if (!c || !window.AnvayaChild) return [];
+    if (!c) return [];
+    const scans = scanItems(c.id, 'baby');
+    if (!window.AnvayaChild) return scans.sort(byDate);
     const map = Object.fromEntries((c.vaccinations || []).map(v => [v.vaccine_code, v.given_on]));
-    return AnvayaChild.vaccineSchedule(String(c.date_of_birth).slice(0, 10), map, M().today()).filter(v => !v.conditional || v.givenOn).map(v => ({ id: 'baby-' + c.id + '-' + v.code, title: v.name, category: 'vaccines', due_date: v.dueDate, status: v.status === 'completed' ? 'completed' : v.status === 'missed' ? 'overdue' : 'upcoming', guidance: 'A little protection, one visit at a time. Your vaccination centre can confirm doses and a catch-up plan.', child: c.id, birth: c.date_of_birth, given: v.givenOn, zone: 'baby' }));
+    return AnvayaChild.vaccineSchedule(String(c.date_of_birth).slice(0, 10), map, M().today()).filter(v => !v.conditional || v.givenOn).map(v => ({ id: 'baby-' + c.id + '-' + v.code, title: v.name, category: 'vaccines', due_date: v.dueDate, status: v.status === 'completed' ? 'completed' : v.status === 'missed' ? 'overdue' : 'upcoming', guidance: 'A little protection, one visit at a time. Your vaccination centre can confirm doses and a catch-up plan.', child: c.id, birth: c.date_of_birth, given: v.givenOn, zone: 'baby' })).concat(scans).sort(byDate);
   }
   const rows = (data.milestones || []).filter(m => m.category !== 'child').map(m => ({ ...m, zone: /postpartum|postnatal|pnc|recovery|post-discharge/i.test([m.stage,m.category,m.title].join(' ')) ? 'post' : week(m) < 14 ? 't1' : week(m) < 28 ? 't2' : 't3' }));
   if (data.post?.active) for (const p of data.post.schedule || []) rows.push({ id: 'post-' + p.code, title: p.title, due_date: p.window_end, guidance: p.why, status: p.status === 'done' ? 'completed' : p.status, post: true, zone: 'post' });
-  return rows.sort((a, b) => String(a.due_date).localeCompare(String(b.due_date)));
+  return rows.concat(scanItems(null)).sort(byDate);
 }
 const zones = [
   { id: 't1', symbol: 'seed', label: 'Little beginnings', short: 'First trimester', sub: 'Weeks 0–13', text: 'The first chapter of a very personal story.' },
@@ -54,16 +73,26 @@ const zones = [
   { id: 'baby', symbol: 'bloom', label: 'Hello, little one', short: 'Baby’s journey', sub: 'Vaccines & follow-ups', text: 'Small steps for a growing world. This baby’s records stay their own.' }
 ];
 function workflow(m) {
+  if (m.careScan) return 'scan_confirmed';
   if(m.child||m.post)return m.status==='completed'?'recorded':'planned';
   return m.workflow_state || (m.completion_verification==='verified'?'clinician_confirmed':m.result_id?'awaiting_review':m.completed_at?'patient_reported':'planned');
 }
-const flowLabels={planned:'Not yet recorded',patient_reported:'You reported done',evidence_submitted:'Evidence submitted',awaiting_review:'Awaiting clinician review',clinician_confirmed:'Reviewed by your clinician',recorded:'Completion recorded'};
+const flowLabels={planned:'Not yet recorded',patient_reported:'You reported done',evidence_submitted:'Evidence submitted',awaiting_review:'Awaiting clinician review',clinician_confirmed:'Reviewed by your clinician',recorded:'Completion recorded',scan_confirmed:'Patient verified'};
 function progress(m){
  const keys=['patient_reported','evidence_submitted','awaiting_review','clinician_confirmed'],at=keys.indexOf(workflow(m));
  return '<ol class="care-proof" aria-label="Evidence and review progress">'+keys.map((k,i)=>'<li class="'+(i<=at?'is-reached':'')+'"><span aria-hidden="true">'+(i<=at?'✓':i+1)+'</span>'+['Your update','Evidence','In review','Clinician review'][i]+'</li>').join('')+'</ol>';
 }
 function provenance(m){const w=workflow(m);return m.post?'From recorded delivery date':m.child?'This baby’s recorded schedule':w==='clinician_confirmed'?'Clinician reviewed'+(m.verified_facility_name?' · '+m.verified_facility_name:''):w==='awaiting_review'?'Uploaded evidence · awaiting review':w==='patient_reported'?'Patient reported · not clinician verified':m.added_by_doctor_id?'Added by your clinician':'From your recorded care plan';}
+function scanDetails(entry) {
+ const fields = [entry.dosage && ['Dose or strength', entry.dosage],
+   entry.result && ['Result', [entry.result, entry.unit].filter(Boolean).join(' ')],
+   entry.notes && ['Details', entry.notes]].filter(Boolean);
+ return '<div class="stop-content"><p class="road-provenance">'+svg('file')+'CareScan · Checked by you against the original</p>'+
+  (fields.length ? '<dl class="care-scan-timeline-fields">'+fields.map(([label, value])=>'<dt>'+E(label)+'</dt><dd>'+E(value)+'</dd>').join('')+'</dl>' : '')+
+  '<button type="button" class="link-btn" data-scan-source-document="'+E(entry.document_id)+'">Open original document</button></div>';
+}
 function details(m,s){
+ if (m.careScan) return scanDetails(m.careScan);
  const linked=!m.child&&!m.post;
  return '<div class="stop-content"><p class="road-provenance">'+svg('shield')+E(provenance(m))+'</p><p class="stop-guidance">'+E(m.guidance||'Discuss this recorded step with your care team.')+'</p><button type="button" class="link-btn" data-step-explain="'+E(m.id)+'">'+(document.documentElement.lang==='hi'?'आसान भाषा में समझें':'Explain in simple words')+'</button>'+(linked?progress(m):'')+'<div class="stop-actions">'+(m.child?'<button class="btn btn--primary" data-journey-child="'+E(m.child)+'">Open baby’s record →</button>':m.post?'<button class="btn btn--primary" data-route="postpartum">Open recovery check-in →</button>':'<button class="btn btn--primary" data-step-help="'+E(m.id)+'">Help me with this step ↗</button>')+'<button class="journey-listen" data-journey-listen="'+stopId(m)+'">'+svg('speaker')+' Listen</button></div>'+(linked?'<div class="stop-secondary">'+(workflow(m)==='planned'?'<button class="link-btn" data-finish="'+E(m.id)+'">I have done this</button>':'')+(workflow(m)!=='clinician_confirmed'?'<button class="link-btn" data-step-evidence="'+E(m.id)+'">'+svg('clipboard')+' Add evidence</button>':'')+'<button class="link-btn" data-book="'+E(m.title)+'">Request visit</button></div><details class="stop-details"><summary>Details & preparation</summary><p>'+E(m.verified_facility_name?'Reviewed at '+m.verified_facility_name:'Bring your care card and previous reports. Ask your clinician about preparation.')+'</p><button class="link-btn" data-journey-questions="'+E(m.title)+'">Prepare questions</button> · <button class="link-btn" data-route="schemes">Scheme information</button></details>':'')+'</div>';
 }
@@ -77,7 +106,7 @@ function recordChart(all){
 function card(m,index,current){
  const s=status(m),id=stopId(m),wf=workflow(m),open=expanded.has(id)?expanded.get(id):current&&!compact;
  const label=wf!=='planned'?flowLabels[wf]:labels[s];
- return '<article id="'+id+'" class="journey-stop stop-'+s+(current?' stop-current':'')+' road-stop road-stop-'+(index%2?'right':'left')+'" data-week="'+(m.child||m.post?'':week(m)??'')+'"><span class="road-node" aria-hidden="true">'+(wf==='clinician_confirmed'?'✓':String(index+1).padStart(2,'0'))+'</span><details class="stop-card" data-stop-expand="'+id+'" '+(open?'open':'')+'><summary class="stop-summary"><span class="road-card-top"><span class="road-type">'+svg(icons[category(m)]||'heart')+E(m.child?'Baby’s care':m.post?'Recovery':category(m).replace('body','Recovery'))+'</span><span class="road-date">'+E(fmt(m.due_date))+'</span></span>'+(current?'<span class="you-are-here">YOUR NEXT STOP</span>':'')+'<span class="road-title">'+E(plain(m))+'</span><span class="road-card-bottom"><span class="stop-status">'+(wf==='clinician_confirmed'?'✓ ':s==='overdue'?'◷ ':'○ ')+E(label)+'</span><span class="road-open" aria-hidden="true">↗</span></span>'+(m.doctor_name&&m.added_by_doctor_id?'<span class="doctor-note">From '+E(m.doctor_name)+'</span>':'')+'</summary>'+details(m,s)+'</details></article>';
+ return '<article id="'+id+'" class="journey-stop stop-'+s+(current?' stop-current':'')+' road-stop road-stop-'+(index%2?'right':'left')+'" data-week="'+(m.child||m.post?'':week(m)??'')+'"><span class="road-node" aria-hidden="true">'+(wf==='clinician_confirmed'?'✓':String(index+1).padStart(2,'0'))+'</span><details class="stop-card" data-stop-expand="'+id+'" '+(open?'open':'')+'><summary class="stop-summary"><span class="road-card-top"><span class="road-type">'+svg(icons[category(m)]||'heart')+E(m.careScan?scanLabels[m.careScan.kind]:m.child?'Baby’s care':m.post?'Recovery':category(m).replace('body','Recovery'))+'</span><span class="road-date">'+E(fmt(m.due_date))+'</span></span>'+(current?'<span class="you-are-here">YOUR NEXT STOP</span>':'')+'<span class="road-title">'+E(plain(m))+'</span><span class="road-card-bottom"><span class="stop-status">'+(wf==='clinician_confirmed'?'✓ ':s==='overdue'?'◷ ':'○ ')+E(label)+'</span><span class="road-open" aria-hidden="true">↗</span></span>'+(m.doctor_name&&m.added_by_doctor_id?'<span class="doctor-note">From '+E(m.doctor_name)+'</span>':'')+'</summary>'+details(m,s)+'</details></article>';
 }
 function roadGeometry(width,points){
  if(!points.length)return '';const x=points[0].x,first=points[0].y;
@@ -194,5 +223,5 @@ document.addEventListener('input', e => {
 function reveal(id){scope='all';filter='all';const rows=items(),i=rows.findIndex(m=>String(m.id)===String(id));if(i<0)return;windowStart=Math.floor(i/WINDOW_SIZE)*WINDOW_SIZE;expanded.set(stopId(rows[i]),true);render();scrollTo($(stopId(rows[i])));}
 document.addEventListener('dai:patient-panel',scheduleRoad);
 window.addEventListener?.('resize',scheduleRoad);
-window.PatientJourney = { update(next, p) { data = next; prefs = p; render(); }, category, roadGeometry, reveal, help:openHelp, evidence:openEvidence, getRows:()=>items() };
+window.PatientJourney = { update(next, p) { data = next; prefs = p; render(); }, category, roadGeometry, reveal, revealCareScan(id, childId) { lane=childId?'baby':'mother'; baby=childId; reveal('care-scan-'+id); }, help:openHelp, evidence:openEvidence, getRows:()=>items() };
 })();

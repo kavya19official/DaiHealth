@@ -1,0 +1,47 @@
+.care-scan-launch { margin: 0 0 1rem; }
+.ct-help-dialog.care-scan-dialog {
+  width: min(52rem, calc(100% - 1.5rem));
+  max-width: 52rem;
+  max-height: calc(100dvh - 1.5rem);
+  overflow: auto;
+}
+.care-scan-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; }
+.care-scan-fields { border: 0; margin: 0; padding: 0; min-width: 0; }
+.care-scan-fields > label { display: block; margin: .75rem 0; }
+.care-scan-fields legend { font-weight: 700; }
+.care-scan-fields input:not([type="radio"]):not([type="checkbox"]):not([type="file"]),
+.care-scan-fields select {
+  display: block;
+  width: 100%;
+  margin-top: .25rem;
+  padding: .5rem;
+  border: 1px solid var(--border, #bcaecb);
+  border-radius: .45rem;
+  background: var(--surface, Canvas);
+  color: inherit;
+  font: inherit;
+}
+.care-scan-file-actions, .care-scan-decisions { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem; }
+.care-scan-dialog [hidden] { display: none !important; }
+.care-scan-original, .care-scan-entry {
+  min-width: 0;
+  padding: .85rem;
+  margin: .75rem 0;
+  border: 1px solid var(--border, #bcaecb);
+  border-radius: .65rem;
+  overflow-wrap: anywhere;
+}
+.care-scan-original img { display: block; max-width: 100%; max-height: 28rem; object-fit: contain; margin: .65rem auto; }
+.care-scan-original iframe { width: 100%; height: min(42dvh, 28rem); border: 0; margin-top: .65rem; }
+.care-scan-original summary { cursor: pointer; font-weight: 600; }
+.care-scan-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; }
+.care-scan-decisions { margin-top: .85rem; }
+.care-scan-decisions label { display: flex; gap: .35rem; align-items: center; min-height: 2.5rem; }
+.care-scan-fields .care-scan-confirm { display: flex; gap: .55rem; align-items: flex-start; }
+.care-scan-fields .care-scan-confirm input { flex: none; margin-top: .25em; }
+.care-scan-timeline-fields { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: .2rem .7rem; }
+.care-scan-timeline-fields dt { font-weight: 600; }
+.care-scan-timeline-fields dd { margin: 0; overflow-wrap: anywhere; }
+@media (max-width: 560px) {
+  .care-scan-grid { grid-template-columns: 1fr; }
+}

@@ -45,3 +45,23 @@ test('overview chart reports actual states and keeps the review explanation coll
 test('roadway alternates stops and draws a connected curve without changing recorded ordering',()=>{const v=view();v.window.PatientJourney.update(data,{});v.events.click({target:{closest:()=>({dataset:{stepScope:'all'},hasAttribute:()=>false})}});const h=v.root.innerHTML;assert.match(h,/id="careRoadway"/);assert.match(h,/class="road-track"/);assert.match(h,/road-stop-left/);assert.match(h,/road-stop-right/);assert.ok(h.indexOf('id="journey-stop-1"')<h.indexOf('id="journey-stop-2"'));assert.equal(v.window.PatientJourney.roadGeometry(390,[]),'');const d=v.window.PatientJourney.roadGeometry(390,[{x:20,y:60},{x:20,y:250}]);assert.match(d,/^M 20 0 L 20 60 C /);assert.doesNotMatch(d,/NaN|undefined/);});
 
 test('long histories render a bounded window and every stop remains reachable',()=>{const v=view(),milestones=Array.from({length:125},(_,i)=>({id:i+1,title:'Recorded visit '+i,category:'pregnancy',due_date:'2026-07-01',status:'upcoming'}));v.window.PatientJourney.update({...data,milestones},{});v.events.click({target:{closest:()=>({dataset:{stepScope:'all'},hasAttribute:()=>false})}});assert.equal((v.root.innerHTML.match(/class="journey-stop /g)||[]).length,40);assert.match(v.root.innerHTML,/showing 1–40/);v.events.click({target:{closest:()=>({dataset:{roadPage:'next'},hasAttribute:()=>false})}});assert.match(v.root.innerHTML,/showing 41–80/);assert.doesNotMatch(v.root.innerHTML,/id="journey-stop-1"/);assert.match(v.root.innerHTML,/id="journey-stop-41"/);assert.match(v.root.innerHTML,/data-step-explain/);});
+
+test('CareScan entries appear chronologically in the correct patient lane with a private source link', () => {
+ const v = view();
+ v.window.PatientJourney.update({ ...data, careScanEntries: [
+  { id: '10', child_id: null, occurred_on: '2026-11-01', kind: 'medicine', label: 'Samplemed', dosage: 'As written', document_id: 21 },
+  { id: '11', child_id: null, occurred_on: '2026-10-22', kind: 'lab_result', label: 'Example Hb', result: '11.1', unit: 'g/dL', document_id: 20 },
+  { id: '12', child_id: 2, occurred_on: '2026-10-07', kind: 'vaccination', label: 'Example vaccine', document_id: 22 }
+ ] }, {});
+ const click = dataset => v.events.click({ target: { closest: () => ({ dataset, hasAttribute: () => false }) } });
+ click({ stepScope: 'all' });
+ const mother = v.root.innerHTML;
+ assert.match(mother, /journey-stop-care-scan-11[\s\S]*journey-stop-2[\s\S]*journey-stop-care-scan-10/);
+ assert.match(mother, /Patient verified/);
+ assert.match(mother, /data-scan-source-document="20"/);
+ assert.doesNotMatch(mother, /Example vaccine/);
+ click({ journeyLane: 'baby' });
+ assert.doesNotMatch(v.root.innerHTML, /Example vaccine|Example Hb/);
+ click({ journeyBaby: '2' });
+ assert.match(v.root.innerHTML, /Example vaccine/);
+});

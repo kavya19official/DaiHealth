@@ -139,8 +139,9 @@ async function canAccessDoc(pool, docId, user) {
   return null;
 }
 
-module.exports = function registerPatientDocuments(app, { pool, authenticateToken, authorizeRole }) {
+module.exports = function registerPatientDocuments(app, { pool, authenticateToken, authorizeRole, jwtSecret }) {
   ensureDir();
+  require('./careScan').register(app, { pool, authenticateToken, authorizeRole, uploadDir: UPLOAD_DIR, readUpload, logEvent, jwtSecret });
   require("./documentIntake")(app,{pool,authenticateToken,authorizeRole,canAccessDoc,logEvent,uploadDir:UPLOAD_DIR});
   require("./patientReportBirth")(app,{pool,authenticateToken,authorizeRole,canAccessDoc,logEvent,uploadDir:UPLOAD_DIR});
 

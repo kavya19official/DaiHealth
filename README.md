@@ -212,6 +212,12 @@ psql "$DATABASE_URL" -f backend/db/delhi_directory.sql   # optional: Delhi facil
 
 Then, from `backend/`: `cp .env.example .env`, fill in `DATABASE_URL` and `JWT_SECRET`, `npm install` and `npm start`.
 
+CareScan uses the bundled English OCR model, including for scanned PDF pages. It processes documents on the
+DaiHealth server and needs no external AI API key. In a standalone PostgreSQL deployment, apply
+`psql "$DATABASE_URL" -f backend/db/care_scan.sql` after the existing migrations (including
+`clinician_report_uploads.sql`). Local and Docker startup apply it automatically. Keep `PATIENT_DOCS_DIR`
+on private persistent storage.
+
 ---
 
 ## Privacy and access model
