@@ -105,13 +105,32 @@ function registerAccessControl(app, { pool, authenticateToken, authorizeRole }) 
         : await pool.query('SELECT 1 FROM appointments WHERE mother_id=$1 AND facility_uuid::text=$2 LIMIT 1', [req.user.id, ref]);
       if (!related.rows.length) return res.status(404).json({ error: 'That clinician or facility is not on your care team' });
       const reason = typeof req.body?.reason === 'string' ? req.body.reason.trim().slice(0, 300) : null;
-      await pool.query(
-        `INSERT INTO patient_access_controls(mother_id,grantee_type,grantee_ref,state,reason) VALUES($1,$2,$3,$4,$5)
-         ON CONFLICT (mother_id,grantee_type,grantee_ref) DO UPDATE SET state=EXCLUDED.state, reason=EXCLUDED.reason, updated_at=NOW()`,
-        [req.user.id, type, ref, state, reason]);
-      await pool.query('INSERT INTO patient_access_events(mother_id,event_type,details) VALUES($1,$2,$3)',
-        [req.user.id, state === 'revoked' ? 'access_revoked' : 'access_granted', JSON.stringify({ grantee_type: type, grantee_ref: ref })]);
-      res.json({ state, message: state === 'revoked' ? 'Access turned off. It takes effect immediately.' : 'Access restored.' });
+      // One transaction: the consent row, the choice event and the audit-chain
+      // receipt commit or roll back together, so a revocation can never be
+      // recorded without its tamper-evident receipt (and vice versa).
+      const db = await pool.connect();
+      let receiptId = null;
+      try {
+        await db.query('BEGIN');
+        const saved = (await db.query(
+          `INSERT INTO patient_access_controls(mother_id,grantee_type,grantee_ref,state,reason) VALUES($1,$2,$3,$4,$5)
+           ON CONFLICT (mother_id,grantee_type,grantee_ref) DO UPDATE SET state=EXCLUDED.state, reason=EXCLUDED.reason, updated_at=NOW()
+           RETURNING updated_at`,
+          [req.user.id, type, ref, state, reason])).rows[0];
+        const effectiveAt = new Date(saved.updated_at).toISOString();
+        await db.query('INSERT INTO patient_access_events(mother_id,event_type,details) VALUES($1,$2,$3)',
+          [req.user.id, state === 'revoked' ? 'access_revoked' : 'access_granted',
+           JSON.stringify({ grantee_type: type, grantee_ref: ref, effective_at: effectiveAt })]);
+        try {
+          const receipt = await require('./consentAudit').issueLatestReceipt(db, req.user.id);
+          receiptId = receipt ? Number(receipt.id) : null;
+        } catch (e) { console.warn('Consent receipt issuance failed:', e.message); }
+        await db.query('COMMIT');
+      } catch (e) { await db.query('ROLLBACK').catch(() => {}); throw e; } finally { db.release(); }
+      res.json({ state, receipt_id: receiptId,
+        message: state === 'revoked'
+          ? 'Access turned off. It takes effect immediately.' + (receiptId ? ' A signed receipt is ready in your audit log.' : '')
+          : 'Access restored.' + (receiptId ? ' A signed receipt is ready in your audit log.' : '') });
     } catch (e) { fail(res, 'Access update', e); }
   });
 

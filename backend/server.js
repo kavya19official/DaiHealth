@@ -1120,6 +1120,7 @@ require('./facilityDiscovery')(app, { pool, authenticateToken, authorizeRole });
 // Smart referral handoff and mother-newborn continuity
 require('./referralContinuity')(app, { pool, authenticateToken, authorizeRole });
 require('./accessControl')(app, { pool, authenticateToken, authorizeRole });
+require('./consentAudit')(app, { pool, authenticateToken, authorizeRole });
 require('./followThrough')(app, { pool, authenticateToken, authorizeRole });
 require('./privacyAnalytics')(app, { pool, authenticateToken, authorizeRole });
 require('./demoCareMessages')(app, { pool, authenticateToken });
