@@ -1,0 +1,43 @@
+#daiDidi{--dd-plum:#6d2c8f;--dd-rose:#e11d48;--dd-ink:#2b1d3a;--dd-soft:#f6effb;font-family:Inter,system-ui,sans-serif;color:var(--dd-ink);font-size:15px;line-height:1.45}
+#daiDidi *{box-sizing:border-box}
+#daiDidi .dd-launch{position:fixed;left:1rem;bottom:5.4rem;z-index:2147482000;display:inline-flex;align-items:center;gap:.55rem;min-height:48px;padding:.5rem 1.1rem .5rem .6rem;border:0;border-radius:999px;background:linear-gradient(135deg,#7c3aed,#c026d3);color:#fff;font-weight:800;box-shadow:0 12px 28px -8px rgba(124,58,237,.7);cursor:pointer}
+#daiDidi .dd-launch .dd-orb{width:34px;height:34px;border-radius:50%;background:#ffffff30;display:grid;place-items:center;font-size:18px}
+#daiDidi .dd-launch small{display:block;font-weight:600;font-size:11px;opacity:.9}
+#daiDidi .dd-panel{position:fixed;left:1rem;bottom:5.4rem;z-index:2147482000;width:min(400px,calc(100vw - 2rem));max-height:min(78vh,720px);display:flex;flex-direction:column;background:#fff;border:1px solid #e6d6f2;border-radius:22px;box-shadow:0 30px 70px -20px rgba(60,20,90,.45);overflow:hidden}
+#daiDidi .dd-panel[hidden],#daiDidi .dd-launch[hidden]{display:none}
+#daiDidi.dd-emergency .dd-panel{max-height:46vh;border-color:#fda4af}
+#daiDidi .dd-head{display:flex;align-items:center;gap:.6rem;padding:.8rem 1rem;background:linear-gradient(135deg,#f3e8ff,#fdf2f8);border-bottom:1px solid #eadcf5}
+#daiDidi .dd-head strong{font-size:16px}#daiDidi .dd-head small{display:block;color:#7a5a92;font-size:11.5px}
+#daiDidi .dd-head select{margin-left:auto;border:1px solid #d9c3ea;border-radius:10px;padding:.3rem .4rem;background:#fff;font-size:13px}
+#daiDidi .dd-x{border:0;background:transparent;font-size:24px;line-height:1;cursor:pointer;color:#6b4a85;padding:0 .2rem}
+#daiDidi .dd-banner{margin:.6rem .8rem 0;padding:.6rem .8rem;border-radius:14px;background:#fff1f2;border:1px solid #fda4af;color:#9f1239;font-weight:700;font-size:13.5px}
+#daiDidi .dd-banner a{color:#9f1239;font-weight:800}
+#daiDidi .dd-feed{flex:1;min-height:90px;overflow-y:auto;padding:.8rem;display:flex;flex-direction:column;gap:.5rem}
+#daiDidi .dd-msg{max-width:92%;padding:.55rem .75rem;border-radius:16px;font-size:14px;white-space:pre-line}
+#daiDidi .dd-msg.me{align-self:flex-end;background:#7c3aed;color:#fff;border-bottom-right-radius:5px}
+#daiDidi .dd-msg.didi{align-self:flex-start;background:var(--dd-soft);border-bottom-left-radius:5px}
+#daiDidi .dd-msg.didi.em{background:#fff1f2;border:1px solid #fecdd3}
+#daiDidi .dd-msg.live{opacity:.65;font-style:italic}
+#daiDidi .dd-entry{margin:0 .8rem .6rem;border:1px solid #e6d6f2;border-radius:14px;padding:.6rem .75rem;background:#fcfaff;font-size:13px}
+#daiDidi .dd-entry h4{margin:0 0 .3rem;font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:#7a5a92}
+#daiDidi .dd-chip{display:inline-block;margin:.1rem .2rem .1rem 0;padding:.12rem .55rem;border-radius:99px;font-size:12px;font-weight:700;background:#ede9fe;color:#5b21b6}
+#daiDidi .dd-chip.emergency{background:#ffe4e6;color:#9f1239}#daiDidi .dd-chip.urgent{background:#ffedd5;color:#9a3412}
+#daiDidi .dd-row{display:flex;gap:.45rem;flex-wrap:wrap;margin-top:.45rem}
+#daiDidi .dd-btn{border:1px solid #d9c3ea;background:#fff;color:#4c1d95;border-radius:12px;padding:.45rem .75rem;font-weight:700;font-size:13px;cursor:pointer}
+#daiDidi .dd-btn.primary{background:#6d28d9;color:#fff;border-color:#6d28d9}#daiDidi .dd-btn.danger{background:#e11d48;color:#fff;border-color:#e11d48}
+#daiDidi .dd-btn:disabled{opacity:.5;cursor:not-allowed}
+#daiDidi .dd-mic{display:flex;align-items:center;justify-content:center;gap:.6rem;padding:.7rem .8rem;border-top:1px solid #eee2f7}
+#daiDidi .dd-micbtn{width:64px;height:64px;border-radius:50%;border:0;background:linear-gradient(135deg,#7c3aed,#c026d3);color:#fff;font-size:26px;cursor:pointer;box-shadow:0 10px 24px -8px rgba(124,58,237,.7)}
+#daiDidi .dd-micbtn[aria-pressed=true]{background:#e11d48;animation:ddpulse 1.1s infinite}
+@keyframes ddpulse{0%{box-shadow:0 0 0 0 rgba(225,29,72,.5)}100%{box-shadow:0 0 0 20px rgba(225,29,72,0)}}
+@media (prefers-reduced-motion:reduce){#daiDidi .dd-micbtn[aria-pressed=true]{animation:none}}
+#daiDidi .dd-status{font-size:12px;color:#6b4a85;text-align:center;padding:0 .8rem .3rem;min-height:1.1em}
+#daiDidi form.dd-type{display:flex;gap:.4rem;padding:0 .8rem .6rem}
+#daiDidi form.dd-type input{flex:1;border:1px solid #d9c3ea;border-radius:12px;padding:.5rem .7rem;font-size:14px}
+#daiDidi .dd-chips{display:flex;gap:.35rem;flex-wrap:wrap;padding:0 .8rem .5rem}
+#daiDidi .dd-chips button{border:1px dashed #c9a8e0;background:#fff;border-radius:99px;padding:.22rem .65rem;font-size:12px;cursor:pointer;color:#5b21b6}
+#daiDidi details.dd-phone{margin:0 .8rem .7rem;font-size:12.5px;color:#5b4470}
+#daiDidi details.dd-phone summary{cursor:pointer;font-weight:700}
+#daiDidi .dd-phonelog{margin:.4rem 0;max-height:130px;overflow:auto;background:#1f1630;color:#e9d5ff;border-radius:10px;padding:.5rem;font-family:ui-monospace,monospace;font-size:12px;white-space:pre-wrap}
+#daiDidi .dd-note{font-size:11.5px;color:#7a5a92;padding:0 .9rem .6rem}
+@media (max-width:640px){#daiDidi .dd-launch,#daiDidi .dd-panel{left:.6rem}#daiDidi .dd-panel{width:calc(100vw - 1.2rem)}}

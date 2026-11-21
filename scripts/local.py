@@ -302,9 +302,6 @@ def main():
                         raise RuntimeError(
                             f"Port {port} is already in use. Stop the old DAI terminal first (Ctrl+C). The launcher will not kill another process. Set DAI_PORT to change the public port."
                         )
-        if hosted:
-            from render_demo import start_demo_postgres
-            start_demo_postgres(env, processes)
         prepare(env)
         if hosted:
             if not (ROOT / "hospital_portal/web/.next-local/BUILD_ID").is_file():
@@ -363,15 +360,7 @@ def main():
         ]
         if env.get("ML_ENABLED") == "true" and env.get("PATIENT_ML_RANKING_ENABLED") == "true":
             commands.insert(0, ([PY, ROOT / "ml-service/run.py", "-m", "uvicorn", "api.main:app", "--host", "127.0.0.1", "--port", "8200"], ROOT, env))
-        upstream_urls = (
-            f"http://127.0.0.1:{api_port}/api/health",
-            f"http://127.0.0.1:{web_port}/hospital-admin",
-        )
-        for index, (args, cwd, child_env) in enumerate(commands):
-            if hosted and index == len(commands) - 1:
-                # Keep the public port closed until the hospital app can serve requests.
-                for url in upstream_urls:
-                    ready(url, processes)
+        for args, cwd, child_env in commands:
             processes.append(
                 subprocess.Popen(
                     [str(a) for a in args],
@@ -381,10 +370,12 @@ def main():
                 )
             )
         required_processes = processes[1:] if not hosted and env.get("ML_ENABLED") == "true" and env.get("PATIENT_ML_RANKING_ENABLED") == "true" else processes
-        if not hosted:
-            for url in upstream_urls:
-                ready(url, required_processes)
-        ready(f"http://127.0.0.1:{env['PORT']}/api/health", required_processes)
+        for url in [
+            f"http://127.0.0.1:{api_port}/api/health",
+            f"http://127.0.0.1:{web_port}/hospital-admin",
+            f"http://127.0.0.1:{env['PORT']}/api/health",
+        ]:
+            ready(url, required_processes)
         if hosted:
             print("Hosted DAI is ready.", flush=True)
         else:

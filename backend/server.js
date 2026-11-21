@@ -1095,6 +1095,7 @@ require('./timelineTrust')(app, { pool, authenticateToken, authorizeRole });
 require('./timelineAccess')(app, { pool, authenticateToken, authorizeRole });
 require('./pendingCare')(app, { pool, authenticateToken, authorizeRole });
 require('./timelinePush').register(app, { pool, authenticateToken, authorizeRole, startScheduler:true });
+require('./didiVoice').register(app, { pool, authenticateToken, authorizeRole });
 require('./patientOfflineSync')(app, {pool,authenticateToken,authorizeRole});
 
 // Enhanced care timeline and missed-care outreach

@@ -22,7 +22,7 @@ function createSpeechHandler({env=process.env,fetchImpl=(...args)=>fetch(...args
     if(!text||text.length>1500)return res.status(400).json({error:'A prepared answer of at most 1500 characters is required'});
     // The public widget can voice prepared educational answers only. Never forward
     // arbitrary questions, patient records or caller-provided prompts to Google.
-    if(!approved[language].has(text))return res.status(400).json({error:'Only Dr. Daya prepared answers can be spoken'});
+    if(!approved[language].has(text)&&!(language==='hi'?(require('../shared/voice-triage').isApprovedUtterance(text,'hi')||require('../shared/voice-triage').isApprovedUtterance(text,'hinglish')):require('../shared/voice-triage').isApprovedUtterance(text,'en')))return res.status(400).json({error:'Only Dr. Daya prepared answers can be spoken'});
     const key=env.GEMINI_API_KEY||env.GOOGLE_API_KEY;
     if(!key)return res.status(503).json({error:'Gemini voice is not configured. Add GEMINI_API_KEY to backend/.env and restart DAI.'});
     const model=env.GEMINI_TTS_MODEL||'gemini-2.5-flash-preview-tts';
