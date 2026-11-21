@@ -1,7 +1,7 @@
 'use strict';
 const fs=require('node:fs/promises'),path=require('node:path'),crypto=require('node:crypto');
 const hash=b=>crypto.createHash('sha256').update(b).digest('hex');
-const FIELDS={facility:200,facility_address:400,facility_phone:40,companion:160,companion_phone:40,transport:300,backup_transport:300,emergency_name:160,emergency_phone:40,backup_contact:200,preferences:1500};
+const birthPlan=require('../shared/birth-plan'),FIELDS=birthPlan.limits;
 // Reference intervals are transcribed from the source, never inferred from a test name.
 function patientCandidates(text){
  const candidates=require('./reportExtraction').parseText(text);
@@ -50,9 +50,16 @@ module.exports=function(app,{pool,authenticateToken,authorizeRole,canAccessDoc,l
  app.get('/api/patient/birth-plan',...mother,handle(async(req,res)=>res.json({plan:(await pool.query('SELECT preferences,version,updated_at FROM patient_birth_plans WHERE mother_id=$1',[req.user.id])).rows[0]||{preferences:{},version:0,updated_at:null}})));
  app.put('/api/patient/birth-plan',...mother,handle(async(req,res)=>{
   const b=req.body||{},p=b.preferences;
-  if(!p||typeof p!=='object'||Array.isArray(p)||!Number.isInteger(b.version)||b.version<0||Object.keys(p).some(k=>!Object.hasOwn(FIELDS,k))||Object.entries(p).some(([k,v])=>typeof v!=='string'||v.length>FIELDS[k]))return res.status(400).json({error:'Check your preferences and reload the latest plan.'});
-  const clean=Object.fromEntries(Object.keys(FIELDS).map(k=>[k,(p[k]||'').trim()]));
-  const result=b.version===0?await pool.query('INSERT INTO patient_birth_plans(mother_id,preferences) VALUES($1,$2) ON CONFLICT DO NOTHING RETURNING preferences,version,updated_at',[req.user.id,JSON.stringify(clean)]):await pool.query('UPDATE patient_birth_plans SET preferences=$1,version=version+1,updated_at=NOW() WHERE mother_id=$2 AND version=$3 RETURNING preferences,version,updated_at',[JSON.stringify(clean),req.user.id,b.version]);
+  if(!p||typeof p!=='object'||Array.isArray(p)||!Number.isInteger(b.version)||b.version<0||Object.keys(p).some(k=>!Object.hasOwn(FIELDS,k))||Object.entries(p).some(([k,v])=>typeof v!=='string'||v.length>FIELDS[k])||!birthPlan.dateValid(p.due_date||''))return res.status(400).json({error:'Check your preferences and reload the latest plan.'});
+  const clean=Object.fromEntries(Object.entries(p).map(([k,v])=>[k,v.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g,'').trim()]));
+  if(!birthPlan.dateValid(clean.discussion_date||'')||(Object.hasOwn(clean,'discussion_status')&&!birthPlan.discussionStatuses.includes(clean.discussion_status)))return res.status(400).json({error:'Check the discussion status and date.'});
+  const previous=b.version?(await pool.query('SELECT preferences FROM patient_birth_plans WHERE mother_id=$1 AND version=$2',[req.user.id,b.version])).rows[0]?.preferences||{}:{};
+  const changed=Object.entries(clean).some(([k,v])=>!k.startsWith('discussion_')&&v!==(previous[k]||''));
+  // A discussion is patient-reported. Edited preferences require another discussion.
+  if(previous.discussion_status==='discussed'&&changed)clean.discussion_status='review_again';
+  const discussionDate=clean.discussion_date??previous.discussion_date;
+  if((clean.discussion_status??previous.discussion_status)==='discussed'&&(!discussionDate||discussionDate>new Date().toLocaleDateString('en-CA',{timeZone:'Asia/Kolkata'})))return res.status(400).json({error:'Enter the date you discussed this plan, no later than today.'});
+  const result=b.version===0?await pool.query('INSERT INTO patient_birth_plans(mother_id,preferences) VALUES($1,$2) ON CONFLICT DO NOTHING RETURNING preferences,version,updated_at',[req.user.id,JSON.stringify(clean)]):await pool.query('UPDATE patient_birth_plans SET preferences=preferences || $1::jsonb,version=version+1,updated_at=NOW() WHERE mother_id=$2 AND version=$3 RETURNING preferences,version,updated_at',[JSON.stringify(clean),req.user.id,b.version]);
   if(!result.rows.length)return res.status(409).json({error:'This plan changed elsewhere. Reload it before saving.'});res.json({plan:result.rows[0]});
  }));
 };

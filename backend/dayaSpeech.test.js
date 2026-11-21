@@ -47,14 +47,14 @@ test('PCM is wrapped as mono 16-bit WAV with the reported sample rate',()=>{
 
 // Exercise the actual widget voice functions with mocked browser audio, without
 // calling Google or requesting a real microphone permission.
-function browserVoice(fetchImpl){
+function browserVoice(fetchImpl,{blocked=false}={}){
  const fs=require('node:fs'),vm=require('node:vm');
  const code=fs.readFileSync(require('node:path').join(__dirname,'../frontend/js/care-chatbot.js'),'utf8');
  const functions=code.slice(code.indexOf('    const preparedAudio='),code.indexOf('    function navigateLink('));
  const audios=[],gestures=[];
  class MockAudio{
   constructor(){audios.push(this);this.paused=true;}
-  async play(){this.paused=false;this.onplaying?.();}
+  async play(){if(blocked&&!this.allowed)throw Object.assign(new Error('Autoplay blocked'),{name:'NotAllowedError'});this.paused=false;this.onplaying?.();}
   pause(){this.paused=true;}
   removeAttribute(){}load(){}
  }
@@ -62,17 +62,18 @@ function browserVoice(fetchImpl){
   window:{},appBase:new URL('http://localhost:3001/'),speechSynthesis:{cancel(){}}});
  vm.runInContext(`let language='en',voice=true,slow=false,utterance=null,speechId=0,opened=true,speechAbort=null,currentAudio=null,audioUrl=null;
  const input={addEventListener(){}},knowledge={faqs:[]};
- const errorBox={hidden:true,textContent:''},root={querySelector:()=>errorBox};
+ const errorBox={hidden:true,textContent:''},playButton={hidden:true,setAttribute(){this.hidden=true;}},fallbackButton={hidden:true,removeAttribute(){this.hidden=false;}};
+ const root={querySelector:selector=>selector==='.dhruv-play-reply'?playButton:selector==='.dhruv-device-fallback'?fallbackButton:errorBox};
  const state={},help={},avatar={setTalking:value=>gestures.push(value)},tr=(en,hi)=>language==='hi'?hi:en;
  ${functions}
- globalThis.voiceTest={speak,stop,setSlow:value=>{slow=value;},setLanguage:value=>{language=value;stop();},status:()=>({text:state.textContent,help:help.textContent})};`,context);
+ globalThis.voiceTest={speak,stop,unlockAudio,resumeReplyAudio,allowPlayback:()=>{if(playbackAudio)playbackAudio.allowed=true;},pending:()=>!!pendingPlayback,playButton:()=>playButton.hidden,setSlow:value=>{slow=value;},setLanguage:value=>{language=value;stop();},status:()=>({text:state.textContent,help:help.textContent})};`,context);
  return {api:context.voiceTest,audios,gestures};
 }
 const wavResponse=()=>({ok:true,blob:async()=>new Blob([Buffer.from([0,0])],{type:'audio/wav'}),headers:{get:name=>name==='X-DAI-TTS-Provider'?'gemini':'Charon'}});
 test('widget starts/stops talking with Gemini playback and releases audio on stop',async()=>{
  const h=browserVoice(async()=>wavResponse());await h.api.speak('prepared answer');assert.equal(h.audios.length,1);assert.equal(h.gestures.at(-1),true);assert.match(h.api.status().help,/Gemini/);
  h.audios[0].onended();assert.equal(h.gestures.at(-1),false);assert.equal(h.audios[0].paused,true);
- await h.api.speak('next answer');h.api.stop();assert.equal(h.audios[1].paused,true);assert.equal(h.gestures.at(-1),false);
+ await h.api.speak('next answer');h.api.stop();assert.equal(h.audios.length,1);assert.equal(h.audios[0].paused,true);assert.equal(h.gestures.at(-1),false);
 });
 test('changing language cancels playback and discards stale audio while the cache request finishes',async()=>{
  let complete,signal;const h=browserVoice(async(url,options)=>{signal=options.signal;return new Promise(resolve=>{complete=resolve;});});
@@ -83,7 +84,7 @@ test('Gemini failure displays an error and never substitutes browser speech',asy
  const h=browserVoice(async()=>({ok:false,status:503,json:async()=>({})}));await h.api.speak('prepared answer');assert.equal(h.audios.length,0);assert.equal(h.gestures.at(-1),false);assert.equal(h.api.status().text,'Gemini voice unavailable');assert.match(h.api.status().help,/no substitute voice/);
 });
 
-test('widget contains no browser speech-synthesis fallback',()=>{const source=require('node:fs').readFileSync(require('node:path').join(__dirname,'../frontend/js/care-chatbot.js'),'utf8');assert.doesNotMatch(source,/SpeechSynthesisUtterance|speechSynthesis\.speak/);});
+test('device speech is an explicit choice, never a silent Gemini substitute',()=>{const source=require('node:fs').readFileSync(require('node:path').join(__dirname,'../frontend/js/care-chatbot.js'),'utf8');assert.match(source,/if\(options\.deviceVoice\)return speakOnDevice/);assert.match(source,/Gemini error · no substitute voice/);});
 test('simultaneous identical replies share one Gemini generation',async()=>{
  let calls=0,resolve;const handle=createSpeechHandler({env:{GEMINI_API_KEY:'fake'},fetchImpl:async()=>{calls++;return new Promise(r=>{resolve=r;});}});
  const a=res(),b=res();const first=handle({body:{text:text('en'),language:'en'},ip:'a'},a),second=handle({body:{text:text('en'),language:'en'},ip:'b'},b);resolve(ok());await Promise.all([first,second]);assert.equal(calls,1);assert.equal(a.code,200);assert.deepEqual(a.body,b.body);
@@ -94,7 +95,27 @@ test('approved voice cache survives handler restarts and separates voice configu
 });
 
 test('widget replays an already prepared reply without another network fetch',async()=>{
- let calls=0;const h=browserVoice(async()=>{calls++;return wavResponse();});await h.api.speak('same approved reply');h.api.stop();await h.api.speak('same approved reply');assert.equal(calls,1);assert.equal(h.audios.length,2);h.api.stop();
+ let calls=0;const h=browserVoice(async()=>{calls++;return wavResponse();});await h.api.speak('same approved reply');h.api.stop();await h.api.speak('same approved reply');assert.equal(calls,1);assert.equal(h.audios.length,1);h.api.stop();
 });
 
 test('slow playback changes only client playback speed and keeps the Gemini voice',async()=>{const h=browserVoice(async()=>wavResponse());h.api.setSlow(true);await h.api.speak('prepared answer');assert.equal(h.audios[0].playbackRate,.85);assert.match(h.api.status().help,/Charon/);h.api.stop();});
+
+test('care-guide audio that echoes personal values is never reused or written to the public audio cache',async()=>{
+ const fs=require('node:fs/promises'),os=require('node:os'),path=require('node:path');
+ const directory=await fs.mkdtemp(path.join(os.tmpdir(),'dhruv-private-voice-'));let calls=0;
+ try{const handle=createSpeechHandler({env:{GEMINI_API_KEY:'fake',DAI_TTS_CACHE_DIR:directory},fetchImpl:async()=>{calls++;return ok();}});
+ const guide=require('../shared/voice-triage');const reply=guide.processTurn(guide.newState(), 'BP 150 by 100',{forceLang:'en'}).text;
+ const a=res(),b=res();await handle({body:{text:reply,language:'en'},ip:'one'},a);await handle({body:{text:reply,language:'en'},ip:'two'},b);
+ assert.equal(a.code,200);assert.equal(b.code,200);assert.equal(calls,2);assert.deepEqual(await fs.readdir(directory),[]);assert.equal(b.headers['X-DAI-TTS-Cache'],'miss');
+ }finally{await fs.rm(directory,{recursive:true,force:true});}
+});
+
+test('Safari playback keeps a single gesture-activated audio element for later spoken replies',async()=>{
+ let calls=0;const h=browserVoice(async()=>{calls++;return wavResponse();});h.api.unlockAudio();await Promise.resolve();await h.api.speak('first approved reply');h.audios[0].onended();await h.api.speak('second approved reply');assert.equal(h.audios.length,1);assert.equal(calls,2);assert.equal(h.audios[0].paused,false);h.api.stop();
+});
+test('autoplay rejection offers Play reply and replays the same Gemini audio without regenerating or substituting voice',async()=>{
+ let calls=0;const h=browserVoice(async()=>{calls++;return wavResponse();},{blocked:true});await h.api.speak('approved reply');assert.equal(h.api.pending(),true);assert.equal(h.api.playButton(),false);assert.equal(h.audios.length,1);h.api.allowPlayback();await h.api.resumeReplyAudio();assert.equal(h.api.pending(),false);assert.equal(h.audios[0].paused,false);assert.equal(h.gestures.at(-1),true);assert.equal(calls,1);h.api.stop();
+});
+test('stopping discards a blocked reply so a later playback click cannot restart it',async()=>{
+ const h=browserVoice(async()=>wavResponse(),{blocked:true});await h.api.speak('approved reply');assert.equal(h.api.pending(),true);h.api.stop();h.api.allowPlayback();h.api.resumeReplyAudio();await Promise.resolve();assert.equal(h.api.pending(),false);assert.equal(h.audios[0].paused,true);assert.equal(h.gestures.at(-1),false);
+});

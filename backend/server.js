@@ -1031,6 +1031,7 @@ app.patch('/api/appointments/:id/status', authenticateToken, authorizeRole(['doc
 
 // Mother dashboard: pregnancy profile, vitals/kick logs, reports
 require('./motherDashboard')(app, { pool, authenticateToken, authorizeRole, MILESTONE_TEMPLATE });
+require('./patientDaily')(app, { pool, authenticateToken, authorizeRole });
 // Predictive risk trend, postpartum pathway, emergency response (db/care_extensions_v4.sql)
 require('./careExtensions')(app, { pool, authenticateToken, authorizeRole });
 

@@ -16,7 +16,7 @@ const { providers } = require('./ivr/provider');
 
 const PHONE = {
   en: {
-    welcome: 'Welcome to Dai Didi, a care guide for mothers.',
+    welcome: 'Welcome to Dhruv, a care guide for mothers.',
     choose: 'For Hindi press 1. For English press 2.',
     talk: 'After the beep, tell me what you are feeling. What you say will be written in your care timeline. I do not diagnose.',
     nospeech: 'I could not hear you. Please tell me again what you are feeling.',
@@ -24,7 +24,7 @@ const PHONE = {
     unknown: 'I could not find your number in DAI, so this call will not be saved to a record.'
   },
   hi: {
-    welcome: 'दाई दीदी में आपका स्वागत है। यह माँओं के लिए एक देखभाल गाइड है।',
+    welcome: 'ध्रुव में आपका स्वागत है। यह माँओं के लिए एक देखभाल गाइड है।',
     choose: 'हिंदी के लिए 1 दबाइए। English ke liye 2 dabaiye.',
     talk: 'बीप के बाद बताइए कि आप क्या महसूस कर रही हैं। आप जो कहेंगी वह आपके केयर टाइमलाइन में लिखा जाएगा। मैं निदान नहीं करती।',
     nospeech: 'मुझे आपकी आवाज़ सुनाई नहीं दी। कृपया फिर से बताइए कि आप क्या महसूस कर रही हैं।',
@@ -80,6 +80,10 @@ function register(app, { pool, authenticateToken, authorizeRole, env = process.e
       const context = b.context === 'postpartum' || b.context === 'pregnant' ? b.context : await contextFor(req.user.id);
       const result = replay(turns, { context });
       if (!result || !result.entry) return res.status(422).json({ error: 'No symptom was understood, so nothing was saved' });
+      const inputMode=['text','dictation','speech'].includes(b.input_mode)?b.input_mode:'speech';
+      result.entry={...result.entry,input_mode:inputMode,disclaimer:'Guidance from fixed rules, not a diagnosis. Self-reported through Dhruv. Not verified by a clinician.'};
+      if(result.entry.vitals?.blood_pressure&&inputMode!=='speech')result.entry.vitals.blood_pressure.source='self_reported_by_'+inputMode;
+      result.entry.review={...result.entry.review,reason:result.entry.review.reason.replace('voice report','self-report')};
       const eventId = Number.isInteger(b.emergency_event_id) ? b.emergency_event_id : null;
       const id = await persist(req.user.id, result, turns, 'app', null, eventId);
       res.status(201).json({ entry: { id, ...result.entry, channel: 'app' } });
@@ -110,7 +114,7 @@ function register(app, { pool, authenticateToken, authorizeRole, env = process.e
       const motherId = await require('./accessControl').gateDoctor(pool, req, res, 'timeline');
       if (motherId == null) return;
       const r = await pool.query('SELECT id, channel, triage_level, review_status, entry, spoken_turns, created_at FROM voice_care_entries WHERE mother_id=$1 ORDER BY created_at DESC LIMIT 50', [motherId]);
-      res.set('Cache-Control', 'no-store').json({ entries: r.rows, label: 'Self-reported by voice. Fixed-rule flags, not a diagnosis.' });
+      res.set('Cache-Control', 'no-store').json({ entries: r.rows, label: 'Self-reported through Dhruv (text or voice). Fixed-rule flags, not a diagnosis.' });
     } catch { res.status(500).json({ error: 'Could not load voice notes' }); }
   });
 

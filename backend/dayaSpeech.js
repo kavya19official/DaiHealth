@@ -23,12 +23,14 @@ function createSpeechHandler({env=process.env,fetchImpl=(...args)=>fetch(...args
     // The public widget can voice prepared educational answers only. Never forward
     // arbitrary questions, patient records or caller-provided prompts to Google.
     if(!approved[language].has(text)&&!(language==='hi'?(require('../shared/voice-triage').isApprovedUtterance(text,'hi')||require('../shared/voice-triage').isApprovedUtterance(text,'hinglish')):require('../shared/voice-triage').isApprovedUtterance(text,'en')))return res.status(400).json({error:'Only Dr. Daya prepared answers can be spoken'});
+    // Only public FAQ audio is reusable. Care-guide replies may echo personal BP values.
+    const cacheable=approved[language].has(text);
     const key=env.GEMINI_API_KEY||env.GOOGLE_API_KEY;
     if(!key)return res.status(503).json({error:'Gemini voice is not configured. Add GEMINI_API_KEY to backend/.env and restart DAI.'});
     const model=env.GEMINI_TTS_MODEL||'gemini-2.5-flash-preview-tts';
     const voice=env.GEMINI_TTS_VOICE||'Charon';
     const cacheKey=JSON.stringify(['v2',model,voice,language,text]);
-    const diskPath=diskDir?path.join(diskDir,crypto.createHash('sha256').update(cacheKey).digest('hex')+'.wav'):null;
+    const diskPath=cacheable&&diskDir?path.join(diskDir,crypto.createHash('sha256').update(cacheKey).digest('hex')+'.wav'):null;
     let usage=null,providerResponse=null,providerStatus=null;
     async function track(outcome,called){if(!usage)usage=await usageTracker?.start({owner_id:req.user?.id,kind:'prepared_speech',task_key:'prepared-speech',model,provider_called:called});const receipt=await usage?.finish({outcome,response:providerResponse,http_status:providerStatus});if(receipt?.event_id)res.set({'X-DAI-Usage-ID':receipt.event_id});}
     async function send(audio,cached){
@@ -38,15 +40,15 @@ function createSpeechHandler({env=process.env,fetchImpl=(...args)=>fetch(...args
         'X-DAI-TTS-Language':language,'X-DAI-TTS-Cache':cached?'hit':'miss'});
       return res.send(audio);
     }
-    if(cache.has(cacheKey))return send(cache.get(cacheKey),true);
+    if(cacheable&&cache.has(cacheKey))return send(cache.get(cacheKey),true);
     if(diskPath){try{const bytes=await fs.readFile(diskPath);if(bytes.length>44&&bytes.length<=8*1024*1024&&bytes.toString('ascii',0,4)==='RIFF'){cache.set(cacheKey,bytes);return send(bytes,true);}}catch{}}
-    if(inflight.has(cacheKey)){const result=await inflight.get(cacheKey);await track('coalesced',false);return result.audio?send(result.audio,true):res.status(result.code).json({error:result.error});}
+    if(cacheable&&inflight.has(cacheKey)){const result=await inflight.get(cacheKey);await track('coalesced',false);return result.audio?send(result.audio,true):res.status(result.code).json({error:result.error});}
 
     const time=now();for(const [ip,entry] of requests)if(entry.expires<=time)requests.delete(ip);
     const ip=req.ip||'local',entry=requests.get(ip)||{count:0,expires:time+600000};
     if(entry.count>=30||requests.size>10000)return res.status(429).json({error:'Voice request limit reached. Please try later.'});
     entry.count++;requests.set(ip,entry);
-    let settle;inflight.set(cacheKey,new Promise(resolve=>{settle=resolve;}));
+    let settle=()=>{};if(cacheable)inflight.set(cacheKey,new Promise(resolve=>{settle=resolve;}));
     async function failure(code,error){await track(code===504?'timeout':'failed',true);settle({code,error});inflight.delete(cacheKey);return res.status(code).json({error});}
     try{
       if(usageTracker){usage=await usageTracker.start({owner_id:req.user?.id,kind:'prepared_speech',task_key:'prepared-speech',model,provider_called:true});usage.sent();}
@@ -80,8 +82,7 @@ function createSpeechHandler({env=process.env,fetchImpl=(...args)=>fetch(...args
       const pcm=Buffer.from(audioPart.data,'base64');
       if(!pcm.length||pcm.length%2||pcm.length>8*1024*1024)return failure(502,'Gemini returned invalid audio');
       const audio=pcmToWav(pcm,rate);
-      if(cache.size>=64)cache.delete(cache.keys().next().value);
-      cache.set(cacheKey,audio);
+      if(cacheable){if(cache.size>=64)cache.delete(cache.keys().next().value);cache.set(cacheKey,audio);}
       if(diskPath){try{await fs.mkdir(diskDir,{recursive:true});const temporary=diskPath+'.'+crypto.randomUUID()+'.tmp';await fs.writeFile(temporary,audio);await fs.rename(temporary,diskPath);}catch{ /* Audio still plays if disk storage is unavailable. */ }}
       settle({audio});inflight.delete(cacheKey);return send(audio,false);
     }catch(error){return failure(error.name==='TimeoutError'||error.name==='AbortError'?504:502,'Gemini voice is temporarily unavailable');}

@@ -232,3 +232,11 @@ test('front-end files parse, dashboard loads them, and the SOS flow accepts a Di
   assert.match(fs.readFileSync(path.join(root, 'frontend/js/care-extensions.js'), 'utf8'), /function openSOS\(preset\)/);
   assert.match(fs.readFileSync(path.join(root, 'frontend/patient-sw.js'), 'utf8'), /shared\/voice-triage\.js/);
 });
+
+test('Dhruv saves typed notes only on request and preserves typed provenance under server replay',async()=>{
+ const h=harness(),route=h.routes.find(r=>r[0]==='post'&&r[1]==='/api/didi/entries');
+ const response={code:200,set(){return this;},status(n){this.code=n;return this;},json(body){this.body=body;return this;}};
+ await route.at(-1)({user:{id:7},body:{turns:['BP 150 by 100'],context:'pregnant',input_mode:'text',triage_level:'unsure'}},response);
+ assert.equal(response.code,201);assert.equal(response.body.entry.input_mode,'text');assert.equal(response.body.entry.vitals.blood_pressure.source,'self_reported_by_text');assert.equal(response.body.entry.triage.decided_by,'fixed_rules');
+ const stored=JSON.parse(h.calls.find(c=>/INSERT INTO voice_care_entries/.test(c.sql)).params[6]);assert.equal(stored.input_mode,'text');assert.match(stored.disclaimer,/Not verified/);
+});

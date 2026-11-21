@@ -37,7 +37,7 @@
   }
 
   function listEmpty(list) {
-    if (!list.children.length) row(list, text('No entries yet', 'अभी कोई रिकॉर्ड नहीं'), text('Your saved entries appear here.', 'आपके सहेजे रिकॉर्ड यहाँ दिखेंगे।'));
+    if (!list.children.length) {row(list, text('No entries yet', 'अभी कोई रिकॉर्ड नहीं'), text('Your saved entries appear here.', 'आपके सहेजे रिकॉर्ड यहाँ दिखेंगे।'));list.lastElementChild.dataset.dailyEmpty='1';}
   }
 
   function updateTimers() {
@@ -67,7 +67,8 @@
     panel.querySelectorAll('form button, input[type="checkbox"], [data-action="water"]').forEach(el => { el.disabled = true; });
     notice(text('Loading your entries…', 'आपके रिकॉर्ड लोड हो रहे हैं…'));
     const requestedDay = day;
-    const user = await api.fetchCurrentUser();
+    const cached = !navigator.onLine ? await window.DaiDaily?.cached(day) : null;
+    const user = cached?.base.user || await api.fetchCurrentUser();
     if (version !== loading) return;
     if (!user || user.role !== 'mother') {
       notice(text('Sign in as a patient to save daily tracking.', 'दैनिक रिकॉर्ड सहेजने के लिए मरीज़ के रूप में साइन इन करें।'));
@@ -81,7 +82,7 @@
     const start = new Date(requestedDay + 'T00:00:00');
     const end = new Date(start);
     end.setDate(end.getDate() + 1);
-    const results = await Promise.all([
+    const results = cached?.base.results || await Promise.all([
       api.apiRequest('/wellness?date=' + encodeURIComponent(day)),
       api.apiRequest('/health-logs?types=kick_session&from=' + encodeURIComponent(start.toISOString()) + '&to=' + encodeURIComponent(end.toISOString()) + '&limit=1000'),
       api.apiRequest('/patient/home')
@@ -112,12 +113,13 @@
     results[2].journal.filter(entry => String(entry.entry_date).slice(0,10) === day && entry.note.startsWith('[Symptoms] ')).forEach(entry => row(get('symptoms'), entry.note.slice(11), text('Personal symptom note', 'निजी लक्षण नोट')));
     listEmpty(get('symptoms'));
     get('pregnancy').hidden = user.pregnancy_status !== 'pregnant';
-    notice(text('Entries saved to your account. Self-reported.', 'रिकॉर्ड आपके खाते में सहेजे गए। आपके द्वारा दर्ज।'));
+    await window.DaiDaily?.render({user,day,results});
+    notice(cached?text('Offline copy · queued entries are waiting to sync.','ऑफलाइन कॉपी · लंबित रिकॉर्ड सिंक होने बाकी हैं।'):text('Entries saved to your account. Self-reported.', 'रिकॉर्ड आपके खाते में सहेजे गए। आपके द्वारा दर्ज।'));
     updateTimers();
   }
 
   async function write(path, body, method = 'POST') {
-    if (busy || !loaded || !navigator.onLine) {
+    if (busy || !loaded) {
       notice(text('Connect to the internet to save. Your current input stays here.', 'सहेजने के लिए इंटरनेट जोड़ें। आपका लिखा यहाँ रहेगा।'));
       return false;
     }
@@ -126,10 +128,18 @@
     updateTimers();
     let result;
     try {
-      result = await api.apiRequest(path, {method, body});
+      let kind, data, at;
+      if(path==='/wellness/water'){kind='water';data={};}
+      if(path==='/wellness/supplements'){kind='supplement';data={supplement:body.supplement,taken:body.taken};}
+      if(path==='/wellness/nutrition'){kind='meal';data={text:body.text};}
+      if(path==='/patient/home/journal'){kind='symptom';const form=panel.querySelector('[data-form=symptom]');data={codes:[...form.querySelectorAll('[name=symptom]:checked')].map(i=>i.value),severity:form.elements.severity.value,note:body.note.replace(/^\[Symptoms\] /,'')};at=new Date(day+'T'+form.elements.time.value+':00+05:30').toISOString();}
+      if(path==='/health-logs'){kind=body.log_type;data=body.data;at=body.logged_at;}
+      result=kind?await window.DaiDaily.save(kind,data,body.date||day,at):await api.apiRequest(path,{method,body});
+      if(result?.queued){notice(text('Encrypted on this device · waiting to sync. Your input stays here.','डिवाइस पर एन्क्रिप्ट किया · सिंक बाकी है। आपका लिखा यहाँ रहेगा।'));return false;}
+
       notice(result ? text('Saved', 'सहेजा गया') : text('Not saved. Your entry is still here. Try again.', 'सहेजा नहीं गया। आपका रिकॉर्ड यहाँ है। फिर कोशिश करें।'));
       return !!result;
-    } finally {
+    } catch(error) {notice(error.message||text('Not saved. Your input is still here.','सहेजा नहीं गया। आपका लिखा यहाँ है।'));return false;} finally {
       busy = false;
       panel.querySelectorAll('form button, input[type="checkbox"], [data-action="water"]').forEach(el => { el.disabled = false; });
       updateTimers();
@@ -191,11 +201,12 @@
     const form = event.target;
     const field = form.querySelector('textarea');
     const value = field.value.trim();
-    if (!value) return field.focus();
     const symptoms = form.dataset.form === 'symptom';
+    if (!value && !(symptoms && form.querySelector('[name=symptom]:checked'))) return field.focus();
     const saved = await write(symptoms ? '/patient/home/journal' : '/wellness/nutrition', symptoms ? {date:day,note:'[Symptoms] '+value} : {date:day,text:value});
     if (saved) {
       field.value = '';
+      if(symptoms)form.querySelectorAll('[name=symptom]').forEach(i=>i.checked=false);
       await load();
     }
   });
@@ -220,6 +231,7 @@
   }
   window.addEventListener('dai:patient-panel', event => { if (event.detail.panel === 'daily') open(); });
   window.addEventListener('dai:lang', translate);
+  window.addEventListener('dai:daily-refresh',()=>{if(location.hash==='#daily'&&!busy)load();});
   window.addEventListener('hashchange', open);
   window.addEventListener('beforeunload', event => {
     if (kick || contraction || busy) { event.preventDefault(); event.returnValue = ''; }

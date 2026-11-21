@@ -450,8 +450,8 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 <link rel="stylesheet" href="patient-home-reference.css?v=1">
 <link rel="stylesheet" href="patient-recovery-access.css?v=1"><link rel="stylesheet" href="patient-recovery.css?v=2">
 <link rel="stylesheet" href="dashboard-charts.css?v=1">
-<link rel="stylesheet" href="patient-daily.css?v=1">
-<link rel="stylesheet" href="patient-report-birth.css?v=1">
+<link rel="stylesheet" href="patient-daily.css?v=3">
+<link rel="stylesheet" href="patient-report-birth.css?v=4"><link rel="stylesheet" href="birth-plan-experience.css?v=1">
 <link rel="stylesheet" href="child-growth-development.css?v=1">
 <link rel="stylesheet" href="connected-care.css?v=1">
 </head>
@@ -550,7 +550,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 <form data-form="meal"><label><span data-en="What did you eat?" data-hi="आपने क्या खाया?">What did you eat?</span><textarea maxlength="500" rows="2" required aria-label="Meal note"></textarea></label><button class="btn btn--primary" type="submit"><span data-en="Save meal" data-hi="खाना सहेजें">Save meal</span></button></form><ul data-daily="meals" class="daily-history"></ul></article>
 <article class="daily-card"><span class="daily-icon" aria-hidden="true">✎</span><h2><span data-en="Symptom diary" data-hi="लक्षण डायरी">Symptom diary</span></h2>
 <form data-form="symptom"><label><span data-en="How have you felt?" data-hi="आप कैसा महसूस कर रही हैं?">How have you felt?</span><textarea maxlength="1500" rows="2" required aria-label="Symptom note"></textarea></label><button class="btn btn--primary" type="submit"><span data-en="Save note" data-hi="नोट सहेजें">Save note</span></button></form>
-<p><span data-en="Saved in your private journal. Contact your care team directly for a response." data-hi="आपकी निजी डायरी में सहेजा जाता है। जवाब के लिए अपनी टीम से सीधे संपर्क करें।">Saved in your private journal. Contact your care team directly for a response.</span></p><ul data-daily="symptoms" class="daily-history"></ul></article>
+<p><span data-en="Saved as private daily notes. Contact your care team directly for a response." data-hi="निजी दैनिक नोट के रूप में सहेजा जाता है। जवाब के लिए अपनी टीम से सीधे संपर्क करें।">Saved as private daily notes. Contact your care team directly for a response.</span></p><ul data-daily="symptoms" class="daily-history"></ul></article>
 </div>
 <div data-daily="pregnancy" hidden><div class="daily-section-title"><h2><span data-en="Pregnancy sessions" data-hi="गर्भावस्था सत्र">Pregnancy sessions</span></h2><p><span data-en="Record movements and timing using the plan your clinician gave you." data-hi="डॉक्टर की दी योजना के अनुसार हलचल और समय दर्ज करें।">Record movements and timing using the plan your clinician gave you.</span></p></div><div class="daily-grid">
 <article class="daily-card daily-session"><h2><span data-en="Baby movement counter" data-hi="बच्चे की हलचल गिनें">Baby movement counter</span></h2><div class="daily-counter"><span class="daily-number" data-daily="kick-count" aria-live="polite">0</span><span data-daily="kick-time">0:00</span></div>
@@ -1023,12 +1023,11 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 <script src="js/care-coordination-patient.js?v=2"></script>
 <script src="js/care-extensions.js?v=2"></script>
 <script src="/shared/voice-triage.js"></script>
-<link rel="stylesheet" href="js/dai-didi.css?v=1">
-<script src="js/dai-didi.js?v=1" defer></script>
-<script src="/shared/who-growth-standards.js"></script><script src="/shared/child-reference.js"></script><script src="js/patient-visuals.js?v=1"></script><script src="js/patient-polish.js?v=1"></script><script src="js/patient-home-model.js?v=1"></script><script src="js/patient-home-reference.js?v=1"></script><script src="js/dashboard-charts.js?v=1"></script><script src="js/patient-home.js?v=graphs-1"></script><script src="js/patient-model.js?v=3"></script><script src="js/patient-offline.js?v=2"></script><script src="js/patient-copy.js?v=3"></script><script src="js/timeline-push.js?v=1"></script><script src="js/timeline-assistance.js?v=2"></script><script src="js/timeline-trust.js?v=1"></script><script src="js/timeline-tools.js?v=1"></script><script src="js/patient-journey.js?v=6"></script><script src="js/patient-pending-model.js?v=3"></script><script src="js/patient-pending.js?v=5"></script><script src="js/pending-care-capabilities.js?v=3"></script><script src="js/patient-appointments-model.js?v=1"></script><script src="js/patient-connected.js?v=6"></script><script src="js/patient-hospital-stay.js?v=1"></script><script src="js/support-model.js?v=1"></script>
+<script src="js/dai-didi.js?v=dhruv-voice-8" defer></script>
+<script src="/shared/who-growth-standards.js"></script><script src="/shared/child-reference.js"></script><script src="js/patient-visuals.js?v=1"></script><script src="js/patient-polish.js?v=1"></script><script src="js/patient-home-model.js?v=1"></script><script src="js/patient-home-reference.js?v=1"></script><script src="js/dashboard-charts.js?v=1"></script><script src="js/patient-home.js?v=graphs-1"></script><script src="js/patient-model.js?v=3"></script><script src="js/patient-offline.js?v=3"></script><script src="js/patient-copy.js?v=3"></script><script src="js/timeline-push.js?v=1"></script><script src="js/timeline-assistance.js?v=2"></script><script src="js/timeline-trust.js?v=1"></script><script src="js/timeline-tools.js?v=1"></script><script src="js/patient-journey.js?v=6"></script><script src="js/patient-pending-model.js?v=3"></script><script src="js/patient-pending.js?v=5"></script><script src="js/pending-care-capabilities.js?v=3"></script><script src="js/patient-appointments-model.js?v=1"></script><script src="js/patient-connected.js?v=6"></script><script src="js/patient-hospital-stay.js?v=1"></script><script src="js/support-model.js?v=1"></script>
 <script src="js/patient-support.js?v=2"></script>
 <script src="js/birth-readiness.js?v=3"></script>
-<script src="js/clinical-dashboard.js?v=1"></script>
+<script src="js/clinical-dashboard.js?v=2"></script>
 <script src="js/patient-home-open.js?v=6"></script>
 <script src="js/patient-timeline-live.js?v=2"></script>
 <script src="/shared/child-development.js?v=1"></script><script src="js/child-growth-development.js?v=1"></script><script src="js/patient-dashboard.js?v=5"></script>
@@ -1924,10 +1923,10 @@ boot().then(function () { return renderMessagesFromAppts(); });
 <script src="js/facility-match-ui.js"></script>
 <script src="js/patient-ml.js"></script>
 <script src="js/facility-discovery.js"></script>
-<script src="js/care-chatbot.js?v=ai-needed-1"></script>
+<script src="js/care-chatbot.js?v=dhruv-voice-8"></script>
 <script src="js/delhi-demo-network.js?v=2"></script>
 <script src="js/delhi-patient-journey.js?v=4"></script>
 <script src="js/demo-request-patient.js?v=3"></script>
 <script src="js/patient-followup-state.js?v=3"></script>
-<script src="js/clinical-review.js?v=4"></script><script src="js/ai-usage.js?v=2"></script><script src="js/demo-care-messages.js?v=1"></script><script src="js/demo-guide.js?v=1"></script><script src="js/patient-tour.js?v=3"></script><script src="js/patient-daily.js?v=1"></script><script src="js/postpartum-infant.js?v=1"></script><script src="js/patient-report-birth.js?v=1"></script><script src="js/remote-followup.js?v=1"></script><script src="js/platform-rights.js?v=1"></script></body>
+<script src="js/clinical-review.js?v=4"></script><script src="js/ai-usage.js?v=2"></script><script src="js/demo-care-messages.js?v=1"></script><script src="js/demo-guide.js?v=1"></script><script src="js/patient-tour.js?v=3"></script><script src="/shared/daily-tracking.js?v=1"></script><script src="js/patient-daily-enhanced.js?v=2"></script><script src="js/patient-daily.js?v=2"></script><script src="js/postpartum-infant.js?v=1"></script><script src="/shared/birth-plan.js?v=2"></script><script src="/shared/birth-plan-experience.js?v=1"></script><script src="js/patient-report-birth.js?v=4"></script><script src="js/birth-plan-experience.js?v=1"></script><script src="js/remote-followup.js?v=1"></script><script src="js/platform-rights.js?v=1"></script></body>
 </html>

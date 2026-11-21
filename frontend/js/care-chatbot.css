@@ -1,83 +1,133 @@
-#daiCareChatbot{--daya-purple:#7546a1;--daya-ink:#30243c;position:fixed;right:22px;bottom:22px;z-index:2147483000;font-family:Inter,system-ui,sans-serif;color:var(--daya-ink);text-align:left;font-size:15px;line-height:1.5}
-#daiCareChatbot *{box-sizing:border-box}#daiCareChatbot button,#daiCareChatbot input,#daiCareChatbot select{font:inherit}#daiCareChatbot button{cursor:pointer}#daiCareChatbot button:focus-visible,#daiCareChatbot input:focus-visible,#daiCareChatbot select:focus-visible{outline:3px solid #b08be0;outline-offset:2px}#daiCareChatbot [hidden]{display:none!important}
-#daiCareChatbot .care-chatbot__launcher{display:flex;align-items:center;gap:10px;border:1px solid #e3d5ee;border-radius:99px;padding:13px 20px;background:#fff;color:#643b88;font-weight:800;box-shadow:0 10px 35px #50366525}#daiCareChatbot .daya-spark{display:grid;place-items:center;width:32px;height:32px;background:#eee4fa;border-radius:50%;font-size:21px}
-#daiCareChatbot .care-chatbot__panel{position:absolute;bottom:0;right:0;width:min(850px,calc(100vw - 44px));height:min(740px,calc(100dvh - 44px));max-height:calc(100dvh - 44px);display:flex;flex-direction:column;border:1px solid #e6dbef;border-radius:24px;background:#fff;box-shadow:0 24px 90px #25103835;overflow:hidden}
-#daiCareChatbot .care-chatbot__header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 22px;border-bottom:1px solid #eee5f4;background:#fff}#daiCareChatbot .care-chatbot__header strong{font-size:21px;font-weight:850;display:block}#daiCareChatbot .care-chatbot__header small{font-size:12px;color:#7d6d8b}#daiCareChatbot .daya-header-actions{display:flex;gap:12px;align-items:center}#daiCareChatbot select{border:1px solid #dfd2e9;border-radius:10px;background:#faf7fe;padding:7px;color:#553378;font-weight:700}#daiCareChatbot .care-chatbot__close{border:0;background:#f3edf8;border-radius:50%;width:34px;height:34px;font-size:24px;color:#684484}
-#daiCareChatbot .daya-body{display:grid;grid-template-columns:300px minmax(0,1fr);flex:1;min-height:0}#daiCareChatbot .daya-character{position:relative;display:flex;flex-direction:column;align-items:center;overflow:hidden;background:radial-gradient(ellipse at 50% 35%,#fcf9ff,#eee3f8 75%);padding:20px 12px 16px}#daiCareChatbot .daya-badge{font-size:10px;font-weight:750;letter-spacing:.06em;color:#785394;background:#ffffffa0;border:1px solid #dfd0ec;border-radius:99px;padding:5px 10px;z-index:1}#daiCareChatbot .daya-avatar{position:relative;flex:1;width:100%;min-height:0}#daiCareChatbot .daya-avatar canvas{position:absolute;inset:0;width:100%;height:100%}#daiCareChatbot .daya-avatar-status{position:absolute;top:50%;left:0;right:0;text-align:center;font-size:13px;color:#795a92}#daiCareChatbot .daya-character h3{margin:8px 0 0;font-size:23px;font-weight:850}#daiCareChatbot .daya-character p{margin:4px 0;font-size:12px;color:#7f6492;text-align:center}#daiCareChatbot .daya-state{font-size:12px;font-weight:750;color:#70418e;display:flex;gap:7px;align-items:center;margin-top:10px}#daiCareChatbot .daya-state::before{content:'';width:7px;height:7px;border-radius:50%;background:#8c69ad}
-#daiCareChatbot .daya-conversation{display:flex;flex-direction:column;min-height:0;min-width:0}#daiCareChatbot .care-chatbot__notice{padding:10px 18px;background:#faf7fd;border-bottom:1px solid #efe7f5;font-size:11px;color:#806691;margin:0}#daiCareChatbot .care-chatbot__feed{display:flex;flex-direction:column;gap:12px;overflow:auto;flex:1;min-height:100px;padding:18px;overscroll-behavior:contain}#daiCareChatbot .care-chatbot__message{max-width:94%;padding:12px 14px;border-radius:16px;font-size:14px;line-height:1.6;white-space:pre-line;overflow-wrap:anywhere;flex-shrink:0}#daiCareChatbot .care-chatbot__message--bot{background:#f2ebf8;align-self:flex-start;color:#42304e;border-bottom-left-radius:4px}#daiCareChatbot .care-chatbot__message--user{background:#7546a1;color:#fff;align-self:flex-end;border-bottom-right-radius:4px}#daiCareChatbot .daya-links{display:flex;flex-direction:column;gap:6px;margin-top:8px}#daiCareChatbot .daya-links a{color:#653c8c;font-size:12px;text-decoration:underline;font-weight:750}
-#daiCareChatbot .daya-topics{border-top:1px solid #eee6f5;padding:12px 18px 8px}#daiCareChatbot .daya-topics summary{font-size:12px;font-weight:800;color:#674082;cursor:pointer}#daiCareChatbot .daya-categories{display:flex;gap:6px;overflow:auto;padding:9px 0 7px}#daiCareChatbot .daya-categories button{border:1px solid #e4d8ee;border-radius:99px;background:#fff;color:#6b4b84;white-space:nowrap;padding:5px 9px;font-size:11px;font-weight:750}#daiCareChatbot .daya-categories button[aria-pressed=true]{background:#7546a1;color:#fff;border-color:#7546a1}#daiCareChatbot .care-chatbot__chips{display:flex;flex-direction:column;gap:5px;max-height:116px;overflow:auto}#daiCareChatbot .care-chatbot__chips button{padding:7px 9px;border:1px solid #eee5f4;border-radius:8px;background:#fcfaff;text-align:left;color:#61467a;font-size:12px;font-weight:650;white-space:normal}
-#daiCareChatbot .care-chatbot__form{display:flex;gap:7px;padding:11px 18px 8px;border-top:1px solid #f0e8f6}#daiCareChatbot .care-chatbot__form input{min-width:0;flex:1;border:1px solid #dfd2e8;border-radius:12px;padding:11px 12px;background:white;color:#30243c;font-size:14px}#daiCareChatbot .care-chatbot__form button{border:0;border-radius:12px;background:#7546a1;color:white;padding:9px 13px;font-weight:800}#daiCareChatbot .daya-tools{display:flex;align-items:center;gap:7px;padding:0 18px 12px}#daiCareChatbot .daya-tools button{border:1px solid #e6dcef;background:#fff;border-radius:8px;padding:6px 9px;font-size:11px;color:#72508c;font-weight:750}#daiCareChatbot .daya-tools button[aria-pressed=true]{background:#f1e9fa}#daiCareChatbot .daya-tools button:disabled{opacity:.5;cursor:default}#daiCareChatbot .daya-tools .daya-mic[aria-pressed=true]{background:#fff0f0;color:#9f3049}#daiCareChatbot .daya-help-status{font-size:10px;color:#897a93;margin-left:auto}
-@media(max-width:680px){#daiCareChatbot{right:10px;bottom:10px}#daiCareChatbot .care-chatbot__panel{width:calc(100vw - 20px);height:min(790px,calc(100dvh - 20px));max-height:calc(100dvh - 20px);border-radius:18px}#daiCareChatbot .care-chatbot__header{padding:10px 14px}#daiCareChatbot .daya-body{display:flex;flex-direction:column}#daiCareChatbot .daya-character{height:190px;min-height:160px;flex-shrink:0;padding:5px;background:radial-gradient(ellipse at 50% 65%,#fcf9ff,#eee3f8)}#daiCareChatbot .daya-avatar{width:180px;height:175px;flex:none;position:absolute;left:calc(50% - 140px);top:4px}#daiCareChatbot .daya-character h3{position:absolute;left:calc(50% + 30px);top:70px;font-size:17px}#daiCareChatbot .daya-character p{display:none}#daiCareChatbot .daya-badge{position:absolute;right:10px;top:10px;font-size:8px}#daiCareChatbot .daya-state{position:absolute;left:calc(50% + 30px);top:97px;font-size:10px}#daiCareChatbot .daya-conversation{flex:1;min-height:0}#daiCareChatbot .care-chatbot__feed{padding:12px;gap:8px}#daiCareChatbot .care-chatbot__message{font-size:13px;padding:9px 12px}#daiCareChatbot .care-chatbot__notice{padding:6px 12px;font-size:10px}#daiCareChatbot .daya-topics{padding:6px 12px}#daiCareChatbot .care-chatbot__chips{max-height:76px}#daiCareChatbot .care-chatbot__form{padding:8px 12px}#daiCareChatbot .daya-tools{padding:0 12px 9px}}
+/* Dhruv: the avatar, three modes and a conversation. */
+#daiCareChatbot{--dhruv-bg:#fff;--dhruv-soft:#f6f0fc;--dhruv-ink:#30243c;--dhruv-muted:#776586;--dhruv-line:#e7dcef;--dhruv-accent:#7546a1;position:fixed;right:20px;bottom:20px;z-index:2147482000;font-family:"Plus Jakarta Sans","Noto Sans Devanagari",Inter,system-ui,sans-serif;color:var(--dhruv-ink);font-size:14px}
+#daiCareChatbot *{box-sizing:border-box}
+#daiCareChatbot [hidden]{display:none!important}
+#daiCareChatbot button,#daiCareChatbot input,#daiCareChatbot select{font:inherit}
+#daiCareChatbot button{cursor:pointer}
+#daiCareChatbot button:disabled{opacity:.5;cursor:default}
+#daiCareChatbot button:focus-visible,#daiCareChatbot input:focus-visible,#daiCareChatbot select:focus-visible,#daiCareChatbot summary:focus-visible,#daiCareChatbot a:focus-visible{outline:2px solid #9364cd;outline-offset:3px}
+#daiCareChatbot .care-chatbot__launcher{display:flex;align-items:center;gap:10px;min-height:54px;padding:8px 20px 8px 10px;border:1px solid var(--dhruv-line);border-radius:30px;background:var(--dhruv-bg);color:var(--dhruv-accent);font-weight:750;box-shadow:0 12px 35px #50366525}
+#daiCareChatbot .daya-spark{display:grid;place-items:center;width:36px;height:36px;border-radius:50%;background:var(--dhruv-soft);font-size:24px}
+#daiCareChatbot .care-chatbot__panel{display:flex;flex-direction:column;width:min(850px,calc(100vw - 40px));height:min(680px,calc(100dvh - 40px));overflow:hidden;background:var(--dhruv-bg);border:1px solid var(--dhruv-line);border-radius:26px;box-shadow:0 28px 100px #25103835}
+#daiCareChatbot .care-chatbot__header{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:70px;padding:14px 22px;border-bottom:1px solid var(--dhruv-line);flex-shrink:0}
+#daiCareChatbot .care-chatbot__header strong{font-size:24px;letter-spacing:-.8px}
+#daiCareChatbot .daya-header-actions{display:flex;align-items:center;gap:10px}
+#daiCareChatbot .daya-header-actions select{max-width:120px;min-height:36px;border:1px solid var(--dhruv-line);border-radius:11px;background:var(--dhruv-bg);color:inherit;padding:6px 10px;font-size:12px}
+#daiCareChatbot .care-chatbot__close{width:36px;height:36px;border:0;border-radius:50%;background:var(--dhruv-soft);color:var(--dhruv-accent);font-size:25px;line-height:1}
+#daiCareChatbot .dhruv-about{position:relative}
+#daiCareChatbot .dhruv-about summary{list-style:none;display:grid;place-items:center;width:30px;height:36px;color:var(--dhruv-muted);cursor:pointer;font-size:18px}
+#daiCareChatbot .dhruv-about summary::-webkit-details-marker{display:none}
+#daiCareChatbot .dhruv-about p{position:absolute;right:-50px;top:35px;width:min(260px,70vw);z-index:5;background:var(--dhruv-bg);border:1px solid var(--dhruv-line);border-radius:12px;padding:14px;font-size:12px;line-height:1.7;box-shadow:0 8px 28px #25103825}
+#daiCareChatbot .daya-body{display:grid;grid-template-columns:36% minmax(0,1fr);min-height:0;flex:1}
+#daiCareChatbot .daya-character{display:flex;flex-direction:column;align-items:center;position:relative;min-height:0;overflow:hidden;background:radial-gradient(ellipse at 50% 45%,#fcf9ff,#eee3f8);border-right:1px solid var(--dhruv-line)}
+#daiCareChatbot .daya-character::before{content:'';position:absolute;width:235px;height:235px;top:24%;border:1px solid #dfd0ec;border-radius:50%;box-shadow:0 0 0 22px #ffffff30}
+#daiCareChatbot .daya-avatar{position:relative;width:100%;height:100%;flex:1;min-height:0}
+#daiCareChatbot .daya-avatar canvas{display:block;width:100%;height:100%}
+#daiCareChatbot .daya-avatar-status{position:absolute;inset:45% 10px auto;text-align:center;font-size:11px;color:#77528f}
+#daiCareChatbot .daya-avatar--static::before{content:'ध';position:absolute;inset:30% 0 auto;text-align:center;font-size:86px;font-weight:800;color:#7546a1}
+#daiCareChatbot .daya-avatar--static .daya-avatar-status{top:55%}
+#daiCareChatbot .daya-state{position:absolute;bottom:35px;padding:6px 12px;border-radius:20px;background:#fff9;color:#684484;font-size:11px;max-width:95%;text-align:center}
+#daiCareChatbot .daya-credit{position:absolute;bottom:10px;color:#77528f;font-size:8px;text-decoration:underline}
+#daiCareChatbot .daya-conversation{display:flex;flex-direction:column;min-width:0;min-height:0;background:var(--dhruv-bg)}
+#daiCareChatbot .dhruv-modes{padding:14px 18px 10px;flex-shrink:0}
+#daiCareChatbot .dhruv-input-mode{width:100%;min-height:42px;border:1px solid var(--dhruv-line);border-radius:13px;background:var(--dhruv-soft);color:var(--dhruv-accent);font-weight:700;padding:9px 12px;cursor:pointer;font-size:13px}
+#daiCareChatbot .care-chatbot__feed{display:flex;flex-direction:column;gap:12px;flex:1;min-height:70px;overflow-y:auto;overscroll-behavior:contain;padding:18px}
+#daiCareChatbot .care-chatbot__message{max-width:94%;padding:11px 14px;border-radius:17px;font-size:13px;line-height:1.7;overflow-wrap:anywhere;white-space:pre-line;flex-shrink:0}
+#daiCareChatbot .care-chatbot__message--bot{align-self:flex-start;background:var(--dhruv-soft);border-bottom-left-radius:5px}
+#daiCareChatbot .care-chatbot__message--user{align-self:flex-end;background:var(--dhruv-accent);color:#fff;border-bottom-right-radius:5px}
+#daiCareChatbot .dhruv-reply-text{margin:0}
+#daiCareChatbot .daya-links{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;font-size:11px}
+#daiCareChatbot .daya-links a{color:inherit;text-decoration:underline}
+#daiCareChatbot .care-chatbot__chips{display:flex;gap:7px;padding:5px 18px 12px;overflow-x:auto;flex-shrink:0;scrollbar-width:thin}
+#daiCareChatbot .care-chatbot__chips button{min-height:36px;white-space:nowrap;border:1px solid var(--dhruv-line);border-radius:20px;background:var(--dhruv-bg);color:var(--dhruv-accent);padding:6px 10px;font-size:11px}
+#daiCareChatbot .care-chatbot__form{display:flex;gap:8px;padding:12px 18px 18px;border-top:1px solid var(--dhruv-line);flex-shrink:0}
+#daiCareChatbot .care-chatbot__form input{min-width:0;flex:1;border:1px solid var(--dhruv-line);border-radius:15px;background:var(--dhruv-bg);color:inherit;padding:12px;font-size:13px}
+#daiCareChatbot .care-chatbot__form button,#daiCareChatbot .daya-mic{min-height:46px;border:0;border-radius:15px;background:var(--dhruv-accent);color:#fff;padding:10px 17px;font-weight:750}
+#daiCareChatbot .dhruv-voice-input{padding:12px 18px 18px;border-top:1px solid var(--dhruv-line);flex-shrink:0}
+#daiCareChatbot .daya-mic{width:100%;font-size:14px}
+#daiCareChatbot .daya-mic[aria-pressed=true]{box-shadow:0 0 0 3px #7546a11a}
+#daiCareChatbot .daya-help-status,#daiCareChatbot .daya-voice-error{margin:0 18px 10px;font-size:11px;line-height:1.6;color:var(--dhruv-muted);max-height:100px;overflow:auto;flex-shrink:0}
+#daiCareChatbot .dhruv-device-fallback{margin:0 18px 8px;align-self:flex-start;border:1px solid var(--dhruv-line);border-radius:10px;padding:7px 10px;background:var(--dhruv-soft);color:var(--dhruv-accent);font-size:11px}
+#daiCareChatbot .dhruv-sos-help{display:flex;gap:10px;flex-wrap:wrap;font-size:12px}
+#daiCareChatbot .dhruv-sos-help a,#daiCareChatbot .dhruv-sos-help button{border:1px solid var(--dhruv-line);border-radius:10px;color:var(--dhruv-accent);background:var(--dhruv-soft);padding:8px;text-decoration:none;font:inherit}
+body[data-home-theme=dark] #daiCareChatbot{--dhruv-bg:#211b2c;--dhruv-soft:#30243f;--dhruv-ink:#eee5f7;--dhruv-muted:#c5afd6;--dhruv-line:#4d3b60;--dhruv-accent:#a87bd0}
+body[data-home-theme=dark] #daiCareChatbot .daya-character{background:radial-gradient(ellipse at 50% 45%,#3b2b4d,#261b32)}
+body[data-home-theme=dark] #daiCareChatbot :is(.daya-state,.daya-credit,.daya-avatar-status){color:#d9c4ed}
+body[data-home-theme=dark] #daiCareChatbot .daya-state{background:#211b2ccc}
+@media(max-width:680px){
+ #daiCareChatbot{right:10px;bottom:10px}
+ #daiCareChatbot .care-chatbot__panel{width:calc(100vw - 20px);height:min(740px,calc(100dvh - 20px));border-radius:22px}
+ #daiCareChatbot .care-chatbot__header{min-height:60px;padding:10px 16px}
+ #daiCareChatbot .care-chatbot__header strong{font-size:22px}
+ #daiCareChatbot .daya-body{display:flex;flex-direction:column}
+ #daiCareChatbot .daya-character{height:160px;min-height:160px;border-right:0;border-bottom:1px solid var(--dhruv-line)}
+ #daiCareChatbot .daya-character::before{width:120px;height:120px;top:10px;box-shadow:none}
+ #daiCareChatbot .daya-avatar{width:170px;height:160px;flex:none}
+ #daiCareChatbot .daya-avatar--static::before{font-size:58px;top:12px}
+ #daiCareChatbot .daya-avatar--static .daya-avatar-status{top:90px;font-size:9px}
+ #daiCareChatbot .daya-state{right:10px;bottom:32px;font-size:9px}
+ #daiCareChatbot .daya-credit{right:10px;bottom:10px;font-size:7px}
+ #daiCareChatbot .daya-conversation{flex:1;min-height:0}
+ #daiCareChatbot .dhruv-modes{padding:10px 13px 4px}
+ #daiCareChatbot .care-chatbot__feed{padding:13px;gap:9px}
+ #daiCareChatbot .care-chatbot__chips{padding-inline:13px;padding-bottom:8px}
+ #daiCareChatbot .care-chatbot__form,#daiCareChatbot .dhruv-voice-input{padding:10px 13px 13px}
+}
+@media(max-width:680px) and (max-height:700px){#daiCareChatbot .daya-character{height:105px;min-height:105px}#daiCareChatbot .daya-avatar{height:105px}#daiCareChatbot .daya-avatar--static::before{top:4px;font-size:44px}#daiCareChatbot .daya-avatar--static .daya-avatar-status{top:60px}}
 @media(prefers-reduced-motion:reduce){#daiCareChatbot *{animation:none!important;transition:none!important}}
 
-#daiCareChatbot .daya-credit{font-size:9px;color:#8b719e;text-decoration:underline;margin-top:8px}@media(max-width:680px){#daiCareChatbot .daya-credit{position:absolute;bottom:5px;right:10px;font-size:8px}}
+#daiCareChatbot .dhruv-play-reply{margin:0 18px 10px;min-height:42px;border:0;border-radius:12px;background:var(--dhruv-accent);color:#fff;padding:8px 14px;font:inherit;font-weight:700;cursor:pointer}
+/* Voice conversation: Dhruv identity, state animation and one microphone control. */
+#daiCareChatbot .dhruv-bubble-identity{display:none}
+#daiCareChatbot[data-input-mode=conversation] .daya-conversation{background:linear-gradient(180deg,var(--dhruv-bg),var(--dhruv-soft))}
+#daiCareChatbot .dhruv-voice-heading{flex-shrink:0;text-align:center;padding:2px 18px 5px}
+#daiCareChatbot .dhruv-voice-heading h2{margin:0 0 3px;font-size:20px;line-height:1.4;letter-spacing:-.4px}
+#daiCareChatbot .dhruv-waveform{display:flex;align-items:center;justify-content:center;gap:5px;height:58px;overflow:hidden}
+#daiCareChatbot .dhruv-waveform span{display:block;width:5px;flex-shrink:0;height:var(--bar-height);border-radius:8px;background:var(--dhruv-accent);opacity:.35;transform:scaleY(.3);transform-origin:center}
+#daiCareChatbot .dhruv-voice-status{font-size:12px;font-weight:650;color:var(--dhruv-muted);min-height:18px;margin:0}
+#daiCareChatbot[data-voice-state=listening] .dhruv-waveform span,#daiCareChatbot[data-voice-state=speaking] .dhruv-waveform span{opacity:.85;animation:dhruv-voice-wave .65s ease-in-out infinite alternate;animation-delay:var(--bar-delay)}
+#daiCareChatbot[data-voice-state=speaking] .dhruv-waveform span{animation-duration:.9s}
+#daiCareChatbot[data-input-mode=conversation] .daya-state{display:none}
+#daiCareChatbot[data-input-mode=conversation] .care-chatbot__message{max-width:91%;position:relative;border:1px solid var(--dhruv-line);box-shadow:0 3px 12px #50366508;padding:10px 13px}
+#daiCareChatbot[data-input-mode=conversation] .care-chatbot__message--bot{background:var(--dhruv-bg);border-bottom-left-radius:5px}
+#daiCareChatbot[data-input-mode=conversation] .care-chatbot__message--user{background:var(--dhruv-soft);color:var(--dhruv-ink);border-bottom-right-radius:5px}
+#daiCareChatbot[data-input-mode=conversation] .dhruv-bubble-identity{display:block;font-size:10px;font-weight:750;letter-spacing:.02em;color:var(--dhruv-accent);margin-bottom:3px}
+#daiCareChatbot[data-input-mode=conversation] .dhruv-voice-input{position:relative;display:flex;justify-content:center;align-items:center;flex-direction:column;gap:10px;border-top:0;min-height:132px;padding:12px 18px 14px}
+#daiCareChatbot[data-input-mode=conversation] .daya-mic{display:grid;place-items:center;position:relative;z-index:1;width:72px;height:72px;min-height:72px;padding:18px;border:1px solid #fff9;border-radius:50%;background:linear-gradient(145deg,#a477cb,#7546a1);color:#fff;box-shadow:0 6px 20px #7546a12b;transition:transform .18s,box-shadow .18s}
+#daiCareChatbot[data-input-mode=conversation] .daya-mic:hover{transform:translateY(-2px);box-shadow:0 9px 26px #7546a13b}
+#daiCareChatbot .daya-mic svg{display:block;width:32px;height:32px}
+#daiCareChatbot .dhruv-mic-orbit{position:absolute;width:94px;height:94px;top:1px;border:1px solid var(--dhruv-line);border-radius:50%;box-shadow:0 0 0 9px #a477cb0c,0 0 0 18px #a477cb07;pointer-events:none}
+#daiCareChatbot .dhruv-mic-caption{font-size:12px;font-weight:700;line-height:1.5;color:var(--dhruv-accent)}
+#daiCareChatbot[data-voice-state=listening] .dhruv-mic-orbit{animation:dhruv-mic-breathe 1.5s ease-in-out infinite}
+#daiCareChatbot .dhruv-sr-only{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@keyframes dhruv-voice-wave{from{transform:scaleY(.3)}to{transform:scaleY(1)}}
+@keyframes dhruv-mic-breathe{0%,100%{transform:scale(.96);opacity:.65}50%{transform:scale(1.06);opacity:1}}
+@media(max-width:680px){
+ #daiCareChatbot[data-input-mode=conversation] .daya-character{height:105px;min-height:105px}
+ #daiCareChatbot[data-input-mode=conversation] .daya-avatar{width:120px;height:105px}
+ #daiCareChatbot[data-input-mode=conversation] .daya-avatar--static::before{font-size:42px;top:0}
+ #daiCareChatbot[data-input-mode=conversation] .daya-avatar--static .daya-avatar-status{top:64px;font-size:8px}
+ #daiCareChatbot[data-input-mode=conversation] .daya-credit{bottom:6px;font-size:7px}
+ #daiCareChatbot[data-input-mode=conversation] .dhruv-modes{padding:8px 13px 3px}
+ #daiCareChatbot .dhruv-voice-heading{padding:0 13px 3px}
+ #daiCareChatbot .dhruv-voice-heading h2{font-size:17px;margin:0}
+ #daiCareChatbot .dhruv-waveform{height:42px;gap:4px}
+ #daiCareChatbot .dhruv-waveform span{max-height:38px;width:4px}
+ #daiCareChatbot .dhruv-voice-status{font-size:11px;min-height:17px}
+ #daiCareChatbot[data-input-mode=conversation] .dhruv-voice-input{min-height:112px;padding:8px 13px 10px;gap:8px}
+ #daiCareChatbot[data-input-mode=conversation] .daya-mic{width:60px;height:60px;min-height:60px;padding:15px}
+ #daiCareChatbot .daya-mic svg{width:28px;height:28px}
+ #daiCareChatbot .dhruv-mic-orbit{width:78px;height:78px;top:0;box-shadow:0 0 0 7px #a477cb0c}
+ #daiCareChatbot .dhruv-mic-caption{font-size:11px}
+ #daiCareChatbot[data-input-mode=conversation] .care-chatbot__feed{padding-block:8px;gap:8px}
+}
+@media(max-width:680px) and (max-height:700px){
+ #daiCareChatbot[data-input-mode=conversation] .daya-character{height:80px;min-height:80px}
+ #daiCareChatbot[data-input-mode=conversation] .daya-avatar{height:80px;width:100px}
+ #daiCareChatbot[data-input-mode=conversation] .daya-avatar--static::before{font-size:34px}
+ #daiCareChatbot[data-input-mode=conversation] .daya-avatar--static .daya-avatar-status{top:45px}
+}
 
-@media(max-height:600px){#daiCareChatbot .care-chatbot__header{padding:8px 14px}#daiCareChatbot .care-chatbot__feed{min-height:60px}#daiCareChatbot .care-chatbot__notice{font-size:10px;padding:5px 12px}#daiCareChatbot .daya-topics{padding:5px 12px}#daiCareChatbot .care-chatbot__chips{max-height:65px}}
-@media(max-width:680px) and (max-height:600px){#daiCareChatbot .daya-character{height:100px;min-height:100px}#daiCareChatbot .daya-avatar{height:98px;top:0}#daiCareChatbot .daya-character h3{top:30px;font-size:14px}#daiCareChatbot .daya-state{top:48px;font-size:9px}#daiCareChatbot .daya-badge{font-size:7px;top:4px;padding:2px 5px}}
-/* Override the older shared widget spacing on patient/doctor pages. */
-#daiCareChatbot .care-chatbot__header,#daiCareChatbot .care-chatbot__notice,#daiCareChatbot .care-chatbot__form,#daiCareChatbot .daya-tools,#daiCareChatbot .daya-topics{flex-shrink:0}
-#daiCareChatbot .daya-tools button{margin:0;white-space:nowrap;flex-shrink:0;line-height:1.4}
-#daiCareChatbot .care-chatbot__feed{min-height:0}
-
-#daiCareChatbot .daya-voice-error{margin:0;padding:9px 16px;background:#fff0f2;color:#9c2447;font-size:12px;line-height:1.5;flex-shrink:0;border-bottom:1px solid #f3d7df}
-
-/* Dhruv: same avatar and purple palette, a calmer companion workspace. */
-#daiCareChatbot{font-family:"Plus Jakarta Sans","Noto Sans Devanagari",Inter,system-ui,sans-serif}
-#daiCareChatbot .care-chatbot__launcher{padding:10px 20px 10px 11px;gap:11px;box-shadow:0 12px 38px #50366525;font-size:14px;text-align:left}
-#daiCareChatbot .care-chatbot__launcher small{display:block;font-size:9px;line-height:1.5;font-weight:500;color:#7d6d8b;letter-spacing:.4px}
-#daiCareChatbot .daya-spark{width:40px;height:40px;font-size:24px}
-#daiCareChatbot .care-chatbot__panel{width:min(940px,calc(100vw - 44px));height:min(770px,calc(100dvh - 44px));border-radius:30px;box-shadow:0 30px 110px #25103835}
-#daiCareChatbot .care-chatbot__header{padding:17px 23px;background:#fff;min-height:85px}
-#daiCareChatbot .dhruv-identity{display:flex;align-items:center;gap:13px}
-#daiCareChatbot .dhruv-monogram{display:grid;place-items:center;width:44px;height:44px;border-radius:16px;background:#f2ebf8;color:#7546a1;font-size:26px;font-weight:800;flex-shrink:0}
-#daiCareChatbot .care-chatbot__header strong{font-size:23px;letter-spacing:-.8px;line-height:1.35}
-#daiCareChatbot .care-chatbot__header small{font-size:11px;line-height:1.8;color:#70418e;font-weight:650}
-#daiCareChatbot .dhruv-online{display:inline-block;width:6px;height:6px;background:#8c69ad;border-radius:50%;vertical-align:middle;margin-left:6px}
-#daiCareChatbot .daya-header-actions select{font-size:12px;padding:10px 12px;border-radius:13px;min-height:42px}
-#daiCareChatbot .care-chatbot__close{width:40px;height:40px}
-#daiCareChatbot .daya-body{grid-template-columns:325px minmax(0,1fr)}
-#daiCareChatbot .daya-character{padding:22px 18px 17px;background:radial-gradient(ellipse at 50% 37%,#fcf9ff 0%,#eee3f8 72%);border-right:1px solid #e6dbef;isolation:isolate}
-#daiCareChatbot .daya-character::before{content:'';position:absolute;width:270px;height:270px;left:calc(50% - 135px);top:17%;border:1px solid #dfd0ec;border-radius:50%;z-index:-1;box-shadow:0 0 0 24px #ffffff30,0 0 0 50px #ffffff20}
-#daiCareChatbot .daya-badge{font-size:8px;letter-spacing:1px;padding:7px 12px;font-weight:700}
-#daiCareChatbot .daya-avatar{min-height:230px;margin-top:5px}
-#daiCareChatbot .dhruv-eyebrow{font-size:8px;font-weight:800;letter-spacing:1.5px;color:#785394;text-align:center;line-height:1.8}
-#daiCareChatbot .daya-character h3{font-size:27px;letter-spacing:-1.1px;line-height:1.2;margin:8px 0 10px}
-#daiCareChatbot .daya-character p{font-size:11px;line-height:1.9;max-width:240px;color:#72508c;margin:0}
-#daiCareChatbot .daya-state{padding:9px 14px;border-radius:20px;background:#ffffffa0;border:1px solid #dfd0ec;font-size:10px;margin-top:16px;min-height:34px}
-#daiCareChatbot .daya-credit{font-size:8px;margin-top:12px}
-#daiCareChatbot .daya-conversation{background:linear-gradient(160deg,#fff,#fcfaff)}
-#daiCareChatbot .care-chatbot__notice{padding:11px 23px;font-size:10px;line-height:1.8;color:#806691;background:#faf7fd}
-#daiCareChatbot .care-chatbot__feed{padding:23px;gap:17px;scrollbar-width:thin}
-#daiCareChatbot .care-chatbot__message{font-size:13px;line-height:1.85;border-radius:21px;padding:17px 19px;max-width:95%;white-space:normal;box-shadow:0 4px 14px -10px #50366525}
-#daiCareChatbot .care-chatbot__message--bot{background:#fff;border:1px solid #e6dbef;border-bottom-left-radius:6px}
-#daiCareChatbot .care-chatbot__message--user{background:linear-gradient(120deg,#7546a1,#643b88);border-bottom-right-radius:6px;padding:13px 17px}
-#daiCareChatbot .dhruv-reply-label{display:block;font-size:8px;font-weight:800;letter-spacing:1.1px;color:#806691;margin-bottom:9px}
-#daiCareChatbot .dhruv-reply-text{white-space:pre-line;font:inherit;line-height:inherit;margin:0}
-#daiCareChatbot .dhruv-reply-actions{display:flex;gap:10px;flex-wrap:wrap;border-top:1px solid #eee5f4;padding-top:10px;margin-top:13px}
-#daiCareChatbot .dhruv-reply-actions button{border:0;background:#f2ebf8;color:#643b88;border-radius:12px;font-size:10px;padding:8px 12px;min-height:36px;font-weight:700}
-#daiCareChatbot .daya-links{gap:8px;margin-top:13px}
-#daiCareChatbot .daya-links a{font-size:11px;line-height:1.7}
-#daiCareChatbot .daya-topics{padding:13px 23px;background:#fff}
-#daiCareChatbot .daya-topics summary{font-size:11px;min-height:24px;line-height:2}
-#daiCareChatbot .daya-categories{gap:8px;padding:12px 0 10px}
-#daiCareChatbot .daya-categories button{font-size:10px;padding:8px 12px;min-height:36px}
-#daiCareChatbot .care-chatbot__chips{gap:7px;max-height:130px}
-#daiCareChatbot .care-chatbot__chips button{border-radius:13px;font-size:11px;padding:10px 13px;min-height:40px;line-height:1.7}
-#daiCareChatbot .care-chatbot__form{padding:15px 23px 10px;gap:9px;background:#fff}
-#daiCareChatbot .care-chatbot__form input{border-radius:16px;padding:13px 15px;min-height:47px;background:#fcfaff;font-size:12px}
-#daiCareChatbot .care-chatbot__form button{border-radius:16px;padding:12px 18px;min-height:47px;font-size:12px}
-#daiCareChatbot .daya-tools{padding:0 23px 17px;gap:7px;flex-wrap:wrap;background:#fff}
-#daiCareChatbot .daya-tools button{font-size:10px;min-height:37px;border-radius:12px;padding:9px 11px}
-#daiCareChatbot .daya-tools .daya-mic{font-size:12px;min-height:43px;border-radius:16px;background:#f2ebf8;color:#643b88;padding:10px 15px}
-#daiCareChatbot .daya-tools .daya-mic[aria-pressed=true]{background:#7546a1;color:#fff;box-shadow:0 0 0 5px #eee4fa}
-#daiCareChatbot .daya-help-status{flex-basis:100%;font-size:9px;text-align:right;margin-top:3px}
-#daiCareChatbot .care-chatbot__message[data-safety=true]{box-shadow:none;border-width:2px}
-@media(max-width:680px){#daiCareChatbot .care-chatbot__panel{width:calc(100vw - 20px);height:calc(100dvh - 20px);border-radius:22px}#daiCareChatbot .care-chatbot__header{padding:12px 15px;min-height:74px}#daiCareChatbot .care-chatbot__header strong{font-size:20px}#daiCareChatbot .dhruv-identity{gap:9px}#daiCareChatbot .dhruv-monogram{width:36px;height:36px;font-size:23px;border-radius:13px}#daiCareChatbot .daya-header-actions{gap:7px}#daiCareChatbot .daya-header-actions select{padding:8px;font-size:11px}#daiCareChatbot .daya-character{height:185px;min-height:185px;padding:8px;border-right:0;border-bottom:1px solid #e6dbef}#daiCareChatbot .daya-character::before{width:150px;height:150px;top:12px;left:calc(50% - 150px);box-shadow:0 0 0 15px #ffffff30}#daiCareChatbot .daya-avatar{width:180px;height:178px;min-height:0;top:0;left:calc(50% - 160px);margin:0}#daiCareChatbot .daya-character h3{left:calc(50% + 15px);top:66px;font-size:20px;margin:0}#daiCareChatbot .dhruv-eyebrow{display:none}#daiCareChatbot .daya-character p{display:none}#daiCareChatbot .daya-state{left:calc(50% + 15px);top:87px;font-size:9px;padding:7px 9px;margin-top:10px;max-width:45%}#daiCareChatbot .daya-badge{top:8px;right:10px;font-size:7px;padding:4px 7px}#daiCareChatbot .daya-credit{bottom:6px;font-size:7px;right:10px}#daiCareChatbot .care-chatbot__notice{font-size:9px;padding:8px 14px}#daiCareChatbot .care-chatbot__feed{padding:15px;gap:12px}#daiCareChatbot .care-chatbot__message{font-size:12px;padding:13px 15px}#daiCareChatbot .daya-topics{padding:8px 15px}#daiCareChatbot .care-chatbot__chips{max-height:92px}#daiCareChatbot .care-chatbot__form{padding:10px 15px 8px}#daiCareChatbot .daya-tools{padding:0 15px 11px;gap:6px}#daiCareChatbot .daya-tools button{font-size:9px;padding:7px 9px}#daiCareChatbot .daya-help-status{font-size:8px}}
-@media(max-height:620px){#daiCareChatbot .daya-character{padding-block:10px}#daiCareChatbot .daya-avatar{min-height:130px}#daiCareChatbot .daya-character h3{font-size:20px}#daiCareChatbot .daya-character p{font-size:9px}#daiCareChatbot .daya-state{margin-top:7px;padding-block:5px}#daiCareChatbot .care-chatbot__header{min-height:65px;padding-block:9px}#daiCareChatbot .daya-tools{padding-bottom:9px}#daiCareChatbot .care-chatbot__notice{padding-block:6px}}
-@media(max-width:680px) and (max-height:620px){#daiCareChatbot .daya-character{height:110px;min-height:110px}#daiCareChatbot .daya-avatar{height:110px;min-height:0;top:0}#daiCareChatbot .daya-character h3{top:33px;font-size:17px}#daiCareChatbot .daya-state{top:54px;margin-top:5px}#daiCareChatbot .daya-credit{bottom:3px}#daiCareChatbot .daya-badge{font-size:6px}}
-#daiCareChatbot .dhruv-journey{display:block;font-size:10px;text-align:center;color:#785394;border:1px dashed #dfd0ec;border-radius:16px;padding:6px 12px;margin-top:9px;max-width:95%}@media(max-width:680px){#daiCareChatbot .dhruv-journey{position:absolute;left:calc(50% + 15px);top:138px;max-width:44%;margin:0;font-size:8px;padding:4px 8px}}@media(max-width:680px) and (max-height:620px){#daiCareChatbot .dhruv-journey{display:none}}
-
-/* Explicit local/external routing and public-content reuse. */
-.daya-routing{margin:8px 0;padding:10px;border:1px solid #ccdcd6;border-radius:12px;font-size:13px;max-width:100%;overflow-wrap:anywhere}
-.daya-routing summary{cursor:pointer;font-weight:600}.daya-routing label{display:block;margin:10px 0}.daya-routing select{max-width:100%;padding:8px}.daya-routing button{min-height:44px;max-width:100%;white-space:normal;padding:8px;border-radius:8px}.daya-routing input[type=checkbox]{width:20px;height:20px;vertical-align:middle}.daya-route-label{display:block;margin:6px 0;color:#416458}
-#daiCareChatbot .daya-routing{flex:0 0 auto;max-height:45%;overflow:auto;margin:6px 12px}
+#daiCareChatbot .dhruv-bubble-play{display:none}
+#daiCareChatbot[data-input-mode=conversation] .dhruv-bubble-play{display:grid;place-items:center;width:28px;height:28px;min-height:28px;border:1px solid var(--dhruv-line);border-radius:50%;background:var(--dhruv-soft);color:var(--dhruv-accent);font-size:10px;padding:0;margin-top:8px}
+#daiCareChatbot .dhruv-live-transcript{border-style:dashed!important;opacity:.8}

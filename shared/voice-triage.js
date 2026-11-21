@@ -282,7 +282,7 @@
       unsure_head: 'I noted what you said. If you are worried about anything, please call your doctor or the facility. You do not need to be sure.',
       review: 'A clinician should review this note. I only guide, I do not diagnose.',
       listen_prompt: 'Please tell me what you are feeling.',
-      guide_note: 'I am Dai Didi, a voice guide. I do not diagnose.'
+      guide_note: 'I am Dhruv, your care guide. I do not diagnose.'
     },
     hinglish: {
       emergency_head: 'Yeh gambhir ho sakta hai. Abhi emergency madad lijiye. 112 par call kijiye, ya 108 agar aapke ilaake mein chalta hai.',
@@ -311,7 +311,7 @@
       unsure_head: 'Maine aapki baat note kar li. Agar kisi bhi baat ki chinta ho to doctor ya facility ko call kijiye. Pakka hona zaroori nahi hai.',
       review: 'Kisi clinician ko yeh note dekhna chahiye. Main sirf margdarshan deti hoon, diagnosis nahi.',
       listen_prompt: 'Kripya bataiye aap kya mehsoos kar rahi hain.',
-      guide_note: 'Main Dai Didi hoon, ek voice guide. Main diagnosis nahi karti.'
+      guide_note: 'Main Dhruv hoon, aapka care guide. Main diagnosis nahi karta.'
     },
     hi: {
       emergency_head: 'यह गंभीर हो सकता है। अभी आपातकालीन मदद लीजिए। 112 पर कॉल कीजिए, या 108 अगर आपके इलाके में चलता है।',
@@ -340,7 +340,7 @@
       unsure_head: 'मैंने आपकी बात नोट कर ली। अगर किसी भी बात की चिंता हो तो डॉक्टर या स्वास्थ्य केंद्र को कॉल कीजिए। पक्का होना ज़रूरी नहीं है।',
       review: 'किसी क्लिनिशियन को यह नोट देखना चाहिए। मैं सिर्फ़ मार्गदर्शन करती हूँ, निदान नहीं।',
       listen_prompt: 'कृपया बताइए आप क्या महसूस कर रही हैं।',
-      guide_note: 'मैं दाई दीदी हूँ, एक आवाज़ वाली गाइड। मैं निदान नहीं करती।'
+      guide_note: 'मैं ध्रुव हूँ, आपका देखभाल साथी। मैं निदान नहीं करता।'
     }
   };
 

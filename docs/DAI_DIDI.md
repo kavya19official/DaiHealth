@@ -1,3 +1,5 @@
+> Patient UI update: DAI Didi now runs inside **Ask Dhruv**. See [Unified Dhruv](UNIFIED-DHRUV.md) for current conversation modes, privacy and test commands. Internal guide/IVR names below remain for compatibility.
+
 # Dai Didi — voice-first care guide
 
 Talk instead of typing. The mother speaks in Hindi, Hinglish or English; Didi asks follow-ups, flags danger signs
@@ -20,7 +22,7 @@ feature-phone users the same guide.
 | File | Role |
 |---|---|
 | `shared/voice-triage.js` | Pure engine (browser + Node + phone). `processTurn(state, text)` |
-| `frontend/js/dai-didi.js/.css` | Panel: mic, live transcript, spoken reply, entry card, emergency hand-off, phone simulator |
+| `frontend/js/dai-didi.js` | Guide adapter inside Dhruv: structured preview, explicit save, SOS hand-off and phone simulator |
 | `frontend/js/care-extensions.js` | `openSOS(preset)` opens the existing emergency flow pre-filled |
 | `backend/didiVoice.js` | Save/list/delete entries, doctor read, phone webhook |
 | `backend/ivr/provider.js` | IVR interface: `stub` (demo), `twilio` (TwiML + signature check), `exotel` (placeholder) |
@@ -28,7 +30,7 @@ feature-phone users the same guide.
 | `backend/didiVoice.test.js` | 19 tests |
 
 ## Demo script
-1. Dashboard -> **Dai Didi** (bottom-left). Language Hindi.
+1. Dashboard -> **Ask Dhruv**. Choose Hindi and Voice conversation, or type.
 2. Tap the mic and say *"sir dard hai aur nazar dhundhli hai"* (or tap the demo chip).
 3. Didi flags emergency + a *possible pre-eclampsia warning* (a warning, not a diagnosis), speaks the reply,
    asks for a BP reading **after** telling her to call 112, and opens the emergency flow pre-filled.
@@ -37,7 +39,7 @@ feature-phone users the same guide.
 
 ## Config
 - Voice out: existing `GEMINI_API_KEY` (+ optional `GEMINI_TTS_MODEL/VOICE`). Without it the browser's own
-  Hindi voice is used and labelled as a fallback.
+  Hindi voice can be explicitly selected with Use device voice.
 - Voice in: browser speech recognition (Chrome/Edge/Safari; audio may be processed by the browser vendor).
   Typing always works.
 - Phone: stub is on outside production (`DAI_IVR_STUB=true` to force on). Twilio: `TWILIO_AUTH_TOKEN`,
