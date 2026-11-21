@@ -1,0 +1,73 @@
+/* Focused doctor views for Birth Readiness and Care Timeline. */
+.doctor-workspace .drx-root{display:grid;gap:22px;color:var(--dw-text)}
+.doctor-workspace .drx-hero{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:24px;align-items:center;padding:28px 30px;border:1px solid var(--dw-border);border-radius:25px;background:linear-gradient(125deg,var(--dw-card) 0%,var(--dw-soft) 100%);overflow:hidden}
+.doctor-workspace .drx-kicker{display:block;color:var(--brand);font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:9px}
+.doctor-workspace .drx-hero h1{font-size:clamp(25px,2.5vw,36px);line-height:1.2;letter-spacing:-1px;margin:0 0 9px;color:var(--dw-text)}
+.doctor-workspace .drx-hero p{font-size:14px;line-height:1.75;color:var(--dw-muted);max-width:720px;margin:0}
+.doctor-workspace .drx-hero-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.doctor-workspace .drx-btn{border:1px solid var(--dw-border);border-radius:12px;background:var(--dw-card);color:var(--brand);font:inherit;font-size:13px;font-weight:750;padding:11px 16px;min-height:42px;cursor:pointer}
+.doctor-workspace .drx-btn--primary{background:var(--brand);border-color:var(--brand);color:#fff}
+.doctor-workspace .drx-btn:hover{transform:translateY(-1px);box-shadow:0 8px 20px -15px #40206088}
+.doctor-workspace .drx-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.doctor-workspace .drx-stat{padding:18px 20px;border:1px solid var(--dw-border);border-radius:18px;background:var(--dw-card);min-height:112px}
+.doctor-workspace .drx-stat span{display:block;font-size:13px;color:var(--dw-muted);line-height:1.5}
+.doctor-workspace .drx-stat strong{display:block;font-size:29px;line-height:1.2;margin:9px 0 3px;letter-spacing:-1px;color:var(--dw-text)}
+.doctor-workspace .drx-stat small{font-size:12px;color:var(--dw-muted);line-height:1.5}
+.doctor-workspace .drx-toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:15px 17px;border:1px solid var(--dw-border);border-radius:17px;background:var(--dw-card)}
+.doctor-workspace .drx-search,.doctor-workspace .drx-select{border:1px solid var(--dw-border);border-radius:11px;background:var(--dw-bg);color:var(--dw-text);font:inherit;font-size:14px;padding:11px 13px;min-height:42px}
+.doctor-workspace .drx-search{flex:1;min-width:230px}
+.doctor-workspace .drx-filter-group{display:flex;gap:6px;flex-wrap:wrap}
+.doctor-workspace .drx-filter{border:1px solid var(--dw-border);border-radius:10px;background:var(--dw-card);color:var(--dw-muted);font:inherit;font-size:13px;font-weight:700;padding:9px 12px;min-height:40px;cursor:pointer}
+.doctor-workspace .drx-filter[aria-pressed=true]{background:var(--brand);border-color:var(--brand);color:#fff}
+.doctor-workspace .drx-patient-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:17px}
+.doctor-workspace .drx-patient{border:1px solid var(--dw-border);border-radius:21px;background:var(--dw-card);padding:20px;display:grid;gap:17px;box-shadow:0 8px 25px -22px #351b4c}
+.doctor-workspace .drx-patient-head{display:flex;align-items:center;gap:13px}
+.doctor-workspace .drx-avatar{width:47px;height:47px;border-radius:15px;background:var(--dw-soft);color:var(--brand);display:grid;place-items:center;font-size:14px;font-weight:850;flex:none}
+.doctor-workspace .drx-patient-head>div{min-width:0;flex:1}
+.doctor-workspace .drx-patient h2{font-size:17px;line-height:1.35;margin:0;color:var(--dw-text)}
+.doctor-workspace .drx-patient-head p{font-size:13px;color:var(--dw-muted);margin:4px 0 0}
+.doctor-workspace .drx-consent{font-size:11px;font-weight:750;color:#39745d;background:#eaf7f1;border-radius:999px;padding:6px 9px;white-space:nowrap}
+.doctor-workspace[data-dw-theme=dark] .drx-consent{background:#254538;color:#bde8d5}
+.doctor-workspace .drx-readiness{display:grid;grid-template-columns:90px minmax(0,1fr);gap:18px;align-items:center;padding:17px;border-radius:17px;background:var(--dw-bg);border:1px solid var(--dw-border)}
+.doctor-workspace .drx-ring{--value:0;width:82px;height:82px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--brand) calc(var(--value)*1%),var(--dw-border) 0);position:relative}
+.doctor-workspace .drx-ring:before{content:"";position:absolute;inset:8px;border-radius:50%;background:var(--dw-card)}
+.doctor-workspace .drx-ring strong{position:relative;font-size:20px;color:var(--dw-text)}
+.doctor-workspace .drx-readiness h3{font-size:14px;margin:0 0 7px;color:var(--dw-text)}
+.doctor-workspace .drx-readiness p{font-size:13px;line-height:1.65;color:var(--dw-muted);margin:0}
+.doctor-workspace .drx-meter{display:block;width:100%;height:7px;margin:11px 0;border:0;border-radius:999px;overflow:hidden;accent-color:var(--brand)}
+.doctor-workspace .drx-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.doctor-workspace .drx-details{border-top:1px solid var(--dw-border);padding-top:13px}
+.doctor-workspace .drx-details summary{cursor:pointer;color:var(--brand);font-size:13px;font-weight:750;list-style:none;display:flex;justify-content:space-between;align-items:center;min-height:36px}
+.doctor-workspace .drx-details summary::-webkit-details-marker{display:none}
+.doctor-workspace .drx-checklist{display:grid;gap:8px;margin-top:12px}
+.doctor-workspace .drx-check{display:grid;grid-template-columns:22px 1fr auto;gap:9px;align-items:center;padding:10px 11px;border-radius:11px;background:var(--dw-bg);font-size:13px;color:var(--dw-muted)}
+.doctor-workspace .drx-check i{width:19px;height:19px;border-radius:50%;display:grid;place-items:center;font-style:normal;border:1px solid var(--dw-border);font-size:11px}
+.doctor-workspace .drx-check.is-done i{background:#e8f7f0;color:#247154;border-color:#ccebdc}
+.doctor-workspace .drx-check b{font-size:11px;color:var(--dw-muted);font-weight:700}
+.doctor-workspace .drx-note{display:flex;gap:10px;align-items:flex-start;padding:15px 17px;border-radius:15px;background:var(--dw-soft);color:var(--dw-muted);font-size:12px;line-height:1.7}
+.doctor-workspace .drx-empty{grid-column:1/-1;text-align:center;padding:45px 20px;border:1px dashed var(--dw-border);border-radius:18px;color:var(--dw-muted);font-size:14px;background:var(--dw-card)}
+.doctor-workspace .drx-timeline-layout{display:grid;grid-template-columns:280px minmax(0,1fr);gap:19px;align-items:start}
+.doctor-workspace .drx-patient-rail{border:1px solid var(--dw-border);border-radius:20px;background:var(--dw-card);padding:16px;display:grid;gap:8px;position:sticky;top:105px}
+.doctor-workspace .drx-patient-rail h2{font-size:15px;margin:0 0 7px}
+.doctor-workspace .drx-patient-tab{display:flex;align-items:center;gap:10px;width:100%;border:1px solid transparent;border-radius:13px;background:transparent;color:var(--dw-text);font:inherit;text-align:left;padding:10px;cursor:pointer}
+.doctor-workspace .drx-patient-tab[aria-pressed=true]{background:var(--dw-soft);border-color:var(--dw-border)}
+.doctor-workspace .drx-patient-tab .drx-avatar{width:36px;height:36px;border-radius:11px;font-size:11px}
+.doctor-workspace .drx-patient-tab strong{font-size:13px;display:block}.doctor-workspace .drx-patient-tab small{font-size:11px;color:var(--dw-muted);display:block;margin-top:3px}
+.doctor-workspace .drx-timeline-main{display:grid;gap:15px}
+.doctor-workspace .drx-timeline-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:21px;border:1px solid var(--dw-border);border-radius:20px;background:var(--dw-card)}
+.doctor-workspace .drx-timeline-head h2{font-size:20px;margin:0 0 5px}.doctor-workspace .drx-timeline-head p{font-size:13px;color:var(--dw-muted);margin:0}
+.doctor-workspace .drx-timeline{display:grid;gap:0;position:relative}
+.doctor-workspace .drx-event{display:grid;grid-template-columns:42px minmax(0,1fr);gap:14px;position:relative;padding-bottom:14px}
+.doctor-workspace .drx-event:not(:last-child):before{content:"";position:absolute;left:20px;top:42px;bottom:-1px;width:2px;background:var(--dw-border)}
+.doctor-workspace .drx-event-dot{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;background:var(--dw-soft);color:var(--brand);font-size:13px;font-weight:850;z-index:1}
+.doctor-workspace .drx-event[data-status=completed] .drx-event-dot{background:#e8f7f0;color:#247154}.doctor-workspace .drx-event[data-status=overdue] .drx-event-dot{background:#fff3df;color:#9a6418}
+.doctor-workspace .drx-event-card{border:1px solid var(--dw-border);border-radius:17px;background:var(--dw-card);padding:17px 18px}
+.doctor-workspace .drx-event-top{display:flex;align-items:flex-start;gap:12px}.doctor-workspace .drx-event-top>div{flex:1;min-width:0}
+.doctor-workspace .drx-event-card h3{font-size:15px;line-height:1.4;margin:0;color:var(--dw-text)}
+.doctor-workspace .drx-event-card p{font-size:13px;line-height:1.65;color:var(--dw-muted);margin:6px 0 0}
+.doctor-workspace .drx-status{display:inline-flex;border-radius:999px;padding:5px 8px;font-size:11px;font-weight:750;background:var(--dw-soft);color:var(--brand);white-space:nowrap}.doctor-workspace .drx-status--completed{background:#e8f7f0;color:#247154}.doctor-workspace .drx-status--overdue{background:#fff3df;color:#9a6418}
+.doctor-workspace .drx-event-details{margin-top:13px;padding-top:12px;border-top:1px solid var(--dw-border);display:none;font-size:12px;color:var(--dw-muted);line-height:1.7}.doctor-workspace .drx-event.is-open .drx-event-details{display:block}
+.doctor-workspace .drx-event-toggle{border:0;background:none;color:var(--brand);font:inherit;font-size:12px;font-weight:750;padding:6px 0;cursor:pointer}
+@media(max-width:1050px){.doctor-workspace .drx-summary{grid-template-columns:repeat(2,1fr)}.doctor-workspace .drx-patient-grid{grid-template-columns:1fr}.doctor-workspace .drx-timeline-layout{grid-template-columns:230px minmax(0,1fr)}}
+@media(max-width:760px){.doctor-workspace .drx-hero{grid-template-columns:1fr;padding:23px}.doctor-workspace .drx-hero-actions{justify-content:flex-start}.doctor-workspace .drx-summary{grid-template-columns:1fr 1fr}.doctor-workspace .drx-timeline-layout{grid-template-columns:1fr}.doctor-workspace .drx-patient-rail{position:static;grid-template-columns:repeat(2,minmax(0,1fr))}.doctor-workspace .drx-patient-rail h2{grid-column:1/-1}.doctor-workspace .drx-readiness{grid-template-columns:72px 1fr}.doctor-workspace .drx-ring{width:68px;height:68px}.doctor-workspace .drx-ring:before{inset:7px}.doctor-workspace .drx-ring strong{font-size:17px}}
+@media(max-width:480px){.doctor-workspace .drx-summary{grid-template-columns:1fr}.doctor-workspace .drx-patient-rail{grid-template-columns:1fr}.doctor-workspace .drx-timeline-head,.doctor-workspace .drx-event-top{flex-direction:column}.doctor-workspace .drx-consent{display:none}}
