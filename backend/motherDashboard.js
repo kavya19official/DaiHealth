@@ -94,8 +94,8 @@ module.exports = function registerMotherDashboardRoutes(app, { pool, authenticat
   // ==========================================================================
   // Pregnancy profile
   // ==========================================================================
-  const readPregnancy = async (motherId) => {
-    const r = await pool.query(
+  const readPregnancy = async (motherId, database = pool) => {
+    const r = await database.query(
       `SELECT to_char(mp.care_start_date::date, 'YYYY-MM-DD')        AS care_start_date,
               to_char(mp.care_start_date::date + 280, 'YYYY-MM-DD')  AS edd,
               (mp.pregnancy_confirmed_at IS NOT NULL)                AS confirmed,
@@ -131,7 +131,7 @@ module.exports = function registerMotherDashboardRoutes(app, { pool, authenticat
     try {
       await client.query('BEGIN');
 
-      const current = await readPregnancy(req.user.id);
+      const current = await readPregnancy(req.user.id, client);
       if (!current) { await client.query('ROLLBACK'); return res.status(404).json({ error: 'Profile not found' }); }
       if (current.delivered_at) {
         await client.query('ROLLBACK');
@@ -158,7 +158,10 @@ module.exports = function registerMotherDashboardRoutes(app, { pool, authenticat
       }
 
       await client.query(
-        'UPDATE mother_profiles SET care_start_date = $2::date, pregnancy_confirmed_at = CURRENT_TIMESTAMP WHERE user_id = $1',
+        `UPDATE mother_profiles SET care_start_date = $2::date, pregnancy_confirmed_at = CURRENT_TIMESTAMP,
+           lmp_date = $2::date, edd_date = $2::date + 280,
+           pregnancy_status = CASE WHEN pregnancy_status = 'planning' THEN 'pregnant' ELSE pregnancy_status END
+         WHERE user_id = $1`,
         [req.user.id, lmp]
       );
       await client.query(
@@ -169,8 +172,9 @@ module.exports = function registerMotherDashboardRoutes(app, { pool, authenticat
         [req.user.id, lmp, MILESTONE_TEMPLATE.map((_, i) => i), MILESTONE_TEMPLATE.map((m) => m.days)]
       );
 
+      const pregnancy = await readPregnancy(req.user.id, client);
       await client.query('COMMIT');
-      res.json({ message: 'Pregnancy dates saved', pregnancy: await readPregnancy(req.user.id) });
+      res.json({ message: 'Pregnancy dates saved', pregnancy });
     } catch (e) {
       await client.query('ROLLBACK').catch(() => {});
       fail(res, 'Update pregnancy', e, 'Failed to save pregnancy dates');

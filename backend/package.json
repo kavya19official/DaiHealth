@@ -28,6 +28,7 @@
     "pdfjs-dist": "^6.4.299",
     "pg": "^8.23.0",
     "qrcode": "1.5.4",
+    "resend": "6.39.0",
     "tesseract.js": "^7.0.0",
     "web-push": "3.6.7",
     "xstate": "5.33.3"

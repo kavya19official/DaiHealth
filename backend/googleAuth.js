@@ -39,7 +39,7 @@ module.exports = function registerGoogleAuth(app, { pool, getUserProfile, seedCa
     try {
       await client.query('BEGIN');
       const hash = await bcrypt.hash(crypto.randomBytes(32).toString('hex'), 10);
-      const { rows } = await client.query("INSERT INTO users (email, password_hash, role) VALUES ($1, $2, 'mother') RETURNING *", [email, hash]);
+      const { rows } = await client.query("INSERT INTO users (email, password_hash, role, email_verified_at) VALUES ($1, $2, 'mother', clock_timestamp()) RETURNING *", [email, hash]);
       const careStart = new Date();
       await client.query('INSERT INTO mother_profiles (user_id, full_name, care_start_date) VALUES ($1, $2, $3)', [rows[0].id, name || email.split('@')[0], careStart]);
       await seedCareMilestones(client, rows[0].id, careStart);
@@ -55,6 +55,9 @@ module.exports = function registerGoogleAuth(app, { pool, getUserProfile, seedCa
       let user = (await pool.query('SELECT * FROM users WHERE lower(email) = $1', [google.email])).rows[0];
       const created = !user;
       if (created) user = await createPatient(google.email, google.name);
+      if (user.closed_at || (user.email_verification_required && !user.email_verified_at)) {
+        throw new AuthError(401, 'Account unavailable');
+      }
       const profile = await getUserProfile(user.id, user.role);
       const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, jwtSecret, { expiresIn: jwtExpiresIn });
       res.cookie('token', token, {

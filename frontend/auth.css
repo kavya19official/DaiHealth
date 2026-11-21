@@ -46,3 +46,38 @@ body.auth-page {--brand:#7950a6;--brand-strong:#633c8e;--brand-pale:#f4eff8;min-
 @media(min-width:1600px){.auth-page .auth-intro{padding:55px 65px}.auth-page .auth-card{width:min(510px,calc(100% - 120px))}}
 @media(max-width:760px){.auth-page .auth-main{grid-template-columns:1fr}.auth-page .auth-intro{position:relative;height:auto;min-height:0;padding:26px 25px}.auth-wordmark .auth-hindi{font-size:35px}.auth-wordmark-text{font-size:18px}.auth-story-content{padding:32px 0 8px}.auth-page .auth-intro h1{font-size:38px}.auth-page .auth-intro p{font-size:15px}.auth-synthetic-label{font-size:10px;margin-bottom:15px}.auth-care-loop,.auth-story-footer{display:none}.auth-page .auth-card{width:min(420px,calc(100% - 48px));margin:36px auto 40px}.auth-page .auth-card h2{font-size:30px}.auth-page .auth-intro h1 br{display:none}}
 @media(prefers-reduced-motion:reduce){.auth-page *{transition:none!important}}
+
+.auth-page.is-registering .login-role-toggle,
+.auth-page.is-registering #loginDescription,
+.auth-page.is-registering .auth-guest-options,
+.auth-page [hidden] { display: none !important; }
+.auth-page .password-field { position: relative; }
+.auth-page .password-field input { padding-inline-end: 75px; }
+.auth-page .password-field button,
+.auth-page .signup-actions button {
+  border: 0;
+  background: transparent;
+  color: var(--brand-strong);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 750;
+  cursor: pointer;
+  min-height: 44px;
+}
+.auth-page .password-field button { position: absolute; inset-inline-end: 6px; top: 4px; padding: 0 9px; }
+.auth-page .signup-status {
+  padding: 12px 14px;
+  border: 1px solid #e6dced;
+  border-radius: 6px;
+  background: var(--brand-pale);
+  color: #563671;
+  margin: 0 0 18px;
+  font-size: 14px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.auth-page .signup-status[data-error] { background: #fbf0f3; color: #842d43; border-color: #edd8df; }
+.auth-page input.signup-code { font-variant-numeric: tabular-nums; letter-spacing: .3em; font-size: 21px; }
+.auth-page .signup-actions { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0 12px; margin-top: 7px; }
+.auth-page .signup-actions button { padding: 0 2px; }
+.auth-page .signup-actions button:disabled { color: #6c6272; cursor: default; }
