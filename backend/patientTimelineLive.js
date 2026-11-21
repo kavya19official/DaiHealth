@@ -11,7 +11,9 @@ module.exports=function register(app,{pool,authenticateToken,authorizeRole,inter
   const tick=async()=>{if(closed||busy)return;busy=true;try{
    if(req.user.exp&&Date.now()>=req.user.exp*1000){send('session-ended',{});res.end();return;}
    const rows=(await pool.query('SELECT id,title,guidance,stage,category,due_date,completed_at,completion_verification,result_id,appointment_id,verified_facility_name FROM care_milestones WHERE mother_id=$1 ORDER BY id',[req.user.id])).rows;
-   const revision=crypto.createHash('sha256').update(JSON.stringify(rows)).digest('hex');
+   const scans = (await pool.query(`SELECT e.id FROM care_scan_entries e JOIN patient_documents d ON d.id=e.document_id
+    WHERE e.mother_id=$1 AND d.deleted_at IS NULL ORDER BY e.id`, [req.user.id])).rows;
+   const revision=crypto.createHash('sha256').update(JSON.stringify([rows, scans])).digest('hex');
    if(last!==revision){send(last===null?'ready':'timeline-changed',{refresh:true},revision);last=revision;}
    else res.write(': heartbeat\n\n');
   }catch{send('unavailable',{fallback:'poll'});res.end();}finally{busy=false;}};

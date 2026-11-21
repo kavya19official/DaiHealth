@@ -139,8 +139,9 @@ async function canAccessDoc(pool, docId, user) {
   return null;
 }
 
-module.exports = function registerPatientDocuments(app, { pool, authenticateToken, authorizeRole }) {
+module.exports = function registerPatientDocuments(app, { pool, authenticateToken, authorizeRole, jwtSecret }) {
   ensureDir();
+  require('./careScan').register(app, { pool, authenticateToken, authorizeRole, uploadDir: UPLOAD_DIR, readUpload, logEvent, jwtSecret });
   require("./documentIntake")(app,{pool,authenticateToken,authorizeRole,canAccessDoc,logEvent,uploadDir:UPLOAD_DIR});
   require("./patientReportBirth")(app,{pool,authenticateToken,authorizeRole,canAccessDoc,logEvent,uploadDir:UPLOAD_DIR});
 
@@ -249,35 +250,60 @@ module.exports = function registerPatientDocuments(app, { pool, authenticateToke
     }
   });
 
-  // Download
+  // Decide provider access and record the disclosure under the same policy snapshot.
   app.get('/api/documents/:id/download', ...anyAuth, async (req, res) => {
     try {
-      const id = parseInt(req.params.id, 10);
-      if (Number.isNaN(id)) return res.status(400).json({ error: 'Invalid id' });
-      const row = await canAccessDoc(pool, id, req.user);
-      if (!row) return res.status(404).json({ error: 'Document not found' });
+      const id = Number(req.params.id);
+      if (!Number.isInteger(id) || id < 1 || id > 2147483647) return res.status(400).json({ error: 'Invalid id' });
+      const db = await pool.connect();
+      const inline = req.query.inline === '1';
+      let result;
+      try {
+        await db.query('BEGIN');
+        if (req.user.role === 'doctor') {
+          await db.query('LOCK TABLE patient_access_controls, patient_document_shares, patient_preferences IN SHARE MODE');
+        }
+        const row = await canAccessDoc(db, id, req.user);
+        if (!row) {
+          const owner = req.user.role === 'doctor' &&
+            (await db.query('SELECT mother_id FROM patient_documents WHERE id=$1 AND deleted_at IS NULL', [id])).rows[0];
+          if (owner) {
+            await require('./accessControl').logAccess(db, owner.mother_id, req.user.id, 'document_download', false);
+          }
+          result = { status: 404, error: 'Document not found' };
+        } else if (row.is_sensitive && req.query.reveal !== '1') {
+          result = { status: 403, error: 'Confirm that you want to reveal this private report before opening it' };
+        } else {
+          let bytes;
+          try {
+            bytes = await fs.promises.readFile(path.join(UPLOAD_DIR, row.storage_key));
+          } catch (error) {
+            if (error.code !== 'ENOENT') throw error;
+            result = { status: 404, error: 'File missing from storage' };
+          }
+          if (bytes) {
+            await logEvent(db, id, req.user.id, inline ? 'preview' : 'download', { by_role: req.user.role });
+            result = { row, bytes };
+          }
+        }
+        await db.query('COMMIT');
+      } catch (error) {
+        await db.query('ROLLBACK').catch(() => {});
+        throw error;
+      } finally { db.release(); }
 
-      if(row.is_sensitive&&req.query.reveal!=='1')return res.status(403).json({error:'Confirm that you want to reveal this private report before opening it'});
-      const diskPath = path.join(UPLOAD_DIR, row.storage_key);
-      if (!fs.existsSync(diskPath)) {
-        return res.status(404).json({ error: 'File missing from storage' });
-      }
-
-      await logEvent(pool, id, req.user.id, req.query.inline==='1'?'preview':'download', {
-        by_role: req.user.role,
+      if (result.error) return res.status(result.status).json({ error: result.error });
+      res.set({
+        'Content-Type': result.row.mime_type,
+        'Content-Disposition': (inline ? 'inline' : 'attachment') + '; filename="' + safeFilename(result.row.original_filename) + '"',
+        'Cache-Control': 'private, no-store',
+        'X-Content-Type-Options': 'nosniff',
+        'Content-Security-Policy': "sandbox; default-src 'none'"
       });
-
-      res.setHeader('Content-Type', row.mime_type);
-      res.setHeader(
-        'Content-Disposition',
-        `${req.query.inline==='1'?'inline':'attachment'}; filename="${safeFilename(row.original_filename)}"`
-      );
-      res.setHeader('Cache-Control', 'private, no-store');
-      res.setHeader('X-Content-Type-Options','nosniff');
-      res.setHeader('Content-Security-Policy',"sandbox; default-src 'none'");
-      fs.createReadStream(diskPath).pipe(res);
+      // The original is bounded by the document upload limit.
+      res.set('Content-Length', String(result.bytes.length)).end(result.bytes);
     } catch (err) {
-      console.error('GET /api/documents/:id/download', err.message);
+      console.error('GET /api/documents/:id/download', err.code || err.name);
       res.status(500).json({ error: 'Failed to download document' });
     }
   });
@@ -387,7 +413,7 @@ if (!linked.rows.length) {
 
       const r = await pool.query(
         `UPDATE patient_document_shares
-            SET revoked_at = NOW()
+            SET revoked_at = clock_timestamp()
           WHERE document_id = $1 AND doctor_id = $2 AND revoked_at IS NULL
           RETURNING id`,
         [id, doctorId]

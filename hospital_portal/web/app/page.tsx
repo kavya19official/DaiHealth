@@ -8,6 +8,7 @@ import { SustainabilityPanel } from "./sustainability";
 import { OperationsIntelligencePanel } from "./operations-intelligence";
 import { PatientRequestsPanel } from "./patient-requests";
 import { FollowupRiskPanel } from "./followup-risk";
+import { AshaCopilot } from "./asha";
 type Row = Record<string, any>;
 type User = {
   id: string;
@@ -28,6 +29,7 @@ const days = [
   "Sunday",
 ];
 const operationNav = [
+  ["ashaCopilot", "ASHA Copilot", "⌂"],
   ["followupRisk", "Follow-up & risk demo", "✓"],
   ["patientRequests", "Patient requests", "⇄"],
   ["handoffs", "Facility handoffs", "⇄"],
@@ -92,6 +94,7 @@ const workspacePermissions: Record<string, string> = {
   readiness: "patient.read",
   diagnostics: "diagnostics.read",
   patients: "patient.read",
+  ashaCopilot: "asha.read",
   audit: "audit.read",
   credentials: "user.verify",
 };
@@ -127,6 +130,10 @@ const titles: Record<string, [string, string]> = {
     "Recorded concerns, human acknowledgement and clinician-approved next steps.",
   ],
   followupRisk: ["Follow-up & risk demo", "Shared follow-up state and separately reviewed synthetic risk flags."],
+  ashaCopilot: [
+    "ASHA Copilot",
+    "Offline-first community visits, village routes, voice notes and health-camp updates.",
+  ],
   patientRequests: ["Patient requests", "Synthetic appointment and referral coordination with facility-scoped staff review."],
   intelligence: ["Operations intelligence", "Bounded agents, explainable maintenance planning and measured AI usage."],
   sustainability: [
@@ -332,11 +339,11 @@ export default function Home() {
           "The richer workspace needs the updated backend. Restart your FastAPI terminal once, then refresh.",
         );
       if (!response.ok)
-        throw new Error(
+        throw Object.assign(new Error(
           typeof result.detail === "string"
             ? result.detail
-            : JSON.stringify(result.detail),
-        );
+            : typeof result.error === "string" ? result.error : JSON.stringify(result.detail),
+        ), { status: response.status });
       return result;
     },
     [token],
@@ -348,7 +355,7 @@ export default function Home() {
     setBusy(true);
     setError("");
     try {
-      if (view === "patientRequests" || view === "followupRisk") { const structure = await api("/facilities/" + user.facility_id + "/structure"); if (sequence === loadSequence.current) setData(structure); return; }
+      if (view === "patientRequests" || view === "followupRisk" || view === "ashaCopilot") { const structure = await api("/facilities/" + user.facility_id + "/structure"); if (sequence === loadSequence.current) setData(structure); return; }
       const params = new URLSearchParams();
       Object.entries(filters).forEach(([key, value]) => {
         if (value) params.set(key, String(value));
@@ -395,11 +402,14 @@ export default function Home() {
     setToken(result.access_token);
     const me = await api("/me", {}, result.access_token);
     setUser(me);
+    if (!resetNavigation && me.role === "asha") {
+      setView(current => current === "overview" ? "ashaCopilot" : current);
+    }
     if (resetNavigation) {
       setData(null);
       setRecords([]);
       setPatient(null);
-      setView("overview");
+      setView(me.role === "asha" ? "ashaCopilot" : "overview");
       setMode("operations");
       setSummary(null);
       setWorkspaceData(null);
@@ -419,18 +429,30 @@ export default function Home() {
   }, []);
   useEffect(() => {
     if (!user) return;
-    const timer = setInterval(
-      () =>
-        api("/auth/refresh", { method: "POST" })
-          .then((result) => session(result, false))
-          .catch(() => {
-            setUser(null);
-            setToken("");
-            setError("Session expired. Please sign in again.");
-          }),
-      8 * 60 * 1000,
-    );
-    return () => clearInterval(timer);
+    let refreshing = false;
+    async function renew() {
+      if (!navigator.onLine || refreshing) return;
+      refreshing = true;
+      try {
+        const result = await api("/auth/refresh", { method: "POST" });
+        await session(result, false);
+      } catch (error) {
+        const status = (error as { status?: number }).status;
+        if (status === 401 || status === 403) {
+          setUser(null);
+          setToken("");
+          setError("Session expired. Please sign in again.");
+        }
+      } finally {
+        refreshing = false;
+      }
+    }
+    const timer = setInterval(renew, 8 * 60 * 1000);
+    window.addEventListener("online", renew);
+    return () => {
+      clearInterval(timer);
+      window.removeEventListener("online", renew);
+    };
   }, [user, api]);
   useEffect(() => {
     if (sessionChecked && !user && process.env.NEXT_PUBLIC_DAI_BASE_PATH)
@@ -896,6 +918,7 @@ export default function Home() {
           )}
           {view === "patientRequests" && <PatientRequestsPanel key={user.id+user.facility_id} api={api} permissions={user.permissions}/>}
           {view === "followupRisk" && <FollowupRiskPanel key={user.id+user.facility_id} api={api} permissions={user.permissions} userId={user.id}/>}
+          {view === "ashaCopilot" && <AshaCopilot key={user.id+user.facility_id} api={api} user={user}/>}
           {data && (
             <>
               {view === "handoffs" && <ReferralInbox key={user.id+user.facility_id} api={api} role={user.role} facilityId={user.facility_id}/>}

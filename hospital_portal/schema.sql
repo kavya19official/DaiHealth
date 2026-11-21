@@ -1215,6 +1215,154 @@ CREATE TABLE sos_abuse_log (
 
 ;
 
+
+CREATE TABLE asha_village (
+	id UUID NOT NULL,
+	source_id VARCHAR,
+	created_at TIMESTAMP WITH TIME ZONE NOT NULL,
+	updated_at TIMESTAMP WITH TIME ZONE NOT NULL,
+	facility_id UUID NOT NULL,
+	name VARCHAR NOT NULL,
+	lat FLOAT NOT NULL,
+	lng FLOAT NOT NULL,
+	anganwadi_name VARCHAR,
+	PRIMARY KEY (id),
+	UNIQUE (source_id),
+	FOREIGN KEY(facility_id) REFERENCES facility (id)
+)
+
+;
+
+
+CREATE TABLE asha_assignment (
+	id UUID NOT NULL,
+	source_id VARCHAR,
+	created_at TIMESTAMP WITH TIME ZONE NOT NULL,
+	updated_at TIMESTAMP WITH TIME ZONE NOT NULL,
+	facility_id UUID NOT NULL,
+	asha_id UUID NOT NULL,
+	mother_id UUID NOT NULL,
+	village_id UUID,
+	household_label VARCHAR,
+	lat FLOAT,
+	lng FLOAT,
+	active BOOLEAN NOT NULL,
+	PRIMARY KEY (id),
+	UNIQUE (asha_id, mother_id),
+	UNIQUE (source_id),
+	FOREIGN KEY(facility_id) REFERENCES facility (id),
+	FOREIGN KEY(asha_id) REFERENCES portal_user (id),
+	FOREIGN KEY(mother_id) REFERENCES mother (id),
+	FOREIGN KEY(village_id) REFERENCES asha_village (id)
+)
+
+;
+
+
+CREATE TABLE asha_visit (
+	id UUID NOT NULL,
+	source_id VARCHAR,
+	created_at TIMESTAMP WITH TIME ZONE NOT NULL,
+	updated_at TIMESTAMP WITH TIME ZONE NOT NULL,
+	facility_id UUID NOT NULL,
+	asha_id UUID NOT NULL,
+	mother_id UUID NOT NULL,
+	village_id UUID,
+	visit_date VARCHAR NOT NULL,
+	status VARCHAR NOT NULL,
+	priority_score FLOAT,
+	priority_reasons JSON NOT NULL,
+	outcome JSON NOT NULL,
+	client_uuid VARCHAR,
+	recorded_at TIMESTAMP WITH TIME ZONE,
+	open_key VARCHAR,
+	PRIMARY KEY (id),
+	UNIQUE (asha_id, client_uuid),
+	UNIQUE (open_key),
+	CHECK (status IN ('planned','completed','missed','rescheduled')),
+	UNIQUE (source_id),
+	FOREIGN KEY(facility_id) REFERENCES facility (id),
+	FOREIGN KEY(asha_id) REFERENCES portal_user (id),
+	FOREIGN KEY(mother_id) REFERENCES mother (id),
+	FOREIGN KEY(village_id) REFERENCES asha_village (id)
+)
+
+;
+
+
+CREATE TABLE asha_camp (
+	id UUID NOT NULL,
+	source_id VARCHAR,
+	created_at TIMESTAMP WITH TIME ZONE NOT NULL,
+	updated_at TIMESTAMP WITH TIME ZONE NOT NULL,
+	facility_id UUID NOT NULL,
+	asha_id UUID NOT NULL,
+	village_id UUID,
+	name VARCHAR NOT NULL,
+	camp_date VARCHAR NOT NULL,
+	status VARCHAR NOT NULL,
+	details JSON NOT NULL,
+	PRIMARY KEY (id),
+	CHECK (status IN ('planned','open','closed')),
+	UNIQUE (source_id),
+	FOREIGN KEY(facility_id) REFERENCES facility (id),
+	FOREIGN KEY(asha_id) REFERENCES portal_user (id),
+	FOREIGN KEY(village_id) REFERENCES asha_village (id)
+)
+
+;
+
+
+CREATE TABLE asha_camp_update (
+	id UUID NOT NULL,
+	source_id VARCHAR,
+	created_at TIMESTAMP WITH TIME ZONE NOT NULL,
+	updated_at TIMESTAMP WITH TIME ZONE NOT NULL,
+	camp_id UUID NOT NULL,
+	asha_id UUID NOT NULL,
+	mother_id UUID NOT NULL,
+	child_id UUID,
+	kind VARCHAR NOT NULL,
+	payload JSON NOT NULL,
+	client_uuid VARCHAR,
+	PRIMARY KEY (id),
+	UNIQUE (asha_id, client_uuid),
+	CHECK (kind IN ('attendance','vitals','immunization','referral_flag')),
+	UNIQUE (source_id),
+	FOREIGN KEY(camp_id) REFERENCES asha_camp (id),
+	FOREIGN KEY(asha_id) REFERENCES portal_user (id),
+	FOREIGN KEY(mother_id) REFERENCES mother (id),
+	FOREIGN KEY(child_id) REFERENCES child (id)
+)
+
+;
+
+
+CREATE TABLE asha_note (
+	id UUID NOT NULL,
+	source_id VARCHAR,
+	created_at TIMESTAMP WITH TIME ZONE NOT NULL,
+	updated_at TIMESTAMP WITH TIME ZONE NOT NULL,
+	facility_id UUID NOT NULL,
+	asha_id UUID NOT NULL,
+	mother_id UUID NOT NULL,
+	visit_id UUID,
+	camp_update_id UUID,
+	transcript VARCHAR NOT NULL,
+	structured JSON NOT NULL,
+	recorded_at TIMESTAMP WITH TIME ZONE NOT NULL,
+	client_uuid VARCHAR,
+	PRIMARY KEY (id),
+	UNIQUE (asha_id, client_uuid),
+	UNIQUE (source_id),
+	FOREIGN KEY(facility_id) REFERENCES facility (id),
+	FOREIGN KEY(asha_id) REFERENCES portal_user (id),
+	FOREIGN KEY(mother_id) REFERENCES mother (id),
+	FOREIGN KEY(visit_id) REFERENCES asha_visit (id),
+	FOREIGN KEY(camp_update_id) REFERENCES asha_camp_update (id)
+)
+
+;
 ALTER TABLE facility ADD COLUMN location geography(Point,4326) GENERATED ALWAYS AS (ST_SetSRID(ST_MakePoint(lng,lat),4326)::geography) STORED;
 
 CREATE INDEX facility_location_idx ON facility USING GIST(location);

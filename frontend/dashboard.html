@@ -443,6 +443,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 <link rel="stylesheet" href="patient-support.css?v=2">
 <link rel="stylesheet" href="clinical-dashboard.css?v=1">
 <link rel="stylesheet" href="css/care-timeline-enhanced.css?v=modal-fix-1">
+<link rel="stylesheet" href="care-scan.css">
 <style>.low-bandwidth img,.low-bandwidth canvas{display:none!important}.low-bandwidth *{animation:none!important;transition:none!important}</style><link rel="stylesheet" href="demo-care-messages.css?v=1">
 <link rel="stylesheet" href="patient-home-open.css?v=5">
 <link rel="stylesheet" href="patient-hospital-stay.css?v=1">
@@ -568,7 +569,9 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 <div class="panel" id="panel-children"><div class="page-section-heading"><h1 data-copy="nav.children">My children</h1><p data-copy="childrenIntro">Separate profiles. Connected care. Never mixed-up records.</p></div><div id="patientChildTabs" class="patient-child-tabs" role="tablist" aria-label="Choose child"></div><div id="patientChildSummary"></div><section id="childGrowthDevelopment" class="child-growth-development" hidden></section></div>
 <div class="panel" id="panel-companion"><div class="page-section-heading"><h1 data-copy="nav.companion">Care companion</h1><p data-copy="companionBoundary">Guidance and explanations. Medical decisions stay with your doctor.</p></div><div class="companion-page-grid"><section class="patient-companion-card"><div class="companion-orb">✦</div><h2 data-copy="youCanAsk">A question on your mind?</h2><p data-copy="companionIntro">Understand your care, in words that feel familiar.</p><button class="btn btn--primary" data-open-daya data-copy="askDaya">Ask Dhruv</button><div id="companionQuickQuestions"></div></section><section class="card section-card"><h2 data-copy="prepareQuestions">Prepare questions for my doctor</h2><p data-copy="questionsIntro">A simple checklist from your open care items. Add anything you want to discuss.</p><button class="btn btn--primary" id="prepareDoctorQuestions" data-copy="makeChecklist">Make my checklist</button><textarea id="doctorQuestions" rows="10" aria-label="Questions for your doctor" placeholder="Your questions will appear here"></textarea><button type="button" class="btn btn--ghost" id="downloadQuestions" data-copy="downloadChecklist">Download checklist</button></section></div></div>
 <div class="panel" id="panel-schemes"><div class="page-section-heading"><h1 data-copy="nav.schemes">Schemes & support</h1><p data-copy="schemeIntro">See what support may fit you. Final eligibility is confirmed on the official website.</p></div><div id="patientSchemes" class="scheme-grid"></div></div>
-<div class="panel" id="panel-family"><div class="page-section-heading"><h1 data-copy="nav.family">Family & consent</h1><p data-copy="sharingIntro">Choose how your documents are shared. Your care team can help connect a family or ASHA account.</p></div><div class="family-grid"><section class="card section-card"><h2 data-copy="whoCanSee">Who can see my records?</h2><div id="sharingControls"></div><h2>Care team and facilities</h2><div id="careTeamAccess"></div><div class="form-group"><label for="familyEmergencyName" data-copy="emergencyName">Emergency contact name</label><input id="familyEmergencyName" maxlength="100"></div><div class="form-group"><label for="familyEmergencyPhone" data-copy="emergencyPhone">Emergency contact phone</label><input id="familyEmergencyPhone" inputmode="tel" maxlength="20"></div><button class="btn btn--primary" id="saveEmergencyContact" data-copy="saveContact">Save emergency contact</button></section><section class="card section-card"><h2 data-copy="sharingHistory">Consent & sharing history</h2><div id="sharingHistory"></div><h3 data-copy="sharedDocuments">Shared documents</h3><div id="activeDocumentShares"></div><h3>Who has viewed my record</h3><div id="recordAccessHistory"></div></section></div></div>
+<div class="panel" id="panel-family"><div class="page-section-heading"><h1 data-copy="nav.family">Family & consent</h1><p data-copy="sharingIntro">Choose how your documents are shared. Your care team can help connect a family or ASHA account.</p></div><div class="family-grid"><section class="card section-card"><h2 data-copy="whoCanSee">Who can see my records?</h2><div id="sharingControls"></div><h2>Care team and facilities</h2><div id="careTeamAccess"></div><div class="form-group"><label for="familyEmergencyName" data-copy="emergencyName">Emergency contact name</label><input id="familyEmergencyName" maxlength="100"></div><div class="form-group"><label for="familyEmergencyPhone" data-copy="emergencyPhone">Emergency contact phone</label><input id="familyEmergencyPhone" inputmode="tel" maxlength="20"></div><button class="btn btn--primary" id="saveEmergencyContact" data-copy="saveContact">Save emergency contact</button></section><section class="card section-card"><h2 data-copy="sharingHistory">Consent & sharing history</h2><div id="sharingHistory"></div><h3 data-copy="sharedDocuments">Shared documents</h3><div id="activeDocumentShares"></div><h3>Who has viewed my record</h3><div id="recordAccessHistory"></div></section></div>
+<section class="card section-card" id="consentAuditCard"><h2>Tamper-evident audit log</h2><div id="auditReceipts"></div><h3>Recent audit events</h3><div id="auditEvents"></div><p class="connected-muted">Each entry is hash-chained and sealed. Download a signed receipt for any event to verify it offline with the public key.</p></section>
+</div>
 <!-- PROFILE -->
 <div class="panel" id="panel-profile">
   <div class="card section-card" style="max-width:560px">
@@ -643,6 +646,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 
 <!-- TIMELINE -->
 <div class="panel" id="panel-timeline"><div class="page-section-heading"><h1 data-copy="nav.timeline">Care timeline</h1><p data-copy="timelineIntro">Your visits and milestones, with a plain-language explanation at each step.</p></div>
+  <button type="button" class="btn btn--secondary care-scan-launch" data-care-scan-open>Scan a document</button>
   <div id="timelineList" aria-live="polite"><div class="timeline-skeleton" role="status"><span>Loading your recorded care journey…</span><i></i><i></i><i></i></div></div>
   <details id="timelineRecordDetails" class="card section-card" style="margin-top:1rem">
     <summary>Clinician notes &amp; edit history</summary>
@@ -661,7 +665,9 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 <div class="panel" id="panel-coordination"><div class="page-section-heading"><span class="eyebrow" data-copy="sustainabilityEyebrow">Sustainability</span><h1 data-copy="nav.coordination">Sustainable care</h1><p data-copy="coordinationIntro">Fewer avoidable trips and repeat tests: verified visit instructions, test preparation and follow-up from your clinician, the right facility for your needs, and referral status. In-person visits your clinician asks for still matter.</p></div><div id="careCoordination" aria-live="polite"></div></div>
 <div class="panel" id="panel-hospital-stay"><div id="hospitalStayView" aria-live="polite"><p role="status">Loading released hospital stay updates…</p></div></div>
 <div class="panel" id="panel-birth-plan"></div>
-<div class="panel" id="panel-records"><div class="page-section-heading"><h1 data-copy="nav.records">Reports & records</h1><p data-copy="recordsIntro">Reports, prescriptions and scans, ready for your next visit.</p></div><div id="connectedRecords"></div>
+<div class="panel" id="panel-records"><div class="page-section-heading"><h1 data-copy="nav.records">Reports & records</h1><p data-copy="recordsIntro">Reports, prescriptions and scans, ready for your next visit.</p></div>
+  <button type="button" class="btn btn--secondary care-scan-launch" data-care-scan-open>Scan a document</button>
+  <div id="connectedRecords"></div>
 <div id="connectedReportArea"><div class="record-filters connected-record-filters"><label>Search<input id="recordSearch" type="search" placeholder="Name, date or centre"></label><label>Type<select id="recordTypeFilter"><option value="">All types</option><option value="blood">Blood tests</option><option value="urine">Urine</option><option value="scan_imaging">Scans</option><option value="screening">Screening</option><option value="discharge_summary">Discharge summaries</option><option value="prescription">Prescriptions</option><option value="vaccination">Vaccination certificates</option><option value="documents">Documents & IDs</option></select></label><label>From date<input id="recordDateFilter" type="date"></label><label>Patient<select id="recordSubjectFilter"><option value="">Mother</option><option value="all">Mother & all babies</option></select></label></div>
 <div id="recordCategoryChips"></div><div id="reportsDocsList"></div><details class="connected-upload" id="connectedUploadDetails"><summary>＋ Upload an original report</summary><p>Self-uploaded files await clinician verification. Choose the correct person and milestone. No automatic interpretation is performed.</p><form class="form-grid" id="docUploadForm" style="max-width:100%;margin-bottom:1rem">
           <div class="form-group">
@@ -1016,6 +1022,88 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 </div></div></div>
 <button type="button" id="sosBtn" class="patient-sos"><svg width="21" height="21"><use href="#i-phone"/></svg><span><strong>SOS</strong><small data-copy="emergencyHelp">Emergency help</small></span></button><div class="toast" id="toast" role="status"></div>
 
+<dialog id="careScanDialog" class="ct-help-dialog care-scan-dialog" aria-labelledby="careScanTitle">
+  <header class="care-scan-header">
+    <h2 id="careScanTitle">CareScan</h2>
+    <button type="button" class="ct-dialog-close" data-scan-close aria-label="Close CareScan">×</button>
+  </header>
+  <form id="careScanUpload">
+    <fieldset class="care-scan-fields">
+      <legend>Choose an original document</legend>
+      <label>Patient<select name="patient" required><option value="" selected disabled>Choose a patient</option></select></label>
+      <label>Document type<select name="document_type" required>
+        <option value="" selected disabled>Choose a type</option>
+        <option value="mcp_card">Mother and Child Protection (MCP) card</option>
+        <option value="prescription">Prescription</option>
+        <option value="vaccination_card">Vaccination card</option>
+        <option value="lab_report">Lab report</option>
+        <option value="medical_document">Other medical document</option>
+      </select></label>
+      <div class="care-scan-file-actions">
+        <button type="button" class="btn btn--secondary" data-scan-pick="careScanFile">Choose file</button>
+        <button type="button" class="btn btn--secondary" data-scan-pick="careScanCamera">Take photo</button>
+      </div>
+      <input id="careScanFile" type="file" accept="application/pdf,image/jpeg,image/png,image/webp" hidden>
+      <input id="careScanCamera" type="file" accept="image/*" capture="environment" hidden>
+      <p id="careScanFilename">Choose a PDF, JPEG, PNG or WebP file up to 5 MB.</p>
+      <p>CareScan reads printed English text. You’ll check each entry against the original before saving.</p>
+      <button type="submit" class="btn btn--primary">Extract entries</button>
+    </fieldset>
+  </form>
+  <form id="careScanReview" novalidate hidden>
+    <fieldset class="care-scan-fields">
+      <legend>Review against the original</legend>
+      <p id="careScanPatient"></p>
+      <p>Correct any fields you can read, then verify or reject each entry. Leave unreadable optional fields blank and reject entries with unreadable required fields.</p>
+      <ul id="careScanWarnings"></ul>
+      <details class="care-scan-original" open>
+        <summary>Original document</summary>
+        <div id="careScanPreview"></div>
+        <a id="careScanOriginal" class="link-btn" download>Download original for comparison</a>
+      </details>
+      <div id="careScanEntries"></div>
+      <button type="button" class="btn btn--secondary" id="careScanAdd">Add a readable entry</button>
+      <label class="care-scan-confirm"><input name="confirm_source" type="checkbox">
+        <span>I checked each verified entry against the original for the selected patient.</span>
+      </label>
+      <div class="care-scan-file-actions">
+        <button type="submit" class="btn btn--primary">Save verified entries</button>
+        <button type="button" class="btn btn--secondary" data-scan-reset>Start over</button>
+      </div>
+    </fieldset>
+  </form>
+  <p id="careScanStatus" role="status" aria-live="polite"></p>
+  <div id="careScanResult" class="care-scan-file-actions" hidden>
+    <button type="button" class="btn btn--primary" id="careScanView">View in care timeline</button>
+    <button type="button" class="btn btn--secondary" data-scan-reset>Scan another document</button>
+  </div>
+</dialog>
+<template id="careScanEntry">
+  <fieldset class="care-scan-entry">
+    <legend></legend>
+    <p data-scan-source></p>
+    <div class="care-scan-grid">
+      <label>Entry type<select name="kind">
+        <option value="medicine">Medicine</option>
+        <option value="vaccination">Vaccination</option>
+        <option value="lab_result">Lab result</option>
+        <option value="antenatal_visit">Antenatal visit</option>
+        <option value="other">Other medical entry</option>
+      </select></label>
+      <label>Date from the document<input name="occurred_on" type="date" min="1900-01-01"></label>
+      <label>Name or description<input name="label" maxlength="160"></label>
+      <label data-scan-field="dosage">Dose or strength as written<input name="dosage" maxlength="120"></label>
+      <label data-scan-field="result">Result as written<input name="result" maxlength="160"></label>
+      <label data-scan-field="unit">Unit as written<input name="unit" maxlength="40"></label>
+      <label>Details from the document (optional)<input name="notes" maxlength="300"></label>
+    </div>
+    <div class="care-scan-decisions">
+      <label><input type="radio" value="verify" data-scan-decision> Verify</label>
+      <label><input type="radio" value="reject" data-scan-decision> Reject</label>
+    </div>
+  </fieldset>
+</template>
+
 <script src="/shared/emergency-triage.js"></script>
 <script src="/shared/postpartum-rules.js"></script>
 <script src="js/follow-through.js"></script>
@@ -1030,7 +1118,8 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 <script src="js/clinical-dashboard.js?v=2"></script>
 <script src="js/patient-home-open.js?v=6"></script>
 <script src="js/patient-timeline-live.js?v=2"></script>
-<script src="/shared/child-development.js?v=1"></script><script src="js/child-growth-development.js?v=1"></script><script src="js/patient-dashboard.js?v=5"></script>
+<script src="js/care-scan.js" defer></script>
+<script src="/shared/child-development.js?v=1"></script><script src="js/child-growth-development.js?v=1"></script><script src="js/patient-dashboard.js?v=6"></script>
 <script src="js/care-timeline-enhanced.js"></script><script src="js/missed-care-outreach.js?v=3"></script>
 <script>
 (function () {
@@ -1252,7 +1341,11 @@ function renderHeader() { if(currentUser) PatientExperience.update({user:current
 
 function renderAppointments() { PatientExperience.update({appointments:appointments}); }
 
-function renderTimeline() { PatientExperience.update({milestones:motherMilestones}); }
+function renderTimeline(careScanEntries) {
+  const update = { milestones: motherMilestones };
+  if (careScanEntries) update.careScanEntries = careScanEntries;
+  PatientExperience.update(update);
+}
 
 function renderWeightChart() {}
 
@@ -1315,7 +1408,7 @@ async function loadTimeline() {
   var data = null;
   try { data = await api.apiRequest('/timeline'); } catch (e) {}
   if(data) motherMilestones = data.milestones || [];
-  renderTimeline();
+  renderTimeline(data?.care_scan_entries);
 }
 
 async function loadAppointments() {
@@ -1684,10 +1777,18 @@ if (notifReadAllBtn) {
   });
 }
 
+var patientBridge = {
+  showPanel: showPanel,
+  reloadTimeline: loadTimeline,
+  reloadAppointments: loadAppointments,
+  reloadDocuments: loadPatientDocuments,
+  fileToBase64: fileToBase64
+};
+
 async function boot() {
   if(!navigator.onLine && !IS_GUEST){
     var cached=await PatientExperience.restore();
-    if(cached){currentUser=cached.user; motherMilestones=cached.milestones; PatientExperience.init({user:currentUser,showPanel:showPanel,reloadTimeline:loadTimeline,reloadAppointments:loadAppointments,offlineOnly:true});route();return;}
+    if(cached){currentUser=cached.user; motherMilestones=cached.milestones; PatientExperience.init({...patientBridge,user:currentUser,offlineOnly:true});route();return;}
   }
   if (IS_GUEST) {
     currentUser = {
@@ -1701,7 +1802,8 @@ async function boot() {
     motherMilestones = hydrateDemoMilestones();
     appointments = hydrateDemoAppointments();
     healthLogs = hydrateDemoHealthLogs();
-    await PatientExperience.init({user:currentUser,showPanel:showPanel,reloadTimeline:loadTimeline,reloadAppointments:loadAppointments});
+    await PatientExperience.init({...patientBridge,user:currentUser});
+    if (window.BirthReadiness) window.BirthReadiness.init({ guest: true });
     renderHeader();
     if (window.CareExt) window.CareExt.init({ guest: true, user: currentUser, educationOnly:true });
     renderAppointments();
@@ -1716,7 +1818,7 @@ async function boot() {
 
   currentUser = await api.fetchCurrentUser();
   if (!currentUser) {
-    if(api.apiRequest.lastNetworkError){var fallback=await PatientExperience.restore();if(fallback){currentUser=fallback.user;motherMilestones=fallback.milestones;await PatientExperience.init({user:currentUser,showPanel:showPanel,reloadTimeline:loadTimeline,reloadAppointments:loadAppointments,offlineOnly:true});route();}}
+    if(api.apiRequest.lastNetworkError){var fallback=await PatientExperience.restore();if(fallback){currentUser=fallback.user;motherMilestones=fallback.milestones;await PatientExperience.init({...patientBridge,user:currentUser,offlineOnly:true});route();}}
     return;
   }
   if (currentUser.role === 'doctor') {
@@ -1724,7 +1826,8 @@ async function boot() {
     return;
   }
 
-  await PatientExperience.init({user:currentUser,showPanel:showPanel,reloadTimeline:loadTimeline,reloadAppointments:loadAppointments});
+  await PatientExperience.init({...patientBridge,user:currentUser});
+  if (window.BirthReadiness) window.BirthReadiness.init({ guest: false });
   renderHeader();
   if (window.CareExt) window.CareExt.init({ guest: false, user: currentUser, educationOnly:true });
   await Promise.all([

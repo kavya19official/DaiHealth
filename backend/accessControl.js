@@ -36,15 +36,14 @@ async function hasDoctorAccess(pool, doctorId, motherId) {
 }
 
 async function logAccess(pool, motherId, doctorId, resource, allowed) {
-  try {
-    await pool.query('INSERT INTO patient_record_access_log(mother_id,doctor_id,resource,allowed) VALUES($1,$2,$3,$4)', [motherId, doctorId, resource, allowed]);
-  } catch (e) { console.warn('Access log write failed:', e.message); }
+  await pool.query(`INSERT INTO patient_record_access_log(mother_id,doctor_id,resource,allowed,created_at)
+    SELECT id,$2,$3,$4,clock_timestamp() FROM users WHERE id=$1 AND role='mother'`, [motherId, doctorId, resource, allowed]);
 }
 
 // Parses :motherId, enforces access and records the view. Returns motherId, or null after sending 400/403.
 async function gateDoctor(pool, req, res, resource) {
-  const motherId = parseInt(req.params.motherId, 10);
-  if (Number.isNaN(motherId)) { res.status(400).json({ error: 'Invalid patient id' }); return null; }
+  const motherId = Number(req.params.motherId);
+  if (!Number.isInteger(motherId) || motherId < 1 || motherId > 2147483647) { res.status(400).json({ error: 'Invalid patient id' }); return null; }
   const ok = await hasDoctorAccess(pool, req.user.id, motherId);
   await logAccess(pool, motherId, req.user.id, resource, ok);
   if (!ok) { res.status(403).json({ error: 'You do not have access to this patient' }); return null; }
@@ -105,13 +104,38 @@ function registerAccessControl(app, { pool, authenticateToken, authorizeRole }) 
         : await pool.query('SELECT 1 FROM appointments WHERE mother_id=$1 AND facility_uuid::text=$2 LIMIT 1', [req.user.id, ref]);
       if (!related.rows.length) return res.status(404).json({ error: 'That clinician or facility is not on your care team' });
       const reason = typeof req.body?.reason === 'string' ? req.body.reason.trim().slice(0, 300) : null;
-      await pool.query(
-        `INSERT INTO patient_access_controls(mother_id,grantee_type,grantee_ref,state,reason) VALUES($1,$2,$3,$4,$5)
-         ON CONFLICT (mother_id,grantee_type,grantee_ref) DO UPDATE SET state=EXCLUDED.state, reason=EXCLUDED.reason, updated_at=NOW()`,
-        [req.user.id, type, ref, state, reason]);
-      await pool.query('INSERT INTO patient_access_events(mother_id,event_type,details) VALUES($1,$2,$3)',
-        [req.user.id, state === 'revoked' ? 'access_revoked' : 'access_granted', JSON.stringify({ grantee_type: type, grantee_ref: ref })]);
-      res.json({ state, message: state === 'revoked' ? 'Access turned off. It takes effect immediately.' : 'Access restored.' });
+      // One transaction: the consent row, the choice event and the audit-chain
+      // receipt commit or roll back together, so a revocation can never be
+      // recorded without its tamper-evident receipt (and vice versa).
+      const db = await pool.connect();
+      let auditEventId;
+      let occurrence;
+      try {
+        await db.query('BEGIN');
+        const saved = (await db.query(
+          `INSERT INTO patient_access_controls(mother_id,grantee_type,grantee_ref,state,reason,updated_at) VALUES($1,$2,$3,$4,$5,clock_timestamp())
+           ON CONFLICT (mother_id,grantee_type,grantee_ref) DO UPDATE SET state=EXCLUDED.state, reason=EXCLUDED.reason, updated_at=clock_timestamp()
+           RETURNING to_char(updated_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"') AS updated_at`,
+          [req.user.id, type, ref, state, reason])).rows[0];
+        occurrence = saved.updated_at;
+        await db.query(`INSERT INTO patient_access_events(mother_id,event_type,details,created_at)
+          VALUES($1,$2,$3::jsonb || jsonb_build_object('transaction_id',txid_current()::text),$4::timestamptz)`,
+          [req.user.id, state === 'revoked' ? 'access_revoked' : 'access_granted',
+           JSON.stringify({ actor_id: req.user.id, grantee_type: type, grantee_ref: ref }), occurrence]);
+        auditEventId = (await db.query(`SELECT id FROM consent_audit_events WHERE mother_id=$1 AND source='access_event'
+          ORDER BY id DESC LIMIT 1`, [req.user.id])).rows[0].id;
+        await db.query('COMMIT');
+      } catch (e) { await db.query('ROLLBACK').catch(() => {}); throw e; } finally { db.release(); }
+      let receipt;
+      try {
+        receipt = await require('./consentAudit').signedReceipt(pool, req.user.id, auditEventId);
+      } catch (error) {
+        console.warn('Consent changed but receipt issuance is unavailable:', error.code || error.status || error.name);
+      }
+      res.json({ state, audit_event_id: String(auditEventId), receipt_id: receipt?.id ?? null, occurred_at: occurrence,
+        message: (state === 'revoked' ? 'Access turned off.' : 'Access restored.') +
+          (receipt ? ' A signed receipt is ready in your audit log.' : ' A signed receipt is temporarily unavailable.') });
+
     } catch (e) { fail(res, 'Access update', e); }
   });
 

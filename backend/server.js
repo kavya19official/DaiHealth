@@ -559,8 +559,9 @@ const MILESTONE_SELECT = `
 app.get('/api/timeline', authenticateToken, authorizeRole(['mother']), async (req, res) => {
   try {
     const result = await require('./timelineEventStore').current(pool,req.user.id);
+    const careScanEntries = await require('./careScan').timelineEntries(pool, req.user.id);
     const allowed=['id','stage','category','title','guidance','due_date','completed_at','sort_order','appointment_id','result_id','completion_verification','verified_facility_name','status','workflow_state','clinician_priority','added_by_doctor_id'];
-    res.set('Cache-Control','no-store').json({milestones:result.rows.map(row=>Object.fromEntries(allowed.filter(k=>row[k]!==undefined).map(k=>[k,row[k]]))),audit_checkpoint:result.checkpoint});
+    res.set('Cache-Control','no-store').json({milestones:result.rows.map(row=>Object.fromEntries(allowed.filter(k=>row[k]!==undefined).map(k=>[k,row[k]]))),audit_checkpoint:result.checkpoint,care_scan_entries:careScanEntries});
   } catch (error) {
     console.error('Fetch timeline error:', error);
     res.status(500).json({ error: 'Failed to fetch timeline' });
@@ -1076,6 +1077,7 @@ require('./notifications')(app, { pool, authenticateToken });
 
 // Patient experience: notification prefs + privacy controls
 require('./patientPreferences')(app, { pool, authenticateToken });
+require('./birthReadiness').register(app, { pool, authenticateToken, authorizeRole });
 require('./patientContinuity')(app, { pool, authenticateToken, authorizeRole });
 require('./patientExperience')(app, { pool, authenticateToken, authorizeRole });
 require('./patientHospitalStay')(app, { pool, authenticateToken, authorizeRole });
@@ -1091,7 +1093,7 @@ require('./patientML')(app, { pool, authenticateToken, authorizeRole,usageTracke
 require('./clinicalDashboard')(app, { pool, authenticateToken, authorizeRole });
 require('./doctorWorkspace')(app, { pool, authenticateToken, authorizeRole });
 require('./doctorOperations')(app, { pool, authenticateToken, authorizeRole });
-require('./patientDocuments')(app, { pool, authenticateToken, authorizeRole });
+require('./patientDocuments')(app, { pool, authenticateToken, authorizeRole, jwtSecret: process.env.JWT_SECRET });
 require('./patientTimelineLive')(app, { pool, authenticateToken, authorizeRole });
 require('./timelineTrust')(app, { pool, authenticateToken, authorizeRole });
 require('./timelineAccess')(app, { pool, authenticateToken, authorizeRole });
@@ -1120,6 +1122,7 @@ require('./facilityDiscovery')(app, { pool, authenticateToken, authorizeRole });
 // Smart referral handoff and mother-newborn continuity
 require('./referralContinuity')(app, { pool, authenticateToken, authorizeRole });
 require('./accessControl')(app, { pool, authenticateToken, authorizeRole });
+require('./consentAudit')(app, { pool, authenticateToken, authorizeRole });
 require('./followThrough')(app, { pool, authenticateToken, authorizeRole });
 require('./privacyAnalytics')(app, { pool, authenticateToken, authorizeRole });
 require('./demoCareMessages')(app, { pool, authenticateToken });
