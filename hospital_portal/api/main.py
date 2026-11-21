@@ -62,6 +62,8 @@ def create_app(engine=None):
                         )
         seed_demo_requests(engine)
         seed_followup_risk(engine)
+        from .asha import seed_asha
+        seed_asha(engine)
         from .demo_video_seed import seed_video_demo
         seed_video_demo(engine)
         yield
@@ -897,6 +899,10 @@ def create_app(engine=None):
     from .demo_followup_risk import register_followup_risk, seed_followup_risk
     patient_request_auth = register_demo_requests(app, engine, require, audit, secret)
     register_followup_risk(app, engine, require, audit, patient_request_auth)
+
+    from .asha import register_asha
+
+    register_asha(app, engine, require, audit, one)
     return app
 
 

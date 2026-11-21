@@ -687,3 +687,88 @@ operations_ai_usage = table(
     number("reported_total_tokens"), number("tool_calls", False),
     Column("latency_ms", Float, nullable=False), text("source", False),
 )
+
+# ASHA community health worker copilot: village beats, beneficiary assignments,
+# offline-first field visits, structured voice notes and health-camp updates.
+asha_village = table(
+    "asha_village",
+    ref("facility_id", "facility", False),
+    text("name", False),
+    Column("lat", Float, nullable=False),
+    Column("lng", Float, nullable=False),
+    text("anganwadi_name"),
+)
+asha_assignment = table(
+    "asha_assignment",
+    ref("facility_id", "facility", False),
+    ref("asha_id", "portal_user", False),
+    ref("mother_id", "mother", False),
+    ref("village_id", "asha_village"),
+    text("household_label"),
+    Column("lat", Float),
+    Column("lng", Float),
+    flag("active", True),
+    constraints=(UniqueConstraint("asha_id", "mother_id"),),
+)
+asha_visit = table(
+    "asha_visit",
+    ref("facility_id", "facility", False),
+    ref("asha_id", "portal_user", False),
+    ref("mother_id", "mother", False),
+    ref("village_id", "asha_village"),
+    text("visit_date", False),
+    text("status", False),
+    Column("priority_score", Float),
+    data("priority_reasons"),
+    data("outcome"),
+    text("client_uuid"),
+    Column("recorded_at", DateTime(timezone=True)),
+    text("open_key"),
+    constraints=(
+        UniqueConstraint("asha_id", "client_uuid"),
+        UniqueConstraint("open_key"),
+        CheckConstraint(
+            "status IN ('planned','completed','missed','rescheduled')"
+        ),
+    ),
+)
+asha_camp = table(
+    "asha_camp",
+    ref("facility_id", "facility", False),
+    ref("asha_id", "portal_user", False),
+    ref("village_id", "asha_village"),
+    text("name", False),
+    text("camp_date", False),
+    text("status", False),
+    data("details"),
+    constraints=(CheckConstraint("status IN ('planned','open','closed')"),),
+)
+asha_camp_update = table(
+    "asha_camp_update",
+    ref("camp_id", "asha_camp", False),
+    ref("asha_id", "portal_user", False),
+    ref("mother_id", "mother", False),
+    ref("child_id", "child"),
+    text("kind", False),
+    data("payload"),
+    text("client_uuid"),
+    constraints=(
+        UniqueConstraint("asha_id", "client_uuid"),
+        CheckConstraint(
+            "kind IN ('attendance','vitals','immunization','referral_flag')"
+        ),
+    ),
+)
+asha_note = table(
+    "asha_note",
+    ref("facility_id", "facility", False),
+    ref("asha_id", "portal_user", False),
+    ref("mother_id", "mother", False),
+    ref("visit_id", "asha_visit"),
+    ref("camp_update_id", "asha_camp_update"),
+    text("transcript", False),
+    data("structured"),
+    Column("recorded_at", DateTime(timezone=True), nullable=False),
+    text("client_uuid"),
+    constraints=(UniqueConstraint("asha_id", "client_uuid"),),
+)
