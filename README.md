@@ -338,3 +338,9 @@ patient account. Clinicians must still register and be verified.
 With `SMTP_USER`/`SMTP_PASS` set (Gmail: an app password), each Google sign-in emails a
 "You have successfully logged in to DAI" notice (`backend/loginMailer.js`). Email failures never block
 sign-in, and synthetic `.invalid` demo addresses are skipped.
+
+## Reports shared both ways
+
+Patient → doctor: in **Reports & records** the patient uploads a PDF or image (up to 5 MB) and chooses **Share with consent** for a connected doctor. That doctor sees it under **Records → Patient reports**, can open the original and record a review.
+
+Doctor → patient: under **Records → Patient reports** a verified doctor chooses **Add a report for a patient**, picks a connected patient and uploads the file (`POST /api/doctor/patients/:motherId/documents`). The patient sees it in **Reports & records** marked "Added by Dr …" and can open or share it, but not delete it. The doctor keeps access to reports they added only while the care relationship is active; revoking the doctor removes it. Migration: `backend/db/clinician_report_uploads.sql`.

@@ -412,7 +412,8 @@
     return c;
   }
 
-  function openSOS() {
+  function openSOS(preset) {
+    if (sos.el) closeSOS();
     sos.opener = document.activeElement;
     sos.step = 1; sos.codes = []; sos.note = ''; sos.triage = null; sos.summary = null; sos.eventId = null; sos.actions = []; sos.saved = null;
     sos.context = (state.emCtx && state.emCtx.context) || (state.pp && state.pp.active ? 'postpartum' : 'pregnant');
@@ -429,6 +430,14 @@
     renderSOS();
     ov.querySelector('.cx-modal').focus();
     // Refresh context in the background (symptom list is also available locally via the shared module).
+    // Dai Didi (voice guide) can open the flow already filled in: {context, codes[], note}. Same triage, same saved record.
+    if (preset && Array.isArray(preset.codes) && preset.codes.length) {
+      sos.context = preset.context === 'postpartum' ? 'postpartum' : 'pregnant';
+      sos.codes = preset.codes.filter(function (c) { return typeof c === 'string'; }).slice(0, 20);
+      sos.note = String(preset.note || '').slice(0, 500);
+      submitSituation();
+      return;
+    }
     loadEmergencyContext().then(function (c) {
       if (c && sos.el && sos.step === 1 && !sos.codes.length) { sos.context = c.context; renderSOS(); }
     });
@@ -721,5 +730,5 @@
   // Rendering helpers reused by the doctor portal (js/doctor-safety.js).
   var helpers = { esc: esc, chip: chip, fmtShort: fmtShort, lineChart: lineChart, injectStyles: injectStyles, LEVEL_STYLE: LEVEL_STYLE, telHref: telHref };
 
-  window.CareExt = { helpers: helpers, init: init, openSOS: openSOS, refreshRisk: loadTrend, afterHealthLog: afterHealthLog, refreshPostpartum: loadPostpartum, recordPostnatalContact: markContact, postpartumData: function(){return state.pp;} };
+  window.CareExt = { currentContext: function () { return (state.emCtx && state.emCtx.context) || (state.pp && state.pp.active ? 'postpartum' : 'pregnant'); }, gestWeeks: function () { return state.emCtx && state.emCtx.gest_weeks != null ? state.emCtx.gest_weeks : null; }, isGuest: function () { return !!(state.guest || state.offline); }, helpers: helpers, init: init, openSOS: openSOS, refreshRisk: loadTrend, afterHealthLog: afterHealthLog, refreshPostpartum: loadPostpartum, recordPostnatalContact: markContact, postpartumData: function(){return state.pp;} };
 })();

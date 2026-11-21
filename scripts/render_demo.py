@@ -8,8 +8,14 @@ from local import ROOT, environment
 
 def mount_state():
     mount = Path(os.environ.get("DAI_STATE_DIR", "/var/data")).resolve()
-    if not mount.is_dir():
-        raise RuntimeError("Attach a persistent disk at DAI_STATE_DIR before starting.")
+    # Render Free can explicitly opt in to disposable synthetic demo data.
+    if mount == Path("/tmp/dai-state").resolve():
+        mount.mkdir(mode=0o700, exist_ok=True)
+    elif not mount.is_dir():
+        raise RuntimeError(
+            "Attach a persistent disk at DAI_STATE_DIR, or set "
+            "DAI_STATE_DIR=/tmp/dai-state for a disposable synthetic demo."
+        )
     link = ROOT / ".local"
     if link.is_symlink() and link.resolve() == mount:
         return
