@@ -315,6 +315,9 @@ module.exports = function registerCareExtensions(app, { pool, authenticateToken,
     };
   }
 
+  // Shared with Golden Hour so the pre-alert summary reads the same profile and logs as the emergency flow.
+  app.locals.loadEmergencyInputs = loadEmergencyInputs;
+
   app.get('/api/emergency/context', ...motherOnly, async (req, res) => {
     try {
       const inputs = await loadEmergencyInputs(req.user.id);
