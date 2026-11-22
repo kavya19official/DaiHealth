@@ -65,7 +65,9 @@
     $('signIn').hidden=true;
     $('status').textContent='';
     $('shared').innerHTML=result.shared.length?result.shared.map(grant=>grantCard(grant,result.notice)).join(''):'<article class="family-grant"><div class="family-loader"><strong>No active information is shared with this account.</strong><p>The invitation may still need to be accepted, or access may have expired or been revoked.</p></div></article>';
+    if(window.GoldenHourUI)window.GoldenHourUI.mountFamily($('shared'),result.shared);
     await restCards(result.shared,version);
+
   }
 
   async function restCards(grants,version){

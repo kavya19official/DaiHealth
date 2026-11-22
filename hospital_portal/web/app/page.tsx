@@ -7,6 +7,7 @@ import { AdministrationPanel, AffiliationSwitcher, InvitationAcceptance, Patient
 import { SustainabilityPanel } from "./sustainability";
 import { OperationsIntelligencePanel } from "./operations-intelligence";
 import { PatientRequestsPanel } from "./patient-requests";
+import { GoldenHourBoard, GoldenHourLayer } from "./golden-hour";
 import { FollowupRiskPanel } from "./followup-risk";
 import { AshaCopilot } from "./asha";
 type Row = Record<string, any>;
@@ -29,6 +30,7 @@ const days = [
   "Sunday",
 ];
 const operationNav = [
+  ["goldenHour", "Golden Hour · incoming", "✚"],
   ["ashaCopilot", "ASHA Copilot", "⌂"],
   ["followupRisk", "Follow-up & risk demo", "✓"],
   ["patientRequests", "Patient requests", "⇄"],
@@ -75,6 +77,7 @@ const workspacePermissions: Record<string, string> = {
   careReviews: "care.read",
   followupRisk: "coordination.read",
   patientRequests: "coordination.read",
+  goldenHour: "coordination.read",
   sustainability: "green.read",
   intelligence: "operations.read",
   forecasts: "forecast.read",
@@ -360,7 +363,7 @@ export default function Home() {
     setBusy(true);
     setError("");
     try {
-      if (view === "patientRequests" || view === "followupRisk" || view === "ashaCopilot") { const structure = await api("/facilities/" + user.facility_id + "/structure"); if (sequence === loadSequence.current) setData(structure); return; }
+      if (view === "patientRequests" || view === "followupRisk" || view === "ashaCopilot" || view === "goldenHour") { const structure = await api("/facilities/" + user.facility_id + "/structure"); if (sequence === loadSequence.current) setData(structure); return; }
       const params = new URLSearchParams();
       Object.entries(filters).forEach(([key, value]) => {
         if (value) params.set(key, String(value));
@@ -750,6 +753,7 @@ export default function Home() {
   }
   return (
     <div className="portal-shell">
+      {user.permissions.includes("coordination.read") && <GoldenHourLayer key={user.id + user.facility_id} api={api} permissions={user.permissions} onOpenBoard={() => navigate("goldenHour")} />}
       <a className="skip" href="#main">
         Skip to workspace
       </a>
@@ -921,6 +925,7 @@ export default function Home() {
               Updating linked records…
             </div>
           )}
+          {view === "goldenHour" && <GoldenHourBoard key={user.id+user.facility_id} api={api} permissions={user.permissions}/>}
           {view === "patientRequests" && <PatientRequestsPanel key={user.id+user.facility_id} api={api} permissions={user.permissions}/>}
           {view === "followupRisk" && <FollowupRiskPanel key={user.id+user.facility_id} api={api} permissions={user.permissions} userId={user.id}/>}
           {view === "ashaCopilot" && <AshaCopilot key={user.id+user.facility_id} api={api} user={user}/>}
