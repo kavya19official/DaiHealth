@@ -499,6 +499,10 @@
     var s = LEVEL_STYLE[t.level] || LEVEL_STYLE.unsure;
     var h = '<div class="cx-banner" role="alert" style="background:' + s.bg + ';border-color:' + s.bd + '"><div style="font-size:1.05rem;font-weight:800;color:' + s.fg + '">' + esc(t.headline) + '</div></div>';
     h += '<div class="cx-actions">' + t.numbers.map(function (n) { return callBtn(n.number, n.number + ' · ' + n.label, n.key === 'national'); }).join('') + '</div>';
+    // Golden Hour (prototype): offered only when the fixed triage says emergency or urgent, and only on synthetic demo accounts.
+    if ((t.level === 'emergency' || t.level === 'urgent') && window.GoldenHourUI && window.GoldenHourUI.enabled && !state.guest) {
+      h += '<div class="cx-banner" style="background:#fff7ed;border-color:#fdba74;margin-top:.5rem"><b>Golden Hour (prototype)</b><div class="cx-sub" style="margin:.2rem 0">Tell the nearest hospital that can really help, with your key details, before you arrive. <b>Call first. This does not replace calling.</b></div><button type="button" class="btn btn--primary" id="sosGolden" style="background:#c2410c">Alert the nearest capable hospital</button></div>';
+    }
     if (t.matched.length) h += '<div class="cx-sub" style="margin-top:.4rem"><b>Why:</b></div><ul style="margin:0 0 .4rem 1.1rem;padding:0;font-size:.86rem">' + t.matched.map(function (m) { return '<li>' + esc(m.label) + ' ' + chip(m.level) + '<div class="cx-sub" style="margin:0">' + esc(m.why) + '</div></li>'; }).join('') + '</ul>';
     h += '<div class="cx-h" style="font-size:.95rem;margin-top:.7rem">Do this now</div><ol style="margin:.2rem 0 .5rem 1.2rem;padding:0;font-size:.9rem;line-height:1.5">' + t.steps.map(function (x) { return '<li style="margin:.3rem 0">' + esc(x) + '</li>'; }).join('') + '</ol>';
     if (t.firstAid.length) h += '<div class="cx-h" style="font-size:.95rem">While you wait for help</div><ul style="margin:.2rem 0 .5rem 1.1rem;padding:0;font-size:.88rem">' + t.firstAid.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>';
@@ -545,7 +549,7 @@
         '<div style="display:flex;gap:.4rem;align-items:center">' + (done(action) ? chip('ok', 'You marked this') : '') + '<a class="cx-call' + (strong ? ' cx-call--strong' : '') + '" data-act="' + action + '" href="' + telHref(phone) + '">Call</a></div></div>';
     }
     var h = '<div class="cx-h" style="font-size:.95rem">Coordinate</div>' +
-      '<div class="cx-banner" style="background:#f5f3ff;border-color:#ddd6fe;font-size:.84rem"><b>Anvaya does not contact hospitals for you, and it cannot see bed availability.</b> Please call the facility yourself so they can prepare — and do not assume a place is ready until they tell you.</div>';
+      (window.GoldenHourUI && window.GoldenHourUI.enabled ? '<div class="cx-banner" style="background:#fff7ed;border-color:#fdba74;font-size:.84rem"><b>Demo only:</b> the Golden Hour button on the previous screen can send a pre-alert to a synthetic demo hospital portal. Outside this demo nothing is sent for you. ' + '</div>' : '') + '<div class="cx-banner" style="background:#f5f3ff;border-color:#ddd6fe;font-size:.84rem"><b>Anvaya does not contact hospitals for you, and it cannot see bed availability.</b> Please call the facility yourself so they can prepare — and do not assume a place is ready until they tell you.</div>';
     h += '<div class="cx-row"><div><b style="font-size:.88rem">Ambulance</b><div class="cx-sub" style="margin:0">112 works everywhere in India; 108 in many states</div></div><div style="display:flex;gap:.4rem;align-items:center">' + (done('called_ambulance') ? chip('ok', 'You marked this') : '') + '<a class="cx-call cx-call--strong" data-act="called_ambulance" href="tel:112">112</a></div></div>';
     h += line('Emergency contact', c.name, c.phone, 'called_contact', false);
     h += line('Planned facility', plan.facility_name, plan.facility_phone, 'called_facility', false);
@@ -588,6 +592,9 @@
       if (res) res.addEventListener('click', resumeEvent);
     } else if (sos.step === 2) {
       $('sosToSummary').addEventListener('click', function () { sos.step = 3; renderSOS(); });
+      if ($('sosGolden')) $('sosGolden').addEventListener('click', function () {
+        window.GoldenHourUI.open({ codes: sos.codes.filter(function (c) { return c !== 'pp_self_harm'; }), note: sos.note, context: sos.context, emergencyEventId: sos.eventId || null });
+      });
       $('sosBack').addEventListener('click', function () { sos.step = 1; renderSOS(); });
     } else if (sos.step === 3) {
       var copy = $('sosCopy'), share = $('sosShare');
