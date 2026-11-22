@@ -112,7 +112,7 @@ module.exports = function wellbeing(app, {pool,mother,doctor,env=process.env,fet
       const previous = (await db.query('SELECT status FROM daicare_referrals WHERE screen_id=$1 FOR UPDATE',[id])).rows[0];
       if (previous && previous.status!=='waiting') return previous.status;
       if (!previous) {
-        await db.query("INSERT INTO daicare_referrals(screen_id,status) VALUES($1,'waiting')",[id]);
+        await db.query("INSERT INTO daicare_referrals(screen_id,status,follow_up_due_at) VALUES($1,'waiting',NOW()+INTERVAL '1 day')",[id]);
         await logEvent(db,req.user.id,'daicare_wellbeing_consent',{screen_id:id});
       }
       return assignReferral(db,id,req.user.id);
@@ -136,7 +136,7 @@ module.exports = function wellbeing(app, {pool,mother,doctor,env=process.env,fet
     const profile = await activeDoctor(pool,req.user.id);
     if (!profile.mental_health) failure(403,'Mental health listing approval is required.');
     const { rows } = await pool.query(`SELECT e.id,e.mother_id,e.score,e.item_ten,e.ai_status,e.created_at,mp.full_name,
-        r.status,r.clinician_note,r.acknowledged_at FROM daicare_referrals r JOIN daicare_epds e ON e.id=r.screen_id
+        r.status,r.clinician_note,r.acknowledged_at,r.follow_up_due_at FROM daicare_referrals r JOIN daicare_epds e ON e.id=r.screen_id
       JOIN daicare_on_call s ON s.id=r.shift_id JOIN mother_profiles mp ON mp.user_id=e.mother_id
       WHERE r.doctor_id=$1 AND r.revoked_at IS NULL AND r.status IN ('assigned','acknowledged','resolved')
         AND (r.status<>'assigned' OR s.ends_at>clock_timestamp())
@@ -144,7 +144,7 @@ module.exports = function wellbeing(app, {pool,mother,doctor,env=process.env,fet
       ORDER BY (e.item_ten>0) DESC,(e.score>=13) DESC,(e.ai_status='review') DESC,r.consent_at LIMIT 60`,[req.user.id]);
     for (const row of rows) await access.logAccess(pool,row.mother_id,req.user.id,'daicare_wellbeing_summary',true);
     res.json({referrals:rows.map(row=>({...scoreResult(row),patient_name:row.full_name,status:row.status,
-      clinician_note:row.clinician_note,acknowledged_at:row.acknowledged_at}))});
+      clinician_note:row.clinician_note,acknowledged_at:row.acknowledged_at,follow_up_due_at:row.follow_up_due_at,review_prompt:'Check in on rest and support; assess the recorded questionnaire clinically.'}))});
   }));
 
   app.patch(clinicianPath + '/:id', ...doctor, endpoint(async (req,res) => {

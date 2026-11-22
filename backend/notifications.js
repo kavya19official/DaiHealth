@@ -174,14 +174,8 @@ module.exports = function registerNotificationRoutes(app, { pool, authenticateTo
     const reminders=(await pool.query("SELECT scheme_id,to_char(reminder_on,'YYYY-MM-DD') AS reminder_on FROM patient_support_progress WHERE mother_id=$1 AND step<4 AND reminder_on IS NOT NULL AND reminder_on<=($2::date+2)",[motherId,today])).rows;
     reminders.forEach(r=>out.push({dedupe_key:'scheme:'+r.scheme_id+':'+r.reminder_on,severity:'info',category:'scheme',title:'Your '+r.scheme_id.toUpperCase()+' checklist reminder',body:'A date you chose for your personal checklist. This is not an official deadline or approval.',route:'schemes',route_sub:null,child_id:null,event_date:r.reminder_on}));
 
-    const checkIn=(await pool.query(`SELECT COALESCE(max(m.logged_on)+7, p.care_start_date::date)::text AS due
-      FROM mother_profiles p LEFT JOIN daicare_mood m ON m.mother_id=p.user_id
-      WHERE p.user_id=$1 AND (p.pregnancy_status='delivered' OR EXISTS
-        (SELECT 1 FROM postpartum_profile pp WHERE pp.mother_id=p.user_id))
-      GROUP BY p.care_start_date`,[motherId])).rows[0];
-    if(checkIn?.due && checkIn.due<=today) out.push({dedupe_key:'daicare-check-in:'+checkIn.due,severity:'info',category:'system',
-      title:'Your weekly check-in is due',body:'Open After delivery to record how you are feeling.',route:'postpartum',
-      route_sub:null,child_id:null,event_date:checkIn.due});
+    const sukoon=(await pool.query("SELECT reminders,EXTRACT(HOUR FROM clock_timestamp() AT TIME ZONE 'Asia/Kolkata')::int AS hour FROM sukoon_preferences WHERE mother_id=$1",[motherId])).rows[0];
+    if(sukoon?.reminders&&sukoon.hour>=18)out.push({dedupe_key:'sukoon-evening:'+today,severity:'info',category:'system',title:'Your evening check-in is ready.',body:'A little space for your recovery, whenever you want it.',route:'sukoon',event_date:today});
 
     return out;
   }
@@ -251,6 +245,8 @@ module.exports = function registerNotificationRoutes(app, { pool, authenticateTo
       const fresh = req.user.role === 'mother'
         ? await computeMotherNotifications(req.user.id, today)
         : req.user.role === 'doctor' ? await computeDoctorNotifications(req.user.id, today) : [];
+      const practical=(await pool.query(`SELECT r.id FROM sukoon_requests r JOIN family_access_grants g ON g.id=r.grant_id JOIN users u ON u.id=r.mother_id AND u.closed_at IS NULL WHERE g.grantee_id=$1 AND g.revoked_at IS NULL AND g.expires_at>NOW() AND g.scopes @> '["support_tips"]'::jsonb AND r.status='requested'`,[req.user.id])).rows;
+      for(const row of practical)fresh.push({dedupe_key:'sukoon-rest:'+row.id,severity:'info',category:'system',title:'A little help tonight',body:'A practical rest request is ready in your family space.',route:'family'});
       await sync(req.user.id, fresh);
 
       const rows = (await pool.query(

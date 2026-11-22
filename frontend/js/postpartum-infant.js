@@ -1,6 +1,7 @@
 (function () {
   'use strict';
   const api = window.DaiAPI;
+  if(document.getElementById('patientSukoon'))return;
   const el = document.createElement('section');
   el.className = 'daily-card wellbeing-screen';
   el.innerHTML = `<h2>A little space for your wellbeing</h2>

@@ -13,6 +13,7 @@
     "test:timeline": "node --test --test-concurrency=2 backend/patientJourney.test.js backend/patientTimelineClient.test.js backend/patientTimelineLive.test.js backend/patientTimelineIntegration.test.js backend/timelineTools.test.js backend/timelineTrust.test.js backend/timelineAccess.test.js backend/timelinePush.test.js backend/localMigrations.test.js",
     "timeline:vendors": "node scripts/sync-timeline-vendor.cjs",
     "setup:patient-postgis": "node scripts/setup-patient-postgis.cjs",
+    "test:sukoon": "node --test backend/sukoon.test.js backend/dayaSpeech.test.js backend/daicare.test.js",
     "test:mirror": "node --test backend/pregnancyMirror.test.js"
   },
   "engines": {

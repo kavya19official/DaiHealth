@@ -31,6 +31,7 @@
   }
 
   function patientWellbeing() {
+    if(document.getElementById("patientSukoon")){const link=document.createElement("a");link.className="sk-toast-link";link.href="#sukoon";link.innerHTML="<div><h2>Sukoon · Mind and rest</h2><p>Short check-ins, rest and support. A private space for every mother.</p></div><strong>Open Sukoon ↗</strong>";postpartumPanel.prepend(link);return;}
     const root = section(postpartumPanel,'Postpartum mental health',`
       <p>Track how you feel, take the Edinburgh Postnatal Depression Scale (EPDS), or ask a clinician for support.</p>
       <div class="dai-care-checkin" data-checkin></div>
@@ -182,7 +183,7 @@
         const response=await api('/mental-health/referrals');
         if(response) referrals.innerHTML='<h3>On-call mental health referrals</h3>'+(response.referrals.map(row=>`
           <article class="dai-care-row"><h4>${escape(row.patient_name)}</h4><p>EPDS ${row.score}/30 · ${escape(row.priority.replace('_',' '))}
-            ${row.ai_status==='review'?' · AI suggested review':''}</p><p>${names[row.status]}</p>
+            ${row.ai_status==='review'?' · AI suggested review':''}</p><p>${names[row.status]}</p>${row.follow_up_due_at?`<p>Follow-up task due ${escape(date(row.follow_up_due_at))}. ${escape(row.review_prompt||'')}</p>`:''}
           ${row.status==='assigned'?buttons('Acknowledge referral','acknowledge',row.id):''}
           ${row.status==='acknowledged'?`<form data-resolution data-id="${row.id}"><label>Follow-up message<textarea required maxlength="800" name="note"></textarea></label><button class="btn btn--primary">Send message and resolve</button></form>`:''}
           </article>`).join('')||'<p>No currently shared referrals.</p>');

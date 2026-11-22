@@ -13,7 +13,7 @@ function pcmToWav(pcm,sampleRate=24000){
 function createSpeechHandler({env=process.env,fetchImpl=(...args)=>fetch(...args),now=Date.now,usageTracker=null}={}){
   const cache=new Map(),requests=new Map(),inflight=new Map();
   const diskDir=env.DAI_TTS_CACHE_DIR || (env===process.env?path.join(__dirname,'../.local/tts-cache'):null);
-  const mirrorApproved=Object.fromEntries(['en','hi'].map(lang=>[lang,new Set([...require('../shared/pregnancy-mirror').narrations(lang),...require('../shared/uterus-learning').narrations(lang)])]));
+  const mirrorApproved=Object.fromEntries(['en','hi'].map(lang=>[lang,new Set([...require('../shared/pregnancy-mirror').narrations(lang),...require('../shared/uterus-learning').narrations(lang),...require('../shared/sukoon').narrations(lang)])]));
   const approved=Object.fromEntries(['en','hi'].map(lang=>[lang,new Set([...faqs.map(f=>f.answer[lang]),respond('',lang).text,...mirrorApproved[lang]])]));
   return async function speech(req,res){
     const text=typeof req.body?.text==='string'?req.body.text.trim():'';

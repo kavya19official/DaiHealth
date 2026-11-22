@@ -136,3 +136,9 @@ test('uterus studio narrations are fixed bilingual Charon explanations without p
  assert.equal(calls.length,12);for(const [,options]of calls)assert.ok(!options.body.includes('PRIVATE'));
  const before=calls.length,r=res();await handle({body:{text:K.text('lining')+' My private result is abnormal.',language:'en'}},r);assert.equal(r.code,400);assert.equal(calls.length,before);
 });
+
+test('Sukoon voices only fixed prototype scripts, never private notes or check-in answers',async()=>{
+ const M=require('../shared/sukoon'),calls=[];const handle=createSpeechHandler({env:{GEMINI_API_KEY:'fake',GEMINI_TTS_VOICE:'Fenrir'},fetchImpl:async(...args)=>{calls.push(args);return ok();}});
+ for(const language of ['en','hi'])for(const text of M.narrations(language)){const r=res();await handle({ip:'sukoon',body:{text,language,note:'PRIVATE'}},r);assert.equal(r.code,200);assert.equal(r.headers['X-DAI-TTS-Voice'],'Charon');}
+ for(const [,options]of calls)assert.ok(!options.body.includes('PRIVATE'));const before=calls.length,r=res();await handle({body:{text:'PRIVATE diary entry',language:'en'}},r);assert.equal(r.code,400);assert.equal(calls.length,before);
+});

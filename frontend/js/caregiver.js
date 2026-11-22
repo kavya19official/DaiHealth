@@ -3,6 +3,7 @@
   const $=id=>document.getElementById(id);
   const E=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const title=value=>String(value||'').replaceAll('_',' ').replace(/\b\w/g,c=>c.toUpperCase());
+  let loadVersion=0;
   let token=new URLSearchParams(location.hash.slice(1)).get('invite')||'';
   history.replaceState(null,'',location.pathname);
 
@@ -57,14 +58,23 @@
   }
 
   async function load(){
+    const version=++loadVersion;
     $('shared').innerHTML='<p class="family-loader">Loading the information shared with you…</p>';
     const result=await api('/family/shared');
-    if(!result)return;
+    if(!result||version!==loadVersion)return;
     $('signIn').hidden=true;
     $('status').textContent='';
     $('shared').innerHTML=result.shared.length?result.shared.map(grant=>grantCard(grant,result.notice)).join(''):'<article class="family-grant"><div class="family-loader"><strong>No active information is shared with this account.</strong><p>The invitation may still need to be accepted, or access may have expired or been revoked.</p></div></article>';
+    await restCards(result.shared,version);
   }
 
+  async function restCards(grants,version){
+    const eligible=grants.filter(g=>g.scopes.includes('support_tips'));if(!eligible.length)return;
+    const result=await api('/family/sukoon');if(!result||version!==loadVersion)return;
+    const section=document.createElement('section');section.className='family-grant';
+    section.innerHTML='<h2>A little help tonight</h2><p>Practical requests only. Private Sukoon notes and check-in results are never included.</p>'+result.requests.map(r=>'<article class="family-data-row"><strong>'+E(r.mother_name||'Your family member')+' · '+r.minutes+' minutes of requested rest</strong><span>'+E(r.status==='requested'?'Requested · please confirm if you can help':'You accepted this request')+'</span><button data-rest-id="'+E(r.id)+'" data-rest-action="'+(r.status==='requested'?'accept':'done')+'">'+(r.status==='requested'?'I can help':'Mark my support done')+'</button></article>').join('')+'<h3>What could help?</h3><ul>'+result.tips.map(t=>'<li>'+E(t)+'</li>').join('')+'</ul><form data-family-duty><label>Log a task I handled<select name="grant">'+eligible.map(g=>'<option value="'+E(g.id)+'">'+E(g.mother_name)+'</option>').join('')+'</select></label><select name="kind"><option value="feed">Feed support</option><option value="diaper">Diaper change</option><option value="meal">Food & water</option><option value="settle">Settling baby</option><option value="home">Household task</option></select><label><input type="checkbox" name="consent" required> Share this practical task log with her.</label><button>Record my task</button></form><p>In-app requests only. No alarm, phone call or emergency dispatch. Task logs are not a measure of total work.</p>';
+    $('shared').prepend(section);section.querySelectorAll('[data-rest-id]').forEach(button=>button.onclick=async()=>{if(await api('/family/sukoon/'+button.dataset.restId,'PATCH',{action:button.dataset.restAction}))load();});section.querySelector('form').onsubmit=async event=>{event.preventDefault();const f=event.target;if(await api('/family/sukoon/duties','POST',{grant_id:f.grant.value,kind:f.kind.value}))load();};
+  }
   $('login').onsubmit=async event=>{
     event.preventDefault();
     const form=event.target;
@@ -83,6 +93,7 @@
     if(result){token='';$('accept').disabled=true;$('status').textContent='Invitation accepted. Your shared view is ready.';load();}
   };
   $('refresh').onclick=load;
-  $('logout').onclick=async()=>{await api('/auth/logout','POST',{});$('shared').replaceChildren();$('signIn').hidden=false;$('status').textContent='Signed out.';};
+  $('logout').onclick=async()=>{loadVersion++;await api('/auth/logout','POST',{});$('shared').replaceChildren();$('signIn').hidden=false;$('status').textContent='Signed out.';};
+  setInterval(()=>{if(!document.hidden&&$('signIn').hidden&&!document.activeElement?.closest('[data-family-duty]'))load();},15000);
   load();
 })();
