@@ -916,6 +916,7 @@ require('./patientExperience')(app, { pool, authenticateToken, authorizeRole });
 require('./patientHospitalStay')(app, { pool, authenticateToken, authorizeRole });
 require('./patientHome')(app, { pool, authenticateToken, authorizeRole });
 require('./postpartumInfant')(app, { pool, authenticateToken, authorizeRole });
+require('./daicare')(app, { pool, authenticateToken, authorizeRole, startScheduler:true });
 require('./clinicalContinuity')(app,{pool,authenticateToken,authorizeRole});
 require('./qualityDashboard')(app,{pool,authenticateToken,authorizeRole});
 require('./platformRights')(app,{pool,authenticateToken,authorizeRole});

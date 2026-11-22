@@ -174,6 +174,15 @@ module.exports = function registerNotificationRoutes(app, { pool, authenticateTo
     const reminders=(await pool.query("SELECT scheme_id,to_char(reminder_on,'YYYY-MM-DD') AS reminder_on FROM patient_support_progress WHERE mother_id=$1 AND step<4 AND reminder_on IS NOT NULL AND reminder_on<=($2::date+2)",[motherId,today])).rows;
     reminders.forEach(r=>out.push({dedupe_key:'scheme:'+r.scheme_id+':'+r.reminder_on,severity:'info',category:'scheme',title:'Your '+r.scheme_id.toUpperCase()+' checklist reminder',body:'A date you chose for your personal checklist. This is not an official deadline or approval.',route:'schemes',route_sub:null,child_id:null,event_date:r.reminder_on}));
 
+    const checkIn=(await pool.query(`SELECT COALESCE(max(m.logged_on)+7, p.care_start_date::date)::text AS due
+      FROM mother_profiles p LEFT JOIN daicare_mood m ON m.mother_id=p.user_id
+      WHERE p.user_id=$1 AND (p.pregnancy_status='delivered' OR EXISTS
+        (SELECT 1 FROM postpartum_profile pp WHERE pp.mother_id=p.user_id))
+      GROUP BY p.care_start_date`,[motherId])).rows[0];
+    if(checkIn?.due && checkIn.due<=today) out.push({dedupe_key:'daicare-check-in:'+checkIn.due,severity:'info',category:'system',
+      title:'Your weekly check-in is due',body:'Open After delivery to record how you are feeling.',route:'postpartum',
+      route_sub:null,child_id:null,event_date:checkIn.due});
+
     return out;
   }
 
@@ -194,6 +203,20 @@ module.exports = function registerNotificationRoutes(app, { pool, authenticateTo
     todayAppts.forEach((a) => out.push({ dedupe_key: `apptoday:${a.id}`, severity: 'info', category: 'appointment',
       title: `${a.mother_name} is booked today`, body: 'Confirmed appointment today.',
       route: 'appointments', route_sub: null, child_id: null, event_date: today }));
+
+    const access=require('./accessControl');
+    const referrals=(await pool.query(`SELECT e.id,r.shift_id,e.item_ten FROM daicare_referrals r
+      JOIN daicare_epds e ON e.id=r.screen_id JOIN daicare_on_call s ON s.id=r.shift_id
+      JOIN daicare_directory d ON d.doctor_id=r.doctor_id JOIN doctor_profiles p ON p.user_id=d.doctor_id
+      WHERE r.doctor_id=$1 AND r.status='assigned' AND r.revoked_at IS NULL AND s.ends_at>clock_timestamp()
+        AND d.suspended_at IS NULL AND d.mental_health AND p.credential_verified
+        AND lower(p.medical_license_number)=lower(d.registration_number)
+        AND NOT ${access.revokedSql('e.mother_id','r.doctor_id')}
+      ORDER BY (e.item_ten>0) DESC,r.assigned_at LIMIT 15`,[doctorId])).rows;
+    referrals.forEach(r=>out.push({dedupe_key:'daicare-referral:'+r.id+':'+r.shift_id,
+      severity:r.item_ten>0?'danger':'info',category:'system',title:'New DaiCare on-call referral',
+      body:'Open Appointments to review the shared screening summary and acknowledge the referral.',
+      route:'appointments',route_sub:null,child_id:null,event_date:today}));
 
     return out;
   }
