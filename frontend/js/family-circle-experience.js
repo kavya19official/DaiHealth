@@ -6,7 +6,7 @@
   const panel=$('panel-family');
   if(!panel)return;
 
-  const scopeNames={appointments:'Upcoming appointments',urgent_help:'Danger signs & emergency help',birth_plan:'Facility & transport plan',support_tips:'How to help',care_timeline:'Care timeline',child_growth:'Selected child growth'};
+  const scopeNames={appointments:'Upcoming appointments',urgent_help:'Danger signs & emergency help',birth_plan:'Facility & transport plan',support_tips:'How to help',care_timeline:'Care timeline',child_growth:'Selected child growth',emergency_alert:'May start an emergency alert for me (prototype)'};
   const relationNames={partner:'Partner',parent:'Parent or elder',sibling:'Sibling',relative:'Relative',caregiver:'Caregiver',other:'Trusted person'};
   const presetScopes={essential:['appointments','urgent_help','birth_plan','support_tips'],child:['appointments','support_tips','child_growth']};
   let grants=[],children=[],recent=[],selectedId=null,step=1,preset='essential';
