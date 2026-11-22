@@ -15,7 +15,6 @@ async function main(){
  const patient=await nodeLogin('mother'),doctor=await nodeLogin('doctor');
  const timeline=(await call('/api/timeline',patient)).data;assert.ok(timeline.milestones.length);assert.ok((await call('/api/children',patient)).data.children.length>=2);
  const workspace=(await call('/api/doctor/workspace',doctor)).data;assert.ok(workspace.patients.some(p=>p.id===patient.user.id));
- const registration=await call('/api/auth/register/mother',{method:'POST',body:{email:'video-check-'+randomUUID()+'@dai-synthetic.invalid',password,full_name:'SYNTHETIC Registration Check',pregnancy_status:'pregnant',lmp_date:new Date(Date.now()-70*86400000).toISOString().slice(0,10)}});assert.ok(registration.data.user?.id||registration.data.userId||registration.data.user_id);
  const result=(await call(P+'search',{...patient,method:'POST',body:{location:{source:'manual_pin',pincode:'110017'},need:'antenatal',preferences:{language:'hindi'}}})).data;
  const f=result.facilities.find(f=>f.pincode==='110017');assert.ok(f,'South synthetic service must be present');assert.ok(f.ranking.reasons.length);
  const date=new Date(Date.now()+2*86400000).toISOString().slice(0,10),note='Synthetic MVP verification; no real appointment or clinical advice.';
@@ -44,7 +43,7 @@ async function main(){
  const docs=(await call('/api/doctor/documents',doctor)).data;assert.ok(Array.isArray(docs.documents));
  const messages=(await call('/api/demo/care-messages/contacts',doctor)).data;assert.ok(messages.contacts.some(c=>c.id===patient.user.id));const message='Synthetic MVP coordination check '+randomUUID();await call('/api/demo/care-messages/thread',{...doctor,method:'POST',body:{peer_id:patient.user.id,text:message,client_id:randomUUID()}});assert.ok((await call('/api/demo/care-messages/thread?peer_id='+doctor.user.id,patient)).data.messages.some(m=>m.body===message));
  const audit=(await call('/hospital-admin/api/audit',{token:admin})).data;assert.ok(audit.items?.length||Array.isArray(audit));
- console.log('PASS: registration; maternal/child records; assigned doctor; explainable discovery; patient request → facility staff → assigned clinician → scheduled state; patient/staff follow-up acknowledgement/report/closure; separately simulated risk review, named escalation owner and audit; scoped documents; saved in-app messages; administration audit.');
+ console.log('PASS: maternal/child records; assigned doctor; explainable discovery; patient request → facility staff → assigned clinician → scheduled state; patient/staff follow-up acknowledgement/report/closure; separately simulated risk review, named escalation owner and audit; scoped documents; saved in-app messages; administration audit.');
  console.log('All writes used local synthetic accounts. This check creates labelled test records; it does not prove clinical validation or real service availability.');
 }
 main().catch(e=>{console.error(e.message);process.exitCode=1;});

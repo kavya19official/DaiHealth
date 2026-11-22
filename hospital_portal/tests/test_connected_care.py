@@ -1,6 +1,7 @@
 """Freshness, geography suppression and API permission boundaries."""
 import sqlite3
 from hospital_portal.api.capacity_board import capacity_rows
+from hospital_portal.api.care_gap_map import care_gap_geography
 from hospital_portal.api.quality_board import quality_rows
 from hospital_portal.tests.test_workspace import workspace, sign_in
 
@@ -44,9 +45,36 @@ def test_quality_rates_have_sources_and_sparse_wards_remain_suppressed():
     db.close()
 
 
+def test_care_gap_map_suppresses_small_zones_and_limits_outreach_to_authorized_records():
+    db=sqlite3.connect(':memory:');db.row_factory=sqlite3.Row
+    db.executescript('''CREATE TABLE mothers(mother_id TEXT,district TEXT,pincode TEXT,home_latitude REAL,home_longitude REAL,registered_hospital_id TEXT);
+    CREATE TABLE care_gaps(gap_type TEXT,expected_item TEXT,due_date TEXT,subject_type TEXT,subject_id TEXT,status TEXT);
+    CREATE TABLE newborns(child_id TEXT,mother_id TEXT);CREATE TABLE pregnancies(pregnancy_id TEXT,mother_id TEXT);
+    CREATE TABLE referrals(pregnancy_id TEXT,referred_from_hospital_id TEXT,referred_to_hospital_id TEXT,transport_time_min INTEGER);''')
+    for i in range(1,22):
+        zone='110001' if i<=12 else '110002'
+        db.execute('INSERT INTO mothers VALUES(?,?,?,?,?,?)',(f'm{i}','New Delhi',zone,28.61+i/10000,77.21+i/10000,'h'))
+        db.execute('INSERT INTO pregnancies VALUES(?,?)',(f'p{i}',f'm{i}'))
+    for i in range(1,5):db.execute("INSERT INTO care_gaps VALUES('missed ANC visit','ANC follow-up','2026-11-01','mother',?,'open')",(f'm{i}',))
+    for i in range(5,8):
+        db.execute('INSERT INTO newborns VALUES(?,?)',(f'c{i}',f'm{i}'))
+        db.execute("INSERT INTO care_gaps VALUES('missed vaccine','Penta','2026-11-01','child',?,'open')",(f'c{i}',))
+    db.execute("INSERT INTO referrals VALUES('p8','h','other',180)")
+    result=care_gap_geography(db,'h','2026-11-22','110001',{'m1':{'id':'portal-1','name':'Synthetic Mother 1'}})
+    assert result['suppressed_area_count']==1;assert len(result['areas'])==1
+    zone=result['areas'][0];assert zone['population']==12;assert zone['care_gap_rate']==58.3
+    assert zone['missed_anc_rate']==33.3;assert zone['overdue_vaccine_rate']==25.0;assert zone['long_referral_rate']==8.3
+    assert result['outreach_authorized'];assert [r['portal_mother_id'] for r in result['outreach']]==['portal-1']
+    assert 'clinical risk score' in result['methodology'];db.close()
+
+
 def test_capacity_and_quality_use_separate_permissions(workspace):
     _,client=workspace
     admin=sign_in(client,'hospital_admin');assert client.get('/api/workspace/capacity',headers=admin).status_code==200
     q=client.get('/api/workspace/quality-board',headers=admin);assert q.status_code==200;assert 'source_notes' in q.json()
     quality=sign_in(client,'quality_officer');assert client.get('/api/workspace/capacity',headers=quality).status_code==403
     assert client.get('/api/workspace/quality-board',headers=quality).status_code==200
+    admin_map=client.get('/api/workspace/care-gap-map',headers=admin);assert admin_map.status_code==200
+    assert admin_map.json()['minimum_cell_size']==10;assert admin_map.json()['outreach_authorized']
+    quality_map=client.get('/api/workspace/care-gap-map',headers=quality);assert quality_map.status_code==200
+    assert not quality_map.json()['outreach_authorized'];assert quality_map.json()['outreach']==[]

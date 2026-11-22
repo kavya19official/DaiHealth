@@ -41,6 +41,7 @@ const operationNav = [
   ["careReviews", "Clinical review & summaries", "▤"],
   ["readiness", "Delivery readiness", "✚"],
   ["capacity", "Capacity & readiness", "▱"],
+  ["care-gap-map", "District care gap map", "⌖"],
   ["quality-board", "Ward quality dashboard", "▥"],
   ["critical", "Critical & neonatal care", "⌁"],
   ["referrals", "Referrals & handovers", "⇄"],
@@ -77,6 +78,7 @@ const workspacePermissions: Record<string, string> = {
   sustainability: "green.read",
   intelligence: "operations.read",
   forecasts: "forecast.read",
+  "care-gap-map": "quality.read",
   "quality-board": "quality.read",
   capacity: "facility.read",
   beds: "bed.read",
@@ -99,6 +101,7 @@ const workspacePermissions: Record<string, string> = {
   credentials: "user.verify",
 };
 const snapshotViews = new Set([
+  "care-gap-map",
   "quality-board",
   "capacity",
   "beds",
@@ -117,6 +120,7 @@ const snapshotViews = new Set([
   "diagnostics",
 ]);
 const titles: Record<string, [string, string]> = {
+  "care-gap-map": ["District care gap map", "Privacy-protected synthetic outreach patterns with role-scoped drill-down."],
   "quality-board": ["Ward quality dashboard", "Suppressed recorded measures; no hospital ranking."],
   capacity: ["Capacity & readiness", "Recorded beds, blood and scheduled staff; freshness is shown without ranking facilities."],
   handoffs: ["Facility handoffs", "Consented referral packets, receiving decisions and recorded outcomes."],
@@ -302,6 +306,7 @@ export default function Home() {
     q: "",
     status: "",
     ward: "",
+    area: "",
   });
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -413,7 +418,7 @@ export default function Home() {
       setMode("operations");
       setSummary(null);
       setWorkspaceData(null);
-      setFilters({ page: 1, q: "", status: "", ward: "" });
+      setFilters({ page: 1, q: "", status: "", ward: "", area: "" });
     }
     setChallenge(null);
     setOtp("");
@@ -733,7 +738,7 @@ export default function Home() {
   ).filter(([id]) => canOpen(id));
   function navigate(id: string) {
     setView(id);
-    setFilters({ page: 1, q: "", status: "", ward: "" });
+    setFilters({ page: 1, q: "", status: "", ward: "", area: "" });
     setMode(
       administrationNav.some(([view]) => view === id)
         ? "administration"

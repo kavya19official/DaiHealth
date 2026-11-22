@@ -14,6 +14,7 @@ from . import schema as s
 LABEL = "Simulated on synthetic data"
 SOURCE = Path(__file__).resolve().parents[2] / "backend/data/dai-hospital.db"
 PERMISSIONS = {
+    "care-gap-map": "quality.read",
     "quality-board": "quality.read",
     "capacity": "facility.read",
     "beds": "bed.read",
@@ -242,6 +243,7 @@ def register_workspace(app, engine, require, audit, roles):
         q: str = Query("", max_length=100),
         status: str = "",
         ward: str = "",
+        area: str = Query("", max_length=6, pattern=r"^[0-9]{0,6}$"),
         u=Depends(require("facility.read")),
     ):
         if view not in PERMISSIONS:
@@ -264,7 +266,39 @@ def register_workspace(app, engine, require, audit, roles):
                 "mode": "Recorded synthetic snapshot · read only",
                 "items": [],
             }
-            if view == "quality-board":
+            if view == "care-gap-map":
+                from .care_gap_map import care_gap_geography
+
+                outreach_mothers = {
+                    source_id: {
+                        "id": mother["id"],
+                        "name": mother["details"]["name"],
+                    }
+                    for source_id, mother in mothers.items()
+                }
+                geography = care_gap_geography(
+                    db, hid, today, area=area, outreach_mothers=outreach_mothers
+                )
+                result.update(geography)
+                result["items"] = geography["areas"]
+                audit(
+                    c,
+                    u,
+                    "read",
+                    "facility",
+                    str(hid),
+                    {"view": "suppressed care gap map", "area": area or None},
+                )
+                for row in geography["outreach"]:
+                    audit(
+                        c,
+                        u,
+                        "read",
+                        "mother",
+                        row["portal_mother_id"],
+                        {"view": "care gap map outreach", "area": area},
+                    )
+            elif view == "quality-board":
                 from .quality_board import quality_rows
                 from datetime import datetime, timezone
                 live = []

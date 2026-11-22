@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "leaflet/dist/leaflet.css";
 import Script from "next/script";
 export const metadata: Metadata = {
   title: "DAI · Hospital readiness",
