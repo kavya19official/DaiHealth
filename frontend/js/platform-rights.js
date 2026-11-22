@@ -1,7 +1,7 @@
 (function(){'use strict';
 const E=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),api=(p,o)=>window.DaiAPI.apiRequest(p,o);
 const family=document.getElementById('panel-family'),settings=document.getElementById('panel-settings');
-const scopeNames={appointments:'Upcoming appointments',urgent_help:'Danger signs & emergency help',birth_plan:'Facility & transport plan',support_tips:'How to help',care_timeline:'Shared care timeline',child_growth:'Selected child growth'};
+const scopeNames={appointments:'Upcoming appointments',urgent_help:'Danger signs & emergency help',birth_plan:'Facility & transport plan',support_tips:'How to help',care_timeline:'Shared care timeline',child_growth:'Selected child growth',emergency_alert:'May start an emergency alert for me (prototype)'};
 const relationshipNames={partner:'Partner',parent:'Parent or elder',sibling:'Sibling',relative:'Relative',caregiver:'Caregiver',other:'Trusted person'};
 function placeFamily(){const root=document.getElementById('realFamilyAccess'),support=document.getElementById('supportFamily'),audit=document.getElementById('consentAuditCard');if(!root||!support)return;if(audit&&root.nextElementSibling!==audit)audit.before(root);else if(!audit&&root.previousElementSibling!==support)support.after(root);}
 if(family){
