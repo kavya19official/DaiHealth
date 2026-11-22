@@ -1,1 +1,64 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><title>DAI · Family access</title><link rel="stylesheet" href="connected-care.css"><style>body{font:16px/1.6 system-ui;background:#f8f5ff;color:#1e1b4b;max-width:900px;margin:30px auto;padding:18px}.btn,button{padding:12px;border:1px solid #ddd;border-radius:10px;background:#f3e8ff;font:inherit}input{padding:12px;max-width:100%}label{display:block;margin:10px 0}pre{white-space:pre-wrap;overflow-wrap:anywhere}</style></head><body><h1>DAI · Family access</h1><p>Only records explicitly shared with this account appear here. Access is read-only and revocable by the mother.</p><section class="connected-care-card" id="signIn"><form id="login"><label>Email<input name="email" type="email" autocomplete="username" required></label><label>Password<input name="password" type="password" autocomplete="current-password" required></label><button>Sign in</button><button type="button" id="create">Create invited caregiver account</button></form></section><p id="status" role="status" aria-live="polite"></p><div class="connected-care-actions"><button id="accept">Accept private invitation</button><button id="refresh">Refresh shared records</button><button id="logout">Sign out</button></div><main id="shared"></main><script src="js/caregiver.js"></script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>DAI · Family Circle</title>
+  <link rel="stylesheet" href="caregiver.css?v=2">
+</head>
+<body>
+  <header class="family-header">
+    <a class="family-brand" href="index.html" aria-label="DAI home">
+      <span class="family-brand-mark" aria-hidden="true">दाई</span>
+      <span><strong>DAI</strong><small>FAMILY CIRCLE</small></span>
+    </a>
+    <div class="family-header-note"><span></span> Private, permission-based access</div>
+  </header>
+
+  <main class="family-shell">
+    <section class="family-welcome">
+      <div>
+        <span class="family-eyebrow">SUPPORT WITHOUT TAKING OVER</span>
+        <h1>Be part of her<br><em>circle of care.</em></h1>
+        <p>See only the practical information she has chosen to share—so you can help with appointments, transport and urgent support.</p>
+      </div>
+      <div class="family-safety-card">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 5 6v5c0 4.6 2.7 8.2 7 10 4.3-1.8 7-5.4 7-10V6l-7-3Z"/><path d="m9 12 2 2 4-4"/></svg>
+        <strong>She stays in control</strong>
+        <p>Access is read-only, expires automatically and can be revoked by her at any time.</p>
+      </div>
+    </section>
+
+    <section class="family-auth" id="signIn">
+      <div>
+        <span class="family-eyebrow">PRIVATE INVITATION</span>
+        <h2>Open your Family Circle</h2>
+        <p>Use the same email address that received the invitation.</p>
+      </div>
+      <form id="login">
+        <label>Email address<input name="email" type="email" autocomplete="username" placeholder="you@example.com" required></label>
+        <label>Password<input name="password" type="password" autocomplete="current-password" minlength="12" required></label>
+        <div class="family-auth-actions">
+          <button class="family-btn family-btn-primary" type="submit">Sign in</button>
+          <button class="family-btn family-btn-quiet" type="button" id="create">Create invited account</button>
+        </div>
+      </form>
+    </section>
+
+    <p class="family-status" id="status" role="status" aria-live="polite"></p>
+
+    <section class="family-toolbar" id="toolbar" hidden>
+      <div><span class="family-live-dot"></span><strong>Family Circle</strong><small>Read-only shared view</small></div>
+      <div>
+        <button class="family-btn family-btn-primary" id="accept" type="button">Accept invitation</button>
+        <button class="family-btn family-btn-quiet" id="refresh" type="button">Refresh</button>
+        <button class="family-btn family-btn-quiet" id="logout" type="button">Sign out</button>
+      </div>
+    </section>
+
+    <main id="shared" class="family-shared" aria-live="polite"></main>
+  </main>
+  <script src="js/caregiver.js?v=2"></script>
+</body>
+</html>

@@ -1,2 +1,88 @@
-(function(){'use strict';const $=id=>document.getElementById(id),E=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));let token=new URLSearchParams(location.hash.slice(1)).get('invite')||'';history.replaceState(null,'',location.pathname);$('accept').disabled=!token;async function api(path,method='GET',body){try{const r=await fetch('/api'+path,{method,credentials:'include',headers:{'Content-Type':'application/json'},body:body?JSON.stringify(body):undefined});const b=await r.json();if(!r.ok){$('status').textContent=b.error||'Request unavailable';if(r.status===401){$('shared').replaceChildren();$('signIn').hidden=false;}return null;}return b;}catch{$('status').textContent='Could not connect. Please retry.';return null;}}
-$('login').onsubmit=async e=>{e.preventDefault();const f=e.target,r=await api('/auth/login','POST',{email:f.elements.email.value,password:f.elements.password.value});if(r){f.elements.password.value='';$('signIn').hidden=true;$('status').textContent='Signed in. Accept your invitation if one was provided.';load();}};$('create').onclick=async()=>{const f=$('login');if(!f.reportValidity())return;const r=await api('/auth/register/caregiver','POST',{email:f.elements.email.value,password:f.elements.password.value,invite:token});if(r)$('status').textContent=r.message;};$('accept').onclick=async()=>{const r=await api('/family/accept','POST',{token});if(r){token='';$('accept').disabled=true;$('status').textContent='Invitation accepted.';load();}};$('refresh').onclick=load;$('logout').onclick=async()=>{await api('/auth/logout','POST',{});$('shared').replaceChildren();$('signIn').hidden=false;};async function load(){const r=await api('/family/shared');if(!r)return;$('signIn').hidden=true;$('shared').innerHTML=r.shared.map(g=>'<section class="connected-care-card"><h2>'+E(g.mother_name)+'</h2><p>Expires '+E(new Date(g.expires_at).toLocaleString())+'</p>'+Object.entries(g).filter(([k])=>['appointments','timeline','children'].includes(k)).map(([k,rows])=>'<h3>'+E(k.replaceAll('_',' '))+'</h3>'+rows.map(row=>'<dl>'+Object.entries(row).filter(([key])=>key!=='id').map(([key,v])=>'<dt>'+E(key.replaceAll('_',' '))+'</dt><dd>'+E(v==null?'Not recorded':String(v))+'</dd>').join('')+'</dl>').join('')).join('')+'</section>').join('')||'<p>No active records are shared with this account.</p>';}$('signIn').hidden=false;})();
+(function(){
+  'use strict';
+  const $=id=>document.getElementById(id);
+  const E=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const title=value=>String(value||'').replaceAll('_',' ').replace(/\b\w/g,c=>c.toUpperCase());
+  let token=new URLSearchParams(location.hash.slice(1)).get('invite')||'';
+  history.replaceState(null,'',location.pathname);
+
+  $('accept').disabled=!token;
+  $('toolbar').hidden=false;
+
+  async function api(path,method='GET',body){
+    try{
+      const response=await fetch('/api'+path,{method,credentials:'include',headers:{'Content-Type':'application/json'},body:body?JSON.stringify(body):undefined});
+      const result=await response.json();
+      if(!response.ok){
+        $('status').textContent=result.error||'This request is unavailable.';
+        if(response.status===401){$('shared').replaceChildren();$('signIn').hidden=false;}
+        return null;
+      }
+      return result;
+    }catch{
+      $('status').textContent='Could not connect to DAI. Please check that the local server is running.';
+      return null;
+    }
+  }
+
+  const section=(icon,name,note,content,full=false)=>'<section class="family-scope-card '+(full?'full':'')+'"><header class="family-scope-title"><span class="family-scope-icon" aria-hidden="true">'+E(icon)+'</span><div><h3>'+E(name)+'</h3><small>'+E(note)+'</small></div></header>'+content+'</section>';
+  const rows=object=>Object.entries(object||{}).filter(([,value])=>value!==null&&value!==''&&value!==undefined).map(([key,value])=>'<dl class="family-row"><dt>'+E(title(key))+'</dt><dd>'+E(value)+'</dd></dl>').join('')||'<p class="family-empty">Nothing has been recorded for this section yet.</p>';
+
+  function appointments(items=[]){
+    const content=items.length?items.map(item=>'<article class="family-appointment"><time class="family-date">'+E(new Date(item.date+'T00:00:00').toLocaleDateString(undefined,{day:'2-digit',month:'short'}))+'</time><div><strong>'+E(item.subject||'Mother')+'</strong><small>'+E([item.requested_time,item.room].filter(Boolean).join(' · ')||'Time to be confirmed')+'</small></div><span class="family-pill">'+E(item.status||'scheduled')+'</span></article>').join(''):'<p class="family-empty">No upcoming appointments are currently shared.</p>';
+    return section('CAL','Upcoming appointments','Help her plan travel and time',content,true);
+  }
+
+  function urgent(data={}){
+    const contact=data.emergency_contact?'<dl class="family-row"><dt>Trusted contact</dt><dd>'+E(data.emergency_contact.name)+(data.emergency_contact.phone?' · <a href="tel:'+E(data.emergency_contact.phone)+'">'+E(data.emergency_contact.phone)+'</a>':'')+'</dd></dl>':'';
+    const signs=(data.danger_signs||[]).map(sign=>'<li>'+E(sign)+'</li>').join('');
+    const calls=(data.numbers||[]).map(number=>'<a class="family-call" href="tel:'+E(number.number)+'">'+E(number.label)+' · '+E(number.number)+'</a>').join('');
+    return section('SOS','Urgent help','Know when and where to call','<div class="family-alert"><strong>Do not wait for family permission in an emergency.</strong><p>'+E(data.instruction||'Seek urgent medical help for danger signs.')+'</p></div>'+contact+'<ul class="family-danger-list">'+signs+'</ul><div class="family-call-grid">'+calls+'</div>',true);
+  }
+
+  function birthPlan(plan={}){return section('PLAN','Practical birth plan','Only the details she chose to share',rows(plan));}
+  function tips(items=[]){return section('HELP','How you can help','Practical, respectful support','<ul class="family-tip-list">'+items.map(item=>'<li>'+E(item)+'</li>').join('')+'</ul>');}
+  function timeline(items=[]){return section('CARE','Care timeline','Recorded and upcoming care',items.map(item=>'<dl class="family-row"><dt>'+E(item.title)+'</dt><dd>'+E(item.completed_at?'Completed '+new Date(item.completed_at).toLocaleDateString():'Due '+new Date(item.due_date).toLocaleDateString())+'</dd></dl>').join('')||'<p class="family-empty">No timeline steps are shared.</p>',true);}
+  function children(items=[]){return section('CHILD','Child growth','Only selected children',items.map(item=>'<dl class="family-row"><dt>'+E(item.name)+(item.measured_on?' · '+E(new Date(item.measured_on).toLocaleDateString()):'')+'</dt><dd>'+E([item.weight_kg&&item.weight_kg+' kg',item.height_cm&&item.height_cm+' cm',item.head_cm&&'Head '+item.head_cm+' cm'].filter(Boolean).join(' · ')||'No measurement recorded')+'</dd></dl>').join('')||'<p class="family-empty">No child growth measurements are shared.</p>');}
+
+  function grantCard(grant,notice){
+    const sections=[];
+    if(grant.appointments)sections.push(appointments(grant.appointments));
+    if(grant.urgent_help)sections.push(urgent(grant.urgent_help));
+    if(grant.birth_plan)sections.push(birthPlan(grant.birth_plan));
+    if(grant.support_tips)sections.push(tips(grant.support_tips));
+    if(grant.timeline)sections.push(timeline(grant.timeline));
+    if(grant.children)sections.push(children(grant.children));
+    return '<article class="family-grant"><header class="family-grant-head"><div><span class="family-eyebrow">SHARED BY HER</span><h2>'+E(grant.mother_name)+'</h2><p>Access expires '+E(new Date(grant.expires_at).toLocaleString())+'</p></div><span class="family-grant-badge">'+E(grant.relationship||'caregiver')+'</span></header><div class="family-scope-list">'+sections.join('')+'</div><footer class="family-notice">'+E(notice)+'</footer></article>';
+  }
+
+  async function load(){
+    $('shared').innerHTML='<p class="family-loader">Loading the information shared with you…</p>';
+    const result=await api('/family/shared');
+    if(!result)return;
+    $('signIn').hidden=true;
+    $('status').textContent='';
+    $('shared').innerHTML=result.shared.length?result.shared.map(grant=>grantCard(grant,result.notice)).join(''):'<article class="family-grant"><div class="family-loader"><strong>No active information is shared with this account.</strong><p>The invitation may still need to be accepted, or access may have expired or been revoked.</p></div></article>';
+  }
+
+  $('login').onsubmit=async event=>{
+    event.preventDefault();
+    const form=event.target;
+    const result=await api('/auth/login','POST',{email:form.elements.email.value,password:form.elements.password.value});
+    if(result){form.elements.password.value='';$('signIn').hidden=true;$('status').textContent=token?'Signed in. Now accept the private invitation.':'Signed in securely.';load();}
+  };
+  $('create').onclick=async()=>{
+    const form=$('login');
+    if(!form.reportValidity())return;
+    if(!token){$('status').textContent='Open the private invitation link before creating an account.';return;}
+    const result=await api('/auth/register/caregiver','POST',{email:form.elements.email.value,password:form.elements.password.value,invite:token});
+    if(result)$('status').textContent=result.message;
+  };
+  $('accept').onclick=async()=>{
+    const result=await api('/family/accept','POST',{token});
+    if(result){token='';$('accept').disabled=true;$('status').textContent='Invitation accepted. Your shared view is ready.';load();}
+  };
+  $('refresh').onclick=load;
+  $('logout').onclick=async()=>{await api('/auth/logout','POST',{});$('shared').replaceChildren();$('signIn').hidden=false;$('status').textContent='Signed out.';};
+  load();
+})();
