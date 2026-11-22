@@ -60,6 +60,12 @@ function registerAccessControl(app, { pool, authenticateToken, authorizeRole }) 
         `SELECT a.doctor_id, dp.full_name, dp.specialization, dp.facility_name, a.facility_uuid::text AS facility_ref, MAX(a.requested_date) AS last_appointment
            FROM appointments a LEFT JOIN doctor_profiles dp ON dp.user_id = a.doctor_id
           WHERE a.mother_id = $1 GROUP BY a.doctor_id, dp.full_name, dp.specialization, dp.facility_name, a.facility_uuid`, [req.user.id])).rows;
+      const network = (await pool.query(`SELECT DISTINCT s.doctor_id,dp.full_name,dp.specialization,
+          dp.facility_name FROM daicare_visits v JOIN daicare_slots s ON s.id=v.slot_id
+          JOIN doctor_profiles dp ON dp.user_id=s.doctor_id WHERE v.mother_id=$1
+        UNION SELECT DISTINCT r.doctor_id,dp.full_name,dp.specialization,dp.facility_name
+          FROM daicare_referrals r JOIN daicare_epds e ON e.id=r.screen_id
+          JOIN doctor_profiles dp ON dp.user_id=r.doctor_id WHERE e.mother_id=$1`,[req.user.id])).rows;
       const consents = (await pool.query(
         `SELECT c.doctor_id, dp.full_name, dp.specialization, dp.facility_name FROM clinical_dashboard_consent c LEFT JOIN doctor_profiles dp ON dp.user_id = c.doctor_id
           WHERE c.mother_id = $1 AND c.revoked_at IS NULL AND c.expires_at > NOW()`, [req.user.id])).rows;
@@ -85,6 +91,7 @@ function registerAccessControl(app, { pool, authenticateToken, authorizeRole }) 
           facilities.set(r.facility_ref, f);
         }
       }
+      for (const r of network) addDoctor(r,'DaiCare',null);
       for (const c of consents) addDoctor(c, 'clinical_dashboard_consent', null);
       for (const d of doctors.values()) d.effective_access = !d.revoked;
       res.set('Cache-Control', 'no-store').json({
@@ -100,7 +107,11 @@ function registerAccessControl(app, { pool, authenticateToken, authorizeRole }) 
       if (!['doctor', 'facility'].includes(type) || !['revoked', 'granted'].includes(state)) return res.status(400).json({ error: 'Choose a doctor or facility, and revoked or granted' });
       const related = type === 'doctor'
         ? await pool.query(`SELECT 1 FROM appointments WHERE mother_id=$1 AND doctor_id::text=$2
-                            UNION SELECT 1 FROM clinical_dashboard_consent WHERE mother_id=$1 AND doctor_id::text=$2 LIMIT 1`, [req.user.id, ref])
+                            UNION SELECT 1 FROM clinical_dashboard_consent WHERE mother_id=$1 AND doctor_id::text=$2
+                            UNION SELECT 1 FROM daicare_visits v JOIN daicare_slots s ON s.id=v.slot_id
+                              WHERE v.mother_id=$1 AND s.doctor_id::text=$2
+                            UNION SELECT 1 FROM daicare_referrals r JOIN daicare_epds e ON e.id=r.screen_id
+                              WHERE e.mother_id=$1 AND r.doctor_id::text=$2 LIMIT 1`, [req.user.id, ref])
         : await pool.query('SELECT 1 FROM appointments WHERE mother_id=$1 AND facility_uuid::text=$2 LIMIT 1', [req.user.id, ref]);
       if (!related.rows.length) return res.status(404).json({ error: 'That clinician or facility is not on your care team' });
       const reason = typeof req.body?.reason === 'string' ? req.body.reason.trim().slice(0, 300) : null;

@@ -45,6 +45,11 @@ async function validateBooking(pool,motherId,b,excludeId=0){
   const taken=await pool.query("SELECT id FROM appointments WHERE doctor_id=$1 AND requested_date=$2 AND requested_time=$3 AND status IN ('pending','confirmed') AND id<>$4",[b.doctor_id,b.requested_date,b.requested_time,excludeId]);if(taken.rows.length)throw fail('This request window is already taken. Please choose another.',409);
   context={facility_uuid:doctor.facility_id,unit_uuid:doctor.unit_id,unit_label:doctor.unit_label,room:session.room,slot_end:time(minutes(b.requested_time)+doctor.slot_minutes)};
  }
+ if(b.requested_time && (await pool.query(`SELECT 1 FROM daicare_slots s JOIN daicare_visits v ON v.slot_id=s.id
+    WHERE s.doctor_id=$1 AND v.status<>'cancelled'
+      AND s.starts_at < ($2::date + COALESCE($4::time,$3::time+interval '30 minutes')) AT TIME ZONE 'Asia/Kolkata'
+      AND s.starts_at+interval '30 minutes' > ($2::date + $3::time) AT TIME ZONE 'Asia/Kolkata' LIMIT 1`,
+    [b.doctor_id,b.requested_date,b.requested_time,context.slot_end||null])).rowCount) throw fail('That time overlaps a DaiCare booking',409);
  if(b.child_id){const r=await pool.query('SELECT id FROM children WHERE id=$1 AND mother_id=$2',[b.child_id,motherId]);if(!r.rows.length)throw fail('Choose a child from your own records');}
  if(b.milestone_id){const r=await pool.query('SELECT id FROM care_milestones WHERE id=$1 AND mother_id=$2',[b.milestone_id,motherId]);if(!r.rows.length)throw fail('Choose a milestone from your own care plan');}
  return context;
