@@ -148,6 +148,7 @@
     function ask(text,options={}){
       const clean=String(text||'').trim().slice(0,1500);if(!clean)return;
       interactionId++;stopListening();stop();speechStatus.hidden=true;message('user',clean);input.value='';
+      if(window.PregnancyMirror?.isOpen()){const explanation=window.PregnancyMirror.handle(clean);if(explanation){guideReply(explanation);return;}}
       if(careGuide?.handle(clean,options))return;
       const result=knowledge.respond(clean,language);lastReplyOptions={};lastReply=result.text;message('bot',result.text,result);speakReply(result.text);
     }

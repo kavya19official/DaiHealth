@@ -41,5 +41,5 @@ setInterval(()=>{if(key&&(Date.now()-touched>300000||meta.expiresAt<Date.now()))
 document.addEventListener('visibilitychange',()=>{clearTimeout(hiddenTimer);if(document.hidden&&key)hiddenTimer=setTimeout(()=>lock(true),60000);});
 if(localStorage.getItem('dai-low-bandwidth')==='true')document.body.classList.add('low-bandwidth');
 if('serviceWorker'in navigator)navigator.serviceWorker.addEventListener('message',e=>{if(e.origin&&e.origin!==location.origin)return;if(e.data?.type==='dai-offline-sync-request')window.PatientOffline?.sync().catch(()=>{});if(e.data?.type==='dai-push-renewal-needed')window.DaiAPI?.toast('Sign in and renew browser reminders in Settings.');});
-if('serviceWorker'in navigator)navigator.serviceWorker.register('/patient-sw.js',{scope:'/'}).catch(()=>{});
+if('serviceWorker'in navigator)navigator.serviceWorker.register('/patient-sw.js',{scope:'/',updateViaCache:'none'}).then(registration=>registration.update()).catch(()=>{});
 })();

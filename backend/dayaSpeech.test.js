@@ -3,6 +3,15 @@ const {createSpeechHandler,pcmToWav}=require('./dayaSpeech');
 const {faqs}=require('../frontend/js/daya-knowledge');
 function res(){return {code:200,headers:{},status(code){this.code=code;return this;},json(body){this.body=body;return this;},set(headers){Object.assign(this.headers,headers);return this;},send(body){this.body=body;return this;}};}
 const text=lang=>faqs.find(f=>f.id==='timeline').answer[lang];
+test('mirror narration is a fixed public catalogue, always Charon, and rejects added patient text',async()=>{
+ const mirror=require('../shared/pregnancy-mirror'),calls=[];
+ const handle=createSpeechHandler({env:{GEMINI_API_KEY:'fake',GEMINI_TTS_VOICE:'Fenrir'},fetchImpl:async(...args)=>{calls.push(args);return ok();}});
+ for(const language of ['en','hi'])for(const config of [{layer:'placenta'},{layer:'baby',twins:true},{revealDepth:2}]){
+  const r=res(),narration=mirror.narration(config,language);await handle({body:{text:narration,language,record:{name:'PRIVATE'}}},r);assert.equal(r.code,200);assert.equal(r.headers['X-DAI-TTS-Voice'],'Charon');
+ }
+ for(const [,options]of calls){assert.equal(JSON.parse(options.body).generationConfig.speechConfig.voiceConfig.prebuiltVoiceConfig.voiceName,'Charon');assert.ok(!options.body.includes('PRIVATE'));}
+ const before=calls.length,r=res();await handle({body:{text:mirror.descriptions.placenta[0]+' My private scan says something.',language:'en'}},r);assert.equal(r.code,400);assert.equal(calls.length,before);
+});
 function ok(){return {ok:true,json:async()=>({candidates:[{content:{parts:[{inlineData:{mimeType:'audio/L16;codec=pcm;rate=24000',data:Buffer.from([0,0,1,0]).toString('base64')}}]}}]})};}
 test('Gemini receives the approved answer with Charon and the selected Hindi/English language, never a question or patient record',async()=>{
  const calls=[];const handle=createSpeechHandler({env:{GEMINI_API_KEY:'fake-test-key'},fetchImpl:async(...args)=>{calls.push(args);return ok();}});
@@ -118,4 +127,12 @@ test('autoplay rejection offers Play reply and replays the same Gemini audio wit
 });
 test('stopping discards a blocked reply so a later playback click cannot restart it',async()=>{
  const h=browserVoice(async()=>wavResponse(),{blocked:true});await h.api.speak('approved reply');assert.equal(h.api.pending(),true);h.api.stop();h.api.allowPlayback();h.api.resumeReplyAudio();await Promise.resolve();assert.equal(h.api.pending(),false);assert.equal(h.audios[0].paused,true);assert.equal(h.gestures.at(-1),false);
+});
+
+test('uterus studio narrations are fixed bilingual Charon explanations without personal data',async()=>{
+ const K=require('../shared/uterus-learning'),calls=[];
+ const handle=createSpeechHandler({env:{GEMINI_API_KEY:'fake',GEMINI_TTS_VOICE:'Fenrir'},fetchImpl:async(...args)=>{calls.push(args);return ok();}});
+ for(const language of ['en','hi'])for(const part of K.order){const r=res();await handle({ip:'uterus',body:{text:K.text(part,language),language,question:'PRIVATE'}},r);assert.equal(r.code,200);assert.equal(r.headers['X-DAI-TTS-Voice'],'Charon');}
+ assert.equal(calls.length,12);for(const [,options]of calls)assert.ok(!options.body.includes('PRIVATE'));
+ const before=calls.length,r=res();await handle({body:{text:K.text('lining')+' My private result is abnormal.',language:'en'}},r);assert.equal(r.code,400);assert.equal(calls.length,before);
 });

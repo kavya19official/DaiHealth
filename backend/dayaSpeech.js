@@ -13,7 +13,8 @@ function pcmToWav(pcm,sampleRate=24000){
 function createSpeechHandler({env=process.env,fetchImpl=(...args)=>fetch(...args),now=Date.now,usageTracker=null}={}){
   const cache=new Map(),requests=new Map(),inflight=new Map();
   const diskDir=env.DAI_TTS_CACHE_DIR || (env===process.env?path.join(__dirname,'../.local/tts-cache'):null);
-  const approved=Object.fromEntries(['en','hi'].map(lang=>[lang,new Set([...faqs.map(f=>f.answer[lang]),respond('',lang).text])]));
+  const mirrorApproved=Object.fromEntries(['en','hi'].map(lang=>[lang,new Set([...require('../shared/pregnancy-mirror').narrations(lang),...require('../shared/uterus-learning').narrations(lang)])]));
+  const approved=Object.fromEntries(['en','hi'].map(lang=>[lang,new Set([...faqs.map(f=>f.answer[lang]),respond('',lang).text,...mirrorApproved[lang]])]));
   return async function speech(req,res){
     const text=typeof req.body?.text==='string'?req.body.text.trim():'';
     const rawLanguage=req.body?.language??'en';
@@ -28,7 +29,7 @@ function createSpeechHandler({env=process.env,fetchImpl=(...args)=>fetch(...args
     const key=env.GEMINI_API_KEY||env.GOOGLE_API_KEY;
     if(!key)return res.status(503).json({error:'Gemini voice is not configured. Add GEMINI_API_KEY to backend/.env and restart DAI.'});
     const model=env.GEMINI_TTS_MODEL||'gemini-2.5-flash-preview-tts';
-    const voice=env.GEMINI_TTS_VOICE||'Charon';
+    const voice=mirrorApproved[language].has(text)?'Charon':env.GEMINI_TTS_VOICE||'Charon';
     const cacheKey=JSON.stringify(['v2',model,voice,language,text]);
     const diskPath=cacheable&&diskDir?path.join(diskDir,crypto.createHash('sha256').update(cacheKey).digest('hex')+'.wav'):null;
     let usage=null,providerResponse=null,providerStatus=null;
