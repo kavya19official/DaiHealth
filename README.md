@@ -154,6 +154,8 @@ On Windows PowerShell set variables first, for example `$env:DAI_PORT=3011; npm 
 
 ## Configuration
 
+See [DaiCare and postpartum mental health](docs/DAICARE.md) for clinician enrolment, on-call coverage and WebRTC setup.
+
 See [feature audit and setup](docs/FEATURE-AUDIT-SETUP.md) for CareScan, ASHA Copilot and consent receipts.
 See [patient email signup](docs/EMAIL-SIGNUP.md) for Resend testing, migrations and Render settings.
 
