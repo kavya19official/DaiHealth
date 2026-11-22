@@ -142,6 +142,7 @@ const titles: Record<string, [string, string]> = {
     "Offline-first community visits, village routes, voice notes and health-camp updates.",
   ],
   patientRequests: ["Patient requests", "Synthetic appointment and referral coordination with facility-scoped staff review."],
+  goldenHour: ["Golden Hour · incoming emergency patients", "Prototype pre-alerts sent before a patient arrives: capability-matched, with an SBAR handover. Synthetic demonstration only."],
   intelligence: ["Operations intelligence", "Bounded agents, explainable maintenance planning and measured AI usage."],
   sustainability: [
     "Green hospital",
@@ -859,8 +860,8 @@ export default function Home() {
                 {mode === "operations" ? "OPERATIONS" : "ADMINISTRATION"}
               </div>
               <AffiliationSwitcher api={api} onSwitch={async()=>{const next=await api("/me");setUser(next);setPatient(null);setData(null);setRecords([]);setWorkspaceData(null);setSummary(null);setNotification("Facility context updated. Showing this facility’s authorised records.");}}/>
-              <h1>{titles[view][0]}</h1>
-              <p>{titles[view][1]}</p>
+              <h1>{(titles[view] ?? [view, ""])[0]}</h1>
+              <p>{(titles[view] ?? [view, ""])[1]}</p>
             </div>
             <div className="account">
               <span className="avatar">DA</span>
