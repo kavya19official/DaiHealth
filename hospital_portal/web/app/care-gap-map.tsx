@@ -1,6 +1,6 @@
 "use client";
 
-import { CSSProperties, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import styles from "./care-gap-map.module.css";
 
 type Row = Record<string, any>;
@@ -12,15 +12,127 @@ const metrics = [
   ["long_referral_rate", "Long referral transport"],
 ] as const;
 
-function heat(value: number) {
-  if (value >= 75) return styles.heat4;
-  if (value >= 50) return styles.heat3;
-  if (value >= 25) return styles.heat2;
-  return styles.heat1;
+function heatColor(value: number) {
+  if (value >= 75) return "#cc425a";
+  if (value >= 50) return "#ef7f57";
+  if (value >= 25) return "#e7b63f";
+  return "#43aa83";
 }
 
 function label(value: unknown) {
   return typeof value === "number" ? `${value.toFixed(1)}%` : "Not recorded";
+}
+
+const districtCentres: Record<string, [number, number]> = {
+  "New Delhi": [28.6139, 77.209],
+  Delhi: [28.6139, 77.209],
+  Lucknow: [26.8467, 80.9462],
+  Patna: [25.5941, 85.1376],
+  Pune: [18.5204, 73.8567],
+  Chennai: [13.0827, 80.2707],
+  Jaipur: [26.9124, 75.7873],
+};
+
+function InteractiveMap({
+  areas,
+  district,
+  metric,
+  selectedArea,
+  onSelect,
+}: {
+  areas: Row[];
+  district: string;
+  metric: (typeof metrics)[number][0];
+  selectedArea: string;
+  onSelect: (area: string) => void;
+}) {
+  const node = useRef<HTMLDivElement | null>(null);
+  const map = useRef<any>(null);
+  const layer = useRef<any>(null);
+  const points = useMemo(
+    () => areas.filter((row) => row.latitude != null && row.longitude != null),
+    [areas],
+  );
+
+  useEffect(() => {
+    let cancelled = false;
+    async function draw() {
+      const L = (await import("leaflet")).default;
+      if (cancelled || !node.current) return;
+      if (!map.current) {
+        map.current = L.map(node.current, {
+          zoomControl: false,
+          attributionControl: true,
+          minZoom: 5,
+          maxZoom: 17,
+        });
+        L.control.zoom({ position: "bottomright" }).addTo(map.current);
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          attribution: "&copy; OpenStreetMap contributors",
+          maxZoom: 19,
+        }).addTo(map.current);
+        layer.current = L.layerGroup().addTo(map.current);
+      }
+
+      const activeLayer = layer.current;
+      activeLayer.clearLayers();
+      if (points.length) {
+        const bounds = L.latLngBounds([]);
+        points.forEach((row) => {
+          const latLng: [number, number] = [Number(row.latitude), Number(row.longitude)];
+          const value = Number(row[metric] || 0);
+          const selected = selectedArea === row.area;
+          const color = heatColor(value);
+          const coverage = L.circle(latLng, {
+            radius: 650 + Math.min(Number(row.population || 10), 50) * 22,
+            color: selected ? "#5a20ca" : color,
+            fillColor: color,
+            fillOpacity: selected ? 0.48 : 0.32,
+            opacity: 0.95,
+            weight: selected ? 5 : 2,
+          }).addTo(activeLayer);
+          coverage.bindTooltip(
+            `<strong>PIN ${row.area}</strong><span>${label(row[metric])} · ${metrics.find(([key]) => key === metric)?.[1]}</span>`,
+            { direction: "top", offset: [0, -10], className: styles.zoneTooltip },
+          );
+          coverage.bindPopup(
+            `<div class="${styles.mapPopup}"><small>SYNTHETIC OUTREACH ZONE</small><strong>PIN ${row.area}</strong><span>${label(row[metric])} recorded rate</span><span>${row.people_band} registered people</span><b>Select zone for details</b></div>`,
+          );
+          coverage.on("click", () => onSelect(selected ? "" : row.area));
+          coverage.on("mouseover", () => coverage.setStyle({ fillOpacity: 0.52, weight: selected ? 5 : 4 }));
+          coverage.on("mouseout", () => coverage.setStyle({ fillOpacity: selected ? 0.48 : 0.32, weight: selected ? 5 : 2 }));
+
+          L.circleMarker(latLng, {
+            radius: selected ? 9 : 6,
+            color: "#fff",
+            fillColor: selected ? "#5a20ca" : color,
+            fillOpacity: 1,
+            weight: 3,
+          }).addTo(activeLayer);
+          bounds.extend(latLng);
+        });
+        map.current.fitBounds(bounds.pad(0.7), { maxZoom: 13, animate: true });
+      } else {
+        map.current.setView(districtCentres[district] || districtCentres["New Delhi"], 11, { animate: true });
+      }
+      window.setTimeout(() => map.current?.invalidateSize(), 50);
+    }
+    draw();
+    return () => {
+      cancelled = true;
+    };
+  }, [district, metric, onSelect, points, selectedArea]);
+
+  useEffect(() => () => {
+    map.current?.remove();
+    map.current = null;
+  }, []);
+
+  return <div className={styles.mapStage}>
+    <div ref={node} className={styles.mapCanvas} aria-label={`${district || "District"} interactive care gap map`} />
+    <div className={styles.mapBadge}><span className={styles.liveDot} /> Interactive street map</div>
+    <div className={styles.mapHint}>{points.length ? "Select a coloured area to inspect its recorded care gaps" : "No privacy-safe zone is available for this facility yet"}</div>
+  </div>;
 }
 
 export function CareGapMap({
@@ -37,24 +149,8 @@ export function CareGapMap({
   const [metric, setMetric] = useState<(typeof metrics)[number][0]>("care_gap_rate");
   const areas: Row[] = data.areas || [];
   const selected = data.selected_area;
-  const points = useMemo(() => areas.filter((row) => row.latitude != null && row.longitude != null), [areas]);
-  const bounds = useMemo(() => {
-    const latitudes = points.map((row) => Number(row.latitude));
-    const longitudes = points.map((row) => Number(row.longitude));
-    return {
-      minLat: Math.min(...latitudes), maxLat: Math.max(...latitudes),
-      minLng: Math.min(...longitudes), maxLng: Math.max(...longitudes),
-    };
-  }, [points]);
-  const position = (row: Row) => {
-    const width = Math.max(bounds.maxLng - bounds.minLng, 0.001);
-    const height = Math.max(bounds.maxLat - bounds.minLat, 0.001);
-    return {
-      left: `${12 + ((Number(row.longitude) - bounds.minLng) / width) * 76}%`,
-      top: `${88 - ((Number(row.latitude) - bounds.minLat) / height) * 76}%`,
-    } as CSSProperties;
-  };
   const worst = areas.reduce<Row | null>((current, row) => !current || Number(row[metric] || 0) > Number(current[metric] || 0) ? row : current, null);
+  const selectArea = (area: string) => setFilters({...filters, area});
 
   return <div className={styles.shell}>
     <section className={styles.hero}>
@@ -83,19 +179,8 @@ export function CareGapMap({
           <div><span className={styles.kicker}>Recorded gap geography</span><h3>{data.district} outreach zones</h3></div>
           <label>Map measure<select value={metric} onChange={(event) => setMetric(event.target.value as typeof metric)}>{metrics.map(([key, text]) => <option key={key} value={key}>{text}</option>)}</select></label>
         </div>
-        {points.length ? <div className={styles.map} role="group" aria-label={`${data.district} care gap map`}>
-          <div className={styles.grid} aria-hidden />
-          {points.map((row) => <button
-            key={row.area}
-            type="button"
-            className={`${styles.zone} ${heat(Number(row[metric] || 0))} ${filters.area === row.area ? styles.selected : ""}`}
-            style={position(row)}
-            aria-label={`PIN ${row.area}, ${label(row[metric])}`}
-            aria-pressed={filters.area === row.area}
-            onClick={() => setFilters({...filters, area: filters.area === row.area ? "" : row.area})}
-          ><strong>{label(row[metric])}</strong><span>{row.area}</span></button>)}
-          <div className={styles.compass} aria-hidden>N</div>
-        </div> : <div className={styles.empty}>No outreach zone meets the minimum group size for this facility.</div>}
+        <InteractiveMap areas={areas} district={data.district} metric={metric} selectedArea={filters.area || ""} onSelect={selectArea} />
+        {!areas.length && <div className={styles.emptyCallout}><strong>The map is ready, but this facility has no displayable zone.</strong><span>Use the Facility context menu above to choose a synthetic district facility with at least {data.minimum_cell_size} registered people in one PIN-code zone. Small groups stay hidden.</span></div>}
         <div className={styles.legend}><span>Lower recorded gap rate</span><i className={styles.heat1}/><i className={styles.heat2}/><i className={styles.heat3}/><i className={styles.heat4}/><span>Higher recorded gap rate</span></div>
         <p className={styles.method}>{data.methodology}</p>
       </div>
