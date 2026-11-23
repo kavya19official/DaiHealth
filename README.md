@@ -44,6 +44,11 @@ delivery and recovery, to her child's first years, shared safely between the mot
 ### For the doctor
 - A patient roster, work queue, report review, a clinical dashboard and risk trends, limited to patients who have
   not turned that doctor off.
+- **Patient record QR:** The patient opens **Reports & records → Share record QR**, selects a connected
+  verified doctor with existing clinical-summary access, and chooses eligible original files. The doctor opens
+  **Scan patient QR** and downloads a profile PDF or a ZIP with the PDF and originals. Opening and downloading
+  require a connection. Saved files open offline and remain on the recipient’s device after QR revocation.
+
 
 ### For the hospital
 - A separate **Operations / Administration** portal (Next.js and FastAPI) with referrals and a hospital-readiness view.
@@ -236,6 +241,7 @@ psql "$DATABASE_URL" -f backend/db/patient_ml.sql
 psql "$DATABASE_URL" -f backend/db/patient_access_controls.sql
 psql "$DATABASE_URL" -f backend/db/follow_through.sql
 psql "$DATABASE_URL" -f backend/db/visit_summaries.sql
+psql "$DATABASE_URL" -f backend/db/patient_record_packets.sql
 psql "$DATABASE_URL" -f backend/db/delhi_directory.sql   # optional: Delhi facility directory (unverified reference data)
 ```
 
