@@ -7,7 +7,7 @@ const { DatabaseSync } = require('node:sqlite');
 const { createLocalPool } = require('../backend/localPool');
 const bcrypt = require('../backend/node_modules/bcrypt');
 const ROOT = path.join(__dirname, '..');
-const migrations = ['auth_and_wellness.sql', 'care_timeline_and_appointments.sql', 'mother_dashboard.sql', 'antenatal_profile.sql', 'child_dashboard.sql', 'child_dashboard_v2.sql', 'child_health_v3.sql', 'hospital_platform.sql', 'patient_preferences.sql', 'patient_documents.sql', 'care_extensions_v4.sql', 'facility_discovery.sql', 'referral_continuity.sql', 'patient_experience.sql', 'patient_home.sql', 'patient_continuity.sql', 'access_matching.sql', 'patient_support.sql', 'clinical_dashboard.sql', 'birth_readiness.sql', 'document_intake_offline.sql', 'missed_care_outreach.sql', 'green_hospital_dashboard.sql', 'smart_referral_handoff.sql', 'doctor_operations.sql', 'facility_freshness.sql', 'patient_ml.sql', 'patient_access_controls.sql', 'follow_through.sql', 'privacy_analytics.sql', 'privacy_analytics_snapshots.sql', 'demo_care_messages.sql', 'visit_summaries.sql', 'clinical_review_requests.sql', 'ai_usage.sql', 'care_coordination.sql', 'clinician_report_uploads.sql', 'hospital_stay.sql', 'care_step_workflow.sql', 'timeline_history.sql', 'timeline_location_consent.sql', 'timeline_push.sql', 'postpartum_infant_tracking.sql', 'patient_report_birth.sql', 'child_development.sql', 'connected_care.sql', 'family_circle.sql', 'didi_voice.sql', 'care_scan.sql', 'consent_audit.sql', 'consent_audit_hardening.sql', 'patient_daily_tracking.sql', 'email_signup.sql', 'daicare.sql', 'golden_hour.sql', 'sukoon.sql'];
+const migrations = ['auth_and_wellness.sql', 'care_timeline_and_appointments.sql', 'mother_dashboard.sql', 'antenatal_profile.sql', 'child_dashboard.sql', 'child_dashboard_v2.sql', 'child_health_v3.sql', 'hospital_platform.sql', 'patient_preferences.sql', 'patient_documents.sql', 'care_extensions_v4.sql', 'facility_discovery.sql', 'referral_continuity.sql', 'patient_experience.sql', 'patient_home.sql', 'patient_continuity.sql', 'access_matching.sql', 'patient_support.sql', 'clinical_dashboard.sql', 'birth_readiness.sql', 'document_intake_offline.sql', 'missed_care_outreach.sql', 'green_hospital_dashboard.sql', 'smart_referral_handoff.sql', 'doctor_operations.sql', 'facility_freshness.sql', 'patient_ml.sql', 'patient_access_controls.sql', 'follow_through.sql', 'privacy_analytics.sql', 'privacy_analytics_snapshots.sql', 'demo_care_messages.sql', 'visit_summaries.sql', 'clinical_review_requests.sql', 'ai_usage.sql', 'care_coordination.sql', 'clinician_report_uploads.sql', 'hospital_stay.sql', 'care_step_workflow.sql', 'timeline_history.sql', 'timeline_location_consent.sql', 'timeline_push.sql', 'postpartum_infant_tracking.sql', 'patient_report_birth.sql', 'child_development.sql', 'connected_care.sql', 'family_circle.sql', 'didi_voice.sql', 'care_scan.sql', 'consent_audit.sql', 'consent_audit_hardening.sql', 'patient_daily_tracking.sql', 'email_signup.sql', 'daicare.sql', 'golden_hour.sql', 'sukoon.sql', 'clinical_history_consent.sql'];
 // Reference data (Delhi facility directory). Kept apart from `migrations` so tests that build a bare schema stay small.
 const directories = ['delhi_directory.sql'];
 
@@ -41,7 +41,7 @@ async function seedLocal() {
     if (previous.rows.length) {
       if (previous.rows[0].source_sha256 !== manifest.source_sha256) throw new Error('Synthetic source changed. Existing local edits were preserved; use a separate checkout for a different dataset.');
       await require('./seed-doctor-activity.cjs').seedDoctorActivity(client,source);
-      await require('./seed-doctor-demo-day.cjs').seedDoctorDemoDay(client,source);
+      for(let dayOffset=0;dayOffset<4;dayOffset++){const date=new Date(new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Kolkata'}).format(new Date())+'T12:00:00Z');date.setUTCDate(date.getUTCDate()+dayOffset);await require('./seed-doctor-demo-day.cjs').seedDoctorDemoDay(client,source,{date:date.toISOString().slice(0,10)});}
       await require('./seed-video-demo.cjs').seedVideoDemo(client);
       await require('./seed-patient-records.cjs').seedPatientRecords(client);
       await require('./seed-hospital-stay.cjs').seedHospitalStay(client);
@@ -102,7 +102,7 @@ async function seedLocal() {
     await client.query("INSERT INTO dai_local_seed VALUES('cohort-v1',$1,$2)",[manifest.source_sha256,JSON.stringify(counts)]);
     await client.query('COMMIT');
     await require('./seed-doctor-activity.cjs').seedDoctorActivity(client,source);
-    await require('./seed-doctor-demo-day.cjs').seedDoctorDemoDay(client,source);
+    for(let dayOffset=0;dayOffset<4;dayOffset++){const date=new Date(new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Kolkata'}).format(new Date())+'T12:00:00Z');date.setUTCDate(date.getUTCDate()+dayOffset);await require('./seed-doctor-demo-day.cjs').seedDoctorDemoDay(client,source,{date:date.toISOString().slice(0,10)});}
     await require('./seed-video-demo.cjs').seedVideoDemo(client);
       await require('./seed-patient-records.cjs').seedPatientRecords(client);
       await require('./seed-hospital-stay.cjs').seedHospitalStay(client);

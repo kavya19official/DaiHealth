@@ -926,6 +926,7 @@ require('./patientSupport')(app, { pool, authenticateToken, authorizeRole });
 const aiUsageTracker=require('./aiUsage').register(app,{pool,authenticateToken});
 require('./patientML')(app, { pool, authenticateToken, authorizeRole,usageTracker:aiUsageTracker });
 require('./clinicalDashboard')(app, { pool, authenticateToken, authorizeRole });
+require('./consultationVoice').register(app, { pool, authenticateToken, authorizeRole });
 require('./doctorWorkspace')(app, { pool, authenticateToken, authorizeRole });
 require('./doctorOperations')(app, { pool, authenticateToken, authorizeRole });
 require('./patientDocuments')(app, { pool, authenticateToken, authorizeRole, jwtSecret: process.env.JWT_SECRET });

@@ -18,3 +18,14 @@
 /* Keep the map above demo/search blocks, not merely above its own controls. */
 #panel-facilities>#nearbyWorld{margin-top:0}
 #panel-facilities:has(>#nearbyWorld)>.page-section-heading{display:none}
+
+/* Directory concentration overlay; pins and controls remain interactive. */
+.nw-heat-canvas{position:absolute;pointer-events:none;opacity:.9}
+.nw-heat-controls{display:flex;align-items:center;flex-wrap:wrap;gap:12px;padding:0 0 16px;color:var(--ink-2);font-size:12px;line-height:1.6}
+.nw-heat-controls button{font:inherit;font-weight:700;min-height:44px;padding:10px 16px;border:1px solid var(--line);border-radius:24px;background:var(--surface);color:var(--brand);cursor:pointer}
+.nw-heat-controls button[aria-pressed=true]{background:var(--brand-pale);border-color:var(--brand)}
+.nw-heat-controls button:focus-visible{outline:3px solid var(--brand);outline-offset:3px}
+#nwHeatLegend{display:flex;align-items:center;gap:10px;max-width:520px;min-width:0}
+#nwHeatLegend[hidden]{display:none}
+.nw-heat-scale{flex:0 0 64px;height:10px;border-radius:12px;background:linear-gradient(90deg,var(--brand-pale),var(--brand));border:1px solid var(--line)}
+@media(max-width:600px){#nwHeatLegend{align-items:flex-start;font-size:11px}.nw-heat-scale{margin-top:4px;flex-basis:42px}}

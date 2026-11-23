@@ -16,4 +16,61 @@
 @media(max-width:600px){.doctor-reference .content{padding:14px 12px 80px}.doctor-reference .topbar{padding:12px;gap:8px}.doctor-reference .topbar .search{order:3;flex-basis:100%;max-width:none}.doctor-reference .dd-modes{gap:0}.doctor-reference .dd-modes button{font-size:9px;min-height:32px;padding:6px 8px}.doctor-reference .topbar__right{margin-left:auto;gap:5px}.doctor-reference .dd-profile-name{display:none}.doctor-reference .dd-profile .dw-avatar{width:32px;height:32px;font-size:10px}.doctor-reference .icon-btn{width:31px;height:31px}.dr-home .dd-hero{display:block;padding:24px 18px 20px;min-height:340px}.dr-home .dd-hero h1{font-size:28px;max-width:85%;letter-spacing:-.8px}.dr-home .dd-hero-copy>.dr-intro{max-width:73%;font-size:12px}.dr-home .dd-hero-art{position:absolute;width:125px;height:158px;right:-8px;top:36px;bottom:auto;opacity:.8;pointer-events:none;margin:0}.dr-home .dd-glance{margin-top:22px;gap:7px}.dr-home .dd-glance>button{min-width:0;max-width:none;flex-basis:27%;padding:9px 6px;gap:5px;flex-direction:column;text-align:center}.dr-home .dd-glance-icon{width:29px;height:29px;border-radius:10px}.dr-home .dd-glance-icon svg{width:17px;height:17px}.dr-home .dd-glance strong{font-size:18px}.dr-home .dd-glance small{font-size:9px}.dr-home .dd-hero-actions{gap:8px}.dr-home .dd-hero-actions .dw-primary{font-size:10px;padding:10px 12px}.dr-home .dd-hero-actions .dw-text-button{font-size:10px}.dr-home .dd-journey{padding:17px 10px}.dr-home .dd-stage-path{margin-top:14px}.dr-home .dd-stage-dot{width:35px;height:35px;border-width:4px}.dr-home .dd-stage-dot svg{width:17px;height:17px}.dr-home .dd-stage-path:before{top:17px}.dr-home .dd-stage>strong{font-size:9px;min-height:27px}.dr-home .dd-stage-count{font-size:18px}.dr-home .dd-stage-count small{font-size:8px}.dr-home .dd-avatar-small{width:18px;height:18px;font-size:6px}.dr-home .dd-avatar-cluster{min-height:21px}.dr-summary-row{grid-template-columns:1fr;gap:13px}.dr-summary-row>.dd-card:last-child{grid-column:auto}.dr-summary-row>.dd-card{padding:19px 16px}.dr-home .dd-card-head h2{font-size:15px}.dr-home .dd-completion .dd-ring-wrap{justify-content:center;gap:25px}.dr-home .dd-ring{width:126px;height:126px}.dr-home .dd-card{max-width:100%}.dr-more{padding:0 12px}.dr-home .dd-stage-path{overflow:visible}.dr-more-body .dd-main{display:grid;gap:14px}.dr-home .dd-preview-table td{overflow-wrap:anywhere}.dr-home .dd-side .dd-more{border:0;padding:0}.dr-home .dd-completion .dd-ring-wrap p{max-width:150px}}
 @media(prefers-reduced-motion:reduce){.dr-home *{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 /* The inline entry replaces only the duplicate Home launcher; other screens retain it. */
-body.doctor-reference:has(#panel-dashboard.is-active):has(.dr-assistant) .care-chatbot__launcher{display:none}
+
+
+/* One workspace entry, with the existing workflows grouped underneath. */
+.doctor-merged-heading{margin:0 0 24px}.doctor-merged-heading h1{font-size:clamp(23px,3vw,30px);color:var(--dw-text);line-height:1.35;margin:0 0 18px;overflow-wrap:anywhere}
+.doctor-workflow-switch{display:flex;flex-wrap:wrap;gap:8px}
+.doctor-workflow-switch button{font:inherit;font-size:14px;min-height:44px;padding:10px 18px;border-radius:24px;border:1px solid var(--dw-border);background:var(--dw-card);color:var(--dw-text);cursor:pointer}
+.doctor-workflow-switch button[aria-pressed=true]{background:var(--dw-soft);border-color:var(--brand);color:var(--brand);font-weight:700}
+.doctor-workflow-switch button:focus-visible{outline:3px solid var(--brand);outline-offset:3px}
+[data-doctor-workflow][hidden]{display:none!important}
+.dd-completion-value{display:block;font-size:40px;line-height:1.2;color:var(--brand);padding:20px 0 8px}
+body.doctor-reference #daiCareChatbot{position:fixed;right:max(20px,env(safe-area-inset-right));bottom:max(20px,env(safe-area-inset-bottom))}
+
+.doctor-workspace .sidebar .dw-label{white-space:normal;overflow-wrap:anywhere;min-width:0}
+
+/* Larger daily overview: primary numbers have their own full-width row. */
+.dr-home .dd-hero{min-height:190px;grid-template-columns:minmax(0,1fr) 210px;padding:28px 32px;margin-bottom:20px}
+.dr-home .dd-hero-art{height:195px;margin-bottom:-28px}
+.dr-home .dd-hero h1{font-size:clamp(30px,3vw,42px);letter-spacing:-1px;margin:10px 0}
+.dr-home .dd-hero .dw-eyebrow{font-size:12px}
+.dr-home .dd-hero-copy>.dr-intro{font-size:16px;line-height:1.6;max-width:600px}
+.dr-home .dd-hero-copy>.dr-date{font-size:14px;line-height:1.6}
+.dr-home .dd-hero-actions :is(.dw-primary,.dw-text-button){font-size:14px;min-height:44px}
+.dr-home>.dd-glance{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin:0 0 24px}
+.dr-home>.dd-glance>button{position:relative;display:flex;align-items:flex-start;flex-direction:column;gap:16px;min-width:0;max-width:none;min-height:190px;padding:24px;text-align:left;background:var(--dw-card);border:1px solid var(--dw-border);border-radius:22px;color:var(--dw-text);box-shadow:var(--dd-shadow)}
+.dr-home>.dd-glance>button:first-child{background:var(--dw-soft);border-color:var(--dr-accent)}
+.dr-home>.dd-glance .dd-glance-icon{width:42px;height:42px;background:var(--dw-soft);color:var(--dr-accent)}
+.dr-home>.dd-glance strong{font-size:clamp(38px,4vw,54px);font-variant-numeric:tabular-nums;line-height:1.05;letter-spacing:-1.5px;margin-bottom:10px;color:var(--dw-text)}
+.dr-home>.dd-glance small{font-size:16px;font-weight:700;line-height:1.45;color:var(--dw-text);display:block;max-width:none}
+.dd-metric-detail{display:block;font-size:12px;line-height:1.6;color:var(--dw-muted);margin-top:8px;overflow-wrap:anywhere}
+.dr-home .dd-card-head h2{font-size:21px;line-height:1.4}
+.dr-home .dd-card-head>.dw-text-button{font-size:14px;min-height:44px}
+.dr-home .dd-journey{padding:26px;margin-bottom:24px}
+.dr-home .dd-stage-path{gap:12px;margin-top:20px}
+.dr-home .dd-stage-path:before{display:none}
+.dr-home .dd-stage{background:var(--dw-bg);border:1px solid var(--dw-border);border-radius:18px;padding:20px 10px;gap:12px;min-height:180px}
+.dr-home .dd-stage[aria-pressed=true]{background:var(--dw-soft);border-color:var(--dr-accent)}
+.dr-home .dd-stage>strong{font-size:14px;min-height:20px;text-align:center;white-space:normal;line-height:1.4}
+.dr-home .dd-stage-count{font-size:34px;font-variant-numeric:tabular-nums;line-height:1.1}
+.dr-home .dd-stage-count small{font-size:13px;line-height:1.5}
+.dr-summary-row{grid-template-columns:minmax(0,1.8fr) minmax(250px,1fr);gap:22px}
+.dr-summary-row>.dd-card{padding:26px}
+.dr-home .dd-clinic-timeline li{gap:14px;padding:18px 0}
+.dr-home .dd-clinic-timeline time{font-size:15px;min-width:48px}
+.dr-home .dd-clinic-timeline strong{font-size:16px;line-height:1.5}
+.dr-home .dd-clinic-timeline small{font-size:14px;line-height:1.6}
+.dr-home .dd-status{font-size:12px;line-height:1.6}
+.dr-home .dd-open{min-width:44px;min-height:44px}
+.dr-home .dd-empty p,.dr-summary-row .dd-empty p{font-size:15px;line-height:1.7}
+.dr-home .dd-attention-list strong,.dr-home .dd-mini-row strong,.dr-home .dd-person strong{font-size:15px}
+.dr-home .dd-attention-list p,.dr-home .dd-mini-row small,.dr-home .dd-person small,.dr-home .dd-preview-table :is(th,td),.dr-home .dd-week-label{font-size:13px;line-height:1.6}
+.dr-home .dd-attention-list .dw-text-button,.dr-home .dd-table-footer,.dr-home .dd-next-booking{font-size:14px}
+.dr-home .dd-stage-note{font-size:14px;line-height:1.6;color:var(--dw-muted);margin:18px 0 0}
+.doctor-reference .sidebar .nav-item{font-size:14px;line-height:1.5;min-height:48px}
+.doctor-reference .sidebar .dw-nav-caption{font-size:11px}
+@media(max-width:1100px){.dr-home>.dd-glance{grid-template-columns:repeat(2,minmax(0,1fr))}.dr-home>.dd-glance>button{min-height:180px}.dr-home .dd-stage-path{grid-template-columns:repeat(3,minmax(0,1fr))}.dr-summary-row{grid-template-columns:1fr}.dr-summary-row>.dd-card:last-child{grid-column:auto}}
+@media(max-width:600px){.dr-home .dd-hero{display:block;min-height:0;padding:24px 20px}.dr-home .dd-hero-art{display:none}.dr-home .dd-hero h1{max-width:none;font-size:30px}.dr-home .dd-hero-copy>.dr-intro{font-size:15px;max-width:none}.dr-home .dd-hero-copy>.dr-date{font-size:14px;max-width:none}.dr-home>.dd-glance{gap:12px;margin-bottom:20px}.dr-home>.dd-glance>button{padding:18px 14px;gap:12px;min-height:205px;flex-basis:auto}.dr-home>.dd-glance strong{font-size:40px}.dr-home>.dd-glance small{font-size:14px;line-height:1.5}.dr-home>.dd-glance .dd-glance-icon{width:34px;height:34px}.dd-metric-detail{font-size:12px}.dr-home .dd-card-head h2{font-size:19px}.dr-home .dd-journey{padding:20px 16px}.dr-home .dd-stage-path{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.dr-home .dd-stage{min-height:170px;padding:16px 10px}.dr-home .dd-stage>strong{font-size:14px;min-height:20px}.dr-home .dd-stage-count{font-size:32px}.dr-home .dd-stage-count small{font-size:12px}.dr-home .dd-avatar-small{width:24px;height:24px;font-size:9px}.dr-summary-row>.dd-card{padding:22px 16px}.dr-home .dd-clinic-timeline time{font-size:14px;min-width:43px}.dr-home .dd-clinic-timeline strong{font-size:15px}.dr-home .dd-clinic-timeline small{font-size:13px}.dr-home .dd-clinic-timeline li{gap:8px}.dr-home .dd-clinic-timeline .dd-avatar{display:none}}
+
+.dr-home .dr-more>summary{font-size:14px;min-height:48px;line-height:1.6}.doctor-workspace #doctorReviewRequests>summary{font-size:14px;min-height:40px;line-height:1.6}.dr-home .dd-footer{font-size:13px}
