@@ -1,0 +1,55 @@
+[data-ultrasound-workspace] {
+  display: grid;
+  gap: 1rem;
+  max-width: 58rem;
+  margin-block: 1rem;
+}
+[data-ultrasound-workspace] p, [data-ultrasound-workspace] h2,
+[data-ultrasound-workspace] h3, [data-ultrasound-workspace] h4 {
+  margin: .35em 0;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+[data-ultrasound-workspace] [role="alert"] { color: #842018; }
+.uw-card, .uw-form {
+  display: grid;
+  gap: .6rem;
+  padding: 1rem;
+  background: #fff;
+  color: #183638;
+  border: 1px solid #cbdcda;
+  border-radius: .85rem;
+}
+.uw-card .uw-form { margin-block-start: .65rem; }
+[data-ultrasound-workspace] label {
+  display: grid;
+  gap: .25rem;
+}
+[data-ultrasound-workspace] label:has(input[type="checkbox"]) {
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: start;
+}
+[data-ultrasound-workspace] select, [data-ultrasound-workspace] textarea {
+  max-width: 100%;
+  min-width: 0;
+  border: 1px solid #9eb9b5;
+  border-radius: .3rem;
+  padding: .45rem;
+  font: inherit;
+}
+[data-ultrasound-workspace] textarea { min-height: 4rem; }
+.uw-button {
+  justify-self: start;
+  background: #17615b;
+  color: white;
+  padding: .5rem .8rem;
+  border: 1px solid transparent;
+  border-radius: .45rem;
+  font: inherit;
+  cursor: pointer;
+}
+.uw-button:disabled { opacity: .65; }
+.uw-image { max-width: 100%; max-height: 65vh; object-fit: contain; object-position: left; }
+.uw-state { color: #185a54; font-weight: 650; }
+.uw-research { padding: .75rem; background: #f2f6f4; }

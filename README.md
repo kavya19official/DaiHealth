@@ -355,3 +355,7 @@ sign-in, and synthetic `.invalid` demo addresses are skipped.
 Patient → doctor: in **Reports & records** the patient uploads a PDF or image (up to 5 MB) and chooses **Share with consent** for a connected doctor. That doctor sees it under **Records → Patient reports**, can open the original and record a review.
 
 Doctor → patient: under **Records → Patient reports** a verified doctor chooses **Add a report for a patient**, picks a connected patient and uploads the file (`POST /api/doctor/patients/:motherId/documents`). The patient sees it in **Reports & records** marked "Added by Dr …" and can open or share it, but not delete it. The doctor keeps access to reports they added only while the care relationship is active; revoking the doctor removes it. Migration: `backend/db/clinician_report_uploads.sql`.
+
+## Ultrasound scans
+
+Patients can securely upload a frame to a verified clinician from their care team. Doctors can review scan history, image quality and pregnancy context and release a report with follow-up instructions. See [the ultrasound setup and deployment guide](hospital_portal/ULTRASOUND_AI_REVIEW.md).

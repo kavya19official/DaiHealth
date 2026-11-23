@@ -18,7 +18,8 @@ from .db import database, initialize
 from .security import ROLES, CLINICAL, digest, verify_password
 from .staff_scope import effective_staff, facility_staff
 from .clinical_monitor import monitor_loop, register_monitor
-from .ultrasound import Ultrasound, register_ultrasound, retention_loop
+from .ultrasound import Ultrasound, retention_loop
+from .ultrasound_workspace import register_workspace as register_ultrasound_workspace
 
 LABEL = "Simulated on synthetic data"
 UTC = timezone.utc
@@ -37,6 +38,9 @@ def create_app(engine=None):
     engine = engine or database()
     demo = os.getenv("DAI_DEMO", "false").lower() == "true"
     ultrasound = Ultrasound(os.environ)
+    workspace_key = os.getenv("DAI_ULTRASOUND_GATEWAY_TOKEN", "")
+    if ultrasound.enabled and len(workspace_key) < 32:
+        raise RuntimeError("DAI_ULTRASOUND_GATEWAY_TOKEN must have at least 32 characters")
     secret = os.getenv("JWT_SECRET")
     if not secret:
         if not demo:
@@ -73,9 +77,9 @@ def create_app(engine=None):
             seed_asha(engine)
         from .demo_video_seed import seed_video_demo
         seed_video_demo(engine)
-        monitor_task = (asyncio.create_task(monitor_loop(engine, demo, ultrasound.enabled))
+        monitor_task = (asyncio.create_task(monitor_loop(engine, demo))
                         if os.getenv("DAI_CLINICAL_MONITOR_ENABLED", "true").lower() == "true" else None)
-        retention = asyncio.create_task(retention_loop(engine)) if ultrasound.enabled else None
+        retention = asyncio.create_task(retention_loop(engine))
         try:
             yield
         finally:
@@ -926,7 +930,7 @@ def create_app(engine=None):
 
     register_asha(app, engine, require, audit, one)
     register_monitor(app, engine, require, audit, demo)
-    register_ultrasound(app, engine, require, audit, demo, ultrasound)
+    register_ultrasound_workspace(app, engine, ultrasound, workspace_key, demo)
     return app
 
 

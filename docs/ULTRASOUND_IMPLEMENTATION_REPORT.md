@@ -1,5 +1,7 @@
 # DaiHealth ultrasound implementation report
 
+> Historical implementation report. The original hospital review UI has been superseded by patient and doctor dashboard workspaces. See [the current integration and deployment guide](../hospital_portal/ULTRASOUND_AI_REVIEW.md).
+
 ## Delivered behavior
 
 The implementation uses the supplied `DaiHealth-main(2).zip` as its source baseline. The hospital portal supports provider upload, scoped review and encrypted image previews. The same private ML service performs raster checks and can run a released EfficientNet-B0 artifact. The clinical monitoring agent attaches the image review to the mother's recorded antenatal evidence. No commit, push or deployment took place.

@@ -20,3 +20,5 @@ hospital_portal/ml_service/artifacts
 synthetic_data/output
 ml-service/data/generated
 ml-service/reports
+
+ml-service/ultrasound/local

@@ -1,112 +1,88 @@
-"""Run separately against a started local DaiHealth demo with no ultrasound model configured."""
-import argparse
+"""Browser acceptance test against the running full local synthetic application."""
 from io import BytesIO
 import os
 import random
-import sqlite3
 
 from PIL import Image
 from playwright.sync_api import expect, sync_playwright
 
 
-def png(flat):
-    rng = random.Random(71)
-    image = Image.new("L", (128, 128), 120)
-    if not flat:
-        image.putdata([rng.randrange(30, 230) for _ in range(128 * 128)])
-    result = BytesIO()
-    image.save(result, "PNG")
-    return result.getvalue()
+def frame():
+    pixels = random.SystemRandom().randbytes(160 * 160)
+    data = BytesIO()
+    Image.frombytes("L", (160, 160), pixels).save(data, "PNG")
+    return {"name":"synthetic-frame.png","mimeType":"image/png","buffer":data.getvalue()}
 
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--url", default="http://localhost:3001")
-    parser.add_argument("--db", default=".local/portal.db")
-    args = parser.parse_args()
-    with sqlite3.connect(args.db) as conn:
-        staff, patient, patient_name = conn.execute("""
-            SELECT u.email, m.source_id, json_extract(m.details, '$.name')
-            FROM mother m JOIN portal_user u
-            ON u.facility_id=m.registered_facility_id AND u.unit_id=m.assigned_unit_id
-            WHERE u.role='consultant' AND u.verified=1
-            AND lower(json_extract(m.details, '$.stage')) IN ('t1','t2','t3')
-            AND NOT EXISTS(SELECT 1 FROM ultrasound_analysis a WHERE a.mother_id=m.id)
-            ORDER BY m.id LIMIT 1
-        """).fetchone()
+    origin = os.getenv("DAI_TEST_URL", "http://127.0.0.1:3001")
+    patient_email = os.environ["DAI_TEST_PATIENT"]
+    doctor_email = os.environ["DAI_TEST_DOCTOR"]
+    password = os.getenv("DAI_TEST_PASSWORD", "Dai-Synthetic-2026!")
+    assert patient_email.endswith("@dai-synthetic.invalid") and doctor_email.endswith("@dai-synthetic.invalid")
     with sync_playwright() as playwright:
-        browser = playwright.chromium.launch(
-            executable_path=os.getenv("DAI_TEST_CHROMIUM"), args=["--no-sandbox"],
-        )
-        context = browser.new_context()
-        base = args.url + "/hospital-admin"
-        headers = {"x-dai-client": "portal"}
-        result = context.request.post(base + "/api/auth/login", headers=headers, data={
-            "email": staff, "password": "Dai-Synthetic-2026!",
-        })
-        assert result.ok, result.text()
-        challenge = result.json()
-        result = context.request.post(base + "/api/auth/otp", headers=headers, data={
-            "challenge_id": challenge["challenge_id"], "code": challenge["demo_otp"],
-        })
-        assert result.ok, result.text()
-        page = context.new_page()
-        page.set_default_timeout(25000)
-        page.goto(base, wait_until="domcontentloaded")
-        expect(page.get_by_role("button", name="Ultrasound AI Review")).to_be_visible()
+        browser = playwright.chromium.launch(executable_path=os.getenv("DAI_TEST_CHROMIUM"),
+                                             args=["--no-sandbox"])
+        patient, doctor = browser.new_context(), browser.new_context()
+        for email, context in [(patient_email,patient),(doctor_email,doctor)]:
+            login = context.request.post(origin+"/api/auth/login",data={"email":email,"password":password})
+            assert login.ok, login.text()
+        mother_id = patient.request.get(origin+"/api/auth/me").json()["user"]["id"]
+        page = patient.new_page()
+        page.goto(origin+"/dashboard.html",wait_until="domcontentloaded")
+        page.get_by_role("button", name="Ultrasound scans", exact=True).click()
+        form = page.locator("#panel-ultrasound form")
+        form.get_by_label("Ultrasound image").set_input_files(frame())
+        doctor_select = form.get_by_role("combobox")
+        doctor_id = doctor.request.get(origin+"/api/auth/me").json()["user"]["id"]
+        doctor_select.select_option(str(doctor_id))
+        form.get_by_role("checkbox").check()
+        with page.expect_response(lambda r: "/api/patient/ultrasound?doctor=" in r.url and
+                                  r.request.method == "POST") as result:
+            form.get_by_role("button",name="Upload for review").click()
+        assert result.value.ok, result.value.text()
+        expect(page.get_by_text("Scan uploaded for review.",exact=True)).to_be_visible(timeout=20000)
+        patient_api = origin+"/api/patient/ultrasound"
+        before = patient.request.get(patient_api).json()["items"][0]
+        assert before["status"] == "pending" and before["report"] is None
+        assert "analysis" not in before and "note" not in before
+        scan_id = before["id"]
 
-        def open_patient():
-            page.get_by_role("button", name="Patient registry").click()
-            search = page.get_by_label("Find a mother")
-            with page.expect_response(lambda response:
-                "/api/patients?" in response.url and ("q=" + patient) in response.url) as response:
-                search.fill(patient)
-            assert response.value.ok
-            row = page.get_by_role("row").filter(has=page.get_by_text(patient_name, exact=True))
-            row.get_by_role("button", name="Open record").click()
-            expect(page.get_by_role("heading", name="Upload ultrasound for review")).to_be_visible()
-
-        open_patient()
-        upload = page.get_by_role("region", name="Upload ultrasound")
-        upload.get_by_label("Ultrasound image").set_input_files({
-            "name": "invalid.png", "mimeType": "image/png", "buffer": b"invalid",
-        })
-        upload.get_by_role("button", name="Upload for review").click()
-        expect(upload.get_by_role("alert")).to_contain_text("Invalid")
-        upload.get_by_label("Ultrasound image").set_input_files({
-            "name": "flat.png", "mimeType": "image/png", "buffer": png(True),
-        })
-        upload.get_by_role("button", name="Upload for review").click()
-        review = page.get_by_role("region", name="Ultrasound AI Review")
-        expect(review.get_by_text("Image quality issue", exact=True)).to_be_visible()
-        review.get_by_role("button", name="View ultrasound image").click()
-        preview = review.get_by_role("img", name="Ultrasound frame submitted for clinician review")
-        expect(preview).to_be_visible()
-        assert preview.get_attribute("src").startswith("blob:")
-        page.wait_for_function("() => [...document.images].some(i => i.src.startsWith('blob:') && i.naturalWidth === 128)")
-        review.get_by_label("Review decision").select_option("replacement_requested")
-        review.get_by_label("Clinician comments").fill("Synthetic browser fixture: replacement requested.")
-        review.get_by_role("button", name="Record ultrasound review").click()
-        expect(review.get_by_text("Reviewed by clinician", exact=True)).to_be_visible()
-
-        open_patient()
-        upload.get_by_label("Ultrasound image").set_input_files({
-            "name": "frame.png", "mimeType": "image/png", "buffer": png(False),
-        })
-        upload.get_by_role("button", name="Upload for review").click()
-        expect(review.get_by_text("Model unavailable", exact=True)).to_be_visible()
-        expect(review.get_by_text("Passed raster checks", exact=True)).to_be_visible()
-        with page.expect_response(lambda response: response.url.endswith("/retry")) as retried:
-            review.get_by_role("button", name="Retry analysis").click()
-        assert retried.value.ok and retried.value.json()["state"] == "model_unavailable"
-        review.get_by_role("button", name="Back to review queue").click()
-        review.get_by_label("Review status").select_option("true")
-        expect(review.get_by_text("Image quality issue", exact=True)).to_be_visible()
-        review.get_by_role("button", name="Open ultrasound review").first.click()
-        expect(review.get_by_text("Synthetic browser fixture: replacement requested.")).to_be_visible()
+        clinical = doctor.new_page()
+        clinical.goto(origin+"/doctor.html",wait_until="domcontentloaded")
+        clinical.get_by_role("button",name="Ultrasound Review",exact=True).click()
+        clinical.locator("#panel-ultrasound").get_by_role("combobox",name="Choose a patient").select_option(str(mother_id))
+        review = clinical.locator("#panel-ultrasound article").first
+        expect(review.get_by_text("Model unavailable",exact=True)).to_be_visible()
+        expect(review.get_by_text("Passed raster checks.",exact=True)).to_be_visible()
+        review.get_by_role("button",name="View scan image").click()
+        expect(review.get_by_role("img",name="Uploaded ultrasound frame")).to_be_visible()
+        clinical.wait_for_function("document.querySelector('#panel-ultrasound img').naturalWidth === 160")
+        review.get_by_role("button",name="Start review").click()
+        expect(review.get_by_text("Under review",exact=True)).to_be_visible()
+        review.get_by_role("combobox",name="Choose a decision").select_option("follow_up_needed")
+        review.get_by_label("Clinical findings to share").fill("Synthetic clinician findings for this frame.")
+        review.get_by_label("Next steps to share").fill("Bring the original report to your next visit.")
+        review.get_by_label("Private clinician notes").fill("Private clinician test note.")
+        review.get_by_role("button",name="Save review draft").click()
+        expect(review.get_by_role("button",name="Release report to patient")).to_be_visible()
+        draft = patient.request.get(patient_api).json()["items"][0]
+        assert draft["status"] == "under_review" and draft["report"] is None
+        assert not ({"analysis","note","draft"} & draft.keys())
+        clinical.once("dialog",lambda dialog:dialog.accept())
+        review.get_by_role("button",name="Release report to patient").click()
+        expect(review.get_by_text("Released clinician report")).to_be_visible()
+        page.locator("#panel-ultrasound").get_by_role("button",name="Refresh scans").click()
+        report = page.locator("#panel-ultrasound article").first
+        expect(report.get_by_text("Reviewed",exact=True)).to_be_visible()
+        expect(report.get_by_text("Bring the original report to your next visit.",exact=True)).to_be_visible()
+        expect(report.get_by_text("Private clinician test note.",exact=True)).to_have_count(0)
+        report.get_by_role("button",name="View scan image").click()
+        page.wait_for_function("document.querySelector('#panel-ultrasound img').naturalWidth === 160")
+        assert patient.request.get(patient_api+"/"+scan_id+"/image").headers["content-type"] == "image/png"
+        assert playwright.request.new_context().get(patient_api).status == 401
         browser.close()
-    print("PASS: live gateway, clinician login, patient upload, invalid image, quality issue, private preview, "
-          "review persistence, no-model fallback and inference retry")
+    print("PASS: patient and doctor dashboards, private image previews, clinical draft isolation and release.")
 
 
 if __name__ == "__main__":

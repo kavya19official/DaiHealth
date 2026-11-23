@@ -1,95 +1,56 @@
-# Ultrasound AI Review
+# Ultrasound scans and clinician review
 
-The hospital portal accepts single ultrasound frames from verified clinical staff and links each submission to the patient's recorded pregnancy. Consultants can review any consented patient in their active facility and unit. Residents can upload and inspect records for patients assigned to them. The consultant records the review decision and comments. This implementation uses the provider upload path.
+The patient workspace can share a single ultrasound frame with a verified clinician from the patient's care team. The clinician opens the patient's scan history, views the image and its available assessment, records a clinical decision, then explicitly releases a patient-facing report. The patient has access to their own images and released findings and next steps. The patient response schema excludes analysis payloads, draft content and private notes.
 
-The Kaggle archive failed the training audit. With the supplied configuration, the portal performs raster quality checks and provides manual image review. Archive scores appear only when an approved research artifact passes the model and dataset release checks. The review record is separate from diagnosis, confirmed risk, prescribing and treatment.
+## Open the workspaces
 
-## Run the synthetic demo
+- **Patient dashboard → Ultrasound scans.** Choose an eligible doctor, confirm sharing, and upload a PNG, JPEG or WebP up to 12 MiB. History shows **Pending review**, **Under review**, or **Reviewed**. Use **Refresh scans** to check for a released report.
+- **Doctor dashboard → Ultrasound Review.** Select an authorized patient. Review their scan and pregnancy context, save clinical findings and next steps as a draft, then use **Release report to patient**. The clinician can record a private note separately. The doctor can also upload with recorded confirmation that the patient agreed to share the frame.
+- The deployed hospital administration dashboard has no scan workflow. Existing hospital records are retained. In the linked synthetic cohort, the verified assigned clinician can view their prior portal records as archived history. Old notes and decisions stay in their original records and are never auto-released.
 
-From the repository root, install Node.js 22.13+ and Python 3.12. The launcher installs the project's dependencies, seeds the databases and starts the public gateway, hospital portal and private ML listener.
+When the live private ML service is available, the workflow assesses image quality. The supplied Kaggle archive failed the training audit. With no approved model directory, scans remain available for clinician review and the UI shows **Model unavailable**. An approved research checkpoint can produce experimental archive-label outputs for the clinician. Those outputs do not set the review decision or release a report. [Research audit and model release](../ml-service/ultrasound/README.md)
+
+## Start locally
+
+Use the full application launcher from the repository root with Node.js 22.13+ and Python 3.12. Create the environment file once. Keep the same image key to reopen frames encrypted during previous runs.
 
 ```sh
 mkdir -p .local
 umask 077
-python3 - <<'PY' > .local/ultrasound-demo.env
+python3 - <<'PY' > .local/ultrasound.env
 import secrets
 print("export DAI_ULTRASOUND_ENABLED=true")
 print("export DAI_ULTRASOUND_IMAGE_KEY=" + secrets.token_hex(32))
+print("export DAI_ULTRASOUND_GATEWAY_TOKEN=" + secrets.token_urlsafe(48))
 print("export DAI_ULTRASOUND_SERVICE_TOKEN=" + secrets.token_urlsafe(48))
 PY
-. ./.local/ultrasound-demo.env
+. ./.local/ultrasound.env
 npm start
 ```
 
-Create the environment file once per local dataset. Source the same file on later runs to keep existing encrypted images readable. Leave `DAI_ULTRASOUND_MODEL_DIR` unset for the no-model workflow.
+Open `http://localhost:3001` and use linked synthetic mother and doctor accounts with a confirmed or completed appointment and an active pregnancy with recorded dates. The local seed reuses the synthetic hospital cohort. Keep any live identifying or clinical data out of the synthetic demo.
 
-1. Open `http://localhost:3001/hospital-admin`. Sign in using the local hospital admin demo account and displayed OTP. Use the **Demo role** selector to open a consultant workspace.
-2. Open **Patient registry** and select an antenatal patient assigned to the current unit. On the patient record, choose **Upload for review** with a synthetic or authorized de-identified PNG, JPEG or WebP file, up to 12 MiB.
-3. **Ultrasound AI Review** opens the linked record. Use **View ultrasound image**, then select a review decision, enter comments and save. The queue's **Reviewed by clinician** filter shows the saved review.
-4. **Clinical monitoring** includes a linked ultrasound flag after its background sweep. Its recorded evidence can include episode-bound BP, glucose, trimester weights, finalized investigations and follow-up records. An image may appear in the Ultrasound queue before the monitoring sweep runs.
+## Access, storage and lifecycle
 
-## Architecture and access
+The Node gateway resolves identity from the existing signed session and checks live appointment, clinician credential, doctor-revocation, and facility-revocation records. A submission is scoped to the confirmed doctor and the most recent qualifying facility relationship. Patient ownership is resolved server-side. Gateway requests to the private hospital service carry a separate, short-lived signed grant bound to the requested method, path, body digest, identity and scope.
 
-```mermaid
-flowchart TD
-    UI["Hospital workspace"]
-    G["Express hospital gateway"]
-    P["FastAPI hospital portal"]
-    DB["Portal database"]
-    ML["Private ML service"]
-    AG["Clinical monitoring agent"]
-    UI --> G --> P
-    P --> DB
-    P --> ML
-    AG --> DB
-```
+The intake service verifies the raster, strips metadata via PNG re-encoding, and saves AES-256-GCM ciphertext and the image digest. Burned-in identifiers are part of the raster and require removal before sharing. Image access is authorized for each request and served with caching disabled. Duplicate frames for the same episode, doctor and facility return the existing scan. An identical expired frame yields a request for a new capture. Retention defaults to 30 days. The report remains available after image expiry. Audit events track submission with sharing confirmation, reads, draft review and release. Review revisions prevent stale writes and release is a separate action.
 
-The portal uses existing hospital sessions, current affiliation, consent and unit assignments. Non-demo patient records require `care_coordination` and `clinical_monitoring` to be true. Synthetic legacy consent works in explicit demo mode. Image access is checked again on every read. PostgreSQL locks the parent record when an upload, retry or review is committed. SQLite uses its existing serialized write transactions. The image digest is unique within a mother, facility and pregnancy episode. Identical decoded submissions return the existing record, including after image expiration. A review uses the current analysis revision and returns 409 for stale or already reviewed submissions.
+The original `ultrasound_analysis` table used hospital-portal UUID ownership. The separate `ultrasound_workspace_scan` table uses the app's native patient/doctor account IDs, including accounts outside the synthetic portal mapping. Both use the same private raster analysis, encryption and retention implementation. The portal creates the table and indexes at startup through its existing schema initializer. PostgreSQL operators can apply [the workspace migration](migrations/20261123_ultrasound_workspace.sql) to the portal database. No migration is needed in the Node account database.
 
-The portal verifies and decodes supported rasters, caps pixel count at 16 million, removes file metadata by re-encoding PNG, and stores only AES-256-GCM ciphertext in the existing database. The record UUID is authenticated as encryption context. Preview uses an authorized, non-cacheable binary response and a browser object URL. File names, tokens, image bytes and scores are excluded from application logs. The internal ML request carries sanitized image bytes and its service credential. It carries no patient or pregnancy identifiers. Raster checks do not establish whether an image depicts the intended anatomy or contains identifiers burned into the pixels. Remove burned-in identifiers before research upload.
+## Deployment
 
-The ML listener on `127.0.0.1:8200` serves all existing access-assistance routes and the authenticated ultrasound endpoint. The portal has an eight-second inference deadline. Unavailable inference leaves an image in the manual queue with a reason. Staff can retry while the image is retained, the record is pending and the previous attempt reported unavailable inference. Poor-quality images bypass prediction. Approved research outputs distinguish usable scores, low confidence and a priority review signal. Priority is for review, with 0.80 top-score and 0.30 combined non-Normal score thresholds for this research policy.
+- **Docker Compose.** The full-app Compose file runs the gateway, clinical portal and private ML service together with persistent local state. Source the three persistent secrets as above and run `docker compose -f compose.ultrasound.yaml up --build`. The app port is published to loopback; the private API and ML ports stay inside the container. The separate hospital-only Compose stack is for the hospital preview and its forecasting service.
+- **Render.** Use the root Dockerfile with the repository's `render.yaml`. Set `DAI_ULTRASOUND_IMAGE_KEY` to a stable 64-digit hex key. The blueprint generates separate gateway and ML tokens and uses the existing persistent disk. Use the Docker launcher so the same service hosts the patient/doctor pages and starts the private applications. If the service exists with different settings, check its dashboard configuration and current commit before deploying. Auto-deploy is disabled in the blueprint. Keep the deployment in synthetic demo mode until your site's clinical, consent, and production controls are configured.
+- **Private model.** The launcher starts the default loopback ML listener when ultrasound is enabled, independently of patient ranking. A separate private HTTPS ML origin can be configured by setting `DAI_ULTRASOUND_ML_ORIGIN` and the same private service credential on both ends. Install the evaluated model's Torch runtime in the private service and set `DAI_ULTRASOUND_MODEL_DIR` there. The default Docker image supports quality checks and manual review.
 
-The agent reads the same approved scope through the consent-filtered monitoring scan. Each flag persists an upload ID and date, analysis revision, model version when available, reason, severity and review state. Related records are date- and episode-bounded and linked by original source ID. Their clinical priorities remain independent of experimental archive scores. A consultant review updates both the ultrasound record and any existing agent flag. Later scans preserve the clinician's review and respect consent and episode changes.
-
-The default image lifetime is 30 days. Reads enforce expiration immediately. The portal's retention task clears expired ciphertext in batches while the feature is enabled. Approval comments and audit records follow the deployment's existing health-record retention policy. Set the image retention period before upload. Keep the key in a secret manager and apply matching retention to backups, exports and database snapshots. Restrict database and audit access, encrypt backups, and ensure proxy access logs do not retain identifiers or credentials. Demo authorization and simulated OTP are for synthetic data. See [deployment variables](.env.example).
-
-## API
-
-The public gateway prefixes the portal paths below with `/hospital-admin`. Portal calls require a valid hospital bearer token. A scoped miss returns 404. Invalid credentials return 401 and an unauthorized role receives 403.
-
-| Method and portal path | Input and output |
-| --- | --- |
-| GET `/api/ultrasound/capability` | Whether intake is enabled for this deployment. |
-| GET `/api/ultrasound?reviewed=false&offset=0` | Scope-checked queue, up to 25 rows per page, ordered by priority then time. |
-| POST `/api/ultrasound/patients/{mother_id}` | Raw bytes with `image/png`, `image/jpeg` or `image/webp`. Returns 201 and an ID, or 200 with the existing ID for a duplicate. Unsupported MIME is 415, invalid rasters 422 and oversized data 413. |
-| GET `/api/ultrasound/{id}` | Linked patient, pregnancy context, model/quality result, review reason and outcome. |
-| GET `/api/ultrasound/{id}/image` | Private PNG with cache disabled. Expired images return 410. |
-| POST `/api/ultrasound/{id}/retry` | Run inference again on a pending unavailable record. Updates its revision. |
-| POST `/api/ultrasound/{id}/review` | JSON with `revision`, `decision` and `note`. Consultant permission required. Decisions are `review_complete`, `follow_up_needed` and `replacement_requested`. They record workflow disposition. |
-| POST `/internal/ultrasound/analyze` | Private ML listener only. Separate service bearer token and sanitized PNG. Returns model state, quality measurements and optional research scores. |
-
-The portable schema creates the table on portal startup. PostgreSQL operators can also apply [the SQL migration](migrations/20261123_ultrasound_analysis.sql) with `psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f hospital_portal/migrations/20261123_ultrasound_analysis.sql`.
+See [the environment template](.env.example) for exact variable names.
 
 ## Tests
 
 ```sh
-hospital_portal/.venv/bin/python -m pytest -q hospital_portal/tests
-make ml-test
-npm test --prefix backend
-npm run typecheck --prefix hospital_portal/web
+node --test backend/ultrasoundWorkspace.test.js
+hospital_portal/.venv/bin/python -m pytest -q hospital_portal/tests/test_ultrasound_flow.py ml-service/tests/test_ultrasound_research.py
 ```
 
-The separate browser test uses the running local demo and no configured ultrasound checkpoint. It creates and reviews two synthetic test uploads using a seeded consultant.
-
-```sh
-hospital_portal/.venv/bin/python -m pip install playwright
-hospital_portal/.venv/bin/python -m playwright install chromium
-hospital_portal/.venv/bin/python hospital_portal/tests/ultrasound_browser.py
-```
-
-Set `DAI_TEST_CHROMIUM` to use an existing Chromium executable. If the demo uses a custom port or state location, pass `--url` or `--db`.
-
-## Model release and clinical evaluation
-
-See [the training and audit guide](../ml-service/ultrasound/README.md) for dataset intake, independent splits, evaluation and model release. Before relying on scores in real care, establish a clinically meaningful target and reference standard, independently adjudicate labels, assess representative patients, scan views, devices and sites, and validate calibration, uncertainty, false negatives and workflow impact in an external cohort. Complete human factors, consent, security, operational monitoring and applicable governance review. [Good machine learning practice for medical device development](https://www.gov.uk/government/publications/good-machine-learning-practice-for-medical-device-development-guiding-principles/good-machine-learning-practice-for-medical-device-development-guiding-principles)
+The browser test exercises a live synthetic deployment through the regular patient/doctor login. Install Playwright with Chromium. Select linked synthetic accounts with a confirmed appointment and an active pregnancy. Set `DAI_TEST_PATIENT`, `DAI_TEST_DOCTOR`, and optional `DAI_TEST_PASSWORD` and `DAI_TEST_URL`, then run `python hospital_portal/tests/ultrasound_browser.py`. The test submits a synthetic frame and releases a synthetic test report.
