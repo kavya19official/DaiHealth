@@ -43,7 +43,9 @@ app.use(cors((req, callback) => {
 
 // Concise request logging. Do not print cookies, authorization headers, or patient data.
 app.use((req, res, next) => {
-  console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
+  if (!(/^\/api\/(patient|doctor)\/(patients\/\d+\/)?ultrasound(?:\/|$)/.test(req.path))) {
+    console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
+  }
   next();
 });
 
@@ -928,6 +930,7 @@ require('./patientML')(app, { pool, authenticateToken, authorizeRole,usageTracke
 require('./clinicalDashboard')(app, { pool, authenticateToken, authorizeRole });
 require('./consultationVoice').register(app, { pool, authenticateToken, authorizeRole });
 require('./doctorWorkspace')(app, { pool, authenticateToken, authorizeRole });
+require('./ultrasoundWorkspace')(app, { pool, authenticateToken, authorizeRole });
 require('./doctorOperations')(app, { pool, authenticateToken, authorizeRole });
 require('./patientDocuments')(app, { pool, authenticateToken, authorizeRole, jwtSecret: process.env.JWT_SECRET });
 require('./patientTimelineLive')(app, { pool, authenticateToken, authorizeRole });
@@ -1006,7 +1009,7 @@ app.use('/frontend', staticCompression(frontendPath), express.static(frontendPat
 app.use(staticCompression(frontendPath), express.static(frontendPath));
 
 // Start server
-const server = app.listen(PORT, demoGate ? '0.0.0.0' : process.env.DAI_LOCAL === 'true' ? '127.0.0.1' : undefined, () => {
+const server = app.listen(PORT, demoGate || process.env.DAI_CONTAINER_DEMO === 'true' ? '0.0.0.0' : process.env.DAI_LOCAL === 'true' ? '127.0.0.1' : undefined, () => {
   const address = server.address();
   const port = address ? (typeof address === 'string' ? address : address.port) : PORT;
   console.log(`DAI backend server running on port ${port}`);

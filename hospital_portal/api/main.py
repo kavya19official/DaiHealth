@@ -18,6 +18,8 @@ from .db import database, initialize
 from .security import ROLES, CLINICAL, digest, verify_password
 from .staff_scope import effective_staff, facility_staff
 from .clinical_monitor import monitor_loop, register_monitor
+from .ultrasound import Ultrasound, retention_loop
+from .ultrasound_workspace import register_workspace as register_ultrasound_workspace
 
 LABEL = "Simulated on synthetic data"
 UTC = timezone.utc
@@ -35,6 +37,10 @@ def aware(value):
 def create_app(engine=None):
     engine = engine or database()
     demo = os.getenv("DAI_DEMO", "false").lower() == "true"
+    ultrasound = Ultrasound(os.environ)
+    workspace_key = os.getenv("DAI_ULTRASOUND_GATEWAY_TOKEN", "")
+    if ultrasound.enabled and len(workspace_key) < 32:
+        raise RuntimeError("DAI_ULTRASOUND_GATEWAY_TOKEN must have at least 32 characters")
     secret = os.getenv("JWT_SECRET")
     if not secret:
         if not demo:
@@ -73,13 +79,15 @@ def create_app(engine=None):
         seed_video_demo(engine)
         monitor_task = (asyncio.create_task(monitor_loop(engine, demo))
                         if os.getenv("DAI_CLINICAL_MONITOR_ENABLED", "true").lower() == "true" else None)
+        retention = asyncio.create_task(retention_loop(engine))
         try:
             yield
         finally:
-            if monitor_task:
-                monitor_task.cancel()
-                with suppress(asyncio.CancelledError):
-                    await monitor_task
+            for task in (monitor_task, retention):
+                if task:
+                    task.cancel()
+                    with suppress(asyncio.CancelledError):
+                        await task
 
     app = FastAPI(
         title="DAI Hospital Readiness API", version="0.1.0", lifespan=lifespan
@@ -292,7 +300,8 @@ def create_app(engine=None):
     async def synthetic_label(request, call_next):
         response = await call_next(request)
         response.headers["X-DAI-Data-Label"] = LABEL
-        response.headers["Cache-Control"] = "no-store"
+        if "Cache-Control" not in response.headers:
+            response.headers["Cache-Control"] = "no-store"
         return response
 
     @app.get("/api/health")
@@ -921,6 +930,7 @@ def create_app(engine=None):
 
     register_asha(app, engine, require, audit, one)
     register_monitor(app, engine, require, audit, demo)
+    register_ultrasound_workspace(app, engine, ultrasound, workspace_key, demo)
     return app
 
 

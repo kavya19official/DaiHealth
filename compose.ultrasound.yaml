@@ -1,0 +1,20 @@
+name: dai-ultrasound
+services:
+  dai:
+    build:
+      context: .
+    environment:
+      DAI_HOSTED_DEMO: "false"
+      DAI_CONTAINER_DEMO: "true"
+      DAI_PORT: "3001"
+      DAI_ULTRASOUND_ENABLED: "true"
+      DAI_ULTRASOUND_IMAGE_KEY: ${DAI_ULTRASOUND_IMAGE_KEY:?Set the persistent 64-digit image key}
+      DAI_ULTRASOUND_GATEWAY_TOKEN: ${DAI_ULTRASOUND_GATEWAY_TOKEN:?Set a gateway credential}
+      DAI_ULTRASOUND_SERVICE_TOKEN: ${DAI_ULTRASOUND_SERVICE_TOKEN:?Set an ML credential}
+      DAI_ULTRASOUND_IMAGE_RETENTION_DAYS: ${DAI_ULTRASOUND_IMAGE_RETENTION_DAYS:-30}
+    volumes:
+      - workspace_state:/app/.local
+    ports:
+      - "127.0.0.1:3001:3001"
+volumes:
+  workspace_state:

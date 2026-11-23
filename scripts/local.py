@@ -132,6 +132,19 @@ def environment(cfg):
     return env
 
 
+def ranking_enabled(env):
+    return env.get("ML_ENABLED") == "true" and env.get("PATIENT_ML_RANKING_ENABLED") == "true"
+
+
+def local_ultrasound(env):
+    return (env.get("DAI_ULTRASOUND_ENABLED") == "true"
+            and env.get("DAI_ULTRASOUND_ML_ORIGIN", "http://127.0.0.1:8200").rstrip("/") == "http://127.0.0.1:8200")
+
+
+def ml_required(env):
+    return ranking_enabled(env) or local_ultrasound(env)
+
+
 def dependencies():
     if not PY.exists():
         run([sys.executable, "-m", "venv", VENV])
@@ -139,7 +152,7 @@ def dependencies():
         ROOT / "hospital_portal/requirements.txt",
         ROOT / "synthetic_data/requirements.txt",
     ]
-    if os.environ.get("ML_ENABLED") == "true" and os.environ.get("PATIENT_ML_RANKING_ENABLED") == "true":
+    if ml_required(os.environ):
         reqs.append(ROOT / "ml-service/requirements.txt")
     signature = hashlib.sha256(b"".join(p.read_bytes() for p in reqs)).hexdigest()
     marker = STATE / "python-dependencies"
@@ -164,7 +177,7 @@ def dependencies():
 
 
 def prepare(env):
-    if env.get("DAI_HOSTED_DEMO") != "true":
+    if env.get("DAI_HOSTED_DEMO") != "true" and env.get("DAI_CONTAINER_DEMO") != "true":
         dependencies()
     if not (ROOT / "synthetic_data/output/dai.db").exists():
         run([PY, ROOT / "synthetic_data/generate.py"], env=env)
@@ -289,6 +302,12 @@ def main():
         raise RuntimeError("Use npm start, npm run setup, or npm run doctor.")
     api_port = int(env["DAI_PORTAL_API_ORIGIN"].rsplit(":", 1)[1])
     web_port = int(env["DAI_PORTAL_WEB_ORIGIN"].rsplit(":", 1)[1])
+    ultrasound = env.get("DAI_ULTRASOUND_ENABLED") == "true"
+    launch_ml = ml_required(env)
+    public_env = {key: value for key, value in env.items() if not key.startswith("DAI_ULTRASOUND_")}
+    gateway_env = public_env | {key: env[key] for key in
+                               ("DAI_ULTRASOUND_ENABLED", "DAI_ULTRASOUND_GATEWAY_TOKEN") if key in env}
+    portal_env = {key: value for key, value in env.items() if key != "DAI_ULTRASOUND_MODEL_DIR"}
     processes = []
     (STATE / "stop-request").unlink(missing_ok=True)
     try:
@@ -303,7 +322,7 @@ def main():
                             f"Port {port} is already in use. Stop the old DAI terminal first (Ctrl+C). The launcher will not kill another process. Set DAI_PORT to change the public port."
                         )
         prepare(env)
-        if hosted:
+        if hosted or env.get("DAI_CONTAINER_DEMO") == "true":
             if not (ROOT / "hospital_portal/web/.next-local/BUILD_ID").is_file():
                 raise RuntimeError("Hosted hospital UI must be compiled during the image build.")
             print("Starting access-gated synthetic DAI demo.", flush=True)
@@ -326,9 +345,10 @@ def main():
                     "127.0.0.1",
                     "--port",
                     str(api_port),
+                    *(["--no-access-log"] if ultrasound else []),
                 ],
                 ROOT,
-                env,
+                portal_env,
             ),
             (
                 (
@@ -345,7 +365,7 @@ def main():
                     ]
                 ),
                 ROOT / "hospital_portal/web",
-                env
+                public_env
                 | {
                     "NODE_ENV": "development"
                     if env.get("DAI_DEV") == "true"
@@ -355,11 +375,15 @@ def main():
             (
                 ["node", "backend/server.js"],
                 ROOT,
-                env | {"DATABASE_URL": "", "DB_SSL": "false"},
+                gateway_env | {"DATABASE_URL": "", "DB_SSL": "false"},
             ),
         ]
-        if env.get("ML_ENABLED") == "true" and env.get("PATIENT_ML_RANKING_ENABLED") == "true":
-            commands.insert(0, ([PY, ROOT / "ml-service/run.py", "-m", "uvicorn", "api.main:app", "--host", "127.0.0.1", "--port", "8200"], ROOT, env))
+        if launch_ml:
+            ml_env = {key: value for key, value in env.items() if key not in
+                      {"DAI_ULTRASOUND_IMAGE_KEY", "DAI_ULTRASOUND_GATEWAY_TOKEN"}}
+            commands.insert(0, ([PY, ROOT / "ml-service/run.py", "-m", "uvicorn", "api.main:app",
+                                 "--host", "127.0.0.1", "--port", "8200",
+                                 *(["--no-access-log"] if ultrasound else [])], ROOT, ml_env))
         for args, cwd, child_env in commands:
             processes.append(
                 subprocess.Popen(
@@ -369,11 +393,12 @@ def main():
                     start_new_session=not WIN,
                 )
             )
-        required_processes = processes[1:] if not hosted and env.get("ML_ENABLED") == "true" and env.get("PATIENT_ML_RANKING_ENABLED") == "true" else processes
+        required_processes = processes[1:] if not hosted and launch_ml and not local_ultrasound(env) else processes
         for url in [
             f"http://127.0.0.1:{api_port}/api/health",
             f"http://127.0.0.1:{web_port}/hospital-admin",
             f"http://127.0.0.1:{env['PORT']}/api/health",
+            *(["http://127.0.0.1:8200/health"] if local_ultrasound(env) else []),
         ]:
             ready(url, required_processes)
         if hosted:

@@ -164,3 +164,8 @@ def health():return {'status':'ok','models_available':{name:load(name) is not No
 def model_info():
     try:return {'models':json.loads((MODELS/'model_registry.json').read_text()),'support_release':support_gate(MODELS),'statement':'Metrics are measured on synthetic data and are not real-world performance.'}
     except (OSError,ValueError):return {'models':{},'statement':'Models unavailable; deterministic fallbacks are active.'}
+
+# Register only inside the existing private ML service. No browser gateway targets this route.
+if os.getenv("DAI_ULTRASOUND_ENABLED") == "true":
+    from ultrasound.inference import register_inference
+    register_inference(app)

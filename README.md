@@ -89,6 +89,29 @@ All three use the password `Dai-Synthetic-2026!`. The sign-in page has a **Patie
 The hospital login shows its one-time code on screen in this synthetic demo, so no SMS or API key is needed.
 The Hospital / Admin portal opens at `/hospital-admin`.
 
+### Ultrasound scan demo (demonstration data only)
+
+The patient dashboard (**Ultrasound scans** in the sidebar) and the doctor dashboard
+(**/doctor.html → patient ultrasound workspace**) share the same encrypted scan records.
+Four seeded demonstration scans exist for the demo mother, reviewed by the demo doctor:
+two released reports (20-week anatomy and 32-week growth scans with BPD/HC/AC/FL,
+estimated fetal weight, fetal heart rate, placental position and amniotic fluid
+assessment) plus one under review and one pending scan for the live review flow.
+Every report is labelled **Demonstration data — not for clinical use**; no AI model
+is deployed, so scans show an explicit "no approved model" analysis state rather than
+simulated predictions.
+
+To reseed after a local database reset:
+
+```sh
+set -a && . ./.local/ultrasound-demo.env && set +a
+hospital_portal/.venv/bin/python scripts/seed-ultrasound-demo.py
+```
+
+Note: the demo mother is postpartum, so new patient uploads are disabled by design
+(upload requires an active pregnancy). The doctor can still review and release the
+pending seeded scan, which then appears as a report on the mother's dashboard.
+
 ---
 
 ## How it fits together
@@ -355,3 +378,7 @@ sign-in, and synthetic `.invalid` demo addresses are skipped.
 Patient → doctor: in **Reports & records** the patient uploads a PDF or image (up to 5 MB) and chooses **Share with consent** for a connected doctor. That doctor sees it under **Records → Patient reports**, can open the original and record a review.
 
 Doctor → patient: under **Records → Patient reports** a verified doctor chooses **Add a report for a patient**, picks a connected patient and uploads the file (`POST /api/doctor/patients/:motherId/documents`). The patient sees it in **Reports & records** marked "Added by Dr …" and can open or share it, but not delete it. The doctor keeps access to reports they added only while the care relationship is active; revoking the doctor removes it. Migration: `backend/db/clinician_report_uploads.sql`.
+
+## Ultrasound scans
+
+Patients can securely upload a frame to a verified clinician from their care team. Doctors can review scan history, image quality and pregnancy context and release a report with follow-up instructions. See [the ultrasound setup and deployment guide](hospital_portal/ULTRASOUND_AI_REVIEW.md).

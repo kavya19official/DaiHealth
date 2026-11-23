@@ -6,7 +6,7 @@ type API = (path: string, options?: RequestInit) => Promise<unknown>;
 type Evidence = {source:string;record_id:string;date:string|null;values:Record<string,string|number|null>};
 type Flag = {id:string;mother_id:string;patient_name:string;priority:number;summary:string;action:string;
   evidence:Evidence[];fingerprint:string;rule_version:string;reference_url:string;reviewed_at:string|null;
-  review_note:string|null;as_of:string};
+  review_note:string|null;as_of:string;ultrasound_id?:string};
 type Queue = {items:Flag[];has_more:boolean;last_scan:string|null};
 type Snapshot = {as_of:string;coverage:{eligible:boolean;synthetic:boolean;anchor_source?:string;anc_visits?:number;
   paired_bp?:number;finalized_reports?:number;glucose_context_records?:number;weight_reference_available?:boolean};
@@ -114,7 +114,7 @@ export function ClinicalMonitoring({api,canReview,openPatient}:{api:API;canRevie
       </div>
       {coverage===item.id && <PatientMonitoring key={item.mother_id} api={api} motherId={item.mother_id}/>}
       {item.review_note && <p><strong>Clinician review note</strong> {item.review_note}</p>}
-      {canReview && !item.reviewed_at && <form key={item.fingerprint} onSubmit={event=>{
+      {canReview && !item.reviewed_at && !item.ultrasound_id && <form key={item.fingerprint} onSubmit={event=>{
         event.preventDefault();const note=(new FormData(event.currentTarget)).get("note");
         if(typeof note==="string")void acknowledge(item,note);
       }}><label>Review note <textarea name="note" minLength={5} maxLength={500} required/></label>

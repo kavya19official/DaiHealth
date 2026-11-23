@@ -10,3 +10,5 @@ numpy==2.4.6
 scikit-learn==1.9.1
 joblib==1.6.0
 ortools==9.15.6755
+Pillow==13.0.0
+cryptography==46.0.5

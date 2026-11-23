@@ -27,3 +27,11 @@ services:
         value: "true"
       - key: PENDING_CARE_PLANNER
         value: "true"
+      - key: DAI_ULTRASOUND_ENABLED
+        value: "true"
+      - key: DAI_ULTRASOUND_IMAGE_KEY
+        sync: false
+      - key: DAI_ULTRASOUND_GATEWAY_TOKEN
+        generateValue: true
+      - key: DAI_ULTRASOUND_SERVICE_TOKEN
+        generateValue: true
