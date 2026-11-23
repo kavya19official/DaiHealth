@@ -25,8 +25,7 @@ const access = require('./accessControl');
 const { verifiedDoctor } = require('./clinicalDashboard');
 
 const LIMITS = { summary: 1200, step: 200, steps: 8, tests: 8, testName: 100, testNote: 200, followText: 300 };
-const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
-const isRealDate = (s) => typeof s === 'string' && DATE_RE.test(s) && new Date(s + 'T00:00:00Z').toISOString().slice(0, 10) === s;
+const { dateValid: isRealDate } = require('./patientContinuity');
 const clean = (v, max) => (typeof v === 'string' ? v.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, '').replace(/[ \t]+/g, ' ').trim().slice(0, max) : '');
 
 // Validates and normalises what the clinician typed. Returns { content } or { error }.
