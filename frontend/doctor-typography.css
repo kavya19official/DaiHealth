@@ -1,0 +1,5 @@
+/* Shared heading emphasis for the doctor workspace; layout and body type stay unchanged. */
+body.doctor-workspace :is(h1,h2,h3,h4,h5,h6,[role="heading"],.section-title,.section-heading,.card-title,.dw-nav-caption,.dp-board-lane-title,.cm-inbox-title,.cr-title>strong),
+body.doctor-workspace :is(.dr-more,.dd-more,.cw-section,.cw-optional-tools,.dpp-other-input,.cr-recording-tools)>summary {
+  font-weight:800!important;
+}

@@ -1,0 +1,14 @@
+'use strict';
+const path=require('node:path'),fs=require('node:fs'),{DatabaseSync}=require('node:sqlite'),{verifiedDoctor}=require('./clinicalDashboard');
+const file=path.join(__dirname,'reference-data/lactmed.sqlite');
+function open(){if(!fs.existsSync(file))throw Error('missing_reference');const db=new DatabaseSync(file,{readOnly:true});db.exec('PRAGMA query_only=ON;PRAGMA cache_size=-512;');return db;}
+function search(query){const tokens=query.normalize('NFKC').match(/[\p{L}\p{N}]+/gu)||[];if(!tokens.length)return [];
+ const match=tokens.slice(0,8).map(t=>'"'+t+'"*').join(' AND '),db=open();try{return db.prepare('SELECT r.id,r.name,r.revised FROM names n JOIN records r ON r.id=n.record_id WHERE names MATCH ? ORDER BY rank LIMIT 21').all(match);}finally{db.close();}}
+function record(id){const db=open();try{const r=db.prepare('SELECT * FROM records WHERE id=?').get(id);if(!r)return null;return {id:r.id,name:r.name,revised:r.revised,aliases:JSON.parse(r.aliases_json),sections:JSON.parse(r.sections_json),source_url:r.source_url,rights:r.rights};}finally{db.close();}}
+function metadata(){const db=open();try{return Object.fromEntries(db.prepare("SELECT key,value FROM metadata WHERE key IN ('source','imported_on','records','scope','archive_sha256')").all().map(r=>[r.key,r.value]));}finally{db.close();}}
+function register(app,{authenticateToken,authorizeRole,pool}){
+ const guards=[authenticateToken,authorizeRole(['doctor']),async(req,res,next)=>{res.set('Cache-Control','private, no-store');try{if(!await verifiedDoctor(pool,req.user.id))return res.status(403).json({error:'Verified doctor required.'});next();}catch{res.status(503).json({error:'Could not verify access to the reference library.'});}}];
+ app.post('/api/doctor/lactmed/search',...guards,(req,res)=>{const q=req.body?.query;if(typeof q!=='string'||q.trim().length<2||q.length>120)return res.status(400).json({error:'Enter a medicine or ingredient name (2–120 characters).'});try{const rows=search(q.trim());res.json({matches:rows.slice(0,20),has_more:rows.length>20,metadata:metadata(),notice:'Name/keyword matches only. Confirm the active ingredient and formulation. This is a breastfeeding reference, not an automated safety check.'});}catch{res.status(503).json({error:'The local LactMed reference is unavailable. No safety conclusion can be drawn.'});}});
+ app.get('/api/doctor/lactmed/records/:id',...guards,(req,res)=>{if(!/^[A-Za-z0-9_.-]{1,100}$/.test(req.params.id))return res.status(400).json({error:'Invalid reference ID.'});try{const value=record(req.params.id);if(!value)return res.status(404).json({error:'Reference record not found. This does not mean the medicine is safe.'});res.json({record:value,metadata:metadata()});}catch{res.status(503).json({error:'The local LactMed reference is unavailable. Check the live source.'});}});
+}
+module.exports={register,search,record,metadata};

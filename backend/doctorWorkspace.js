@@ -79,6 +79,7 @@ module.exports=function(app,{pool,authenticateToken,authorizeRole}){
   const response=assemble({profile:profile.rows[0],patients:patients.rows,milestones:milestones.rows,appointments:appointments.rows,reports:reports.rows,postpartum:postpartum.rows,shared,snapshot,date,readiness});
   const [queue,actions]=await Promise.all([pool.query(`SELECT q.* FROM doctor_queue_state q JOIN appointments a ON a.id=q.appointment_id WHERE q.doctor_id=$1 AND a.doctor_id=q.doctor_id AND NOT ${access.revokedSql('a.mother_id','a.doctor_id','a.facility_uuid')}`,[id]),pool.query(`SELECT w.* FROM doctor_worklist_action w JOIN care_milestones cm ON cm.id=w.milestone_id WHERE w.doctor_id=$1 AND ${access.activeRelationshipSql('cm.mother_id','w.doctor_id')}`,[id])]);
   response.queue=queue.rows;response.worklistActions=actions.rows;
+  response.patient_reports=await require('./doctorDayReports').doctorDayReports(pool,id,date);
   response.coordination_requests=await scopedCoordinationRequests(pool,id,snapshot?.coordinationRequests||[],assignedIds);
   response.demo={enabled:process.env.DAI_LOCAL==='true'&&!!snapshot,synthetic_only:process.env.DAI_LOCAL==='true'&&!!snapshot};
   response.label=response.demo.enabled?'Simulated on synthetic data':'Recorded care data';

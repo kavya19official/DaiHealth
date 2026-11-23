@@ -1,0 +1,50 @@
+/* Lavender belongs to top banners; the existing white card surfaces stay intact. */
+body.doctor-workspace{
+  --doctor-heading-wash:linear-gradient(110deg,#eeeaff,#f7f4ff 60%,#eae6ff);
+}
+body.doctor-workspace[data-dw-theme=dark]{
+  --doctor-heading-wash:linear-gradient(110deg,#352746,#30223e 60%,#3a294d);
+}
+body.doctor-workspace :is(.dp-head,.doctor-merged-heading,.dpp-header,.cm-inbox-title),
+body.doctor-workspace :is(#dwReadiness,#dwWards,#dwAnalytics)>.dw-card-head:first-child{
+  background:var(--doctor-heading-wash);
+}
+body.doctor-workspace :is(.dp-head,.doctor-merged-heading),
+body.doctor-workspace :is(#dwReadiness,#dwWards,#dwAnalytics)>.dw-card-head:first-child{
+  padding:14px 18px;
+  border-radius:16px;
+  box-sizing:border-box;
+}
+/* Keep the requested compact statistics without tinting their cards. */
+body.doctor-workspace .dr-home>.dd-glance>button{
+  background:var(--dw-card);
+  border-color:var(--dw-border);
+  min-height:160px;
+  padding:18px;
+  gap:10px;
+  border-radius:19px;
+}
+body.doctor-workspace .dr-home>.dd-glance .dd-glance-icon{width:34px;height:34px;border-radius:11px}
+body.doctor-workspace .dr-home>.dd-glance .dd-glance-icon svg{width:18px;height:18px}
+body.doctor-workspace .dr-home>.dd-glance strong{font-size:clamp(38px,3.5vw,48px);margin-bottom:7px}
+@media(max-width:650px){
+  body.doctor-workspace .dr-home>.dd-glance>button{min-height:180px;padding:14px 12px;gap:8px}
+  body.doctor-workspace .dr-home>.dd-glance .dd-glance-icon{width:30px;height:30px}
+  body.doctor-workspace .dr-home>.dd-glance strong{font-size:40px}
+  body.doctor-workspace :is(.dp-head,.doctor-merged-heading){padding:12px 14px}
+}
+/* Light mode: white everywhere outside the top banners. */
+body.doctor-workspace:not([data-dw-theme=dark]){
+  --dw-bg:#fff;
+  --dw-card:#fff;
+  --ground:#fff;
+  --surface:#fff;
+  background:#fff;
+}
+body.doctor-workspace:not([data-dw-theme=dark]) :is(
+  .main,.content,.panel,.sidebar,.topbar,.topbar .search,
+  .dd-card,.dw-card,.card,.dp-page,.dp-person,.ds-person,.dp-queue-lane,.ds-lane,
+  .dp-day-panel,.ds-settings-card,.dpp-dialog,.dpp-body,.dpp-tabs,.ds-dialog,
+  .dp-preview,.cm-panel,.cm-sidebar,.cm-chat,.cm-chat-header,.cm-compose,
+  .dd-next-booking,.dw-next,.cr-recorder,.dpp-medicine,.cw-teachback,.cw-provider
+){background:#fff}

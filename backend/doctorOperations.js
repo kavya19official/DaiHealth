@@ -5,6 +5,8 @@ const iso=x=>x instanceof Date?x.toISOString().slice(0,10):String(x).slice(0,10)
 const transitions={booked:['waiting','no_show'],waiting:['in_consult','no_show','booked'],in_consult:['done','waiting'],no_show:['waiting'],done:[]};
 module.exports=function(app,{pool,authenticateToken,authorizeRole}){
  const guards=[authenticateToken,authorizeRole(['doctor'])];
+ require('./doctorFollowup')(app,{pool,authenticateToken,authorizeRole});
+ require('./lactmedReference').register(app,{pool,authenticateToken,authorizeRole});
 
  app.get('/api/doctor/activity',...guards,async(req,res)=>{
   try{if(!await verifiedDoctor(pool,req.user.id))return res.status(403).json({error:'Verified doctor required'});

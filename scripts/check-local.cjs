@@ -44,6 +44,7 @@ async function seedLocal() {
       await require('./seed-doctor-demo-day.cjs').seedDoctorDemoDay(client,source);
       await require('./seed-video-demo.cjs').seedVideoDemo(client);
       await require('./seed-care-chat-demo.cjs').seedCareChatDemo(client);
+      await require('./seed-doctor-showcase.cjs').seedDoctorShowcase(client);
       console.log('Patient/doctor cohort already imported:', previous.rows[0].counts);
       return;
     }
@@ -103,6 +104,7 @@ async function seedLocal() {
     await require('./seed-doctor-demo-day.cjs').seedDoctorDemoDay(client,source);
     await require('./seed-video-demo.cjs').seedVideoDemo(client);
       await require('./seed-care-chat-demo.cjs').seedCareChatDemo(client);
+      await require('./seed-doctor-showcase.cjs').seedDoctorShowcase(client);
     console.log('Imported shared synthetic patient/doctor cohort:',counts);
   } catch (error) {
     await client.query('ROLLBACK').catch(()=>{});
