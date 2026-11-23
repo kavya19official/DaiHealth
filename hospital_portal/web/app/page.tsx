@@ -10,6 +10,7 @@ import { PatientRequestsPanel } from "./patient-requests";
 import { GoldenHourBoard, GoldenHourLayer } from "./golden-hour";
 import { FollowupRiskPanel } from "./followup-risk";
 import { AshaCopilot } from "./asha";
+import { ClinicalMonitoring, PatientMonitoring } from "./clinical-monitor";
 type Row = Record<string, any>;
 type User = {
   id: string;
@@ -32,6 +33,7 @@ const days = [
 const operationNav = [
   ["goldenHour", "Golden Hour · incoming", "✚"],
   ["ashaCopilot", "ASHA Copilot", "⌂"],
+  ["clinicalMonitor", "Clinical monitoring", "▥"],
   ["followupRisk", "Follow-up & risk demo", "✓"],
   ["patientRequests", "Patient requests", "⇄"],
   ["handoffs", "Facility handoffs", "⇄"],
@@ -76,6 +78,7 @@ const workspacePermissions: Record<string, string> = {
   careTasks: "care.read",
   careReviews: "care.read",
   followupRisk: "coordination.read",
+  clinicalMonitor: "monitor.read",
   patientRequests: "coordination.read",
   goldenHour: "coordination.read",
   sustainability: "green.read",
@@ -136,12 +139,14 @@ const titles: Record<string, [string, string]> = {
     "Clinical review & summaries",
     "Recorded concerns, human acknowledgement and clinician-approved next steps.",
   ],
+  clinicalMonitor: ["Clinical monitoring", "Prioritized antenatal findings and evidence for clinician review."],
   followupRisk: ["Follow-up & risk demo", "Shared follow-up state and separately reviewed synthetic risk flags."],
   ashaCopilot: [
     "ASHA Copilot",
     "Offline-first community visits, village routes, voice notes and health-camp updates.",
   ],
   patientRequests: ["Patient requests", "Synthetic appointment and referral coordination with facility-scoped staff review."],
+  goldenHour: ["Golden Hour · incoming emergency patients", "Prototype pre-alerts sent before a patient arrives: capability-matched, with an SBAR handover. Synthetic demonstration only."],
   intelligence: ["Operations intelligence", "Bounded agents, explainable maintenance planning and measured AI usage."],
   sustainability: [
     "Green hospital",
@@ -363,6 +368,7 @@ export default function Home() {
     setBusy(true);
     setError("");
     try {
+      if (view === "clinicalMonitor") { if (sequence === loadSequence.current) setData(null); return; }
       if (view === "patientRequests" || view === "followupRisk" || view === "ashaCopilot" || view === "goldenHour") { const structure = await api("/facilities/" + user.facility_id + "/structure"); if (sequence === loadSequence.current) setData(structure); return; }
       const params = new URLSearchParams();
       Object.entries(filters).forEach(([key, value]) => {
@@ -859,8 +865,8 @@ export default function Home() {
                 {mode === "operations" ? "OPERATIONS" : "ADMINISTRATION"}
               </div>
               <AffiliationSwitcher api={api} onSwitch={async()=>{const next=await api("/me");setUser(next);setPatient(null);setData(null);setRecords([]);setWorkspaceData(null);setSummary(null);setNotification("Facility context updated. Showing this facility’s authorised records.");}}/>
-              <h1>{titles[view][0]}</h1>
-              <p>{titles[view][1]}</p>
+              <h1>{(titles[view] ?? [view, ""])[0]}</h1>
+              <p>{(titles[view] ?? [view, ""])[1]}</p>
             </div>
             <div className="account">
               <span className="avatar">DA</span>
@@ -927,6 +933,9 @@ export default function Home() {
           )}
           {view === "goldenHour" && <GoldenHourBoard key={user.id+user.facility_id} api={api} permissions={user.permissions}/>}
           {view === "patientRequests" && <PatientRequestsPanel key={user.id+user.facility_id} api={api} permissions={user.permissions}/>}
+          {view === "clinicalMonitor" && user.permissions.includes("monitor.read") && <ClinicalMonitoring
+            key={user.id+user.facility_id} api={api} canReview={user.permissions.includes("monitor.review")}
+            openPatient={async id=>{setPatient(await api("/patients/"+id));}}/>}
           {view === "followupRisk" && <FollowupRiskPanel key={user.id+user.facility_id} api={api} permissions={user.permissions} userId={user.id}/>}
           {view === "ashaCopilot" && <AshaCopilot key={user.id+user.facility_id} api={api} user={user}/>}
           {data && (
@@ -1474,6 +1483,7 @@ export default function Home() {
                 c.birth_weight_g + " g",
               ])}
             />
+            {user.permissions.includes("monitor.read") && <PatientMonitoring key={patient.mother.id} api={api} motherId={patient.mother.id}/>}
             {user.permissions.includes("care.read") && (
               <PatientCoordination
                 key={patient.mother.id}

@@ -1,0 +1,17 @@
+.panel { display:grid; gap:.75rem; }
+.toolbar { display:flex; flex-wrap:wrap; align-items:end; gap:.65rem; }
+.toolbar label,.flag form label { display:grid; gap:.3rem; }
+.flag { border:1px solid #dbe4ee; border-inline-start:5px solid #5b7089; background:#fff; border-radius:.75rem; color:#24374c; padding:1rem; margin:.2rem 0; overflow-wrap:anywhere; }
+.flag[data-level="3"] { border-inline-start-color:#ac2639; }
+.flag[data-level="2"] { border-inline-start-color:#a75416; }
+.flag header { display:flex; flex-wrap:wrap; justify-content:space-between; gap:.5rem; margin-bottom:.65rem; }
+.flag h3 { margin:.3rem 0; }
+.flag p,.snapshot p { margin:.5rem 0; line-height:1.5; }
+.flag form { padding-top:.8rem; display:grid; gap:.6rem; }
+.flag form button { justify-self:start; }
+.flag textarea { inline-size:min(100%,42rem); min-block-size:4.5rem; }
+.flag summary,.snapshot summary { cursor:pointer; font-weight:650; padding:.4rem 0; }
+.evidence { display:grid; gap:.6rem; margin:.4rem 0; padding-inline-start:1.5rem; }
+.evidence code { display:block; font-size:.8rem; }
+.evidence span { display:inline-block; margin-inline-end:.6rem; }
+.snapshot { padding:.75rem; margin:.7rem 0; background:#eff5fa; border-radius:.55rem; color:#24374c; }

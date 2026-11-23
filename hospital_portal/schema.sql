@@ -1398,3 +1398,43 @@ CREATE TABLE IF NOT EXISTS sustainability_waste_stream (
   segregation_compliant INTEGER NOT NULL DEFAULT 0,
   UNIQUE (facility_id, period, stream)
 );
+
+CREATE TABLE IF NOT EXISTS clinical_monitor_run (
+	id UUID NOT NULL,
+	source_id VARCHAR,
+	created_at TIMESTAMP WITH TIME ZONE NOT NULL,
+	updated_at TIMESTAMP WITH TIME ZONE NOT NULL,
+	mother_id UUID NOT NULL,
+	as_of VARCHAR NOT NULL,
+	coverage JSON NOT NULL,
+	trends JSON NOT NULL,
+	PRIMARY KEY (id),
+	UNIQUE (mother_id),
+	UNIQUE (source_id),
+	FOREIGN KEY(mother_id) REFERENCES mother (id)
+);
+
+CREATE TABLE IF NOT EXISTS clinical_monitor_flag (
+	id UUID NOT NULL,
+	source_id VARCHAR,
+	created_at TIMESTAMP WITH TIME ZONE NOT NULL,
+	updated_at TIMESTAMP WITH TIME ZONE NOT NULL,
+	mother_id UUID NOT NULL,
+	rule_key VARCHAR NOT NULL,
+	rule_version VARCHAR NOT NULL,
+	priority INTEGER NOT NULL,
+	summary VARCHAR NOT NULL,
+	action VARCHAR NOT NULL,
+	reference_url VARCHAR NOT NULL,
+	fingerprint VARCHAR NOT NULL,
+	evidence JSON NOT NULL,
+	active BOOLEAN NOT NULL,
+	reviewed_by UUID,
+	review_note VARCHAR,
+	reviewed_at TIMESTAMP WITH TIME ZONE,
+	PRIMARY KEY (id),
+	UNIQUE (mother_id, rule_key),
+	UNIQUE (source_id),
+	FOREIGN KEY(mother_id) REFERENCES mother (id),
+	FOREIGN KEY(reviewed_by) REFERENCES portal_user (id)
+);

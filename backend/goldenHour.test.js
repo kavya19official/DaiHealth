@@ -284,3 +284,17 @@ test('front-end and portal files are wired in', () => {
   for (const [f, res] of Object.entries(need)) { const s = fs.readFileSync(path.join(root, f), 'utf8'); for (const re of res) assert.match(s, re, f + ' ' + re); }
   for (const f of ['frontend/js/golden-hour.js', 'shared/golden-hour.js', 'frontend/js/care-extensions.js', 'frontend/js/caregiver.js']) assert.doesNotThrow(() => new vm.Script(fs.readFileSync(path.join(root, f), 'utf8')), f);
 });
+
+test('every hospital-portal navigation view has a heading entry (a missing one crashed the page on click)', () => {
+  const page = fs.readFileSync(path.join(__dirname, '../hospital_portal/web/app/page.tsx'), 'utf8');
+  const titles = page.slice(page.indexOf('const titles: Record<string, [string, string]> = {'));
+  const block = titles.slice(0, titles.indexOf('\n};'));
+  const have = new Set([...block.matchAll(/^\s{2}"?([A-Za-z0-9_-]+)"?:\s*\[/gm)].map((m) => m[1]));
+  const navs = [...page.matchAll(/const (\w*Nav)\s*(?::[^=]+)?=\s*\[([\s\S]*?)\n\];/g)];
+  assert.ok(navs.length > 0, 'found the navigation lists');
+  const missing = [];
+  for (const [, , body] of navs) for (const m of body.matchAll(/\[\s*"([A-Za-z0-9_-]+)"\s*,/g)) if (!have.has(m[1])) missing.push(m[1]);
+  assert.deepEqual(missing, [], 'views without a title entry: ' + missing.join(', '));
+  assert.ok(have.has('goldenHour'));
+  assert.match(page, /\(titles\[view\] \?\? \[view, ""\]\)/, 'the heading is safe if a title is ever missing');
+});

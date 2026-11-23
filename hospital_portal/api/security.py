@@ -44,7 +44,8 @@ ROLES = {
 # New modules keep clinical approval separate from administrative ownership.
 for _role in ("hospital_admin", "consultant", "resident", "phc_user"):
     ROLES[_role].update({"care.read", "care.write"})
-ROLES["consultant"].add("care.review")
+ROLES["consultant"].update({"care.review", "monitor.read", "monitor.review"})
+ROLES["resident"].add("monitor.read")
 for _role in ("hospital_admin", "quality_officer"):
     ROLES[_role].update({"green.read", "green.write"})
 ROLES["hospital_admin"].update({"asha.read", "asha.assign"})

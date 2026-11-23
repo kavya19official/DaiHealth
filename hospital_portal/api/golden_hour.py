@@ -63,6 +63,9 @@ events = s.table(
     s.number("version", False),
 )
 
+_LAST_READ_AUDIT = {}
+READ_AUDIT_SECONDS = 60
+
 OPEN = {"incoming", "seen", "accepted"}
 TERMINAL = {"declined", "cancelled", "arrived"}
 TRANSITIONS = {
@@ -299,7 +302,11 @@ def register_golden_hour(app, engine, require, audit, patient):
             rows = c.execute(
                 select(alerts).where(alerts.c.facility_id == u["facility_id"], alerts.c.created_at >= since).order_by(alerts.c.created_at.desc()).limit(50)
             ).mappings().all()
-            audit(c, u, "golden_hour_incoming_read", "facility", u["facility_id"], {"alert_ids": [r["id"] for r in rows]})
+            stamp = (u["id"], u["facility_id"])
+            moment = datetime.now(timezone.utc)
+            if rows and (stamp not in _LAST_READ_AUDIT or (moment - _LAST_READ_AUDIT[stamp]).total_seconds() >= READ_AUDIT_SECONDS):
+                _LAST_READ_AUDIT[stamp] = moment
+                audit(c, u, "golden_hour_incoming_read", "facility", u["facility_id"], {"alert_ids": [r["id"] for r in rows]})
             return {
                 "alerts": [output(c, r, staff=True) for r in rows],
                 "facility_name": c.scalar(select(s.facility.c.name).where(s.facility.c.id == u["facility_id"])),
