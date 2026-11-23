@@ -205,10 +205,7 @@ async function hospitalLogin() {
 
 function redirectForUser(user) {
   if (user && user.role === 'caregiver') return 'caregiver.html';
-  if (user && user.role === 'doctor') {
-    var packet = /^#record-packet=([A-Za-z0-9_-]{43})$/.exec(location.hash);
-    return packet ? '/record-packet.html#' + packet[1] : 'doctor.html';
-  }
+  if (user && user.role === 'doctor') return 'doctor.html';
   if (user && (user.role === 'hospital' || user.role === 'admin' || user.role === 'care_team')) return 'hospital.html';
   if (user && user.pregnancy_status === 'delivered' && user.has_child) return 'child-dashboard.html';
   return 'dashboard.html';
