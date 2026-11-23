@@ -1,6 +1,7 @@
 """Patient-linked raster intake, private inference, and clinician review."""
 import asyncio
 import hashlib
+import json
 import logging
 import os
 from datetime import datetime, timezone
@@ -153,15 +154,26 @@ class Ultrasound:
         except (InvalidTag, ValueError):
             raise HTTPException(503, "Private image could not be opened") from None
 
-    async def analyze(self, png):
+    async def analyze(self, png, progress=None):
         try:
-            async with asyncio.timeout(8):
-                async with httpx.AsyncClient(timeout=7.5, trust_env=False) as client:
-                    reply = await client.post(self.url, content=png, headers={
+            async with asyncio.timeout(25):
+                async with httpx.AsyncClient(timeout=24, trust_env=False) as client:
+                    async with client.stream("POST", self.url, content=png, headers={
                         "Authorization": "Bearer " + self.token, "Content-Type": "image/png",
-                    })
-                    reply.raise_for_status()
-                    return Scores.model_validate(reply.json())
+                        "Accept": "application/x-ndjson",
+                    }) as reply:
+                        reply.raise_for_status()
+                        if reply.headers.get("content-type", "").split(";")[0] != "application/x-ndjson":
+                            return Scores.model_validate_json(await reply.aread())
+                        async for line in reply.aiter_lines():
+                            event = json.loads(line)
+                            if "error" in event:
+                                return unavailable("inference_unavailable")
+                            if "result" in event:
+                                return Scores.model_validate(event["result"])
+                            if progress and event.get("stage") in {"quality", "inference"}:
+                                await progress(event["stage"])
+                        return unavailable("inference_unavailable")
         except (TimeoutError, httpx.TimeoutException):
             return unavailable("inference_timeout")
         except (httpx.HTTPError, ValueError):

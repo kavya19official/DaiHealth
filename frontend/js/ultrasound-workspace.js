@@ -5,7 +5,7 @@
   if (!root) return;
   const clinician = root.dataset.ultrasoundWorkspace === 'doctor';
   const patientPath = '/patient/ultrasound';
-  const messages = {pending:'Pending review', under_review:'Under review', reviewed:'Reviewed'};
+  const messages = {pending:'Awaiting doctor review', under_review:'Under review', reviewed:'Reviewed by doctor'};
   const decisions = {
     review_complete:'Review complete', follow_up_needed:'Follow-up needed', replacement_requested:'New image requested',
   };
@@ -18,6 +18,7 @@
   let generation = 0;
   let busy = false;
   let opened = false;
+  let latestUpload = null;
   const previews = new Set();
 
   function element(tag, text, attrs) {
@@ -96,9 +97,10 @@
     const active = generation;
     notice('Working…');
     try {
-      await action();
+      const result = await action();
+      if (active === generation && result?.id) { latestUpload = result.id; offset = 0; }
       if (active === generation) {
-        if (await load() && active + 1 === generation) notice(success);
+        if (await load() && active + 1 === generation) notice(typeof success === "function" ? success(result) : success);
       }
     } catch (error) {
       if (active === generation) notice(error.message, true);
@@ -108,42 +110,84 @@
   }
 
   function uploadForm(options) {
-    const form = element('form', null, {class:'uw-form'});
-    form.append(element('h2','Upload a scan'));
-    form.append(element('p','Choose a single PNG, JPEG or WebP image up to 12 MiB. Remove any identifying text visible in the image.'));
-    const file = element('input', null, {type:'file', accept:'image/png,image/jpeg,image/webp', required:''});
+    const form = element('form', null, {class:'uw-form uw-upload'});
+    form.append(element('h2','Upload an ultrasound frame'));
+    form.append(element('p','Share one PNG, JPEG or WebP image, up to 12 MiB. Remove any identifying text visible in the image.'));
+    const file = element('input', null, {type:'file', accept:'image/png,image/jpeg,image/webp'});
+    const zone = label('Choose an image or drop it here', file);
+    zone.className = 'uw-drop';
+    file.setAttribute('aria-label','Ultrasound image');
+    const image = element('img', null, {alt:'Selected ultrasound frame',class:'uw-image',hidden:''});
+    const name = element('p',null,{class:'uw-filename'});
     const consent = element('input', null, {type:'checkbox', required:''});
     const doctor = clinician ? null : select(options, 'Choose a doctor');
+    const submit = element('button','Upload for review',{type:'submit',class:'uw-button',disabled:''});
+    let frame;
+    let previewUrl;
+
+    function choose(candidate) {
+      frame = null;
+      submit.disabled = true;
+      if (previewUrl) { URL.revokeObjectURL(previewUrl); previews.delete(previewUrl); }
+      image.hidden = true;
+      image.removeAttribute('src');
+      name.textContent = '';
+      if (!candidate) return;
+      if (!['image/png','image/jpeg','image/webp'].includes(candidate.type)) {
+        notice('Choose a PNG, JPEG or WebP image.',true);
+      } else if (!candidate.size || candidate.size > 12 * 1024 * 1024) {
+        notice('Choose a nonempty image up to 12 MiB.',true);
+      } else {
+        frame = candidate;
+        previewUrl = URL.createObjectURL(frame);
+        previews.add(previewUrl);
+        image.src = previewUrl;
+        image.hidden = false;
+        name.textContent = frame.name;
+        submit.disabled = false;
+        notice('');
+      }
+    }
+    file.addEventListener('change', () => choose(file.files[0]));
+    for (const event of ['dragover','dragleave','drop']) zone.addEventListener(event, pointer => {
+      pointer.preventDefault();
+      zone.classList.toggle('uw-dragging',event === 'dragover');
+      if (event === 'drop') choose(pointer.dataTransfer.files[0]);
+    });
+    form.append(zone,name,image);
     if (doctor) {
       doctor.required = true;
-      form.append(label('Share with', doctor));
+      form.append(label('Share with',doctor));
     }
-    form.append(label('Ultrasound image', file), label(clinician ?
-      ' The patient agreed to share this scan for review.' :
-      ' I agree to share this scan with the selected doctor.', consent),
-    element('button','Upload for review',{type:'submit',class:'uw-button'}));
-    form.addEventListener('submit', event => {
+    form.append(label(clinician ? ' The patient agreed to share this scan.' :
+      ' I agree to share this scan with the selected doctor.', consent), submit);
+    form.addEventListener('submit', async event => {
       event.preventDefault();
-      const frame = file.files[0];
-      if (!frame || !consent.checked) return;
-      if (frame.size > 12 * 1024 * 1024) return notice('Choose an image up to 12 MiB.', true);
+      if (!frame || !consent.checked || busy) return;
       const path = base() + (doctor ? '?doctor=' + encodeURIComponent(doctor.value) : '');
-      perform(() => request(path, {method:'POST', body:frame, headers:{
-        'content-type':frame.type,'x-dai-ultrasound':'upload','x-dai-ultrasound-consent':'yes',
-      }}), 'Scan uploaded for review.');
+      submit.disabled = true;
+      submit.textContent = 'Uploading…';
+      await perform(async () => {
+        notice('Uploading image…');
+        return request(path, {method:'POST', body:frame, headers:{
+          'content-type':frame.type,'x-dai-ultrasound':'upload','x-dai-ultrasound-consent':'yes',
+        }});
+      }, result => result.duplicate ? 'This image is already in your scan history.' : 'Scan uploaded for review.');
+      submit.textContent = 'Upload for review';
+      submit.disabled = false;
     });
     return form;
   }
 
-  function preview(card, record) {
+  function preview(card, record, preload) {
     if (!record.image_available) {
-      card.append(element('p','The image is no longer available. Any released report remains below.'));
+      card.append(element('p','Image unavailable. Released reports remain in your history.'));
       return;
     }
     const path = base() + '/' + record.id + '/image';
     const image = element('img', null, {alt:'Uploaded ultrasound frame',class:'uw-image',hidden:''});
     const open = button('View scan image', async () => {
-      if (image.src && !image.hidden) {
+      if (!image.hidden) {
         URL.revokeObjectURL(image.src);
         previews.delete(image.src);
         image.removeAttribute('src');
@@ -153,6 +197,7 @@
       }
       const active = generation;
       open.disabled = true;
+      open.textContent = 'Loading image…';
       try {
         const blob = await request(path, {}, true);
         if (generation !== active || !card.isConnected) return;
@@ -162,20 +207,67 @@
         image.hidden = false;
         open.textContent = 'Hide scan image';
       } catch (error) {
+        open.textContent = 'View scan image';
         if (generation === active) notice(error.message, true);
       } finally { open.disabled = false; }
     });
     if (record.demo_image) card.append(element('p',
-      'PUBLIC DEMONSTRATION IMAGE — NOT THIS PATIENT\'S ACTUAL SCAN — NOT FOR CLINICAL USE.',
-      {class:'uw-demo-note'}));
-    card.append(open, image);
+      'Public demonstration image. This frame belongs to a research dataset.', {class:'uw-demo-note'}));
+    card.append(image, open);
+    if (preload) queueMicrotask(() => { if (card.isConnected) open.click(); });
+  }
+
+  const issueDescriptions = {
+    small_image:'The frame is too small.',
+    low_contrast:'The frame has too little contrast.',
+    low_detail:'The frame appears to have insufficient detail.',
+  };
+
+  function renderAssessment(target, record) {
+    const result = record.assessment;
+    if (!result) return;
+    target.append(element('h3','Image assessment'));
+    if (result.steps.length || record.processing) {
+      const stages = element('ol',null,{class:'uw-steps','aria-label':'Analysis progress'});
+      for (const [key, label] of [['uploaded','Image uploaded'],['quality','Checking image quality'],
+        ['inference','Running AI analysis'],['report','Preparing assessment']]) {
+        if (key === 'inference' && !result.steps.includes(key)) continue;
+        if (key === 'quality' && !record.processing && !result.steps.includes(key)) continue;
+        const done = key === 'uploaded' || result.steps.includes(key) && result.state !== key;
+        stages.append(element('li',label,{'data-step':done ? 'complete' : result.state === key ? 'active' : 'waiting'}));
+      }
+      target.append(stages);
+    }
+    if (record.processing) {
+      target.append(element('p', {
+        queued:'Waiting for the analysis service.', claimed:'Sending the scan to the analysis service.',
+        quality:'Checking resolution, contrast and detail.', inference:'The configured model is analyzing this frame.',
+        report:'Saving the assessment.',
+      }[result.state],{class:'uw-processing',role:'status'}));
+      return;
+    }
+    const grade = {good:'Good',acceptable:'Acceptable',poor:'Poor'}[result.grade] || 'Not assessed';
+    target.append(element('p','Image quality · ' + grade,{class:'uw-quality','data-grade':result.grade || 'unknown'}));
+    if (result.image_checks_passed) {
+      target.append(element('p','Passed basic image checks for AI processing. A clinician assesses scan suitability.'));
+    }
+    if (result.state === 'quality_issue') {
+      for (const problem of result.issues) target.append(element('p',issueDescriptions[problem]));
+      target.append(element('p','Upload a clearer frame if available or ask your care team to review this image.'));
+    } else if (result.model_ran) {
+      target.append(element('p',result.state === 'low_confidence'
+        ? 'AI analysis completed with insufficient confidence. Manual review is required.'
+        : 'AI analysis completed. Your care team can review the experimental output alongside the image.'));
+    } else if (result.state === 'model_unavailable') {
+      target.append(element('p','AI analysis unavailable. The scan is available for doctor review.'));
+    }
   }
 
   function report(card, data, heading) {
     card.append(element('h3', heading), element('p',decisions[data.decision]));
     const m = data.measurements;
     if (m && typeof m === 'object') {
-      if (m.demo) card.append(element('p','Demonstration data — not for clinical use.',{class:'uw-demo-note'}));
+      if (m.demo) card.append(element('p','Scripted demonstration measurements. These values were not measured from the frame.',{class:'uw-demo-note'}));
       const rows = [
         ['Scan date', m.scan_date], ['Gestational age', m.gestational_age_weeks != null ? m.gestational_age_weeks + ' weeks' : null],
         ['BPD', m.bpd_mm != null ? m.bpd_mm + ' mm' : null], ['Head circumference', m.hc_mm != null ? m.hc_mm + ' mm' : null],
@@ -186,7 +278,7 @@
         ['Scan type', m.scan_type],
       ].filter(([,v]) => v != null && v !== '');
       if (rows.length) {
-        const table = element('table',{class:'uw-measurements'});
+        const table = element('table',null,{class:'uw-measurements'});
         for (const [k,v] of rows) {
           const tr = element('tr');
           tr.append(element('th',k), element('td',String(v)));
@@ -208,22 +300,22 @@
         context.scan_ga_weeks != null ? 'Scan at ' + context.scan_ga_weeks + ' weeks' : null,
         context.edd && 'Estimated due date ' + context.edd,
         context.lmp && 'Recorded LMP ' + context.lmp].filter(Boolean).join(' · ') || 'Pregnancy dates unavailable.'),
-      element('h3','Image assessment'),
+      element('h3','Analysis details'),
       element('p', states[analysis.state] || 'Assessment unavailable.'),
-      element('p', record.reasons?.join(' ') || ''),
-      element('p', analysis.state === 'quality_issue' ? 'Raster quality check flagged this image.' :
-        analysis.quality?.width ? 'Passed raster checks.' : 'Raster quality not assessed.'));
+      element('p', record.reasons?.join(' ') || ''));
     if (analysis.probabilities) {
       const research = element('details', null, {class:'uw-research'});
       research.append(element('summary','Experimental AI output'),
         element('p','Research archive scores. Verified clinical conclusions are recorded separately.'),
+        element('p','Top archive class: ' + analysis.label + ' · confidence ' +
+          (analysis.confidence * 100).toFixed(1) + '%'),
         element('p',Object.entries(analysis.probabilities).map(([key,score]) =>
           key + ' ' + (score*100).toFixed(1) + '%').join(' · ')),
         element('p','Model version ' + analysis.model_version));
       card.append(research);
     }
     if (record.note) card.append(element('h3','Private clinician notes'),element('p',record.note));
-    if (record.report || record.archived) return;
+    if (record.report || record.archived || record.processing) return;
     const change = (action, fields, success) => perform(() => request(base() + '/' + record.id + '/' + action, {
       method:'POST', body:JSON.stringify({revision:record.revision,...fields}),
       headers:{'content-type':'application/json','x-dai-ultrasound':'review'},
@@ -232,7 +324,7 @@
       card.append(button('Start review', () => change('start',{},'Scan marked under review.')));
     }
     if (!record.draft && analysis.state === 'model_unavailable' && record.image_available) {
-      card.append(button('Retry image assessment', () => change('retry',{},'Image assessment updated.')));
+      card.append(button('Retry image assessment', () => change('retry',{},'Image assessment queued.')));
     }
     if (record.draft) {
       report(card, record.draft, 'Draft review · visible to clinicians');
@@ -262,16 +354,64 @@
     card.append(form);
   }
 
-  function scanCard(record, archived = false) {
-    const card = element('article',null,{class:'uw-card'});
-    card.append(element('h2', 'Scan uploaded ' + new Date(record.created_at).toLocaleString()),
-      element('p',archived ? 'Archived hospital record' : messages[record.status],{class:'uw-state'}));
-    preview(card,record);
-    if (clinician) review(card, archived ? {...record, archived, note:record.review_note} : record);
-    if (record.report) report(card,record.report,'Released clinician report');
-    if (archived && record.decision) card.append(element('p','Recorded decision · ' + decisions[record.decision]));
-    if (!clinician && !record.report) card.append(element('p','Check back for the clinician’s report and next steps.'));
+  function status(record) {
+    if (record.report?.decision === 'replacement_requested') return 'Additional scan required';
+    return record.processing ? (record.assessment?.state === 'queued' ? 'Uploaded' : 'Processing') : messages[record.status];
+  }
+
+  function scanCard(record, archived = false, primary = false) {
+    const card = element('article',null,{class:'uw-card','data-scan-id':record.id});
+    const disclosure = element('details',null,{class:'uw-scan-disclosure'});
+    disclosure.open = primary;
+    const heading = element('summary',null,{class:'uw-card-heading'});
+    heading.append(element('h3','Scan · ' + new Date(record.created_at).toLocaleDateString()),
+      element('span',archived ? 'Archived hospital record' : status(record),{
+        class:'uw-state','data-state':record.processing ? 'processing' : record.status,
+      }));
+    const layout = element('div',null,{class:'uw-scan-layout'});
+    const media = element('div',null,{class:'uw-scan-media'});
+    const details = element('div',null,{class:'uw-scan-details'});
+    preview(media,record,primary);
+    renderAssessment(details,record);
+    if (clinician && !record.processing) review(details, archived ? {...record, archived, note:record.review_note} : record);
+    if (record.report) report(details,record.report,'Released clinician report');
+    if (archived && record.decision) details.append(element('p','Recorded decision · ' + decisions[record.decision]));
+    if (!clinician && !record.report) details.append(element('p',record.processing
+      ? 'Your scan has been saved. The assessment will update here.'
+      : 'Your scan is in your doctor’s review queue. Their feedback will appear here after release.'));
+    layout.append(media,details);
+    disclosure.append(heading,layout);
+    card.append(disclosure);
+    if (!archived && (record.processing || !clinician && !record.report)) watch(card,record);
     return card;
+  }
+
+  function watch(card, record, primary) {
+    const view = generation;
+    const endpoint = base() + '/' + record.id;
+    const state = JSON.stringify([record.assessment,record.status,record.report]);
+    async function refresh() {
+      if (view !== generation || !card.isConnected) return;
+      if (!document.hidden && !busy && (record.processing || card.querySelector("details").open)) {
+        try {
+          const fresh = await request(endpoint);
+          if (view !== generation || !card.isConnected) return;
+          if (state !== JSON.stringify([fresh.assessment,fresh.status,fresh.report])) {
+            const openImage = card.querySelector('.uw-image:not([hidden])');
+            if (openImage?.src) {
+              URL.revokeObjectURL(openImage.src);
+              previews.delete(openImage.src);
+            }
+            card.replaceWith(scanCard(fresh,false,card.querySelector('.uw-scan-disclosure').open));
+            return;
+          }
+        } catch {
+          // Manual refresh remains available if the session or connection is lost.
+        }
+      }
+      setTimeout(refresh,record.processing ? 900 : 7000);
+    }
+    setTimeout(refresh, record.processing ? 400 : 7000);
   }
 
   async function load() {
@@ -284,7 +424,7 @@
       notice('');
       if (clinician) {
         const chooser = select(options.patients, 'Choose a patient', patient);
-        chooser.addEventListener('change',()=>{patient=chooser.value;offset=0;load();});
+        chooser.addEventListener('change',()=>{patient=chooser.value;offset=0;latestUpload=null;load();});
         root.append(label('Patient',chooser));
         if (!chooser.value) {
           patient = '';
@@ -304,7 +444,9 @@
       if (clinician) root.append(uploadForm([]));
       root.append(refresh, element('h2','Scan history'));
       if (!data.items.length && !data.archived?.length) root.append(element('p','No scans are available yet.'));
-      for (const scan of data.items) root.append(scanCard(scan));
+      for (const [index,scan] of data.items.entries()) {
+        root.append(scanCard(scan,false,scan.id === latestUpload || index === 0));
+      }
       for (const scan of data.archived || []) root.append(scanCard(scan,true));
       if (offset) root.append(button('Previous scans',()=>{offset=Math.max(0,offset-25);load();}));
       if (data.has_more) root.append(button('More scans',()=>{offset+=25;load();}));

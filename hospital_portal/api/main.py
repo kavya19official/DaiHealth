@@ -19,6 +19,7 @@ from .security import ROLES, CLINICAL, digest, verify_password
 from .staff_scope import effective_staff, facility_staff
 from .clinical_monitor import monitor_loop, register_monitor
 from .ultrasound import Ultrasound, retention_loop
+from .ultrasound_processing import analysis_loop
 from .ultrasound_workspace import register_workspace as register_ultrasound_workspace
 
 LABEL = "Simulated on synthetic data"
@@ -77,13 +78,14 @@ def create_app(engine=None):
             seed_asha(engine)
         from .demo_video_seed import seed_video_demo
         seed_video_demo(engine)
-        monitor_task = (asyncio.create_task(monitor_loop(engine, demo))
+        monitor_task = (asyncio.create_task(monitor_loop(engine, demo, ultrasound.enabled))
                         if os.getenv("DAI_CLINICAL_MONITOR_ENABLED", "true").lower() == "true" else None)
         retention = asyncio.create_task(retention_loop(engine))
+        analysis = asyncio.create_task(analysis_loop(engine, ultrasound)) if ultrasound.enabled else None
         try:
             yield
         finally:
-            for task in (monitor_task, retention):
+            for task in (monitor_task, retention, analysis):
                 if task:
                     task.cancel()
                     with suppress(asyncio.CancelledError):

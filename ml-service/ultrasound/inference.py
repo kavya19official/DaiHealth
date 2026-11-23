@@ -1,4 +1,5 @@
 """Authenticated stateless inference on the existing DaiHealth ML service."""
+import asyncio
 import json
 import math
 import os
@@ -7,6 +8,7 @@ import secrets
 from threading import BoundedSemaphore
 
 from fastapi import Depends, HTTPException, Request
+from fastapi.responses import JSONResponse, StreamingResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 import numpy as np
 from PIL import Image
@@ -96,8 +98,9 @@ def register_inference(app, config=None, model_loader=load_model):
             raise HTTPException(401, "Internal credential required",
                                 headers={**CACHE, "WWW-Authenticate": "Bearer"})
 
-    def run(raw):
+    def run(raw, progress):
         nonlocal model
+        progress("quality")
         try:
             image = decode(raw)
         except (ValueError, OSError, SyntaxError, Image.DecompressionBombError,
@@ -112,6 +115,7 @@ def register_inference(app, config=None, model_loader=load_model):
             if model is None:
                 model = model_loader(Path(directory))
             predictor, model_id = model
+            progress("inference")
             return dict(**score_image(predictor, model_id, image), quality=stats)
         except (OSError, RuntimeError, ValueError, KeyError, TypeError, ImportError, EOFError,
                 AttributeError, OverflowError):
@@ -127,13 +131,40 @@ def register_inference(app, config=None, model_loader=load_model):
             if len(raw) + len(chunk) > MAX_BYTES:
                 raise HTTPException(413, "Image exceeds the byte limit", headers=CACHE)
             raw.extend(chunk)
-        def analyze_one():
-            # Keep the reservation in the worker even if its HTTP caller times out.
+        def analyze_one(progress):
             if not busy.acquire(blocking=False):
                 raise HTTPException(503, "Ultrasound inference is busy", headers=CACHE)
             try:
-                return run(bytes(raw))
+                return run(bytes(raw), progress)
             finally:
                 busy.release()
-        from fastapi.responses import JSONResponse
-        return JSONResponse(await run_in_threadpool(analyze_one), headers=CACHE)
+
+        if request.headers.get("accept") != "application/x-ndjson":
+            return JSONResponse(await run_in_threadpool(analyze_one, lambda _: None), headers=CACHE)
+
+        async def stream():
+            events = asyncio.Queue()
+            loop = asyncio.get_running_loop()
+
+            def progress(stage):
+                loop.call_soon_threadsafe(events.put_nowait, {"stage": stage})
+
+            async def work():
+                try:
+                    result = await run_in_threadpool(analyze_one, progress)
+                    events.put_nowait({"result": result})
+                except HTTPException as error:
+                    events.put_nowait({"error": error.status_code})
+                finally:
+                    events.put_nowait(None)
+
+            task = asyncio.create_task(work())
+            try:
+                while (event := await events.get()) is not None:
+                    yield json.dumps(event, allow_nan=False) + "\n"
+                await task
+            finally:
+                if not task.done():
+                    task.cancel()
+
+        return StreamingResponse(stream(), media_type="application/x-ndjson", headers=CACHE)

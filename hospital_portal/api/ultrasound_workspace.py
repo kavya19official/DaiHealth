@@ -15,6 +15,7 @@ from starlette.concurrency import run_in_threadpool
 from starlette.requests import ClientDisconnect
 
 from . import schema as s
+from .ultrasound_processing import ACTIVE, assessment, queued
 from .ultrasound import CACHE, FORMATS, MAX_BYTES, REASONS, aware, encode, utc
 
 scans = s.ultrasound_workspace_scan
@@ -62,15 +63,18 @@ def audit(conn, grant, event, scan_id, **details):
 
 def safe_record(row, role):
     released = bool(row["released_at"])
+    analysis = row["analysis"] or {}
+    processing = analysis.get("state") in ACTIVE
     record = dict(
         id=row["id"], created_at=aware(row["created_at"]), doctor_id=row["doctor_account_id"],
         image_available=row["image_available"] and aware(row["image_expires_at"]) > utc(),
         status="reviewed" if released else "under_review" if row["started_at"] else "pending",
         report=None,
+        assessment=assessment(analysis),
+        processing=processing,
         demo_image=bool(((row["analysis"] or {}).get("measurements") or {}).get("demo")),
     )
     if released:
-        analysis = row["analysis"] or {}
         record["report"] = dict(
             findings=row["findings"], instructions=row["instructions"], decision=row["decision"],
             released_at=aware(row["released_at"]),
@@ -78,8 +82,10 @@ def safe_record(row, role):
         )
     if role == "doctor":
         record.update(
-            analysis=row["analysis"], pregnancy_context=row["pregnancy_context"], revision=row["revision"],
-            reasons=[REASONS[code] for code in row["analysis"]["reasons"] or ["research_prediction"]],
+            analysis={k: v for k, v in analysis.items() if k != "lease"},
+            pregnancy_context=row["pregnancy_context"], revision=row["revision"],
+            reasons=[] if processing else [REASONS[code] for code in
+                (analysis.get("reasons") or (["research_prediction"] if analysis.get("probabilities") else []))],
             draft=None if not row["reviewed_at"] else dict(
                 findings=row["findings"], instructions=row["instructions"], decision=row["decision"],
                 reviewed_at=aware(row["reviewed_at"]),
@@ -159,6 +165,13 @@ def register_workspace(app, engine, service, key, demo=False):
         return {"items": [safe_record(row, grant.role) for row in rows[:25]], "archived": legacy,
                 "has_more": len(rows) > 25 or bool(legacy and len(history) > 25)}
 
+    @app.get("/internal/ultrasound-workspace/scans/{scan_id}", include_in_schema=False)
+    def detail(scan_id: UUID, request: Request, response: Response):
+        grant, _ = authorize(request)
+        response.headers.update(CACHE)
+        with engine.connect() as conn:
+            return safe_record(row_for(conn, grant, str(scan_id), *display), grant.role)
+
     async def body(request, maximum, digest):
         data = bytearray()
         try:
@@ -202,7 +215,6 @@ def register_workspace(app, engine, service, key, demo=False):
                     raise HTTPException(409, "An older copy of this frame expired. Submit a new capture.")
                 response.status_code = 200
                 return {"id": duplicate.id, "duplicate": True}
-            scores = await service.analyze(png)
             scan_id = str(uuid4())
             encrypted = await run_in_threadpool(service.encrypt, scan_id, png)
 
@@ -212,7 +224,7 @@ def register_workspace(app, engine, service, key, demo=False):
                         id=scan_id, patient_account_id=grant.patient, doctor_account_id=grant.doctor,
                         facility_ref=grant.facility, episode=grant.episode, image_digest=image_digest,
                         image_expires_at=utc()+timedelta(days=service.retention), image_ciphertext=encrypted,
-                        analysis=scores.model_dump(exclude_none=True), pregnancy_context=grant.context, revision=1,
+                        analysis=queued(), pregnancy_context=grant.context, revision=1,
                     ))
                     audit(conn, grant, "workspace_upload", scan_id, sharing_confirmed=True,
                           workspace_doctor_id=grant.doctor, workspace_facility_ref=grant.facility)
@@ -261,29 +273,13 @@ def register_workspace(app, engine, service, key, demo=False):
         except ValidationError:
             raise HTTPException(422, "Provide the current revision and all required review fields") from None
 
-        def read():
-            with engine.begin() as conn:
-                return row_for(conn, grant, scan_id, scans.c.analysis, scans.c.image_ciphertext,
-                               scans.c.image_expires_at, scans.c.revision, scans.c.reviewed_at)
-        if action == "retry":
-            if not service.inflight.acquire(blocking=False):
-                raise HTTPException(503, "Ultrasound intake is busy. Try again shortly.")
-            try:
-                row = await run_in_threadpool(read)
-                if row["reviewed_at"] or row["analysis"]["state"] != "model_unavailable" or row["revision"] != form.revision:
-                    raise HTTPException(409, "Refresh this scan before retrying its analysis")
-                if not row["image_ciphertext"] or aware(row["image_expires_at"]) <= utc():
-                    raise HTTPException(410, "This image has reached its retention limit")
-                png = await run_in_threadpool(service.decrypt, scan_id, row["image_ciphertext"])
-                result = await service.analyze(png)
-            finally:
-                service.inflight.release()
-
         def save():
             with engine.begin() as conn:
                 row = row_for(conn, grant, scan_id, *metadata)
                 if row["released_at"] or row["revision"] != form.revision:
                     raise HTTPException(409, "This scan changed. Refresh its history.")
+                if row["analysis"].get("state") in ACTIVE:
+                    raise HTTPException(409, "Wait for the current analysis to finish")
                 now = utc()
                 values = {"revision": form.revision+1}
                 if action == "start":
@@ -301,7 +297,9 @@ def register_workspace(app, engine, service, key, demo=False):
                 else:
                     if aware(row["image_expires_at"]) <= now:
                         raise HTTPException(410, "This image has reached its retention limit")
-                    values["analysis"] = result.model_dump(exclude_none=True)
+                    if row["reviewed_at"] or row["analysis"]["state"] != "model_unavailable":
+                        raise HTTPException(409, "Only unavailable analysis can be retried before review")
+                    values["analysis"] = queued()
                 changed = conn.execute(update(scans).where(*scope(grant), scans.c.id == scan_id,
                     scans.c.revision == form.revision, scans.c.released_at.is_(None)).values(**values)).rowcount
                 if not changed:

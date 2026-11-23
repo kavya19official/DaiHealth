@@ -1,0 +1,105 @@
+"""Durable, single-frame analysis using the existing scan record and ML service."""
+import asyncio
+from datetime import timedelta
+import logging
+from uuid import uuid4
+
+from sqlalchemy import and_, or_, select, update
+from starlette.concurrency import run_in_threadpool
+
+from . import schema as s
+from .ultrasound import QUALITY_REASONS, aware, unavailable, utc
+
+scans = s.ultrasound_workspace_scan
+ACTIVE = ("queued", "claimed", "quality", "inference", "report")
+PREDICTIONS = {"prediction", "priority_review", "low_confidence"}
+
+
+def queued():
+    return {"state": "queued", "steps": [], "reasons": []}
+
+
+def assessment(analysis):
+    """Public projection. Archive classes and probabilities stay in the clinician payload."""
+    state = analysis.get("state")
+    quality = analysis.get("quality") or {}
+    demo = bool((analysis.get("measurements") or {}).get("demo"))
+    problems = [code for code in analysis.get("reasons", []) if code in QUALITY_REASONS]
+    if state == "quality_issue" and not demo:
+        grade = "poor"
+    elif not demo and quality.get("width") and quality.get("height"):
+        strong = (min(quality["width"], quality["height"]) >= 144 and quality.get("std", 0) >= 12
+                  and quality.get("dynamic_range", 0) >= 42 and quality.get("focus", 0) >= 3)
+        grade = "good" if strong else "acceptable"
+    else:
+        grade = None
+    return dict(state=state, grade=grade, issues=problems,
+                image_checks_passed=True if grade in {"good", "acceptable"} else
+                False if grade == "poor" else None,
+                steps=[step for step in analysis.get("steps", []) if step in {"quality", "inference", "report"}],
+                model_ran=state in PREDICTIONS, requires_doctor_review=True)
+
+
+def claim(engine):
+    state = scans.c.analysis["state"].as_string()
+    eligible = or_(state == "queued", and_(state.in_(ACTIVE[1:]),
+                                          scans.c.updated_at < utc() - timedelta(minutes=2)))
+    with engine.begin() as conn:
+        row = conn.execute(select(scans.c.id, scans.c.analysis, scans.c.image_expires_at,
+                                  scans.c.image_ciphertext).where(eligible)
+                           .order_by(scans.c.created_at, scans.c.id).limit(1)).mappings().first()
+        if not row:
+            return None
+        lease = uuid4().hex
+        acquired = conn.execute(update(scans).where(scans.c.id == row["id"], eligible).values(
+            analysis={**queued(), "state": "claimed", "lease": lease}, updated_at=utc())).rowcount
+        return (row, lease) if acquired else None
+
+
+async def process_next(engine, service):
+    item = await run_in_threadpool(claim, engine)
+    if not item:
+        return False
+    row, lease = item
+    steps = []
+
+    def persist(result, final=False):
+        if not final:
+            result["lease"] = lease
+        with engine.begin() as conn:
+            changed = conn.execute(update(scans).where(scans.c.id == row["id"],
+                scans.c.analysis["lease"].as_string() == lease)
+                .values(analysis={**result, "steps": list(steps)}, updated_at=utc())).rowcount
+            if changed and final:
+                conn.execute(s.audit_log.insert().values(
+                    action="workspace_analysis_finished", entity_type="ultrasound_workspace_scan",
+                    entity_id=row["id"], details={"state": result["state"]},
+                ))
+
+    async def progress(stage):
+        if stage not in steps:
+            steps.append(stage)
+            await run_in_threadpool(persist, {"state": stage, "reasons": []})
+
+    if not row["image_ciphertext"] or aware(row["image_expires_at"]) <= utc():
+        result = unavailable("inference_unavailable")
+    else:
+        try:
+            image = await run_in_threadpool(service.decrypt, row["id"], row["image_ciphertext"])
+            result = await service.analyze(image, progress)
+        except Exception:
+            logging.getLogger(__name__).exception("Ultrasound analysis job failed")
+            result = unavailable("inference_unavailable")
+    await progress("report")
+    await run_in_threadpool(persist, result.model_dump(exclude_none=True), True)
+    return True
+
+
+async def analysis_loop(engine, service):
+    while True:
+        try:
+            if await process_next(engine, service):
+                continue
+        except Exception:
+            logging.getLogger(__name__).exception("Ultrasound analysis queue unavailable")
+        await asyncio.sleep(0.5)

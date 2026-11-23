@@ -4,11 +4,26 @@ The patient workspace can share a single ultrasound frame with a verified clinic
 
 ## Open the workspaces
 
-- **Patient dashboard → Ultrasound scans.** Choose an eligible doctor, confirm sharing, and upload a PNG, JPEG or WebP up to 12 MiB. History shows **Pending review**, **Under review**, or **Reviewed**. Use **Refresh scans** to check for a released report.
+- **Patient dashboard → Ultrasound scans.** Choose an eligible doctor, confirm sharing, and upload a PNG, JPEG or WebP up to 12 MiB. History shows **Pending review**, **Under review**, or **Reviewed**. Open scan history for the encrypted image preview. Pending scans refresh automatically while the workspace is visible.
 - **Doctor dashboard → Ultrasound Review.** Select an authorized patient. Review their scan and pregnancy context, save clinical findings and next steps as a draft, then use **Release report to patient**. The clinician can record a private note separately. The doctor can also upload with recorded confirmation that the patient agreed to share the frame.
 - The deployed hospital administration dashboard has no scan workflow. Existing hospital records are retained. In the linked synthetic cohort, the verified assigned clinician can view their prior portal records as archived history. Old notes and decisions stay in their original records and are never auto-released.
 
 When the live private ML service is available, the workflow assesses image quality. The supplied Kaggle archive failed the training audit. With no approved model directory, scans remain available for clinician review and the UI shows **Model unavailable**. An approved research checkpoint can produce experimental archive-label outputs for the clinician. Those outputs do not set the review decision or release a report. [Research audit and model release](../ml-service/ultrasound/README.md)
+
+## Analysis and review states
+
+The upload endpoint authenticates, validates, re-encodes and encrypts the image before returning the scan ID. The existing scan row stores the pending job, processing stages and assessment. A background worker uses a database lease so duplicate uploads share the same result and interrupted jobs can resume. The browser polls the existing patient's or doctor's scoped scan detail. Quality and inference stages are emitted by the private ML service when those steps start. An older private service returning plain JSON still works and does not report intermediate stages.
+
+| Stage or state | Meaning |
+| --- | --- |
+| Uploaded / Processing | The frame is stored. The worker may be waiting for the ML service, checking the image, running inference or saving the assessment. |
+| Awaiting doctor review | The assessment is ready. The doctor can see the stored image, pregnancy context and any experimental results. |
+| Under review | The doctor has started work. A saved draft remains in the clinician workspace until release. |
+| Reviewed by doctor / Additional scan required | The patient can see the released findings and follow-up instructions. |
+
+The public assessment returns only image-check grade, safe quality reasons, processing milestones, and whether AI actually ran. Good and Acceptable mean the raster passed the resolution, contrast and detail checks. Poor means at least one check failed and classification was skipped. An unavailable service or unaudited model can leave confidence and findings unavailable. The existing EfficientNet-B0 model's archive categories and scores are experimental and available to clinicians if an approved checkpoint is installed. They do not set the clinical decision. The supplied ZIP has no approved checkpoint, and the bundled data audit is blocked by conflict, leakage and missing group provenance.
+
+Use the real fetal ultrasound frames under `frontend/assets/ultrasound-demo/` with the existing linked synthetic demo accounts. The image credits are in that directory. The browser acceptance test uploads `brain_1013.png` through the live backend, checks the quality and no-model branch, and verifies release to the same patient. Scripted measurements from the separate seed are identified as demo values and are never presented as inference output.
 
 ## Start locally
 
@@ -60,3 +75,12 @@ hospital_portal/.venv/bin/python -m pytest -q hospital_portal/tests/test_ultraso
 ```
 
 The browser test exercises a live synthetic deployment through the regular patient/doctor login. Install Playwright with Chromium. Select linked synthetic accounts with a confirmed appointment and an active pregnancy. Set `DAI_TEST_PATIENT`, `DAI_TEST_DOCTOR`, and optional `DAI_TEST_PASSWORD` and `DAI_TEST_URL`, then run `python hospital_portal/tests/ultrasound_browser.py`. The test submits a synthetic frame and releases a synthetic test report.
+
+## Refinement files
+
+| Area | Files |
+| --- | --- |
+| Patient and doctor views | `frontend/dashboard.html`, `frontend/doctor.html`, `frontend/js/ultrasound-workspace.js`, `frontend/ultrasound-workspace.css` |
+| Scoped API and persisted processing | `backend/ultrasoundWorkspace.js`, `hospital_portal/api/main.py`, `hospital_portal/api/ultrasound_workspace.py`, `hospital_portal/api/ultrasound_processing.py`, `hospital_portal/api/ultrasound.py` |
+| Inference events | `ml-service/ultrasound/inference.py` |
+| Verification | `hospital_portal/tests/test_ultrasound_flow.py`, `hospital_portal/tests/ultrasound_browser.py`, `ml-service/tests/test_ultrasound_research.py` |

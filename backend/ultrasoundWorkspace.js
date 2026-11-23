@@ -151,6 +151,10 @@ module.exports = function register(app, {pool, authenticateToken, authorizeRole,
     await forward(res,{...grant,...await context(grant.patient),doctor:selected, facilities,facility:facilities[0]},
       '', 'POST',req.body,req.get('content-type'));
   }));
+  app.get(patientPath+'/:scanId', ...mother, guard(async (req,res) => {
+    if (!SCAN_ID.test(req.params.scanId)) return res.status(404).json({error:'Scan not available.'});
+    await forward(res, patientGrant(req), '/'+req.params.scanId);
+  }));
   app.get(patientPath+'/:scanId/image', ...mother,guard(async (req,res) => {
     if (!SCAN_ID.test(req.params.scanId)) return res.status(404).json({error:'Scan not available.'});
     await forward(res, patientGrant(req), '/'+req.params.scanId+'/image');
@@ -173,6 +177,11 @@ module.exports = function register(app, {pool, authenticateToken, authorizeRole,
       return res.status(422).json({error:'Confirm the patient agreed to share this image.'});
     }
     await forward(res,{...grant,...await context(grant.patient)},'', 'POST',req.body,req.get('content-type'));
+  }));
+  app.get(doctorPath+'/:scanId', ...doctor, guard(async (req,res) => {
+    if (!SCAN_ID.test(req.params.scanId)) return res.status(404).json({error:'Scan not available.'});
+    const grant = await grantDoctor(req,res);
+    if (grant) await forward(res,grant,'/'+req.params.scanId);
   }));
   app.get(doctorPath+'/:scanId/image',...doctor,guard(async (req,res) => {
     if (!SCAN_ID.test(req.params.scanId)) return res.status(404).json({error:'Scan not available.'});

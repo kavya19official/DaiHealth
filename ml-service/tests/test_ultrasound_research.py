@@ -1,4 +1,5 @@
 import csv
+import json
 from io import BytesIO
 from zipfile import ZipFile
 
@@ -125,6 +126,14 @@ def test_internal_route_authentication_quality_and_score_states(tmp_path):
         assert bad["state"] == "quality_issue" and "probabilities" not in bad and not calls
         result = client.post(route, headers=headers, content=png(0)).json()
         assert result["state"] == "low_confidence" and result["confidence"] == .75
+        stream_headers = {**headers, "Accept": "application/x-ndjson"}
+        success = client.post(route, headers=stream_headers, content=png(0))
+        events = [json.loads(line) for line in success.text.splitlines()]
+        assert events == [{"stage":"quality"}, {"stage":"inference"}, {"result":result}]
+        invalid = client.post(route, headers=stream_headers, content=png(0, flat=True))
+        events = [json.loads(line) for line in invalid.text.splitlines()]
+        assert events == [{"stage":"quality"}, {"result":bad}]
+
         scores[:] = [.03, .02, .95]
         assert client.post(route, headers=headers, content=png(0)).json()["state"] == "priority_review"
         scores[:] = [.93, .04, .03]

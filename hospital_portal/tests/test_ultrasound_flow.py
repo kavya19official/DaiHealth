@@ -1,3 +1,4 @@
+import asyncio
 from datetime import timedelta
 from io import BytesIO
 import hashlib
@@ -12,6 +13,7 @@ from hospital_portal.api import schema as s
 from hospital_portal.api.db import database, initialize
 from hospital_portal.api.ultrasound import Ultrasound, Scores, purge_expired, utc
 from hospital_portal.api.ultrasound_workspace import register_workspace
+from hospital_portal.api.ultrasound_processing import process_next
 
 
 def test_workspace_release_privacy_concurrency_and_retention(tmp_path):
@@ -23,7 +25,9 @@ def test_workspace_release_privacy_concurrency_and_retention(tmp_path):
         "DAI_ULTRASOUND_SERVICE_TOKEN":"fixture-inference-key-for-tests-only",
     })
 
-    async def analyze(_):
+    async def analyze(_, progress):
+        await progress("quality")
+        await progress("inference")
         return Scores(state="prediction", label="normal", probabilities={"normal":.9,"benign":.05,"malignant":.05},
                       confidence=.9, model_version="a"*64, reasons=[], quality={"width":128})
 
@@ -59,6 +63,14 @@ def test_workspace_release_privacy_concurrency_and_retention(tmp_path):
         assert call(client,create,method="POST",value=png.getvalue(),media="image/png").json()["duplicate"]
         pending = call(client,mother).json()["items"][0]
         assert pending["status"] == "pending" and pending["report"] is None
+        assert pending["processing"] and pending["assessment"]["state"] == "queued"
+        assert call(client,doctor,route+"/start",method="POST",value={"revision":1}).status_code == 409
+        assert call(client,dict(role="mother",actor=102,patient=102),route).status_code == 404
+        assert asyncio.run(process_next(engine,service))
+        done = call(client,mother,route).json()
+        assert not done["processing"] and done["assessment"]["model_ran"]
+        assert done["assessment"]["steps"] == ["quality", "inference", "report"]
+        assert not ({"confidence","probabilities","label"} & done["assessment"].keys())
         assert not ({"analysis","note","draft","pregnancy_context","revision"} & pending.keys())
         assert call(client,{**doctor,"facilities":["other"]}).json()["items"] == []
         assert call(client,dict(role="doctor",actor=99,doctor=99,patient=101,facilities=["fixture-facility"]),
