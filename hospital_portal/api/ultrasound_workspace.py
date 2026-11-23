@@ -67,11 +67,14 @@ def safe_record(row, role):
         image_available=row["image_available"] and aware(row["image_expires_at"]) > utc(),
         status="reviewed" if released else "under_review" if row["started_at"] else "pending",
         report=None,
+        demo_image=bool(((row["analysis"] or {}).get("measurements") or {}).get("demo")),
     )
     if released:
+        analysis = row["analysis"] or {}
         record["report"] = dict(
             findings=row["findings"], instructions=row["instructions"], decision=row["decision"],
             released_at=aware(row["released_at"]),
+            measurements=analysis.get("measurements"),
         )
     if role == "doctor":
         record.update(

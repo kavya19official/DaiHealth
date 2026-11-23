@@ -89,6 +89,29 @@ All three use the password `Dai-Synthetic-2026!`. The sign-in page has a **Patie
 The hospital login shows its one-time code on screen in this synthetic demo, so no SMS or API key is needed.
 The Hospital / Admin portal opens at `/hospital-admin`.
 
+### Ultrasound scan demo (demonstration data only)
+
+The patient dashboard (**Ultrasound scans** in the sidebar) and the doctor dashboard
+(**/doctor.html → patient ultrasound workspace**) share the same encrypted scan records.
+Four seeded demonstration scans exist for the demo mother, reviewed by the demo doctor:
+two released reports (20-week anatomy and 32-week growth scans with BPD/HC/AC/FL,
+estimated fetal weight, fetal heart rate, placental position and amniotic fluid
+assessment) plus one under review and one pending scan for the live review flow.
+Every report is labelled **Demonstration data — not for clinical use**; no AI model
+is deployed, so scans show an explicit "no approved model" analysis state rather than
+simulated predictions.
+
+To reseed after a local database reset:
+
+```sh
+set -a && . ./.local/ultrasound-demo.env && set +a
+hospital_portal/.venv/bin/python scripts/seed-ultrasound-demo.py
+```
+
+Note: the demo mother is postpartum, so new patient uploads are disabled by design
+(upload requires an active pregnancy). The doctor can still review and release the
+pending seeded scan, which then appears as a report on the mother's dashboard.
+
 ---
 
 ## How it fits together

@@ -30,7 +30,15 @@ def main():
         mother_id = patient.request.get(origin+"/api/auth/me").json()["user"]["id"]
         page = patient.new_page()
         page.goto(origin+"/dashboard.html",wait_until="domcontentloaded")
+        missing_route = "**/api/patient/ultrasound/options"
+        page.route(missing_route, lambda route: route.fulfill(
+            status=404, content_type="text/html", body="Cannot GET /api/patient/ultrasound/options",
+        ))
         page.get_by_role("button", name="Ultrasound scans", exact=True).click()
+        expect(page.locator("#pageTitle")).to_have_text("Ultrasound scans")
+        expect(page.get_by_role("alert").filter(has_text="does not have the ultrasound route")).to_be_visible()
+        page.unroute(missing_route)
+        page.get_by_role("button", name="Try again", exact=True).click()
         form = page.locator("#panel-ultrasound form")
         form.get_by_label("Ultrasound image").set_input_files(frame())
         doctor_select = form.get_by_role("combobox")

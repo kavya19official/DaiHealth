@@ -47,14 +47,27 @@
   }
 
   async function request(path, options = {}, image = false) {
-    const response = await fetch(window.DaiAPI.API_BASE + path, {
-      credentials:'include', cache:'no-store', signal:AbortSignal.timeout(40000), ...options,
-    });
+    let response;
+    try {
+      response = await fetch(window.DaiAPI.API_BASE + path, {
+        credentials:'include', cache:'no-store', signal:AbortSignal.timeout(40000), ...options,
+      });
+    } catch {
+      throw new Error('Could not reach the ultrasound service. Check your connection and try again.');
+    }
     if (image && response.ok && response.headers.get('content-type')?.startsWith('image/png')) return response.blob();
     const value = await response.json().catch(() => null);
     if (!response.ok || !value) {
-      throw new Error(value?.error || (response.status === 401 ? 'Sign in to view ultrasound scans.' :
-        'Could not load the ultrasound workspace. Try again.'));
+      if (typeof value?.error === 'string' && value.error) throw new Error(value.error);
+      if (response.status === 401) throw new Error('Sign in to view ultrasound scans.');
+      if (response.status === 404 && !image) {
+        const local = ['localhost', '127.0.0.1'].includes(location.hostname);
+        throw new Error(local
+          ? 'The running DaiHealth server does not have the ultrasound route. Stop it, restart the updated checkout with npm start, and reopen port 3001.'
+          : 'The ultrasound route is unavailable on this deployment.');
+      }
+      throw new Error(response.ok ? 'The server returned an unexpected ultrasound response.' :
+        'The ultrasound request failed (HTTP ' + response.status + '). Try again.');
     }
     return value;
   }
@@ -152,12 +165,37 @@
         if (generation === active) notice(error.message, true);
       } finally { open.disabled = false; }
     });
+    if (record.demo_image) card.append(element('p',
+      'PUBLIC DEMONSTRATION IMAGE — NOT THIS PATIENT\'S ACTUAL SCAN — NOT FOR CLINICAL USE.',
+      {class:'uw-demo-note'}));
     card.append(open, image);
   }
 
   function report(card, data, heading) {
-    card.append(element('h3', heading), element('p',decisions[data.decision]),
-      element('h4','Clinical findings'), element('p',data.findings || '—'),
+    card.append(element('h3', heading), element('p',decisions[data.decision]));
+    const m = data.measurements;
+    if (m && typeof m === 'object') {
+      if (m.demo) card.append(element('p','Demonstration data — not for clinical use.',{class:'uw-demo-note'}));
+      const rows = [
+        ['Scan date', m.scan_date], ['Gestational age', m.gestational_age_weeks != null ? m.gestational_age_weeks + ' weeks' : null],
+        ['BPD', m.bpd_mm != null ? m.bpd_mm + ' mm' : null], ['Head circumference', m.hc_mm != null ? m.hc_mm + ' mm' : null],
+        ['Abdominal circumference', m.ac_mm != null ? m.ac_mm + ' mm' : null], ['Femur length', m.fl_mm != null ? m.fl_mm + ' mm' : null],
+        ['Estimated fetal weight', m.estimated_fetal_weight_g != null ? m.estimated_fetal_weight_g + ' g' : null],
+        ['Fetal heart rate', m.fetal_heart_rate_bpm != null ? m.fetal_heart_rate_bpm + ' bpm' : null],
+        ['Placenta', m.placenta], ['Amniotic fluid', m.amniotic_fluid], ['Presentation', m.presentation],
+        ['Scan type', m.scan_type],
+      ].filter(([,v]) => v != null && v !== '');
+      if (rows.length) {
+        const table = element('table',{class:'uw-measurements'});
+        for (const [k,v] of rows) {
+          const tr = element('tr');
+          tr.append(element('th',k), element('td',String(v)));
+          table.append(tr);
+        }
+        card.append(element('h4','Fetal measurements'), table);
+      }
+    }
+    card.append(element('h4','Clinical findings'), element('p',data.findings || '—'),
       element('h4','Next steps'), element('p',data.instructions || '—'));
     if (data.released_at) card.append(element('p','Released ' + new Date(data.released_at).toLocaleString()));
   }
@@ -166,7 +204,9 @@
     const analysis = record.analysis || {};
     const context = record.pregnancy_context || {};
     card.append(element('h3','Pregnancy context'),
-      element('p', [context.stage, context.edd && 'Estimated due date ' + context.edd,
+      element('p', [context.stage, context.gestation_weeks != null ? context.gestation_weeks + ' weeks gestation' : null,
+        context.scan_ga_weeks != null ? 'Scan at ' + context.scan_ga_weeks + ' weeks' : null,
+        context.edd && 'Estimated due date ' + context.edd,
         context.lmp && 'Recorded LMP ' + context.lmp].filter(Boolean).join(' · ') || 'Pregnancy dates unavailable.'),
       element('h3','Image assessment'),
       element('p', states[analysis.state] || 'Assessment unavailable.'),

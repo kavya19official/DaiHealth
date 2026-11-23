@@ -53,3 +53,8 @@
 .uw-image { max-width: 100%; max-height: 65vh; object-fit: contain; object-position: left; }
 .uw-state { color: #185a54; font-weight: 650; }
 .uw-research { padding: .75rem; background: #f2f6f4; }
+
+.uw-measurements{width:100%;border-collapse:collapse;font-size:.9rem}
+.uw-measurements th{text-align:left;padding:4px 10px 4px 0;color:var(--muted,#5b6472);font-weight:600;white-space:nowrap}
+.uw-measurements td{padding:4px 0}
+.uw-demo-note{font-size:.8rem;color:#8a5a00;background:#fff7e0;border:1px solid #f0dfa8;border-radius:8px;padding:6px 10px;display:inline-block}

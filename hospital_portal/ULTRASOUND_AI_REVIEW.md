@@ -30,6 +30,12 @@ npm start
 
 Open `http://localhost:3001` and use linked synthetic mother and doctor accounts with a confirmed or completed appointment and an active pregnancy with recorded dates. The local seed reuses the synthetic hospital cohort. Keep any live identifying or clinical data out of the synthetic demo.
 
+## Troubleshoot a missing workspace
+
+Apply the ultrasound workflow update to the same checkout you launch. Stop the running app with `npm run stop`, source the existing `.local/ultrasound.env` in that checkout, then run `npm start`. Open the address printed by the launcher, normally `http://localhost:3001`. Restarting Safari alone does not reload the backend routes.
+
+An unauthenticated `curl -i http://localhost:3001/api/patient/ultrasound/options` should return **401 JSON**. An HTML **404** means that process lacks the ultrasound route. A signed-in **503** with the disabled message means ultrasound is not enabled in the running process. Postpartum accounts can view scan history and released reports. The upload form requires an active pregnancy.
+
 ## Access, storage and lifecycle
 
 The Node gateway resolves identity from the existing signed session and checks live appointment, clinician credential, doctor-revocation, and facility-revocation records. A submission is scoped to the confirmed doctor and the most recent qualifying facility relationship. Patient ownership is resolved server-side. Gateway requests to the private hospital service carry a separate, short-lived signed grant bound to the requested method, path, body digest, identity and scope.
