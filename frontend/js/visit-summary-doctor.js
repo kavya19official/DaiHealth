@@ -39,8 +39,8 @@
       '<label style="display:block;font-size:.85rem;margin-top:.5rem">What the patient should do next (one per line, up to 8)<textarea name="steps" rows="3" style="width:100%">' + esc((base.next_steps || []).join('\n')) + '</textarea></label>' +
       '<div style="display:flex;gap:.5rem;margin-top:.5rem"><label style="flex:2;font-size:.85rem">Follow-up<input name="ftext" maxlength="300" value="' + esc((base.follow_up || {}).text || '') + '" style="width:100%"></label>' +
       '<label style="flex:1;font-size:.85rem">By date<input type="date" name="fdate" value="' + esc((base.follow_up || {}).due_date || '') + '" style="width:100%"></label></div>' +
-      '<label style="display:block;font-size:.85rem;margin-top:.5rem">Tests still to do (one per line: Test name | note)<textarea name="tests" rows="3" style="width:100%">' +
-      esc((base.pending_tests || []).map(function (t) { return t.name + (t.note ? ' | ' + t.note : ''); }).join('\n')) + '</textarea></label>' +
+      '<label style="display:block;font-size:.85rem;margin-top:.5rem">Tests still to do (one per line: Test name | optional note | optional due date YYYY-MM-DD)<textarea name="tests" rows="3" style="width:100%">' +
+      esc((base.pending_tests || []).map(function (t) { return t.name + (t.note || t.due_date ? ' | ' + (t.note || '') : '') + (t.due_date ? ' | ' + t.due_date : ''); }).join('\n')) + '</textarea></label>' +
       '<div id="vsHints" aria-live="polite" style="font-size:.82rem;margin:.6rem 0"></div>' +
       '<div style="display:flex;gap:.5rem;justify-content:flex-end;flex-wrap:wrap"><button type="button" data-vs-cancel class="btn btn--ghost btn--sm">Close</button>' +
       '<button type="button" data-vs-save class="btn btn--ghost btn--sm">Save draft</button>' +
@@ -52,7 +52,7 @@
       return {
         summary_text: f.summary.value, next_steps: lines(f.steps.value),
         follow_up: { text: f.ftext.value, due_date: f.fdate.value || null },
-        pending_tests: lines(f.tests.value).map(function (l) { var p = l.split('|'); return { name: (p[0] || '').trim(), note: (p[1] || '').trim() }; })
+        pending_tests: lines(f.tests.value).map(function (l) { var p = l.split('|'); return { name: (p[0] || '').trim(), note: (p[1] || '').trim(), due_date: (p[2] || '').trim() || null }; })
       };
     }
     function hints() {
@@ -75,7 +75,7 @@
       if (!confirm('The patient will see exactly what is on screen. Approve it?')) return;
       if (!(await save())) return;
       var a = await api.apiRequest('/doctor/visit-summaries/' + encodeURIComponent(id) + '/approve', { method: 'POST', body: {} });
-      if (a) { api.toast(a.message); dlg.close(); load(); }
+      if (a) { api.toast(a.message); dlg.close(); load(); window.DoctorFollowupAgent?.load(); }
     };
     dlg.addEventListener('close', function () { dlg.remove(); });
     dlg.showModal();

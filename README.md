@@ -235,6 +235,7 @@ psql "$DATABASE_URL" -f backend/db/facility_freshness.sql
 psql "$DATABASE_URL" -f backend/db/patient_ml.sql
 psql "$DATABASE_URL" -f backend/db/patient_access_controls.sql
 psql "$DATABASE_URL" -f backend/db/follow_through.sql
+psql "$DATABASE_URL" -f backend/db/visit_summaries.sql
 psql "$DATABASE_URL" -f backend/db/delhi_directory.sql   # optional: Delhi facility directory (unverified reference data)
 ```
 

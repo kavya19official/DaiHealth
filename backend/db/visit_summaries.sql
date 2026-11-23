@@ -21,3 +21,11 @@ CREATE TABLE IF NOT EXISTS visit_summaries (
 CREATE UNIQUE INDEX IF NOT EXISTS visit_summaries_one_draft ON visit_summaries(appointment_id) WHERE status = 'draft';
 CREATE UNIQUE INDEX IF NOT EXISTS visit_summaries_one_approved ON visit_summaries(appointment_id) WHERE status = 'approved';
 CREATE INDEX IF NOT EXISTS visit_summaries_mother ON visit_summaries(mother_id, status);
+
+CREATE TABLE IF NOT EXISTS doctor_followup_reviews (
+  summary_id INTEGER NOT NULL REFERENCES visit_summaries(id) ON DELETE CASCADE,
+  item_key VARCHAR(12) NOT NULL CHECK (item_key ~ '^(test:[0-7]|step:[0-7]|visit)$'),
+  reviewed_by INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  reviewed_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  PRIMARY KEY (summary_id, item_key)
+);

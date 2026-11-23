@@ -108,11 +108,11 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 <link rel="stylesheet" href="doctor-report-review.css?v=1">
 <link rel="stylesheet" href="clinical-dashboard.css?v=1">
 <script src="js/clinical-dashboard.js?v=history-3"></script>
-<link rel="stylesheet" href="css/smart-referral-handoff.css?v=modal-fix-1"><link rel="stylesheet" href="css/missed-care-outreach.css?v=2"><link rel="stylesheet" href="doctor-workspace.css?v=2"><link rel="stylesheet" href="doctor-studio.css?v=2"><link rel="stylesheet" href="doctor-dashboard-focus.css?v=1"><link rel="stylesheet" href="doctor-readiness-experience.css?v=1"><link rel="stylesheet" href="privacy-analytics.css?v=2">
+<link rel="stylesheet" href="css/smart-referral-handoff.css?v=modal-fix-1"><link rel="stylesheet" href="css/missed-care-outreach.css?v=2"><link rel="stylesheet" href="doctor-workspace.css?v=follow-up-1"><link rel="stylesheet" href="doctor-studio.css?v=2"><link rel="stylesheet" href="doctor-dashboard-focus.css?v=1"><link rel="stylesheet" href="doctor-readiness-experience.css?v=1"><link rel="stylesheet" href="privacy-analytics.css?v=2">
 <link rel="stylesheet" href="demo-care-messages.css?v=3">
 <link rel="stylesheet" href="doctor-pages.css?v=3">
 <link rel="stylesheet" href="doctor-home-reference.css?v=insights-4">
-<link rel="stylesheet" href="doctor-patient-profile.css?v=english-report-4"><link rel="stylesheet" href="consultation-workflow.css?v=optional-tools-3">
+<link rel="stylesheet" href="doctor-patient-profile.css?v=visit-prep-1"><link rel="stylesheet" href="consultation-workflow.css?v=optional-tools-3">
 
 <link rel="stylesheet" href="patient-journey.css?v=7"><link rel="stylesheet" href="connected-care.css?v=1">
 <link rel="stylesheet" href="daicare.css">
@@ -273,6 +273,22 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 
 <section class="panel" id="panel-schedule"><div class="dw-card dw-chart-card" id="dwSchedule"><div class="dw-skeleton" aria-label="Loading schedule"></div></div></section>
 <section class="panel" id="panel-attention"><div class="dw-card dw-chart-card" id="dwAttention"></div></section>
+<section class="panel" id="panel-follow-up-agent">
+  <div class="dw-card dw-chart-card" id="dwFollowupAgent">
+    <div class="section-head">
+      <h2>Follow-up review queue</h2>
+      <button type="button" class="dw-primary" data-followup-refresh>Refresh queue</button>
+    </div>
+    <p>Review agreed next steps, possible report matches and recorded follow-up visits.</p>
+    <p role="status" data-followup-status></p>
+    <div data-followup-items></div>
+    <button type="button" class="dw-text-button" data-followup-more hidden>Review older visit plans</button>
+  </div>
+  <details class="dw-card dw-chart-card" id="dwFollowupSummaries">
+    <summary>Write or update an approved visit plan</summary>
+    <div id="dwVisitSummaries"></div>
+  </details>
+</section>
 <section class="panel" id="panel-readiness"><div class="dw-card dw-chart-card" id="dwReadiness"></div></section>
 <section class="panel" id="panel-wards"><div class="dw-card dw-chart-card" id="dwWards"></div></section>
 <section class="panel" id="panel-analytics"><div class="dw-card dw-chart-card" id="dwAnalytics"></div></section>
@@ -444,7 +460,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 </div></div></div>
 <div class="toast" id="toast"></div>
 
-<script src="js/doctor-workspace-simplify.js?v=1"></script>
+<script src="js/doctor-workspace-simplify.js?v=followup-1"></script>
 <script src="/shared/emergency-triage.js"></script>
 <script src="js/care-extensions.js"></script>
 <script src="js/doctor-safety.js"></script>
@@ -728,9 +744,9 @@ boot();
 <script src="js/doctor-studio.js?v=6"></script>
 <script src="js/doctor-readiness-experience.js?v=1"></script>
 <script src="js/doctor-workflows.js"></script>
-<script src="/shared/consultation-draft.js"></script><script src="/shared/consultation-workflow.js"></script><script src="js/lactmed-reference.js?v=1"></script><script src="js/consultation-workflow.js?v=optional-tools-3"></script><script src="js/prescription-pdf.js"></script><script src="js/consultation-recorder.js?v=restored-6"></script><script src="js/doctor-patient-profile.js?v=optional-tools-7"></script>
+<script src="/shared/plain-language.js"></script><script src="js/visit-summary-doctor.js?v=follow-up-1"></script><script src="js/doctor-follow-up-agent.js?v=1"></script>
+<script src="/shared/consultation-draft.js"></script><script src="/shared/consultation-workflow.js"></script><script src="js/lactmed-reference.js?v=1"></script><script src="js/consultation-workflow.js?v=optional-tools-3"></script><script src="js/prescription-pdf.js"></script><script src="js/consultation-recorder.js?v=restored-6"></script><script src="js/doctor-visit-prep.js?v=1"></script><script src="js/doctor-patient-profile.js?v=visit-prep-1"></script>
 
-<script src="/shared/plain-language.js"></script>
 
 
 <script src="js/smart-referral-handoff.js"></script><script src="js/missed-care-outreach.js?v=2"></script>

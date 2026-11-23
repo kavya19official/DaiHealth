@@ -17,3 +17,9 @@
 .dw-care-hero>div{padding-bottom:26px;position:relative;z-index:1}.dw-care-hero h2{font-size:clamp(23px,2.2vw,35px);line-height:1.23;letter-spacing:-1px;color:var(--dw-text);margin:12px 0}.dw-care-hero p{font-size:12px;line-height:1.8;color:var(--dw-muted);max-width:490px}.dw-care-hero>img{width:100%;height:245px;object-fit:contain;object-position:bottom}.dw-hero-actions{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin:18px 0}.dw-hero-stats{display:flex;gap:18px;flex-wrap:wrap;font-size:10px;color:var(--dw-muted)}.dw-hero-stats span{display:flex;align-items:center;gap:6px}.dw-hero-stats i{width:6px;height:6px;border-radius:50%;background:#86a78f}.dw-next{position:relative;overflow:hidden}.dw-next-art{float:right;width:85px;height:110px;object-fit:cover;object-position:top;border-radius:45px 45px 18px 18px;margin:0 0 8px 14px;opacity:.9}.dw-patient-name .dw-avatar{background:linear-gradient(145deg,var(--dw-soft),#e4d6f4);border-radius:50%}.dw-table tbody tr:nth-child(3n+2) .dw-avatar{background:#edf1ea;color:#62775b}.dw-table tbody tr:nth-child(3n) .dw-avatar{background:#f6ece9;color:#a17a70}
 @media(max-width:700px){.dw-care-hero{grid-template-columns:minmax(0,1fr) 120px;padding:20px 20px 0;gap:0}.dw-care-hero>img{height:190px;width:200px;max-width:none;margin-left:-30px;opacity:.75}.dw-care-hero h2{font-size:23px}.dw-hero-stats{gap:8px}.dw-care-hero .dw-text-button{font-size:11px}}
 @media(max-width:420px){.dw-care-hero{grid-template-columns:1fr}.dw-care-hero>img{display:none}}
+
+#dwFollowupAgent [data-followup-items] { display: grid; gap: .75rem; }
+#dwFollowupAgent .dw-attention-item { display: block; overflow-wrap: anywhere; }
+#dwFollowupAgent textarea { display: block; width: 100%; margin-block: .35rem; }
+#dwFollowupAgent .dw-text-button { margin-inline-end: .5rem; }
+#dwFollowupSummaries { margin-block-start: 1rem; }
