@@ -13,3 +13,10 @@
 .cr-recording-tools{margin:12px 0;color:var(--dw-muted)}.cr-recording-tools>summary{font-size:13px;min-height:40px;padding:8px 0;cursor:pointer}.cr-recording-tools .dpp-muted{font-size:12px}.cr-magic{width:100%}.cr-magic-progress[hidden]{display:none}
 
 .cr-language-controls{display:flex;align-items:center;flex-wrap:wrap;gap:12px;margin:16px 0}.cr-language-controls label{display:flex;align-items:center;flex-wrap:wrap;gap:10px;font-size:14px}.cr-language-controls select{font-size:14px;min-height:44px}.cr-language-controls>span{padding:8px 12px;border-radius:20px;background:var(--dw-card);font-size:13px;color:var(--dw-muted)}
+
+[data-prep-ai][hidden] { display: none; }
+[data-prep-result] { margin-top: 1rem; }
+[data-prep-result] label { display: grid; gap: .35rem; margin-top: 1rem; }
+[data-prep-result] textarea { width: 100%; }
+[data-prep-result] ol, [data-prep-result] ul { padding-inline-start: 1.5rem; }
+[data-prep-result] li { margin-block: .35rem; }
