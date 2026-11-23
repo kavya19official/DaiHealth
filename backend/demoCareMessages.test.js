@@ -22,10 +22,32 @@ test('local in-app demo messages persist once, isolate connections, require veri
   assert.equal((await request('/thread',mother,{peer_id:doctor,text:'Synthetic reply',client_id:randomUUID()})).status,201);
   const thread=(await request('/thread?peer_id='+mother,doctor)).data.messages;assert.equal(thread.length,2);assert.equal(thread[0].mine,true);assert.equal(thread[1].mine,false);assert.equal('sender_id' in thread[0],false);
   assert.equal((await request('/thread',doctor,{peer_id:mother,text:'',client_id:randomUUID()})).status,400);
+  let inbox=(await request('/contacts',doctor)).data.contacts;
+  assert.equal(inbox[0].last_message.body,'Synthetic reply');assert.equal(inbox[0].unread,1);
+  assert.equal((await request('/read',doctor,{peer_id:mother,message_id:thread[1].id})).status,200);
+  assert.equal((await request('/contacts',doctor)).data.contacts[0].unread,0);
+  assert.equal((await request('/read',other,{peer_id:doctor,message_id:thread[1].id})).status,403);
+  // Another connected patient's new message must appear in the same inbox.
+  await pool.query("INSERT INTO appointments(mother_id,doctor_id,requested_date,status) VALUES($1,$2,CURRENT_DATE,'confirmed')",[other,doctor]);
+  assert.equal((await request('/thread',other,{peer_id:doctor,text:'Another patient question',client_id:randomUUID()})).status,201);
+  inbox=(await request('/contacts',doctor)).data.contacts;
+  assert.equal(inbox.length,2);assert.equal(inbox[0].id,other);assert.equal(inbox[0].unread,1);
+  assert.equal((await request('/read',doctor,{peer_id:mother,message_id:inbox[0].last_message.id})).status,400);
+  for(let n=0;n<105;n++)await pool.query('INSERT INTO demo_care_messages(mother_id,doctor_id,sender_id,client_id,body) VALUES($1,$2,$1,$3,$4)',[mother,doctor,randomUUID(),'History '+n]);
+  const newest=(await request('/thread?peer_id='+mother,doctor)).data;
+  assert.equal(newest.messages.length,100);assert.equal(newest.has_more,true);
+  const older=(await request('/thread?peer_id='+mother+'&before='+newest.next_before,doctor)).data;
+  assert.equal(older.messages.length,7);assert.equal(older.has_more,false);assert.equal(older.messages[0].body,b.text);
+  assert.equal(new Set([...older.messages,...newest.messages].map(m=>String(m.id))).size,107);
+  assert.equal((await request('/thread?peer_id='+mother+'&before=-1',doctor)).status,400);
+  assert.equal((await request('/thread?peer_id='+mother+'&before=99999999999999999999',doctor)).status,400);
+  assert.equal((await request('/read',doctor,{peer_id:mother,message_id:newest.messages.at(-1).id})).status,200);
+  assert.equal((await request('/read',doctor,{peer_id:mother,message_id:thread[0].id})).status,200);
+  assert.equal((await request('/contacts',doctor)).data.contacts.find(c=>c.id===mother).unread,0);
   await pool.query("INSERT INTO patient_access_controls(mother_id,grantee_type,grantee_ref,state) VALUES($1,'doctor',$2,'revoked')",[mother,String(doctor)]);
-  assert.equal((await request('/contacts',doctor)).data.contacts.length,0);assert.equal((await request('/thread?peer_id='+mother,doctor)).status,403);assert.equal((await request('/thread',doctor,{...b,client_id:randomUUID()})).status,403);
+  assert.deepEqual((await request('/contacts',doctor)).data.contacts.map(c=>c.id),[other]);assert.equal((await request('/thread?peer_id='+mother,doctor)).status,403);assert.equal((await request('/thread',doctor,{...b,client_id:randomUUID()})).status,403);
   process.env.DAI_LOCAL='false';assert.equal((await request('/contacts',doctor)).status,404);
-  assert.equal(Number((await pool.query('SELECT COUNT(*) AS n FROM demo_care_messages')).rows[0].n),2);
-  assert.equal(Number((await pool.query("SELECT COUNT(*) AS n FROM patient_access_events WHERE event_type='demo_message_sent'")).rows[0].n),2);
+  assert.equal(Number((await pool.query('SELECT COUNT(*) AS n FROM demo_care_messages')).rows[0].n),108);
+  assert.equal(Number((await pool.query("SELECT COUNT(*) AS n FROM patient_access_events WHERE event_type='demo_message_sent'")).rows[0].n),3);
  }finally{if(server)await new Promise(r=>server.close(r));await pool.end();await fs.rm(dir,{recursive:true,force:true});for(const [k,v]of Object.entries(before))v===undefined?delete process.env[k]:process.env[k]=v;}
 });
