@@ -20,7 +20,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import and_, or_, select, update
 
 from . import schema as s
-from .clinical_monitor_rules import day, evaluate, numeric
+from .clinical_monitor_rules import day, evaluate, evidence, numeric
 
 logger = logging.getLogger(__name__)
 ACTIVE_STAGES = {"t1", "t2", "t3", "pregnant", "antenatal"}
@@ -98,6 +98,14 @@ def synthetic_rows(mothers, manifest):
                     sbp=row["bp_systolic"], dbp=row["bp_diastolic"], weight_kg=row["weight_kg"],
                 ))
     return profiles, visits
+
+
+def episode(mother):
+    details = mother["details"]
+    for value in (details.get("source_pregnancy_id"), details.get("lmp"), mother["edd"]):
+        if isinstance(value, str) and value.strip():
+            return value.strip()
+    return ""
 
 
 def pregnancy(mother, synthetic, as_of):
@@ -200,7 +208,7 @@ def fingerprint(flag):
     return hashlib.sha256(json.dumps(flag, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
 
 
-def persist(c, mother_id, as_of, flags, trends, coverage):
+def persist(c, mother_id, as_of, flags, trends, coverage, ultrasound_reviews=None):
     now = datetime.now(timezone.utc)
     existing = {r["rule_key"]:r for r in c.execute(select(s.clinical_monitor_flag).where(
         s.clinical_monitor_flag.c.mother_id == mother_id)).mappings()}
@@ -208,11 +216,27 @@ def persist(c, mother_id, as_of, flags, trends, coverage):
         old = existing.pop(finding["rule_key"], None)
         digest = fingerprint(finding)
         values = dict(**finding, fingerprint=digest, active=True, updated_at=now)
+        review = (ultrasound_reviews or {}).get(finding["rule_key"])
+        if review:
+            values.update(reviewed_by=review["reviewed_by"], reviewed_at=review["reviewed_at"],
+                          review_note=review["review_note"])
         if old is None:
-            c.execute(s.clinical_monitor_flag.insert().values(mother_id=mother_id, **values))
+            identifier = c.execute(s.clinical_monitor_flag.insert().values(
+                mother_id=mother_id, **values)).inserted_primary_key[0]
         elif old["fingerprint"] != digest or not old["active"]:
-            c.execute(update(s.clinical_monitor_flag).where(s.clinical_monitor_flag.c.id==old["id"])
-                .values(**values,reviewed_by=None,reviewed_at=None,review_note=None))
+            identifier = old["id"]
+            c.execute(update(s.clinical_monitor_flag).where(s.clinical_monitor_flag.c.id==identifier)
+                .values(**{"reviewed_by": None, "reviewed_at": None, "review_note": None, **values}))
+        else:
+            continue
+        if finding["rule_key"].startswith("ultrasound:"):
+            source = finding["evidence"][0]
+            c.execute(s.audit_log.insert().values(
+                action="agent_flag_version", entity_type="clinical_monitor_flag", entity_id=identifier,
+                details={"ultrasound_id": source["record_id"], "revision": source["values"]["revision"],
+                         "fingerprint": digest, "priority": finding["priority"],
+                         "review_status": source["values"]["review_status"]},
+            ))
     inactive = [r["id"] for r in existing.values() if r["active"]]
     if inactive:
         c.execute(update(s.clinical_monitor_flag).where(s.clinical_monitor_flag.c.id.in_(inactive))
@@ -224,7 +248,105 @@ def persist(c, mother_id, as_of, flags, trends, coverage):
         c.execute(run.insert().values(mother_id=mother_id, **snapshot))
 
 
-def scan_batch(engine, demo, cursor=None, limit=125, today=None):
+def ultrasound_observations(conn, mothers):
+    patients = {mother["id"]: mother for mother in mothers}
+    a = s.ultrasound_analysis
+    rows = conn.execute(select(
+        a.c.id, a.c.mother_id, a.c.facility_id, a.c.episode, a.c.created_at, a.c.updated_at,
+        a.c.analysis, a.c.priority, a.c.revision, a.c.reviewed_at, a.c.reviewed_by, a.c.review_note,
+        a.c.decision,
+    ).where(a.c.mother_id.in_(patients)).order_by(a.c.created_at.desc(), a.c.id)).mappings()
+    observations = defaultdict(list)
+    for row in rows:
+        mother = patients[row["mother_id"]]
+        if (row["facility_id"] == mother["registered_facility_id"] and row["episode"] == episode(mother)
+                and canonical_status(mother["details"].get("stage")) in ACTIVE_STAGES
+                and not mother["details"].get("outcome_date")):
+            observations[row["mother_id"]].append(row)
+    return observations
+
+
+def ultrasound_context(conn, mother, records, profile, as_of):
+    if not profile:
+        return []
+    result = []
+    for group, fields, checks in (
+        ("visits", ("sbp", "dbp"), lambda r: numeric(r.get("sbp"), 55, 280) is not None
+         and numeric(r.get("dbp"), 25, 180) is not None and r["sbp"] > r["dbp"]),
+        ("glucose", ("glucose", "unit", "context"), lambda r: r.get("unit") in {"mg/dL", "mmol/L"}
+         and r.get("context") in {"fasting", "postprandial_1h", "postprandial_2h"}
+         and numeric(r.get("glucose"), 1, 720 if r["unit"] == "mg/dL" else 40) is not None),
+        ("reports", ("test", "flag", "value", "unit"), lambda r: True),
+        ("gaps", ("item", "status"), lambda r: True),
+    ):
+        candidates = (r for r in records[group] if profile["lmp"] <= r["date"] <= as_of and checks(r))
+        latest = max(candidates, key=lambda r: (r["date"], str(r["id"])), default=None)
+        if latest:
+            result.append(evidence(latest, {field: latest.get(field) for field in fields}))
+    task = s.worklist_item
+    tasks = conn.execute(select(task).where(
+        task.c.mother_id == mother["id"], task.c.facility_id == mother["registered_facility_id"],
+        task.c.details["kind"].as_string().in_(("follow_up", "referral_follow_up", "investigation")),
+    ).order_by(task.c.created_at.desc(), task.c.id).limit(10)).mappings()
+    for row in tasks:
+        detail = row["details"]
+        created = row["created_at"].date()
+        if detail.get("child_id") or not profile["lmp"] <= created <= as_of:
+            continue
+        result.append(evidence(dict(id=row["id"], source="Hospital follow-up task", date=created), {
+            "kind": detail["kind"], "status": row["status"], "due_date": detail.get("due_date"),
+        }))
+    return result
+
+
+def ultrasound_flags(rows, clinical_flags, trends, context_rows):
+    from .ultrasound import REASONS
+    related = {}
+
+    def collect(item):
+        key = (item["source"], item["record_id"])
+        if key not in related:
+            related[key] = {**item, "values": {}}
+        related[key]["values"].update(item["values"])
+
+    for item in context_rows:
+        collect(item)
+    for trend in trends:
+        for item in trend["evidence"][:2]:
+            collect(item)
+    for finding in clinical_flags:
+        for item in finding["evidence"]:
+            collect(item)
+    related = list(related.values())
+    flags, reviews = [], {}
+    for row in rows:
+        result = row["analysis"]
+        key = "ultrasound:" + row["id"]
+        source = dict(source="Hospital ultrasound review", record_id=row["id"],
+                      date=row["created_at"].date().isoformat(), values={
+            "uploaded_at": row["created_at"].replace(tzinfo=timezone.utc).isoformat(),
+            "analysis_state": result["state"],
+            "archive_label": result.get("label"),
+            "model_version": result.get("model_version"),
+            "confidence": result.get("confidence"),
+            "revision": row["revision"],
+            "review_status": "reviewed" if row["reviewed_at"] else "pending",
+            "review_decision": row["decision"],
+        })
+        reasons = result["reasons"] or ["research_prediction"]
+        verb = "Reviewed ultrasound." if row["reviewed_at"] else "Ultrasound awaiting clinician review."
+        context = (" Related maternal observations are available below." if related else
+                   " No related observations were selected by the monitoring rules.")
+        flags.append(dict(rule_key=key, rule_version="ultrasound-review-v1", priority=row["priority"],
+            summary=f"{verb} {' '.join(REASONS[code] for code in reasons)}{context}",
+            action="Open the ultrasound review record and assess the image alongside the source records.",
+            reference_url="", evidence=[source, *related[:25]]))
+        if row["reviewed_at"]:
+            reviews[key] = row
+    return flags, reviews
+
+
+def scan_batch(engine, demo, cursor=None, limit=125, today=None, include_ultrasound=False):
     """Scan one batch. A patient row lock serializes review with a concurrent rescan."""
     today = today or datetime.now(INDIA).date()
     with engine.begin() as c:
@@ -239,6 +361,7 @@ def scan_batch(engine, demo, cursor=None, limit=125, today=None):
         manifest = c.execute(select(s.seed_manifest).limit(1)).mappings().first() if demo else None
         synthetic, visits = synthetic_rows(mothers, manifest) if demo else ({},{})
         records = normalized_records(c, mothers, visits)
+        ultrasound = ultrasound_observations(c, mothers) if include_ultrasound else {}
         for m in mothers:
             mid = m["id"]
             simulated = demo and m["consent_flags"].get("synthetic_demo") is True
@@ -252,15 +375,22 @@ def scan_batch(engine, demo, cursor=None, limit=125, today=None):
                 flags,trends,counts = evaluate(profile,records[mid],as_of)
                 coverage.update(counts,eligible=True,gestation_anchor=profile["lmp"].isoformat(),
                     anchor_source="estimated from recorded EDD" if profile["estimated_from_edd"] else "recorded LMP")
-            persist(c, mid, as_of, flags, trends, coverage)
+            image_rows = ultrasound.get(mid, [])
+            if image_rows:
+                related = ultrasound_context(c, m, records[mid], profile, as_of)
+                image_flags, reviews = ultrasound_flags(image_rows, flags, trends, related)
+                flags.extend(image_flags)
+            else:
+                reviews = {}
+            persist(c, mid, as_of, flags, trends, coverage, reviews)
         return mothers[-1]["id"] if len(mothers)==limit else None
 
 
-async def monitor_loop(engine, demo):
+async def monitor_loop(engine, demo, include_ultrasound=False):
     cursor = None
     while True:
         try:
-            cursor = await asyncio.to_thread(scan_batch, engine, demo, cursor)
+            cursor = await asyncio.to_thread(scan_batch, engine, demo, cursor, include_ultrasound=include_ultrasound)
             await asyncio.sleep(3 if cursor else 90)
         except asyncio.CancelledError:
             raise
@@ -296,6 +426,8 @@ def register_monitor(app, engine, require, audit, demo):
                 item = dict(row)
                 details = item.pop("mother_details")
                 item["patient_name"] = details.get("name") or item["uhid"]
+                if item["rule_key"].startswith("ultrasound:"):
+                    item["ultrasound_id"] = item["rule_key"].split(":", 1)[1]
                 items.append(item)
                 audit(c,u,"read","clinical_monitor_flag",item["id"],{"mother_id":item["mother_id"]})
             last_scan = c.scalar(select(r.c.updated_at).join(m,m.c.id==r.c.mother_id).where(*scoped(u,demo))
@@ -324,6 +456,8 @@ def register_monitor(app, engine, require, audit, demo):
                 f.c.id==str(flag_id),*scoped(u,demo)).with_for_update(of=m))
             if not owner:
                 raise HTTPException(404,"No in-scope monitoring flag")
+            if c.scalar(select(f.c.rule_key).where(f.c.id==str(flag_id))).startswith("ultrasound:"):
+                raise HTTPException(409,"Review this item in Ultrasound AI Review")
             changed = c.execute(update(f).where(f.c.id==str(flag_id),f.c.active.is_(True),
                 f.c.reviewed_at.is_(None),f.c.fingerprint==body.fingerprint)
                 .values(reviewed_by=u["id"],reviewed_at=datetime.now(timezone.utc),review_note=note)).rowcount

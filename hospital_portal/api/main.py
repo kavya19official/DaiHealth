@@ -18,6 +18,7 @@ from .db import database, initialize
 from .security import ROLES, CLINICAL, digest, verify_password
 from .staff_scope import effective_staff, facility_staff
 from .clinical_monitor import monitor_loop, register_monitor
+from .ultrasound import Ultrasound, register_ultrasound, retention_loop
 
 LABEL = "Simulated on synthetic data"
 UTC = timezone.utc
@@ -35,6 +36,7 @@ def aware(value):
 def create_app(engine=None):
     engine = engine or database()
     demo = os.getenv("DAI_DEMO", "false").lower() == "true"
+    ultrasound = Ultrasound(os.environ)
     secret = os.getenv("JWT_SECRET")
     if not secret:
         if not demo:
@@ -71,15 +73,17 @@ def create_app(engine=None):
             seed_asha(engine)
         from .demo_video_seed import seed_video_demo
         seed_video_demo(engine)
-        monitor_task = (asyncio.create_task(monitor_loop(engine, demo))
+        monitor_task = (asyncio.create_task(monitor_loop(engine, demo, ultrasound.enabled))
                         if os.getenv("DAI_CLINICAL_MONITOR_ENABLED", "true").lower() == "true" else None)
+        retention = asyncio.create_task(retention_loop(engine)) if ultrasound.enabled else None
         try:
             yield
         finally:
-            if monitor_task:
-                monitor_task.cancel()
-                with suppress(asyncio.CancelledError):
-                    await monitor_task
+            for task in (monitor_task, retention):
+                if task:
+                    task.cancel()
+                    with suppress(asyncio.CancelledError):
+                        await task
 
     app = FastAPI(
         title="DAI Hospital Readiness API", version="0.1.0", lifespan=lifespan
@@ -292,7 +296,8 @@ def create_app(engine=None):
     async def synthetic_label(request, call_next):
         response = await call_next(request)
         response.headers["X-DAI-Data-Label"] = LABEL
-        response.headers["Cache-Control"] = "no-store"
+        if "Cache-Control" not in response.headers:
+            response.headers["Cache-Control"] = "no-store"
         return response
 
     @app.get("/api/health")
@@ -921,6 +926,7 @@ def create_app(engine=None):
 
     register_asha(app, engine, require, audit, one)
     register_monitor(app, engine, require, audit, demo)
+    register_ultrasound(app, engine, require, audit, demo, ultrasound)
     return app
 
 

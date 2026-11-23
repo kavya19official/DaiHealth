@@ -13,6 +13,8 @@ from sqlalchemy import (
     DateTime,
     JSON,
     ForeignKey,
+    Index,
+    LargeBinary,
     Uuid,
     UniqueConstraint,
     CheckConstraint,
@@ -799,3 +801,30 @@ clinical_monitor_flag = table(
     Column("reviewed_at", DateTime(timezone=True)),
     constraints=(UniqueConstraint("mother_id", "rule_key"),),
 )
+
+
+ultrasound_analysis = table(
+    "ultrasound_analysis",
+    ref("mother_id", "mother", False),
+    ref("facility_id", "facility", False),
+    ref("uploaded_by", "portal_user", False),
+    text("episode", False),
+    text("image_digest", False),
+    Column("image_ciphertext", LargeBinary),
+    Column("image_expires_at", DateTime(timezone=True), nullable=False),
+    data("pregnancy_context"),
+    data("analysis"),
+    number("priority", False),
+    number("revision", False),
+    ref("reviewed_by", "portal_user"),
+    Column("reviewed_at", DateTime(timezone=True)),
+    text("decision"),
+    text("review_note"),
+    constraints=(UniqueConstraint("mother_id", "facility_id", "episode", "image_digest"),),
+)
+Index("ultrasound_facility_queue", ultrasound_analysis.c.facility_id,
+      ultrasound_analysis.c.reviewed_at, ultrasound_analysis.c.priority,
+      ultrasound_analysis.c.created_at)
+Index("ultrasound_image_expiry", ultrasound_analysis.c.image_expires_at,
+      postgresql_where=ultrasound_analysis.c.image_ciphertext.is_not(None),
+      sqlite_where=ultrasound_analysis.c.image_ciphertext.is_not(None))

@@ -1,0 +1,232 @@
+{
+  "audit_version": "fetal-ultrasound-audit-v1",
+  "archive_sha256": "edb036207c35bda609571900ddb73b7d5815bea9327b8984239c01507e20b029",
+  "group_map_sha256": null,
+  "frequent_image_sizes": [
+    {
+      "width": 800,
+      "height": 540,
+      "images": 1629
+    },
+    {
+      "width": 800,
+      "height": 542,
+      "images": 5
+    },
+    {
+      "width": 788,
+      "height": 541,
+      "images": 2
+    },
+    {
+      "width": 782,
+      "height": 541,
+      "images": 2
+    },
+    {
+      "width": 795,
+      "height": 542,
+      "images": 2
+    },
+    {
+      "width": 786,
+      "height": 544,
+      "images": 2
+    },
+    {
+      "width": 784,
+      "height": 544,
+      "images": 2
+    },
+    {
+      "width": 784,
+      "height": 545,
+      "images": 2
+    },
+    {
+      "width": 799,
+      "height": 544,
+      "images": 2
+    },
+    {
+      "width": 800,
+      "height": 543,
+      "images": 2
+    }
+  ],
+  "original_counts": {
+    "train": {
+      "normal": 242,
+      "benign": 241,
+      "malignant": 1443
+    },
+    "validation": {
+      "normal": 43,
+      "benign": 43,
+      "malignant": 255
+    },
+    "test": {
+      "normal": 50,
+      "benign": 51,
+      "malignant": 300
+    }
+  },
+  "eligible_counts": {
+    "train": {
+      "normal": 0,
+      "benign": 0,
+      "malignant": 719
+    },
+    "validation": {
+      "normal": 0,
+      "benign": 0,
+      "malignant": 122
+    },
+    "test": {
+      "normal": 0,
+      "benign": 0,
+      "malignant": 143
+    }
+  },
+  "image_folders": {
+    "datasets": 2964,
+    "overlayedimages": 401,
+    "test": 401,
+    "train": 1926,
+    "validation": 341
+  },
+  "derivative_counts": {
+    "train": {
+      "normal": 0,
+      "benign": 0,
+      "malignant": 714
+    },
+    "validation": {
+      "normal": 0,
+      "benign": 0,
+      "malignant": 133
+    },
+    "test": {
+      "normal": 0,
+      "benign": 0,
+      "malignant": 152
+    }
+  },
+  "corrupt": [],
+  "derivative_errors": [],
+  "unexpected": [],
+  "metadata": [
+    {
+      "file": "FetusDataset.csv",
+      "columns": [
+        "baseline value",
+        "accelerations",
+        "fetal_movement",
+        "uterine_contractions",
+        "light_decelerations",
+        "severe_decelerations",
+        "prolongued_decelerations",
+        "abnormal_short_term_variability",
+        "mean_value_of_short_term_variability",
+        "percentage_of_time_with_abnormal_long_term_variability",
+        "mean_value_of_long_term_variability",
+        "histogram_width",
+        "histogram_min",
+        "histogram_max",
+        "histogram_number_of_peaks",
+        "histogram_number_of_zeroes",
+        "histogram_mode",
+        "histogram_mean",
+        "histogram_median",
+        "histogram_variance",
+        "histogram_tendency",
+        "fetal_health"
+      ],
+      "rows": 2126,
+      "patient_or_study_column": false
+    },
+    {
+      "file": "ultrasound_fetus.csv",
+      "columns": [
+        "Parent Directory",
+        "Subdirectory",
+        "File Count"
+      ],
+      "rows": 15,
+      "patient_or_study_column": false
+    }
+  ],
+  "exact_bytes": {
+    "groups": 335,
+    "cross_split_groups": 143,
+    "cross_label_groups": 335
+  },
+  "exact_pixels": {
+    "groups": 336,
+    "cross_split_groups": 144,
+    "cross_label_groups": 335
+  },
+  "near_duplicate_pairs": 15,
+  "near_cross_split_pairs": 4,
+  "quality_counts": {
+    "train": {
+      "normal": 0,
+      "benign": 0,
+      "malignant": 0
+    },
+    "validation": {
+      "normal": 0,
+      "benign": 0,
+      "malignant": 0
+    },
+    "test": {
+      "normal": 0,
+      "benign": 0,
+      "malignant": 0
+    }
+  },
+  "quality_thresholds": {
+    "min_side": 96,
+    "min_std": 8.0,
+    "min_dynamic_range": 28,
+    "min_focus": 2.0
+  },
+  "perceptual_distance": 6,
+  "colored_counts": {
+    "train": {
+      "normal": 0,
+      "benign": 0,
+      "malignant": 0
+    },
+    "validation": {
+      "normal": 0,
+      "benign": 0,
+      "malignant": 0
+    },
+    "test": {
+      "normal": 0,
+      "benign": 0,
+      "malignant": 0
+    }
+  },
+  "patient_groups": {
+    "groups": 0,
+    "cross_split_groups": 0,
+    "cross_label_groups": 0,
+    "complete": false
+  },
+  "blockers": [
+    "No complete independently verified patient/study group map",
+    "At least one split lost a class",
+    "Cross-label pixel/near-duplicate candidates require source-label adjudication"
+  ],
+  "excluded_records": {
+    "duplicate_quarantine": 679,
+    "candidate_after_exclusions": 984,
+    "derivative": 999,
+    "within_split_repeat": 6
+  },
+  "duplicate_cross_split_components": 147,
+  "dataset_release": "Kaggle orvile/ultrasound-fetus-dataset v2",
+  "training_status": "blocked"
+}

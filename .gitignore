@@ -43,3 +43,4 @@ ml-service/reports/predictability-checkpoint.json
 
 # macOS Finder metadata
 .DS_Store
+ml-service/ultrasound/local/ultrasound-fetus-dataset.zip

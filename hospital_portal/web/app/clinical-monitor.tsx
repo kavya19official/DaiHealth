@@ -6,7 +6,7 @@ type API = (path: string, options?: RequestInit) => Promise<unknown>;
 type Evidence = {source:string;record_id:string;date:string|null;values:Record<string,string|number|null>};
 type Flag = {id:string;mother_id:string;patient_name:string;priority:number;summary:string;action:string;
   evidence:Evidence[];fingerprint:string;rule_version:string;reference_url:string;reviewed_at:string|null;
-  review_note:string|null;as_of:string};
+  review_note:string|null;as_of:string;ultrasound_id?:string};
 type Queue = {items:Flag[];has_more:boolean;last_scan:string|null};
 type Snapshot = {as_of:string;coverage:{eligible:boolean;synthetic:boolean;anchor_source?:string;anc_visits?:number;
   paired_bp?:number;finalized_reports?:number;glucose_context_records?:number;weight_reference_available?:boolean};
@@ -54,7 +54,7 @@ export function PatientMonitoring({api,motherId}:{api:API;motherId:string}) {
   </section>;
 }
 
-export function ClinicalMonitoring({api,canReview,openPatient}:{api:API;canReview:boolean;openPatient:(id:string)=>Promise<void>}) {
+export function ClinicalMonitoring({api,canReview,openPatient,openUltrasound}:{api:API;canReview:boolean;openPatient:(id:string)=>Promise<void>;openUltrasound:(id:string)=>void}) {
   const [priority,setPriority] = useState("all");
   const [reviewed,setReviewed] = useState(false);
   const [offset,setOffset] = useState(0);
@@ -112,9 +112,10 @@ export function ClinicalMonitoring({api,canReview,openPatient}:{api:API;canRevie
         <button type="button" onClick={()=>setCoverage(coverage===item.id?"":item.id)}>{coverage===item.id?"Hide coverage":"View weight and observation coverage"}</button>
         <button type="button" onClick={()=>openPatient(item.mother_id).catch(e=>setError(errorText(e)))}>Open patient record</button>
       </div>
+      {item.ultrasound_id && <button type="button" onClick={()=>openUltrasound(item.ultrasound_id!)}>Open ultrasound review</button>}
       {coverage===item.id && <PatientMonitoring key={item.mother_id} api={api} motherId={item.mother_id}/>}
       {item.review_note && <p><strong>Clinician review note</strong> {item.review_note}</p>}
-      {canReview && !item.reviewed_at && <form key={item.fingerprint} onSubmit={event=>{
+      {canReview && !item.reviewed_at && !item.ultrasound_id && <form key={item.fingerprint} onSubmit={event=>{
         event.preventDefault();const note=(new FormData(event.currentTarget)).get("note");
         if(typeof note==="string")void acknowledge(item,note);
       }}><label>Review note <textarea name="note" minLength={5} maxLength={500} required/></label>
