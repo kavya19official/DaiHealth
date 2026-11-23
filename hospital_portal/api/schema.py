@@ -772,3 +772,30 @@ asha_note = table(
     text("client_uuid"),
     constraints=(UniqueConstraint("asha_id", "client_uuid"),),
 )
+
+# Clinical monitoring suggestions are review artefacts, separate from diagnoses and validated risk.
+clinical_monitor_run = table(
+    "clinical_monitor_run",
+    ref("mother_id", "mother", False),
+    text("as_of", False),
+    data("coverage"),
+    data("trends"),
+    constraints=(UniqueConstraint("mother_id"),),
+)
+clinical_monitor_flag = table(
+    "clinical_monitor_flag",
+    ref("mother_id", "mother", False),
+    text("rule_key", False),
+    text("rule_version", False),
+    number("priority", False),
+    text("summary", False),
+    text("action", False),
+    text("reference_url", False),
+    text("fingerprint", False),
+    data("evidence"),
+    flag("active", True),
+    ref("reviewed_by", "portal_user"),
+    text("review_note"),
+    Column("reviewed_at", DateTime(timezone=True)),
+    constraints=(UniqueConstraint("mother_id", "rule_key"),),
+)

@@ -1,5 +1,7 @@
 """DAI phase-one foundation: authenticated, scoped, audited synthetic portal."""
 
+import asyncio
+from contextlib import suppress
 import os
 import secrets
 from contextlib import asynccontextmanager
@@ -15,6 +17,7 @@ from . import schema as s
 from .db import database, initialize
 from .security import ROLES, CLINICAL, digest, verify_password
 from .staff_scope import effective_staff, facility_staff
+from .clinical_monitor import monitor_loop, register_monitor
 
 LABEL = "Simulated on synthetic data"
 UTC = timezone.utc
@@ -68,7 +71,15 @@ def create_app(engine=None):
             seed_asha(engine)
         from .demo_video_seed import seed_video_demo
         seed_video_demo(engine)
-        yield
+        monitor_task = (asyncio.create_task(monitor_loop(engine, demo))
+                        if os.getenv("DAI_CLINICAL_MONITOR_ENABLED", "true").lower() == "true" else None)
+        try:
+            yield
+        finally:
+            if monitor_task:
+                monitor_task.cancel()
+                with suppress(asyncio.CancelledError):
+                    await monitor_task
 
     app = FastAPI(
         title="DAI Hospital Readiness API", version="0.1.0", lifespan=lifespan
@@ -909,6 +920,7 @@ def create_app(engine=None):
     from .asha import register_asha
 
     register_asha(app, engine, require, audit, one)
+    register_monitor(app, engine, require, audit, demo)
     return app
 
 

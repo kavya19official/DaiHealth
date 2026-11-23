@@ -1,5 +1,7 @@
 # DAI Hospital & Administration Portal
 
+
+[Clinical monitoring agent setup and evidence rules](CLINICAL_MONITOR.md)
 DAI is a hospital readiness and care-coordination layer. All people, facility identities, registrations and clinical records are **synthetic**. A compact **About this demo** disclosure explains provenance; forecasts and unconnected integrations retain contextual labels. No diagnosis, prescribing or clinical safety decision is automated.
 
 This folder implements the **first phase** of the supplied specification alongside the existing Express prototype. Next.js/TypeScript/Tailwind and FastAPI are the new portal. The existing plain-HTML hospital screen is a separate synthetic administration preview; its header-based demo roles are not secure authentication and it must not receive real data or be publicly deployed.
