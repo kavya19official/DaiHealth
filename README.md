@@ -46,8 +46,11 @@ delivery and recovery, to her child's first years, shared safely between the mot
   not turned that doctor off.
 - **Patient record QR:** The patient opens **Reports & records → Share record QR**, selects a connected
   verified doctor with existing clinical-summary access, and chooses eligible original files. The doctor opens
-  **Scan patient QR** and downloads a profile PDF or a ZIP with the PDF and originals. Opening and downloading
-  require a connection. Saved files open offline and remain on the recipient’s device after QR revocation.
+  **Scan patient QR** or scans the QR with their phone Camera and opens the link in the browser. The selected
+  doctor signs in and can download a profile PDF or a ZIP with the originals. Phones need a reachable HTTPS
+  deployment. For a custom public address, set `DAI_PUBLIC_ORIGIN` on the backend. A QR generated from
+  `localhost` works on the computer serving the local demo. Saved files open offline and remain on the
+  recipient’s device after QR revocation.
 
 
 ### For the hospital

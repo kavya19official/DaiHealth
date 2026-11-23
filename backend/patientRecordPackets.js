@@ -9,6 +9,24 @@ const { canAccessDoc } = require('./patientDocuments');
 const hash = token => createHash('sha256').update(token).digest('hex');
 const validId = id => Number.isInteger(id) && id > 0 && id <= 2147483647;
 const maxReports = 8;
+const localHosts = new Set(['localhost', '127.0.0.1', '[::1]']);
+
+function packetLink(req, token, env) {
+  const configured = env.DAI_PUBLIC_ORIGIN;
+  const origin = configured || req.get('origin');
+  if (!origin) return null;
+  try {
+    const base = new URL(origin);
+    const loopback = localHosts.has(base.hostname);
+    if (base.protocol !== 'https:' && !(base.protocol === 'http:' && loopback)) return null;
+    if (!configured && base.host !== (req.get('x-forwarded-host') || req.get('host'))) return null;
+    const url = new URL('/record-packet.html', base.origin);
+    url.hash = token;
+    return url.href;
+  } catch {
+    return null;
+  }
+}
 
 async function grant(pool, mother, doctor) {
   const result = await pool.query(`
@@ -50,7 +68,7 @@ function profile(chart, includeHistory) {
   };
 }
 
-function register(app, { pool, authenticateToken, authorizeRole }) {
+function register(app, { pool, authenticateToken, authorizeRole, env = process.env }) {
   const patient = [authenticateToken, authorizeRole(['mother'])];
   const doctor = [authenticateToken, authorizeRole(['doctor'])];
   const unavailable = res => res.status(404).json({ error: 'Packet unavailable. Check the recipient, consent and expiry.' });
@@ -108,11 +126,13 @@ function register(app, { pool, authenticateToken, authorizeRole }) {
       if ((await selectedReports(pool, mother, recipient, ids)).length !== ids.length) return unavailable(res);
       const token = randomBytes(32).toString('base64url');
       const code = 'dai-record:v1:' + token;
-      const qr = await QRCode.toDataURL(code, { width: 320, margin: 4, errorCorrectionLevel: 'M' });
+      const link = packetLink(req, token, env);
+      if (!link) return res.status(503).json({ error: 'Open DaiHealth on its HTTPS address to create a phone-scannable QR.' });
+      const qr = await QRCode.toDataURL(link, { width: 320, margin: 4, errorCorrectionLevel: 'M' });
       const result = await pool.query(`
         INSERT INTO patient_record_packets(mother_id,doctor_id,token_hash,document_ids,expires_at)
         VALUES ($1,$2,$3,$4,NOW()+INTERVAL '10 minutes') RETURNING id,expires_at`, [mother, recipient, hash(token), ids]);
-      res.status(201).json({ ...result.rows[0], code, qr });
+      res.status(201).json({ ...result.rows[0], code, qr, phone_reachable: !localHosts.has(new URL(link).hostname) });
     } catch { fail(res); }
   });
 

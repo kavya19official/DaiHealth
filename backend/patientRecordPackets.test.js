@@ -63,7 +63,7 @@ test('patient QR round trip checks recipient, history scope, file permissions, e
     const base = 'http://127.0.0.1:' + server.address().port + '/api';
     async function call(url, actor, method = 'GET', body) {
       const res = await fetch(base + url, {
-        method, headers: { 'x-fixture-user': actor, 'Content-Type': 'application/json' },
+        method, headers: { 'x-fixture-user': actor, 'Content-Type': 'application/json', Origin: new URL(base).origin },
         body: body && JSON.stringify(body)
       });
       return { status: res.status, data: await res.json().catch(() => null), cache: res.headers.get('cache-control') };
@@ -80,21 +80,25 @@ test('patient QR round trip checks recipient, history scope, file permissions, e
     assert.equal(result.status, 201, JSON.stringify(result.data));
     const png = PNG.sync.read(Buffer.from(result.data.qr.split(',')[1], 'base64'));
     const decoded = decode(new Uint8ClampedArray(png.data), png.width, png.height).data;
-    assert.equal(decoded, result.data.code);
-    assert.match(decoded, /^dai-record:v1:[A-Za-z0-9_-]{43}$/);
-    assert.equal((await redeem(decoded, other)).status, 404);
-    assert.equal((await redeem(decoded, mother)).status, 403);
+    const link = new URL(decoded);
+    assert.equal(link.origin, new URL(base).origin);
+    assert.equal(link.pathname, '/record-packet.html');
+    assert.equal('dai-record:v1:' + link.hash.slice(1), result.data.code);
+    assert.equal(result.data.phone_reachable, false);
+    const code = result.data.code;
+    assert.equal((await redeem(code, other)).status, 404);
+    assert.equal((await redeem(code, mother)).status, 403);
 
-    const packet = await redeem(decoded);
+    const packet = await redeem(code);
     assert.equal(packet.status, 200, JSON.stringify(packet.data));
     assert.match(packet.cache, /no-store/);
     assert.equal(packet.data.profile.name, 'Synthetic QR Patient');
     assert.equal(packet.data.profile.history, null);
     assert.deepEqual(packet.data.reports.map(report => report.id), [shared]);
     await pool.query('UPDATE patient_document_shares SET revoked_at=NOW() WHERE document_id=$1', [shared]);
-    assert.equal((await redeem(decoded)).data.omitted_reports, 1);
+    assert.equal((await redeem(code)).data.omitted_reports, 1);
     assert.equal((await call(issue + '/' + result.data.id, mother, 'DELETE')).status, 200);
-    assert.equal((await redeem(decoded)).status, 404);
+    assert.equal((await redeem(code)).status, 404);
 
     const expired = (await mint([])).data;
     await pool.query("UPDATE patient_record_packets SET expires_at=NOW()-INTERVAL '1 second' WHERE id=$1", [expired.id]);

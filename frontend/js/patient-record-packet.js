@@ -3,6 +3,10 @@
 
   const patientEntry = document.querySelector('[data-create-record-packet]');
   const doctorEntry = document.querySelector('[data-scan-record-packet]');
+  const phoneEntry = doctorEntry?.hasAttribute('data-open-record-link');
+  const phoneToken = phoneEntry ? location.hash.slice(1) : '';
+  if (phoneEntry) history.replaceState(null, '', location.pathname);
+  const tokenPattern = /^[A-Za-z0-9_-]{43}$/;
   if (!patientEntry && !doctorEntry) return;
 
   const apiBase = window.DaiAPI.API_BASE;
@@ -13,13 +17,27 @@
   }
   const codePattern = /^dai-record:v1:[A-Za-z0-9_-]{43}$/;
 
+  function scanCode(value) {
+    if (codePattern.test(value || '')) return value;
+    try {
+      const url = new URL(value);
+      const token = url.hash.slice(1);
+      return url.origin === location.origin && url.pathname === '/record-packet.html' &&
+        tokenPattern.test(token) ? 'dai-record:v1:' + token : null;
+    } catch {
+      return null;
+    }
+  }
+
   async function request(path, options = {}) {
     const response = await fetch(apiBase + path, {
       credentials: 'include', cache: 'no-store', signal: AbortSignal.timeout(20000), ...options
     });
     if (!response.ok) {
       const data = await response.json().catch(() => ({}));
-      throw Error(data.error || 'Sign in and check your connection before trying again.');
+      const error = Error(data.error || 'Sign in and check your connection before trying again.');
+      error.status = response.status;
+      throw error;
     }
     return response.json();
   }
@@ -172,7 +190,9 @@
         manual.append(input);
         generated.dataset.id = result.id;
         generated.replaceChildren(qr, manual, element('p', 'Expires ' + formatDate(result.expires_at)));
-        status.textContent = 'Show this QR to the selected doctor.';
+        status.textContent = result.phone_reachable
+          ? 'Have the doctor scan this QR with their phone Camera and tap the link.'
+          : 'This local QR opens on your computer. Generate it on the hosted DaiHealth site to use a phone Camera.';
         form.elements.confirm.checked = false;
         await refreshShares();
       } catch (error) {
@@ -226,7 +246,7 @@
     setTimeout(() => URL.revokeObjectURL(url), 30000);
   }
 
-  if (doctorEntry) doctorEntry.onclick = () => {
+  function openScanner(initialCode) {
     const { dialog, status } = modal('Scan a patient record QR');
     const form = document.createElement('form');
     form.innerHTML = `
@@ -270,7 +290,7 @@
     function scanFrame() {
       if (!stream || !dialog.open) return;
       if (video.videoWidth && video.videoHeight) {
-        const code = decode(video, video.videoWidth, video.videoHeight);
+        const code = scanCode(decode(video, video.videoWidth, video.videoHeight));
         if (codePattern.test(code || '')) {
           form.elements.code.value = code;
           void redeem(code);
@@ -315,7 +335,7 @@
       let bitmap;
       try {
         bitmap = await createImageBitmap(file);
-        const code = decode(bitmap, bitmap.width, bitmap.height);
+        const code = scanCode(decode(bitmap, bitmap.width, bitmap.height));
         if (!dialog.open) return;
         if (!codePattern.test(code || '')) throw Error('Invalid QR');
         form.elements.code.value = code;
@@ -367,6 +387,11 @@
         status.textContent = packet.omitted_reports ? 'Some selected files are no longer available.' : 'Record packet ready.';
       } catch (error) {
         status.textContent = error.message;
+        if (error.status === 401 || error.status === 403) {
+          const signIn = element('a', 'Sign in as doctor');
+          signIn.href = '/auth.html?role=doctor#record-packet=' + code.slice('dai-record:v1:'.length);
+          result.append(signIn);
+        }
       } finally {
         busy = false;
       }
@@ -406,5 +431,17 @@
         busy = false;
       }
     }
-  };
+
+    if (initialCode) {
+      form.elements.code.value = initialCode;
+      form.hidden = true;
+      void redeem(initialCode);
+    }
+  }
+
+  if (doctorEntry) doctorEntry.onclick = () => openScanner();
+  if (phoneEntry && tokenPattern.test(phoneToken)) {
+    doctorEntry.onclick = () => openScanner('dai-record:v1:' + phoneToken);
+    doctorEntry.click();
+  }
 })();
