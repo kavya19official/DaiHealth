@@ -45,6 +45,24 @@ delivery and recovery, to her child's first years, shared safely between the mot
 - A patient roster, work queue, report review, a clinical dashboard and risk trends, limited to patients who have
   not turned that doctor off.
 
+### Care Capsule
+
+From **Reports & records** or the child dashboard, select **Create Care Capsule**. Choose the maternal
+or child record, review and select the fields, and save or print the QR. The QR carries the selected
+values, so anyone who has the QR can read them. Choose only what you want to carry.
+
+Open **Care Capsule verifier** on the clinician's device while online and wait for **Ready for offline
+scanning**. The verifier works without a DaiHealth account. Once prepared, it checks signatures and
+expiry offline and labels the date of its last revocation sync. Test by disconnecting, reloading,
+and scanning the printed QR. Reconnect and use **Sync keys and revocations** to check new revocations.
+
+Hosted deployments should configure `DAI_CARE_CAPSULE_KEYS` with comma-separated, random 32-byte
+base64url seeds. Generate a seed with `node -e "console.log(require('node:crypto').randomBytes(32).toString('base64url'))"`.
+Put the new seed first to rotate signing keys and retain previous seeds for at least 30 days after
+their last use. Set `DAI_PUBLIC_ORIGIN` if the public HTTPS address differs from the request origin.
+The local demo derives a signing key from its existing local secret. Phone scanning from the
+system camera requires a reachable HTTPS origin. The in-browser verifier can scan the QR itself.
+
 ### For the hospital
 - A separate **Operations / Administration** portal (Next.js and FastAPI) with referrals and a hospital-readiness view.
 
@@ -236,6 +254,7 @@ psql "$DATABASE_URL" -f backend/db/patient_ml.sql
 psql "$DATABASE_URL" -f backend/db/patient_access_controls.sql
 psql "$DATABASE_URL" -f backend/db/follow_through.sql
 psql "$DATABASE_URL" -f backend/db/visit_summaries.sql
+psql "$DATABASE_URL" -f backend/db/care_capsules.sql
 psql "$DATABASE_URL" -f backend/db/delhi_directory.sql   # optional: Delhi facility directory (unverified reference data)
 ```
 

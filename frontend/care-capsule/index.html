@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>Care Capsule verifier · DaiHealth</title>
+  <link rel="stylesheet" href="/care-capsule/capsule.css">
+</head>
+<body class="capsule-page">
+  <main>
+    <h1>Care Capsule verifier</h1>
+    <p>Prepare this page online before going offline. Scan the patient’s QR to read the fields they chose to share.</p>
+    <section class="capsule-card" aria-label="Verifier setup">
+      <p id="capsule-ready" role="status">Checking offline readiness…</p>
+      <button type="button" id="capsule-sync">Sync keys and revocations</button>
+    </section>
+    <section class="capsule-card" aria-label="Scan a capsule">
+      <div class="capsule-actions">
+        <button type="button" id="capsule-camera">Start camera</button>
+        <label>Scan a QR image<input type="file" id="capsule-image" accept="image/*"></label>
+      </div>
+      <video id="capsule-video" playsinline muted autoplay hidden></video>
+      <form id="capsule-form">
+        <label for="capsule-input">Or paste the capsule link</label>
+        <input id="capsule-input" autocomplete="off" spellcheck="false" maxlength="1200" required>
+        <button>Verify capsule</button>
+      </form>
+      <p id="capsule-status" role="status"></p>
+      <section id="capsule-result" aria-label="Verified capsule"></section>
+    </section>
+  </main>
+  <script src="/vendor/qr/jsQR.js"></script>
+  <script type="module" src="/care-capsule/verify.js"></script>
+</body>
+</html>

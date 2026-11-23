@@ -948,6 +948,7 @@ button, input { font: inherit; }
 <script src="js/little-world-model.js?v=1"></script>
 <script src="js/little-world.js?v=1"></script>
 <link rel="stylesheet" href="child-growth-development.css?v=1">
+<link rel="stylesheet" href="/care-capsule/capsule.css">
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
@@ -1049,7 +1050,8 @@ button, input { font: inherit; }
     </header>
 
     <div class="content">
-      <div class="child-tabs" id="childTabs"></div>
+      <button type="button" class="btn btn--primary btn--sm" data-issue-capsule>Create Care Capsule</button>
+<div class="child-tabs" id="childTabs"></div>
 
       <div id="babyWorld"></div><div id="twinCompare"></div>
       <!-- Welcome + Next vax -->
@@ -2452,5 +2454,6 @@ boot();
 </script>
 <script src="js/care-chatbot.js?v=dhruv-ui-1"></script>
 
+<script src="/care-capsule/issue.js"></script>
 </body>
 </html>
