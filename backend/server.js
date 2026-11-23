@@ -933,7 +933,6 @@ require('./doctorWorkspace')(app, { pool, authenticateToken, authorizeRole });
 require('./ultrasoundWorkspace')(app, { pool, authenticateToken, authorizeRole });
 require('./doctorOperations')(app, { pool, authenticateToken, authorizeRole });
 require('./patientDocuments')(app, { pool, authenticateToken, authorizeRole, jwtSecret: process.env.JWT_SECRET });
-require('./patientRecordPackets').register(app, { pool, authenticateToken, authorizeRole });
 require('./patientTimelineLive')(app, { pool, authenticateToken, authorizeRole });
 require('./timelineTrust')(app, { pool, authenticateToken, authorizeRole });
 require('./timelineAccess')(app, { pool, authenticateToken, authorizeRole });
