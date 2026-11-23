@@ -74,3 +74,25 @@ body.doctor-reference #daiCareChatbot{position:fixed;right:max(20px,env(safe-are
 @media(max-width:600px){.dr-home .dd-hero{display:block;min-height:0;padding:24px 20px}.dr-home .dd-hero-art{display:none}.dr-home .dd-hero h1{max-width:none;font-size:30px}.dr-home .dd-hero-copy>.dr-intro{font-size:15px;max-width:none}.dr-home .dd-hero-copy>.dr-date{font-size:14px;max-width:none}.dr-home>.dd-glance{gap:12px;margin-bottom:20px}.dr-home>.dd-glance>button{padding:18px 14px;gap:12px;min-height:205px;flex-basis:auto}.dr-home>.dd-glance strong{font-size:40px}.dr-home>.dd-glance small{font-size:14px;line-height:1.5}.dr-home>.dd-glance .dd-glance-icon{width:34px;height:34px}.dd-metric-detail{font-size:12px}.dr-home .dd-card-head h2{font-size:19px}.dr-home .dd-journey{padding:20px 16px}.dr-home .dd-stage-path{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.dr-home .dd-stage{min-height:170px;padding:16px 10px}.dr-home .dd-stage>strong{font-size:14px;min-height:20px}.dr-home .dd-stage-count{font-size:32px}.dr-home .dd-stage-count small{font-size:12px}.dr-home .dd-avatar-small{width:24px;height:24px;font-size:9px}.dr-summary-row>.dd-card{padding:22px 16px}.dr-home .dd-clinic-timeline time{font-size:14px;min-width:43px}.dr-home .dd-clinic-timeline strong{font-size:15px}.dr-home .dd-clinic-timeline small{font-size:13px}.dr-home .dd-clinic-timeline li{gap:8px}.dr-home .dd-clinic-timeline .dd-avatar{display:none}}
 
 .dr-home .dr-more>summary{font-size:14px;min-height:48px;line-height:1.6}.doctor-workspace #doctorReviewRequests>summary{font-size:14px;min-height:40px;line-height:1.6}.dr-home .dd-footer{font-size:13px}
+/* Compact review brief beside the existing purple welcome banner. */
+.dr-top-row{display:grid;grid-template-columns:minmax(0,1fr) 295px;gap:18px;margin-bottom:20px;align-items:stretch}
+.dr-top-row .dd-hero{margin-bottom:0;grid-template-columns:minmax(0,1fr) minmax(155px,.45fr)}
+.dr-top-row .dd-hero-art{height:255px;margin-bottom:-26px}
+.dr-insights{display:flex;flex-direction:column;min-width:0;position:relative;padding:22px 22px 16px;background:var(--dw-card,#fff);border:1px solid var(--dw-border,#eae4ff);border-radius:20px;overflow:hidden;box-shadow:0 5px 24px #68469306;color:var(--dw-text)}
+.dr-insight-eyebrow{font-size:9px;font-weight:750;letter-spacing:1.3px;color:var(--dr-accent,#8145ee)}
+.dr-insights h2{font-size:22px;letter-spacing:-.6px;line-height:1.3;margin:5px 0 8px}
+.dr-insights header p{font-size:12px;line-height:1.65;color:var(--dw-muted);margin:0;max-width:235px}
+.dr-insights header p strong{color:var(--dr-accent,#8145ee);font-weight:750}
+.dr-insight-art{position:relative;min-height:137px;flex:1;display:flex;align-items:center;justify-content:center;margin:0 -14px 4px}
+.dr-insight-art svg{width:220px;max-width:100%;height:150px;overflow:visible}
+.dr-insight-chip{position:absolute;border:1px solid var(--dw-border);background:var(--dw-card,#fff);box-shadow:0 3px 10px #65428a0b;border-radius:18px;padding:6px 8px;font-size:9px;color:var(--dw-muted);white-space:nowrap}
+.dr-insight-chip-left{left:0;top:22px}.dr-insight-chip-right{right:0;bottom:23px}
+.dr-insight-action{display:flex;justify-content:center;align-items:center;gap:12px;min-height:43px;flex-shrink:0;border:0;border-radius:24px;background:#2b203a;color:#fff;font:inherit;font-size:13px;font-weight:700;cursor:pointer;padding:6px 18px}
+.dr-insight-action>span{display:grid;place-items:center;background:#fff;color:#392548;border-radius:50%;height:30px;width:30px;font-size:20px;margin-left:-9px}
+.dr-insights>small{font-size:9px;text-align:center;color:var(--dw-muted);margin-top:10px;line-height:1.5}
+.dr-insight-action:focus-visible{outline:3px solid #b999ed;outline-offset:3px}
+.doctor-reference[data-dw-theme=dark] .dr-insight-art svg{opacity:.8}
+.doctor-reference[data-dw-theme=dark] .dr-insight-action{background:#d3b7fc;color:#261b33}
+@media(min-width:1800px){.dr-top-row{grid-template-columns:minmax(0,1fr) 330px}.dr-insights h2{font-size:25px}.dr-insights header p{font-size:14px}.dr-insight-chip{font-size:11px}.dr-insights>small{font-size:11px}}
+@media(max-width:1200px){.dr-top-row{grid-template-columns:minmax(0,1fr) 270px;gap:14px}.dr-top-row .dd-hero{grid-template-columns:1fr;padding:22px}.dr-top-row .dd-hero-art{display:none}.dr-insights{padding:19px 19px 15px}}
+@media(max-width:800px){.dr-top-row{grid-template-columns:1fr}.dr-top-row .dd-hero{min-height:0}.dr-insights{min-height:260px}.dr-insight-art{min-height:125px}.dr-insights header p{max-width:none}.dr-insight-chip-left{left:15%;top:20px}.dr-insight-chip-right{right:15%;bottom:20px}}
