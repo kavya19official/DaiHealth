@@ -967,6 +967,7 @@ require('./followThrough')(app, { pool, authenticateToken, authorizeRole });
 require('./privacyAnalytics')(app, { pool, authenticateToken, authorizeRole });
 require('./demoCareMessages')(app, { pool, authenticateToken });
 require('./visitSummary')(app, { pool, authenticateToken, authorizeRole });
+require('./doctorFollowupAgent').register(app, { pool, authenticateToken, authorizeRole });
 
 // Gemini receives approved Dr. Daya answers only; the API key remains server-side.
 require('./clinicalReview').register(app,{pool,authenticateToken,authorizeRole});
