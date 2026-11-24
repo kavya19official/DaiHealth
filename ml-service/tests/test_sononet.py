@@ -1,3 +1,4 @@
+import builtins
 import io
 from pathlib import Path
 
@@ -49,7 +50,15 @@ def test_each_panel_reaches_the_classifier_as_a_distinct_tensor():
     assert [view["label"] for view in results] == ["abdomen", "four_chamber"]
 
 
-def test_published_weights_on_private_inference_endpoint():
+def test_published_weights_on_private_inference_endpoint(monkeypatch):
+    original_import = builtins.__import__
+
+    def without_onnx(name, *args, **kwargs):
+        if name.split(".")[0] in {"onnx", "onnxruntime"}:
+            raise ImportError("Test runtime has no ONNX packages")
+        return original_import(name, *args, **kwargs)
+
+    monkeypatch.setattr(builtins, "__import__", without_onnx)
     app = FastAPI()
     register_inference(app, {"DAI_ULTRASOUND_SERVICE_TOKEN": "n"*40})
     png = io.BytesIO()
@@ -58,7 +67,7 @@ def test_published_weights_on_private_inference_endpoint():
         url = "/internal/ultrasound/status"
         assert client.get(url).status_code == 401
         auth = {"Authorization": "Bearer " + "n"*40}
-        assert client.get(url, headers=auth).json() == {"state": "ready", "model": "sononet16"}
+        assert client.get(url, headers=auth).json() == {"state": "ready", "model": "sononet16", "runtime": "numpy-v1"}
         response = client.post("/internal/ultrasound/analyze", content=png.getvalue(), headers={
             **auth, "Content-Type": "image/png",
         })

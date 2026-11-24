@@ -315,7 +315,7 @@ def register_workspace(app, engine, service, key, demo=False):
                     if (row["reviewed_at"] or row["analysis"]["state"] != "model_unavailable"
                             or (row["analysis"].get("measurements") or {}).get("demo")):
                         raise HTTPException(409, "Only unavailable analysis can be retried before review")
-                    values["analysis"] = {**queued(), "auto_recovered": row["analysis"].get("auto_recovered", False)}
+                    values["analysis"] = {**queued(), "recovery_runtime": row["analysis"].get("recovery_runtime")}
                 changed = conn.execute(update(scans).where(*scope(grant), scans.c.id == scan_id,
                     scans.c.revision == form.revision, scans.c.released_at.is_(None)).values(**values)).rowcount
                 if not changed:

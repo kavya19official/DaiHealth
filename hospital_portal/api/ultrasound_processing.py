@@ -62,11 +62,11 @@ def assessment(analysis):
                 model_ran=state in PREDICTIONS, requires_doctor_review=True)
 
 
-def claim(engine, recover=False):
+def claim(engine, recovery_runtime=None):
     state = scans.c.analysis["state"].as_string()
-    if recover:
+    if recovery_runtime:
         eligible = and_(state == "model_unavailable",
-                        scans.c.analysis["auto_recovered"].as_boolean().is_not(True),
+                        scans.c.analysis["recovery_runtime"].as_string().is_distinct_from(recovery_runtime),
                         scans.c.analysis["measurements"]["demo"].as_boolean().is_not(True),
                         scans.c.image_ciphertext.is_not(None), scans.c.image_expires_at > utc(),
                         scans.c.started_at.is_(None), scans.c.reviewed_at.is_(None), scans.c.released_at.is_(None))
@@ -81,34 +81,34 @@ def claim(engine, recover=False):
             return None
         lease = uuid4().hex
         started = utc()
-        recovered = recover or row["analysis"].get("auto_recovered") is True
+        attempted_runtime = recovery_runtime or row["analysis"].get("recovery_runtime")
         values = dict(analysis={**queued(), "state": "claimed", "lease": lease,
-                                "started_at": started.isoformat(), "auto_recovered": recovered},
+                                "started_at": started.isoformat(), "recovery_runtime": attempted_runtime},
                       updated_at=started)
-        if recover:
+        if recovery_runtime:
             values["revision"] = scans.c.revision + 1
         acquired = conn.execute(update(scans).where(scans.c.id == row["id"], eligible)
                                 .values(**values)).rowcount
-        if acquired and recover:
+        if acquired and recovery_runtime:
             conn.execute(s.audit_log.insert().values(
                 action="workspace_analysis_recovered", entity_type="ultrasound_workspace_scan",
-                entity_id=row["id"], details={"previous_state": "model_unavailable"},
+                entity_id=row["id"], details={"previous_state": "model_unavailable", "runtime": recovery_runtime},
             ))
-        return (row, lease, started.isoformat(), recovered) if acquired else None
+        return (row, lease, started.isoformat(), attempted_runtime) if acquired else None
 
 
-async def process_next(engine, service, recover=False):
-    item = await run_in_threadpool(claim, engine, recover)
+async def process_next(engine, service, recovery_runtime=None):
+    item = await run_in_threadpool(claim, engine, recovery_runtime)
     if not item:
         return False
-    row, lease, started, recovered = item
+    row, lease, started, attempted_runtime = item
     stage_times = {}
 
     def persist(result, final=False):
         now = utc()
         result = {**result, "steps": list(stage_times), "stage_times": dict(stage_times), "started_at": started}
-        if recovered:
-            result["auto_recovered"] = True
+        if attempted_runtime:
+            result["recovery_runtime"] = attempted_runtime
         if final:
             result.update(finished_at=now.isoformat(), flag=review_flag(result))
         else:
@@ -148,8 +148,10 @@ async def analysis_loop(engine, service):
             if await process_next(engine, service):
                 continue
             status = await service.model_status()
-            if status == {"state": "ready", "model": "sononet16"} and await process_next(engine, service, recover=True):
-                continue
+            runtime = status.get("runtime")
+            if status.get("state") == "ready" and status.get("model") == "sononet16" and runtime:
+                if await process_next(engine, service, recovery_runtime=runtime):
+                    continue
         except Exception:
             logging.getLogger(__name__).exception("Ultrasound analysis queue unavailable")
         await asyncio.sleep(0.5)

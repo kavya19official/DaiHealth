@@ -150,7 +150,7 @@ def test_recovery_attempts_only_pending_retained_scans_once(tmp_path):
     failed = unavailable("no_approved_model").model_dump(exclude_none=True)
     with engine.begin() as db:
         for scan_id, extra in [
-            (pending_id, {}),
+            (pending_id, {"analysis":{**failed,"auto_recovered":True}}),
             (str(uuid4()), {"started_at":now}),
             (str(uuid4()), {"reviewed_at":now}),
             (str(uuid4()), {"released_at":now}),
@@ -164,12 +164,12 @@ def test_recovery_attempts_only_pending_retained_scans_once(tmp_path):
                           analysis=failed,pregnancy_context={},revision=1)
             db.execute(scans.insert().values(**(values | extra)))
     assert not asyncio.run(process_next(engine,service))
-    assert asyncio.run(process_next(engine,service,recover=True))
+    assert asyncio.run(process_next(engine,service,recovery_runtime="numpy-v1"))
     assert seen == [b"stored raster"]
-    assert not asyncio.run(process_next(engine,service,recover=True))
+    assert not asyncio.run(process_next(engine,service,recovery_runtime="numpy-v1"))
     with engine.connect() as db:
         row = db.execute(select(scans.c.analysis,scans.c.revision).where(scans.c.id==pending_id)).one()
-        assert row.revision == 2 and row.analysis["auto_recovered"] is True
+        assert row.revision == 2 and row.analysis["recovery_runtime"] == "numpy-v1"
         assert db.scalar(select(s.audit_log.c.action).where(s.audit_log.c.entity_id==pending_id,
                                                            s.audit_log.c.action=="workspace_analysis_recovered"))
     engine.dispose()

@@ -302,6 +302,23 @@ def ready(url, processes):
     raise RuntimeError("Service startup timed out: " + url)
 
 
+def report_ultrasound_status(env):
+    request = urllib.request.Request("http://127.0.0.1:8200/internal/ultrasound/status", headers={
+        "Authorization": "Bearer " + env.get("DAI_ULTRASOUND_SERVICE_TOKEN", ""),
+    })
+    try:
+        opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+        with opener.open(request, timeout=5) as response:
+            status = json.load(response)
+        if status.get("state") == "ready":
+            model = "SonoNet16" if status.get("model") == "sononet16" else "research archive model"
+            print(f"Ultrasound AI ready: {model}.", flush=True)
+        else:
+            print(f"Ultrasound AI status: {status.get('state', 'unknown')}. Doctor review is available.", flush=True)
+    except (OSError, ValueError):
+        print("Could not verify ultrasound AI readiness. Doctor review is available.", flush=True)
+
+
 def main():
     action = sys.argv[1] if len(sys.argv) > 1 else "run"
     if action == "stop":
@@ -433,6 +450,8 @@ def main():
             *(["http://127.0.0.1:8200/health"] if local_ultrasound(env) else []),
         ]:
             ready(url, required_processes)
+        if local_ultrasound(env):
+            report_ultrasound_status(env)
         if hosted:
             print("Hosted DAI is ready.", flush=True)
         else:

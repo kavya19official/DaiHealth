@@ -9,10 +9,12 @@ import tempfile
 import numpy as np
 from PIL import Image
 from scipy.special import softmax
+from threadpoolctl import threadpool_limits
 
 from .imaging import quality
 
 BUNDLED_WEIGHTS = Path(__file__).resolve().parent / "assets/SonoNet16.npz"
+RUNTIME = "numpy-v1"
 WEIGHTS_SHA256 = "bbbf9dde2b3af686c247a3074d890ceb685cd63fc1fc2af7e704edc07810c53f"
 CLASSES = ("three_vessel", "four_chamber", "abdomen", "background", "brain_cerebellum",
            "brain_transventricular", "femur", "kidneys", "lips", "left_outflow",
@@ -46,50 +48,41 @@ def install(destination):
 
 
 def load(weights):
-    import onnx
-    from onnx import TensorProto, helper as h, numpy_helper
-    import onnxruntime as ort
-
-    nodes, parameters = [], []
-    previous = "image"
-
-    def node(kind, suffix, inputs=(), **attrs):
-        nonlocal previous
-        output = suffix + "_out"
-        nodes.append(h.make_node(kind, [previous, *inputs], [output], **attrs))
-        previous = output
-
-    # In the published Lasagne checkpoint each convolution is followed by
-    # beta, gamma, running mean and inverse standard deviation. Fold the
-    # inference-time batch normalization into a single Conv per layer.
+    layers = []
+    # The Lasagne checkpoint stores convolution weights followed by beta,
+    # gamma, running mean and inverse standard deviation. Fold batch
+    # normalization into the convolution for inference.
     with np.load(BytesIO(verify_weights(Path(weights).read_bytes())), allow_pickle=False) as archive:
         for layer in range(15):
             weight, beta, gamma, mean, inv_std = (archive[f"arr_{5*layer+i}"] for i in range(5))
             scale = gamma * inv_std
-            w, b = f"weights_{layer}", f"bias_{layer}"
-            parameters.extend((numpy_helper.from_array(weight * scale[:, None, None, None], w),
-                               numpy_helper.from_array(beta - mean * scale, b)))
-            pad = weight.shape[-1] // 2
-            node("Conv", f"conv_{layer}", (w, b), pads=[pad] * 4)
-            if layer < 14:
-                node("Relu", f"relu_{layer}")
-            if layer in (1, 3, 6, 9):
-                node("MaxPool", f"pool_{layer}", kernel_shape=[2, 2], strides=[2, 2])
+            kernel = np.ascontiguousarray((weight * scale[:, None, None, None]).reshape(len(scale), -1).T)
+            layers.append((kernel, beta - mean * scale, weight.shape[-1]))
 
-    node("GlobalAveragePool", "average")
-    node("Flatten", "logits", axis=1)
-    graph = h.make_graph(nodes, "SonoNet16", [h.make_tensor_value_info("image", TensorProto.FLOAT, [None, 1, 224, 288])],
-                         [h.make_tensor_value_info(previous, TensorProto.FLOAT, [None, len(CLASSES)])], parameters)
-    model = h.make_model(graph, opset_imports=[h.make_opsetid("", 13)], ir_version=8)
-    onnx.checker.check_model(model)
-    options = ort.SessionOptions()
-    options.intra_op_num_threads = 2
-    options.inter_op_num_threads = 1
-    session = ort.InferenceSession(model.SerializeToString(), options, providers=["CPUExecutionProvider"])
+    def forward(image):
+        # NHWC patches flattened in channel, kernel row, kernel column order
+        # match the checkpoint's OIHW filters. The convolutions use zero padding.
+        activation = image.transpose(1, 2, 0)
+        for index, (kernel, bias, size) in enumerate(layers):
+            height, width, _ = activation.shape
+            if size > 1:
+                pad = size // 2
+                padded = np.pad(activation, ((pad, pad), (pad, pad), (0, 0)))
+                patches = np.lib.stride_tricks.sliding_window_view(padded, (size, size), axis=(0, 1))
+            else:
+                patches = activation
+            activation = (patches.reshape(height * width, -1) @ kernel + bias).reshape(height, width, -1)
+            if index < len(layers) - 1:
+                np.maximum(activation, 0, out=activation)
+            if index in (1, 3, 6, 9):
+                activation = activation.reshape(height//2, 2, width//2, 2, -1).max(axis=(1, 3))
+        return activation.mean(axis=(0, 1), dtype=np.float64)
 
     def predict(frames):
-        logits, = session.run(None, {"image": frames})
-        return softmax(logits.astype(np.float64), axis=1)
+        # Cap BLAS threads on developer laptops and shared demo servers.
+        with threadpool_limits(limits=2, user_api="blas"):
+            logits = np.stack([forward(image) for image in frames])
+        return softmax(logits, axis=1)
 
     return predict
 

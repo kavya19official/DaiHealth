@@ -125,7 +125,10 @@ def register_inference(app, config=None, model_loader=load_model):
                 return JSONResponse({"state": "model_error"}, headers=CACHE)
             finally:
                 busy.release()
-        return JSONResponse({"state": "ready", "model": model_name}, headers=CACHE)
+        ready = {"state": "ready", "model": model_name}
+        if model_name == "sononet16":
+            ready["runtime"] = sononet.RUNTIME
+        return JSONResponse(ready, headers=CACHE)
 
     def run(raw, progress):
         nonlocal model

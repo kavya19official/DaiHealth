@@ -4,6 +4,7 @@ import hashlib
 import json
 import logging
 import os
+import re
 from datetime import datetime, timezone
 from io import BytesIO
 from threading import BoundedSemaphore
@@ -208,6 +209,9 @@ class Ultrasound:
                                 status = {"state": state}
                             elif state == "ready" and data.get("model") in ("sononet16", "archive"):
                                 status = {"state": state, "model": data["model"]}
+                                runtime = data.get("runtime")
+                                if isinstance(runtime, str) and re.fullmatch(r"[a-z0-9-]{1,32}", runtime):
+                                    status["runtime"] = runtime
                         elif reply.status_code == 404:
                             status = {"state": "service_outdated"}
                         elif reply.status_code in (401, 403):
