@@ -1,13 +1,9 @@
-import { translate, locale } from './language.js';
+import { translate, locale, fieldLabels, fieldText } from './language.js';
 
 (function () {
   'use strict';
   const entry = document.querySelector('[data-issue-capsule]');
   if (!entry) return;
-  const labels = {
-    allergies: 'Recorded allergies', blood_group: 'Recorded blood group', recorded_risk: 'Last recorded risk level',
-    risk_factors: 'Recorded risk factors', pregnancy_week: 'Pregnancy week when issued', vaccines: 'Four most recent recorded vaccine doses'
-  };
   const api = window.DaiAPI.API_BASE;
   async function request(path = '', options) {
     const response = await fetch(api + '/patient/care-capsules' + path, {
@@ -120,14 +116,14 @@ import { translate, locale } from './language.js';
         values = data.fields;
         let available = 0;
         for (const [name, value] of Object.entries(values)) {
-          if (value == null || !Object.hasOwn(labels, name)) continue;
+          if (value == null || !Object.hasOwn(fieldLabels, name)) continue;
           const label = document.createElement('label');
           const checkbox = document.createElement('input');
           checkbox.type = 'checkbox';
           checkbox.name = 'field';
           checkbox.value = name;
-          const preview = name === 'vaccines' ? value.map(row => row.code + ' (' + row.date + ')').join(', ') : name === 'risk_factors' ? value.join(', ') : value;
-          label.append(checkbox, document.createTextNode(' ' + labels[name] + ' · ' + preview));
+          const preview = fieldText(name, value, ', ');
+          label.append(checkbox, document.createTextNode(' ' + fieldLabels[name] + ' · ' + preview));
           fields.append(label);
           available++;
         }

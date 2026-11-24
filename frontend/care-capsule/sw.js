@@ -1,6 +1,6 @@
 'use strict';
 
-const cacheName = 'dai-care-capsule-shell-v2';
+const cacheName = 'dai-care-capsule-shell-v3';
 const shell = '/care-capsule/index.html';
 const assets = [shell, '/care-capsule/capsule.css', '/care-capsule/verify.js',
   '/care-capsule/verify-data.js', '/care-capsule/language.js', '/vendor/qr/jsQR.js', '/vendor/three/examples/jsm/libs/fflate.module.js'];
