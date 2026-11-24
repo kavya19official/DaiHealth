@@ -914,6 +914,7 @@ require('./notifications')(app, { pool, authenticateToken });
 // Patient experience: notification prefs + privacy controls
 require('./patientPreferences')(app, { pool, authenticateToken });
 require('./birthReadiness').register(app, { pool, authenticateToken, authorizeRole });
+require('./deliveryReadiness').register(app, { pool, authenticateToken, authorizeRole });
 require('./patientContinuity')(app, { pool, authenticateToken, authorizeRole });
 require('./patientExperience')(app, { pool, authenticateToken, authorizeRole });
 require('./patientHospitalStay')(app, { pool, authenticateToken, authorizeRole });

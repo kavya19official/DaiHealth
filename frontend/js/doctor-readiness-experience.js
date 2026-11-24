@@ -10,7 +10,7 @@
   function data(){return window.DoctorWorkspace?.getData?.()||null;}
   function activePatients(d){return (d?.patients||[]).filter(p=>p.edd&&!p.stage?.delivered).sort((a,b)=>String(a.edd).localeCompare(String(b.edd)));}
   function dayDiff(date){return Math.ceil((new Date(String(date).slice(0,10)+'T12:00:00')-new Date(String(data()?.date||new Date().toISOString().slice(0,10))+'T12:00:00'))/86400000);}
-  function readinessItems(p){const done=Math.max(0,Math.min(labels.length,p.readiness?.completed||0));return labels.map((label,index)=>({label,done:index<done}));}
+  function readinessItems(p){return labels.map(label=>({label,done:(p.readiness?.items||[]).some(item=>item.label===label&&item.complete===true)}));}
   function patientCard(p){
     const r=p.readiness,active=Boolean(r&&r.eligible!==false),days=dayDiff(p.edd),items=readinessItems(p);
     return '<article class="drx-patient" data-drx-patient-card="'+esc(p.id)+'">'+
@@ -20,6 +20,7 @@
       (active?'<details class="drx-details"><summary>View shared checklist <span>'+r.completed+'/'+r.total+'</span></summary><div class="drx-checklist">'+items.map(item=>'<div class="drx-check '+(item.done?'is-done':'')+'"><i>'+(item.done?'✓':'')+'</i><span>'+esc(item.label)+'</span><b>'+(item.done?'Complete':'To do')+'</b></div>').join('')+'</div></details>':'')+'</article>';
   }
   function readiness(){
+    if(window.DoctorDeliveryBoard){window.DoctorDeliveryBoard.render($('dwReadiness'),data());return;}
     const host=$('dwReadiness'),d=data();if(!host||!d)return;
     const patients=activePatients(d),withList=patients.filter(p=>p.readiness),activeLists=withList.filter(p=>p.readiness.eligible!==false),needs=activeLists.filter(p=>p.readiness.completed<p.readiness.total),due14=patients.filter(p=>{const n=dayDiff(p.edd);return n>=0&&n<=14;});
     let rows=patients.filter(p=>state.readinessFilter==='all'||state.readinessFilter==='due14'&&due14.includes(p)||state.readinessFilter==='needs'&&needs.includes(p)||state.readinessFilter==='later'&&dayDiff(p.edd)>14);

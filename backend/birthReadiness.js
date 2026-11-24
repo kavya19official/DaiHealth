@@ -22,7 +22,7 @@ function buildReadiness(profile={}, saved=[], date=M.today(), deliveryDate=null)
   for (const key of ['care_start_date','lmp_date','edd_date']) clean[key] = iso(clean[key]);
   const stage = M.stage(clean, deliveryDate?{active:true,delivery:{date:iso(deliveryDate)}}:{}, [], date);
   const values = new Map(saved.map(row => [row.item_key, !!row.completed]));
-  const items = CATALOGUE.map(item => ({ ...item, complete:values.get(item.key) || false, confirmable:true, can_confirm:true }));
+  const items = CATALOGUE.map(item => ({ ...item, complete:values.get(item.key) || false, updated_at:saved.find(row=>row.item_key===item.key)?.updated_at||null, source:'Patient checklist', confirmable:true, can_confirm:true }));
   const completed = items.filter(item => item.complete).length;
   const eligible = !stage.delivered && Number.isInteger(stage.week) && stage.week >= START_WEEK;
   const nextAction=items.find(item => !item.complete) || null;
@@ -45,7 +45,7 @@ function buildReadiness(profile={}, saved=[], date=M.today(), deliveryDate=null)
 async function readinessForMother(pool, motherId, date=M.today()) {
   const [profile, saved, postpartum] = await Promise.all([
     pool.query('SELECT care_start_date,lmp_date,edd_date,pregnancy_status FROM mother_profiles WHERE user_id=$1',[motherId]),
-    pool.query('SELECT item_key,completed FROM birth_readiness_items WHERE mother_id=$1',[motherId]),
+    pool.query('SELECT item_key,completed,updated_at FROM birth_readiness_items WHERE mother_id=$1',[motherId]),
     pool.query('SELECT delivery_date FROM postpartum_profile WHERE mother_id=$1',[motherId])
   ]);
   if (!profile.rows[0]) return null;
@@ -89,7 +89,7 @@ function register(app,{pool,authenticateToken,authorizeRole}) {
         updated_by=EXCLUDED.updated_by,updated_at=NOW(),version=birth_readiness_items.version+1`,[req.user.id,key,req.body.complete]);
       await client.query(`INSERT INTO birth_readiness_events(mother_id,actor_id,event_type,item_key,previous_completed,completed,details)
         VALUES($1,$1,'item_updated',$2,$3,$4,'{}'::jsonb)`,[req.user.id,key,current?.completed??false,req.body.complete]);
-      const saved=(await client.query('SELECT item_key,completed FROM birth_readiness_items WHERE mother_id=$1',[req.user.id])).rows;
+      const saved=(await client.query('SELECT item_key,completed,updated_at FROM birth_readiness_items WHERE mother_id=$1',[req.user.id])).rows;
       const updated=buildReadiness(profile,saved,M.today(),postpartum?.delivery_date);
       await client.query('COMMIT');
       res.set('Cache-Control','no-store').json({readiness:updated});
