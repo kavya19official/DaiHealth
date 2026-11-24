@@ -399,6 +399,10 @@ Patient → doctor: in **Reports & records** the patient uploads a PDF or image 
 
 Doctor → patient: under **Records → Patient reports** a verified doctor chooses **Add a report for a patient**, picks a connected patient and uploads the file (`POST /api/doctor/patients/:motherId/documents`). The patient sees it in **Reports & records** marked "Added by Dr …" and can open or share it, but not delete it. The doctor keeps access to reports they added only while the care relationship is active; revoking the doctor removes it. Migration: `backend/db/clinician_report_uploads.sql`.
 
+## Digital Pregnancy Library
+
+Open **My Pregnancy Library** on the Mother Dashboard for a private timeline, memory gallery, diary and letters. See the [setup, demo and privacy guide](docs/PREGNANCY_LIBRARY.md) for the PostgreSQL migration and test commands.
+
 ## Ultrasound scans
 
 Patients can securely upload a frame to a verified clinician from their care team. Doctors can review scan history, image quality and pregnancy context and release a report with follow-up instructions. See [the ultrasound setup and deployment guide](hospital_portal/ULTRASOUND_AI_REVIEW.md).

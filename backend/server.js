@@ -43,7 +43,8 @@ app.use(cors((req, callback) => {
 
 // Concise request logging. Do not print cookies, authorization headers, or patient data.
 app.use((req, res, next) => {
-  if (!(/^\/api\/(patient|doctor)\/(patients\/\d+\/)?ultrasound(?:\/|$)/.test(req.path))) {
+  if (!(/^\/api\/(patient|doctor)\/(patients\/\d+\/)?ultrasound(?:\/|$)/.test(req.path) ||
+      /^\/api\/patient\/pregnancy-library(?:\/|$)/.test(req.path))) {
     console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
   }
   next();
@@ -931,6 +932,7 @@ require('./clinicalDashboard')(app, { pool, authenticateToken, authorizeRole });
 require('./consultationVoice').register(app, { pool, authenticateToken, authorizeRole });
 require('./doctorWorkspace')(app, { pool, authenticateToken, authorizeRole });
 require('./ultrasoundWorkspace')(app, { pool, authenticateToken, authorizeRole });
+require('./pregnancyLibrary')(app, { pool, authenticateToken, authorizeRole });
 require('./doctorOperations')(app, { pool, authenticateToken, authorizeRole });
 require('./patientDocuments')(app, { pool, authenticateToken, authorizeRole, jwtSecret: process.env.JWT_SECRET });
 require('./patientTimelineLive')(app, { pool, authenticateToken, authorizeRole });
