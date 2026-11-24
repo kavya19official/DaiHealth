@@ -1,6 +1,6 @@
 'use strict';
 const fs=require('node:fs/promises'),path=require('node:path'),crypto=require('node:crypto');
-const {faqs,respond}=require('../frontend/js/daya-knowledge');
+const {faqs,respond,localize}=require('../frontend/js/daya-knowledge');
 
 function pcmToWav(pcm,sampleRate=24000){
   const header=Buffer.alloc(44);
@@ -15,12 +15,15 @@ function createSpeechHandler({env=process.env,fetchImpl=(...args)=>fetch(...args
   const diskDir=env.DAI_TTS_CACHE_DIR || (env===process.env?path.join(__dirname,'../.local/tts-cache'):null);
   const mirrorApproved=Object.fromEntries(['en','hi'].map(lang=>[lang,new Set([...require('../shared/pregnancy-mirror').narrations(lang),...require('../shared/uterus-learning').narrations(lang),...require('../shared/sukoon').narrations(lang)])]));
   const approved=Object.fromEntries(['en','hi'].map(lang=>[lang,new Set([...faqs.map(f=>f.answer[lang]),respond('',lang).text,...mirrorApproved[lang]])]));
+  mirrorApproved.mr=new Set([...mirrorApproved.en].map(t=>localize(t,'mr')));
+  approved.mr=new Set([...faqs.map(f=>f.answer.mr),localize(respond('','en').text,'mr'),...mirrorApproved.mr]);
+  for(const lang of ['hi','mr'])for(const text of [...approved.en]){const translated=localize(text,lang);if(translated!==text)approved[lang].add(translated);}
   return async function speech(req,res){
     const text=typeof req.body?.text==='string'?req.body.text.trim():'';
     const rawLanguage=req.body?.language??'en';
-    if(!['en','hi','en-IN','hi-IN'].includes(rawLanguage))return res.status(400).json({error:'Language must be English (en) or Hindi (hi)'});
-    const language=rawLanguage.startsWith('hi')?'hi':'en';
-    if(!text||text.length>1500)return res.status(400).json({error:'A prepared answer of at most 1500 characters is required'});
+    if(!['en','hi','mr','en-IN','hi-IN','mr-IN'].includes(rawLanguage))return res.status(400).json({error:'Language must be English (en), Hindi (hi) or Marathi (mr)'});
+    const language=rawLanguage.startsWith('hi')?'hi':rawLanguage.startsWith('mr')?'mr':'en';
+    if(!text||text.length>4500)return res.status(400).json({error:'A prepared answer of at most 4500 characters is required'});
     // The public widget can voice prepared educational answers only. Never forward
     // arbitrary questions, patient records or caller-provided prompts to Google.
     if(!approved[language].has(text)&&!(language==='hi'?(require('../shared/voice-triage').isApprovedUtterance(text,'hi')||require('../shared/voice-triage').isApprovedUtterance(text,'hinglish')):require('../shared/voice-triage').isApprovedUtterance(text,'en')))return res.status(400).json({error:'Only Dr. Daya prepared answers can be spoken'});
@@ -57,7 +60,7 @@ function createSpeechHandler({env=process.env,fetchImpl=(...args)=>fetch(...args
         method:'POST',signal:AbortSignal.timeout(30000),
         headers:{'Content-Type':'application/json','x-goog-api-key':key},
         body:JSON.stringify({contents:[{parts:[{text:[
-          `Read the transcript below in ${language==='hi'?'Hindi (India)':'English (India)'}.`,
+          `Read the transcript below in ${language==='hi'?'Hindi (India)':language==='mr'?'Marathi (India)':'English (India)'}.`,
           'Use a calm, clear Indian male care-guide voice. Read only the transcript, without adding advice, explanations or words. Do not translate the transcript into another language.',
           'For Roman-script Hindi, pronounce the words naturally in Hindi.',
           '', 'Transcript:',text

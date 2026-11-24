@@ -142,3 +142,10 @@ test('Sukoon voices only fixed prototype scripts, never private notes or check-i
  for(const language of ['en','hi'])for(const text of M.narrations(language)){const r=res();await handle({ip:'sukoon',body:{text,language,note:'PRIVATE'}},r);assert.equal(r.code,200);assert.equal(r.headers['X-DAI-TTS-Voice'],'Charon');}
  for(const [,options]of calls)assert.ok(!options.body.includes('PRIVATE'));const before=calls.length,r=res();await handle({body:{text:'PRIVATE diary entry',language:'en'}},r);assert.equal(r.code,400);assert.equal(calls.length,before);
 });
+
+test('Marathi prepared replies use Marathi Charon and still reject arbitrary records',async()=>{
+ const calls=[],handle=createSpeechHandler({env:{GEMINI_API_KEY:'synthetic-test-key'},fetchImpl:async(...args)=>{calls.push(args);return ok();}});
+ const answer=faqs.find(f=>f.id==='timeline').answer.mr;assert.match(answer,/[\u0900-\u097f]/);
+ const r=res();await handle({body:{text:answer,language:'mr',record:{name:'PRIVATE'}},ip:'marathi-test'},r);assert.equal(r.code,200);assert.equal(r.headers['X-DAI-TTS-Language'],'mr');assert.equal(r.headers['X-DAI-TTS-Voice'],'Charon');assert.match(calls[0][1].body,/Marathi \(India\)/);assert.ok(!calls[0][1].body.includes('PRIVATE'));
+ const invalid=res();await handle({body:{text:answer+' PRIVATE-CLINICAL-RECORD',language:'mr'},ip:'marathi-test'},invalid);assert.equal(invalid.code,400);assert.equal(calls.length,1);
+});

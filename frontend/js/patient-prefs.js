@@ -67,11 +67,13 @@
   async function getPrefs() {
     var server = await loadFromServer();
     if (server) {
+      if(window.DaiI18n?.hasPreference())server.lang=window.DaiI18n.getLang();
       writeLocal(server);
       applyAppearance(server);
       return server;
     }
     var local = readLocal();
+    if(window.DaiI18n?.hasPreference())local.lang=window.DaiI18n.getLang();
     applyAppearance(local);
     return local;
   }

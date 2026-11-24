@@ -270,3 +270,47 @@ The local/synthetic workflows do not demonstrate reduced loss to follow-up.
   booking, evidence consent, proposed adaptation, approval, edit invalidation,
   exports, dark mode and viewport fit using synthetic data and a stub AI provider.
 - Existing doctor navigation/dashboard browser checks remain applicable.
+
+## Shared app language system (24 November 2026)
+
+English, Hindi and Marathi are available from the page language selector on the
+patient, doctor, hospital/admin, sign-in, child, caregiver, directory and public
+pages. The hospital portal copies the same runtime and catalogues during its
+existing `predev`/`prebuild` asset sync.
+
+The shared translator covers newly inserted panels and dialogs, labels, options,
+help text, server messages, placeholders, tooltips, accessible names and page
+titles. It preserves element structure, event handlers, form values, identifiers
+and dynamic placeholders. Original typed text, chat messages, editable clinical
+content and marked source records are not silently rewritten. Existing reviewed
+FAQ responses retain their API contract; the visible UI can render localized
+copy. Marathi prepared replies and Charon speech are supported by the fixed
+public-content allowlist, without allowing arbitrary records into speech calls.
+
+Language choice is stored locally and in a same-site language cookie so moving
+between workspaces does not reset it. Patient preference loading respects an
+explicit device language choice. English restoration and dynamic re-rendering
+are tested. The private-device service workers cache both public catalogues;
+no runtime patient text is sent to a translation service.
+
+The committed `frontend/locales` catalogues contain translations for 13,507
+extracted static UI phrases and templates in each language. Important navigation
+and clinical-interface terms have explicit overrides. Number and placeholder
+checks cover the full catalogue; named ordinal stages use explicit word-form overrides.
+These coverage checks do not replace clinical review of medical wording.
+
+To maintain translations after adding application copy:
+
+```sh
+node scripts/extract-ui-catalog.cjs
+node scripts/build-ui-translations.cjs --offline
+node --test backend/localization.test.js
+```
+
+Offline mode applies committed overrides, removes obsolete entries and reports
+missing copy without calling a provider. An optional build without `--offline`
+uses the existing backend Gemini configuration for static source copy only.
+Keys remain server-side. It preserves checkpoints and reports a daily quota
+failure directly. The static assets include complete catalogues; users do
+not need an AI key or quota to change the interface language. Prepared AI speech
+still depends on its configured service and device audio permissions.

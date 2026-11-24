@@ -1,4 +1,4 @@
-/* Reviewed educational responses. No generative model, diagnosis or private-record retrieval. */
+/* Prepared educational responses with bundled localisation. No generative model, diagnosis or private-record retrieval. */
 (function(root,factory){ const api=factory(); if(typeof module==='object' && module.exports) module.exports=api; else root.DaiDayaKnowledge=api; })(typeof globalThis!=='undefined'?globalThis:this,function(){
 'use strict';
 const faqs = [
@@ -40,8 +40,8 @@ const faqs = [
       "hi": "मैं हिंदी या अपनी क्षेत्रीय भाषा कैसे चुनूँ?"
     },
     "answer": {
-      "en": "For Dhruv, use the English / हिंदी switch above. For the app, open Settings → Language and choose an available language. Other regional languages are not supported by this assistant yet.",
-      "hi": "Dhruv के लिए ऊपर English / हिंदी चुनें। ऐप में Settings → Language में उपलब्ध भाषा चुनें। इस असिस्टेंट में अभी दूसरी क्षेत्रीय भाषाएँ उपलब्ध नहीं हैं।"
+      "en": "Choose English, Hindi or Marathi from the language selector. Your choice is shared across the app and Dhruv. Device read-aloud depends on the voices installed on your device.",
+      "hi": "भाषा के विकल्प में English, हिंदी या मराठी चुनें। यह विकल्प ऐप और ध्रुव दोनों पर लागू होता है। डिवाइस पर सुनने के लिए उस भाषा की आवाज़ उपलब्ध होनी चाहिए।"
     },
     "pattern": "language|hindi|regional|भाषा|हिंदी|bhasha",
     "sources": [],
@@ -652,19 +652,28 @@ const danger = /bleed|haemorrhag|hemorrhag|severe\s*(headache|head pain)|bad hea
 const medicine = /(medicine|medication|dose|tablet|दवा|डो[ज़ज]|खुराक).{0,35}(change|increase|reduce|stop|double|बदल|बढ़ा|घटा|बंद|badal|badha|kam kar|band kar)|(change|increase|reduce|stop|double|बदल|बढ़ा|घटा|बंद).{0,35}(medicine|medication|dose|tablet|दवा|डो[ज़ज]|खुराक)|should i take|which medicine|कौन.?सी दवा|kitni.*(goli|dose)|कितनी.*(गोली|खुराक)/i;
 const personalSafety = /(?:is|am|kya|क्या).{0,35}(?:my|meri|mera|मेरी|मेरा).{0,40}(?:safe|unsafe|सुरक्षित)|(?:my|meri|मेरी).{0,25}(?:pregnancy|गर्भावस्था).{0,25}(?:safe|unsafe|सुरक्षित)|am i.{0,12}(high.?risk|at risk|safe|unsafe)/i;
 const diagnosis = /diagnos|what.{0,10}(disease|illness|condition).{0,18}(i have|have i)|do i have.{0,20}(diabetes|gdm|ana?emia|preeclampsia|pre eclampsia|infection|disease)|am i suffering|mujhe.{0,30}(bimari|beemari|kya hua)|मुझे.{0,20}(बीमारी|बीमार|क्या हुआ)|क्या मुझे.{0,15}(डायबिटीज|एनीमिया|संक्रमण|बीमारी)/i;
-function make(entry,lang,safety=false){ return {id:entry.id,text:entry.answer[lang],sources:safety?[]:entry.sources,navigation:safety?null:entry.navigation,safety}; }
+const localeCache={};
+function localize(text,lang){
+ if(lang==='en')return text;
+ if(typeof window!=='undefined'&&window.DaiI18n)return window.DaiI18n.translate(text,lang);
+ if(typeof module==='object'&&module.exports){try{localeCache[lang]||=(require('../locales/'+lang+'.json').phrases||{});return localeCache[lang][String(text).replace(/\s+/g,' ').trim()]||text;}catch(_){}}
+ return text;
+}
+for(const category of categories)Object.defineProperty(category,'mr',{enumerable:true,get:()=>localize(category.en,'mr')});
+for(const entry of faqs){for(const field of ['question','answer'])Object.defineProperty(entry[field],'mr',{enumerable:true,get:()=>localize(entry[field].en,'mr')});}
+function make(entry,lang,safety=false){return {id:entry.id,text:entry.answer[lang]||entry.answer.en,sources:safety?[]:entry.sources,navigation:safety?null:entry.navigation,safety}; }
 function respond(text,language='en'){
- const lang=language==='hi'?'hi':'en'; const value=normalise(text);
- if(danger.test(value))return make(faqs.find(x=>x.id==='danger'),lang,true);
- if(medicine.test(value))return make(faqs.find(x=>x.id==='medicine-refusal'),lang,true);
- if(personalSafety.test(value))return make(faqs.find(x=>x.id==='safe-refusal'),lang,true);
- if(diagnosis.test(value))return make(faqs.find(x=>x.id==='diagnosis-refusal'),lang,true);
+ const lang=['hi','mr'].includes(language)?language:'en'; const value=normalise(text);
+ if(danger.test(value)||/तीव्र.*डोकेदुखी|धूसर.*दिस|श्वास.*त्रास|बाळ.*हालचाल.*नाही/.test(value))return make(faqs.find(x=>x.id==='danger'),lang,true);
+ if(medicine.test(value)||/औषध.*(बदल|वाढ|कमी|बंद)|डोस.*(बदल|वाढ|कमी)/.test(value))return make(faqs.find(x=>x.id==='medicine-refusal'),lang,true);
+ if(personalSafety.test(value)||/माझी.*(गर्भावस्था|प्रसूती).*सुरक्षित/.test(value))return make(faqs.find(x=>x.id==='safe-refusal'),lang,true);
+ if(diagnosis.test(value)||/मला.*(कोणता.*आजार|कोणता.*रोग)/.test(value))return make(faqs.find(x=>x.id==='diagnosis-refusal'),lang,true);
  const exact=faqs.find(x=>Object.values(x.question).some(q=>normalise(q)===value));
  if(exact)return make(exact,lang,['danger','medicine-refusal','safe-refusal','diagnosis-refusal'].includes(exact.id));
  // Specific phrases outrank generic report, vaccine, appointment and terminology matches.
  const order=['missed-vaccine','twin-terms','high-risk','sos-how','sos-after','pnc','first-anc','anc-count','anomaly','ogtt','supplements','td','bag','pnc','feeding','mood','contraception','next-visit','pending','timeline','upload','language','family','voice','twin-records','growth','vaccines','pmjay','pmmvy','jsy','scheme-docs','delete-share','privacy','booking','report-next','terms'];
  for(const id of order){const entry=faqs.find(x=>x.id===id);if(new RegExp(entry.pattern,'iu').test(value))return make(entry,lang);}
- return {id:'fallback',text:lang==='hi'?'मैं DAI इस्तेमाल, गर्भावस्था के सामान्य पड़ाव, बच्चों की care, योजनाओं और privacy के प्रश्नों में मदद कर सकता हूँ। नीचे कोई विषय चुनें। निजी रिपोर्ट या चिकित्सा फ़ैसले के लिए care team से मिलें।':'I can help with using DAI, general pregnancy milestones, baby care, schemes and privacy. Choose a topic below. Ask your care team about personal results or medical decisions.',sources:[],navigation:null,safety:false};
+ return {id:'fallback',text:lang==='mr'?localize('I can help with using DAI, general pregnancy milestones, baby care, schemes and privacy. Choose a topic below. Ask your care team about personal results or medical decisions.','mr'):lang==='hi'?'मैं DAI इस्तेमाल, गर्भावस्था के सामान्य पड़ाव, बच्चों की care, योजनाओं और privacy के प्रश्नों में मदद कर सकता हूँ। नीचे कोई विषय चुनें। निजी रिपोर्ट या चिकित्सा फ़ैसले के लिए care team से मिलें।':'I can help with using DAI, general pregnancy milestones, baby care, schemes and privacy. Choose a topic below. Ask your care team about personal results or medical decisions.',sources:[],navigation:null,safety:false};
 }
-return {faqs,categories,respond,normalise};
+return {faqs,categories,respond,normalise,localize};
 });

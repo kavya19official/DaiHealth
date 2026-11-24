@@ -119,6 +119,7 @@ const titles: Record<string, [string, string]> = {
   "care-gap-map": ["District care gap map", "Privacy-protected synthetic outreach patterns with role-scoped drill-down."],
   "quality-board": ["Ward quality dashboard", "Suppressed recorded measures; no hospital ranking."],
   capacity: ["Capacity & readiness", "Recorded beds, blood and scheduled staff; freshness is shown without ranking facilities."],
+  goldenHour: ["Golden hour", "Emergency arrivals, patient requests and facility transfers in one coordinated workspace."],
   incomingCare: ["Incoming care", "Emergency arrivals, patient requests and facility transfers in one coordinated workspace."],
   patientCare: ["Patient Care Hub", "Patients, appointments, care gaps and follow-ups in one connected workspace."],
   management: ["Facility & staff management", "Onboarding, services, slots and accountable staff access."],
@@ -816,6 +817,7 @@ export default function Home() {
               {facility ? compact(facility.name) : "Loading facility…"}
             </strong>
           </div>
+          <span data-dai-language-slot />
           <details className="demo-info"><summary>About this demo</summary><p>Fictional people, facilities and synthetic records. Forecasts are demonstrations and are not validated on real hospital activity.</p></details>
           <button
             className="icon-button"

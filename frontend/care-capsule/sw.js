@@ -1,8 +1,8 @@
 'use strict';
 
-const cacheName = 'dai-care-capsule-shell-v1';
+const cacheName = 'dai-care-capsule-shell-v2-locales';
 const shell = '/care-capsule/index.html';
-const assets = [shell, '/care-capsule/capsule.css', '/care-capsule/verify.js',
+const assets = [shell, "/js/i18n.js", "/i18n.css", "/locales/source.json", "/locales/hi.json", "/locales/mr.json", '/care-capsule/capsule.css', '/care-capsule/verify.js',
   '/care-capsule/verify-data.js', '/vendor/qr/jsQR.js', '/vendor/three/examples/jsm/libs/fflate.module.js'];
 
 self.addEventListener('install', event => {

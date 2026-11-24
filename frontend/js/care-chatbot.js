@@ -10,11 +10,11 @@
   function el(tag,attrs={},text){const n=document.createElement(tag);for(const [key,value] of Object.entries(attrs))n.setAttribute(key,value);if(text)n.textContent=text;return n;}
   function boot(){
     const knowledge=window.DaiDayaKnowledge;
-    let language='en',voice=false,avatar=null,avatarPromise=null,recognition=null,lastReply='',lastReplyOptions={},speechId=0,opened=false,speechAbort=null,currentAudio=null,audioUrl=null,slow=false;
+    let language=['hi','mr'].includes(window.DaiI18n?.getLang())?window.DaiI18n.getLang():'en',voice=false,avatar=null,avatarPromise=null,recognition=null,lastReply='',lastReplyOptions={},speechId=0,opened=false,speechAbort=null,currentAudio=null,audioUrl=null,slow=false;
     const root=el('div',{class:'care-chatbot',id:'daiCareChatbot'});
     root.innerHTML=`<button type="button" class="care-chatbot__launcher" aria-controls="careChatbotPanel" aria-expanded="false"><span class="daya-spark" aria-hidden="true">✦</span><span>Ask Dhruv</span></button>
       <section id="careChatbotPanel" class="care-chatbot__panel" aria-label="Dhruv assistant" hidden>
-      <header class="care-chatbot__header"><strong>Dhruv</strong><div class="daya-header-actions"><details class="dhruv-about"><summary aria-label="About Dhruv">ⓘ</summary><p>AI guide, not a clinician. Microphone audio may use your browser’s speech service. Approved spoken replies use Gemini. Nothing is saved from this chat.</p></details><select aria-label="Assistant language"><option value="en">English</option><option value="hi">हिंदी</option></select><button type="button" class="care-chatbot__close" aria-label="Close assistant">×</button></div></header>
+      <header class="care-chatbot__header"><strong>Dhruv</strong><div class="daya-header-actions"><details class="dhruv-about"><summary aria-label="About Dhruv">ⓘ</summary><p>AI guide, not a clinician. Microphone audio may use your browser’s speech service. Approved spoken replies use Gemini. Nothing is saved from this chat.</p></details><select aria-label="Assistant language"><option value="en">English</option><option value="hi">हिंदी</option><option value="mr">मराठी</option></select><button type="button" class="care-chatbot__close" aria-label="Close assistant">×</button></div></header>
       <div class="daya-body"><aside class="daya-character" aria-label="Animated 3D Dhruv"><div class="daya-avatar"><span class="daya-avatar-status" role="status">Loading…</span></div><span class="daya-state" role="status">Ready</span><a class="daya-credit" href="https://sketchfab.com/3d-models/doctor-sketchfab-weekly-13-mar23-9c89a438a5e940e59a0f9a07c22d6ade" target="_blank" rel="noopener noreferrer">Avatar: BrushDip · CC BY</a></aside>
       <div class="daya-conversation"><div class="dhruv-modes"><select class="dhruv-input-mode" aria-label="Chat mode"><option value="text">Text → Text</option><option value="text-voice">Text → Voice</option><option value="conversation">Voice ↔ Voice</option></select></div>
       <div class="dhruv-voice-heading" hidden><h2>Talk to Dhruv</h2><div class="dhruv-waveform" aria-hidden="true"></div><p class="dhruv-voice-status" role="status">Ready when you are</p></div>
@@ -24,7 +24,7 @@
       <div class="dhruv-voice-input" hidden><div class="dhruv-mic-orbit" aria-hidden="true"></div><button type="button" class="daya-mic" aria-pressed="false">🎙 Start conversation</button><span class="dhruv-mic-caption" aria-hidden="true">Start conversation</span></div><p class="daya-help-status" role="status" hidden></p></div></div></section>`;
     document.body.appendChild(root);
     const panel=root.querySelector('section'),launcher=root.querySelector('.care-chatbot__launcher'),feed=root.querySelector('.care-chatbot__feed'),input=root.querySelector('.care-chatbot__form input'),mic=root.querySelector('.daya-mic'),state=root.querySelector('.daya-state'),help=root.querySelector('.daya-help-status'),avatarHost=root.querySelector('.daya-avatar');
-    const tr=(en,hi)=>language==='hi'?hi:en;
+    const tr=(en,hi)=>{const translated=window.DaiI18n?.translate(en,language);return translated&&translated!==en?translated:language==='hi'?hi:en;};
     let careGuide=null,inputMode='text',interactionId=0,conversationActive=false,deviceVoice=false,liveTranscript=null;
     const modeBar=root.querySelector('.dhruv-modes'),modeSelect=root.querySelector('.dhruv-input-mode'),voiceControls=root.querySelector('.dhruv-voice-input'),speechStatus=help;
     const micIdleLabel=()=>conversationActive?tr('■ End conversation','■ बातचीत बंद करें'):tr('🎙 Start conversation','🎙 बातचीत शुरू करें');
@@ -112,7 +112,7 @@
     }
     function speakOnDevice(text,options={}){
       if(!window.speechSynthesis||!window.SpeechSynthesisUtterance){setVoiceState('error',tr('Voice unavailable','आवाज़ उपलब्ध नहीं'));help.hidden=false;help.textContent=tr('Device voice unavailable. Read the reply.','डिवाइस की आवाज़ उपलब्ध नहीं। जवाब पढ़ें।');return;}
-      const id=speechId,u=new window.SpeechSynthesisUtterance(text);u.lang=(options.language||language)==='hi'?'hi-IN':'en-IN';u.rate=slow?.8:.95;
+      const id=speechId,u=new window.SpeechSynthesisUtterance(text);u.lang=({hi:'hi-IN',mr:'mr-IN',en:'en-IN'}[options.language||language]||'en-IN');u.rate=slow?.8:.95;
       help.textContent=tr('Device voice · no Gemini request','डिवाइस की आवाज़ · Gemini को अनुरोध नहीं');
       u.onstart=()=>{if(id===speechId){avatar?.setTalking(true);setVoiceState('speaking',tr('Speaking…','बोल रहा हूँ…'));}};
       u.onend=()=>{if(id===speechId){avatar?.setTalking(false);setVoiceState('idle',tr('Ready when you are','आपका प्रश्न सुनने को तैयार'));options.onEnd?.();}};
@@ -158,7 +158,7 @@
       for(const [id,en,hi] of suggestions){const q=knowledge.faqs.find(q=>q.id===id);if(!q)continue;const button=el('button',{type:'button','data-question-id':id},tr(en,hi));button.onclick=()=>{ask(q.question[language],{faq:true});unlockAudio();};chips.appendChild(button);}
     }
     function labels(){
-      root.lang=language;root.dataset.inputMode=inputMode;root.querySelector('.dhruv-voice-heading').hidden=inputMode!=='conversation';root.querySelector('.dhruv-voice-heading h2').textContent=tr('Talk to Dhruv','ध्रुव से बात करें');state.setAttribute('aria-hidden',String(inputMode==='conversation'));setVoiceState('idle',tr('Ready when you are','आपका प्रश्न सुनने को तैयार'));
+      root.lang=language;root.querySelector('.daya-header-actions select').value=language;root.dataset.inputMode=inputMode;root.querySelector('.dhruv-voice-heading').hidden=inputMode!=='conversation';root.querySelector('.dhruv-voice-heading h2').textContent=tr('Talk to Dhruv','ध्रुव से बात करें');state.setAttribute('aria-hidden',String(inputMode==='conversation'));setVoiceState('idle',tr('Ready when you are','आपका प्रश्न सुनने को तैयार'));
       input.placeholder=tr('Ask me anything…','अपना प्रश्न पूछें…');root.querySelector('form button').textContent=tr('Send','भेजें');
       modeSelect.options[0].textContent=tr('Text → Text','लिखें → लिखित जवाब');modeSelect.options[1].textContent=tr('Text → Voice','लिखें → आवाज़ में जवाब');modeSelect.options[2].textContent=tr('Voice ↔ Voice','बोलकर बातचीत');
       root.querySelector('.care-chatbot__form').hidden=inputMode==='conversation';voiceControls.hidden=inputMode!=='conversation';updateMic();
@@ -181,7 +181,7 @@
     launcher.addEventListener('click',open);root.querySelector('.care-chatbot__close').addEventListener('click',close);
     root.addEventListener('keydown',event=>{if(event.key==='Escape')close();});
     root.querySelector('form').addEventListener('submit',event=>{event.preventDefault();ask(input.value);unlockAudio();});
-    root.querySelector('.daya-header-actions select').addEventListener('change',event=>{stopListening();interactionId++;conversationActive=false;language=event.target.value;stop();lastReply='';careGuide?.reset();labels();intro();});
+    root.querySelector('.daya-header-actions select').addEventListener('change',async event=>{stopListening();interactionId++;conversationActive=false;language=event.target.value;stop();lastReply='';careGuide?.reset();if(window.DaiI18n?.setLang)await window.DaiI18n.setLang(language);labels();intro();});
     const Recognition=window.SpeechRecognition||window.webkitSpeechRecognition;
     function speechFailure(code){
       conversationActive=false;clearLiveTranscript();
@@ -204,7 +204,7 @@
     if(!Recognition){mic.disabled=true;mic.title='Speech recognition is not supported in this browser. You can type instead.';}
     function startListening(){
       if(!Recognition||!opened||inputMode!=='conversation')return;
-      stopListening();stop();let r;try{r=new Recognition();}catch{speechFailure('service-not-allowed');return;}delete speechStatus.dataset.error;recognition=r;r.lang=language==='hi'?'hi-IN':'en-IN';r.interimResults=true;r.continuous=false;
+      stopListening();stop();let r;try{r=new Recognition();}catch{speechFailure('service-not-allowed');return;}delete speechStatus.dataset.error;recognition=r;r.lang={hi:'hi-IN',mr:'mr-IN',en:'en-IN'}[language]||'en-IN';r.interimResults=true;r.continuous=false;
       let finalText='',hadError=false;
       speechStatus.hidden=true;
       r.onstart=()=>{if(recognition!==r)return;updateMic();setVoiceState('listening',tr('Listening…','सुन रहा हूँ…'));};
@@ -228,6 +228,8 @@
       if(pauseConversation){conversationActive=false;updateMic();}
       speakReply(text,{...lastReplyOptions,pauseConversation});
     }
+    window.addEventListener('dai:lang',event=>{const next=event.detail.lang;if(!['en','hi','mr'].includes(next)||next===language)return;stopListening();interactionId++;conversationActive=false;language=next;stop();lastReply='';careGuide?.reset();labels();if(opened)intro();});
+    window.addEventListener('dai:i18n-ready',()=>{labels();});
     window.DhruvCompanion={open,close,ask,root,feed,reply:guideReply,message,language:()=>language,isOpen:()=>opened,registerGuide:guide=>{careGuide=guide;},listen:startListening,stop:()=>{interactionId++;conversationActive=false;stopListening();stop();updateMic();}};
     window.dispatchEvent(new Event('dhruv:ready'));
     document.addEventListener('visibilitychange',()=>{if(document.hidden){interactionId++;conversationActive=false;stop();stopListening();}});

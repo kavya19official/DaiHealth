@@ -178,7 +178,7 @@
  function updateVoice(){if(!dialog)return;$('[data-pm-mute]').textContent=muted?T('Unmute voice','आवाज़ चालू करें'):T('Mute voice','आवाज़ बंद करें');$('[data-pm-mute]').setAttribute('aria-pressed',String(muted));voiceState('ready');}
  function stopVoice(){speechToken++;voicePlayer?.stop();window.speechSynthesis?.cancel();}
  function replayVoice(){muted=false;updateVoice();if(voicePlayer?.pending()){voicePlayer.resume();return;}voicePlayer?.unlock();listen();}
- function listen(){if(!dialog||muted)return;window.DhruvCompanion?.stop();window.speechSynthesis?.cancel();if(!voicePlayer){voiceState('error');return;}voicePlayer.speak($('[data-pm-explanation]').textContent,document.documentElement.lang==='hi'?'hi':'en');}
+ function listen(){if(!dialog||muted)return;window.DhruvCompanion?.stop();window.speechSynthesis?.cancel();if(!voicePlayer){voiceState('error');return;}voicePlayer.speak(window.DaiI18n?.translate($('[data-pm-explanation]').textContent)||$('[data-pm-explanation]').textContent,['hi','mr'].includes(document.documentElement.lang)?document.documentElement.lang:'en');}
  function deviceListen(){
   if(!dialog||!window.speechSynthesis||!window.SpeechSynthesisUtterance)return;stopVoice();muted=false;updateVoice();const utterance=new SpeechSynthesisUtterance($('[data-pm-explanation]').textContent);utterance.lang=document.documentElement.lang==='hi'?'hi-IN':'en-IN';utterance.rate=.9;utterance.onstart=()=>{if(dialog)$('[data-pm-voice-status]').textContent=T('Device voice · transcript below','डिवाइस की आवाज़ · लिखित जानकारी नीचे');};speechSynthesis.speak(utterance);
  }
