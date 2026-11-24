@@ -1,5 +1,5 @@
 import { capsuleCode, verifyCapsule } from './verify-data.js';
-import { translate, locale } from './language.js';
+import { translate, locale, fieldLabels, fieldText } from './language.js';
 
 const $ = id => document.getElementById('capsule-' + id);
 const readiness = $('ready');
@@ -34,10 +34,6 @@ function renderLanguage() {
   renderResult();
 }
 
-const labels = {
-  allergies: 'Recorded allergies', blood_group: 'Recorded blood group', recorded_risk: 'Last recorded risk level',
-  risk_factors: 'Recorded risk factors', pregnancy_week: 'Pregnancy week when issued', vaccines: 'Most recent recorded vaccine doses'
-};
 let trust, stream, pending, lastCode, timer, shellReady = false, savedTrust = false, cameraGeneration = 0;
 try {
   trust = JSON.parse(localStorage.getItem(storageKey));
@@ -91,9 +87,7 @@ function renderResult() {
   const data = verifiedData;
   const fields = document.createElement('dl');
   for (const [key, value] of Object.entries(data.fields)) {
-    const text = key === 'vaccines' ? value.map(entry => entry.code + ' · ' + entry.date).join('\n') :
-      key === 'risk_factors' ? value.join('\n') : value;
-    fields.append(node('dt', t(labels[key])), node('dd', text));
+    fields.append(node('dt', t(fieldLabels[key])), node('dd', fieldText(key, value)));
   }
   result.append(node('h2', t(data.subject === 'mother' ? 'Maternal emergency summary' : 'Child emergency summary')),
     node('p', t('Issued') + ' ' + new Date(data.iat * 1000).toLocaleDateString(locale(language)) + ' · ' +

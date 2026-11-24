@@ -30,6 +30,11 @@ const hindi = {
   'Expires': 'वैधता समाप्ति',
   'This snapshot contains the fields chosen by the patient. Confirm identity and check for newer information when possible.':
     'इसमें मरीज़ की चुनी हुई जानकारी है। पहचान की पुष्टि करें और संभव हो तो नई जानकारी की जाँच करें।',
+  'Patient name': 'मरीज़ का नाम',
+  'Recorded medical conditions': 'दर्ज स्वास्थ्य स्थितियाँ',
+  'Recorded current medicines': 'वर्तमान में दर्ज दवाएँ',
+  'Expected delivery date': 'प्रसव की अनुमानित तारीख',
+  'Recent recorded child health events': 'बच्चे की हाल में दर्ज स्वास्थ्य घटनाएँ',
   'Recorded allergies': 'दर्ज एलर्जी',
   'Recorded blood group': 'दर्ज रक्त समूह',
   'Last recorded risk level': 'पिछला दर्ज जोखिम स्तर',
@@ -61,3 +66,24 @@ const hindi = {
 export const translate = (language, text) =>
   language === 'hi' && Object.hasOwn(hindi, text) ? hindi[text] : text;
 export const locale = language => language === 'hi' ? 'hi-IN' : 'en-IN';
+
+export const fieldLabels = {
+  patient_name: 'Patient name',
+  allergies: 'Recorded allergies',
+  blood_group: 'Recorded blood group',
+  medical_conditions: 'Recorded medical conditions',
+  current_medications: 'Recorded current medicines',
+  recorded_risk: 'Last recorded risk level',
+  risk_factors: 'Recorded risk factors',
+  pregnancy_week: 'Pregnancy week when issued',
+  expected_delivery: 'Expected delivery date',
+  vaccines: 'Most recent recorded vaccine doses',
+  recent_child_history: 'Recent recorded child health events'
+};
+
+export function fieldText(key, value, separator = '\n') {
+  if (key === 'vaccines') return value.map(entry => entry.code + ' · ' + entry.date).join(separator);
+  if (key === 'recent_child_history') return value.map(entry => entry.title + ' · ' + entry.date).join(separator);
+  if (key === 'risk_factors') return value.join(separator);
+  return value;
+}
