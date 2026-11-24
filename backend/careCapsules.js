@@ -10,6 +10,7 @@ const order = BigInt('0xffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2
 const encode = value => Buffer.from(value).toString('base64url');
 const utcDate = value => value instanceof Date ? value.toISOString().slice(0, 10) : value;
 const shortText = value => typeof value === 'string' ? [...value.trim()].slice(0, 140).join('') || null : null;
+const recordedAllergies = value => typeof value === 'string' && value.trim() ? value : null;
 const blood = value => /^(A|B|AB|O)[+-]$/.test(value || '') ? value : null;
 
 function signingKeys(env) {
@@ -67,7 +68,7 @@ async function subjectFields(pool, mother, child) {
       FROM child_vaccinations WHERE child_id=$1 AND given_on<=CURRENT_DATE
       ORDER BY given_on DESC,vaccine_code ASC LIMIT 4`, [child]);
     return {
-      allergies: shortText(profile.allergies),
+      allergies: recordedAllergies(profile.allergies),
       blood_group: blood(profile.blood_group),
       vaccines: rows.length ? rows : null
     };
@@ -82,7 +83,7 @@ async function subjectFields(pool, mother, child) {
   const factors = (Array.isArray(profile.risk_factors) ? profile.risk_factors : [])
     .map(factor => shortText(factor?.label)).filter(Boolean).slice(0, 3);
   return {
-    allergies: shortText(profile.allergies),
+    allergies: recordedAllergies(profile.allergies),
     blood_group: blood(profile.blood_group),
     recorded_risk: shortText(profile.risk_level),
     risk_factors: factors.length ? factors : null,
@@ -146,6 +147,9 @@ function register(app, { pool, authenticateToken, authorizeRole, env = process.e
         }
         if (JSON.stringify(available[name]) !== JSON.stringify(preview)) {
           return res.status(409).json({ error: 'The selected values changed. Reopen Care Capsule and review the latest values.' });
+        }
+        if (name === 'allergies' && Buffer.byteLength(preview) > 2048) {
+          return res.status(400).json({ error: 'The recorded allergy text is too long for a capsule.' });
         }
         fields[name] = available[name];
       }

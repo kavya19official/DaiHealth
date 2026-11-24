@@ -23,7 +23,7 @@ export function capsuleCode(input) {
 
 const text = value => typeof value === 'string' && value.length > 0 && [...value].length <= 140;
 const validators = {
-  allergies: text,
+  allergies: value => typeof value === 'string' && !!value.trim() && new TextEncoder().encode(value).length <= 2048,
   blood_group: value => /^(A|B|AB|O)[+-]$/.test(value),
   recorded_risk: text,
   risk_factors: value => Array.isArray(value) && value.length > 0 && value.length <= 3 && value.every(text),

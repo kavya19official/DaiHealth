@@ -44,7 +44,7 @@ test('only mother-selected fields are carried by the QR and revocation sync is p
       CREATE TABLE child_vaccinations (child_id int, vaccine_code text, given_on date);
       INSERT INTO users VALUES (1,NULL),(2,NULL);
       INSERT INTO mother_profiles VALUES (1,'A+','Synthetic allergy','planning',NULL,NULL,'Synthetic risk','[{"label":"Synthetic factor"}]');
-      INSERT INTO children VALUES (11,1,'Demo infant','B+',NULL,CURRENT_DATE),(12,2,'Other child',NULL,NULL,CURRENT_DATE);
+      INSERT INTO children VALUES (11,1,'Demo infant','B+','  Latex / लेटेक्स  ',CURRENT_DATE),(12,2,'Other child',NULL,NULL,CURRENT_DATE);
       INSERT INTO child_vaccinations VALUES (11,'BCG',CURRENT_DATE);
     `);
     await pool.exec(await fs.readFile(path.join(__dirname, 'db/care_capsules.sql'), 'utf8'));
@@ -86,8 +86,14 @@ test('only mother-selected fields are carried by the QR and revocation sync is p
     assert.deepEqual((await verifyCapsule(code, snapshot)).fields, { blood_group: 'A+' });
     await assert.rejects(verifyCapsule(code, (await trust()).data), /Revoked/);
     const childFields = (await call(issue + '/fields?child_id=11')).data.fields;
-    const child = await mint({ child_id: 11, fields: { vaccines: childFields.vaccines } });
+    const child = await mint({ child_id: 11, fields: { vaccines: childFields.vaccines, allergies: childFields.allergies } });
     assert.equal(child.status, 201, JSON.stringify(child.data));
+    const childPng = PNG.sync.read(Buffer.from(child.data.qr.split(',')[1], 'base64'));
+    const childCode = capsuleCode(scan(new Uint8ClampedArray(childPng.data), childPng.width, childPng.height).data);
+    const childCapsule = await verifyCapsule(childCode, snapshot);
+    assert.equal(childCapsule.fields.allergies, '  Latex / लेटेक्स  ');
+    assert.equal(childCapsule.fields.vaccines[0].code, 'BCG');
+
   } finally {
     if (server) await new Promise(resolve => server.close(resolve));
     await pool.close();
