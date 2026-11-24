@@ -115,7 +115,10 @@ def test_internal_route_authentication_quality_and_score_states(tmp_path):
     calls = []
     def load(_):
         calls.append("loaded")
-        return lambda image: scores, "1"*64
+        def predict(tensor):
+            assert tensor.shape == (3, 224, 224)
+            return scores
+        return predict, "1"*64
 
     register_inference(app, config, load)
     with TestClient(app) as client:
@@ -129,7 +132,7 @@ def test_internal_route_authentication_quality_and_score_states(tmp_path):
         stream_headers = {**headers, "Accept": "application/x-ndjson"}
         success = client.post(route, headers=stream_headers, content=png(0))
         events = [json.loads(line) for line in success.text.splitlines()]
-        assert events == [{"stage":"quality"}, {"stage":"inference"}, {"result":result}]
+        assert events == [{"stage":"quality"}, {"stage":"preprocessing"}, {"stage":"inference"}, {"result":result}]
         invalid = client.post(route, headers=stream_headers, content=png(0, flat=True))
         events = [json.loads(line) for line in invalid.text.splitlines()]
         assert events == [{"stage":"quality"}, {"result":bad}]
@@ -148,6 +151,30 @@ def test_internal_route_authentication_quality_and_score_states(tmp_path):
     with TestClient(app) as client:
         reply = client.post(route, headers=headers, content=png(7)).json()
         assert reply["state"] == "model_unavailable" and reply["reasons"] == ["no_approved_model"]
+
+
+def test_distinct_upload_pixels_reach_the_model(tmp_path):
+    app = FastAPI()
+    frames = [png(3), png(53)]
+    expected = [preprocess(decode(raw)) for raw in frames]
+    received = []
+    index = np.unravel_index(np.abs(expected[0] - expected[1]).argmax(), expected[0].shape)
+
+    def predict(tensor):
+        received.append(tensor)
+        score = .5 + float(tensor[index]) * .1
+        return [score, (1-score)*.75, (1-score)*.25]
+
+    register_inference(app, {
+        "DAI_ULTRASOUND_MODEL_DIR": str(tmp_path), "DAI_ULTRASOUND_SERVICE_TOKEN": "a"*40,
+    }, lambda _: (predict, "a"*64))
+    with TestClient(app) as client:
+        results = [client.post("/internal/ultrasound/analyze", content=raw, headers={
+            "Authorization": "Bearer " + "a"*40, "Content-Type": "image/png",
+        }).json() for raw in frames]
+    for actual, target in zip(received, expected, strict=True):
+        np.testing.assert_array_equal(actual, target)
+    assert results[0]["probabilities"] != results[1]["probabilities"]
 
 
 def test_real_torch_checkpoint_load_requires_integrity_and_research_release(tmp_path):
@@ -178,7 +205,21 @@ def test_real_torch_checkpoint_load_requires_integrity_and_research_release(tmp_
                                       model_manifest_sha256=version))
     predict, identifier = load_model(tmp_path)
     assert identifier == version
-    assert predict(decode(png(0))).sum() == pytest.approx(1)
+    raw = png(0)
+    expected = predict(preprocess(decode(raw)))
+    assert expected.sum() == pytest.approx(1)
+    app = FastAPI()
+    register_inference(app, {
+        "DAI_ULTRASOUND_MODEL_DIR": str(tmp_path), "DAI_ULTRASOUND_SERVICE_TOKEN": "a"*40,
+    })
+    with TestClient(app) as client:
+        response = client.post("/internal/ultrasound/analyze", content=raw, headers={
+            "Authorization": "Bearer " + "a"*40, "Content-Type": "image/png", "Accept": "application/x-ndjson",
+        })
+    *stages, outcome = map(json.loads, response.text.splitlines())
+    assert [event["stage"] for event in stages] == ["quality", "model_loading", "preprocessing", "inference"]
+    assert outcome["result"]["model_version"] == version
+    assert [outcome["result"]["probabilities"][label] for label in CLASSES] == pytest.approx(expected)
     dump(tmp_path/"report.json", {"tampered":True})
     with pytest.raises(ValueError, match="hash mismatch"):
         load_model(tmp_path)

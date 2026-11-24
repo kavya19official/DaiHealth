@@ -81,6 +81,13 @@ test('ultrasound gateway binds authenticated ownership, doctor selection and fac
   await pool.query("INSERT INTO patient_access_controls VALUES (101,'doctor','42','revoked')");
   assert.equal((await fetch(base+doctorScan,{headers:doctor})).status,403);
   const preview = await fetch(base+scan+'/11111111-1111-1111-1111-111111111111/image',{headers:mother});
+  const retryUrl = base+scan+'/11111111-1111-1111-1111-111111111111/retry';
+  const retry = {method:'POST', headers:{...mother,'x-dai-ultrasound':'review','content-type':'application/json'},
+    body:JSON.stringify({revision:1, patient:102})};
+  assert.equal((await fetch(retryUrl, {...retry, headers:{...retry.headers,'sec-fetch-site':'cross-site'}})).status,403);
+  assert.equal((await fetch(retryUrl, retry)).status,200);
+  assert.equal(requests.at(-1).patient,101);
+  assert.equal(requests.at(-1).sha256,createHash('sha256').update('{"revision":1}').digest('hex'));
   assert.equal(preview.headers.get('content-type'),'image/png');
   assert.deepEqual(Buffer.from(await preview.arrayBuffer()),Buffer.from([137,80,78,71]));
 });

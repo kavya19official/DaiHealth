@@ -11,7 +11,7 @@
   };
   const states = {
     quality_issue:'Image quality issue', model_unavailable:'Model unavailable',
-    prediction:'Research scores available', priority_review:'Priority review', low_confidence:'Low confidence',
+    prediction:'Research scores available', priority_review:'Research scores available', low_confidence:'Low model confidence',
   };
   let patient = '';
   let offset = 0;
@@ -19,6 +19,11 @@
   let busy = false;
   let opened = false;
   let latestUpload = null;
+  let clock;
+  const interpretations = {
+    confirmed:'Agree with the AI interpretation', corrected:'Correct the AI interpretation',
+    rejected:'Reject the AI interpretation', independent:'Independent clinical review',
+  };
   const previews = new Set();
 
   function element(tag, text, attrs) {
@@ -213,7 +218,9 @@
     });
     if (record.demo_image) card.append(element('p',
       'Public demonstration image. This frame belongs to a research dataset.', {class:'uw-demo-note'}));
-    card.append(image, open);
+    const viewer = element('div', null, {class:'uw-viewer'});
+    viewer.append(image);
+    card.append(viewer, open);
     if (preload) queueMicrotask(() => { if (card.isConnected) open.click(); });
   }
 
@@ -223,43 +230,77 @@
     low_detail:'The frame appears to have insufficient detail.',
   };
 
+  function updateClocks() {
+    for (const timer of root.querySelectorAll('[data-uw-start]')) {
+      const start = Number(timer.dataset.uwStart);
+      const end = timer.dataset.uwEnd ? Number(timer.dataset.uwEnd) : Date.now();
+      const seconds = Math.max(0, Math.floor((end - start) / 1000));
+      timer.textContent = Math.floor(seconds / 60) + ':' + String(seconds % 60).padStart(2, '0');
+    }
+  }
+
   function renderAssessment(target, record) {
     const result = record.assessment;
     if (!result) return;
-    target.append(element('h3','Image assessment'));
+    target.append(element('h3', record.demo_image ? 'Demo assessment' : 'AI analysis'));
+    if (record.demo_image) {
+      target.append(element('p','Preloaded demo record with scripted results.',{class:'uw-demo-note'}));
+      return;
+    }
+    const start = Date.parse(result.started_at || record.created_at);
+    const finish = Date.parse(result.finished_at);
+    if (Number.isFinite(start) && (record.processing || Number.isFinite(finish))) {
+      const elapsed = element('p','Analysis elapsed ',{class:'uw-elapsed'});
+      elapsed.append(element('span',null,{'data-uw-start':start,'data-uw-end':Number.isFinite(finish) ? finish : ''}));
+      target.append(elapsed);
+    }
     if (result.steps.length || record.processing) {
       const stages = element('ol',null,{class:'uw-steps','aria-label':'Analysis progress'});
-      for (const [key, label] of [['uploaded','Image uploaded'],['quality','Checking image quality'],
-        ['inference','Running AI analysis'],['report','Preparing assessment']]) {
-        if (key === 'inference' && !result.steps.includes(key)) continue;
-        if (key === 'quality' && !record.processing && !result.steps.includes(key)) continue;
-        const done = key === 'uploaded' || result.steps.includes(key) && result.state !== key;
-        stages.append(element('li',label,{'data-step':done ? 'complete' : result.state === key ? 'active' : 'waiting'}));
+      const phases = [['uploaded','Image saved securely'], ['quality','Image quality checks'],
+        ['model_loading','Loading the research model'], ['preprocessing','Preparing the image'],
+        ['inference','Running model inference'], ['report','Saving the analysis report'],
+        ['handoff','Available for doctor review']];
+      for (const [key, label] of phases) {
+        if (!record.processing && !['uploaded','handoff'].includes(key) && !result.steps.includes(key)) continue;
+        if (key === 'model_loading' && !result.steps.includes(key)) continue;
+        const done = key === 'uploaded' || key === 'handoff' && !record.processing ||
+          result.steps.includes(key) && result.state !== key;
+        const active = result.state === key;
+        const step = element('li',label,{'data-step':done ? 'complete' : active ? 'active' : 'waiting'});
+        if (active) step.setAttribute('aria-current','step');
+        stages.append(step);
       }
       target.append(stages);
     }
     if (record.processing) {
       target.append(element('p', {
-        queued:'Waiting for the analysis service.', claimed:'Sending the scan to the analysis service.',
-        quality:'Checking resolution, contrast and detail.', inference:'The configured model is analyzing this frame.',
-        report:'Saving the assessment.',
+        queued:'Waiting for the analysis service.', claimed:'Sending the saved image to the analysis service.',
+        quality:'Checking resolution, contrast and detail.', model_loading:'Opening the configured model.',
+        preprocessing:'Resizing and normalizing this frame.', inference:'The model is analyzing this uploaded frame.',
+        report:'Saving the report and review flag.',
       }[result.state],{class:'uw-processing',role:'status'}));
       return;
     }
     const grade = {good:'Good',acceptable:'Acceptable',poor:'Poor'}[result.grade] || 'Not assessed';
-    target.append(element('p','Image quality · ' + grade,{class:'uw-quality','data-grade':result.grade || 'unknown'}));
+    target.append(element('h4','Image quality'),
+      element('p',grade,{class:'uw-quality','data-grade':result.grade || 'unknown'}));
     if (result.image_checks_passed) {
       target.append(element('p','Passed basic image checks for AI processing. A clinician assesses scan suitability.'));
     }
-    if (result.state === 'quality_issue') {
-      for (const problem of result.issues) target.append(element('p',issueDescriptions[problem]));
-      target.append(element('p','Upload a clearer frame if available or ask your care team to review this image.'));
-    } else if (result.model_ran) {
-      target.append(element('p',result.state === 'low_confidence'
-        ? 'AI analysis completed with insufficient confidence. Manual review is required.'
-        : 'AI analysis completed. Your care team can review the experimental output alongside the image.'));
+    for (const problem of result.issues) target.append(element('p',issueDescriptions[problem]));
+    target.append(element('h4','AI observations'));
+    if (result.model_ran) {
+      target.append(element('p','AI analysis completed. Your care team can review the experimental classification scores.'));
+    } else if (result.state === 'quality_issue') {
+      target.append(element('p','The image did not pass the technical checks for model inference.'));
     } else if (result.state === 'model_unavailable') {
       target.append(element('p','AI analysis unavailable. The scan is available for doctor review.'));
+    }
+    target.append(element('h4','Clinical significance'),
+      element('p','A single uploaded frame requires clinician interpretation. The image checks cannot verify the scan type or establish fetal health.'));
+    if (result.flag) {
+      target.append(element('h4','Review flag'),element('p','Review recommended',{class:'uw-flag'}));
+      for (const reason of result.flag.reasons) target.append(element('p',reason));
     }
   }
 
@@ -303,11 +344,18 @@
       element('h3','Analysis details'),
       element('p', states[analysis.state] || 'Assessment unavailable.'),
       element('p', record.reasons?.join(' ') || ''));
+    if (analysis.quality?.width && analysis.quality?.height && !record.demo_image) {
+      const {width,height,dynamic_range,focus} = analysis.quality;
+      card.append(element('p', [
+        width + ' × ' + height + ' px', dynamic_range != null ? 'contrast range ' + dynamic_range : null,
+        focus != null ? 'detail metric ' + focus : null,
+      ].filter(Boolean).join(' · ')));
+    }
     if (analysis.probabilities) {
       const research = element('details', null, {class:'uw-research'});
       research.append(element('summary','Experimental AI output'),
-        element('p','Research archive scores. Verified clinical conclusions are recorded separately.'),
-        element('p','Top archive class: ' + analysis.label + ' · confidence ' +
+        element('p','EfficientNet-B0 archive classification for a single raster. Scores express class preference within this model. Scan type, fetal anatomy and clinical risk require clinician assessment.'),
+        element('p','Top archive class: ' + analysis.label + ' · model score ' +
           (analysis.confidence * 100).toFixed(1) + '%'),
         element('p',Object.entries(analysis.probabilities).map(([key,score]) =>
           key + ' ' + (score*100).toFixed(1) + '%').join(' · ')),
@@ -323,11 +371,12 @@
     if (record.status === 'pending') {
       card.append(button('Start review', () => change('start',{},'Scan marked under review.')));
     }
-    if (!record.draft && analysis.state === 'model_unavailable' && record.image_available) {
+    if (record.retry_revision) {
       card.append(button('Retry image assessment', () => change('retry',{},'Image assessment queued.')));
     }
     if (record.draft) {
       report(card, record.draft, 'Draft review · visible to clinicians');
+      if (record.draft.interpretation) card.append(element('p', interpretations[record.draft.interpretation]));
       card.append(button('Release report to patient', () => {
         if (window.confirm('Release the findings and next steps to the patient? Private notes stay in the clinician workspace.')) {
           change('release',{},'Report released to the patient.');
@@ -337,18 +386,22 @@
     const form = element('form',null,{class:'uw-form'});
     const decision = select(Object.entries(decisions).map(([id,name])=>({id,name})), 'Choose a decision', record.draft?.decision);
     decision.required = true;
+    const options = analysis.probabilities ? Object.entries(interpretations) : [['independent',interpretations.independent]];
+    const interpretation = select(options.map(([id,name]) => ({id,name})),
+      'Choose how you reviewed the scan', record.draft?.interpretation || (!analysis.probabilities ? 'independent' : ''));
+    interpretation.required = true;
     const findings = element('textarea',null,{required:'',minlength:'5',maxlength:'2000'});
     const instructions = element('textarea',null,{required:'',minlength:'5',maxlength:'2000'});
     const note = element('textarea',null,{maxlength:'2000'});
     findings.value = record.draft?.findings || '';
     instructions.value = record.draft?.instructions || '';
     note.value = record.note || '';
-    form.append(label('Clinical decision',decision),label('Clinical findings to share',findings),
+    form.append(label('AI interpretation',interpretation),label('Clinical decision',decision),label('Clinical findings to share',findings),
       label('Next steps to share',instructions),label('Private clinician notes',note),
       element('button','Save review draft',{type:'submit',class:'uw-button'}));
     form.addEventListener('submit',event=>{
       event.preventDefault();
-      change('review',{decision:decision.value,findings:findings.value,instructions:instructions.value,note:note.value},
+      change('review',{decision:decision.value,interpretation:interpretation.value,findings:findings.value,instructions:instructions.value,note:note.value},
         'Review saved. Release the report when ready.');
     });
     card.append(form);
@@ -359,59 +412,89 @@
     return record.processing ? (record.assessment?.state === 'queued' ? 'Uploaded' : 'Processing') : messages[record.status];
   }
 
+  function scanDetails(details, record, archived) {
+    details.replaceChildren();
+    renderAssessment(details,record);
+    if (clinician && !record.processing) review(details, archived ? {...record, archived, note:record.review_note} : record);
+    if (record.report) report(details,record.report,'Released clinician report');
+    if (archived && record.decision) details.append(element('p','Recorded decision · ' + decisions[record.decision]));
+    if (clinician || record.report || archived) return;
+    details.append(element('h4','Doctor review status'), element('p', record.processing
+      ? 'Your scan has been saved. The assessment will update here.'
+      : record.status === 'under_review' ? 'Your doctor is reviewing the scan.'
+      : 'Your scan is in your doctor’s review queue. Their feedback will appear here after release.'));
+    if (!record.processing) {
+      details.append(element('h4','Recommended next step'), element('p',resultNextStep(record)));
+    }
+    if (record.retry_revision) {
+      details.append(button('Retry AI analysis', () => perform(() => request(base() + '/' + record.id + '/retry', {
+        method:'POST', body:JSON.stringify({revision:record.retry_revision}),
+        headers:{'content-type':'application/json','x-dai-ultrasound':'review'},
+      }), 'Analysis queued for this scan.')));
+    }
+  }
+
+  function resultNextStep(record) {
+    return record.assessment?.grade === 'poor'
+      ? 'If you have a clearer frame, share it with your care team.'
+      : 'Check here for feedback and next steps from your care team.';
+  }
+
+  function updateStatus(card, record) {
+    const badge = card.querySelector('.uw-state');
+    badge.textContent = status(record);
+    badge.dataset.state = record.processing ? 'processing' : record.status;
+    card.dataset.inference = record.assessment?.state === 'inference' ? 'active' : '';
+  }
+
   function scanCard(record, archived = false, primary = false) {
     const card = element('article',null,{class:'uw-card','data-scan-id':record.id});
     const disclosure = element('details',null,{class:'uw-scan-disclosure'});
     disclosure.open = primary;
     const heading = element('summary',null,{class:'uw-card-heading'});
-    heading.append(element('h3','Scan · ' + new Date(record.created_at).toLocaleDateString()),
-      element('span',archived ? 'Archived hospital record' : status(record),{
-        class:'uw-state','data-state':record.processing ? 'processing' : record.status,
-      }));
+    heading.append(element('h3',(record.demo_image ? 'Demo scan' : 'Ultrasound scan') + ' · ' +
+      new Date(record.created_at).toLocaleDateString()), element('span',null,{class:'uw-state'}));
     const layout = element('div',null,{class:'uw-scan-layout'});
     const media = element('div',null,{class:'uw-scan-media'});
     const details = element('div',null,{class:'uw-scan-details'});
     preview(media,record,primary);
-    renderAssessment(details,record);
-    if (clinician && !record.processing) review(details, archived ? {...record, archived, note:record.review_note} : record);
-    if (record.report) report(details,record.report,'Released clinician report');
-    if (archived && record.decision) details.append(element('p','Recorded decision · ' + decisions[record.decision]));
-    if (!clinician && !record.report) details.append(element('p',record.processing
-      ? 'Your scan has been saved. The assessment will update here.'
-      : 'Your scan is in your doctor’s review queue. Their feedback will appear here after release.'));
+    if (!archived) media.append(element('p','Scan ID ' + record.id,{class:'uw-scan-ref'}));
+    scanDetails(details,record,archived);
     layout.append(media,details);
     disclosure.append(heading,layout);
     card.append(disclosure);
+    updateStatus(card,record);
+    if (archived) card.querySelector('.uw-state').textContent = 'Archived hospital record';
     if (!archived && (record.processing || !clinician && !record.report)) watch(card,record);
     return card;
   }
 
-  function watch(card, record, primary) {
+  function watch(card, initial) {
     const view = generation;
-    const endpoint = base() + '/' + record.id;
-    const state = JSON.stringify([record.assessment,record.status,record.report]);
+    const endpoint = base() + '/' + initial.id;
+    let record = initial;
+    const snapshot = scan => JSON.stringify([scan.assessment, scan.status, scan.report, scan.retry_revision]);
     async function refresh() {
       if (view !== generation || !card.isConnected) return;
-      if (!document.hidden && !busy && (record.processing || card.querySelector("details").open)) {
+      if (!document.hidden && !busy && (record.processing || card.querySelector('details').open)) {
         try {
           const fresh = await request(endpoint);
           if (view !== generation || !card.isConnected) return;
-          if (state !== JSON.stringify([fresh.assessment,fresh.status,fresh.report])) {
-            const openImage = card.querySelector('.uw-image:not([hidden])');
-            if (openImage?.src) {
-              URL.revokeObjectURL(openImage.src);
-              previews.delete(openImage.src);
-            }
-            card.replaceWith(scanCard(fresh,false,card.querySelector('.uw-scan-disclosure').open));
-            return;
+          if (snapshot(record) !== snapshot(fresh)) {
+            record = fresh;
+            updateStatus(card, record);
+            scanDetails(card.querySelector('.uw-scan-details'), record, false);
+            updateClocks();
           }
         } catch {
           // Manual refresh remains available if the session or connection is lost.
         }
       }
-      setTimeout(refresh,record.processing ? 900 : 7000);
+      if (record.processing || !clinician && !record.report) {
+        setTimeout(refresh,record.processing ? 450 : 7000);
+      }
     }
-    setTimeout(refresh, record.processing ? 400 : 7000);
+    setTimeout(refresh, record.processing ? 250 : 7000);
   }
 
   async function load() {
@@ -450,6 +533,7 @@
       for (const scan of data.archived || []) root.append(scanCard(scan,true));
       if (offset) root.append(button('Previous scans',()=>{offset=Math.max(0,offset-25);load();}));
       if (data.has_more) root.append(button('More scans',()=>{offset+=25;load();}));
+      updateClocks();
       return true;
     } catch (error) {
       if (active !== generation) return;
@@ -462,8 +546,11 @@
     const active = panel === 'ultrasound';
     if (active === opened) return;
     opened = active;
-    if (active) load();
-    else {
+    if (active) {
+      load();
+      clock = setInterval(updateClocks, 500);
+    } else {
+      clearInterval(clock);
       generation++;
       revokePreviews();
       root.replaceChildren();
