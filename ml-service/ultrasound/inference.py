@@ -15,6 +15,7 @@ from PIL import Image
 from scipy.special import softmax
 from starlette.concurrency import run_in_threadpool
 
+from . import sononet
 from .audit import CLASSES, VERSION, sha_file
 from .imaging import MAX_BYTES, PREPROCESS, QUALITY, decode, preprocess, quality
 from .training import LOW_CONFIDENCE, NON_NORMAL_SCORE, WEIGHTS
@@ -89,6 +90,7 @@ def register_inference(app, config=None, model_loader=load_model):
     config = os.environ if config is None else config
     key = config.get("DAI_ULTRASOUND_SERVICE_TOKEN", "")
     directory = config.get("DAI_ULTRASOUND_MODEL_DIR")
+    plane_weights = config.get("DAI_ULTRASOUND_PLANE_WEIGHTS")
     busy = BoundedSemaphore(1)
     model = None
 
@@ -109,9 +111,18 @@ def register_inference(app, config=None, model_loader=load_model):
         stats, reasons = quality(image)
         if reasons:
             return dict(state="quality_issue", quality=stats, reasons=reasons)
-        if not directory:
+        if not directory and not plane_weights:
             return dict(state="model_unavailable", quality=stats, reasons=["no_approved_model"])
         try:
+            if not directory:
+                if model is None:
+                    progress("model_loading")
+                    model = sononet.load(plane_weights)
+                planes = sononet.classify(image, model, progress)
+                if not any(view["state"] == "classified" for view in planes):
+                    return dict(state="quality_issue", quality=stats, reasons=["unusable_views"])
+                return dict(state="plane_analysis", quality=stats, reasons=[],
+                            model_version=sononet.WEIGHTS_SHA256, planes=planes)
             if model is None:
                 progress("model_loading")
                 model = model_loader(Path(directory))

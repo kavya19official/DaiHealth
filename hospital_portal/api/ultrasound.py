@@ -27,6 +27,7 @@ REASONS = {
     "small_image": "The raster is below the minimum dimensions.",
     "low_contrast": "The raster has low contrast.",
     "low_detail": "The raster has little measurable detail.",
+    "unusable_views": "The individual views did not pass the image quality checks.",
     "low_confidence": "The highest archive-label score is below the review threshold.",
     "non_normal_archive_label_score": "The experimental archive-label scores met a research review rule. These scores do not establish clinical urgency.",
     "no_approved_model": "No approved research model is configured. The image is available for manual review.",
@@ -35,7 +36,7 @@ REASONS = {
     "inference_unavailable": "The analysis service was unavailable. The image is available for manual review.",
     "research_prediction": "Experimental archive-label scores are available for clinician review.",
 }
-QUALITY_REASONS = {"small_image", "low_contrast", "low_detail"}
+QUALITY_REASONS = {"small_image", "low_contrast", "low_detail", "unusable_views"}
 CLASSES = ("normal", "benign", "malignant")
 CACHE = {"Cache-Control": "private, no-store", "X-Content-Type-Options": "nosniff"}
 a = s.ultrasound_analysis
@@ -70,14 +71,35 @@ def encode(raw, media_type):
     return result.getvalue()
 
 
+class PlaneFinding(BaseModel):
+    model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
+    view: Literal["whole", "top", "bottom"]
+    state: Literal["classified", "quality_issue"]
+    label: Literal["three_vessel", "four_chamber", "abdomen", "background",
+                   "brain_cerebellum", "brain_transventricular", "femur", "kidneys",
+                   "lips", "left_outflow", "profile", "right_outflow",
+                   "spine_coronal", "spine_sagittal"] | None = None
+    score: float | None = Field(default=None, ge=0, le=1)
+
+    @model_validator(mode="after")
+    def consistent(self):
+        if self.state == "classified":
+            if self.label is None or self.score is None:
+                raise ValueError("Plane result requires a label and score")
+        elif self.label is not None or self.score is not None:
+            raise ValueError("Skipped view cannot contain a score")
+        return self
+
+
 class Scores(BaseModel):
     model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
-    state: Literal["quality_issue", "prediction", "priority_review", "low_confidence", "model_unavailable"]
+    state: Literal["quality_issue", "prediction", "priority_review", "low_confidence", "model_unavailable", "plane_analysis"]
     quality: dict[str, float] = Field(default_factory=dict)
     reasons: list[str] = Field(max_length=3)
     label: Literal["normal", "benign", "malignant"] | None = None
     probabilities: dict[str, float] | None = None
     confidence: float | None = Field(default=None, ge=0, le=1)
+    planes: list[PlaneFinding] | None = Field(default=None, min_length=1, max_length=2)
     model_version: str | None = Field(default=None, pattern=r"^[a-f0-9]{64}$")
 
     @model_validator(mode="after")
@@ -85,6 +107,15 @@ class Scores(BaseModel):
         if (set(self.quality) - {"width", "height", "std", "dynamic_range", "focus"}
                 or set(self.reasons) - REASONS.keys()):
             raise ValueError("Unexpected analysis fields")
+        if self.state == "plane_analysis":
+            views = tuple(view.view for view in self.planes or ())
+            if (views not in {("whole",), ("top", "bottom")} or not self.model_version or self.reasons
+                    or any(value is not None for value in (self.label, self.probabilities, self.confidence))
+                    or not any(view.state == "classified" for view in self.planes)):
+                raise ValueError("Inconsistent scan-view output")
+            return self
+        if self.planes is not None:
+            raise ValueError("Unexpected scan-view output")
         if self.state in {"quality_issue", "model_unavailable"}:
             if any(value is not None for value in (self.label, self.probabilities, self.confidence, self.model_version)):
                 raise ValueError("Scores unavailable")

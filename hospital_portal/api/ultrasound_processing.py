@@ -13,7 +13,7 @@ from .ultrasound import QUALITY_REASONS, REASONS, aware, unavailable, utc
 scans = s.ultrasound_workspace_scan
 STAGES = ("quality", "model_loading", "preprocessing", "inference", "report")
 ACTIVE = ("queued", "claimed", *STAGES)
-PREDICTIONS = {"prediction", "priority_review", "low_confidence"}
+PREDICTIONS = {"prediction", "priority_review", "low_confidence", "plane_analysis"}
 
 
 def queued():
@@ -26,6 +26,8 @@ def review_flag(analysis):
         rationale = [REASONS[code] for code in analysis.get("reasons", []) if code in QUALITY_REASONS]
     elif state == "model_unavailable":
         rationale = [REASONS[code] for code in analysis.get("reasons", []) if code in REASONS]
+    elif state == "plane_analysis":
+        rationale = ["The model estimates the view in the uploaded image. Your care team interprets the scan."]
     elif state in PREDICTIONS:
         rationale = ["The research model classifies archive labels. Clinical interpretation requires your care team."]
         if "low_confidence" in analysis.get("reasons", []):
@@ -56,6 +58,7 @@ def assessment(analysis):
                 started_at=analysis.get("started_at"), finished_at=analysis.get("finished_at"),
                 stage_times=analysis.get("stage_times", {}),
                 flag=None if demo else analysis.get("flag") or review_flag(analysis),
+                planes=analysis.get("planes") if state == "plane_analysis" and not demo else None,
                 model_ran=state in PREDICTIONS, requires_doctor_review=True)
 
 

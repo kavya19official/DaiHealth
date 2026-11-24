@@ -10,7 +10,7 @@
     review_complete:'Review complete', follow_up_needed:'Follow-up needed', replacement_requested:'New image requested',
   };
   const states = {
-    quality_issue:'Image quality issue', model_unavailable:'Model unavailable',
+    quality_issue:'Image quality issue', model_unavailable:'Model unavailable', plane_analysis:'Scan views analyzed',
     prediction:'Research scores available', priority_review:'Research scores available', low_confidence:'Low model confidence',
   };
   let patient = '';
@@ -228,6 +228,7 @@
     small_image:'The frame is too small.',
     low_contrast:'The frame has too little contrast.',
     low_detail:'The frame appears to have insufficient detail.',
+    unusable_views:'The individual views did not pass the image quality checks.',
   };
 
   function updateClocks() {
@@ -235,8 +236,40 @@
       const start = Number(timer.dataset.uwStart);
       const end = timer.dataset.uwEnd ? Number(timer.dataset.uwEnd) : Date.now();
       const seconds = Math.max(0, Math.floor((end - start) / 1000));
-      timer.textContent = Math.floor(seconds / 60) + ':' + String(seconds % 60).padStart(2, '0');
+      timer.textContent = timer.dataset.uwEnd && seconds === 0 ? '<1 s'
+        : Math.floor(seconds / 60) + ':' + String(seconds % 60).padStart(2, '0');
     }
+  }
+
+  const planeLabels = {
+    three_vessel:'Three-vessel view', four_chamber:'Four-chamber heart view', abdomen:'Abdominal view',
+    brain_cerebellum:'Brain view · cerebellum', brain_transventricular:'Brain view · ventricles',
+    femur:'Femur view', kidneys:'Kidney view', lips:'Lips view', left_outflow:'Left ventricular outflow view',
+    profile:'Fetal profile', right_outflow:'Right ventricular outflow view',
+    spine_coronal:'Spine view · coronal', spine_sagittal:'Spine view · sagittal',
+  };
+
+  function renderPlanes(target, planes) {
+    target.append(element('p','SonoNet16 analyzed the uploaded image.',{class:'uw-ml-source'}));
+    const list = element('dl',null,{class:'uw-plane-results'});
+    const positions = {whole:'Uploaded view',top:'Top panel',bottom:'Bottom panel'};
+    for (const plane of planes) {
+      const item = element('div');
+      item.append(element('dt',positions[plane.view]));
+      if (plane.state === 'quality_issue') {
+        item.append(element('dd','Image quality too low for the model.'));
+      } else if (plane.label === 'background') {
+        item.append(element('dd','No supported standard view matched.'));
+      } else {
+        const pct = (plane.score * 100).toFixed(1) + '%';
+        const match = plane.score < .70 ? 'Weak match · ' : 'Likely view · ';
+        const result = element('dd');
+        result.append(element('strong',planeLabels[plane.label]),element('span',match + 'model score ' + pct));
+        item.append(result);
+      }
+      list.append(item);
+    }
+    target.append(list);
   }
 
   function renderAssessment(target, record) {
@@ -289,7 +322,9 @@
     }
     for (const problem of result.issues) target.append(element('p',issueDescriptions[problem]));
     target.append(element('h4','AI observations'));
-    if (result.model_ran) {
+    if (result.planes?.length) {
+      renderPlanes(target,result.planes);
+    } else if (result.model_ran) {
       target.append(element('p','AI analysis completed. Your care team can review the experimental classification scores.'));
     } else if (result.state === 'quality_issue') {
       target.append(element('p','The image did not pass the technical checks for model inference.'));
@@ -297,7 +332,9 @@
       target.append(element('p','AI analysis unavailable. The scan is available for doctor review.'));
     }
     target.append(element('h4','Clinical significance'),
-      element('p','A single uploaded frame requires clinician interpretation. The image checks cannot verify the scan type or establish fetal health.'));
+      element('p',result.planes?.length
+        ? 'These scores rank views the model recognizes. A clinician reviews the scan for measurements, abnormalities and fetal health.'
+        : 'A single uploaded frame requires clinician interpretation. The image checks cannot verify the scan type or establish fetal health.'));
     if (result.flag) {
       target.append(element('h4','Review flag'),element('p','Review recommended',{class:'uw-flag'}));
       for (const reason of result.flag.reasons) target.append(element('p',reason));
@@ -386,9 +423,10 @@
     const form = element('form',null,{class:'uw-form'});
     const decision = select(Object.entries(decisions).map(([id,name])=>({id,name})), 'Choose a decision', record.draft?.decision);
     decision.required = true;
-    const options = analysis.probabilities ? Object.entries(interpretations) : [['independent',interpretations.independent]];
+    const hasModelOutput = Boolean(analysis.probabilities || analysis.planes?.length);
+    const options = hasModelOutput ? Object.entries(interpretations) : [['independent',interpretations.independent]];
     const interpretation = select(options.map(([id,name]) => ({id,name})),
-      'Choose how you reviewed the scan', record.draft?.interpretation || (!analysis.probabilities ? 'independent' : ''));
+      'Choose how you reviewed the scan', record.draft?.interpretation || (!hasModelOutput ? 'independent' : ''));
     interpretation.required = true;
     const findings = element('textarea',null,{required:'',minlength:'5',maxlength:'2000'});
     const instructions = element('textarea',null,{required:'',minlength:'5',maxlength:'2000'});

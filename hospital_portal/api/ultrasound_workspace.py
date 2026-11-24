@@ -293,7 +293,7 @@ def register_workspace(app, engine, service, key, demo=False):
                         return
                     values["started_at"] = now
                 elif action == "review":
-                    if form.interpretation not in {None, "independent"} and not row["analysis"].get("probabilities"):
+                    if form.interpretation not in {None, "independent"} and not (row["analysis"].get("probabilities") or row["analysis"].get("planes")):
                         raise HTTPException(422, "Record an independent review when AI scores are unavailable")
                     values.update(analysis={**row["analysis"], "clinician_interpretation": form.interpretation},
                                   started_at=row["started_at"] or now, reviewed_at=now,
