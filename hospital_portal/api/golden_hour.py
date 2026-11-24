@@ -11,7 +11,7 @@ import json
 import os
 from datetime import datetime, timezone, timedelta
 from typing import Literal
-from uuid import UUID, uuid4
+from uuid import UUID, uuid4, uuid5, NAMESPACE_URL
 
 from fastapi import Depends, HTTPException
 from pydantic import BaseModel, ConfigDict, Field
@@ -74,6 +74,61 @@ TRANSITIONS = {
     "accepted": {"arrived", "cancelled"},
 }
 DECIDERS = {"consultant", "hospital_admin"}  # accepting an incoming patient is a clinical-operational decision
+
+
+def seed_golden_hour(engine):
+    """Keep a varied, complete incoming-alert queue visible in the local demo."""
+    if os.getenv("DAI_LOCAL") != "true" or os.getenv("DAI_DEMO") != "true" or os.getenv("DAI_SHOWCASE_DATA") != "true":
+        return
+    cases = [
+        dict(slug="meera", name="Meera Joshi", priority="emergency", trigger="family", eta=24, distance=8.6,
+             origin=(28.604, 77.151, "Dwarka, New Delhi"), situation="Pregnancy, week 34 · heavy bleeding and dizziness reported",
+             signs="Heavy bleeding, dizziness", bp="142/92 mmHg (patient-recorded, unverified)", blood="B positive (patient-recorded, unverified)",
+             medicines="Iron and calcium supplements (patient-recorded)", request="Prepare obstetric emergency reception and blood-bank readiness check",
+             symptoms=[{"label":"Heavy bleeding"},{"label":"Dizziness"}], checks=["Alert obstetric emergency team","Confirm receiving bay","Check blood-bank readiness","Prepare SBAR handover"]),
+        dict(slug="asha", name="Asha Nair", priority="urgent", trigger="mother", eta=38, distance=12.4,
+             origin=(28.576, 77.196, "Hauz Khas, New Delhi"), situation="Postnatal day 8 · fever and increasing wound discomfort reported",
+             signs="Fever, increasing wound discomfort", bp="118/76 mmHg (patient-recorded, unverified)", blood="O positive (patient-recorded, unverified)",
+             medicines="Paracetamol listed by patient; dose not verified", request="Prepare postnatal assessment area and notify the receiving obstetric team",
+             symptoms=[{"label":"Fever"},{"label":"Wound discomfort"}], checks=["Notify postnatal team","Prepare assessment bay","Review discharge handover","Confirm infection-control precautions"]),
+        dict(slug="sana", name="Sana Khan", priority="emergency", trigger="family", eta=16, distance=5.2,
+             origin=(28.650, 77.185, "Karol Bagh, New Delhi"), situation="Pregnancy, week 39 · strong contractions with reduced fetal movement reported",
+             signs="Frequent contractions, reduced fetal movement", bp="126/82 mmHg (patient-recorded, unverified)", blood="A negative (patient-recorded, unverified)",
+             medicines="No current medicine information recorded", request="Prepare labour assessment and Rh-negative blood readiness review",
+             symptoms=[{"label":"Frequent contractions"},{"label":"Reduced fetal movement"}], checks=["Alert labour room","Prepare assessment bay","Check blood-group documentation","Confirm neonatal standby"]),
+        dict(slug="riya", name="Riya Sharma", priority="urgent", trigger="mother", eta=47, distance=15.1,
+             origin=(28.689, 77.228, "Civil Lines, New Delhi"), situation="Pregnancy, week 30 · persistent headache and visual disturbance reported",
+             signs="Persistent headache, visual disturbance", bp="148/94 mmHg (patient-recorded, unverified)", blood="Not recorded",
+             medicines="Calcium supplement reported; details not verified", request="Prepare maternal assessment and blood-pressure confirmation on arrival",
+             symptoms=[{"label":"Persistent headache"},{"label":"Visual disturbance"}], checks=["Notify obstetric assessment team","Prepare BP confirmation","Review antenatal record","Keep escalation route ready"]),
+    ]
+    with engine.begin() as c:
+        admin = c.execute(select(s.user).where(s.user.c.source_id == "demo:hospital_admin")).mappings().first()
+        if not admin:
+            return
+        for item in cases:
+            identifier = str(uuid5(NAMESPACE_URL, "dai:showcase-golden-hour:" + item["slug"]))
+            existing = c.execute(select(alerts).where(alerts.c.id == identifier)).mappings().first()
+            if existing:
+                if existing["status"] in OPEN:
+                    c.execute(update(alerts).where(alerts.c.id == identifier).values(created_at=datetime.now(timezone.utc), updated_at=datetime.now(timezone.utc)))
+                continue
+            sbar = {"sections":[
+                {"key":"S","title":"Situation","rows":[{"label":"Situation","value":item["situation"]},{"label":"Danger signs reported","value":item["signs"]}]},
+                {"key":"B","title":"Background","rows":[{"label":"Last blood pressure readings","value":item["bp"]},{"label":"Blood group","value":item["blood"]},{"label":"Allergies","value":"No allergy information recorded"},{"label":"Current medicines","value":item["medicines"]}]},
+                {"key":"A","title":"Assessment information","rows":[{"label":"Source","value":item["trigger"].title()+"-triggered pre-alert; receiving clinician must assess on arrival"}]},
+                {"key":"R","title":"Requested readiness","rows":[{"label":"Request","value":item["request"]}]},
+            ],"readiness_checklist":item["checks"]}
+            request_key="showcase-golden-hour-"+item["slug"]
+            c.execute(alerts.insert().values(
+                id=identifier,source_id="showcase:golden-hour-"+item["slug"],facility_id=admin["facility_id"],directory_code="CENTRAL",
+                patient_key="showcase:"+item["slug"],patient_name=item["name"],alert_ref=str(uuid5(NAMESPACE_URL,"dai:showcase-golden-hour-ref:"+item["slug"])),
+                request_key=request_key,request_hash=hashlib.sha256(request_key.encode()).hexdigest(),priority=item["priority"],triage_level=item["priority"],
+                triggered_by=item["trigger"],eta_minutes=item["eta"],distance_km=item["distance"],origin_lat=item["origin"][0],origin_lng=item["origin"][1],origin_label=item["origin"][2],
+                symptoms=item["symptoms"],requirements={"caps":["obstetric emergency"],"svcs":["obstetrics"]},sbar=sbar,
+                skipped=[],status="incoming",public_note="The hospital has received your pre-alert and is reviewing readiness.",version=1,
+            ))
+            c.execute(events.insert().values(alert_id=identifier,actor_type=item["trigger"],actor_key="showcase:"+item["trigger"],status="incoming",note="Pre-alert sent to the receiving hospital.",version=1))
 
 
 class Input(BaseModel):

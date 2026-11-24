@@ -64,6 +64,73 @@ def seed_demo_requests(engine):
                 c.execute(s.staff_affiliation.insert().values(id=uid('affiliation:'+f['code']+person['id']),source_id='demo-coordination:'+f['code']+':'+person['id'],facility_id=fid,user_id=person['id'],email=person['email'],name=person['name'],role=person['role'],department_id=did if person['role']=='consultant' else None,unit_id=unit if person['role']=='consultant' else None,registration_no=person['registration_no'],verified=person['verified'],active=True,version=1))
                 c.execute(s.audit_log.insert().values(actor_id=person['id'],action='demo_coordination_affiliation_seeded',entity_type='facility',entity_id=fid,details={'facility_id':fid,'synthetic_only':True,'directory_code':f['code']}))
 
+        # Keep the default demo useful before anyone clicks or creates data. These
+        # records intentionally use the same patient bridge key as the patient
+        # dashboard, so one request is visible to the patient, assigned doctor and
+        # hospital team instead of becoming three unrelated mock cards.
+        admin = next((p for p in people if p['role'] == 'hospital_admin'), None)
+        clinician = next((p for p in people if p['role'] == 'consultant'), None)
+        if admin and clinician and os.getenv('DAI_SHOWCASE_DATA') == 'true':
+            tomorrow = (datetime.now(ZoneInfo('Asia/Kolkata')).date() + timedelta(days=1)).isoformat()
+            seeded = [
+                {
+                    'slug': 'nivara-postnatal-review', 'patient_key': 'node-mother:1',
+                    'patient_name': 'Nivara Sethi', 'kind': 'appointment',
+                    'need': 'Postnatal recovery review', 'service': 'Obstetrics',
+                    'status': 'accepted', 'requested_date': tomorrow,
+                    'patient_note': 'I would like to review my recovery and discharge instructions.',
+                    'public_note': 'Request accepted. Dr. S. Kumar will confirm the visit time.',
+                    'clinician_id': clinician['id'],
+                },
+                {
+                    'slug': 'kavini-scan-coordination', 'patient_key': 'node-mother:2',
+                    'patient_name': 'Kavini Batra', 'kind': 'referral',
+                    'need': 'Ultrasound report review', 'service': 'Diagnostics',
+                    'status': 'requested', 'requested_date': tomorrow,
+                    'patient_note': 'Please help me share my scan with the receiving care team.',
+                    'public_note': 'Received by the hospital coordination desk.',
+                    'clinician_id': None,
+                },
+            ]
+            for item in seeded:
+                identifier = uid('showcase-request:' + item['slug'])
+                if c.scalar(select(requests.c.id).where(requests.c.id == identifier)):
+                    continue
+                request_key = 'showcase-' + item['slug']
+                c.execute(requests.insert().values(
+                    id=identifier, source_id='showcase:' + item['slug'],
+                    facility_id=admin['facility_id'], directory_code='CENTRAL',
+                    patient_key=item['patient_key'], patient_name=item['patient_name'],
+                    kind=item['kind'], need=item['need'], service=item['service'],
+                    status=item['status'], requested_date=item['requested_date'],
+                    patient_note=item['patient_note'], request_key=request_key,
+                    request_hash=hashlib.sha256(request_key.encode()).hexdigest(),
+                    open_key=identifier, clinician_id=item['clinician_id'],
+                    public_note=item['public_note'], consented_at=datetime.now(timezone.utc),
+                    version=1,
+                ))
+                c.execute(events.insert().values(
+                    request_id=identifier, actor_type='patient', actor_key=item['patient_key'],
+                    status='requested', note=item['patient_note'], version=1,
+                ))
+
+            # A consented incoming handoff demonstrates the real receiving workflow.
+            mother = c.execute(select(s.mother).order_by(s.mother.c.source_id).limit(1)).mappings().first()
+            from_facility = uid('facility:SOUTH')
+            referral_id = uid('showcase-referral:incoming-postnatal')
+            if mother and c.scalar(select(s.facility.c.id).where(s.facility.c.id == from_facility)) and not c.scalar(select(s.referral.c.id).where(s.referral.c.id == referral_id)):
+                c.execute(s.referral.insert().values(
+                    id=referral_id, source_id='showcase:incoming-postnatal-referral',
+                    from_facility_id=from_facility, to_facility_id=admin['facility_id'],
+                    mother_id=mother['id'], reason='Postnatal review and continuity handoff',
+                    status='requested', details={
+                        'staff_handoff': True,
+                        'created_at': datetime.now(timezone.utc).isoformat(),
+                        'summary': 'Recent delivery discharge summary is available. The referring team requests a routine postnatal review and confirmation of the follow-up plan.',
+                        'version': 1, 'created_by': clinician['id'],
+                    },
+                ))
+
 class Input(BaseModel):
     model_config = ConfigDict(extra='forbid', str_strip_whitespace=True)
 class New(Input):
