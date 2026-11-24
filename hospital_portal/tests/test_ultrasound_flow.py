@@ -25,11 +25,17 @@ def test_workspace_release_privacy_concurrency_and_retention(tmp_path):
         "DAI_ULTRASOUND_SERVICE_TOKEN":"fixture-inference-key-for-tests-only",
     })
 
-    async def analyze(_, progress):
+    received = []
+    async def analyze(frame, progress):
+        received.append(frame)
         await progress("quality")
+        if len(received) == 1:
+            from hospital_portal.api.ultrasound import unavailable
+            return unavailable("inference_timeout")
+        await progress("preprocessing")
         await progress("inference")
         return Scores(state="prediction", label="normal", probabilities={"normal":.9,"benign":.05,"malignant":.05},
-                      confidence=.9, model_version="a"*64, reasons=[], quality={"width":128})
+                      confidence=.9, model_version="a"*64, reasons=[], quality={"width":128, "height":128})
 
     service.analyze = analyze
     app = FastAPI()
@@ -67,9 +73,21 @@ def test_workspace_release_privacy_concurrency_and_retention(tmp_path):
         assert call(client,doctor,route+"/start",method="POST",value={"revision":1}).status_code == 409
         assert call(client,dict(role="mother",actor=102,patient=102),route).status_code == 404
         assert asyncio.run(process_next(engine,service))
+        timed_out = call(client,mother,route).json()
+        assert timed_out["assessment"]["flag"]["category"] == "review_recommended"
+        assert "timed out" in timed_out["assessment"]["flag"]["reasons"][0]
+        retry = {"revision": timed_out["retry_revision"]}
+        assert call(client,dict(role="mother",actor=102,patient=102),route+"/retry",method="POST",value=retry).status_code == 404
+        assert call(client,mother,route+"/retry",method="POST",value=retry).status_code == 200
+        assert call(client,mother,route+"/retry",method="POST",value=retry).status_code == 409
+        assert asyncio.run(process_next(engine,service))
+        assert received[0] == received[1]
+        assert Image.open(BytesIO(received[0])).convert("L").tobytes() == Image.open(BytesIO(png.getvalue())).tobytes()
         done = call(client,mother,route).json()
         assert not done["processing"] and done["assessment"]["model_ran"]
-        assert done["assessment"]["steps"] == ["quality", "inference", "report"]
+        assert done["assessment"]["steps"] == ["quality", "preprocessing", "inference", "report"]
+        assert done["assessment"]["started_at"] <= done["assessment"]["stage_times"]["inference"] <= done["assessment"]["finished_at"]
+        assert done["assessment"]["flag"]["category"] == "review_recommended"
         assert not ({"confidence","probabilities","label"} & done["assessment"].keys())
         assert not ({"analysis","note","draft","pregnancy_context","revision"} & pending.keys())
         assert call(client,{**doctor,"facilities":["other"]}).json()["items"] == []
@@ -81,19 +99,20 @@ def test_workspace_release_privacy_concurrency_and_retention(tmp_path):
         with engine.begin() as conn:
             ciphertext = conn.scalar(select(s.ultrasound_workspace_scan.c.image_ciphertext))
             assert ciphertext != image.content and not ciphertext.startswith(b"\x89PNG")
-        assert call(client,doctor,route+"/release",method="POST",value={"revision":1}).status_code == 409
-        assert call(client,doctor,route+"/start",method="POST",value={"revision":1}).status_code == 200
+        assert call(client,doctor,route+"/release",method="POST",value={"revision":2}).status_code == 409
+        assert call(client,doctor,route+"/start",method="POST",value={"revision":2}).status_code == 200
         assert call(client,mother).json()["items"][0]["status"] == "under_review"
-        form = {"revision":2,"decision":"follow_up_needed","findings":"Recorded by clinician.",
+        form = {"revision":3,"decision":"follow_up_needed","interpretation":"corrected","findings":"Recorded by clinician.",
                 "instructions":"Contact your care team.","note":"Private clinician content."}
         assert call(client,mother,route+"/review",method="POST",value=form).status_code == 403
         assert call(client,doctor,route+"/review",method="POST",value=form).status_code == 200
-        assert call(client,doctor,route+"/release",method="POST",value={"revision":2}).status_code == 409
+        assert call(client,doctor,route+"/release",method="POST",value={"revision":3}).status_code == 409
         draft = call(client,mother).json()["items"][0]
         assert draft["report"] is None and draft["status"] == "under_review"
         clinician = call(client,doctor).json()["items"][0]
         assert clinician["note"] == form["note"] and clinician["analysis"]["confidence"] == .9
-        assert call(client,doctor,route+"/release",method="POST",value={"revision":3}).status_code == 200
+        assert clinician["draft"]["interpretation"] == "corrected"
+        assert call(client,doctor,route+"/release",method="POST",value={"revision":4}).status_code == 200
         released = call(client,mother).json()["items"][0]
         assert released["status"] == "reviewed" and released["report"]["instructions"] == form["instructions"]
         assert not ({"analysis","note","draft","pregnancy_context","revision"} & released.keys())

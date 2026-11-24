@@ -1,6 +1,12 @@
 'use strict';
 const { createHmac, timingSafeEqual } = require('node:crypto');
 
+const publicCapsulePaths = new Set([
+  '/api/care-capsule/trust', '/care-capsule/index.html', '/care-capsule/capsule.css',
+  '/care-capsule/verify.js', '/care-capsule/verify-data.js', '/care-capsule/sw.js',
+  '/vendor/qr/jsQR.js', '/vendor/three/examples/jsm/libs/fflate.module.js'
+]);
+
 function hostedDemoGate(env = process.env) {
   if (env.DAI_HOSTED_DEMO !== 'true') return null;
   const secret = env.DAI_DEMO_ACCESS_KEY;
@@ -19,6 +25,7 @@ function hostedDemoGate(env = process.env) {
   });
   function middleware(req, res, next) {
     if (req.method === 'GET' && req.path === '/api/health') return next();
+    if (['GET', 'HEAD'].includes(req.method) && publicCapsulePaths.has(req.path)) return next();
     res.set('Cache-Control', 'private, no-store');
     const basic = (req.headers.authorization || '').match(/^Basic ([A-Za-z0-9+/=]+)$/i);
     if (basic && timingSafeEqual(sign(Buffer.from(basic[1], 'base64')), credentials)) {

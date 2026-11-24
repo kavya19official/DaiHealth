@@ -28,7 +28,7 @@ REASONS = {
     "low_contrast": "The raster has low contrast.",
     "low_detail": "The raster has little measurable detail.",
     "low_confidence": "The highest archive-label score is below the review threshold.",
-    "non_normal_archive_label_score": "The experimental archive-label scores reached the priority review threshold.",
+    "non_normal_archive_label_score": "The experimental archive-label scores met a research review rule. These scores do not establish clinical urgency.",
     "no_approved_model": "No approved research model is configured. The image is available for manual review.",
     "model_load_or_inference_failed": "The configured research model could not return scores.",
     "inference_timeout": "The analysis service timed out. The image is available for manual review.",
@@ -156,8 +156,8 @@ class Ultrasound:
 
     async def analyze(self, png, progress=None):
         try:
-            async with asyncio.timeout(25):
-                async with httpx.AsyncClient(timeout=24, trust_env=False) as client:
+            async with asyncio.timeout(85):
+                async with httpx.AsyncClient(timeout=httpx.Timeout(80, connect=5), trust_env=False) as client:
                     async with client.stream("POST", self.url, content=png, headers={
                         "Authorization": "Bearer " + self.token, "Content-Type": "image/png",
                         "Accept": "application/x-ndjson",
@@ -171,7 +171,7 @@ class Ultrasound:
                                 return unavailable("inference_unavailable")
                             if "result" in event:
                                 return Scores.model_validate(event["result"])
-                            if progress and event.get("stage") in {"quality", "inference"}:
+                            if progress and event.get("stage") in {"quality", "model_loading", "preprocessing", "inference"}:
                                 await progress(event["stage"])
                         return unavailable("inference_unavailable")
         except (TimeoutError, httpx.TimeoutException):

@@ -159,6 +159,14 @@ module.exports = function register(app, {pool, authenticateToken, authorizeRole,
     if (!SCAN_ID.test(req.params.scanId)) return res.status(404).json({error:'Scan not available.'});
     await forward(res, patientGrant(req), '/'+req.params.scanId+'/image');
   }));
+  app.post(patientPath+'/:scanId/retry', ...mother, guard(async (req,res) => {
+    if (!SCAN_ID.test(req.params.scanId)) return res.status(404).json({error:'Scan not available.'});
+    if ((req.get('sec-fetch-site') || '') === 'cross-site' || !req.is('application/json') ||
+        req.get('x-dai-ultrasound') !== 'review') return res.status(403).json({error:'Use the signed-in ultrasound workspace.'});
+    const revision = req.body?.revision;
+    if (!Number.isSafeInteger(revision) || revision < 1) return res.status(422).json({error:'Refresh the scan before retrying.'});
+    await forward(res, patientGrant(req), '/'+req.params.scanId+'/retry', 'POST', {revision});
+  }));
   app.get('/api/doctor/ultrasound/patients', ...doctor, guard(async (req,res) => {
     if (!await verifyDoctor(pool,req.user.id)) return res.status(403).json({error:'A verified clinician account is required.'});
     const patients = (await pool.query(`SELECT DISTINCT a.mother_id AS id, mp.full_name AS name

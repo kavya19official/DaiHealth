@@ -3,12 +3,12 @@ import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
 import { OperationalOverview, SnapshotView } from "./operations";
 import { ForecastPanel } from "./forecasts";
 import { CarePanel, PatientCoordination } from "./care";
-import { AdministrationPanel, AffiliationSwitcher, InvitationAcceptance, PatientStaffRecords, ReferralInbox, CreateReferral } from "./administration";
+import { AdministrationPanel, AffiliationSwitcher, InvitationAcceptance, PatientStaffRecords, CreateReferral } from "./administration";
 import { SustainabilityPanel } from "./sustainability";
 import { OperationsIntelligencePanel } from "./operations-intelligence";
-import { PatientRequestsPanel } from "./patient-requests";
-import { GoldenHourBoard, GoldenHourLayer } from "./golden-hour";
-import { FollowupRiskPanel } from "./followup-risk";
+import { GoldenHourLayer } from "./golden-hour";
+import { IncomingCare } from "./incoming-care";
+import { PatientCareHub } from "./patient-care-hub";
 import { AshaCopilot } from "./asha";
 import { ClinicalMonitoring, PatientMonitoring } from "./clinical-monitor";
 type Row = Record<string, any>;
@@ -31,26 +31,17 @@ const days = [
   "Sunday",
 ];
 const operationNav = [
-  ["goldenHour", "Golden Hour · incoming", "✚"],
-  ["ashaCopilot", "ASHA Copilot", "⌂"],
-  ["clinicalMonitor", "Clinical monitoring", "▥"],
-  ["followupRisk", "Follow-up & risk demo", "✓"],
-  ["patientRequests", "Patient requests", "⇄"],
-  ["handoffs", "Facility handoffs", "⇄"],
   ["overview", "Today’s overview", "◈"],
-  ["patients", "Patient registry", "♡"],
-  ["appointments", "Appointments & queue", "◷"],
-  ["gaps", "Recorded care gaps", "☷"],
-  ["careTasks", "Follow-up & outreach", "✓"],
+  ["incomingCare", "Incoming care", "✚"],
+  ["patientCare", "Patient Care Hub", "♡"],
   ["careReviews", "Clinical review & summaries", "▤"],
+  ["clinicalMonitor", "Clinical monitoring", "▥"],
   ["readiness", "Delivery readiness", "✚"],
   ["capacity", "Capacity & readiness", "▱"],
   ["care-gap-map", "District care gap map", "⌖"],
-  ["quality-board", "Ward quality dashboard", "▥"],
   ["critical", "Critical & neonatal care", "⌁"],
-  ["referrals", "Referrals & handovers", "⇄"],
-  ["sos", "SOS & emergency inbox", "◉"],
   ["diagnostics", "Diagnostics & results", "▤"],
+  ["ashaCopilot", "Community care", "⌂"],
 ];
 const administrationNav = [
   ["management", "Facility & staff management", "✚"],
@@ -74,13 +65,12 @@ const administrationNav = [
 ];
 const workspacePermissions: Record<string, string> = {
   management: "facility.write",
-  handoffs: "care.read",
+  incomingCare: "coordination.read",
+  patientCare: "patient.read",
   careTasks: "care.read",
   careReviews: "care.read",
-  followupRisk: "coordination.read",
+  followups: "coordination.read",
   clinicalMonitor: "monitor.read",
-  patientRequests: "coordination.read",
-  goldenHour: "coordination.read",
   sustainability: "green.read",
   intelligence: "operations.read",
   forecasts: "forecast.read",
@@ -129,7 +119,8 @@ const titles: Record<string, [string, string]> = {
   "care-gap-map": ["District care gap map", "Privacy-protected synthetic outreach patterns with role-scoped drill-down."],
   "quality-board": ["Ward quality dashboard", "Suppressed recorded measures; no hospital ranking."],
   capacity: ["Capacity & readiness", "Recorded beds, blood and scheduled staff; freshness is shown without ranking facilities."],
-  handoffs: ["Facility handoffs", "Consented referral packets, receiving decisions and recorded outcomes."],
+  incomingCare: ["Incoming care", "Emergency arrivals, patient requests and facility transfers in one coordinated workspace."],
+  patientCare: ["Patient Care Hub", "Patients, appointments, care gaps and follow-ups in one connected workspace."],
   management: ["Facility & staff management", "Onboarding, services, slots and accountable staff access."],
   careTasks: [
     "Follow-up & outreach",
@@ -140,13 +131,11 @@ const titles: Record<string, [string, string]> = {
     "Recorded concerns, human acknowledgement and clinician-approved next steps.",
   ],
   clinicalMonitor: ["Clinical monitoring", "Prioritized antenatal findings and evidence for clinician review."],
-  followupRisk: ["Follow-up & risk demo", "Shared follow-up state and separately reviewed synthetic risk flags."],
+  followups: ["Follow-up worklist", "Patient-visible tasks with a clear owner, due date and shared completion state."],
   ashaCopilot: [
     "ASHA Copilot",
     "Offline-first community visits, village routes, voice notes and health-camp updates.",
   ],
-  patientRequests: ["Patient requests", "Synthetic appointment and referral coordination with facility-scoped staff review."],
-  goldenHour: ["Golden Hour · incoming emergency patients", "Prototype pre-alerts sent before a patient arrives: capability-matched, with an SBAR handover. Synthetic demonstration only."],
   intelligence: ["Operations intelligence", "Bounded agents, explainable maintenance planning and measured AI usage."],
   sustainability: [
     "Green hospital",
@@ -369,7 +358,7 @@ export default function Home() {
     setError("");
     try {
       if (view === "clinicalMonitor") { if (sequence === loadSequence.current) setData(null); return; }
-      if (view === "patientRequests" || view === "followupRisk" || view === "ashaCopilot" || view === "goldenHour") { const structure = await api("/facilities/" + user.facility_id + "/structure"); if (sequence === loadSequence.current) setData(structure); return; }
+      if (view === "incomingCare" || view === "patientCare" || view === "followups" || view === "ashaCopilot") { const structure = await api("/facilities/" + user.facility_id + "/structure"); if (sequence === loadSequence.current) setData(structure); return; }
       const params = new URLSearchParams();
       Object.entries(filters).forEach(([key, value]) => {
         if (value) params.set(key, String(value));
@@ -759,7 +748,7 @@ export default function Home() {
   }
   return (
     <div className="portal-shell">
-      {user.permissions.includes("coordination.read") && <GoldenHourLayer key={user.id + user.facility_id} api={api} permissions={user.permissions} onOpenBoard={() => navigate("goldenHour")} />}
+      {user.permissions.includes("coordination.read") && <GoldenHourLayer key={user.id + user.facility_id} api={api} permissions={user.permissions} onOpenBoard={() => navigate("incomingCare")} />}
       <a className="skip" href="#main">
         Skip to workspace
       </a>
@@ -931,16 +920,28 @@ export default function Home() {
               Updating linked records…
             </div>
           )}
-          {view === "goldenHour" && <GoldenHourBoard key={user.id+user.facility_id} api={api} permissions={user.permissions}/>}
-          {view === "patientRequests" && <PatientRequestsPanel key={user.id+user.facility_id} api={api} permissions={user.permissions}/>}
+          {view === "incomingCare" && (
+            <IncomingCare key={user.id+user.facility_id} api={api} permissions={user.permissions} role={user.role} facilityId={user.facility_id}/>
+          )}
+          {view === "patientCare" && (
+            <PatientCareHub
+              key={user.id+user.facility_id}
+              api={api}
+              openPatient={async id => {
+                try {
+                  setPatient(await api("/patients/" + id));
+                } catch (e) {
+                  setError((e as Error).message);
+                }
+              }}
+            />
+          )}
           {view === "clinicalMonitor" && user.permissions.includes("monitor.read") && <ClinicalMonitoring
             key={user.id+user.facility_id} api={api} canReview={user.permissions.includes("monitor.review")}
             openPatient={async id=>{setPatient(await api("/patients/"+id));}}/>}
-          {view === "followupRisk" && <FollowupRiskPanel key={user.id+user.facility_id} api={api} permissions={user.permissions} userId={user.id}/>}
           {view === "ashaCopilot" && <AshaCopilot key={user.id+user.facility_id} api={api} user={user}/>}
           {data && (
             <>
-              {view === "handoffs" && <ReferralInbox key={user.id+user.facility_id} api={api} role={user.role} facilityId={user.facility_id}/>}
               {view === "management" && <AdministrationPanel key={user.id + user.facility_id} api={api}/>}
               {(view === "careTasks" || view === "careReviews") && (
                 <CarePanel

@@ -710,6 +710,9 @@ def register_administration(app, engine, require, actor, audit, one, clinical_sc
                 ):
                     continue
                 item = dict(row)
+                item["patient_name"] = mother["details"].get("name") or mother["uhid"]
+                item["from_facility_name"] = c.scalar(select(s.facility.c.name).where(s.facility.c.id == row["from_facility_id"]))
+                item["to_facility_name"] = c.scalar(select(s.facility.c.name).where(s.facility.c.id == row["to_facility_id"]))
                 item["sbar"] = {
                     "Situation": row["reason"],
                     "Background": "Only the consented handoff summary is included. The full record is not shared by this packet.",

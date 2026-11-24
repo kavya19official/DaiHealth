@@ -72,6 +72,7 @@ def create_app(engine=None):
                         )
         seed_demo_requests(engine)
         seed_followup_risk(engine)
+        seed_golden_hour(engine)
         if demo:
             from .asha import seed_asha
 
@@ -924,7 +925,7 @@ def create_app(engine=None):
     from .demo_requests import register_demo_requests, seed_demo_requests
     from .demo_followup_risk import register_followup_risk, seed_followup_risk
     patient_request_auth = register_demo_requests(app, engine, require, audit, secret)
-    from .golden_hour import register_golden_hour
+    from .golden_hour import register_golden_hour, seed_golden_hour
     register_golden_hour(app, engine, require, audit, patient_request_auth)
     register_followup_risk(app, engine, require, audit, patient_request_auth)
 

@@ -151,13 +151,13 @@ export function OperationalOverview({
       ]
     : [
         [
-          "appointments",
-          "Appointments & queue",
-          "Review the recorded clinic list",
-          "◷",
+          "patientCare",
+          "Patient Care Hub",
+          "Patients, visits and follow-up work",
+          "♡",
         ],
-        ["patients", "Find a patient", "Open linked care records", "⌕"],
-        ["gaps", "Care-gap worklist", "Review missing recorded care", "♡"],
+        ["incomingCare", "Incoming care", "Review arrivals and requests", "✚"],
+        ["careReviews", "Clinical review", "Review summaries and evidence", "▤"],
         ["readiness", "Delivery readiness", "Check recorded resources", "✚"],
       ];
   return (

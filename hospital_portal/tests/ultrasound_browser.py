@@ -1,4 +1,5 @@
 """Browser acceptance test against the running full local synthetic application."""
+import io
 import os
 from pathlib import Path
 
@@ -62,10 +63,27 @@ def main():
         assert before["assessment"]["grade"] in ("good","acceptable"), before
         assert before["assessment"]["steps"] == ["quality","report"], before
         assert not before["assessment"]["model_ran"]
-        assert scan_id == before["id"]
+        assert scan_id == before["id"] and not result.value.json()["duplicate"]
+        assert before["assessment"]["flag"]["category"] == "review_recommended"
+        assert before["assessment"]["started_at"] <= before["assessment"]["finished_at"]
+        upload_url = patient_api + "?doctor=" + str(doctor_id)
+        upload_headers = {"Content-Type":"image/png", "x-dai-ultrasound":"upload",
+                          "x-dai-ultrasound-consent":"yes"}
+        assert patient.request.post(upload_url, data=b"invalid PNG", headers=upload_headers).status == 422
+        duplicate = patient.request.post(upload_url, data=test_frame["buffer"], headers=upload_headers)
+        assert duplicate.json() == {"id":scan_id,"duplicate":True}
+        patient_scan.get_by_role("button",name="Retry AI analysis").click()
+        expect(page.get_by_text("Analysis queued for this scan.",exact=True)).to_be_visible()
+        expect(patient_scan.get_by_text("AI analysis unavailable.",exact=False)).to_be_visible(timeout=35000)
+        page.reload(wait_until="domcontentloaded")
+        page.get_by_role("button", name="Ultrasound scans", exact=True).click()
+        expect(patient_scan.get_by_text("Review recommended",exact=True)).to_be_visible()
 
         doctor_image = doctor.request.get(origin + f"/api/doctor/patients/{mother_id}/ultrasound/{scan_id}/image")
-        assert doctor_image.ok, (doctor_image.status, doctor_image.text())
+        assert doctor_image.ok, doctor_image.status
+        original = Image.open(io.BytesIO(test_frame["buffer"])).convert("RGB")
+        private = Image.open(io.BytesIO(doctor_image.body())).convert("RGB")
+        assert private.tobytes() == original.tobytes()
         clinical = doctor.new_page()
         clinical.goto(origin+"/doctor.html",wait_until="domcontentloaded")
         clinical.get_by_role("button",name="Ultrasound Review",exact=True).click()
@@ -101,6 +119,15 @@ def main():
         )
         assert patient.request.get(patient_api+"/"+scan_id+"/image").headers["content-type"] == "image/png"
         assert playwright.request.new_context().get(patient_api).status == 401
+        poor_frame = io.BytesIO()
+        Image.new("L", (128, 128), 48).save(poor_frame, format="PNG")
+        poor_upload = patient.request.post(upload_url, data=poor_frame.getvalue(), headers=upload_headers)
+        assert poor_upload.status == 201, poor_upload.text()
+        poor_id = poor_upload.json()["id"]
+        page.get_by_role("button", name="Refresh scans").click()
+        poor = page.locator(f'[data-scan-id="{poor_id}"]')
+        expect(poor.get_by_text("Poor", exact=True)).to_be_visible(timeout=15000)
+        assert patient.request.get(patient_api+"/"+poor_id).json()["assessment"]["model_ran"] is False
         browser.close()
     print("PASS: patient and doctor dashboards, private image previews, clinical draft isolation and release.")
 

@@ -57,16 +57,16 @@ def load_model(directory):
     model.load_state_dict(torch.load(directory/WEIGHTS,map_location="cpu",weights_only=True))
     model.eval()
 
-    def predict(image):
+    def predict(tensor):
         with torch.inference_mode():
-            logits=model(torch.from_numpy(preprocess(image)).unsqueeze(0))[0].numpy().astype(np.float64)
+            logits=model(torch.from_numpy(tensor).unsqueeze(0))[0].numpy().astype(np.float64)
         return softmax(logits/temperature)
 
     return predict, approval["model_manifest_sha256"]
 
 
-def score_image(predictor, model_id, image):
-    scores = np.asarray(predictor(image), dtype=np.float64)
+def score_image(predictor, model_id, tensor):
+    scores = np.asarray(predictor(tensor), dtype=np.float64)
     if (scores.shape != (len(CLASSES),) or not np.isfinite(scores).all()
             or (scores < 0).any() or (scores > 1).any() or not np.isclose(scores.sum(), 1, atol=1e-6, rtol=0)):
         raise ValueError("Invalid model probabilities")
@@ -113,10 +113,13 @@ def register_inference(app, config=None, model_loader=load_model):
             return dict(state="model_unavailable", quality=stats, reasons=["no_approved_model"])
         try:
             if model is None:
+                progress("model_loading")
                 model = model_loader(Path(directory))
             predictor, model_id = model
+            progress("preprocessing")
+            tensor = preprocess(image)
             progress("inference")
-            return dict(**score_image(predictor, model_id, image), quality=stats)
+            return dict(**score_image(predictor, model_id, tensor), quality=stats)
         except (OSError, RuntimeError, ValueError, KeyError, TypeError, ImportError, EOFError,
                 AttributeError, OverflowError):
             model = None

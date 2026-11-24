@@ -1,5 +1,6 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
+import referralStyles from "./referral-inbox.module.css";
 type Row = Record<string, any>;
 type Api = (path: string, options?: RequestInit) => Promise<any>;
 const profileFields = [
@@ -758,77 +759,36 @@ export function ReferralInbox({
     load();
   }, [load]);
   return (
-    <section>
-      <h2>Receiving facility handoffs</h2>
-      <p>
-        Consented handoff summaries only. Acceptance does not grant access to
-        the full patient record. Create a referral from an authorised patient’s
-        record.
-      </p>
-      {error && <p role="alert">{error}</p>}
-      {!data.items.length && <p>No new handoffs for this facility.</p>}
-      {data.items.map((r: Row) => (
-        <article key={r.id}>
-          <h3>{r.reason}</h3>
-          <p>
-            {r.status} ·{" "}
-            {r.to_facility_id === facilityId ? "Incoming" : "Outgoing"}
-          </p>
-          <p>{r.details.summary}</p>
-          <p>{r.details.outcome_notes}</p>
-          {r.sbar && <details><summary>SBAR handover draft</summary><section data-sbar><h3>SBAR · Referral {r.id}</h3><dl>{Object.entries(r.sbar).map(([key,value])=><div key={key}><dt><strong>{key}</strong></dt><dd style={{whiteSpace:"pre-wrap"}}>{String(value)}</dd></div>)}</dl></section><button type="button" onClick={e=>{const section=e.currentTarget.parentElement?.querySelector("[data-sbar]");const win=window.open("","_blank");if(!win||!section)return;win.opener=null;win.document.write("<!doctype html><html><head><title>DAI SBAR</title><style>body{font:12px/1.3 system-ui;margin:24px}dd{white-space:pre-wrap;overflow-wrap:anywhere}@page{size:A4;margin:12mm}</style></head><body>"+section.outerHTML+"</body></html>");win.document.close();win.print();}}>Print / save SBAR</button></details>}
-
-          {r.to_facility_id === facilityId &&
-            ["hospital_admin", "consultant"].includes(role) && (
-              <form
-                onSubmit={async (e) => {
-                  e.preventDefault();
-                  setBusy(true);
-                  setError("");
-                  const form = new FormData(e.currentTarget);
-                  try {
-                    await api("/care-referrals/" + r.id, {
-                      method: "PATCH",
-                      body: JSON.stringify({
-                        status: form.get("status"),
-                        notes: form.get("notes"),
-                        version: r.details.version,
-                      }),
-                    });
-                    await load();
-                  } catch (e) {
-                    setError((e as Error).message);
-                  } finally {
-                    setBusy(false);
-                  }
-                }}
-              >
-                <label>
-                  Next action
-                  <select name="status">
-                    {(r.status === "requested"
-                      ? ["accepted", "rejected"]
-                      : r.status === "accepted"
-                        ? ["arrived"]
-                        : r.status === "arrived" && role === "consultant"
-                          ? ["completed"]
-                          : []
-                    ).map((k) => (
-                      <option key={k}>{k}</option>
-                    ))}
-                  </select>
-                </label>
-                <label>
-                  Handoff evidence / outcome
-                  <textarea name="notes" required minLength={5} />
-                </label>
-                {!["completed", "rejected"].includes(r.status) && (
-                  <button disabled={busy}>Record action</button>
-                )}
-              </form>
-            )}
+    <section className={referralStyles.panel}>
+      <header className={referralStyles.heading}>
+        <div><span>FACILITY TRANSFER DESK</span><h2>Patients referred from another care centre</h2><p>Review the shared handover, decide whether your facility can receive the patient, and record the next step.</p></div>
+        <button type="button" onClick={load}>Refresh</button>
+      </header>
+      <div className={referralStyles.guide}>
+        <div><strong>1</strong><span><b>Review handover</b><small>Reason and essential care context</small></span></div><i />
+        <div><strong>2</strong><span><b>Decide</b><small>Accept or decline with a reason</small></span></div><i />
+        <div><strong>3</strong><span><b>Prepare arrival</b><small>Record arrival and outcome</small></span></div>
+      </div>
+      {error && <p role="alert" className={referralStyles.error}>{error}</p>}
+      {!data.items.length && <div className={referralStyles.empty}><strong>No transfers need review</strong><p>New consented facility handovers will appear here.</p></div>}
+      {data.items.map((r: Row) => {
+        const actions = r.status === "requested" ? ["accepted", "rejected"] : r.status === "accepted" ? ["arrived"] : r.status === "arrived" && role === "consultant" ? ["completed"] : [];
+        return <article key={r.id} className={referralStyles.card}>
+          <div className={referralStyles.cardTop}>
+            <div className={referralStyles.avatar}>{String(r.patient_name||"PT").split(" ").map((x:string)=>x[0]).join("").slice(0,2)}</div>
+            <div><span>{r.to_facility_id === facilityId ? "INCOMING TRANSFER" : "OUTGOING TRANSFER"}</span><h3>{r.patient_name||"Patient handover"}</h3><p>From {r.from_facility_name||"referring facility"}</p></div>
+            <b className={referralStyles.status}>{String(r.status).replaceAll("_"," ")}</b>
+          </div>
+          <div className={referralStyles.reason}><small>REASON FOR TRANSFER</small><h4>{r.reason}</h4><p>{r.details.summary}</p></div>
+          {r.details.outcome_notes&&<p className={referralStyles.outcome}><strong>Latest update:</strong> {r.details.outcome_notes}</p>}
+          {r.sbar && <details className={referralStyles.sbar}><summary>Review clinical handover (SBAR)</summary><section data-sbar><h3>Shared handover</h3><dl>{Object.entries(r.sbar).map(([key,value])=><div key={key}><dt><strong>{key}</strong></dt><dd>{String(value)}</dd></div>)}</dl></section><button type="button" onClick={e=>{const section=e.currentTarget.parentElement?.querySelector("[data-sbar]");const win=window.open("","_blank");if(!win||!section)return;win.opener=null;win.document.write("<!doctype html><html><head><title>DAI SBAR</title><style>body{font:14px/1.5 system-ui;margin:24px}dd{white-space:pre-wrap;overflow-wrap:anywhere}@page{size:A4;margin:12mm}</style></head><body>"+section.outerHTML+"</body></html>");win.document.close();win.print();}}>Print or save handover</button></details>}
+          {r.to_facility_id === facilityId && ["hospital_admin", "consultant"].includes(role) && actions.length>0 && (
+            <form className={referralStyles.actionPanel} onSubmit={async (e) => {e.preventDefault();setBusy(true);setError("");const form=new FormData(e.currentTarget);try{await api("/care-referrals/"+r.id,{method:"PATCH",body:JSON.stringify({status:form.get("status"),notes:form.get("notes"),version:r.details.version})});await load()}catch(e){setError((e as Error).message)}finally{setBusy(false)}}}>
+              <h4>Record the receiving decision</h4><div className={referralStyles.formGrid}><label>Decision<select name="status">{actions.map((k:string)=><option key={k} value={k}>{k==="accepted"?"Accept transfer":k==="rejected"?"Decline transfer":k==="arrived"?"Mark patient arrived":"Complete handover"}</option>)}</select></label><label>Note for the care teams<textarea name="notes" required minLength={5} placeholder="Explain the decision and what should happen next" /></label></div><button disabled={busy}>Save receiving decision</button>
+            </form>
+          )}
         </article>
-      ))}
+      })}
     </section>
   );
 }

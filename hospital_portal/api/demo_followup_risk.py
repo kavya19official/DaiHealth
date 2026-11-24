@@ -1,5 +1,5 @@
 """Shared coordination follow-ups and a separate, explicitly simulated risk-review workflow."""
-from datetime import datetime, timezone, date
+from datetime import datetime, timezone, date, timedelta
 from zoneinfo import ZoneInfo
 from uuid import UUID, uuid4, uuid5, NAMESPACE_URL
 import hashlib,json,os
@@ -25,6 +25,28 @@ def seed_followup_risk(engine):
             identifier=str(uuid5(NAMESPACE_URL,'dai:synthetic-risk-case:'+code))
             if not c.scalar(select(cases.c.id).where(cases.c.id==identifier)):
                 c.execute(cases.insert().values(id=identifier,source_id=code,title=title,vignette=vignette,review_state='pending_review',version=1))
+
+        # Seed one connected, patient-visible task. The risk fixtures above remain
+        # available to backend tests, but the product UI no longer exposes them.
+        request=(c.execute(select(requests).where(requests.c.source_id=='showcase:nivara-postnatal-review')).mappings().first()
+                 if os.getenv('DAI_SHOWCASE_DATA')=='true' else None)
+        clinician=c.execute(select(s.user).where(s.user.c.source_id=='demo:consultant')).mappings().first()
+        if request and clinician:
+            identifier=str(uuid5(NAMESPACE_URL,'dai:showcase-followup:nivara-discharge-review'))
+            if not c.scalar(select(followups.c.id).where(followups.c.id==identifier)):
+                due=(datetime.now(ZoneInfo('Asia/Kolkata')).date()+timedelta(days=1)).isoformat()
+                key=request['id']+'|discharge summary and recovery check-in'
+                c.execute(followups.insert().values(
+                    id=identifier,source_id='showcase:nivara-followup',request_id=request['id'],
+                    facility_id=request['facility_id'],patient_key=request['patient_key'],patient_name=request['patient_name'],
+                    title='Discharge summary and recovery check-in',due_date=due,assigned_to=clinician['id'],
+                    status='open',public_note='Please upload your discharge summary and confirm a suitable time for your postnatal review.',
+                    open_key=key,request_key='showcase-nivara-followup',request_hash=hashlib.sha256(key.encode()).hexdigest(),version=1,
+                ))
+                c.execute(trail.insert().values(
+                    entity_kind='followup',entity_id=identifier,actor_kind='staff',actor_id=clinician['id'],
+                    actor_name=clinician['name'],action='created',note='Postnatal follow-up shared with the patient.',version=1,
+                ))
 
 class NewFollowup(Input):
     request_id:UUID

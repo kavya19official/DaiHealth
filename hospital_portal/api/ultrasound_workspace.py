@@ -44,6 +44,7 @@ class Review(BaseModel):
     revision: int = Field(ge=1)
     decision: decisions
     note: str = Field(default="", max_length=2000)
+    interpretation: Literal["confirmed", "corrected", "rejected", "independent"] | None = None
     findings: str = Field(min_length=5, max_length=2000)
     instructions: str = Field(min_length=5, max_length=2000)
 
@@ -74,6 +75,9 @@ def safe_record(row, role):
         processing=processing,
         demo_image=bool(((row["analysis"] or {}).get("measurements") or {}).get("demo")),
     )
+    if (analysis.get("state") == "model_unavailable" and record["image_available"]
+            and not row["reviewed_at"] and not released and not record["demo_image"]):
+        record["retry_revision"] = row["revision"]
     if released:
         record["report"] = dict(
             findings=row["findings"], instructions=row["instructions"], decision=row["decision"],
@@ -85,10 +89,12 @@ def safe_record(row, role):
             analysis={k: v for k, v in analysis.items() if k != "lease"},
             pregnancy_context=row["pregnancy_context"], revision=row["revision"],
             reasons=[] if processing else [REASONS[code] for code in
-                (analysis.get("reasons") or (["research_prediction"] if analysis.get("probabilities") else []))],
+                (analysis.get("reasons") or (["research_prediction"] if analysis.get("probabilities") else []))
+                if code in REASONS],
             draft=None if not row["reviewed_at"] else dict(
                 findings=row["findings"], instructions=row["instructions"], decision=row["decision"],
                 reviewed_at=aware(row["reviewed_at"]),
+                interpretation=analysis.get("clinician_interpretation"),
             ),
             note=row["review_note"],
         )
@@ -264,7 +270,7 @@ def register_workspace(app, engine, service, key, demo=False):
                      request: Request, response: Response):
         grant, digest = authorize(request)
         response.headers.update(CACHE)
-        if grant.role != "doctor":
+        if grant.role != "doctor" and action != "retry":
             raise HTTPException(403, "Clinician account required")
         scan_id = str(scan_id)
         raw = await body(request, 16000, digest)
@@ -287,7 +293,10 @@ def register_workspace(app, engine, service, key, demo=False):
                         return
                     values["started_at"] = now
                 elif action == "review":
-                    values.update(started_at=row["started_at"] or now, reviewed_at=now,
+                    if form.interpretation not in {None, "independent"} and not row["analysis"].get("probabilities"):
+                        raise HTTPException(422, "Record an independent review when AI scores are unavailable")
+                    values.update(analysis={**row["analysis"], "clinician_interpretation": form.interpretation},
+                                  started_at=row["started_at"] or now, reviewed_at=now,
                                   decision=form.decision, review_note=form.note,
                                   findings=form.findings, instructions=form.instructions)
                 elif action == "release":
@@ -297,7 +306,8 @@ def register_workspace(app, engine, service, key, demo=False):
                 else:
                     if aware(row["image_expires_at"]) <= now:
                         raise HTTPException(410, "This image has reached its retention limit")
-                    if row["reviewed_at"] or row["analysis"]["state"] != "model_unavailable":
+                    if (row["reviewed_at"] or row["analysis"]["state"] != "model_unavailable"
+                            or (row["analysis"].get("measurements") or {}).get("demo")):
                         raise HTTPException(409, "Only unavailable analysis can be retried before review")
                     values["analysis"] = queued()
                 changed = conn.execute(update(scans).where(*scope(grant), scans.c.id == scan_id,

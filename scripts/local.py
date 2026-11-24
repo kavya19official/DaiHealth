@@ -109,6 +109,7 @@ def environment(cfg):
             "NODE_ENV": "development",
             "DAI_LOCAL": "true",
             "DAI_DEMO": "true",
+            "DAI_SHOWCASE_DATA": "true",
             "PORT": str(port),
             "DAI_WEB_ORIGIN": f"http://localhost:{port}",
             "JWT_SECRET": cfg["jwt_secret"],

@@ -8,15 +8,31 @@ from sqlalchemy import and_, or_, select, update
 from starlette.concurrency import run_in_threadpool
 
 from . import schema as s
-from .ultrasound import QUALITY_REASONS, aware, unavailable, utc
+from .ultrasound import QUALITY_REASONS, REASONS, aware, unavailable, utc
 
 scans = s.ultrasound_workspace_scan
-ACTIVE = ("queued", "claimed", "quality", "inference", "report")
+STAGES = ("quality", "model_loading", "preprocessing", "inference", "report")
+ACTIVE = ("queued", "claimed", *STAGES)
 PREDICTIONS = {"prediction", "priority_review", "low_confidence"}
 
 
 def queued():
     return {"state": "queued", "steps": [], "reasons": []}
+
+
+def review_flag(analysis):
+    state = analysis.get("state")
+    if state == "quality_issue":
+        rationale = [REASONS[code] for code in analysis.get("reasons", []) if code in QUALITY_REASONS]
+    elif state == "model_unavailable":
+        rationale = [REASONS[code] for code in analysis.get("reasons", []) if code in REASONS]
+    elif state in PREDICTIONS:
+        rationale = ["The research model classifies archive labels. Clinical interpretation requires your care team."]
+        if "low_confidence" in analysis.get("reasons", []):
+            rationale.append("The top model score was below its research review threshold.")
+    else:
+        return None
+    return dict(category="review_recommended", reasons=rationale)
 
 
 def assessment(analysis):
@@ -36,7 +52,10 @@ def assessment(analysis):
     return dict(state=state, grade=grade, issues=problems,
                 image_checks_passed=True if grade in {"good", "acceptable"} else
                 False if grade == "poor" else None,
-                steps=[step for step in analysis.get("steps", []) if step in {"quality", "inference", "report"}],
+                steps=[step for step in analysis.get("steps", []) if step in STAGES],
+                started_at=analysis.get("started_at"), finished_at=analysis.get("finished_at"),
+                stage_times=analysis.get("stage_times", {}),
+                flag=None if demo else analysis.get("flag") or review_flag(analysis),
                 model_ran=state in PREDICTIONS, requires_doctor_review=True)
 
 
@@ -51,25 +70,31 @@ def claim(engine):
         if not row:
             return None
         lease = uuid4().hex
+        started = utc()
         acquired = conn.execute(update(scans).where(scans.c.id == row["id"], eligible).values(
-            analysis={**queued(), "state": "claimed", "lease": lease}, updated_at=utc())).rowcount
-        return (row, lease) if acquired else None
+            analysis={**queued(), "state": "claimed", "lease": lease,
+                      "started_at": started.isoformat()}, updated_at=started)).rowcount
+        return (row, lease, started.isoformat()) if acquired else None
 
 
 async def process_next(engine, service):
     item = await run_in_threadpool(claim, engine)
     if not item:
         return False
-    row, lease = item
-    steps = []
+    row, lease, started = item
+    stage_times = {}
 
     def persist(result, final=False):
-        if not final:
+        now = utc()
+        result = {**result, "steps": list(stage_times), "stage_times": dict(stage_times), "started_at": started}
+        if final:
+            result.update(finished_at=now.isoformat(), flag=review_flag(result))
+        else:
             result["lease"] = lease
         with engine.begin() as conn:
             changed = conn.execute(update(scans).where(scans.c.id == row["id"],
                 scans.c.analysis["lease"].as_string() == lease)
-                .values(analysis={**result, "steps": list(steps)}, updated_at=utc())).rowcount
+                .values(analysis=result, updated_at=now)).rowcount
             if changed and final:
                 conn.execute(s.audit_log.insert().values(
                     action="workspace_analysis_finished", entity_type="ultrasound_workspace_scan",
@@ -77,8 +102,8 @@ async def process_next(engine, service):
                 ))
 
     async def progress(stage):
-        if stage not in steps:
-            steps.append(stage)
+        if stage in STAGES and stage not in stage_times:
+            stage_times[stage] = utc().isoformat()
             await run_in_threadpool(persist, {"state": stage, "reasons": []})
 
     if not row["image_ciphertext"] or aware(row["image_expires_at"]) <= utc():
