@@ -592,6 +592,7 @@
         showAnalysisStatus(badge,active);
       }
       const data = await request(base() + '?offset=' + offset);
+      if(!Array.isArray(data?.items))throw Error('Ultrasound history could not be loaded. Please try again.');
       if (active !== generation) return;
       const refresh = button('Refresh scans', load);
       if (clinician) root.append(uploadForm([]));

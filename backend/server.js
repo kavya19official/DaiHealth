@@ -915,6 +915,8 @@ require('./notifications')(app, { pool, authenticateToken });
 require('./patientPreferences')(app, { pool, authenticateToken });
 require('./birthReadiness').register(app, { pool, authenticateToken, authorizeRole });
 require('./deliveryReadiness').register(app, { pool, authenticateToken, authorizeRole });
+require('./clinicalTools').register(app, { pool, authenticateToken, authorizeRole });
+require('./pregnancyJourney').register(app, { pool, authenticateToken, authorizeRole });
 require('./patientContinuity')(app, { pool, authenticateToken, authorizeRole });
 require('./patientExperience')(app, { pool, authenticateToken, authorizeRole });
 require('./patientHospitalStay')(app, { pool, authenticateToken, authorizeRole });

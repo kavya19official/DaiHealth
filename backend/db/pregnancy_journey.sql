@@ -1,0 +1,7 @@
+CREATE TABLE IF NOT EXISTS pregnancy_care_context (
+ mother_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+ record JSONB NOT NULL DEFAULT '{}'::jsonb,
+ version INTEGER NOT NULL DEFAULT 1,
+ updated_by INTEGER NOT NULL REFERENCES users(id),
+ updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);

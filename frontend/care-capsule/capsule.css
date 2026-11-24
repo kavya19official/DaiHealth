@@ -22,3 +22,6 @@
 }
 
 .capsule-page #capsule-language { font: inherit; margin-inline-start: .4rem; }
+html.capsule-embedded body{padding:0;background:transparent}html.capsule-embedded main{margin:0;max-width:none;padding:0}html.capsule-embedded main>h1,html.capsule-embedded main>label{display:none}html.capsule-embedded .dai-language-control{display:none}
+
+html.capsule-embedded body{font-family:"Inter",system-ui,sans-serif;font-size:17px;line-height:1.6}html.capsule-embedded .capsule-card{border-radius:20px;padding:22px}html.capsule-embedded button{font:inherit;padding:10px 16px;border-radius:12px}html.capsule-embedded input:not([type=file]){border:1px solid #ded2f2;border-radius:12px;padding:12px;font:inherit}html.capsule-embedded input[type=file]{font:inherit;max-width:100%}html.capsule-embedded .capsule-card>p{margin:10px 0}

@@ -26,7 +26,7 @@
     const root=document.createElement('section');
     root.className='dai-care-card';
     root.innerHTML=`<h2>${title}</h2><p data-status role="status"></p>${content}`;
-    panel.insertBefore(root,panel.children[1]||null);
+    if(doctor&&panel===appointmentPanel&&document.getElementById('doctor-view-appointments')){const more=document.createElement('details');more.className='doctor-appointment-extra';const summary=document.createElement('summary');summary.textContent=title;more.append(summary);root.querySelector('h2')?.remove();more.append(root);document.getElementById('doctor-view-appointments').append(more);}else panel.insertBefore(root,panel.children[1]||null);
     return root;
   }
 

@@ -1,7 +1,7 @@
 /* Optional educational exploration. No patient images, measurements or record writes. */
 (function(){
  'use strict';
- const T=(en,hi)=>document.documentElement.lang==='hi'?hi:en,base=new URL('../',document.currentScript.src);
+ const T=(en,hi)=>document.documentElement.lang==='hi'?hi:(window.DaiI18n?.translate(en)||en),base=new URL('../',document.currentScript.src);
  let K=window.UterusLearning,bootstrap=null,bootGeneration=0,viewer=null,voice=null,generation=0,root=null,loading=false,mode='learning',selected='fundus',muted=false,timer=null;
  const active=()=>location.hash==='#uterus-model',$=s=>root?.querySelector(s),language=()=>['hi','mr'].includes(document.documentElement.lang)?document.documentElement.lang:'en';
  function status(text){if($('[data-uterus-status]'))$('[data-uterus-status]').textContent=text;}

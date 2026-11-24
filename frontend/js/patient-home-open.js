@@ -13,7 +13,7 @@
   const $ = id => document.getElementById(id);
   const E = x => String(x ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   let state, selectedChild, selectedDate, map, markers, mapKey = '',catchupOpen=false,mapReady=false,mapObserver;
-  const T=(en,hi)=>document.documentElement.lang==='hi'?hi:en;
+  const T=(en,hi)=>document.documentElement.lang==='hi'?hi:(window.DaiI18n?.translate(en)||en);
   const listen=id=>'<button type="button" class="home-listen" data-listen="'+id+'" aria-label="'+T('Read this section aloud','यह भाग सुनें')+'"><svg aria-hidden="true"><use href="#i-speaker"/></svg></button>';
   const info=(text,name)=>'<details class="oh-info"><summary aria-label="'+E(name||T('About these records','इन रिकॉर्ड के बारे में'))+'">i</summary><div>'+E(text)+'</div></details>';
   const dateLabel = v => v ? new Date(String(v).slice(0,10) + 'T12:00:00').toLocaleDateString(document.documentElement.lang || 'en', {day:'numeric',month:'short'}) : 'Date not recorded';

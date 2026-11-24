@@ -10,12 +10,14 @@
 <link rel="stylesheet" href="/i18n.css?v=app-4">
 </head>
 <body class="capsule-page">
+<script>if(new URLSearchParams(location.search).has("embedded"))document.documentElement.classList.add("capsule-embedded");</script>
   <main>
     <h1 data-text>Care Capsule verifier</h1>
     <label><span data-text>Language</span>
       <select id="capsule-language">
         <option value="en" lang="en">English</option>
         <option value="hi" lang="hi">हिन्दी</option>
+        <option value="mr" lang="mr">मराठी</option>
       </select>
     </label>
     <p data-text>Prepare this page online before going offline. Scan the patient’s QR to read the fields they chose to share.</p>

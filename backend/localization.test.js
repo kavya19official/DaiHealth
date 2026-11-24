@@ -23,3 +23,8 @@ test('Marathi FAQs retain prepared-response routing and safety boundaries',()=>{
  const {faqs,respond}=require('../frontend/js/daya-knowledge');for(const faq of faqs){assert.match(faq.question.mr,/[\u0900-\u097f]/,faq.id);assert.match(faq.answer.mr,/[\u0900-\u097f]/,faq.id);const result=respond(faq.question.mr,'mr');assert.equal(result.id,faq.id,faq.id);}
  assert.equal(respond('मला रक्तस्राव होत आहे','mr').id,'danger');assert.equal(respond('औषधाचा डोस बदलू का','mr').id,'medicine-refusal');
 });
+
+test('template-rendered forms, ordinary action verbs and generated clinical labels have complete Hindi and Marathi copy',()=>{
+ const keys=['Create my private space','Your Family Circle','Every opening is recorded privately.','Delete copy','Select a person','Let’s take the next step','{{0}} years','{{0}} reports','{{0}} recorded steps','Exploring now: {{0}}','Please complete this field.','AI image review is not configured. You can still upload the report and save your own reading.'];
+ for(const en of keys){assert.ok(source.entries.includes(en),en);for(const lang of ['hi','mr'])assert.match(require('../frontend/locales/'+lang+'.json').phrases[en],/[\u0900-\u097f]/,lang+': '+en);}
+});

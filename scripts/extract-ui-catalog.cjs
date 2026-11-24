@@ -4,7 +4,7 @@ const ROOT=path.join(__dirname,'..'),ts=require('../hospital_portal/web/node_mod
 const phrases=new Set(),aliases={},origins=new Map();
 const decode=s=>s.replace(/&(?:amp|lt|gt|quot|apos|nbsp|#39|#x27);/g,t=>({'&amp;':'&','&lt;':'<','&gt;':'>','&quot;':'"','&apos;':"'",'&#39;':"'",'&#x27;':"'",'&nbsp;':' '}[t]));
 const normalize=s=>decode(s).replace(/\s+/g,' ').trim();
-function add(s,file){s=normalize(s);if(s.length<2||s.length>2600||!/[A-Za-z]{2}/.test(s)||/[\u0900-\u0dff]/.test(s)||/^\s*(?:https?:|\/|#|\.|@|--|data:|SELECT |INSERT |UPDATE |CREATE |DELETE |ALTER |WITH |PRAGMA |function\b|const\b|var\b|let\b)/i.test(s)||/[{}<>=\\]|\$\(|\b(?:SELECT|FROM|WHERE|JOIN)\b/.test(s)||/^[\w.-]+\.(?:js|css|json|sql|png|jpg|glb|html|wav|csv|pdf)$/i.test(s)||/^[\w]+[_:/][\w/:.-]+$/.test(s)||/^(?:[a-z]+[-_][a-z_-]+|[a-z]+[A-Z][a-zA-Z]+)$/.test(s)||/^(?:SYNTHETIC |Dr\.? [A-Z]|Gemini|gemini-|DAI-SYN|mother@|doctor@)/.test(s))return;
+function add(s,file){s=normalize(s);if(s.length<2||s.length>2600||!/[A-Za-z]{2}/.test(s)||/[\u0900-\u0dff]/.test(s)||/^\s*(?:https?:|\/|#|\.|@|--|data:|SELECT\s+.+\s+FROM\s|INSERT\s+INTO\s|UPDATE\s+\w+\s+SET\s|CREATE\s+(?:TABLE|INDEX|VIEW)\s|DELETE\s+FROM\s|ALTER\s+TABLE\s|WITH\s+\w+\s+AS\s|PRAGMA |function\s*\(|(?:const|var|let)\s+\w+\s*=)/i.test(s)||/[{}<>=\\]|\$\(|\b(?:SELECT .+ FROM|WHERE .+=|JOIN .+ ON)\b/.test(s)||/^[\w.-]+\.(?:js|css|json|sql|png|jpg|glb|html|wav|csv|pdf)$/i.test(s)||/^[\w]+[_:/][\w/:.-]+$/.test(s)||/^(?:[a-z]+[-_][a-z_-]+|[a-z]+[A-Z][a-zA-Z]+)$/.test(s)||/^(?:SYNTHETIC |Dr\.? [A-Z]|Gemini|gemini-|DAI-SYN|mother@|doctor@)/.test(s))return;
  if(!origins.has(s))origins.set(s,new Set());origins.get(s).add(file);phrases.add(s);
 }
 function html(s,file){for(const m of s.matchAll(/(?:placeholder|aria-label|title|alt)\s*=\s*["']([^"']+)["']/gi))add(m[1],file);s=s.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,'').replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi,'').replace(/<!--[\s\S]*?-->/g,'');for(const part of s.split(/<[^>]*>/g))add(part,file);}
@@ -14,13 +14,14 @@ function expression(node,map=new Map()){
  if(ts.isTemplateExpression(node))return node.head.text+node.templateSpans.map(s=>expression(s.expression,map)+s.literal.text).join('');
  const key=node.getText();if(!map.has(key))map.set(key,map.size);return '{{'+map.get(key)+'}}';
 }
-function template(value,file){for(const raw of value.split(/<[^>]*>/g)){const s=normalize(raw),literal=s.replace(/\{\{\d+\}\}/g,'');if(!/[\u0900-\u0dff]/.test(s)&&/[A-Za-z]{4}/.test(literal)&&literal.length>=7&&s.length<1600&&!/[<>{}=]/.test(s.replace(/\{\{\d+\}\}/g,''))&&(s.match(/\{\{/g)||[]).length<=6){phrases.add(s);origins.set(s,new Set([file]));}}}
+function template(value,file){for(const raw of value.split(/<[^>]*>/g)){const s=normalize(raw),literal=s.replace(/\{\{\d+\}\}/g,'');if(!/[\u0900-\u0dff]/.test(s)&&/[A-Za-z]{4}/.test(literal)&&literal.trim().length>=3&&s.length<1600&&!/[<>{}=]/.test(s.replace(/\{\{\d+\}\}/g,''))&&(s.match(/\{\{/g)||[]).length<=6){phrases.add(s);origins.set(s,new Set([file]));}}}
 function alias(en,localized,file,allowRoman=false){en=normalize(en);localized=normalize(localized);if(!/[A-Za-z]{3}/.test(en)||/[\u0900-\u0dff]/.test(en)||(!allowRoman&&!/[\u0900-\u097f]/.test(localized)))return;if(en.includes('{{'))template(en,file);else add(en,file);if(phrases.has(en))aliases[localized]=en;}
 function strings(node,file){
  if(ts.isStringLiteralLike(node)){
   const v=node.text;if(v.includes('<')||v.includes('>'))html(v,file);else add(v,file);
  }
  if(ts.isJsxText(node))add(node.text,file);
+ if(ts.isTemplateExpression(node)&&/[<>]/.test(node.getText())){const value=expression(node);html(value,file);template(value,file);}
  if(ts.isTemplateExpression(node)&&!/[<>]/.test(node.getText())){
   const value=node.head.text+node.templateSpans.map((s,i)=>'{{'+i+'}}'+s.literal.text).join('');
   if(value.length<1500&&!/[;<>]/.test(value)){const safe=value.replace(/\{\{\d+\}\}/g,'TOKEN');if(/[A-Za-z]{3}/.test(safe)){const tokenized=normalize(value);add(safe,file);if(phrases.has(normalize(safe))){phrases.delete(normalize(safe));phrases.add(tokenized);origins.set(tokenized,new Set([file]));}}}
@@ -32,10 +33,10 @@ function strings(node,file){
  if(ts.isBinaryExpression(node)&&node.operatorToken.kind===ts.SyntaxKind.PlusToken&&!(ts.isBinaryExpression(node.parent)&&node.parent.operatorToken.kind===ts.SyntaxKind.PlusToken))template(expression(node),file);
  ts.forEachChild(node,n=>strings(n,file));
 }
-function walk(dir){for(const e of fs.readdirSync(dir,{withFileTypes:true})){if(['name-localization.js','patient-sw.js','sw.js'].includes(e.name)||e.name.startsWith('.')||['node_modules','vendor','reference-data','public','previews'].includes(e.name))continue;const p=path.join(dir,e.name);if(e.isDirectory())walk(p);else if(/\.(?:js|tsx?|html)$/.test(e.name)&&!/(?:\.test\.|\.spec\.|service-worker|\.min\.)/.test(e.name)){const rel=path.relative(ROOT,p),s=fs.readFileSync(p,'utf8');if(p.endsWith('.html')){html(s,rel);for(const m of s.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi))strings(ts.createSourceFile(p+'.js',m[1],ts.ScriptTarget.Latest,true),rel);}else strings(ts.createSourceFile(p,s,ts.ScriptTarget.Latest,true,p.endsWith('tsx')?ts.ScriptKind.TSX:ts.ScriptKind.JS),rel);}}}
+function walk(dir){for(const e of fs.readdirSync(dir,{withFileTypes:true})){if(['name-localization.js','patient-sw.js','sw.js'].includes(e.name)||e.name.startsWith('.')||['node_modules','vendor','reference-data','public','previews'].includes(e.name))continue;const p=path.join(dir,e.name);if(e.isDirectory())walk(p);else if(/\.(?:m?js|tsx?|html)$/.test(e.name)&&!/(?:\.test\.|\.spec\.|service-worker|\.min\.)/.test(e.name)){const rel=path.relative(ROOT,p),s=fs.readFileSync(p,'utf8');if(p.endsWith('.html')){html(s,rel);for(const m of s.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi))strings(ts.createSourceFile(p+'.js',m[1],ts.ScriptTarget.Latest,true),rel);}else strings(ts.createSourceFile(p,s,ts.ScriptTarget.Latest,true,p.endsWith('tsx')?ts.ScriptKind.TSX:ts.ScriptKind.JS),rel);}}}
 function backendCopy(node,file){
  if(ts.isPropertyAssignment(node)&&/^(error|message|label|title|description|notice|warning)$/.test(node.name.getText().replace(/['"]/g,''))&&ts.isStringLiteralLike(node.initializer))add(node.initializer.text,file);
- if((ts.isNewExpression(node)||ts.isCallExpression(node))&&/^Error$/.test(node.expression.getText())&&node.arguments?.length&&ts.isStringLiteralLike(node.arguments[0]))add(node.arguments[0].text,file);
+ if((ts.isNewExpression(node)||ts.isCallExpression(node))&&/^(?:Error|fail)$/.test(node.expression.getText())&&node.arguments?.length&&ts.isStringLiteralLike(node.arguments[0]))add(node.arguments[0].text,file);
  ts.forEachChild(node,n=>backendCopy(n,file));
 }
 for(const name of fs.readdirSync(path.join(ROOT,'backend'))){if(!name.endsWith('.js')||name.includes('.test.'))continue;const file='backend/'+name;backendCopy(ts.createSourceFile(file,fs.readFileSync(path.join(ROOT,file),'utf8'),ts.ScriptTarget.Latest,true),file);}

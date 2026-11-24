@@ -10,12 +10,12 @@ const camera = $('camera');
 const storageKey = 'dai-care-capsule-trust-v1';
 const languageKey = 'dai-care-capsule-language';
 const strings = [...document.querySelectorAll('[data-text]')].map(node => [node, node.textContent]);
-let language = 'en';
+let language = window.DaiI18n?.getLang() || 'en';
 let readyMessage = '';
 let statusMessage = '';
 let verifiedData = null;
 try { if (localStorage.getItem(languageKey) === 'hi') language = 'hi'; } catch { /* Private mode. */ }
-const t = text => translate(language, text);
+const t = text => window.DaiI18n?.translate ? window.DaiI18n.translate(text, language) : translate(language, text);
 
 function setStatus(message) {
   statusMessage = message;
@@ -230,10 +230,12 @@ document.addEventListener('visibilitychange', () => { if (document.hidden) stopC
 window.addEventListener('pagehide', stopCamera);
 
 $('language').onchange = () => {
-  language = $('language').value === 'hi' ? 'hi' : 'en';
+  language = ['hi','mr'].includes($('language').value) ? $('language').value : 'en';
+  window.DaiI18n?.setLang(language);
   try { localStorage.setItem(languageKey, language); } catch { /* Private mode. */ }
   renderLanguage();
 };
+window.addEventListener('dai:lang', () => { const next=window.DaiI18n?.getLang()||'en';if(next!==language){language=next;renderLanguage();} });
 renderLanguage();
 
 if ('serviceWorker' in navigator) {
@@ -251,3 +253,5 @@ if (incoming) {
 } else {
   updateReady('Offline. Recent revocations may be unavailable.');
 }
+
+window.addEventListener('message',event=>{if(event.origin===location.origin&&event.source===window.parent&&event.data?.type==='dai:capsule-inactive')stopCamera();});

@@ -1,7 +1,7 @@
 /* Optional on-device learning experience. Camera images and landmarks are never uploaded. */
 (function(){
  'use strict';
- const M=window.PregnancyMirrorModel,base=new URL('../',document.currentScript.src),T=(en,hi)=>document.documentElement.lang==='hi'?hi:en;
+ const M=window.PregnancyMirrorModel,base=new URL('../',document.currentScript.src),T=(en,hi)=>document.documentElement.lang==='hi'?hi:(window.DaiI18n?.translate(en)||en);
  const icon='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="3" y="5" width="18" height="15" rx="4"/><path d="m8 5 1-2h6l1 2"/><circle cx="12" cy="12" r="4"/></svg>';
  const layers=[['all','All layers','सभी परतें'],['uterus','Uterus','गर्भाशय'],['sac','Amniotic sac','एमनियोटिक थैली'],['fluid','Amniotic fluid','एमनियोटिक द्रव'],['placenta','Placenta','अपरा'],['baby','Baby','शिशु'],['cord','Cord','गर्भनाल']];
  let context={},dialog=null,returnFocus=null,view=null,stream=null,worker=null,ready=false,busy=false,frameTimer=null,lastFrame=0,lastPose=0,recognition=null,downloadURL=null,epoch=0,tracking=false,placement={x:.5,y:.47,size:360,angle:0},config={week:28,layer:'all',twins:false,revealDepth:0,explainLayer:null},recorded=null,knownWeek=null,delivered=false,resizeObserver=null,muted=false,reducedMotion=false,speechToken=0,sosRestore=null,cameraPending=false,cameraRequestId=0,sheetOpen=false,handsEnabled=false,handsReady=false,gestureCameraRequest=false,lastHandGesture=null,voicePlayer=null,placementManual=false,sceneAttempt=0,sceneTimer=null;

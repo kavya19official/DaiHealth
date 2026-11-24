@@ -1,6 +1,6 @@
 /* Pending Care: a compact action worklist over recorded care and authoritative workflow states. */
 (function(){'use strict';
-const P=window.PatientPendingModel,M=window.PatientModel,E=M.escape,$=id=>document.getElementById(id),T=(en,hi)=>document.documentElement.lang==='hi'?hi:en;
+const P=window.PatientPendingModel,M=window.PatientModel,E=M.escape,$=id=>document.getElementById(id),T=(en,hi)=>document.documentElement.lang==='hi'?hi:(window.DaiI18n?.translate(en)||en);
 const svg=n=>'<svg aria-hidden="true"><use href="#i-'+n+'"/></svg>',icons={tests:'droplet',visits:'clipboard',vaccines:'shield',nutrition:'pill',postpartum:'heart',child:'baby'};
 const labels={planned:'Not yet recorded',patient_reported:'Patient reported done',evidence_submitted:'Evidence submitted',awaiting_review:'Awaiting clinician review',clinician_confirmed:'Clinician confirmed',recorded:'Recorded · confirmation unavailable'};
 let state=null,subject='mother',selected=null,drawer=null,offsets={arrange:40,review:40,completed:40},previous=new Map(),initial=true,renderKey='';

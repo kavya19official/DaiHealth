@@ -33,7 +33,7 @@
   }
   if(typeof module==='object'&&module.exports){module.exports={validDate,buildJourney,buildActivities};return;}
   const $=id=>document.getElementById(id),E=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  const T=(en,hi)=>document.documentElement.lang==='hi'?hi:en;
+  const T=(en,hi)=>document.documentElement.lang==='hi'?hi:(window.DaiI18n?.translate(en)||en);
   const icon=name=>name==='pin'?'<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg>':'<svg aria-hidden="true"><use href="#i-'+name+'"/></svg>';
   let mounted=false;
   function mount() {

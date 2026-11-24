@@ -1,7 +1,7 @@
 /* Recovery presentation and visible care routes. Existing clinical forms and APIs are unchanged. */
 (function(){
  'use strict';
- const $=id=>document.getElementById(id),T=(en,hi)=>document.documentElement.lang==='hi'?hi:en;
+ const $=id=>document.getElementById(id),T=(en,hi)=>document.documentElement.lang==='hi'?hi:(window.DaiI18n?.translate(en)||en);
  const icon=k=>'<svg aria-hidden="true"><use href="#i-'+k+'"/></svg>';
  const routes=[['facilities','search','Nearby care','नज़दीकी देखभाल'],['appointments','cal','Appointments','अपॉइंटमेंट'],['records','file','Reports & records','रिपोर्ट और रिकॉर्ड'],['family','shield','Family & consent','परिवार और सहमति']];
  function setup(){

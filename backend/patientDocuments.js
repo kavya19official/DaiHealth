@@ -71,7 +71,7 @@ function docRow(r) {
     verification_status: r.verification_status,
     notes: r.notes,
     uploaded_at: r.uploaded_at,
-    report_category:r.report_category,report_date:r.report_date,facility_name:r.facility_name,child_id:r.child_id,milestone_id:r.milestone_id,appointment_id:r.appointment_id,is_sensitive:!!r.is_sensitive,viewed_at:r.viewed_at,reviewed_by:r.reviewed_by,doctor_note:r.doctor_note,source:r.uploaded_by_role==='doctor'?'clinician_uploaded':'self_uploaded',uploaded_by_name:r.uploaded_by_role==='doctor'?(r.uploaded_by_name||null):null,
+    report_category:r.report_category,report_date:r.report_date,facility_name:r.facility_name,child_id:r.child_id,milestone_id:r.milestone_id,appointment_id:r.appointment_id,is_sensitive:!!r.is_sensitive,viewed_at:r.viewed_at,reviewed_by:r.reviewed_by,reviewed_at:r.reviewed_at,reviewed_by_name:r.reviewed_by_name||null,doctor_note:r.doctor_note,source:r.uploaded_by_role==='doctor'?'clinician_uploaded':'self_uploaded',uploaded_by_name:r.uploaded_by_role==='doctor'?(r.uploaded_by_name||null):null,
     can_delete: r.uploaded_by_role!=='doctor' && r.verification_status !== 'locked' && r.verification_status !== 'verified',
   };
 }
@@ -153,9 +153,10 @@ module.exports = function registerPatientDocuments(app, { pool, authenticateToke
   app.get('/api/documents', ...motherOnly, async (req, res) => {
     try {
       const r = await pool.query(
-        `SELECT d.*, dp.full_name AS uploaded_by_name
+        `SELECT d.*, dp.full_name AS uploaded_by_name, reviewer.full_name AS reviewed_by_name
            FROM patient_documents d
            LEFT JOIN doctor_profiles dp ON dp.user_id = d.uploaded_by AND d.uploaded_by_role = 'doctor'
+           LEFT JOIN doctor_profiles reviewer ON reviewer.user_id=d.reviewed_by
           WHERE d.mother_id = $1 AND d.deleted_at IS NULL
           ORDER BY d.uploaded_at DESC, d.id DESC`,
         [req.user.id]
@@ -464,7 +465,7 @@ if (!linked.rows.length) {
     try{const row=await canAccessDoc(pool,Number(req.params.id),req.user);if(!row)return res.status(404).json({error:'Shared report not found'});
       const credentials=(await pool.query('SELECT medical_license_number,facility_name FROM doctor_profiles WHERE user_id=$1',[req.user.id])).rows[0];if(!credentials?.medical_license_number||!await require('./clinicalDashboard').verifiedDoctor(pool,req.user.id))return res.status(403).json({error:'Verified clinical credentials are required'});
       const note=cleanStr(req.body?.doctor_note,2000);if(!note)return res.status(400).json({error:'Enter your review note'});
-      const client=await pool.connect();try{await client.query('BEGIN');await client.query('LOCK TABLE patient_access_controls,doctor_profiles,patient_document_shares,patient_preferences IN SHARE MODE');if(!await canAccessDoc(client,row.id,req.user)||!await require('./clinicalDashboard').verifiedDoctor(client,req.user.id)){await client.query('ROLLBACK');return res.status(403).json({error:'Clinical credentials or document access changed. Refresh before review.'});}if(row.milestone_id){const step=(await client.query('SELECT * FROM care_milestones WHERE id=$1 AND mother_id=$2 FOR UPDATE',[row.milestone_id,row.mother_id])).rows[0];if(step&&Number(step.result_id)===Number(row.id)&&require('./careStepMachine').stateOf(step)!=='clinician_confirmed')await require('./careStepMachine').record(client,step,{type:'CONFIRM',authorised:true,evidence:true},req.user.id);}await client.query("UPDATE patient_documents SET reviewed_by=$1,doctor_note=$2,verification_status='verified' WHERE id=$3",[req.user.id,note,row.id]);if(row.milestone_id)await client.query("UPDATE care_milestones SET completion_verification='verified',verified_facility_name=$1 WHERE id=$2 AND mother_id=$3 AND result_id=$4",[credentials.facility_name||null,row.milestone_id,row.mother_id,row.id]);await logEvent(client,row.id,req.user.id,'verify',{});await client.query('COMMIT');}catch(e){await client.query('ROLLBACK');throw e;}finally{client.release();}
+      const client=await pool.connect();try{await client.query('BEGIN');await client.query('LOCK TABLE patient_access_controls,doctor_profiles,patient_document_shares,patient_preferences IN SHARE MODE');if(!await canAccessDoc(client,row.id,req.user)||!await require('./clinicalDashboard').verifiedDoctor(client,req.user.id)){await client.query('ROLLBACK');return res.status(403).json({error:'Clinical credentials or document access changed. Refresh before review.'});}if(row.milestone_id){const step=(await client.query('SELECT * FROM care_milestones WHERE id=$1 AND mother_id=$2 FOR UPDATE',[row.milestone_id,row.mother_id])).rows[0];if(step&&Number(step.result_id)===Number(row.id)&&require('./careStepMachine').stateOf(step)!=='clinician_confirmed')await require('./careStepMachine').record(client,step,{type:'CONFIRM',authorised:true,evidence:true},req.user.id);}await client.query("UPDATE patient_documents SET reviewed_by=$1,reviewed_at=NOW(),doctor_note=$2,verification_status='verified' WHERE id=$3",[req.user.id,note,row.id]);if(row.milestone_id)await client.query("UPDATE care_milestones SET completion_verification='verified',verified_facility_name=$1 WHERE id=$2 AND mother_id=$3 AND result_id=$4",[credentials.facility_name||null,row.milestone_id,row.mother_id,row.id]);await logEvent(client,row.id,req.user.id,'verify',{});await client.query('COMMIT');}catch(e){await client.query('ROLLBACK');throw e;}finally{client.release();}
       res.json({message:'Clinician review recorded'});
     }catch(e){res.status(500).json({error:'Could not save the review'});}
   });
@@ -475,13 +476,14 @@ if (!linked.rows.length) {
       const { revokedSql, activeRelationshipSql } = require('./accessControl');
       const r = await pool.query(
         `SELECT d.id, d.title, d.doc_type, d.original_filename, d.mime_type, d.size_bytes,
-                d.verification_status, d.notes, d.uploaded_at,d.report_category,d.report_date,d.facility_name,d.child_id,d.milestone_id,d.appointment_id,d.is_sensitive,d.viewed_at,d.reviewed_by,d.doctor_note, d.mother_id,
+                d.verification_status, d.notes, d.uploaded_at,d.report_category,d.report_date,d.facility_name,d.child_id,d.milestone_id,d.appointment_id,d.is_sensitive,d.viewed_at,d.reviewed_by,d.reviewed_at,reviewer.full_name AS reviewed_by_name,d.doctor_note, d.mother_id,
                 d.uploaded_by, d.uploaded_by_role, mp.full_name AS mother_name, s.shared_at, dp.full_name AS uploaded_by_name
            FROM patient_documents d
            LEFT JOIN patient_document_shares s
              ON s.document_id = d.id AND s.doctor_id = $1 AND s.revoked_at IS NULL AND (s.expires_at IS NULL OR s.expires_at>NOW())
            LEFT JOIN mother_profiles mp ON mp.user_id = d.mother_id
            LEFT JOIN doctor_profiles dp ON dp.user_id = d.uploaded_by AND d.uploaded_by_role = 'doctor'
+           LEFT JOIN doctor_profiles reviewer ON reviewer.user_id=d.reviewed_by
           WHERE d.deleted_at IS NULL
             AND ((s.id IS NOT NULL
                   AND COALESCE((SELECT (preferences->>'privacy_share_doctors')::boolean FROM patient_preferences WHERE user_id=d.mother_id),TRUE)

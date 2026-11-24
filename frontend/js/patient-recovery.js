@@ -1,5 +1,5 @@
 /* Mature post-discharge workspace. Existing clinical forms/APIs remain authoritative. */
-(function(){'use strict';const R=window.PatientRecoveryModel,M=window.PatientModel,E=M.escape,$=id=>document.getElementById(id),T=(en,hi)=>document.documentElement.lang==='hi'?hi:en,svg=id=>'<svg aria-hidden="true"><use href="#i-'+id+'"/></svg>';
+(function(){'use strict';const R=window.PatientRecoveryModel,M=window.PatientModel,E=M.escape,$=id=>document.getElementById(id),T=(en,hi)=>document.documentElement.lang==='hi'?hi:(window.DaiI18n?.translate(en)||en),svg=id=>'<svg aria-hidden="true"><use href="#i-'+id+'"/></svg>';
 let state=null,owner=null,epoch=0,data={},loading=false,renderKey='',lane='mother',measureSource='self',selectedMood=null,lastChecked=null;
 const fmt=d=>R.date(d)?new Date(R.date(d)+'T12:00:00').toLocaleDateString(document.documentElement.lang||'en',{day:'numeric',month:'short',year:'numeric'}):T('Not recorded','दर्ज नहीं');
 const post=()=>state?.post||{},online=()=>state?.user&&!state.user.guest&&!state.offline&&navigator.onLine!==false;

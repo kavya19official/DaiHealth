@@ -5,7 +5,7 @@ const svg=n=>'<svg aria-hidden="true"><use href="#i-'+n+'"/></svg>';
 const fmt=d=>d?new Date(String(d).slice(0,10)+'T12:00:00').toLocaleDateString(document.documentElement.lang||'en',{day:'numeric',month:'short',year:'numeric'}):'Not recorded';
 const times=t=>t?.slice(0,5)||'Time to confirm';
 let state={},owner=null,catalog={doctors:[],facilities:[]},records=null,docs=[],tab='upcoming',recordTab='reports',month=0,loading=false,vaultChild='all',reportFilter='';
-const A=window.PatientAppointmentsModel,T=(en,hi)=>document.documentElement.lang==='hi'?hi:en;
+const A=window.PatientAppointmentsModel,T=(en,hi)=>document.documentElement.lang==='hi'?hi:(window.DaiI18n?.translate(en)||en);
 let calendarView='week',week=0,appointmentKey='';
 const types={antenatal:'Antenatal check-up',test:'Test',scan:'Scan',mother_vaccine:'Mother’s vaccination',baby_vaccine:'Baby’s vaccination',postpartum:'Postpartum visit',paediatric:'Paediatric visit',specialist:'Specialist visit'};
 function dl(text,name,type='text/plain'){const url=URL.createObjectURL(new Blob([text],{type})),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}

@@ -1,7 +1,7 @@
 /* Sukoon prototype: private recovery tools, no diagnostic inference or autonomous action. */
 (function(){
  'use strict';
- const M=window.SukoonModel,T=(en,hi)=>document.documentElement.lang==='hi'?hi:en,E=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const M=window.SukoonModel,T=(en,hi)=>document.documentElement.lang==='hi'?hi:(window.DaiI18n?.translate(en)||en),E=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  let modalNumber=0,state={},owner=null,vault=null,data=null,root=null,tab='today',exists=false,busy=false,selected=null,weekOffset=0,config={people:[],reminders:false,awake_available:false},household={requests:[],duties:[]},cloudRevision=null,voice=null,muted=false,recorder=null,recordStream=null,recordedAudio=null,urls=[],toolTimer=null,breathTimer=null,sessionEnd=0,sessionStep=-1,night=false,joined=false,sessionEpoch=0,lastTouch=Date.now(),lastRemote=0,presenceTimer=null,wizard=null,modal=null,crisis=false;
  const $=selector=>root?.querySelector(selector),language=()=>document.documentElement.lang==='hi'?'hi':'en',guest=()=>!!state.user?.guest||!!localStorage.getItem('dai_guest'),real=()=>owner&&owner!=='guest'&&!guest(),active=()=>location.hash==='#sukoon';
  const api=(path,options)=>window.DaiAPI?.apiRequest(path,options),notice=text=>{if($('[data-sk-status]'))$('[data-sk-status]').textContent=text;};

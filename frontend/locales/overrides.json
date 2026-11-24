@@ -3146,5 +3146,4101 @@
   "Reminder language": {
     "hi": "अनुस्मारक की भाषा",
     "mr": "आठवणीच्या संदेशाची भाषा"
+  },
+  "+1 or +2": {
+    "hi": "+1 या +2",
+    "mr": "+1 किंवा +2"
+  },
+  "/ 10 at {{0}} minutes": {
+    "hi": "/ 10, {{0}} मिनट पर",
+    "mr": "/ 10, {{0}} मिनिटांनी"
+  },
+  "/doctor/patients/{{0}}/clinical-tools": {
+    "hi": "/doctor/patients/{{0}}/clinical-tools",
+    "mr": "/doctor/patients/{{0}}/clinical-tools"
+  },
+  "/doctor/patients/{{0}}/ecg/draft": {
+    "hi": "/doctor/patients/{{0}}/ecg/draft",
+    "mr": "/doctor/patients/{{0}}/ecg/draft"
+  },
+  "1 minute": {
+    "hi": "1 मिनट",
+    "mr": "1 मिनिट"
+  },
+  "10 minutes": {
+    "hi": "10 मिनट",
+    "mr": "10 मिनिटे"
+  },
+  "10 mm/mV": {
+    "hi": "10 mm/mV",
+    "mr": "10 mm/mV"
+  },
+  "1–2 cm": {
+    "hi": "1–2 cm",
+    "mr": "1–2 cm"
+  },
+  "25 mm/s": {
+    "hi": "25 mm/s",
+    "mr": "25 mm/s"
+  },
+  "280 − days remaining until EDD; expressed as completed weeks and days.": {
+    "hi": "280 − EDD तक बाकी दिन; पूरे सप्ताह और दिनों में।",
+    "mr": "280 − EDD पर्यंत उरलेले दिवस; पूर्ण आठवडे आणि दिवसांत."
+  },
+  "3–4 cm": {
+    "hi": "3–4 cm",
+    "mr": "3–4 cm"
+  },
+  "5 minutes": {
+    "hi": "5 मिनट",
+    "mr": "5 मिनिटे"
+  },
+  "5 mm/mV": {
+    "hi": "5 mm/mV",
+    "mr": "5 mm/mV"
+  },
+  "50 mm/s": {
+    "hi": "50 mm/s",
+    "mr": "50 mm/s"
+  },
+  "A source beside the decision": {
+    "hi": "हर निर्णय के साथ एक स्रोत",
+    "mr": "प्रत्येक निर्णयासोबत एक स्रोत"
+  },
+  "AAP / ACOG · The Apgar Score": {
+    "hi": "AAP / ACOG · अपगार स्कोर",
+    "mr": "AAP / ACOG · अपगार गुण"
+  },
+  "ACOG · Methods for Estimating the Due Date": {
+    "hi": "ACOG · प्रसव की अनुमानित तारीख तय करने की विधियाँ",
+    "mr": "ACOG · प्रसूतीची अंदाजित तारीख ठरवण्याच्या पद्धती"
+  },
+  "ACOG · Methods for estimating the due date": {
+    "hi": "ACOG · प्रसव की अनुमानित तारीख तय करने की विधियाँ",
+    "mr": "ACOG · प्रसूतीची अंदाजित तारीख ठरवण्याच्या पद्धती"
+  },
+  "AI image draft · research only": {
+    "hi": "AI चित्र का मसौदा · केवल शोध के लिए",
+    "mr": "AI प्रतिमा मसुदा · फक्त संशोधनासाठी"
+  },
+  "AI image output, if requested, was a research draft and was not automatically approved.": {
+    "hi": "AI चित्र का परिणाम, यदि माँगा गया था, शोध का मसौदा था और अपने आप स्वीकृत नहीं हुआ।",
+    "mr": "AI प्रतिमेचा निष्कर्ष मागवला असल्यास तो संशोधन मसुदा होता; तो आपोआप मंजूर झाला नाही."
+  },
+  "Additional days": {
+    "hi": "अतिरिक्त दिन",
+    "mr": "अतिरिक्त दिवस"
+  },
+  "Adult pre-pregnancy measurements only; not current pregnancy weight.": {
+    "hi": "केवल वयस्कों के गर्भधारण से पहले के माप; गर्भावस्था का वर्तमान वजन नहीं।",
+    "mr": "फक्त प्रौढ व्यक्तीची गर्भधारणेपूर्वीची मोजमापे; गर्भावस्थेतील सध्याचे वजन नाही."
+  },
+  "An institution-approved instrument and review are required before scoring is enabled.": {
+    "hi": "स्कोर शुरू करने से पहले संस्था द्वारा स्वीकृत साधन और समीक्षा आवश्यक है।",
+    "mr": "गुणांकन सुरू करण्यापूर्वी संस्थेने मंजूर केलेले साधन आणि पुनरावलोकन आवश्यक आहे."
+  },
+  "Anaemia and iron": {
+    "hi": "खून की कमी और आयरन",
+    "mr": "रक्तक्षय आणि लोह"
+  },
+  "Anterior": {
+    "hi": "आगे की ओर",
+    "mr": "पुढील बाजूस"
+  },
+  "Apgar score": {
+    "hi": "अपगार स्कोर",
+    "mr": "अपगार गुण"
+  },
+  "Apply crop": {
+    "hi": "चुना हिस्सा काटें",
+    "mr": "निवडलेला भाग कापा"
+  },
+  "Appointment summary": {
+    "hi": "अपॉइंटमेंट का सार",
+    "mr": "भेटींचा सारांश"
+  },
+  "Approve & save calculation": {
+    "hi": "गणना मंजूर करके सहेजें",
+    "mr": "गणना मंजूर करून जतन करा"
+  },
+  "Approved by the reviewing clinician; no digital signature.": {
+    "hi": "समीक्षा करने वाले चिकित्सक द्वारा स्वीकृत; डिजिटल हस्ताक्षर नहीं।",
+    "mr": "पुनरावलोकन करणाऱ्या डॉक्टरांनी मंजूर केलेले; डिजिटल स्वाक्षरी नाही."
+  },
+  "Aspirin prevention evidence": {
+    "hi": "एस्पिरिन से बचाव के साक्ष्य",
+    "mr": "अॅस्पिरिनद्वारे प्रतिबंधाचे पुरावे"
+  },
+  "Assessment time": {
+    "hi": "मूल्यांकन का समय",
+    "mr": "मूल्यांकनाची वेळ"
+  },
+  "Assigned EDD": {
+    "hi": "तय की गई EDD",
+    "mr": "ठरवलेली EDD"
+  },
+  "Assigned EDD in current shared roster": {
+    "hi": "वर्तमान साझा रोगी सूची में तय EDD",
+    "mr": "सध्या सामायिक रुग्ण यादीतील ठरवलेली EDD"
+  },
+  "At least 5 cm": {
+    "hi": "कम से कम 5 cm",
+    "mr": "किमान 5 cm"
+  },
+  "At least 80%": {
+    "hi": "कम से कम 80%",
+    "mr": "किमान 80%"
+  },
+  "Authored index · clinical review pending": {
+    "hi": "संकलित स्रोत सूची · चिकित्सकीय समीक्षा बाकी",
+    "mr": "संकलित स्रोत सूची · वैद्यकीय पुनरावलोकन बाकी"
+  },
+  "Background on recognition and complications. This fact sheet does not replace an assessment or an institution’s management protocol.": {
+    "hi": "पहचान और जटिलताओं की जानकारी। यह तथ्य पत्र मूल्यांकन या संस्था के उपचार नियमों का विकल्प नहीं है।",
+    "mr": "ओळख आणि गुंतागुंतींबाबत माहिती. ही माहितीपत्रिका मूल्यांकन किंवा संस्थेच्या व्यवस्थापन नियमांची जागा घेत नाही."
+  },
+  "Blood pressure and pre-eclampsia": {
+    "hi": "रक्तचाप और प्री-एक्लेम्पसिया",
+    "mr": "रक्तदाब आणि प्री-एक्लॅम्प्सिया"
+  },
+  "CDC · Urgent maternal warning signs": {
+    "hi": "CDC · मातृत्व के तत्काल चेतावनी संकेत",
+    "mr": "CDC · मातृत्वातील तातडीची धोक्याची लक्षणे"
+  },
+  "Calculate": {
+    "hi": "गणना करें",
+    "mr": "गणना करा"
+  },
+  "Calculation saved with its version, inputs and clinician confirmation.": {
+    "hi": "गणना, उसका संस्करण, इनपुट और चिकित्सक की पुष्टि सहेजी गई।",
+    "mr": "गणना, आवृत्ती, माहिती आणि डॉक्टरांची पुष्टी जतन झाली."
+  },
+  "Check the allowed range and units.": {
+    "hi": "अनुमत सीमा और इकाइयाँ जाँचें।",
+    "mr": "मान्य मर्यादा आणि एकके तपासा."
+  },
+  "Check the converted weight and height.": {
+    "hi": "बदली गई इकाइयों में वजन और लंबाई जाँचें।",
+    "mr": "रूपांतरित एककांतील वजन आणि उंची तपासा."
+  },
+  "Check the ultrasound gestational age.": {
+    "hi": "अल्ट्रासाउंड में गर्भावस्था की आयु जाँचें।",
+    "mr": "अल्ट्रासाऊंडवरील गर्भावधी तपासा."
+  },
+  "Chest discomfort, breathing difficulty, fainting and changes in heartbeat warrant prompt assessment. This source supports recognition, not automated ECG diagnosis.": {
+    "hi": "सीने में तकलीफ, सांस की परेशानी, बेहोशी और धड़कन में बदलाव की तुरंत जाँच चाहिए। यह स्रोत पहचान में मदद करता है; अपने आप ECG निदान नहीं करता।",
+    "mr": "छातीतील त्रास, श्वास घेण्यास अडचण, बेशुद्ध होणे आणि हृदयाचे ठोके बदलणे यांचे त्वरित मूल्यांकन आवश्यक आहे. हा स्रोत ओळखण्यासाठी आहे; स्वयंचलित ECG निदानासाठी नाही."
+  },
+  "Chest pain": {
+    "hi": "छाती में दर्द",
+    "mr": "छातीत दुखणे"
+  },
+  "Choose": {
+    "hi": "चुनें",
+    "mr": "निवडा"
+  },
+  "Choose a listed option.": {
+    "hi": "सूची में से विकल्प चुनें।",
+    "mr": "यादीतील पर्याय निवडा."
+  },
+  "Choose a valid calendar date.": {
+    "hi": "कैलेंडर की मान्य तारीख चुनें।",
+    "mr": "दिनदर्शिकेतील वैध तारीख निवडा."
+  },
+  "Choose an ECG image first. PDFs and echo reports can be reviewed manually.": {
+    "hi": "पहले ECG का चित्र चुनें। PDF और इको रिपोर्ट की समीक्षा स्वयं की जा सकती है।",
+    "mr": "आधी ECG प्रतिमा निवडा. PDF आणि इको अहवालांचे स्वतः पुनरावलोकन करता येते."
+  },
+  "Clinical calculators": {
+    "hi": "चिकित्सकीय कैलकुलेटर",
+    "mr": "वैद्यकीय गणक"
+  },
+  "Clinician entered": {
+    "hi": "चिकित्सक ने दर्ज किया",
+    "mr": "डॉक्टरांनी नोंदवले"
+  },
+  "Clinician reading:": {
+    "hi": "चिकित्सक की व्याख्या:",
+    "mr": "डॉक्टरांचे विश्लेषण:"
+  },
+  "Clinician reading: {{0}}": {
+    "hi": "चिकित्सक की व्याख्या: {{0}}",
+    "mr": "डॉक्टरांचे विश्लेषण: {{0}}"
+  },
+  "Clinician-performed cervical examination. Total only; no induction recommendation.": {
+    "hi": "चिकित्सक द्वारा गर्भाशय ग्रीवा की जाँच। केवल कुल अंक; प्रसव शुरू कराने की सलाह नहीं।",
+    "mr": "डॉक्टरांनी केलेली गर्भाशयमुखाची तपासणी. फक्त एकूण गुण; प्रसव सुरू करण्याची शिफारस नाही."
+  },
+  "Clipboard unavailable. You can select and copy the displayed result.": {
+    "hi": "क्लिपबोर्ड उपलब्ध नहीं। दिख रहे परिणाम को चुनकर कॉपी कर सकते हैं।",
+    "mr": "क्लिपबोर्ड उपलब्ध नाही. दिसणारा निकाल निवडून प्रत बनवू शकता."
+  },
+  "Complete every required field.": {
+    "hi": "हर आवश्यक स्थान भरें।",
+    "mr": "सर्व आवश्यक माहिती भरा."
+  },
+  "Confirm image processing consent and removal of identifying labels.": {
+    "hi": "चित्र भेजने की सहमति और पहचान वाले लेबल हटाने की पुष्टि करें।",
+    "mr": "प्रतिमा प्रक्रियेची संमती आणि ओळख दर्शवणारी लेबले काढल्याची पुष्टी करा."
+  },
+  "Confirm the inputs and result first.": {
+    "hi": "पहले इनपुट और परिणाम की पुष्टि करें।",
+    "mr": "आधी माहिती आणि निकालाची पुष्टी करा."
+  },
+  "Consistency": {
+    "hi": "बनावट",
+    "mr": "घनता"
+  },
+  "Consult the drug-specific entry and its revision date for breastfeeding information. LactMed is not a complete pregnancy safety or interaction database.": {
+    "hi": "स्तनपान की जानकारी के लिए दवा की अपनी प्रविष्टि और संशोधन की तारीख देखें। LactMed गर्भावस्था सुरक्षा या दवाओं की परस्पर क्रिया का संपूर्ण डेटाबेस नहीं है।",
+    "mr": "स्तनपानाच्या माहितीसाठी त्या औषधाची नोंद आणि सुधारित तारीख पाहा. LactMed हा गर्भावस्थेतील सुरक्षितता किंवा औषधांच्या परस्पर परिणामांचा संपूर्ण डेटाबेस नाही."
+  },
+  "Copy result": {
+    "hi": "परिणाम कॉपी करें",
+    "mr": "निकालाची प्रत करा"
+  },
+  "Crop applied. Check the preview before sending.": {
+    "hi": "चुना हिस्सा लागू हुआ। भेजने से पहले झलक जाँचें।",
+    "mr": "निवडलेला भाग लागू झाला. पाठवण्यापूर्वी पूर्वदृश्य तपासा."
+  },
+  "Date of assessment": {
+    "hi": "मूल्यांकन की तारीख",
+    "mr": "मूल्यांकनाची तारीख"
+  },
+  "Day 3": {
+    "hi": "दिन 3",
+    "mr": "दिवस 3"
+  },
+  "Day 3 or day 5 embryo transfers only.": {
+    "hi": "केवल दिन 3 या दिन 5 के भ्रूण स्थानांतरण के लिए।",
+    "mr": "फक्त दिवस 3 किंवा दिवस 5 च्या भ्रूण हस्तांतरणासाठी."
+  },
+  "Day 3 transfer + 263 days; day 5 transfer + 261 days.": {
+    "hi": "दिन 3 स्थानांतरण + 263 दिन; दिन 5 स्थानांतरण + 261 दिन।",
+    "mr": "दिवस 3 हस्तांतरण + 263 दिवस; दिवस 5 हस्तांतरण + 261 दिवस."
+  },
+  "Day 5": {
+    "hi": "दिन 5",
+    "mr": "दिवस 5"
+  },
+  "Dilation": {
+    "hi": "ग्रीवा का खुलना",
+    "mr": "गर्भाशयमुख उघडणे"
+  },
+  "Document how the assigned due date was established. Review LMP, embryo-transfer details and the appropriate ultrasound assessment before changing dates.": {
+    "hi": "प्रसव की तय तारीख कैसे निकाली गई, दर्ज करें। तारीख बदलने से पहले LMP, भ्रूण स्थानांतरण और उपयुक्त अल्ट्रासाउंड जाँच देखें।",
+    "mr": "प्रसूतीची तारीख कशी ठरवली ते नोंदवा. तारीख बदलण्यापूर्वी LMP, भ्रूण हस्तांतरण आणि योग्य अल्ट्रासाऊंड मूल्यांकन तपासा."
+  },
+  "Draft ready for your review. Your clinical reading is unchanged.": {
+    "hi": "समीक्षा के लिए मसौदा तैयार है। आपकी चिकित्सकीय व्याख्या नहीं बदली।",
+    "mr": "पुनरावलोकनासाठी मसुदा तयार आहे. तुमचे वैद्यकीय विश्लेषण बदललेले नाही."
+  },
+  "Drag a larger crop area on the image first.": {
+    "hi": "पहले चित्र पर खींचकर बड़ा हिस्सा चुनें।",
+    "mr": "आधी प्रतिमेवर ओढून मोठा भाग निवडा."
+  },
+  "ECG": {
+    "hi": "ECG",
+    "mr": "ECG"
+  },
+  "ECG & echo review": {
+    "hi": "ECG और इको की समीक्षा",
+    "mr": "ECG आणि इको पुनरावलोकन"
+  },
+  "ECG and maternal cardiac concerns": {
+    "hi": "ECG और मातृ हृदय से जुड़ी चिंताएँ",
+    "mr": "ECG आणि मातृत्वातील हृदयविषयक समस्या"
+  },
+  "ECG image crop preview": {
+    "hi": "ECG चित्र के चुने हिस्से की झलक",
+    "mr": "ECG प्रतिमेतील निवडलेल्या भागाचे पूर्वदृश्य"
+  },
+  "ECG report": {
+    "hi": "ECG रिपोर्ट",
+    "mr": "ECG अहवाल"
+  },
+  "ECG ·": {
+    "hi": "ECG ·",
+    "mr": "ECG ·"
+  },
+  "EDD from embryo transfer": {
+    "hi": "भ्रूण स्थानांतरण से EDD",
+    "mr": "भ्रूण हस्तांतरणावरून EDD"
+  },
+  "EDD from last menstrual period": {
+    "hi": "आखिरी माहवारी से EDD",
+    "mr": "शेवटच्या पाळीवरून EDD"
+  },
+  "EDD from ultrasound dating": {
+    "hi": "अल्ट्रासाउंड की आयु से EDD",
+    "mr": "अल्ट्रासाऊंड गर्भावधीवरून EDD"
+  },
+  "EVIDENCE · DOCTOR WORKSPACE": {
+    "hi": "साक्ष्य · डॉक्टर का कार्यक्षेत्र",
+    "mr": "पुरावे · डॉक्टरांचे कार्यक्षेत्र"
+  },
+  "Echo": {
+    "hi": "इको",
+    "mr": "इको"
+  },
+  "Echo report": {
+    "hi": "इको रिपोर्ट",
+    "mr": "इको अहवाल"
+  },
+  "Edited by clinician": {
+    "hi": "चिकित्सक ने संपादित किया",
+    "mr": "डॉक्टरांनी संपादित केले"
+  },
+  "Effacement": {
+    "hi": "ग्रीवा का पतला होना",
+    "mr": "गर्भाशयमुख पातळ होणे"
+  },
+  "Embryo age": {
+    "hi": "भ्रूण की आयु",
+    "mr": "भ्रूणाचे वय"
+  },
+  "Enter the gestational age already established by a clinician; no image interpretation.": {
+    "hi": "चिकित्सक द्वारा पहले से तय गर्भावस्था की आयु भरें; चित्र की व्याख्या नहीं की जाती।",
+    "mr": "डॉक्टरांनी आधीच ठरवलेला गर्भावधी भरा; प्रतिमेचे विश्लेषण केले जात नाही."
+  },
+  "Enter the required values.": {
+    "hi": "आवश्यक जानकारी भरें।",
+    "mr": "आवश्यक माहिती भरा."
+  },
+  "Enter your findings, interpretation and plan. The AI draft does not fill or approve this field.": {
+    "hi": "अपने निष्कर्ष, व्याख्या और योजना लिखें। AI मसौदा इस स्थान को भरता या मंजूर नहीं करता।",
+    "mr": "तुमचे निष्कर्ष, विश्लेषण आणि योजना लिहा. AI मसुदा ही जागा भरत किंवा मंजूर करत नाही."
+  },
+  "Evidence & calculators": {
+    "hi": "साक्ष्य और कैलकुलेटर",
+    "mr": "पुरावे आणि गणक"
+  },
+  "Evidence & calculators ↗": {
+    "hi": "साक्ष्य और कैलकुलेटर ↗",
+    "mr": "पुरावे आणि गणक ↗"
+  },
+  "FOGSI / ICOG · Good clinical practice recommendations": {
+    "hi": "FOGSI / ICOG · अच्छी चिकित्सकीय पद्धति की अनुशंसाएँ",
+    "mr": "FOGSI / ICOG · उत्तम वैद्यकीय पद्धतीच्या शिफारसी"
+  },
+  "FOGSI / ICOG · Hypertensive disorders in pregnancy": {
+    "hi": "FOGSI / ICOG · गर्भावस्था में उच्च रक्तचाप से जुड़ी स्थितियाँ",
+    "mr": "FOGSI / ICOG · गर्भावस्थेतील उच्च रक्तदाबाच्या समस्या"
+  },
+  "Fainting": {
+    "hi": "बेहोशी",
+    "mr": "बेशुद्ध होणे"
+  },
+  "Fast or irregular heartbeat": {
+    "hi": "तेज़ या अनियमित धड़कन",
+    "mr": "वेगवान किंवा अनियमित हृदयाचे ठोके"
+  },
+  "Find a calculator": {
+    "hi": "कैलकुलेटर खोजें",
+    "mr": "गणक शोधा"
+  },
+  "Find sources": {
+    "hi": "स्रोत खोजें",
+    "mr": "स्रोत शोधा"
+  },
+  "Firm": {
+    "hi": "कड़ा",
+    "mr": "घट्ट"
+  },
+  "First day of last period": {
+    "hi": "आखिरी माहवारी का पहला दिन",
+    "mr": "शेवटच्या पाळीचा पहिला दिवस"
+  },
+  "For example: blood pressure in pregnancy": {
+    "hi": "जैसे: गर्भावस्था में रक्तचाप",
+    "mr": "उदाहरणार्थ: गर्भावस्थेतील रक्तदाब"
+  },
+  "Gain": {
+    "hi": "गेन",
+    "mr": "गेन"
+  },
+  "Generate PDF": {
+    "hi": "PDF बनाएँ",
+    "mr": "PDF तयार करा"
+  },
+  "Gestational age from assigned EDD": {
+    "hi": "तय EDD से गर्भावस्था की आयु",
+    "mr": "ठरवलेल्या EDD वरून गर्भावधी"
+  },
+  "Gestational weeks": {
+    "hi": "गर्भावस्था के सप्ताह",
+    "mr": "गर्भावस्थेचे आठवडे"
+  },
+  "Grimace": {
+    "hi": "प्रतिक्रिया",
+    "mr": "प्रतिक्षिप्त प्रतिसाद"
+  },
+  "Height unit": {
+    "hi": "लंबाई की इकाई",
+    "mr": "उंचीचे एकक"
+  },
+  "How this is calculated": {
+    "hi": "यह गणना कैसे होती है",
+    "mr": "ही गणना कशी होते"
+  },
+  "I checked the cropped image and removed identifying labels.": {
+    "hi": "मैंने चुना चित्र जाँचा और पहचान वाले लेबल हटा दिए हैं।",
+    "mr": "मी निवडलेली प्रतिमा तपासून ओळख दर्शवणारी लेबले काढली आहेत."
+  },
+  "I confirmed the inputs, their sources and this prototype result.": {
+    "hi": "मैंने इनपुट, उनके स्रोत और इस प्रोटोटाइप परिणाम की पुष्टि की है।",
+    "mr": "मी माहिती, तिचे स्रोत आणि या प्रायोगिक निकालाची पुष्टी केली आहे."
+  },
+  "I reviewed the original and approve this clinical reading.": {
+    "hi": "मैंने मूल रिपोर्ट देखी और इस चिकित्सकीय व्याख्या को मंजूर करता/करती हूँ।",
+    "mr": "मी मूळ अहवाल तपासला असून हे वैद्यकीय विश्लेषण मंजूर करतो/करते."
+  },
+  "Image quality:": {
+    "hi": "चित्र की गुणवत्ता:",
+    "mr": "प्रतिमेची गुणवत्ता:"
+  },
+  "Image quality: {{0}}": {
+    "hi": "चित्र की गुणवत्ता: {{0}}",
+    "mr": "प्रतिमेची गुणवत्ता: {{0}}"
+  },
+  "India": {
+    "hi": "भारत",
+    "mr": "भारत"
+  },
+  "Indian specialty guidance directory. Locate the relevant document, check its date and confirm applicability with your hospital protocol.": {
+    "hi": "भारतीय विशेषज्ञ दिशानिर्देशों की सूची। संबंधित दस्तावेज़ खोजें, तारीख जाँचें और अस्पताल के नियमों से उपयुक्तता की पुष्टि करें।",
+    "mr": "भारतीय विशेषतज्ज्ञ मार्गदर्शक तत्त्वांची सूची. संबंधित दस्तऐवज शोधा, तारीख तपासा आणि रुग्णालयाच्या नियमांशी लागू होण्याची खात्री करा."
+  },
+  "Inputs and provenance": {
+    "hi": "इनपुट और उनके स्रोत",
+    "mr": "माहिती आणि तिचे स्रोत"
+  },
+  "International": {
+    "hi": "अंतरराष्ट्रीय",
+    "mr": "आंतरराष्ट्रीय"
+  },
+  "Keep the original report, an optional AI image draft and your final reading together. This research assistant is not a validated ECG diagnostic device.": {
+    "hi": "मूल रिपोर्ट, वैकल्पिक AI चित्र मसौदा और अपनी अंतिम व्याख्या साथ रखें। यह शोध सहायक मान्यता प्राप्त ECG निदान उपकरण नहीं है।",
+    "mr": "मूळ अहवाल, पर्यायी AI प्रतिमा मसुदा आणि तुमचे अंतिम विश्लेषण एकत्र ठेवा. हा संशोधन सहाय्यक प्रमाणित ECG निदान उपकरण नाही."
+  },
+  "Known LMP; review cycle regularity and ultrasound dating.": {
+    "hi": "LMP ज्ञात हो; चक्र की नियमितता और अल्ट्रासाउंड की तारीख की समीक्षा करें।",
+    "mr": "LMP माहीत असावी; चक्राची नियमितता आणि अल्ट्रासाऊंडवरील गर्भावधी तपासा."
+  },
+  "LMP + 280 calendar days. Does not change the assigned EDD.": {
+    "hi": "LMP + 280 कैलेंडर दिन। तय EDD नहीं बदलती।",
+    "mr": "LMP + 280 दिनदर्शिकेतील दिवस. ठरवलेली EDD बदलत नाही."
+  },
+  "Laughon et al. · Original Bishop components, Table 1": {
+    "hi": "Laughon और अन्य · मूल बिशप घटक, तालिका 1",
+    "mr": "Laughon आणि सहकारी · मूळ बिशप घटक, तक्ता 1"
+  },
+  "Load the original, enter your reading and confirm review before saving.": {
+    "hi": "मूल रिपोर्ट लोड करें, अपनी व्याख्या भरें और सहेजने से पहले समीक्षा की पुष्टि करें।",
+    "mr": "मूळ अहवाल निवडा, तुमचे विश्लेषण लिहा आणि जतन करण्यापूर्वी पुनरावलोकनाची पुष्टी करा."
+  },
+  "Local curated-source matching": {
+    "hi": "स्थानीय संकलित स्रोतों का मिलान",
+    "mr": "स्थानिक संकलित स्रोत जुळवणी"
+  },
+  "Local source library": {
+    "hi": "स्थानीय स्रोत संग्रह",
+    "mr": "स्थानिक स्रोत संग्रह"
+  },
+  "Medicines during breastfeeding": {
+    "hi": "स्तनपान के दौरान दवाएँ",
+    "mr": "स्तनपानादरम्यान औषधे"
+  },
+  "Middle": {
+    "hi": "बीच में",
+    "mr": "मधोमध"
+  },
+  "NHLBI · Calculate your BMI": {
+    "hi": "NHLBI · अपना BMI निकालें",
+    "mr": "NHLBI · तुमचा BMI मोजा"
+  },
+  "NHM · Anaemia Mukt Bharat guideline directory": {
+    "hi": "NHM · एनीमिया मुक्त भारत दिशानिर्देश सूची",
+    "mr": "NHM · अॅनिमिया मुक्त भारत मार्गदर्शक सूची"
+  },
+  "NIH · LactMed": {
+    "hi": "NIH · LactMed",
+    "mr": "NIH · LactMed"
+  },
+  "Newborn assessment by a trained clinician; not a resuscitation decision tool.": {
+    "hi": "प्रशिक्षित चिकित्सक द्वारा नवजात का मूल्यांकन; पुनर्जीवन के निर्णय का साधन नहीं।",
+    "mr": "प्रशिक्षित डॉक्टरांकडून नवजाताचे मूल्यांकन; पुनर्जीवनाचा निर्णय घेण्याचे साधन नाही."
+  },
+  "No automated risk model or treatment advice. Use the cited guideline with your clinical assessment.": {
+    "hi": "अपने आप जोखिम का मॉडल या उपचार की सलाह नहीं। अपने मूल्यांकन के साथ दिए दिशानिर्देश देखें।",
+    "mr": "स्वयंचलित जोखीम मॉडेल किंवा उपचार सल्ला नाही. तुमच्या मूल्यांकनासह दिलेली मार्गदर्शक तत्त्वे वापरा."
+  },
+  "No clearly readable printed text.": {
+    "hi": "स्पष्ट पढ़ने योग्य मुद्रित शब्द नहीं।",
+    "mr": "स्पष्ट वाचता येणारा छापील मजकूर नाही."
+  },
+  "No external request. The original question is not sent or saved. Matching topic:": {
+    "hi": "बाहर कोई अनुरोध नहीं भेजा जाता। मूल सवाल भेजा या सहेजा नहीं जाता। मिला विषय:",
+    "mr": "बाहेर कोणतीही विनंती पाठवली जात नाही. मूळ प्रश्न पाठवला किंवा जतन केला जात नाही. जुळलेला विषय:"
+  },
+  "No prediction coefficients implemented. Model selection and local validation require clinical review.": {
+    "hi": "पूर्वानुमान के गुणांक लागू नहीं हैं। मॉडल का चयन और स्थानीय मान्यता के लिए चिकित्सकीय समीक्षा चाहिए।",
+    "mr": "अंदाजाचे गुणांक लागू केलेले नाहीत. मॉडेलची निवड आणि स्थानिक प्रमाणीकरणासाठी वैद्यकीय पुनरावलोकन आवश्यक आहे."
+  },
+  "No saved calculations for this care connection.": {
+    "hi": "इस देखभाल संबंध के लिए सहेजी गणनाएँ नहीं हैं।",
+    "mr": "या देखभाल संबंधासाठी जतन केलेल्या गणना नाहीत."
+  },
+  "No source in this small library matches that question. Try a listed topic.": {
+    "hi": "इस छोटे संग्रह में सवाल से मिलता स्रोत नहीं है। सूची में दिया विषय आजमाएँ।",
+    "mr": "या छोट्या संग्रहात प्रश्नाशी जुळणारा स्रोत नाही. यादीतील विषय वापरून पाहा."
+  },
+  "Open MDCalc ↗": {
+    "hi": "MDCalc खोलें ↗",
+    "mr": "MDCalc उघडा ↗"
+  },
+  "Open original resource ↗": {
+    "hi": "मूल संसाधन खोलें ↗",
+    "mr": "मूळ स्रोत उघडा ↗"
+  },
+  "Open the national programme’s current guideline directory for the applicable anaemia pathway. Verify the document’s date and the local protocol; no dose is generated here.": {
+    "hi": "खून की कमी की उपयुक्त प्रक्रिया के लिए राष्ट्रीय कार्यक्रम की वर्तमान दिशानिर्देश सूची खोलें। दस्तावेज़ की तारीख और स्थानीय नियम जाँचें; यहाँ खुराक नहीं बनती।",
+    "mr": "रक्तक्षयासाठी योग्य प्रक्रियेसाठी राष्ट्रीय कार्यक्रमाची सध्याची मार्गदर्शक सूची उघडा. दस्तऐवजाची तारीख आणि स्थानिक नियम तपासा; येथे औषधाची मात्रा ठरवली जात नाही."
+  },
+  "Open this section to load saved results.": {
+    "hi": "सहेजे परिणाम देखने के लिए यह हिस्सा खोलें।",
+    "mr": "जतन केलेले निकाल पाहण्यासाठी हा विभाग उघडा."
+  },
+  "Original Bishop score": {
+    "hi": "मूल बिशप स्कोर",
+    "mr": "मूळ बिशप गुण"
+  },
+  "Original loaded. Confirm the report type and review the image.": {
+    "hi": "मूल रिपोर्ट लोड हो गई। रिपोर्ट का प्रकार और चित्र जाँचें।",
+    "mr": "मूळ अहवाल लोड झाला. अहवालाचा प्रकार आणि प्रतिमा तपासा."
+  },
+  "Original report and your approved reading saved.": {
+    "hi": "मूल रिपोर्ट और आपकी स्वीकृत व्याख्या सहेजी गई।",
+    "mr": "मूळ अहवाल आणि तुमचे मंजूर विश्लेषण जतन झाले."
+  },
+  "Original saved; the clinical review was not saved. Retry to finish.": {
+    "hi": "मूल रिपोर्ट सहेजी; चिकित्सकीय समीक्षा नहीं सहेजी गई। पूरा करने के लिए फिर प्रयास करें।",
+    "mr": "मूळ अहवाल जतन झाला; वैद्यकीय पुनरावलोकन जतन झाले नाही. पूर्ण करण्यासाठी पुन्हा प्रयत्न करा."
+  },
+  "PDF generation failed. Your result is still available.": {
+    "hi": "PDF नहीं बन पाया। परिणाम अभी भी उपलब्ध है।",
+    "mr": "PDF तयार झाला नाही. तुमचा निकाल अजून उपलब्ध आहे."
+  },
+  "Paper speed": {
+    "hi": "कागज़ की गति",
+    "mr": "कागदाचा वेग"
+  },
+  "Position": {
+    "hi": "स्थिति",
+    "mr": "स्थिती"
+  },
+  "Posterior": {
+    "hi": "पीछे की ओर",
+    "mr": "मागील बाजूस"
+  },
+  "Postpartum haemorrhage assessment": {
+    "hi": "प्रसव के बाद रक्तस्राव का मूल्यांकन",
+    "mr": "प्रसूतीनंतरच्या रक्तस्रावाचे मूल्यांकन"
+  },
+  "Pre-eclampsia assessment": {
+    "hi": "प्री-एक्लेम्पसिया का मूल्यांकन",
+    "mr": "प्री-एक्लॅम्प्सियाचे मूल्यांकन"
+  },
+  "Pre-pregnancy BMI": {
+    "hi": "गर्भधारण से पहले का BMI",
+    "mr": "गर्भधारणेपूर्वीचा BMI"
+  },
+  "Pre-pregnancy weight": {
+    "hi": "गर्भधारण से पहले का वजन",
+    "mr": "गर्भधारणेपूर्वीचे वजन"
+  },
+  "Prefilled from shared roster · timestamp unavailable · confirm before use": {
+    "hi": "साझा सूची से भरा · समय उपलब्ध नहीं · उपयोग से पहले पुष्टि करें",
+    "mr": "सामायिक यादीवरून भरलेले · वेळ उपलब्ध नाही · वापरण्यापूर्वी पुष्टी करा"
+  },
+  "Pregnancy dating": {
+    "hi": "गर्भावस्था की तारीखें तय करना",
+    "mr": "गर्भावस्थेचा कालावधी ठरवणे"
+  },
+  "Pregnancy weight gain targets": {
+    "hi": "गर्भावस्था में वजन बढ़ने के लक्ष्य",
+    "mr": "गर्भावस्थेतील वजनवाढीची उद्दिष्टे"
+  },
+  "Preparing an unvalidated ECG image draft…": {
+    "hi": "बिना मान्यता का ECG चित्र मसौदा तैयार हो रहा है…",
+    "mr": "अप्रमाणित ECG प्रतिमेचा मसुदा तयार होत आहे…"
+  },
+  "Prevention guidance for clinicians assessing eligibility. Review the original recommendation, contraindications and local guidance before prescribing.": {
+    "hi": "पात्रता जाँचने वाले चिकित्सकों के लिए बचाव के दिशानिर्देश। दवा देने से पहले मूल अनुशंसा, निषेध और स्थानीय नियम देखें।",
+    "mr": "पात्रता तपासणाऱ्या डॉक्टरांसाठी प्रतिबंध मार्गदर्शन. औषध देण्यापूर्वी मूळ शिफारस, निषिद्ध बाबी आणि स्थानिक नियम तपासा."
+  },
+  "Printed report text · not a DAI diagnosis": {
+    "hi": "रिपोर्ट का मुद्रित पाठ · DAI का निदान नहीं",
+    "mr": "अहवालातील छापील मजकूर · DAI चे निदान नाही"
+  },
+  "Privacy preview": {
+    "hi": "गोपनीयता की झलक",
+    "mr": "गोपनीयतेचे पूर्वदृश्य"
+  },
+  "Prototype calculation; clinical review is pending. Confirm inputs and the result before use.": {
+    "hi": "प्रोटोटाइप गणना; चिकित्सकीय समीक्षा बाकी है। उपयोग से पहले इनपुट और परिणाम की पुष्टि करें।",
+    "mr": "प्रायोगिक गणना; वैद्यकीय पुनरावलोकन बाकी. वापरण्यापूर्वी माहिती आणि निकालाची पुष्टी करा."
+  },
+  "Prototype tools for clinician review. No MDCalc API is connected. External links contain no patient data.": {
+    "hi": "चिकित्सक समीक्षा के लिए प्रोटोटाइप साधन। MDCalc API जुड़ा नहीं है। बाहरी लिंक में मरीज़ का डेटा नहीं जाता।",
+    "mr": "डॉक्टरांच्या पुनरावलोकनासाठी प्रायोगिक साधने. MDCalc API जोडलेला नाही. बाह्य दुव्यांत रुग्णाचा डेटा जात नाही."
+  },
+  "Publication date: see original": {
+    "hi": "प्रकाशन की तारीख: मूल स्रोत देखें",
+    "mr": "प्रकाशनाची तारीख: मूळ स्रोत पाहा"
+  },
+  "Question or topic": {
+    "hi": "सवाल या विषय",
+    "mr": "प्रश्न किंवा विषय"
+  },
+  "REPORTS & RESULTS": {
+    "hi": "रिपोर्ट और परिणाम",
+    "mr": "अहवाल आणि निकाल"
+  },
+  "Read the original source and check local guidance and the patient’s context. No chart or prescription has changed.": {
+    "hi": "मूल स्रोत पढ़ें और स्थानीय नियम तथा मरीज़ की स्थिति जाँचें। रिकॉर्ड या प्रिस्क्रिप्शन में बदलाव नहीं हुआ।",
+    "mr": "मूळ स्रोत वाचा आणि स्थानिक मार्गदर्शन व रुग्णाची स्थिती तपासा. नोंद किंवा औषधपत्र बदललेले नाही."
+  },
+  "Record:": {
+    "hi": "रिकॉर्ड:",
+    "mr": "नोंद:"
+  },
+  "Record: {{0}}": {
+    "hi": "रिकॉर्ड: {{0}}",
+    "mr": "नोंद: {{0}}"
+  },
+  "Recorded today": {
+    "hi": "आज दर्ज",
+    "mr": "आज नोंदवलेले"
+  },
+  "Recovery check-in / EPDS": {
+    "hi": "रिकवरी चेक-इन / EPDS",
+    "mr": "पुनर्प्राप्ती तपासणी / EPDS"
+  },
+  "Report type": {
+    "hi": "रिपोर्ट का प्रकार",
+    "mr": "अहवालाचा प्रकार"
+  },
+  "Reset crop": {
+    "hi": "चित्र वापस पूरा करें",
+    "mr": "मूळ प्रतिमा परत आणा"
+  },
+  "Respiration": {
+    "hi": "सांस लेना",
+    "mr": "श्वसन"
+  },
+  "Result copied.": {
+    "hi": "परिणाम कॉपी हो गया।",
+    "mr": "निकालाची प्रत झाली."
+  },
+  "Result:": {
+    "hi": "परिणाम:",
+    "mr": "निकाल:"
+  },
+  "Result: {{0}} {{1}}": {
+    "hi": "परिणाम: {{0}} {{1}}",
+    "mr": "निकाल: {{0}} {{1}}"
+  },
+  "Reviewed by the signed-in clinician ·": {
+    "hi": "साइन-इन किए चिकित्सक ने समीक्षा की ·",
+    "mr": "साइन-इन केलेल्या डॉक्टरांनी पुनरावलोकन केले ·"
+  },
+  "Reviewed by the signed-in clinician · {{0}}": {
+    "hi": "साइन-इन किए चिकित्सक ने समीक्षा की · {{0}}",
+    "mr": "साइन-इन केलेल्या डॉक्टरांनी पुनरावलोकन केले · {{0}}"
+  },
+  "Reviewed report saved. Reopen the profile to refresh the report list.": {
+    "hi": "समीक्षा वाली रिपोर्ट सहेजी। सूची ताज़ा करने के लिए प्रोफ़ाइल दोबारा खोलें।",
+    "mr": "पुनरावलोकित अहवाल जतन झाला. यादी अद्ययावत पाहण्यासाठी प्रोफाइल पुन्हा उघडा."
+  },
+  "Reviewer: not yet signed off. Inputs and calculator version are stored only when you approve and save.": {
+    "hi": "समीक्षक: अभी मंजूरी नहीं हुई। इनपुट और कैलकुलेटर संस्करण केवल आपकी मंजूरी और सहेजने पर दर्ज होते हैं।",
+    "mr": "पुनरावलोकनकर्ता: अद्याप मंजुरी नाही. तुम्ही मंजूर करून जतन केल्यावरच माहिती आणि गणक आवृत्ती नोंदवली जाते."
+  },
+  "Save reviewed report": {
+    "hi": "समीक्षा वाली रिपोर्ट सहेजें",
+    "mr": "पुनरावलोकित अहवाल जतन करा"
+  },
+  "Saved calculations for this care connection": {
+    "hi": "इस देखभाल संबंध की सहेजी गणनाएँ",
+    "mr": "या देखभाल संबंधातील जतन केलेल्या गणना"
+  },
+  "Scan date + 280 − gestational age in days. Does not automatically redate a pregnancy.": {
+    "hi": "स्कैन तारीख + 280 − दिनों में गर्भावस्था की आयु। गर्भावस्था की तय तारीख अपने आप नहीं बदलती।",
+    "mr": "स्कॅन तारीख + 280 − दिवसांतील गर्भावधी. गर्भावस्थेची ठरवलेली तारीख आपोआप बदलत नाही."
+  },
+  "Search a small, curated index of Indian guidance and international sources. Your question stays on this device. This is source discovery, not an exhaustive evidence review or personalised medical advice.": {
+    "hi": "भारतीय दिशानिर्देशों और अंतरराष्ट्रीय स्रोतों की छोटी, संकलित सूची खोजें। सवाल इसी डिवाइस पर रहता है। यह स्रोत खोज है; संपूर्ण साक्ष्य समीक्षा या व्यक्तिगत चिकित्सकीय सलाह नहीं।",
+    "mr": "भारतीय मार्गदर्शक तत्त्वे आणि आंतरराष्ट्रीय स्रोतांच्या छोट्या संकलित सूचीत शोधा. तुमचा प्रश्न याच उपकरणावर राहतो. हा स्रोत शोध आहे; संपूर्ण पुरावा पुनरावलोकन किंवा वैयक्तिक वैद्यकीय सल्ला नाही."
+  },
+  "Search dating, BMI, Bishop or Apgar": {
+    "hi": "तारीखें, BMI, बिशप या अपगार खोजें",
+    "mr": "तारखा, BMI, बिशप किंवा अपगार शोधा"
+  },
+  "Soft": {
+    "hi": "नरम",
+    "mr": "मऊ"
+  },
+  "Source: {{0}}": {
+    "hi": "स्रोत: {{0}}",
+    "mr": "स्रोत: {{0}}"
+  },
+  "Station": {
+    "hi": "स्टेशन",
+    "mr": "स्टेशन"
+  },
+  "Sudden breathlessness": {
+    "hi": "अचानक सांस फूलना",
+    "mr": "अचानक श्वास लागणे"
+  },
+  "Sum of five clinician-assigned components, maximum 10. Record timing and any concurrent interventions.": {
+    "hi": "चिकित्सक द्वारा दिए पाँच घटकों का जोड़, अधिकतम 10। समय और साथ चल रहे उपाय दर्ज करें।",
+    "mr": "डॉक्टरांनी दिलेल्या पाच घटकांची बेरीज, कमाल 10. वेळ आणि त्यावेळी सुरू असलेले उपचार नोंदवा."
+  },
+  "Sum of five original components, maximum 13. Interpretation depends on the clinical setting.": {
+    "hi": "पाँच मूल घटकों का जोड़, अधिकतम 13। व्याख्या चिकित्सकीय संदर्भ पर निर्भर है।",
+    "mr": "पाच मूळ घटकांची बेरीज, कमाल 13. अर्थ वैद्यकीय परिस्थितीवर अवलंबून आहे."
+  },
+  "Targets are not calculated until an appropriate population-specific guideline is reviewed.": {
+    "hi": "उपयुक्त जनसमूह के दिशानिर्देश की समीक्षा तक लक्ष्य नहीं निकाले जाते।",
+    "mr": "संबंधित लोकसमूहासाठी योग्य मार्गदर्शक तत्त्वांचे पुनरावलोकन होईपर्यंत उद्दिष्टे मोजली जात नाहीत."
+  },
+  "Tentative waveform observations": {
+    "hi": "तरंग के प्रारंभिक अवलोकन",
+    "mr": "लहरींची प्राथमिक निरीक्षणे"
+  },
+  "The cropped image is sent to Google Gemini. Check that names, IDs and dates have been excluded. No patient profile is sent. A general image model can miss or invent findings; the original and your own assessment remain essential.": {
+    "hi": "चुना चित्र Google Gemini को भेजा जाता है। नाम, पहचान नंबर और तारीखें हटाई हैं, जाँचें। मरीज़ की प्रोफ़ाइल नहीं भेजी जाती। सामान्य चित्र मॉडल निष्कर्ष छोड़ या गढ़ सकता है; मूल रिपोर्ट और आपका मूल्यांकन आवश्यक हैं।",
+    "mr": "निवडलेली प्रतिमा Google Gemini ला पाठवली जाते. नावे, ओळख क्रमांक आणि तारखा काढल्या आहेत ते तपासा. रुग्णाची प्रोफाइल पाठवली जात नाही. सामान्य प्रतिमा मॉडेल निष्कर्ष चुकवू किंवा बनवू शकते; मूळ अहवाल आणि तुमचे मूल्यांकन आवश्यक आहेत."
+  },
+  "The dates fall outside the supported gestational range.": {
+    "hi": "तारीखें समर्थित गर्भावधि की सीमा के बाहर हैं।",
+    "mr": "तारखा समर्थित गर्भावधीच्या मर्यादेबाहेर आहेत."
+  },
+  "The patient agreed to this image being processed by Gemini.": {
+    "hi": "मरीज़ ने इस चित्र की Gemini द्वारा प्रक्रिया की सहमति दी है।",
+    "mr": "रुग्णाने या प्रतिमेवर Gemini कडून प्रक्रिया करण्यास संमती दिली आहे."
+  },
+  "This calculator is not enabled.": {
+    "hi": "यह कैलकुलेटर चालू नहीं है।",
+    "mr": "हा गणक सुरू केलेला नाही."
+  },
+  "This file could not be opened. Try another report.": {
+    "hi": "यह फ़ाइल नहीं खुली। दूसरी रिपोर्ट आजमाएँ।",
+    "mr": "ही फाइल उघडता आली नाही. दुसरा अहवाल वापरा."
+  },
+  "Tools awaiting clinical review": {
+    "hi": "चिकित्सकीय समीक्षा की प्रतीक्षा वाले साधन",
+    "mr": "वैद्यकीय पुनरावलोकनाची प्रतीक्षा असलेली साधने"
+  },
+  "Transfer date": {
+    "hi": "स्थानांतरण की तारीख",
+    "mr": "हस्तांतरणाची तारीख"
+  },
+  "Unvalidated research draft · verify every finding": {
+    "hi": "बिना मान्यता का शोध मसौदा · हर निष्कर्ष जाँचें",
+    "mr": "अप्रमाणित संशोधन मसुदा · प्रत्येक निष्कर्ष तपासा"
+  },
+  "Up to 5 MB. For ECG AI review, use a clear image. Drag on the image to select a crop that excludes identifying labels. The original is preserved when you save it.": {
+    "hi": "अधिकतम 5 MB। ECG AI समीक्षा के लिए साफ चित्र लें। पहचान वाले लेबल हटाने के लिए चित्र पर खींचकर हिस्सा चुनें। सहेजने पर मूल फ़ाइल भी सुरक्षित रहती है।",
+    "mr": "कमाल 5 MB. ECG AI पुनरावलोकनासाठी स्पष्ट प्रतिमा वापरा. ओळख दर्शवणारी लेबले वगळण्यासाठी प्रतिमेवर ओढून भाग निवडा. जतन केल्यावर मूळ फाइलही जतन होते."
+  },
+  "Use Sukoon’s existing consented check-in pathway. No duplicate questionnaire or automatic diagnosis.": {
+    "hi": "Sukoon का मौजूदा सहमति वाला चेक-इन इस्तेमाल करें। दोहरी प्रश्नावली या अपने आप निदान नहीं।",
+    "mr": "Sukoon चा विद्यमान संमतीसह तपासणी मार्ग वापरा. दुबार प्रश्नावली किंवा स्वयंचलित निदान नाही."
+  },
+  "Use a PDF or image up to 5 MB.": {
+    "hi": "अधिकतम 5 MB की PDF या चित्र लें।",
+    "mr": "कमाल 5 MB ची PDF किंवा प्रतिमा वापरा."
+  },
+  "Use the Indian guideline to review maternal assessment, investigations, monitoring and postpartum follow-up. Confirm the recommendation and local protocol in the original document.": {
+    "hi": "मातृ मूल्यांकन, जाँच, निगरानी और प्रसव के बाद देखभाल के लिए भारतीय दिशानिर्देश देखें। मूल दस्तावेज़ में अनुशंसा और स्थानीय नियम की पुष्टि करें।",
+    "mr": "मातेचे मूल्यांकन, तपासण्या, निरीक्षण आणि प्रसूतीनंतरच्या पाठपुराव्यासाठी भारतीय मार्गदर्शक तत्त्वे वापरा. मूळ दस्तऐवजातील शिफारस आणि स्थानिक नियमांची खात्री करा."
+  },
+  "Uses the clinician-assigned EDD.": {
+    "hi": "चिकित्सक द्वारा तय EDD इस्तेमाल होती है।",
+    "mr": "डॉक्टरांनी ठरवलेली EDD वापरली जाते."
+  },
+  "VBAC estimate": {
+    "hi": "VBAC का अनुमान",
+    "mr": "VBAC चा अंदाज"
+  },
+  "VERSIONED · WORKS LOCALLY": {
+    "hi": "संस्करण सहित · स्थानीय रूप से चलता है",
+    "mr": "आवृत्तीसह · स्थानिकरीत्या चालते"
+  },
+  "WHO · Antiplatelet agents for prevention of pre-eclampsia": {
+    "hi": "WHO · प्री-एक्लेम्पसिया की रोकथाम के लिए एंटीप्लेटलेट दवाएँ",
+    "mr": "WHO · प्री-एक्लॅम्प्सियाच्या प्रतिबंधासाठी अँटिप्लेटलेट औषधे"
+  },
+  "WHO · Pre-eclampsia": {
+    "hi": "WHO · प्री-एक्लेम्पसिया",
+    "mr": "WHO · प्री-एक्लॅम्प्सिया"
+  },
+  "Weight in kg / height in metres squared. Exact unit conversion; rounded to 1 decimal place.": {
+    "hi": "kg में वजन / मीटर में लंबाई का वर्ग। सटीक इकाई रूपांतरण; दशमलव के 1 स्थान तक।",
+    "mr": "kg मधील वजन / मीटरमधील उंचीचा वर्ग. अचूक एकक रूपांतरण; दशांशाच्या 1 स्थानापर्यंत."
+  },
+  "Weight unit": {
+    "hi": "वजन की इकाई",
+    "mr": "वजनाचे एकक"
+  },
+  "Your clinical reading": {
+    "hi": "आपकी चिकित्सकीय व्याख्या",
+    "mr": "तुमचे वैद्यकीय विश्लेषण"
+  },
+  "apgar": {
+    "hi": "apgar",
+    "mr": "apgar"
+  },
+  "appearance": {
+    "hi": "appearance",
+    "mr": "appearance"
+  },
+  "aspirin": {
+    "hi": "aspirin",
+    "mr": "aspirin"
+  },
+  "bishop": {
+    "hi": "bishop",
+    "mr": "bishop"
+  },
+  "bmi": {
+    "hi": "bmi",
+    "mr": "bmi"
+  },
+  "breastfeeding": {
+    "hi": "breastfeeding",
+    "mr": "breastfeeding"
+  },
+  "breath": {
+    "hi": "breath",
+    "mr": "breath"
+  },
+  "breathlessness": {
+    "hi": "breathlessness",
+    "mr": "breathlessness"
+  },
+  "cardiac": {
+    "hi": "cardiac",
+    "mr": "cardiac"
+  },
+  "chest": {
+    "hi": "chest",
+    "mr": "chest"
+  },
+  "consistency": {
+    "hi": "consistency",
+    "mr": "consistency"
+  },
+  "dai-clinical-tool-favourites-v1": {
+    "hi": "dai-clinical-tool-favourites-v1",
+    "mr": "dai-clinical-tool-favourites-v1"
+  },
+  "dating": {
+    "hi": "dating",
+    "mr": "dating"
+  },
+  "dilation": {
+    "hi": "dilation",
+    "mr": "dilation"
+  },
+  "drug": {
+    "hi": "drug",
+    "mr": "drug"
+  },
+  "due date": {
+    "hi": "due date",
+    "mr": "due date"
+  },
+  "ecg": {
+    "hi": "ecg",
+    "mr": "ecg"
+  },
+  "echo": {
+    "hi": "echo",
+    "mr": "echo"
+  },
+  "effacement": {
+    "hi": "effacement",
+    "mr": "effacement"
+  },
+  "ekg": {
+    "hi": "ekg",
+    "mr": "ekg"
+  },
+  "embedded": {
+    "hi": "embedded",
+    "mr": "embedded"
+  },
+  "embryo": {
+    "hi": "embryo",
+    "mr": "embryo"
+  },
+  "epds": {
+    "hi": "epds",
+    "mr": "epds"
+  },
+  "faint": {
+    "hi": "faint",
+    "mr": "faint"
+  },
+  "grimace": {
+    "hi": "grimace",
+    "mr": "grimace"
+  },
+  "input,button,select,textarea": {
+    "hi": "input,button,select,textarea",
+    "mr": "input,button,select,textarea"
+  },
+  "ivf": {
+    "hi": "ivf",
+    "mr": "ivf"
+  },
+  "kg/m²": {
+    "hi": "kg/m²",
+    "mr": "kg/m²"
+  },
+  "lactation": {
+    "hi": "lactation",
+    "mr": "lactation"
+  },
+  "lactmed": {
+    "hi": "lactmed",
+    "mr": "lactmed"
+  },
+  "lb": {
+    "hi": "lb",
+    "mr": "lb"
+  },
+  "minute": {
+    "hi": "minute",
+    "mr": "minute"
+  },
+  "mm/s ·": {
+    "hi": "mm/s ·",
+    "mr": "mm/s ·"
+  },
+  "palpitations": {
+    "hi": "palpitations",
+    "mr": "palpitations"
+  },
+  "position": {
+    "hi": "position",
+    "mr": "position"
+  },
+  "pph": {
+    "hi": "pph",
+    "mr": "pph"
+  },
+  "reference": {
+    "hi": "reference",
+    "mr": "reference"
+  },
+  "respiration": {
+    "hi": "respiration",
+    "mr": "respiration"
+  },
+  "station": {
+    "hi": "station",
+    "mr": "station"
+  },
+  "tools": {
+    "hi": "tools",
+    "mr": "tools"
+  },
+  "transfer": {
+    "hi": "transfer",
+    "mr": "transfer"
+  },
+  "vbac": {
+    "hi": "vbac",
+    "mr": "vbac"
+  },
+  "{{0}} weeks {{1}} days": {
+    "hi": "{{0}} सप्ताह {{1}} दिन",
+    "mr": "{{0}} आठवडे {{1}} दिवस"
+  },
+  "{{0}} · clinician-assigned points": {
+    "hi": "{{0}} · चिकित्सक द्वारा दिए अंक",
+    "mr": "{{0}} · डॉक्टरांनी दिलेले गुण"
+  },
+  "{{2}} · Source checked {{3}}": {
+    "hi": "{{2}} · स्रोत जाँचा {{3}}",
+    "mr": "{{2}} · स्रोत तपासला {{3}}"
+  },
+  "· Source checked": {
+    "hi": "· स्रोत जाँचा",
+    "mr": "· स्रोत तपासला"
+  },
+  "· clinician-assigned points": {
+    "hi": "· चिकित्सक द्वारा दिए अंक",
+    "mr": "· डॉक्टरांनी दिलेले गुण"
+  },
+  "· evidence sources": {
+    "hi": "· साक्ष्य स्रोत",
+    "mr": "· पुराव्यांचे स्रोत"
+  },
+  "· guideline sources": {
+    "hi": "· दिशानिर्देश स्रोत",
+    "mr": "· मार्गदर्शक स्रोत"
+  },
+  "· version": {
+    "hi": "· संस्करण",
+    "mr": "· आवृत्ती"
+  },
+  "−1 or 0": {
+    "hi": "−1 या 0",
+    "mr": "−1 किंवा 0"
+  },
+  "★ Saved favourite": {
+    "hi": "★ पसंदीदा सहेजा",
+    "mr": "★ आवडते जतन झाले"
+  },
+  "☆ Favourite": {
+    "hi": "☆ पसंदीदा",
+    "mr": "☆ आवडते"
+  },
+  "Discard the open unsaved clinical drafts and recording?": {
+    "hi": "खुले हुए बिना सहेजे चिकित्सकीय मसौदे और रिकॉर्डिंग हटाएँ?",
+    "mr": "उघडे असलेले न जतन केलेले वैद्यकीय मसुदे आणि रेकॉर्डिंग काढायचे?"
+  },
+  "Discard the unsaved clinical drafts and recording?": {
+    "hi": "बिना सहेजे चिकित्सकीय मसौदे और रिकॉर्डिंग हटाएँ?",
+    "mr": "न जतन केलेले वैद्यकीय मसुदे आणि रेकॉर्डिंग काढायचे?"
+  },
+  "Reviewed by:": {
+    "hi": "समीक्षा की:",
+    "mr": "पुनरावलोकन केले:"
+  },
+  "Reviewed by: {{0}}{{1}}": {
+    "hi": "समीक्षा की: {{0}}{{1}}",
+    "mr": "पुनरावलोकन केले: {{0}}{{1}}"
+  },
+  "Reviewed report saved.": {
+    "hi": "समीक्षा वाली रिपोर्ट सहेजी गई।",
+    "mr": "पुनरावलोकित अहवाल जतन झाला."
+  },
+  "/doctor/patients/{{0}}/pregnancy-context": {
+    "hi": "/doctor/patients/{{0}}/pregnancy-context",
+    "mr": "/doctor/patients/{{0}}/pregnancy-context"
+  },
+  "540px": {
+    "hi": "540px",
+    "mr": "540px"
+  },
+  "A shift copy is being saved. Please wait.": {
+    "hi": "शिफ्ट की कॉपी सहेजी जा रही है। कृपया प्रतीक्षा करें।",
+    "mr": "शिफ्टची प्रत जतन होत आहे. कृपया थांबा."
+  },
+  "Above": {
+    "hi": "से ऊपर",
+    "mr": "पेक्षा जास्त"
+  },
+  "Activate this individual visit plan and review prompts.": {
+    "hi": "इस व्यक्तिगत विज़िट योजना और समीक्षा संकेतों को सक्रिय करें।",
+    "mr": "ही वैयक्तिक भेट योजना आणि पुनरावलोकन सूचना सक्रिय करा."
+  },
+  "Add fetal measurement": {
+    "hi": "भ्रूण का माप जोड़ें",
+    "mr": "गर्भाचे मोजमाप जोडा"
+  },
+  "Add review limit": {
+    "hi": "समीक्षा सीमा जोड़ें",
+    "mr": "पुनरावलोकन मर्यादा जोडा"
+  },
+  "Additional conditions · clinician-led plan": {
+    "hi": "अन्य स्थितियाँ · चिकित्सक की योजना",
+    "mr": "इतर स्थिती · डॉक्टरांच्या मार्गदर्शनातील योजना"
+  },
+  "Anaemia": {
+    "hi": "खून की कमी",
+    "mr": "रक्तक्षय"
+  },
+  "Babies / chorionicity": {
+    "hi": "बच्चे / प्लेसेंटा और थैली का प्रकार",
+    "mr": "बाळे / अपरा आणि गर्भपिशवीचा प्रकार"
+  },
+  "Baby {{0}} · estimated fetal weight": {
+    "hi": "बच्चा {{0}} · भ्रूण का अनुमानित वजन",
+    "mr": "बाळ {{0}} · गर्भाचे अंदाजित वजन"
+  },
+  "Below": {
+    "hi": "से नीचे",
+    "mr": "पेक्षा कमी"
+  },
+  "Blood group / Rh": {
+    "hi": "रक्त समूह / Rh",
+    "mr": "रक्तगट / Rh"
+  },
+  "Cardiac disease": {
+    "hi": "हृदय रोग",
+    "mr": "हृदयरोग"
+  },
+  "Cardiac disease · multidisciplinary plan": {
+    "hi": "हृदय रोग · संयुक्त विशेषज्ञ योजना",
+    "mr": "हृदयरोग · संयुक्त तज्ज्ञांची योजना"
+  },
+  "Changes across visits": {
+    "hi": "विज़िट के बीच बदलाव",
+    "mr": "भेटींमधील बदल"
+  },
+  "Check visit weeks and the scan-week subset.": {
+    "hi": "विज़िट के सप्ताह और उनमें चुने स्कैन सप्ताह जाँचें।",
+    "mr": "भेटींचे आठवडे आणि त्यांतील स्कॅन आठवडे तपासा."
+  },
+  "Chorionicity / amnionicity": {
+    "hi": "प्लेसेंटा / गर्भ थैली का प्रकार",
+    "mr": "अपरा / गर्भपिशवीचा प्रकार"
+  },
+  "Chorionicity is missing. Confirm the original scan before selecting a twin schedule.": {
+    "hi": "प्लेसेंटा का प्रकार दर्ज नहीं है। जुड़वाँ की योजना चुनने से पहले मूल स्कैन की पुष्टि करें।",
+    "mr": "अपरेचा प्रकार नोंदवलेला नाही. जुळ्यांचे वेळापत्रक निवडण्यापूर्वी मूळ स्कॅन तपासा."
+  },
+  "Chorionicity not recorded": {
+    "hi": "प्लेसेंटा का प्रकार दर्ज नहीं",
+    "mr": "अपरेचा प्रकार नोंदवलेला नाही"
+  },
+  "Clinic measurements are shown separately from self-reported readings. Lines show observations, not a prediction or a normal range.": {
+    "hi": "क्लिनिक के माप, स्वयं दर्ज रीडिंग से अलग हैं। रेखाएँ दर्ज अवलोकन दिखाती हैं, भविष्यवाणी या सामान्य सीमा नहीं।",
+    "mr": "दवाखान्यातील मोजमापे स्वतः नोंदवलेल्या मोजमापांपासून वेगळी आहेत. रेषा नोंदवलेली निरीक्षणे दाखवतात; अंदाज किंवा सामान्य मर्यादा नाहीत."
+  },
+  "Clinical history is not shared.": {
+    "hi": "चिकित्सकीय इतिहास साझा नहीं है।",
+    "mr": "वैद्यकीय इतिहास सामायिक नाही."
+  },
+  "Clinician recorded Rh negative": {
+    "hi": "चिकित्सक ने Rh नेगेटिव दर्ज किया",
+    "mr": "डॉक्टरांनी Rh निगेटिव्ह नोंदवले"
+  },
+  "Clinician-approved individual plan": {
+    "hi": "चिकित्सक द्वारा स्वीकृत व्यक्तिगत योजना",
+    "mr": "डॉक्टरांनी मंजूर केलेली वैयक्तिक योजना"
+  },
+  "Clinician-marked context:": {
+    "hi": "चिकित्सक द्वारा चिह्नित संदर्भ:",
+    "mr": "डॉक्टरांनी चिन्हांकित केलेला संदर्भ:"
+  },
+  "Clinician-marked context: {{0}}": {
+    "hi": "चिकित्सक द्वारा चिह्नित संदर्भ: {{0}}",
+    "mr": "डॉक्टरांनी चिन्हांकित केलेला संदर्भ: {{0}}"
+  },
+  "Clinician-set limit": {
+    "hi": "चिकित्सक द्वारा तय सीमा",
+    "mr": "डॉक्टरांनी ठरवलेली मर्यादा"
+  },
+  "Clinician-set review prompts": {
+    "hi": "चिकित्सक द्वारा तय समीक्षा संकेत",
+    "mr": "डॉक्टरांनी ठरवलेल्या पुनरावलोकन सूचना"
+  },
+  "Confirm antibody and Rh history in the original report": {
+    "hi": "मूल रिपोर्ट में एंटीबॉडी और Rh इतिहास की पुष्टि करें",
+    "mr": "मूळ अहवालातील अँटिबॉडी आणि Rh इतिहास तपासा"
+  },
+  "Confirmed histories and individual care plans. This is not an emergency risk score, a diagnosis or a replacement for triage.": {
+    "hi": "पुष्टि किया इतिहास और व्यक्तिगत देखभाल योजनाएँ। यह आपातकालीन जोखिम स्कोर, निदान या ट्रायेज का विकल्प नहीं है।",
+    "mr": "पुष्टी केलेला इतिहास आणि वैयक्तिक देखभाल योजना. हे आपत्कालीन जोखीम गुणांकन, निदान किंवा तातडीच्या वर्गीकरणाचा पर्याय नाही."
+  },
+  "Could not unlock this copy. Check the passphrase and signed-in doctor.": {
+    "hi": "कॉपी नहीं खुली। पासफ़्रेज़ और साइन-इन किए डॉक्टर की जाँच करें।",
+    "mr": "प्रत उघडता आली नाही. पासफ्रेज आणि साइन-इन केलेले डॉक्टर तपासा."
+  },
+  "Current patient sharing must be verified before saving.": {
+    "hi": "सहेजने से पहले मरीज़ की वर्तमान साझाकरण अनुमति की पुष्टि चाहिए।",
+    "mr": "जतन करण्यापूर्वी रुग्णाच्या सध्याच्या सामायिकरण परवानगीची खात्री आवश्यक आहे."
+  },
+  "Current shared record": {
+    "hi": "वर्तमान साझा रिकॉर्ड",
+    "mr": "सध्याची सामायिक नोंद"
+  },
+  "DCDA": {
+    "hi": "DCDA",
+    "mr": "DCDA"
+  },
+  "DCDA twin pathway": {
+    "hi": "DCDA जुड़वाँ की योजना",
+    "mr": "DCDA जुळ्यांची योजना"
+  },
+  "Date not established": {
+    "hi": "तारीख तय नहीं",
+    "mr": "तारीख ठरलेली नाही"
+  },
+  "Dated readings and sources": {
+    "hi": "तारीखवार रीडिंग और स्रोत",
+    "mr": "तारखेनुसार मोजमापे आणि स्रोत"
+  },
+  "Dating discrepancy: the care-context EDD differs from the profile EDD. Reconcile the original dating record before planning.": {
+    "hi": "तारीखों में अंतर: देखभाल संदर्भ की EDD प्रोफ़ाइल की EDD से अलग है। योजना से पहले मूल डेटिंग रिकॉर्ड का मिलान करें।",
+    "mr": "तारखांमध्ये तफावत: देखभाल संदर्भातील EDD प्रोफाइलमधील EDD पेक्षा वेगळी आहे. योजना करण्यापूर्वी मूळ गर्भावधी नोंदीशी मेळ घाला."
+  },
+  "Dating evidence / discrepancy note": {
+    "hi": "डेटिंग का आधार / अंतर का नोट",
+    "mr": "गर्भावधीचा पुरावा / तफावतीची नोंद"
+  },
+  "Dating method": {
+    "hi": "गर्भावधि तय करने की विधि",
+    "mr": "गर्भावधी ठरवण्याची पद्धत"
+  },
+  "Dating method not recorded": {
+    "hi": "डेटिंग की विधि दर्ज नहीं",
+    "mr": "गर्भावधीची पद्धत नोंदवलेली नाही"
+  },
+  "Draft · clinician approval required": {
+    "hi": "मसौदा · चिकित्सक की मंजूरी चाहिए",
+    "mr": "मसुदा · डॉक्टरांची मंजुरी आवश्यक"
+  },
+  "EDD needed": {
+    "hi": "EDD चाहिए",
+    "mr": "EDD आवश्यक"
+  },
+  "Estimated weight (g)": {
+    "hi": "अनुमानित वजन (g)",
+    "mr": "अंदाजित वजन (g)"
+  },
+  "External clinician": {
+    "hi": "बाहरी चिकित्सक",
+    "mr": "बाहेरील डॉक्टर"
+  },
+  "External clinician dating": {
+    "hi": "बाहरी चिकित्सक की डेटिंग",
+    "mr": "बाहेरील डॉक्टरांनी ठरवलेला गर्भावधी"
+  },
+  "Fetal growth by baby": {
+    "hi": "हर बच्चे की गर्भ में वृद्धि",
+    "mr": "प्रत्येक बाळाची गर्भातील वाढ"
+  },
+  "For example: 16, 20, 24": {
+    "hi": "जैसे: 16, 20, 24",
+    "mr": "उदाहरणार्थ: 16, 20, 24"
+  },
+  "For uncomplicated DCDA or MCDA twins only. The first-trimester dating / chorionicity assessment is separate. Complex or combined conditions need an individual specialist plan.": {
+    "hi": "केवल बिना जटिलता वाले DCDA या MCDA जुड़वाँ के लिए। पहली तिमाही की डेटिंग / प्लेसेंटा जाँच अलग है। जटिल या संयुक्त स्थितियों में व्यक्तिगत विशेषज्ञ योजना चाहिए।",
+    "mr": "फक्त गुंतागुंत नसलेल्या DCDA किंवा MCDA जुळ्यांसाठी. पहिल्या तिमाहीतील गर्भावधी / अपरा मूल्यांकन वेगळे आहे. जटिल किंवा एकत्रित स्थितींसाठी वैयक्तिक तज्ज्ञ योजना आवश्यक आहे."
+  },
+  "Gestational age / stage": {
+    "hi": "गर्भावस्था की आयु / चरण",
+    "mr": "गर्भावधी / टप्पा"
+  },
+  "Gestational diabetes": {
+    "hi": "गर्भावस्था का मधुमेह",
+    "mr": "गर्भावस्थेतील मधुमेह"
+  },
+  "Growth measurements by baby": {
+    "hi": "हर बच्चे की वृद्धि के माप",
+    "mr": "प्रत्येक बाळाच्या वाढीची मोजमापे"
+  },
+  "Hb · g/dL": {
+    "hi": "Hb · g/dL",
+    "mr": "Hb · g/dL"
+  },
+  "Hypertension": {
+    "hi": "उच्च रक्तचाप",
+    "mr": "उच्च रक्तदाब"
+  },
+  "I confirmed an uncomplicated twin pregnancy before using a reference proposal.": {
+    "hi": "संदर्भ योजना से पहले मैंने बिना जटिलता वाली जुड़वाँ गर्भावस्था की पुष्टि की है।",
+    "mr": "संदर्भ योजना वापरण्यापूर्वी मी गुंतागुंत नसलेल्या जुळ्या गर्भावस्थेची खात्री केली आहे."
+  },
+  "I have permission to keep this protected copy on this private device.": {
+    "hi": "मुझे इस निजी डिवाइस पर यह सुरक्षित कॉपी रखने की अनुमति है।",
+    "mr": "मला या वैयक्तिक उपकरणावर ही सुरक्षित प्रत ठेवण्याची परवानगी आहे."
+  },
+  "I reviewed the history, dating, pathway, measurements and limits.": {
+    "hi": "मैंने इतिहास, डेटिंग, योजना, माप और सीमाओं की समीक्षा की है।",
+    "mr": "मी इतिहास, गर्भावधी, योजना, मोजमापे आणि मर्यादांचे पुनरावलोकन केले आहे."
+  },
+  "IVF": {
+    "hi": "IVF",
+    "mr": "IVF"
+  },
+  "IVF dating": {
+    "hi": "IVF डेटिंग",
+    "mr": "IVF वरून गर्भावधी"
+  },
+  "IVF pregnancy": {
+    "hi": "IVF गर्भावस्था",
+    "mr": "IVF गर्भावस्था"
+  },
+  "IVF · confirmed dating and individualised plan": {
+    "hi": "IVF · पुष्टि की डेटिंग और व्यक्तिगत योजना",
+    "mr": "IVF · पुष्टी केलेला गर्भावधी आणि वैयक्तिक योजना"
+  },
+  "Individual alert limits": {
+    "hi": "व्यक्तिगत अलर्ट सीमाएँ",
+    "mr": "वैयक्तिक सूचना मर्यादा"
+  },
+  "Individual plan and responsible team": {
+    "hi": "व्यक्तिगत योजना और ज़िम्मेदार टीम",
+    "mr": "वैयक्तिक योजना आणि जबाबदार पथक"
+  },
+  "Know her pathway before the handoff": {
+    "hi": "हैंडऑफ से पहले उसकी देखभाल योजना जानें",
+    "mr": "हस्तांतरणापूर्वी तिची देखभाल योजना जाणून घ्या"
+  },
+  "LMP": {
+    "hi": "LMP",
+    "mr": "LMP"
+  },
+  "LMP dating": {
+    "hi": "LMP से डेटिंग",
+    "mr": "LMP वरून गर्भावधी"
+  },
+  "Live shared context · patient permission checked.": {
+    "hi": "वर्तमान साझा संदर्भ · मरीज़ की अनुमति जाँची गई।",
+    "mr": "सध्याचा सामायिक संदर्भ · रुग्णाची परवानगी तपासली."
+  },
+  "Loading shared pregnancy context…": {
+    "hi": "साझा गर्भावस्था संदर्भ लोड हो रहा है…",
+    "mr": "सामायिक गर्भावस्था संदर्भ लोड होत आहे…"
+  },
+  "MCDA": {
+    "hi": "MCDA",
+    "mr": "MCDA"
+  },
+  "MCDA twin pathway": {
+    "hi": "MCDA जुड़वाँ की योजना",
+    "mr": "MCDA जुळ्यांची योजना"
+  },
+  "MCMA": {
+    "hi": "MCMA",
+    "mr": "MCMA"
+  },
+  "Measurement": {
+    "hi": "माप",
+    "mr": "मोजमाप"
+  },
+  "Missed visits": {
+    "hi": "छूटी विज़िट",
+    "mr": "चुकलेल्या भेटी"
+  },
+  "Multiples · specialist plan required": {
+    "hi": "एकाधिक बच्चे · विशेषज्ञ योजना चाहिए",
+    "mr": "एकाहून अधिक बाळे · तज्ज्ञ योजना आवश्यक"
+  },
+  "NICE NG137 · recommendations 1.3.7–1.3.8": {
+    "hi": "NICE NG137 · अनुशंसाएँ 1.3.7–1.3.8",
+    "mr": "NICE NG137 · शिफारसी 1.3.7–1.3.8"
+  },
+  "NICE NG137 · source and limitations ↗": {
+    "hi": "NICE NG137 · स्रोत और सीमाएँ ↗",
+    "mr": "NICE NG137 · स्रोत आणि मर्यादा ↗"
+  },
+  "No copy was saved.": {
+    "hi": "कोई कॉपी नहीं सहेजी गई।",
+    "mr": "कोणतीही प्रत जतन झाली नाही."
+  },
+  "No dated readings shared.": {
+    "hi": "तारीख वाली रीडिंग साझा नहीं हैं।",
+    "mr": "तारीख असलेली मोजमापे सामायिक नाहीत."
+  },
+  "No pending items in the shared timeline.": {
+    "hi": "साझा टाइमलाइन में लंबित मद नहीं है।",
+    "mr": "सामायिक कालरेषेत प्रलंबित बाबी नाहीत."
+  },
+  "No protected shift copy is saved. Save a patient summary while online.": {
+    "hi": "सुरक्षित शिफ्ट कॉपी सहेजी नहीं है। ऑनलाइन रहते हुए मरीज़ का सार सहेजें।",
+    "mr": "सुरक्षित शिफ्ट प्रत जतन केलेली नाही. ऑनलाइन असताना रुग्णाचा सारांश जतन करा."
+  },
+  "No reading available": {
+    "hi": "रीडिंग उपलब्ध नहीं",
+    "mr": "मोजमाप उपलब्ध नाही"
+  },
+  "No reference proposal applies. Confirm chorionicity and use an individual plan for combined or complex conditions.": {
+    "hi": "कोई संदर्भ योजना लागू नहीं है। प्लेसेंटा के प्रकार की पुष्टि करें; संयुक्त या जटिल स्थितियों में व्यक्तिगत योजना बनाएँ।",
+    "mr": "संदर्भ योजना लागू होत नाही. अपरेचा प्रकार तपासा; एकत्रित किंवा जटिल स्थितींमध्ये वैयक्तिक योजना करा."
+  },
+  "No specialist context is available here. Review the patient profile to confirm history, chorionicity and the individual care plan. Offline, unlock a protected shift copy first.": {
+    "hi": "यहाँ विशेषज्ञ संदर्भ उपलब्ध नहीं है। प्रोफ़ाइल में इतिहास, प्लेसेंटा का प्रकार और व्यक्तिगत योजना की पुष्टि करें। ऑफ़लाइन होने पर पहले सुरक्षित शिफ्ट कॉपी खोलें।",
+    "mr": "येथे तज्ज्ञ संदर्भ उपलब्ध नाही. प्रोफाइलमध्ये इतिहास, अपरेचा प्रकार आणि वैयक्तिक योजना तपासा. ऑफलाइन असताना आधी सुरक्षित शिफ्ट प्रत उघडा."
+  },
+  "No specialist pathway is confirmed yet.": {
+    "hi": "विशेषज्ञ योजना की अभी पुष्टि नहीं हुई है।",
+    "mr": "विशेष देखभाल योजनेची अद्याप पुष्टी नाही."
+  },
+  "No staff-recorded missed visits in the shared history.": {
+    "hi": "साझा इतिहास में स्टाफ द्वारा दर्ज छूटी विज़िट नहीं हैं।",
+    "mr": "सामायिक इतिहासात कर्मचाऱ्यांनी नोंदवलेल्या चुकलेल्या भेटी नाहीत."
+  },
+  "No universal threshold is filled in. Enter only limits you have assessed for this patient.": {
+    "hi": "कोई सार्वभौमिक सीमा भरी नहीं है। केवल इस मरीज़ के लिए जाँची गई सीमाएँ भरें।",
+    "mr": "कोणतीही सार्वत्रिक मर्यादा भरलेली नाही. फक्त या रुग्णासाठी तपासलेल्या मर्यादा भरा."
+  },
+  "Not shared or not recorded": {
+    "hi": "साझा नहीं या दर्ज नहीं",
+    "mr": "सामायिक नाही किंवा नोंद नाही"
+  },
+  "Number of babies": {
+    "hi": "बच्चों की संख्या",
+    "mr": "बाळांची संख्या"
+  },
+  "Offline copies are read-only. Reconnect to save clinical changes.": {
+    "hi": "ऑफ़लाइन कॉपी केवल पढ़ सकते हैं। चिकित्सकीय बदलाव सहेजने के लिए दोबारा जुड़ें।",
+    "mr": "ऑफलाइन प्रत फक्त वाचता येते. वैद्यकीय बदल जतन करण्यासाठी पुन्हा जोडा."
+  },
+  "Offline shell could not be installed. Keep the app open until connectivity returns.": {
+    "hi": "ऑफ़लाइन ऐप तैयार नहीं हुआ। कनेक्टिविटी लौटने तक ऐप खुला रखें।",
+    "mr": "ऑफलाइन अॅप तयार करता आले नाही. जोडणी परत येईपर्यंत अॅप उघडे ठेवा."
+  },
+  "Offline snapshot. Records and consent may have changed. No prescriptions, orders, messages or appointments can be sent from this copy.": {
+    "hi": "ऑफ़लाइन कॉपी। रिकॉर्ड और सहमति बदल सकते हैं। इस कॉपी से प्रिस्क्रिप्शन, आदेश, संदेश या अपॉइंटमेंट नहीं भेज सकते।",
+    "mr": "ऑफलाइन प्रत. नोंदी आणि संमती बदलल्या असू शकतात. या प्रतीतून औषधपत्रे, आदेश, संदेश किंवा भेटी पाठवता येत नाहीत."
+  },
+  "Offline · read-only saved information. Revocations cannot be checked.": {
+    "hi": "ऑफ़लाइन · सहेजी जानकारी केवल पढ़ सकते हैं। अनुमति रद्द होने की जाँच नहीं हो सकती।",
+    "mr": "ऑफलाइन · जतन केलेली माहिती फक्त वाचता येते. परवानगी रद्द झाल्याची तपासणी करता येत नाही."
+  },
+  "Older reading · repeat assessment needed": {
+    "hi": "पुरानी रीडिंग · दोबारा मूल्यांकन चाहिए",
+    "mr": "जुने मोजमाप · पुन्हा मूल्यांकन आवश्यक"
+  },
+  "One journey. The context that matters.": {
+    "hi": "एक यात्रा। ज़रूरी संदर्भ साथ में।",
+    "mr": "एक प्रवास. महत्त्वाचा संदर्भ एकत्र."
+  },
+  "One reading · a trend needs more measurements.": {
+    "hi": "एक रीडिंग · रुझान के लिए और माप चाहिए।",
+    "mr": "एक मोजमाप · कल पाहण्यासाठी आणखी मोजमापे आवश्यक."
+  },
+  "Online · live sharing can be checked.": {
+    "hi": "ऑनलाइन · वर्तमान साझाकरण जाँच सकते हैं।",
+    "mr": "ऑनलाइन · सध्याचे सामायिकरण तपासता येते."
+  },
+  "Only explicitly confirmed conditions are flagged. Unknown or missing entries do not mean low risk.": {
+    "hi": "केवल पुष्टि की गई स्थितियाँ चिह्नित हैं। अज्ञात या खाली जानकारी का अर्थ कम जोखिम नहीं है।",
+    "mr": "फक्त पुष्टी झालेल्या स्थिती चिन्हांकित आहेत. अज्ञात किंवा नसलेली माहिती म्हणजे कमी जोखीम नाही."
+  },
+  "Open pregnancy summary": {
+    "hi": "गर्भावस्था का सार खोलें",
+    "mr": "गर्भावस्थेचा सारांश उघडा"
+  },
+  "Original report / source": {
+    "hi": "मूल रिपोर्ट / स्रोत",
+    "mr": "मूळ अहवाल / स्रोत"
+  },
+  "Other / specialist review": {
+    "hi": "अन्य / विशेषज्ञ समीक्षा",
+    "mr": "इतर / तज्ज्ञ पुनरावलोकन"
+  },
+  "Outside clinician-set limit": {
+    "hi": "चिकित्सक की तय सीमा के बाहर",
+    "mr": "डॉक्टरांनी ठरवलेल्या मर्यादेबाहेर"
+  },
+  "PREGNANCY CONTEXT · EMERGENCY & REFERRALS": {
+    "hi": "गर्भावस्था संदर्भ · आपातकाल और रेफ़रल",
+    "mr": "गर्भावस्था संदर्भ · आपत्कालीन आणि संदर्भ सेवा"
+  },
+  "Patient sharing has expired. Refresh before saving.": {
+    "hi": "मरीज़ की साझाकरण अनुमति समाप्त है। सहेजने से पहले ताज़ा करें।",
+    "mr": "रुग्णाची सामायिकरण परवानगी संपली. जतन करण्यापूर्वी अद्ययावत करा."
+  },
+  "Patient-reported trends": {
+    "hi": "मरीज़ द्वारा बताए रुझान",
+    "mr": "रुग्णाने सांगितलेले कल"
+  },
+  "Pending tests and care": {
+    "hi": "लंबित जाँच और देखभाल",
+    "mr": "प्रलंबित तपासण्या आणि देखभाल"
+  },
+  "Plan needs clinician review": {
+    "hi": "योजना की चिकित्सकीय समीक्षा चाहिए",
+    "mr": "योजनेचे वैद्यकीय पुनरावलोकन आवश्यक"
+  },
+  "Pregnancy context saved. The emergency view uses this confirmed plan.": {
+    "hi": "गर्भावस्था संदर्भ सहेजा गया। आपातकालीन दृश्य इस पुष्ट योजना को दिखाता है।",
+    "mr": "गर्भावस्था संदर्भ जतन झाला. आपत्कालीन दृश्य ही पुष्टी केलेली योजना वापरते."
+  },
+  "Previous caesarean": {
+    "hi": "पहले का सिजेरियन",
+    "mr": "पूर्वीचे सिझेरियन"
+  },
+  "Previous stillbirth": {
+    "hi": "पहले का मृत जन्म",
+    "mr": "पूर्वीचा मृतजन्म"
+  },
+  "Previous stillbirth · individualised plan": {
+    "hi": "पहले का मृत जन्म · व्यक्तिगत योजना",
+    "mr": "पूर्वीचा मृतजन्म · वैयक्तिक योजना"
+  },
+  "Prior pregnancy outcomes": {
+    "hi": "पहली गर्भावस्थाओं के परिणाम",
+    "mr": "पूर्वीच्या गर्भधारणांचे परिणाम"
+  },
+  "Prior pregnancy outcomes and relevant details": {
+    "hi": "पहली गर्भावस्थाओं के परिणाम और संबंधित विवरण",
+    "mr": "पूर्वीच्या गर्भधारणांचे परिणाम आणि संबंधित तपशील"
+  },
+  "Prompt when": {
+    "hi": "संकेत कब दें",
+    "mr": "सूचना कधी द्यावी"
+  },
+  "Protect this shift copy": {
+    "hi": "इस शिफ्ट कॉपी को सुरक्षित करें",
+    "mr": "ही शिफ्ट प्रत सुरक्षित करा"
+  },
+  "Protected offline snapshot": {
+    "hi": "सुरक्षित ऑफ़लाइन कॉपी",
+    "mr": "सुरक्षित ऑफलाइन प्रत"
+  },
+  "Protected shift copy deleted.": {
+    "hi": "सुरक्षित शिफ्ट कॉपी हटा दी गई।",
+    "mr": "सुरक्षित शिफ्ट प्रत काढली."
+  },
+  "Protected shift copy is locked.": {
+    "hi": "सुरक्षित शिफ्ट कॉपी बंद है।",
+    "mr": "सुरक्षित शिफ्ट प्रत कुलूपबंद आहे."
+  },
+  "Protected shift copy saved.": {
+    "hi": "सुरक्षित शिफ्ट कॉपी सहेजी गई।",
+    "mr": "सुरक्षित शिफ्ट प्रत जतन झाली."
+  },
+  "Protected shift summary": {
+    "hi": "सुरक्षित शिफ्ट सार",
+    "mr": "सुरक्षित शिफ्ट सारांश"
+  },
+  "Protected storage changed. Retry.": {
+    "hi": "सुरक्षित संग्रह बदल गया। फिर कोशिश करें।",
+    "mr": "सुरक्षित साठवण बदलली. पुन्हा प्रयत्न करा."
+  },
+  "Prototype · clinician approval required": {
+    "hi": "प्रोटोटाइप · चिकित्सक की मंजूरी चाहिए",
+    "mr": "प्रायोगिक आवृत्ती · डॉक्टरांची मंजुरी आवश्यक"
+  },
+  "Read-only copies expire within 8 hours or when recorded sharing expires, whichever comes first. Offline revocations cannot be checked. Use a private device and confirm current information before acting.": {
+    "hi": "केवल पढ़ने वाली कॉपी 8 घंटों में या दर्ज साझाकरण अनुमति के समाप्त होने पर, जो पहले हो, समाप्त होती है। ऑफ़लाइन अनुमति रद्द होने की जाँच नहीं होती। निजी डिवाइस लें और कदम उठाने से पहले जानकारी की पुष्टि करें।",
+    "mr": "फक्त वाचता येणारी प्रत 8 तासांत किंवा नोंदवलेली सामायिकरण परवानगी संपल्यावर, यांपैकी आधी घडेल तेव्हा कालबाह्य होते. ऑफलाइन परवानगी रद्द झाल्याची तपासणी होत नाही. वैयक्तिक उपकरण वापरा आणि कृतीपूर्वी माहिती तपासा."
+  },
+  "Read-only shift copies · current consent and new emergencies cannot be checked.": {
+    "hi": "केवल पढ़ने वाली शिफ्ट कॉपी · वर्तमान सहमति और नई आपात स्थितियाँ जाँची नहीं जा सकतीं।",
+    "mr": "फक्त वाचता येणारी शिफ्ट प्रत · सध्याची संमती आणि नवीन आपत्कालीन घटना तपासता येत नाहीत."
+  },
+  "Read-only · saved": {
+    "hi": "केवल पढ़ने के लिए · सहेजा गया",
+    "mr": "फक्त वाचण्यासाठी · जतन केले"
+  },
+  "Read-only · saved {{0}} · expires {{1}}": {
+    "hi": "केवल पढ़ने के लिए · सहेजा {{0}} · समाप्ति {{1}}",
+    "mr": "फक्त वाचण्यासाठी · जतन केले {{0}} · कालबाह्यता {{1}}"
+  },
+  "Reconnect before saving a new shift copy.": {
+    "hi": "नई शिफ्ट कॉपी सहेजने से पहले दोबारा जुड़ें।",
+    "mr": "नवीन शिफ्ट प्रत जतन करण्यापूर्वी पुन्हा जोडा."
+  },
+  "Reconnect to refresh consent before saving a new shift copy.": {
+    "hi": "नई शिफ्ट कॉपी से पहले सहमति ताज़ा करने के लिए दोबारा जुड़ें।",
+    "mr": "नवीन शिफ्ट प्रत जतन करण्यापूर्वी संमती अद्ययावत करण्यासाठी पुन्हा जोडा."
+  },
+  "Recorded estimated weights only. No centiles or singleton normal ranges are applied.": {
+    "hi": "केवल दर्ज अनुमानित वजन। प्रतिशतक या एक बच्चे वाली गर्भावस्था की सामान्य सीमाएँ लागू नहीं हैं।",
+    "mr": "फक्त नोंदवलेली अंदाजित वजने. पर्सेंटाइल किंवा एकाच बाळाच्या गर्भावस्थेच्या सामान्य मर्यादा लागू केलेल्या नाहीत."
+  },
+  "Recorded risk context": {
+    "hi": "दर्ज जोखिम संदर्भ",
+    "mr": "नोंदवलेला जोखीम संदर्भ"
+  },
+  "Recorded trend; open dated readings for exact values": {
+    "hi": "दर्ज रुझान; सही मान के लिए तारीखवार रीडिंग खोलें",
+    "mr": "नोंदवलेला कल; अचूक मूल्यांसाठी तारखेनुसार मोजमापे उघडा"
+  },
+  "Reference proposal · confirm locally": {
+    "hi": "संदर्भ प्रस्ताव · स्थानीय पुष्टि करें",
+    "mr": "संदर्भ प्रस्ताव · स्थानिक पुष्टी करा"
+  },
+  "Reference weeks filled for review. Nothing has been booked.": {
+    "hi": "समीक्षा के लिए संदर्भ सप्ताह भर दिए। कोई बुकिंग नहीं हुई।",
+    "mr": "पुनरावलोकनासाठी संदर्भ आठवडे भरले. कोणतीही भेट आरक्षित केलेली नाही."
+  },
+  "Refresh context": {
+    "hi": "संदर्भ ताज़ा करें",
+    "mr": "संदर्भ अद्ययावत करा"
+  },
+  "Replace the entered visit weeks with this reference proposal?": {
+    "hi": "भरे विज़िट सप्ताह इस संदर्भ प्रस्ताव से बदलें?",
+    "mr": "भरलेले भेटींचे आठवडे या संदर्भ प्रस्तावाने बदलायचे?"
+  },
+  "Review dating, history and the individual pathway": {
+    "hi": "डेटिंग, इतिहास और व्यक्तिगत योजना की समीक्षा करें",
+    "mr": "गर्भावधी, इतिहास आणि वैयक्तिक योजनेचे पुनरावलोकन करा"
+  },
+  "Review due plan item": {
+    "hi": "देय योजना मद की समीक्षा करें",
+    "mr": "देय योजना बाबीचे पुनरावलोकन करा"
+  },
+  "Review instruction": {
+    "hi": "समीक्षा निर्देश",
+    "mr": "पुनरावलोकन सूचना"
+  },
+  "Review the original clinical mark": {
+    "hi": "मूल चिकित्सकीय चिह्न की समीक्षा करें",
+    "mr": "मूळ वैद्यकीय चिन्हांकन तपासा"
+  },
+  "Review this context before saving.": {
+    "hi": "सहेजने से पहले इस संदर्भ की समीक्षा करें।",
+    "mr": "जतन करण्यापूर्वी या संदर्भाचे पुनरावलोकन करा."
+  },
+  "Reviewed · absent": {
+    "hi": "समीक्षा हुई · मौजूद नहीं",
+    "mr": "तपासले · आढळले नाही"
+  },
+  "Rh negative": {
+    "hi": "Rh नेगेटिव",
+    "mr": "Rh निगेटिव्ह"
+  },
+  "Save pregnancy context": {
+    "hi": "गर्भावस्था संदर्भ सहेजें",
+    "mr": "गर्भावस्था संदर्भ जतन करा"
+  },
+  "Save protected shift copy": {
+    "hi": "सुरक्षित शिफ्ट कॉपी सहेजें",
+    "mr": "सुरक्षित शिफ्ट प्रत जतन करा"
+  },
+  "Saved shift copy": {
+    "hi": "सहेजी शिफ्ट कॉपी",
+    "mr": "जतन केलेली शिफ्ट प्रत"
+  },
+  "Scan + review": {
+    "hi": "स्कैन और समीक्षा",
+    "mr": "स्कॅन आणि पुनरावलोकन"
+  },
+  "Scan + review weeks (subset of visit weeks)": {
+    "hi": "स्कैन और समीक्षा के सप्ताह (विज़िट सप्ताह में से)",
+    "mr": "स्कॅन आणि पुनरावलोकनाचे आठवडे (भेटीच्या आठवड्यांपैकी)"
+  },
+  "Selected care pathways": {
+    "hi": "चुनी देखभाल योजनाएँ",
+    "mr": "निवडलेले देखभाल मार्ग"
+  },
+  "Shared context could not be loaded. Check the care connection and history-sharing permission.": {
+    "hi": "साझा संदर्भ नहीं खुला। देखभाल संबंध और इतिहास साझा करने की अनुमति जाँचें।",
+    "mr": "सामायिक संदर्भ लोड झाला नाही. देखभाल संबंध आणि इतिहास सामायिक करण्याची परवानगी तपासा."
+  },
+  "Shared history to reconcile": {
+    "hi": "साझा इतिहास का मिलान करें",
+    "mr": "सामायिक इतिहासाशी मेळ घाला"
+  },
+  "Sharing could not be refreshed.": {
+    "hi": "साझाकरण ताज़ा नहीं हुआ।",
+    "mr": "सामायिकरण अद्ययावत करता आले नाही."
+  },
+  "Sharing refresh unavailable.": {
+    "hi": "साझाकरण ताज़ा करना उपलब्ध नहीं।",
+    "mr": "सामायिकरण अद्ययावत करणे उपलब्ध नाही."
+  },
+  "Sharing refresh unavailable. Saved copies may be stale.": {
+    "hi": "साझाकरण ताज़ा नहीं हुआ। सहेजी कॉपी पुरानी हो सकती है।",
+    "mr": "सामायिकरण अद्ययावत झाले नाही. जतन केलेल्या प्रती जुन्या असू शकतात."
+  },
+  "Shift copy locked before saving.": {
+    "hi": "सहेजने से पहले शिफ्ट कॉपी बंद हो गई।",
+    "mr": "जतन करण्यापूर्वी शिफ्ट प्रत कुलूपबंद झाली."
+  },
+  "Shift copy locked before saving. Retry.": {
+    "hi": "सहेजने से पहले शिफ्ट कॉपी बंद हो गई। फिर प्रयास करें।",
+    "mr": "जतन करण्यापूर्वी शिफ्ट प्रत कुलूपबंद झाली. पुन्हा प्रयत्न करा."
+  },
+  "Sign in as the doctor who saved this shift copy.": {
+    "hi": "कॉपी सहेजने वाले डॉक्टर के रूप में साइन-इन करें।",
+    "mr": "प्रत जतन करणारे डॉक्टर म्हणून साइन-इन करा."
+  },
+  "Sign in as the reviewing doctor.": {
+    "hi": "समीक्षा करने वाले डॉक्टर के रूप में साइन-इन करें।",
+    "mr": "पुनरावलोकन करणारे डॉक्टर म्हणून साइन-इन करा."
+  },
+  "Singleton": {
+    "hi": "एक बच्चा",
+    "mr": "एक बाळ"
+  },
+  "Source not recorded": {
+    "hi": "स्रोत दर्ज नहीं",
+    "mr": "स्रोत नोंदवलेला नाही"
+  },
+  "Suggest reference visit weeks": {
+    "hi": "संदर्भ विज़िट सप्ताह सुझाएँ",
+    "mr": "संदर्भ भेटींचे आठवडे सुचवा"
+  },
+  "THE WHOLE PREGNANCY": {
+    "hi": "पूरी गर्भावस्था",
+    "mr": "संपूर्ण गर्भावस्था"
+  },
+  "The shift copy expired. Reconnect to save a fresh summary.": {
+    "hi": "शिफ्ट कॉपी समाप्त हो गई। नया सार सहेजने के लिए दोबारा जुड़ें।",
+    "mr": "शिफ्ट प्रत कालबाह्य झाली. नवीन सारांश जतन करण्यासाठी पुन्हा जोडा."
+  },
+  "The visit schedule has not been entered. No appointment is booked automatically.": {
+    "hi": "विज़िट योजना दर्ज नहीं है। कोई अपॉइंटमेंट अपने आप बुक नहीं होती।",
+    "mr": "भेटीचे वेळापत्रक नोंदवलेले नाही. कोणतीही भेट आपोआप आरक्षित होत नाही."
+  },
+  "Triplets": {
+    "hi": "तीन बच्चे",
+    "mr": "तीन बाळे"
+  },
+  "Ultrasound dating": {
+    "hi": "अल्ट्रासाउंड से डेटिंग",
+    "mr": "अल्ट्रासाऊंडवरून गर्भावधी"
+  },
+  "Unlock shift copy": {
+    "hi": "शिफ्ट कॉपी खोलें",
+    "mr": "शिफ्ट प्रत उघडा"
+  },
+  "Unlock the existing shift copy first.": {
+    "hi": "पहले मौजूदा शिफ्ट कॉपी खोलें।",
+    "mr": "आधी विद्यमान शिफ्ट प्रत उघडा."
+  },
+  "Unlock your shift copy": {
+    "hi": "अपनी शिफ्ट कॉपी खोलें",
+    "mr": "तुमची शिफ्ट प्रत उघडा"
+  },
+  "Updated 2024": {
+    "hi": "अपडेट 2024",
+    "mr": "अद्ययावत 2024"
+  },
+  "Updated {{6}} ·": {
+    "hi": "अपडेट {{6}} ·",
+    "mr": "अद्ययावत {{6}} ·"
+  },
+  "Visit schedule not entered.": {
+    "hi": "विज़िट योजना दर्ज नहीं।",
+    "mr": "भेटीचे वेळापत्रक नोंदवलेले नाही."
+  },
+  "Visit weeks (comma separated)": {
+    "hi": "विज़िट सप्ताह (कॉमा से अलग करें)",
+    "mr": "भेटीचे आठवडे (स्वल्पविरामाने वेगळे करा)"
+  },
+  "Week {{0}} · {{1}} · {{2}}": {
+    "hi": "सप्ताह {{0}} · {{1}} · {{2}}",
+    "mr": "आठवडा {{0}} · {{1}} · {{2}}"
+  },
+  "below": {
+    "hi": "below",
+    "mr": "below"
+  },
+  "chorionicity": {
+    "hi": "chorionicity",
+    "mr": "chorionicity"
+  },
+  "dai-doctor-shift-v1": {
+    "hi": "dai-doctor-shift-v1",
+    "mr": "dai-doctor-shift-v1"
+  },
+  "dcda": {
+    "hi": "dcda",
+    "mr": "dcda"
+  },
+  "direction": {
+    "hi": "direction",
+    "mr": "direction"
+  },
+  "external": {
+    "hi": "external",
+    "mr": "external"
+  },
+  "gdm": {
+    "hi": "gdm",
+    "mr": "gdm"
+  },
+  "mcda": {
+    "hi": "mcda",
+    "mr": "mcda"
+  },
+  "mcma": {
+    "hi": "mcma",
+    "mr": "mcma"
+  },
+  "multiples": {
+    "hi": "multiples",
+    "mr": "multiples"
+  },
+  "plurality": {
+    "hi": "plurality",
+    "mr": "plurality"
+  },
+  "protected patient summaries unlocked.": {
+    "hi": "सुरक्षित मरीज़ सार खुले हैं।",
+    "mr": "सुरक्षित रुग्ण सारांश उघडले आहेत."
+  },
+  "single": {
+    "hi": "single",
+    "mr": "single"
+  },
+  "thresholds": {
+    "hi": "thresholds",
+    "mr": "thresholds"
+  },
+  "triplets": {
+    "hi": "triplets",
+    "mr": "triplets"
+  },
+  "{{0}} protected patient summaries unlocked.": {
+    "hi": "{{0}} सुरक्षित मरीज़ सार खुले हैं।",
+    "mr": "{{0}} सुरक्षित रुग्ण सारांश उघडले आहेत."
+  },
+  "{{0}} · self-reported": {
+    "hi": "{{0}} · मरीज़ द्वारा दर्ज",
+    "mr": "{{0}} · रुग्णाने नोंदवलेले"
+  },
+  "· Past planned date": {
+    "hi": "· तय तारीख निकल गई",
+    "mr": "· नियोजित तारीख उलटली"
+  },
+  "· estimated fetal weight": {
+    "hi": "· भ्रूण का अनुमानित वजन",
+    "mr": "· गर्भाचे अंदाजित वजन"
+  },
+  "· expires": {
+    "hi": "· समाप्ति",
+    "mr": "· कालबाह्यता"
+  },
+  "· self-reported": {
+    "hi": "· मरीज़ द्वारा दर्ज",
+    "mr": "· रुग्णाने नोंदवलेले"
+  },
+  "Systolic / diastolic": {
+    "hi": "सिस्टोलिक / डायस्टोलिक",
+    "mr": "सिस्टोलिक / डायस्टोलिक"
+  },
+  "Delete copy": {
+    "hi": "कॉपी हटाएँ",
+    "mr": "प्रत काढा"
+  },
+  "Delete copy and queued changes": {
+    "hi": "कॉपी और भेजे जाने वाले बदलाव हटाएँ",
+    "mr": "प्रत आणि पाठवायचे बदल काढा"
+  },
+  "DAI · CLINICAL WORKSPACE": {
+    "hi": "DAI · चिकित्सक का कार्यक्षेत्र",
+    "mr": "DAI · वैद्यकीय कार्यक्षेत्र"
+  },
+  "DAI · CLINICIAN PRESCRIPTION": {
+    "hi": "DAI · चिकित्सक का प्रिस्क्रिप्शन",
+    "mr": "DAI · डॉक्टरांचे औषधपत्र"
+  },
+  "DAI · PATIENT WORKSPACE": {
+    "hi": "DAI · आपकी देखभाल की जगह",
+    "mr": "DAI · तुमचे देखभाल कार्यक्षेत्र"
+  },
+  "DAI · Family Circle": {
+    "hi": "DAI · परिवार का साथ",
+    "mr": "DAI · कुटुंबाचे वर्तुळ"
+  },
+  "DAI · Hospital administration": {
+    "hi": "DAI · अस्पताल प्रशासन",
+    "mr": "DAI · रुग्णालय प्रशासन"
+  },
+  "DAI · Hospital readiness": {
+    "hi": "DAI · अस्पताल की तैयारी",
+    "mr": "DAI · रुग्णालयाची तयारी"
+  },
+  "DAI · Illustrative week": {
+    "hi": "DAI · समझने के लिए सप्ताह",
+    "mr": "DAI · समजून घेण्यासाठीचा आठवडा"
+  },
+  "DAI · My recorded care journey": {
+    "hi": "DAI · मेरी दर्ज देखभाल यात्रा",
+    "mr": "DAI · माझा नोंदवलेला देखभाल प्रवास"
+  },
+  "DAI · Recorded care": {
+    "hi": "DAI · दर्ज देखभाल",
+    "mr": "DAI · नोंदवलेली देखभाल"
+  },
+  "DAI · Reviewed educational content": {
+    "hi": "DAI · समीक्षा की गई जानकारी",
+    "mr": "DAI · पुनरावलोकित शैक्षणिक माहिती"
+  },
+  "DAI · Shared care summary": {
+    "hi": "DAI · साझा देखभाल सार",
+    "mr": "DAI · सामायिक देखभाल सारांश"
+  },
+  "DAI · Sign in": {
+    "hi": "DAI · साइन इन करें",
+    "mr": "DAI · साइन इन करा"
+  },
+  "DAI · Simulated on synthetic data": {
+    "hi": "DAI · काल्पनिक डेटा पर प्रदर्शन",
+    "mr": "DAI · काल्पनिक माहितीवरील प्रात्यक्षिक"
+  },
+  "DAI · Synthetic demonstration · Illustration": {
+    "hi": "DAI · काल्पनिक प्रदर्शन · चित्रण",
+    "mr": "DAI · काल्पनिक प्रात्यक्षिक · चित्रण"
+  },
+  "DAI · Weekly self-reported summary": {
+    "hi": "DAI · आपकी बताई जानकारी का साप्ताहिक सार",
+    "mr": "DAI · स्वतः नोंदवलेल्या माहितीचा साप्ताहिक सारांश"
+  },
+  "DAI HOSPITAL PORTAL · PHASE 1": {
+    "hi": "DAI अस्पताल पोर्टल · चरण 1",
+    "mr": "DAI रुग्णालय पोर्टल · टप्पा 1"
+  },
+  "DAI Demonstration Hospital": {
+    "hi": "DAI प्रदर्शन अस्पताल",
+    "mr": "DAI प्रात्यक्षिक रुग्णालय"
+  },
+  "DAI birth pass": {
+    "hi": "DAI प्रसव पास",
+    "mr": "DAI प्रसूती पास"
+  },
+  "DAI birth plan": {
+    "hi": "DAI प्रसव योजना",
+    "mr": "DAI प्रसूती योजना"
+  },
+  "DAI care continuity loop": {
+    "hi": "DAI निरंतर देखभाल व्यवस्था",
+    "mr": "DAI सातत्यपूर्ण देखभाल व्यवस्था"
+  },
+  "DAI / BIRTH PASS": {
+    "hi": "DAI / प्रसव पास",
+    "mr": "DAI / प्रसूती पास"
+  },
+  "DaiCare": {
+    "hi": "दाईकेयर",
+    "mr": "दाईकेअर"
+  },
+  "DaiHealth": {
+    "hi": "दाईहेल्थ",
+    "mr": "दाईहेल्थ"
+  },
+  "DaiCare doctor network": {
+    "hi": "दाईकेयर का डॉक्टर नेटवर्क",
+    "mr": "दाईकेअरचे डॉक्टर नेटवर्क"
+  },
+  "Load my DaiCare bookings": {
+    "hi": "मेरी दाईकेयर बुकिंग देखें",
+    "mr": "माझ्या दाईकेअर भेटी पाहा"
+  },
+  "Find a verified doctor": {
+    "hi": "सत्यापित डॉक्टर खोजें",
+    "mr": "पडताळणी झालेले डॉक्टर शोधा"
+  },
+  "Create my private space": {
+    "hi": "मेरी निजी जगह बनाएँ",
+    "mr": "माझी खासगी जागा तयार करा"
+  },
+  "Create Care Capsule": {
+    "hi": "केयर कैप्सूल बनाएँ",
+    "mr": "केअर कॅप्सूल तयार करा"
+  },
+  "Let’s take care of you and your little ones. ♡": {
+    "hi": "आइए, आपका और आपके नन्हों का ख्याल रखें। ♡",
+    "mr": "चला, तुमची आणि तुमच्या लहानग्यांची काळजी घेऊया. ♡"
+  },
+  "Let’s take the next step": {
+    "hi": "आइए अगला कदम उठाएँ",
+    "mr": "चला, पुढचे पाऊल टाकूया"
+  },
+  "Ready · choose a part to hear its story": {
+    "hi": "तैयार · जानकारी सुनने के लिए कोई अंग चुनें",
+    "mr": "तयार · माहिती ऐकण्यासाठी एखादा अवयव निवडा"
+  },
+  "Slow rotation": {
+    "hi": "धीरे घुमाएँ",
+    "mr": "हळूहळू फिरवा"
+  },
+  "PREPARE TOGETHER": {
+    "hi": "मिलकर तैयारी करें",
+    "mr": "एकत्र तयारी करूया"
+  },
+  "PRIVATE COPY": {
+    "hi": "निजी कॉपी",
+    "mr": "खासगी प्रत"
+  },
+  "PREFERENCES TO DISCUSS": {
+    "hi": "बातचीत के लिए आपकी पसंद",
+    "mr": "चर्चा करायच्या तुमच्या पसंती"
+  },
+  "Saved —": {
+    "hi": "सहेजा गया —",
+    "mr": "जतन झाले —"
+  },
+  "LITTLE DOSES, LASTING MEMORIES": {
+    "hi": "छोटे पल, यादों का साथ",
+    "mr": "लहान क्षण, कायमच्या आठवणी"
+  },
+  "LITTLE MOMENTS OF CARE": {
+    "hi": "देखभाल के छोटे पल",
+    "mr": "काळजीचे छोटे क्षण"
+  },
+  "LITTLE STEPS. CONTINUOUS CARE.": {
+    "hi": "छोटे कदम। निरंतर देखभाल।",
+    "mr": "लहान पावले. सातत्यपूर्ण काळजी."
+  },
+  "PATIENT CARE HUB": {
+    "hi": "मरीज़ की देखभाल का केंद्र",
+    "mr": "रुग्ण देखभाल केंद्र"
+  },
+  "PATIENT RECORD ·": {
+    "hi": "मरीज़ का रिकॉर्ड ·",
+    "mr": "रुग्णाची नोंद ·"
+  },
+  "PATIENT REQUEST INBOX": {
+    "hi": "मरीज़ों के अनुरोध",
+    "mr": "रुग्णांच्या विनंत्या"
+  },
+  "PATIENT-LANGUAGE INSTRUCTIONS · DOCTOR REVIEWED": {
+    "hi": "मरीज़ की भाषा में निर्देश · चिकित्सक द्वारा जाँचे गए",
+    "mr": "रुग्णाच्या भाषेतील सूचना · डॉक्टरांनी तपासलेल्या"
+  },
+  "PEOPLE IN YOUR CORNER": {
+    "hi": "आपके साथ खड़े लोग",
+    "mr": "तुमच्या पाठीशी असलेली माणसे"
+  },
+  "PERSONAL & PRIVATE": {
+    "hi": "आपका और निजी",
+    "mr": "वैयक्तिक आणि खासगी"
+  },
+  "PERSONAL CHECKLIST WALLET": {
+    "hi": "आपकी तैयारी की सूची",
+    "mr": "तुमची वैयक्तिक तयारी यादी"
+  },
+  "PROTOTYPE · OPTIONAL": {
+    "hi": "प्रोटोटाइप · वैकल्पिक",
+    "mr": "प्रायोगिक आवृत्ती · ऐच्छिक"
+  },
+  "YOUR PEOPLE. YOUR PERMISSION.": {
+    "hi": "आपके अपने। आपकी अनुमति।",
+    "mr": "तुमची माणसे. तुमची परवानगी."
+  },
+  "Your Family Circle": {
+    "hi": "आपके परिवार का साथ",
+    "mr": "तुमचे कुटुंब वर्तुळ"
+  },
+  "Select a person": {
+    "hi": "एक व्यक्ति चुनें",
+    "mr": "एखादी व्यक्ती निवडा"
+  },
+  "RECENT ACCESS": {
+    "hi": "हाल में जानकारी किसने देखी",
+    "mr": "अलीकडे माहिती कोणी पाहिली"
+  },
+  "What happened recently": {
+    "hi": "हाल में क्या हुआ",
+    "mr": "अलीकडे काय घडले"
+  },
+  "AUTOMATIC SAFEGUARDS": {
+    "hi": "अपने आप लागू सुरक्षा",
+    "mr": "आपोआप लागू होणारी सुरक्षा"
+  },
+  "Access looks after itself": {
+    "hi": "जानकारी देखने की अनुमति का ध्यान अपने आप",
+    "mr": "माहिती पाहण्याच्या परवानगीची आपोआप काळजी"
+  },
+  "Invitations expire automatically.": {
+    "hi": "निमंत्रण की अवधि अपने आप समाप्त होती है।",
+    "mr": "निमंत्रणांची मुदत आपोआप संपते."
+  },
+  "Expiring access is highlighted early.": {
+    "hi": "अनुमति समाप्त होने से पहले सूचना दिखती है।",
+    "mr": "परवानगीची मुदत संपण्यापूर्वी सूचना दिसते."
+  },
+  "Every opening is recorded privately.": {
+    "hi": "जानकारी हर बार खोले जाने का निजी रिकॉर्ड रखा जाता है।",
+    "mr": "माहिती प्रत्येक वेळी उघडल्याची खासगी नोंद ठेवली जाते."
+  },
+  "You can revoke access immediately.": {
+    "hi": "आप अनुमति तुरंत वापस ले सकते हैं।",
+    "mr": "तुम्ही परवानगी त्वरित मागे घेऊ शकता."
+  },
+  "Advanced privacy controls": {
+    "hi": "गोपनीयता के अतिरिक्त विकल्प",
+    "mr": "गोपनीयतेचे अतिरिक्त पर्याय"
+  },
+  "FROM YOUR ORIGINAL REPORTS": {
+    "hi": "आपकी मूल रिपोर्ट से",
+    "mr": "तुमच्या मूळ अहवालांमधून"
+  },
+  "Labour · Labour": {
+    "hi": "प्रसव पीड़ा · प्रसव",
+    "mr": "प्रसवकळा · प्रसूती"
+  },
+  "Placenta": {
+    "hi": "प्लेसेंटा",
+    "mr": "वार"
+  },
+  "Uterus": {
+    "hi": "गर्भाशय",
+    "mr": "गर्भाशय"
+  },
+  "Exploring now: {{0}}": {
+    "hi": "अभी देख रहे हैं: {{0}}",
+    "mr": "आता पाहत आहात: {{0}}"
+  },
+  "{{0}} years": {
+    "hi": "{{0}} वर्ष",
+    "mr": "{{0}} वर्षे"
+  },
+  "{{0}} reports": {
+    "hi": "{{0}} रिपोर्ट",
+    "mr": "{{0}} अहवाल"
+  },
+  "{{0}} steps": {
+    "hi": "{{0}} चरण",
+    "mr": "{{0}} टप्पे"
+  },
+  "{{0}} mapped places · Darker = more listed places. Not quality or availability.": {
+    "hi": "नक्शे पर {{0}} केंद्र · गहरा रंग = अधिक दर्ज केंद्र। यह गुणवत्ता या उपलब्धता नहीं बताता।",
+    "mr": "नकाशावर {{0}} केंद्रे · गडद रंग = अधिक नोंदवलेली केंद्रे. हे गुणवत्ता किंवा उपलब्धता दर्शवत नाही."
+  },
+  "Please choose an option.": {
+    "hi": "कृपया एक विकल्प चुनें।",
+    "mr": "कृपया एक पर्याय निवडा."
+  },
+  "Please complete this field.": {
+    "hi": "कृपया यह जानकारी भरें।",
+    "mr": "कृपया ही माहिती भरा."
+  },
+  "Please enter a valid email address.": {
+    "hi": "कृपया सही ईमेल पता दर्ज करें।",
+    "mr": "कृपया वैध ईमेल पत्ता भरा."
+  },
+  "The value is below the allowed minimum.": {
+    "hi": "यह मान अनुमति दी गई न्यूनतम सीमा से कम है।",
+    "mr": "हे मूल्य अनुमत किमान मर्यादेपेक्षा कमी आहे."
+  },
+  "The value is above the allowed maximum.": {
+    "hi": "यह मान अनुमति दी गई अधिकतम सीमा से ज़्यादा है।",
+    "mr": "हे मूल्य अनुमत कमाल मर्यादेपेक्षा जास्त आहे."
+  },
+  "Please enter a longer value.": {
+    "hi": "कृपया कुछ और अक्षर दर्ज करें।",
+    "mr": "कृपया आणखी अक्षरे भरा."
+  },
+  "Please check the required format.": {
+    "hi": "कृपया जानकारी का सही प्रारूप जाँचें।",
+    "mr": "कृपया माहितीचा आवश्यक नमुना तपासा."
+  },
+  "Clinician record": {
+    "hi": "चिकित्सक का रिकॉर्ड",
+    "mr": "डॉक्टरांची नोंद"
+  },
+  "Clinic visit": {
+    "hi": "क्लिनिक की विज़िट",
+    "mr": "दवाखान्यातील भेट"
+  },
+  "Unknown": {
+    "hi": "जानकारी नहीं",
+    "mr": "माहिती नाही"
+  },
+  "Pending": {
+    "hi": "लंबित",
+    "mr": "प्रलंबित"
+  },
+  "Reading": {
+    "hi": "रीडिंग",
+    "mr": "मोजमाप"
+  },
+  "Verified": {
+    "hi": "सत्यापित",
+    "mr": "पडताळलेले"
+  },
+  "Book": {
+    "hi": "बुक करें",
+    "mr": "बुूक करा"
+  },
+  "Capacity at {{8}} on {{9}}": {
+    "hi": "{{9}} पर {{8}} पर क्षमता",
+    "mr": "{{9}} रोजी {{8}} येथे क्षमता"
+  },
+  "Clinical Summary": {
+    "hi": "क्लिनिकल सारांश",
+    "mr": "क्लिनिकल सारांश"
+  },
+  "Clinical Summary:": {
+    "hi": "क्लिनिकल सारांश",
+    "mr": "क्लिनिकल सारांश"
+  },
+  "Create Referral": {
+    "hi": "रेफरल बनाएँ",
+    "mr": "रेफरल तयार करा"
+  },
+  "Created:": {
+    "hi": "बनाया गया",
+    "mr": "तयार केले"
+  },
+  "Entry not found.": {
+    "hi": "प्रविष्टि नहीं मिली",
+    "mr": "नोंद सापडली नाही"
+  },
+  "FROM YOUR CLINICIAN": {
+    "hi": "आपके चिकित्सक से",
+    "mr": "तुमच्या चिकित्सकाकडून"
+  },
+  "More": {
+    "hi": "अधिक",
+    "mr": "अधिक"
+  },
+  "Now:": {
+    "hi": "अभी",
+    "mr": "आता"
+  },
+  "Phone:": {
+    "hi": "फ़ोन",
+    "mr": "फोन"
+  },
+  "Priority:": {
+    "hi": "प्राथमिकता",
+    "mr": "प्राधान्य"
+  },
+  "Reason for Referral:": {
+    "hi": "रेफरल का कारण",
+    "mr": "संदर्भ (रेफरल) कारण"
+  },
+  "Reason:": {
+    "hi": "कारण",
+    "mr": "कारण"
+  },
+  "Reassign": {
+    "hi": "पुनः असाइन करें",
+    "mr": "पुन्हा नियुक्त करा"
+  },
+  "Resolve": {
+    "hi": "समाधान करें",
+    "mr": "निवारण करा"
+  },
+  "SELECT": {
+    "hi": "चुनें",
+    "mr": "निवडा"
+  },
+  "Send Message": {
+    "hi": "संदेश भेजें",
+    "mr": "संदेश पाठवा"
+  },
+  "Source: {{8}}": {
+    "hi": "स्रोत: {{8}}",
+    "mr": "स्रोत: {{8}}"
+  },
+  "Type:": {
+    "hi": "प्रकार",
+    "mr": "प्रकार"
+  },
+  "Unit {{0}} · {{1}}": {
+    "hi": "यूनिट {{0}} · {{1}}",
+    "mr": "युनिट {{0}} · {{1}}"
+  },
+  "Update": {
+    "hi": "अपडेट:",
+    "mr": "अपडेट:"
+  },
+  "View Details": {
+    "hi": "विवरण देखें",
+    "mr": "तपशील पहा"
+  },
+  "{{11}} open": {
+    "hi": "{{11}} बाकी",
+    "mr": "{{11}} बाकी"
+  },
+  "{{2}} days": {
+    "hi": "{{2}} दिन",
+    "mr": "{{2}} दिवस"
+  },
+  "(optional)": {
+    "hi": "(वैकल्पिक)",
+    "mr": "(ऐच्छिक)"
+  },
+  "+{{0}} more": {
+    "hi": "+{{0}} और",
+    "mr": "+आणखी {{0}}"
+  },
+  ". Share the original with your clinician there; this request does not grant access.": {
+    "hi": ". वहाँ मूल रिपोर्ट चिकित्सक से साझा करें; यह अनुरोध देखने की अनुमति नहीं देता।",
+    "mr": ". तेथे मूळ अहवाल डॉक्टरांना दाखवा; या विनंतीमुळे पाहण्याची परवानगी मिळत नाही."
+  },
+  "/ {{3}} beds occupied": {
+    "hi": "/ {{3}} बेड भरे हैं",
+    "mr": "/ {{3}} खाटा भरलेल्या"
+  },
+  "/care/{{0}}": {
+    "hi": "/care/{{0}}",
+    "mr": "/care/{{0}}"
+  },
+  "A distance limit needs your explicit one-shot location permission": {
+    "hi": "दूरी की सीमा के लिए इस बार स्थान इस्तेमाल करने की आपकी स्पष्ट अनुमति चाहिए",
+    "mr": "अंतर मर्यादेसाठी या वेळी स्थान वापरण्याची तुमची स्पष्ट परवानगी आवश्यक आहे"
+  },
+  "A little space for your wellbeing": {
+    "hi": "आपकी भलाई के लिए थोड़ी जगह",
+    "mr": "तुमच्या स्वास्थ्यासाठी थोडी जागा"
+  },
+  "A private, two-question PHQ-2 check. Think about the past two weeks. Screening only; a clinician makes any diagnosis.": {
+    "hi": "दो प्रश्नों वाला निजी PHQ-2 चेक-इन। पिछले दो सप्ताह के बारे में सोचें। यह केवल जाँच है; निदान चिकित्सक करते हैं।",
+    "mr": "दोन प्रश्नांची खासगी PHQ-2 तपासणी. मागील दोन आठवड्यांचा विचार करा. ही केवळ तपासणी आहे; निदान डॉक्टर करतात."
+  },
+  "A scheduled visit and active patient consent are required": {
+    "hi": "तय विज़िट और मरीज़ की सक्रिय सहमति चाहिए",
+    "mr": "नियोजित भेट आणि रुग्णाची सक्रिय संमती आवश्यक आहे"
+  },
+  "A selected child is unavailable": {
+    "hi": "चुने हुए बच्चे का रिकॉर्ड उपलब्ध नहीं है",
+    "mr": "निवडलेल्या बाळाची नोंद उपलब्ध नाही"
+  },
+  "AI image review is not configured. You can still upload the report and save your own reading.": {
+    "hi": "AI चित्र समीक्षा सेट नहीं है। आप रिपोर्ट अपलोड करके अपनी व्याख्या सहेज सकते हैं।",
+    "mr": "AI प्रतिमा पुनरावलोकन जोडलेले नाही. तुम्ही अहवाल अपलोड करून स्वतःचे विश्लेषण जतन करू शकता."
+  },
+  "AI image review is unavailable. Keep the original image and enter your clinical reading.": {
+    "hi": "AI चित्र समीक्षा उपलब्ध नहीं है। मूल चित्र रखें और अपनी चिकित्सकीय व्याख्या दर्ज करें।",
+    "mr": "AI प्रतिमा पुनरावलोकन उपलब्ध नाही. मूळ प्रतिमा ठेवा आणि तुमचे वैद्यकीय विश्लेषण नोंदवा."
+  },
+  "About the PHQ-2 screening tool ↗": {
+    "hi": "PHQ-2 जाँच के बारे में ↗",
+    "mr": "PHQ-2 तपासणीबद्दल ↗"
+  },
+  "Access duration": {
+    "hi": "अनुमति की अवधि",
+    "mr": "परवानगीचा कालावधी"
+  },
+  "Active invitation not found": {
+    "hi": "सक्रिय निमंत्रण नहीं मिला",
+    "mr": "सक्रिय निमंत्रण सापडले नाही"
+  },
+  "Add a message...": {
+    "hi": "संदेश लिखें...",
+    "mr": "संदेश लिहा..."
+  },
+  "Add a title and, for a diary entry or letter, write a message.": {
+    "hi": "शीर्षक जोड़ें। डायरी या पत्र के लिए संदेश भी लिखें।",
+    "mr": "शीर्षक जोडा. दैनंदिनी किंवा पत्रासाठी संदेशही लिहा."
+  },
+  "Add pregnancy dates in your profile before starting a journey.": {
+    "hi": "यात्रा शुरू करने से पहले प्रोफ़ाइल में गर्भावस्था की तारीखें जोड़ें।",
+    "mr": "प्रवास सुरू करण्यापूर्वी प्रोफाइलमध्ये गर्भावस्थेच्या तारखा जोडा."
+  },
+  "Add up to 4 blood-support contacts.": {
+    "hi": "रक्त सहायता के अधिकतम 4 संपर्क जोड़ें।",
+    "mr": "रक्तसहाय्यासाठी कमाल 4 संपर्क जोडा."
+  },
+  "Agree to share this call-in with your chosen care-team doctor.": {
+    "hi": "यह जानकारी चुने हुए देखभाल डॉक्टर से साझा करने की सहमति दें।",
+    "mr": "ही माहिती निवडलेल्या देखभाल डॉक्टरांशी सामायिक करण्यास संमती द्या."
+  },
+  "All bed states": {
+    "hi": "बेड की सभी स्थितियाँ",
+    "mr": "खाटांच्या सर्व स्थिती"
+  },
+  "All office holders are fictional. Clinical staff and administrative positions remain separate linked records.": {
+    "hi": "सभी पदाधिकारी काल्पनिक हैं। चिकित्सकीय और प्रशासनिक पदों के रिकॉर्ड अलग हैं और आपस में जुड़े हैं।",
+    "mr": "सर्व पदाधिकारी काल्पनिक आहेत. वैद्यकीय आणि प्रशासकीय पदांच्या नोंदी वेगळ्या असून एकमेकांशी जोडलेल्या आहेत."
+  },
+  "An invitation and a password of at least 12 characters (maximum 72 UTF-8 bytes) are required": {
+    "hi": "निमंत्रण और कम से कम 12 अक्षरों का पासवर्ड (अधिकतम 72 UTF-8 बाइट) चाहिए",
+    "mr": "निमंत्रण आणि किमान 12 अक्षरांचा पासवर्ड (कमाल 72 UTF-8 बाइट) आवश्यक आहे"
+  },
+  "Any urgency-related information...": {
+    "hi": "तत्कालता से जुड़ी कोई जानकारी...",
+    "mr": "तातडीशी संबंधित माहिती..."
+  },
+  "Apply": {
+    "hi": "लागू करें",
+    "mr": "लागू करा"
+  },
+  "Appointments, support tips and selected child growth.": {
+    "hi": "अपॉइंटमेंट, सहायता के सुझाव और चुने बच्चों की वृद्धि।",
+    "mr": "भेटी, मदतीच्या सूचना आणि निवडलेल्या बाळांची वाढ."
+  },
+  "Appointments, urgent help, transport and practical support.": {
+    "hi": "अपॉइंटमेंट, तत्काल मदद, यातायात और व्यावहारिक सहायता।",
+    "mr": "भेटी, तातडीची मदत, प्रवास आणि दैनंदिन मदत."
+  },
+  "Approve slot": {
+    "hi": "समय मंजूर करें",
+    "mr": "वेळ मंजूर करा"
+  },
+  "Approved source: {{5}}": {
+    "hi": "स्वीकृत स्रोत: {{5}}",
+    "mr": "मंजूर स्रोत: {{5}}"
+  },
+  "Attachment not found.": {
+    "hi": "संलग्न फ़ाइल नहीं मिली।",
+    "mr": "जोडलेली फाइल सापडली नाही."
+  },
+  "Attachments belong to memories.": {
+    "hi": "संलग्न फ़ाइलें यादों की प्रविष्टि से जुड़ी होती हैं।",
+    "mr": "जोडलेल्या फाइली आठवणीच्या नोंदीशी संबंधित असतात."
+  },
+  "Available times (IST)": {
+    "hi": "उपलब्ध समय (IST)",
+    "mr": "उपलब्ध वेळा (IST)"
+  },
+  "BASED ON YOUR PREFERENCES": {
+    "hi": "आपकी पसंद के अनुसार",
+    "mr": "तुमच्या पसंतीनुसार"
+  },
+  "Baby {{0}}": {
+    "hi": "बच्चा {{0}}",
+    "mr": "बाळ {{0}}"
+  },
+  "Bed-state history": {
+    "hi": "बेड की स्थिति का इतिहास",
+    "mr": "खाटेच्या स्थितीचा इतिहास"
+  },
+  "Blood stock date": {
+    "hi": "रक्त भंडार की तारीख",
+    "mr": "रक्तसाठ्याची तारीख"
+  },
+  "Book this visit": {
+    "hi": "यह विज़िट बुक करें",
+    "mr": "ही भेट आरक्षित करा"
+  },
+  "Born {{0}}": {
+    "hi": "जन्म {{0}}",
+    "mr": "जन्म {{0}}"
+  },
+  "Born {{2}}": {
+    "hi": "जन्म {{2}}",
+    "mr": "जन्म {{2}}"
+  },
+  "British Journal of Psychiatry": {
+    "hi": "British Journal of Psychiatry",
+    "mr": "British Journal of Psychiatry"
+  },
+  "Call {{0}}": {
+    "hi": "{{0}} को कॉल करें",
+    "mr": "{{0}} यांना फोन करा"
+  },
+  "Call {{1}}": {
+    "hi": "{{1}} को कॉल करें",
+    "mr": "{{1}} यांना फोन करा"
+  },
+  "Calls open on the scheduled visit date": {
+    "hi": "कॉल तय विज़िट की तारीख पर खुलता है",
+    "mr": "नियोजित भेटीच्या दिवशी कॉल सुरू होतो"
+  },
+  "Check before you invite": {
+    "hi": "निमंत्रण से पहले जाँचें",
+    "mr": "निमंत्रण देण्यापूर्वी तपासा"
+  },
+  "Check the clinician-set alert limit and units.": {
+    "hi": "चिकित्सक द्वारा तय सीमा और इकाइयाँ जाँचें।",
+    "mr": "डॉक्टरांनी ठरवलेली मर्यादा आणि एकके तपासा."
+  },
+  "Check the dated fetal growth measurement.": {
+    "hi": "तारीख वाले भ्रूण वृद्धि माप की जाँच करें।",
+    "mr": "तारीख असलेले गर्भाच्या वाढीचे मोजमाप तपासा."
+  },
+  "Check the entry length.": {
+    "hi": "प्रविष्टि की लंबाई जाँचें।",
+    "mr": "नोंदीची लांबी तपासा."
+  },
+  "Check the image size.": {
+    "hi": "चित्र का आकार जाँचें।",
+    "mr": "प्रतिमेचा आकार तपासा."
+  },
+  "Check the length and format of your entries.": {
+    "hi": "प्रविष्टियों की लंबाई और प्रारूप जाँचें।",
+    "mr": "नोंदींची लांबी आणि नमुना तपासा."
+  },
+  "Check the recorded blood group.": {
+    "hi": "दर्ज रक्त समूह जाँचें।",
+    "mr": "नोंदवलेला रक्तगट तपासा."
+  },
+  "Check the visit note and release choice": {
+    "hi": "विज़िट नोट और साझा करने का विकल्प जाँचें",
+    "mr": "भेटीची नोंद आणि सामायिक करण्याचा पर्याय तपासा"
+  },
+  "Child {{0}}": {
+    "hi": "बच्चा {{0}}",
+    "mr": "मूल {{0}}"
+  },
+  "Choose a bed to inspect its record and state history.": {
+    "hi": "रिकॉर्ड और स्थिति का इतिहास देखने के लिए बेड चुनें।",
+    "mr": "नोंद आणि स्थितीचा इतिहास पाहण्यासाठी खाट निवडा."
+  },
+  "Choose a child from your own records": {
+    "hi": "अपने रिकॉर्ड में से बच्चा चुनें",
+    "mr": "तुमच्या नोंदींमधील बाळ निवडा"
+  },
+  "Choose a cropped JPEG, PNG or WebP image under 3 MB.": {
+    "hi": "3 MB से छोटा, चुना हुआ JPEG, PNG या WebP चित्र लें।",
+    "mr": "3 MB पेक्षा लहान, निवडलेली JPEG, PNG किंवा WebP प्रतिमा वापरा."
+  },
+  "Choose a date during this journey.": {
+    "hi": "इस यात्रा की अवधि में तारीख चुनें।",
+    "mr": "या प्रवासाच्या कालावधीतील तारीख निवडा."
+  },
+  "Choose a future request time": {
+    "hi": "आगे के अनुरोध का समय चुनें",
+    "mr": "पुढील विनंतीची वेळ निवडा"
+  },
+  "Choose a linked case": {
+    "hi": "जुड़ा हुआ केस चुनें",
+    "mr": "जोडलेले प्रकरण निवडा"
+  },
+  "Choose a milestone from your own care plan": {
+    "hi": "अपनी देखभाल योजना का चरण चुनें",
+    "mr": "तुमच्या देखभाल योजनेतील टप्पा निवडा"
+  },
+  "Choose a mood": {
+    "hi": "मन की स्थिति चुनें",
+    "mr": "मनःस्थिती निवडा"
+  },
+  "Choose a pregnancy week or Delivery and birth.": {
+    "hi": "गर्भावस्था का सप्ताह या प्रसव और जन्म चुनें।",
+    "mr": "गर्भावस्थेचा आठवडा किंवा प्रसूती आणि जन्म निवडा."
+  },
+  "Choose a prescription file issued by you for this patient": {
+    "hi": "इस मरीज़ के लिए आपके जारी प्रिस्क्रिप्शन की फ़ाइल चुनें",
+    "mr": "या रुग्णासाठी तुम्ही दिलेल्या औषधपत्राची फाइल निवडा"
+  },
+  "Choose a valid assigned EDD.": {
+    "hi": "तय की गई सही EDD चुनें।",
+    "mr": "ठरवलेली वैध EDD निवडा."
+  },
+  "Choose a valid care-team doctor.": {
+    "hi": "देखभाल टीम का सही डॉक्टर चुनें।",
+    "mr": "देखभाल पथकातील योग्य डॉक्टर निवडा."
+  },
+  "Choose a valid date up to today.": {
+    "hi": "आज तक की सही तारीख चुनें।",
+    "mr": "आजपर्यंतची वैध तारीख निवडा."
+  },
+  "Choose a valid milestone date.": {
+    "hi": "चरण की सही तारीख चुनें।",
+    "mr": "टप्प्याची वैध तारीख निवडा."
+  },
+  "Choose a valid patient.": {
+    "hi": "सही मरीज़ चुनें।",
+    "mr": "योग्य रुग्ण निवडा."
+  },
+  "Choose a valid time": {
+    "hi": "सही समय चुनें",
+    "mr": "वैध वेळ निवडा"
+  },
+  "Choose a valid upcoming date": {
+    "hi": "आने वाली सही तारीख चुनें",
+    "mr": "पुढील वैध तारीख निवडा"
+  },
+  "Choose an actual delivery date.": {
+    "hi": "प्रसव की वास्तविक तारीख चुनें।",
+    "mr": "प्रसूतीची प्रत्यक्ष तारीख निवडा."
+  },
+  "Choose audio or video and explicit consent": {
+    "hi": "ऑडियो या वीडियो चुनें और स्पष्ट सहमति दें",
+    "mr": "ऑडिओ किंवा व्हिडिओ निवडा आणि स्पष्ट संमती द्या"
+  },
+  "Choose each information category yourself.": {
+    "hi": "जानकारी की हर श्रेणी स्वयं चुनें।",
+    "mr": "माहितीची प्रत्येक श्रेणी स्वतः निवडा."
+  },
+  "Choose individual categories": {
+    "hi": "अलग-अलग श्रेणियाँ चुनें",
+    "mr": "स्वतंत्र श्रेणी निवडा"
+  },
+  "Choose one of the unit’s available appointment times": {
+    "hi": "यूनिट का उपलब्ध अपॉइंटमेंट समय चुनें",
+    "mr": "युनिटमधील उपलब्ध भेटीची वेळ निवडा"
+  },
+  "Choose tags from the available options.": {
+    "hi": "उपलब्ध विकल्पों में से टैग चुनें।",
+    "mr": "उपलब्ध पर्यायांमधून टॅग निवडा."
+  },
+  "Choose the recipient, relationship, scopes, children and expiry; confirm sharing": {
+    "hi": "व्यक्ति, रिश्ता, अनुमत जानकारी, बच्चे और अवधि चुनकर साझाकरण की पुष्टि करें",
+    "mr": "व्यक्ती, नाते, माहितीची परवानगी, बाळे आणि कालावधी निवडून सामायिकरणाची पुष्टी करा"
+  },
+  "Choose two to eight recorded maternal steps": {
+    "hi": "दर्ज मातृ देखभाल के दो से आठ चरण चुनें",
+    "mr": "नोंदवलेल्या मातृ देखभालीचे दोन ते आठ टप्पे निवडा"
+  },
+  "Choose up to eight files.": {
+    "hi": "अधिकतम आठ फ़ाइलें चुनें।",
+    "mr": "कमाल आठ फाइली निवडा."
+  },
+  "Choose up to eight valid attachments.": {
+    "hi": "अधिकतम आठ सही संलग्न फ़ाइलें चुनें।",
+    "mr": "कमाल आठ वैध जोडलेल्या फाइली निवडा."
+  },
+  "Choose valid preferred days": {
+    "hi": "पसंद के सही दिन चुनें",
+    "mr": "पसंतीचे वैध दिवस निवडा"
+  },
+  "Clinical Details": {
+    "hi": "चिकित्सकीय विवरण",
+    "mr": "वैद्यकीय तपशील"
+  },
+  "Clinical history is not shared. Ask for that optional permission before opening this context.": {
+    "hi": "चिकित्सकीय इतिहास साझा नहीं है। इसे खोलने से पहले उस वैकल्पिक अनुमति का अनुरोध करें।",
+    "mr": "वैद्यकीय इतिहास सामायिक नाही. हा संदर्भ उघडण्यापूर्वी त्या ऐच्छिक परवानगीची विनंती करा."
+  },
+  "Clinician sharing, individual report permissions, emergency contacts and technical controls.": {
+    "hi": "चिकित्सक के साथ साझाकरण, अलग रिपोर्ट की अनुमति, आपात संपर्क और तकनीकी विकल्प।",
+    "mr": "डॉक्टरांशी सामायिकरण, स्वतंत्र अहवालांची परवानगी, आपत्कालीन संपर्क आणि तांत्रिक पर्याय."
+  },
+  "Closed{{0}}": {
+    "hi": "बंद{{0}}",
+    "mr": "बंद{{0}}"
+  },
+  "Communication History": {
+    "hi": "संपर्क का इतिहास",
+    "mr": "संवादाचा इतिहास"
+  },
+  "Confirm account closure with your current password": {
+    "hi": "वर्तमान पासवर्ड से खाता बंद करने की पुष्टि करें",
+    "mr": "सध्याच्या पासवर्डने खाते बंद करण्याची पुष्टी करा"
+  },
+  "Confirm an extension between 1 and 30 days": {
+    "hi": "1 से 30 दिनों की अतिरिक्त अनुमति की पुष्टि करें",
+    "mr": "1 ते 30 दिवसांच्या वाढीव परवानगीची पुष्टी करा"
+  },
+  "Confirm availability": {
+    "hi": "उपलब्धता की पुष्टि करें",
+    "mr": "उपलब्धतेची पुष्टी करा"
+  },
+  "Confirm patient consent and check the cropped image for identifiers before sending it to Gemini.": {
+    "hi": "Gemini को भेजने से पहले मरीज़ की सहमति और चुने चित्र से पहचान हटाने की पुष्टि करें।",
+    "mr": "Gemini ला पाठवण्यापूर्वी रुग्णाची संमती आणि निवडलेल्या प्रतिमेतून ओळख काढल्याची पुष्टी करा."
+  },
+  "Confirm review before activating this plan.": {
+    "hi": "योजना सक्रिय करने से पहले समीक्षा की पुष्टि करें।",
+    "mr": "योजना सक्रिय करण्यापूर्वी पुनरावलोकनाची पुष्टी करा."
+  },
+  "Confirm the inputs and result before saving.": {
+    "hi": "सहेजने से पहले इनपुट और परिणाम की पुष्टि करें।",
+    "mr": "जतन करण्यापूर्वी माहिती आणि निकालाची पुष्टी करा."
+  },
+  "Confirm the paper speed and gain.": {
+    "hi": "कागज़ की गति और गेन की पुष्टि करें।",
+    "mr": "कागदाचा वेग आणि गेनची पुष्टी करा."
+  },
+  "Confirm use of these steps and planning preferences": {
+    "hi": "इन चरणों और योजना की पसंद के उपयोग की पुष्टि करें",
+    "mr": "या टप्प्यांचा आणि नियोजनाच्या पसंतीचा वापर करण्याची पुष्टी करा"
+  },
+  "Confirm {{2}}": {
+    "hi": "{{2}} की पुष्टि करें",
+    "mr": "{{2}} ची पुष्टी करा"
+  },
+  "Confirmed by {{2}}": {
+    "hi": "{{2}} द्वारा पुष्टि",
+    "mr": "{{2}} यांनी पुष्टी केलेले"
+  },
+  "Context / separate newborn record references": {
+    "hi": "संदर्भ / नवजात के अलग रिकॉर्ड के लिंक",
+    "mr": "संदर्भ / नवजाताच्या स्वतंत्र नोंदीचे दुवे"
+  },
+  "Correct": {
+    "hi": "सही",
+    "mr": "बरोबर"
+  },
+  "Cox JL, Holden JM, Sagovsky R (1987). British Journal of Psychiatry, 150, 782–786. Prototype for clinical review.": {
+    "hi": "Cox JL, Holden JM, Sagovsky R (1987). British Journal of Psychiatry, 150, 782–786. Prototype for clinical review.",
+    "mr": "Cox JL, Holden JM, Sagovsky R (1987). British Journal of Psychiatry, 150, 782–786. Prototype for clinical review."
+  },
+  "Cox JL, Holden JM, Sagovsky R (1987). Detection of postnatal depression: Development of the 10-item Edinburgh Postnatal Depression Scale.": {
+    "hi": "Cox JL, Holden JM, Sagovsky R (1987). Detection of postnatal depression: Development of the 10-item Edinburgh Postnatal Depression Scale.",
+    "mr": "Cox JL, Holden JM, Sagovsky R (1987). Detection of postnatal depression: Development of the 10-item Edinburgh Postnatal Depression Scale."
+  },
+  "Create ECG review draft": {
+    "hi": "ECG समीक्षा का मसौदा बनाएँ",
+    "mr": "ECG पुनरावलोकन मसुदा तयार करा"
+  },
+  "Create New Referral": {
+    "hi": "नया रेफ़रल बनाएँ",
+    "mr": "नवीन संदर्भपत्र तयार करा"
+  },
+  "Create a Care Capsule": {
+    "hi": "केयर कैप्सूल बनाएँ",
+    "mr": "केअर कॅप्सूल तयार करा"
+  },
+  "Create a care task": {
+    "hi": "देखभाल का काम जोड़ें",
+    "mr": "देखभालीचे काम तयार करा"
+  },
+  "Create a follow-up; patient acknowledges; staff closes with evidence.": {
+    "hi": "फॉलो-अप बनाएँ; मरीज़ पुष्टि करे; स्टाफ प्रमाण के साथ पूरा करे।",
+    "mr": "पाठपुरावा तयार करा; रुग्णाने स्वीकार करावा; कर्मचाऱ्यांनी पुराव्यासह पूर्ण करावा."
+  },
+  "Create a review draft": {
+    "hi": "समीक्षा का मसौदा बनाएँ",
+    "mr": "पुनरावलोकन मसुदा तयार करा"
+  },
+  "Create an invitation to share only the practical information someone needs to support you.": {
+    "hi": "सहायता के लिए ज़रूरी व्यावहारिक जानकारी ही साझा करने का निमंत्रण बनाएँ।",
+    "mr": "मदतीसाठी आवश्यक तेवढीच दैनंदिन माहिती सामायिक करण्याचे निमंत्रण तयार करा."
+  },
+  "Create camp": {
+    "hi": "शिविर बनाएँ",
+    "mr": "शिबिर तयार करा"
+  },
+  "Create capsule QR": {
+    "hi": "कैप्सूल का QR बनाएँ",
+    "mr": "कॅप्सूलचा QR तयार करा"
+  },
+  "Create invited account": {
+    "hi": "निमंत्रण वाला खाता बनाएँ",
+    "mr": "निमंत्रित खाते तयार करा"
+  },
+  "Create private invitation": {
+    "hi": "निजी निमंत्रण बनाएँ",
+    "mr": "खासगी निमंत्रण तयार करा"
+  },
+  "Create workflow": {
+    "hi": "कार्य प्रक्रिया बनाएँ",
+    "mr": "कामाची प्रक्रिया तयार करा"
+  },
+  "Create your patient account": {
+    "hi": "अपना मरीज़ खाता बनाएँ",
+    "mr": "तुमचे रुग्ण खाते तयार करा"
+  },
+  "Create your private space first.": {
+    "hi": "पहले अपनी निजी जगह बनाएँ।",
+    "mr": "आधी तुमची खासगी जागा तयार करा."
+  },
+  "Create {{1}}": {
+    "hi": "{{1}} बनाएँ",
+    "mr": "{{1}} तयार करा"
+  },
+  "Created: {{9}}": {
+    "hi": "बनाया गया: {{9}}",
+    "mr": "तयार केले: {{9}}"
+  },
+  "Current password is incorrect": {
+    "hi": "वर्तमान पासवर्ड गलत है",
+    "mr": "सध्याचा पासवर्ड चुकीचा आहे"
+  },
+  "Custom access": {
+    "hi": "अनुमति स्वयं तय करें",
+    "mr": "परवानगी स्वतः ठरवा"
+  },
+  "Daily admissions and discharges for the past seven days": {
+    "hi": "पिछले सात दिनों में रोज़ के भर्ती और डिस्चार्ज",
+    "mr": "मागील सात दिवसांतील रोजच्या भरती आणि घरी सोडण्याच्या नोंदी"
+  },
+  "Decided: {{1}}": {
+    "hi": "निर्णय: {{1}}",
+    "mr": "निर्णय: {{1}}"
+  },
+  "Decision Notes": {
+    "hi": "निर्णय के नोट",
+    "mr": "निर्णयाची नोंद"
+  },
+  "Delete all protected doctor shift copies on this device?": {
+    "hi": "इस डिवाइस की सभी सुरक्षित डॉक्टर शिफ्ट कॉपी हटाएँ?",
+    "mr": "या उपकरणावरील सर्व सुरक्षित डॉक्टर शिफ्ट प्रती काढायच्या?"
+  },
+  "Delete item": {
+    "hi": "मद हटाएँ",
+    "mr": "बाब काढा"
+  },
+  "Delete my encrypted server backup.": {
+    "hi": "मेरा एन्क्रिप्टेड सर्वर बैकअप हटाएँ।",
+    "mr": "माझा एन्क्रिप्टेड सर्व्हर बॅकअप काढा."
+  },
+  "Delete private copies": {
+    "hi": "निजी कॉपी हटाएँ",
+    "mr": "खासगी प्रती काढा"
+  },
+  "Delete the other doctor’s saved copy before creating yours.": {
+    "hi": "अपनी कॉपी बनाने से पहले दूसरे डॉक्टर की सहेजी कॉपी हटाएँ।",
+    "mr": "तुमची प्रत तयार करण्यापूर्वी दुसऱ्या डॉक्टरांची जतन केलेली प्रत काढा."
+  },
+  "Delete the saved copy and all unsynchronised updates?": {
+    "hi": "सहेजी कॉपी और अभी तक न भेजे गए सभी बदलाव हटाएँ?",
+    "mr": "जतन केलेली प्रत आणि अजून न पाठवलेले सर्व बदल काढायचे?"
+  },
+  "Delete the selected copies": {
+    "hi": "चुनी हुई कॉपी हटाएँ",
+    "mr": "निवडलेल्या प्रती काढा"
+  },
+  "Delete this device’s encrypted Sukoon copy.": {
+    "hi": "इस डिवाइस की एन्क्रिप्टेड सुकून कॉपी हटाएँ।",
+    "mr": "या उपकरणावरील एन्क्रिप्टेड सुकून प्रत काढा."
+  },
+  "Delete this document? This cannot be undone.": {
+    "hi": "यह दस्तावेज़ हटाएँ? इसे वापस नहीं लाया जा सकेगा।",
+    "mr": "हा दस्तऐवज काढायचा? तो पुन्हा मिळवता येणार नाही."
+  },
+  "Delete this entry and its attachments?": {
+    "hi": "यह प्रविष्टि और उसकी फ़ाइलें हटाएँ?",
+    "mr": "ही नोंद आणि तिच्या फाइली काढायच्या?"
+  },
+  "Delete this history entry?": {
+    "hi": "यह इतिहास प्रविष्टि हटाएँ?",
+    "mr": "ही इतिहासातील नोंद काढायची?"
+  },
+  "Delete this letter": {
+    "hi": "यह पत्र हटाएँ",
+    "mr": "हे पत्र काढा"
+  },
+  "Delete unused record": {
+    "hi": "इस्तेमाल नहीं हुआ रिकॉर्ड हटाएँ",
+    "mr": "न वापरलेली नोंद काढा"
+  },
+  "Delivery & labour allocation": {
+    "hi": "प्रसव और लेबर रूम का आवंटन",
+    "mr": "प्रसूती आणि प्रसवकक्ष वाटप"
+  },
+  "Diagnosis": {
+    "hi": "निदान",
+    "mr": "निदान"
+  },
+  "Diagnosis:": {
+    "hi": "निदान:",
+    "mr": "निदान:"
+  },
+  "Due {{1}} · {{2}} days overdue · assigned to {{3}}": {
+    "hi": "तय तारीख {{1}} · {{2}} दिन की देरी · ज़िम्मेदार {{3}}",
+    "mr": "नियोजित तारीख {{1}} · {{2}} दिवस उशीर · जबाबदार {{3}}"
+  },
+  "EPDS {{0}}/30 · {{1}}": {
+    "hi": "EPDS {{0}}/30 · {{1}}",
+    "mr": "EPDS {{0}}/30 · {{1}}"
+  },
+  "EPDS {{1}}/30 · {{2}} {{3}}": {
+    "hi": "EPDS {{1}}/30 · {{2}} {{3}}",
+    "mr": "EPDS {{1}}/30 · {{2}} {{3}}"
+  },
+  "Edit History": {
+    "hi": "बदलाव का इतिहास",
+    "mr": "बदलांचा इतिहास"
+  },
+  "Edit {{0}}": {
+    "hi": "{{0}} बदलें",
+    "mr": "{{0}} संपादित करा"
+  },
+  "Editable content · version {{3}} · {{4}}": {
+    "hi": "बदलने योग्य सामग्री · संस्करण {{3}} · {{4}}",
+    "mr": "संपादित करता येणारी सामग्री · आवृत्ती {{3}} · {{4}}"
+  },
+  "Enter a delivery planning record.": {
+    "hi": "प्रसव की तैयारी का रिकॉर्ड भरें।",
+    "mr": "प्रसूती नियोजनाची नोंद भरा."
+  },
+  "Enter a pregnancy context.": {
+    "hi": "गर्भावस्था का संदर्भ भरें।",
+    "mr": "गर्भावस्थेचा संदर्भ भरा."
+  },
+  "Enter a reported travel time from 0 to 1440 minutes.": {
+    "hi": "बताया गया यात्रा समय 0 से 1440 मिनट में भरें।",
+    "mr": "सांगितलेला प्रवास कालावधी 0 ते 1440 मिनिटांत भरा."
+  },
+  "Enter a valid support contact.": {
+    "hi": "सहायता संपर्क की सही जानकारी भरें।",
+    "mr": "मदतीच्या संपर्काची वैध माहिती भरा."
+  },
+  "Enter a ward or village label, up to 120 characters": {
+    "hi": "इलाके या गाँव का नाम, अधिकतम 120 अक्षर, भरें",
+    "mr": "भागाचे किंवा गावाचे नाव, कमाल 120 अक्षरे, भरा"
+  },
+  "Entry type cannot be changed.": {
+    "hi": "प्रविष्टि का प्रकार नहीं बदल सकता।",
+    "mr": "नोंदीचा प्रकार बदलता येत नाही."
+  },
+  "Essential support": {
+    "hi": "ज़रूरी सहायता",
+    "mr": "आवश्यक मदत"
+  },
+  "Expected vs recorded care": {
+    "hi": "अपेक्षित और दर्ज देखभाल",
+    "mr": "अपेक्षित आणि नोंदवलेली देखभाल"
+  },
+  "Explain why this referral is needed...": {
+    "hi": "रेफ़रल की ज़रूरत का कारण लिखें...",
+    "mr": "संदर्भपत्राची गरज का आहे ते लिहा..."
+  },
+  "FROM YOUR LAST VISITS": {
+    "hi": "आपकी पिछली विज़िट से",
+    "mr": "तुमच्या मागील भेटींमधून"
+  },
+  "Family access overview": {
+    "hi": "परिवार की अनुमति का सार",
+    "mr": "कुटुंबाच्या परवानग्यांचा आढावा"
+  },
+  "Feeling down, depressed, or hopeless": {
+    "hi": "उदास, निराश या उम्मीद कम महसूस होना",
+    "mr": "उदास, खिन्न किंवा निराश वाटणे"
+  },
+  "Fictional address": {
+    "hi": "काल्पनिक पता",
+    "mr": "काल्पनिक पत्ता"
+  },
+  "Filter by bed status": {
+    "hi": "बेड की स्थिति से छाँटें",
+    "mr": "खाटेच्या स्थितीनुसार निवडा"
+  },
+  "Filter by ward": {
+    "hi": "वार्ड से छाँटें",
+    "mr": "वॉर्डनुसार निवडा"
+  },
+  "Find doctors": {
+    "hi": "डॉक्टर खोजें",
+    "mr": "डॉक्टर शोधा"
+  },
+  "Find the ID in": {
+    "hi": "ID यहाँ देखें",
+    "mr": "ID येथे शोधा"
+  },
+  "Follow-up message": {
+    "hi": "फॉलो-अप संदेश",
+    "mr": "पाठपुराव्याचा संदेश"
+  },
+  "Follow-up task due {{0}}. {{1}}": {
+    "hi": "फॉलो-अप की तारीख {{0}}। {{1}}",
+    "mr": "पाठपुराव्याची तारीख {{0}}. {{1}}"
+  },
+  "Follow-up {{0}} · {{1}}": {
+    "hi": "फॉलो-अप {{0}} · {{1}}",
+    "mr": "पाठपुरावा {{0}} · {{1}}"
+  },
+  "For example, call again on Monday": {
+    "hi": "जैसे, सोमवार को दोबारा कॉल करें",
+    "mr": "उदाहरणार्थ, सोमवारी पुन्हा फोन करा"
+  },
+  "From {{0}}": {
+    "hi": "{{0}} से",
+    "mr": "{{0}} कडून"
+  },
+  "Given {{0}}": {
+    "hi": "{{0}} को दिया गया",
+    "mr": "{{0}} रोजी दिले"
+  },
+  "Grant not found": {
+    "hi": "अनुमति नहीं मिली",
+    "mr": "परवानगी सापडली नाही"
+  },
+  "How did you reach out?": {
+    "hi": "आपने संपर्क कैसे किया?",
+    "mr": "तुम्ही संपर्क कसा केला?"
+  },
+  "How the score is calculated": {
+    "hi": "स्कोर कैसे निकाला जाता है",
+    "mr": "गुण कसे मोजले जातात"
+  },
+  "I agree to share my name and booking details with this clinician for this {{2}} consultation. My medical records stay under separate consent.": {
+    "hi": "मैं इस {{2}} परामर्श के लिए इस चिकित्सक से अपना नाम और बुकिंग विवरण साझा करने की सहमति देता/देती हूँ। मेडिकल रिकॉर्ड के लिए अलग सहमति चाहिए।",
+    "mr": "या {{2}} सल्ल्यासाठी या डॉक्टरांशी माझे नाव आणि भेटीचे तपशील सामायिक करण्यास मी संमती देतो/देते. वैद्यकीय नोंदींसाठी स्वतंत्र संमती आवश्यक आहे."
+  },
+  "I am completing this screening after a birth.": {
+    "hi": "मैं प्रसव के बाद यह जाँच भर रहा/रही हूँ।",
+    "mr": "मी प्रसूतीनंतर ही तपासणी भरत आहे."
+  },
+  "I chose this person and confirm these specific permissions.": {
+    "hi": "मैंने यह व्यक्ति चुना है और इन निश्चित अनुमतियों की पुष्टि करता/करती हूँ।",
+    "mr": "मी ही व्यक्ती निवडली असून या विशिष्ट परवानग्यांची पुष्टी करतो/करते."
+  },
+  "ICD Code:": {
+    "hi": "ICD कोड:",
+    "mr": "ICD संकेतांक:"
+  },
+  "If you feel you may hurt yourself or your baby, seek urgent in-person help and ask someone you trust to stay with you. Use SOS.": {
+    "hi": "अगर खुद को या बच्चे को नुकसान पहुँचाने का डर हो, तुरंत आमने-सामने मदद लें और भरोसेमंद व्यक्ति को साथ रहने को कहें। SOS इस्तेमाल करें।",
+    "mr": "स्वतःला किंवा बाळाला इजा होऊ शकते असे वाटत असल्यास तातडीने प्रत्यक्ष मदत घ्या आणि विश्वासू व्यक्तीला सोबत राहण्यास सांगा. SOS वापरा."
+  },
+  "Incoming high-risk mother": {
+    "hi": "आने वाली उच्च जोखिम वाली माँ",
+    "mr": "येणारी उच्च जोखीम असलेली माता"
+  },
+  "Instructions for the patient...": {
+    "hi": "मरीज़ के लिए निर्देश...",
+    "mr": "रुग्णासाठी सूचना..."
+  },
+  "Invalid invitation": {
+    "hi": "निमंत्रण सही नहीं है",
+    "mr": "निमंत्रण वैध नाही"
+  },
+  "Invitation expired, revoked or belongs to another email": {
+    "hi": "निमंत्रण समाप्त, रद्द या किसी दूसरे ईमेल का है",
+    "mr": "निमंत्रणाची मुदत संपली आहे, ते रद्द झाले आहे किंवा दुसऱ्या ईमेलसाठी आहे"
+  },
+  "Invitation progress": {
+    "hi": "निमंत्रण की स्थिति",
+    "mr": "निमंत्रणाची प्रगती"
+  },
+  "Invitation unavailable for this email": {
+    "hi": "इस ईमेल के लिए निमंत्रण उपलब्ध नहीं",
+    "mr": "या ईमेलसाठी निमंत्रण उपलब्ध नाही"
+  },
+  "Journey not found.": {
+    "hi": "यह यात्रा नहीं मिली।",
+    "mr": "हा प्रवास सापडला नाही."
+  },
+  "Last touch {{5}}": {
+    "hi": "पिछला संपर्क {{5}}",
+    "mr": "मागील संपर्क {{5}}"
+  },
+  "Latest contact: {{0}}": {
+    "hi": "सबसे हाल का संपर्क: {{0}}",
+    "mr": "सर्वात अलीकडील संपर्क: {{0}}"
+  },
+  "Let this be a small pause. You can keep your eyes open and stay seated however is comfortable. If you are caring for your baby, keep doing what your baby needs. There is nothing to finish or get right. Notice where your body is supported.": {
+    "hi": "थोड़ा विराम लें। आँखें खुली रख सकती हैं और जैसे आराम मिले वैसे बैठी रहें। बच्चे की देखभाल कर रही हैं तो उसकी ज़रूरत पूरी करती रहें। यहाँ कुछ पूरा या सही करना ज़रूरी नहीं। ध्यान दें कि शरीर को कहाँ सहारा मिल रहा है।",
+    "mr": "थोडा विराम घ्या. डोळे उघडे ठेवून तुम्हाला आरामदायक वाटेल तसे बसू शकता. बाळाची काळजी घेत असाल तर त्याची गरज पूर्ण करत राहा. येथे काही पूर्ण किंवा अचूक करायचे नाही. शरीराला कुठे आधार मिळतो ते जाणवा."
+  },
+  "Let’s ask": {
+    "hi": "आइए पूछें",
+    "mr": "चला, विचारूया"
+  },
+  "Let’s catch up": {
+    "hi": "आइए हालचाल जानें",
+    "mr": "चला, पुन्हा संपर्क साधूया"
+  },
+  "Let’s catch up!": {
+    "hi": "आइए हालचाल जानें!",
+    "mr": "चला, पुन्हा संपर्क साधूया!"
+  },
+  "Let’s plan the next dose": {
+    "hi": "अगली खुराक की योजना बनाएँ",
+    "mr": "पुढील मात्रेचे नियोजन करूया"
+  },
+  "Let’s plan your next checkup": {
+    "hi": "अगली जाँच की योजना बनाएँ",
+    "mr": "पुढील तपासणीचे नियोजन करूया"
+  },
+  "Let’s reload the anatomy studio": {
+    "hi": "शरीर रचना का दृश्य फिर खोलें",
+    "mr": "शरीररचनेचे दृश्य पुन्हा उघडूया"
+  },
+  "Let’s review these together": {
+    "hi": "आइए साथ में समीक्षा करें",
+    "mr": "चला, एकत्र पुनरावलोकन करूया"
+  },
+  "Level {{0}}": {
+    "hi": "स्तर {{0}}",
+    "mr": "पातळी {{0}}"
+  },
+  "Linked children": {
+    "hi": "जुड़े बच्चों के रिकॉर्ड",
+    "mr": "जोडलेल्या बाळांच्या नोंदी"
+  },
+  "Location use needs explicit one-shot permission": {
+    "hi": "स्थान के उपयोग के लिए इस बार की स्पष्ट अनुमति चाहिए",
+    "mr": "स्थान वापरण्यासाठी या वेळची स्पष्ट परवानगी आवश्यक आहे"
+  },
+  "Log attempt": {
+    "hi": "संपर्क प्रयास दर्ज करें",
+    "mr": "संपर्काचा प्रयत्न नोंदवा"
+  },
+  "Log contact attempt": {
+    "hi": "संपर्क का प्रयास दर्ज करें",
+    "mr": "संपर्काचा प्रयत्न नोंदवा"
+  },
+  "Mark resolved": {
+    "hi": "समाधान हो गया चिह्नित करें",
+    "mr": "निराकरण झाले असे नोंदवा"
+  },
+  "Name: {{0}}": {
+    "hi": "नाम: {{0}}",
+    "mr": "नाव: {{0}}"
+  },
+  "Next step": {
+    "hi": "अगला कदम",
+    "mr": "पुढचे पाऊल"
+  },
+  "Next step date": {
+    "hi": "अगले कदम की तारीख",
+    "mr": "पुढच्या पावलाची तारीख"
+  },
+  "Next: {{0}}{{1}}": {
+    "hi": "अगला: {{0}}{{1}}",
+    "mr": "पुढील: {{0}}{{1}}"
+  },
+  "Next: {{4}}": {
+    "hi": "अगला: {{4}}",
+    "mr": "पुढील: {{4}}"
+  },
+  "Non-urgent clinician review": {
+    "hi": "बिना तत्कालता की चिकित्सकीय समीक्षा",
+    "mr": "तातडी नसलेले वैद्यकीय पुनरावलोकन"
+  },
+  "Obstetrics & gynaecology": {
+    "hi": "प्रसूति एवं स्त्री रोग",
+    "mr": "प्रसूती आणि स्त्रीरोग"
+  },
+  "One or more retained attachments are invalid.": {
+    "hi": "रखी गई एक या अधिक संलग्न फ़ाइलें सही नहीं हैं।",
+    "mr": "ठेवलेल्या एक किंवा अधिक जोडलेल्या फाइली वैध नाहीत."
+  },
+  "One record per ward, with counts calculated from its beds.": {
+    "hi": "हर वार्ड का एक रिकॉर्ड; गिनती उसके बेड से निकाली जाती है।",
+    "mr": "प्रत्येक वॉर्डची एक नोंद; संख्या त्यातील खाटांवरून मोजली जाते."
+  },
+  "Only facilities passing your required service, capability and accessibility checks are ranked. Your stated preferences earn points; unknown information earns zero. This is not a clinical safety, affordability or hospital-quality score.": {
+    "hi": "ज़रूरी सेवा, क्षमता और सुगमता की शर्तें पूरी करने वाले केंद्र ही क्रम में आते हैं। आपकी बताई पसंद के लिए अंक मिलते हैं; अज्ञात जानकारी के लिए शून्य अंक। यह चिकित्सकीय सुरक्षा, खर्च वहन करने या अस्पताल की गुणवत्ता का स्कोर नहीं है।",
+    "mr": "आवश्यक सेवा, क्षमता आणि सुलभतेच्या अटी पूर्ण करणारी केंद्रेच क्रमवारीत येतात. तुमच्या नमूद पसंतींना गुण मिळतात; अज्ञात माहितीस शून्य गुण. हे वैद्यकीय सुरक्षितता, खर्च परवडणे किंवा रुग्णालयाच्या गुणवत्तेचे गुणांकन नाही."
+  },
+  "Open {{9}}": {
+    "hi": "{{9}} खोलें",
+    "mr": "{{9}} उघडा"
+  },
+  "Open →": {
+    "hi": "खोलें →",
+    "mr": "उघडा →"
+  },
+  "Open ↗": {
+    "hi": "खोलें ↗",
+    "mr": "उघडा ↗"
+  },
+  "Organisation & clinical governance": {
+    "hi": "संगठन और चिकित्सकीय प्रशासन",
+    "mr": "संस्था आणि वैद्यकीय प्रशासन"
+  },
+  "PIN code (required for home visits)": {
+    "hi": "PIN कोड (घर की विज़िट के लिए ज़रूरी)",
+    "mr": "PIN कोड (घरभेटीसाठी आवश्यक)"
+  },
+  "Patient *": {
+    "hi": "मरीज़ *",
+    "mr": "रुग्ण *"
+  },
+  "Patient Information": {
+    "hi": "मरीज़ की जानकारी",
+    "mr": "रुग्णाची माहिती"
+  },
+  "Patient Instructions": {
+    "hi": "मरीज़ के लिए निर्देश",
+    "mr": "रुग्णासाठी सूचना"
+  },
+  "Patient Instructions:": {
+    "hi": "मरीज़ के लिए निर्देश:",
+    "mr": "रुग्णासाठी सूचना:"
+  },
+  "Patient Summary": {
+    "hi": "मरीज़ का सार",
+    "mr": "रुग्णाचा सारांश"
+  },
+  "Patient consent is required": {
+    "hi": "मरीज़ की सहमति चाहिए",
+    "mr": "रुग्णाची संमती आवश्यक आहे"
+  },
+  "Patient-reported reading": {
+    "hi": "मरीज़ द्वारा बताई रीडिंग",
+    "mr": "रुग्णाने सांगितलेले मोजमाप"
+  },
+  "Patient-shared care summary": {
+    "hi": "मरीज़ द्वारा साझा देखभाल सार",
+    "mr": "रुग्णाने सामायिक केलेला देखभाल सारांश"
+  },
+  "Plan {{0}}": {
+    "hi": "योजना {{0}}",
+    "mr": "योजना {{0}}"
+  },
+  "Planning limit reached. Try later.": {
+    "hi": "योजना की सीमा पूरी हुई। बाद में प्रयास करें।",
+    "mr": "नियोजनाची मर्यादा पूर्ण झाली. नंतर प्रयत्न करा."
+  },
+  "Please provide reasoning for this decision...": {
+    "hi": "इस निर्णय का कारण लिखें...",
+    "mr": "या निर्णयाचे कारण लिहा..."
+  },
+  "Please wait before another AI image request.": {
+    "hi": "अगले AI चित्र अनुरोध से पहले प्रतीक्षा करें।",
+    "mr": "पुढील AI प्रतिमा विनंतीपूर्वी थांबा."
+  },
+  "Provenance: {{4}}": {
+    "hi": "जानकारी का स्रोत: {{4}}",
+    "mr": "माहितीचा स्रोत: {{4}}"
+  },
+  "Provide entry details.": {
+    "hi": "प्रविष्टि का विवरण दें।",
+    "mr": "नोंदीचा तपशील द्या."
+  },
+  "Publish/file": {
+    "hi": "जारी करें / फ़ाइल करें",
+    "mr": "प्रसिद्ध करा / नोंदवा"
+  },
+  "Reason for Referral *": {
+    "hi": "रेफ़रल का कारण *",
+    "mr": "संदर्भपत्राचे कारण *"
+  },
+  "Recommended": {
+    "hi": "सुझाया गया",
+    "mr": "शिफारस केलेले"
+  },
+  "Record the reason for this change…": {
+    "hi": "इस बदलाव का कारण दर्ज करें…",
+    "mr": "या बदलाचे कारण नोंदवा…"
+  },
+  "Recorded care steps not found": {
+    "hi": "दर्ज देखभाल चरण नहीं मिले",
+    "mr": "नोंदवलेले देखभाल टप्पे सापडले नाहीत"
+  },
+  "Referral Information": {
+    "hi": "रेफ़रल की जानकारी",
+    "mr": "संदर्भपत्राची माहिती"
+  },
+  "Referral Type": {
+    "hi": "रेफ़रल का प्रकार",
+    "mr": "संदर्भपत्राचा प्रकार"
+  },
+  "Referral access is unavailable": {
+    "hi": "रेफ़रल देखने की अनुमति उपलब्ध नहीं",
+    "mr": "संदर्भपत्र पाहण्याची परवानगी उपलब्ध नाही"
+  },
+  "Referral access unavailable": {
+    "hi": "रेफ़रल देखने की अनुमति उपलब्ध नहीं",
+    "mr": "संदर्भपत्र पाहण्याची परवानगी उपलब्ध नाही"
+  },
+  "Release notes only for a confirmed visit that has taken place": {
+    "hi": "हो चुकी पुष्ट विज़िट के नोट ही जारी करें",
+    "mr": "पार पडलेल्या पुष्टी केलेल्या भेटीच्याच नोंदी द्या"
+  },
+  "Relevant clinical information...": {
+    "hi": "संबंधित चिकित्सकीय जानकारी...",
+    "mr": "संबंधित वैद्यकीय माहिती..."
+  },
+  "Reload the calculator version before saving.": {
+    "hi": "सहेजने से पहले कैलकुलेटर का संस्करण ताज़ा करें।",
+    "mr": "जतन करण्यापूर्वी गणकाची आवृत्ती अद्ययावत करा."
+  },
+  "Reload the context version before saving.": {
+    "hi": "सहेजने से पहले संदर्भ का संस्करण ताज़ा करें।",
+    "mr": "जतन करण्यापूर्वी संदर्भाची आवृत्ती अद्ययावत करा."
+  },
+  "Reload the plan before saving.": {
+    "hi": "सहेजने से पहले योजना दोबारा खोलें।",
+    "mr": "जतन करण्यापूर्वी योजना पुन्हा उघडा."
+  },
+  "Remove entry": {
+    "hi": "प्रविष्टि हटाएँ",
+    "mr": "नोंद काढा"
+  },
+  "Report document ID": {
+    "hi": "रिपोर्ट दस्तावेज़ ID",
+    "mr": "अहवाल दस्तऐवज ID"
+  },
+  "Request booking": {
+    "hi": "बुकिंग का अनुरोध करें",
+    "mr": "भेटीसाठी विनंती करा"
+  },
+  "Required directory checks passed: {{1}}": {
+    "hi": "डायरेक्टरी की आवश्यक जाँच पूरी: {{1}}",
+    "mr": "सूचीतील आवश्यक तपासण्या पूर्ण: {{1}}"
+  },
+  "Returned: {{1}}": {
+    "hi": "वापस किया: {{1}}",
+    "mr": "परत केले: {{1}}"
+  },
+  "Review type": {
+    "hi": "समीक्षा का प्रकार",
+    "mr": "पुनरावलोकनाचा प्रकार"
+  },
+  "Room {{0}}": {
+    "hi": "कमरा {{0}}",
+    "mr": "खोली {{0}}"
+  },
+  "SYNTHETIC OUTREACH ZONE": {
+    "hi": "काल्पनिक संपर्क क्षेत्र",
+    "mr": "काल्पनिक संपर्क क्षेत्र"
+  },
+  "Save bed state": {
+    "hi": "बेड की स्थिति सहेजें",
+    "mr": "खाटेची स्थिती जतन करा"
+  },
+  "Save confirmation": {
+    "hi": "पुष्टि सहेजें",
+    "mr": "पुष्टी जतन करा"
+  },
+  "Save edit": {
+    "hi": "बदलाव सहेजें",
+    "mr": "बदल जतन करा"
+  },
+  "Save facility": {
+    "hi": "केंद्र सहेजें",
+    "mr": "केंद्र जतन करा"
+  },
+  "Save follow-up": {
+    "hi": "फॉलो-अप सहेजें",
+    "mr": "पाठपुरावा जतन करा"
+  },
+  "Save private screening": {
+    "hi": "निजी जाँच सहेजें",
+    "mr": "खासगी तपासणी जतन करा"
+  },
+  "Save privately": {
+    "hi": "निजी रूप से सहेजें",
+    "mr": "खासगी जतन करा"
+  },
+  "Save {{0}}": {
+    "hi": "{{0}} सहेजें",
+    "mr": "{{0}} जतन करा"
+  },
+  "Saved {{0}}": {
+    "hi": "सहेजा गया {{0}}",
+    "mr": "जतन झाले {{0}}"
+  },
+  "Saved {{8}}": {
+    "hi": "सहेजा गया {{8}}",
+    "mr": "जतन झाले {{8}}"
+  },
+  "Search bed ID or admitted mother…": {
+    "hi": "बेड ID या भर्ती माँ खोजें…",
+    "mr": "खाटेचा ID किंवा दाखल माता शोधा…"
+  },
+  "Search mother name or ID…": {
+    "hi": "माँ का नाम या ID खोजें…",
+    "mr": "मातेचे नाव किंवा ID शोधा…"
+  },
+  "Search mothers": {
+    "hi": "माताओं को खोजें",
+    "mr": "माता शोधा"
+  },
+  "Search registry": {
+    "hi": "रजिस्टर में खोजें",
+    "mr": "नोंदवहीत शोधा"
+  },
+  "See who can help, what they can view and when their access ends.": {
+    "hi": "देखें कौन मदद कर सकता है, क्या देख सकता है और अनुमति कब समाप्त होती है।",
+    "mr": "कोण मदत करू शकते, कोणती माहिती पाहू शकते आणि परवानगी कधी संपते ते पाहा."
+  },
+  "Select / none": {
+    "hi": "चुनें / कोई नहीं",
+    "mr": "निवडा / काहीही नाही"
+  },
+  "Select a care need.": {
+    "hi": "देखभाल की ज़रूरत चुनें।",
+    "mr": "देखभालीची गरज निवडा."
+  },
+  "Select a child with recorded measurements.": {
+    "hi": "दर्ज माप वाला बच्चा चुनें।",
+    "mr": "मोजमापे नोंदवलेले बाळ निवडा."
+  },
+  "Select a coloured area to inspect its recorded care gaps": {
+    "hi": "दर्ज देखभाल की कमियाँ देखने के लिए रंगीन क्षेत्र चुनें",
+    "mr": "नोंदवलेल्या देखभाल उणिवा पाहण्यासाठी रंगीत भाग निवडा"
+  },
+  "Select a doctor": {
+    "hi": "डॉक्टर चुनें",
+    "mr": "डॉक्टर निवडा"
+  },
+  "Select a doctor and date": {
+    "hi": "डॉक्टर और तारीख चुनें",
+    "mr": "डॉक्टर आणि तारीख निवडा"
+  },
+  "Select a higher-tier facility to inspect NICU, PICU and HDU capacity.": {
+    "hi": "NICU, PICU और HDU की क्षमता देखने के लिए उच्च स्तरीय केंद्र चुनें।",
+    "mr": "NICU, PICU आणि HDU क्षमता पाहण्यासाठी उच्चस्तरीय केंद्र निवडा."
+  },
+  "Select a patient": {
+    "hi": "मरीज़ चुनें",
+    "mr": "रुग्ण निवडा"
+  },
+  "Select a patient, then review their tests": {
+    "hi": "मरीज़ चुनकर उनकी जाँचों की समीक्षा करें",
+    "mr": "रुग्ण निवडून त्यांच्या तपासण्यांचे पुनरावलोकन करा"
+  },
+  "Select a patient.": {
+    "hi": "मरीज़ चुनें।",
+    "mr": "रुग्ण निवडा."
+  },
+  "Select a supported care need.": {
+    "hi": "उपलब्ध देखभाल ज़रूरत चुनें।",
+    "mr": "उपलब्ध देखभाल गरज निवडा."
+  },
+  "Select a supported facility type.": {
+    "hi": "उपलब्ध केंद्र का प्रकार चुनें।",
+    "mr": "उपलब्ध केंद्राचा प्रकार निवडा."
+  },
+  "Select a supported language preference.": {
+    "hi": "उपलब्ध भाषा की पसंद चुनें।",
+    "mr": "उपलब्ध भाषेची पसंती निवडा."
+  },
+  "Select a valid preferred date.": {
+    "hi": "पसंद की सही तारीख चुनें।",
+    "mr": "पसंतीची वैध तारीख निवडा."
+  },
+  "Select a visible zone.": {
+    "hi": "दिख रहा क्षेत्र चुनें।",
+    "mr": "दिसणारा भाग निवडा."
+  },
+  "Select a worker to understand their current field workload.": {
+    "hi": "वर्तमान क्षेत्रीय काम देखने के लिए कार्यकर्ता चुनें।",
+    "mr": "सध्याचे क्षेत्रीय काम पाहण्यासाठी कर्मचारी निवडा."
+  },
+  "Select a workspace view.": {
+    "hi": "कार्यक्षेत्र का दृश्य चुनें।",
+    "mr": "कार्यक्षेत्राचे दृश्य निवडा."
+  },
+  "Select an appointment to see its details.": {
+    "hi": "विवरण के लिए अपॉइंटमेंट चुनें।",
+    "mr": "तपशील पाहण्यासाठी भेट निवडा."
+  },
+  "Select and copy this draft.": {
+    "hi": "यह मसौदा चुनकर कॉपी करें।",
+    "mr": "हा मसुदा निवडून प्रत करा."
+  },
+  "Select at least one beneficiary update.": {
+    "hi": "लाभार्थी का कम से कम एक अपडेट चुनें।",
+    "mr": "लाभार्थ्याचे किमान एक अद्यतन निवडा."
+  },
+  "Select at least one field.": {
+    "hi": "कम से कम एक जानकारी का स्थान चुनें।",
+    "mr": "किमान एक माहितीचे क्षेत्र निवडा."
+  },
+  "Select at least one patient in the table.": {
+    "hi": "तालिका में कम से कम एक मरीज़ चुनें।",
+    "mr": "तक्त्यात किमान एक रुग्ण निवडा."
+  },
+  "Select available fields, choose an expiry, and confirm sharing.": {
+    "hi": "उपलब्ध जानकारी और समाप्ति चुनकर साझाकरण की पुष्टि करें।",
+    "mr": "उपलब्ध माहिती आणि मुदत निवडून सामायिकरणाची पुष्टी करा."
+  },
+  "Select baby for vaccine tracker": {
+    "hi": "टीके की जानकारी के लिए बच्चा चुनें",
+    "mr": "लसींच्या माहितीसाठी बाळ निवडा"
+  },
+  "Select children": {
+    "hi": "बच्चे चुनें",
+    "mr": "बाळे निवडा"
+  },
+  "Select each child whose growth may be shared": {
+    "hi": "हर वह बच्चा चुनें जिसकी वृद्धि साझा करनी है",
+    "mr": "वाढीची माहिती सामायिक करायची अशी प्रत्येक बाळाची नोंद निवडा"
+  },
+  "Select facility": {
+    "hi": "केंद्र चुनें",
+    "mr": "केंद्र निवडा"
+  },
+  "Select hospital": {
+    "hi": "अस्पताल चुनें",
+    "mr": "रुग्णालय निवडा"
+  },
+  "Select one to view details": {
+    "hi": "विवरण देखने के लिए एक चुनें",
+    "mr": "तपशील पाहण्यासाठी एक निवडा"
+  },
+  "Select only available fields.": {
+    "hi": "केवल उपलब्ध जानकारी चुनें।",
+    "mr": "फक्त उपलब्ध माहिती निवडा."
+  },
+  "Select patient...": {
+    "hi": "मरीज़ चुनें...",
+    "mr": "रुग्ण निवडा..."
+  },
+  "Select the administrator role to change this synthetic facility.": {
+    "hi": "इस काल्पनिक केंद्र को बदलने के लिए प्रशासक की भूमिका चुनें।",
+    "mr": "या काल्पनिक केंद्रात बदल करण्यासाठी प्रशासकाची भूमिका निवडा."
+  },
+  "Select the answer closest to how you have felt over the past seven days.": {
+    "hi": "पिछले सात दिनों की अपनी भावना से सबसे मिलता जवाब चुनें।",
+    "mr": "मागील सात दिवसांत तुम्हाला कसे वाटले त्याच्याशी सर्वाधिक जुळणारे उत्तर निवडा."
+  },
+  "Select type": {
+    "hi": "प्रकार चुनें",
+    "mr": "प्रकार निवडा"
+  },
+  "Select type...": {
+    "hi": "प्रकार चुनें...",
+    "mr": "प्रकार निवडा..."
+  },
+  "Select zone for details": {
+    "hi": "विवरण के लिए क्षेत्र चुनें",
+    "mr": "तपशील पाहण्यासाठी भाग निवडा"
+  },
+  "Selected doctor is not available": {
+    "hi": "चुना हुआ डॉक्टर उपलब्ध नहीं है",
+    "mr": "निवडलेले डॉक्टर उपलब्ध नाहीत"
+  },
+  "Send message and resolve": {
+    "hi": "संदेश भेजकर समाधान पूरा करें",
+    "mr": "संदेश पाठवून निराकरण करा"
+  },
+  "Send private invitation": {
+    "hi": "निजी निमंत्रण भेजें",
+    "mr": "खासगी निमंत्रण पाठवा"
+  },
+  "Send review request": {
+    "hi": "समीक्षा का अनुरोध भेजें",
+    "mr": "पुनरावलोकनाची विनंती पाठवा"
+  },
+  "Shift handovers": {
+    "hi": "शिफ्ट हैंडओवर",
+    "mr": "शिफ्ट हस्तांतरण"
+  },
+  "Sign in to your account.": {
+    "hi": "अपने खाते में साइन इन करें।",
+    "mr": "तुमच्या खात्यात साइन इन करा."
+  },
+  "Sign in to your existing account, then accept the invitation": {
+    "hi": "पहले मौजूदा खाते में साइन इन करें, फिर निमंत्रण स्वीकार करें",
+    "mr": "आधी विद्यमान खात्यात साइन इन करा, नंतर निमंत्रण स्वीकारा"
+  },
+  "Something is in the way": {
+    "hi": "कुछ रुकावट है",
+    "mr": "काहीतरी अडथळा आहे"
+  },
+  "Source: {{3}} · Confidence: {{4}}": {
+    "hi": "स्रोत: {{3}} · विश्वसनीयता: {{4}}",
+    "mr": "स्रोत: {{3}} · खात्रीची पातळी: {{4}}"
+  },
+  "Specialty or clinician": {
+    "hi": "विशेषता या चिकित्सक",
+    "mr": "विशेषता किंवा डॉक्टर"
+  },
+  "State or union territory": {
+    "hi": "राज्य या केंद्रशासित प्रदेश",
+    "mr": "राज्य किंवा केंद्रशासित प्रदेश"
+  },
+  "Status: {{2}} · waiting {{3}} min": {
+    "hi": "स्थिति: {{2}} · प्रतीक्षा {{3}} मिनट",
+    "mr": "स्थिती: {{2}} · प्रतीक्षा {{3}} मिनिटे"
+  },
+  "Submit the library form.": {
+    "hi": "संग्रह का फ़ॉर्म जमा करें।",
+    "mr": "संग्रहाचा अर्ज सादर करा."
+  },
+  "Take the 10-question EPDS": {
+    "hi": "10 प्रश्नों वाला EPDS भरें",
+    "mr": "10 प्रश्नांचे EPDS भरा"
+  },
+  "That time overlaps a DaiCare booking": {
+    "hi": "यह समय दाईकेयर की बुकिंग से टकराता है",
+    "mr": "ही वेळ दाईकेअरच्या भेटीशी जुळते"
+  },
+  "The AI response could not be verified. Review the original image manually.": {
+    "hi": "AI का जवाब सत्यापित नहीं हुआ। मूल चित्र की स्वयं समीक्षा करें।",
+    "mr": "AI चे उत्तर पडताळता आले नाही. मूळ प्रतिमेचे स्वतः पुनरावलोकन करा."
+  },
+  "The clinic must first confirm this appointment": {
+    "hi": "पहले क्लिनिक को इस अपॉइंटमेंट की पुष्टि करनी होगी",
+    "mr": "आधी दवाखान्याने या भेटीची पुष्टी करणे आवश्यक आहे"
+  },
+  "The entry or attachments could not be read.": {
+    "hi": "प्रविष्टि या संलग्न फ़ाइलें पढ़ी नहीं जा सकीं।",
+    "mr": "नोंद किंवा जोडलेल्या फाइली वाचता आल्या नाहीत."
+  },
+  "The image format does not match its contents.": {
+    "hi": "चित्र का प्रारूप उसकी सामग्री से मेल नहीं खाता।",
+    "mr": "प्रतिमेचा प्रकार तिच्या मजकुराशी जुळत नाही."
+  },
+  "The library is handling other uploads. Try again shortly.": {
+    "hi": "संग्रह में अन्य अपलोड चल रहे हैं। थोड़ी देर बाद प्रयास करें।",
+    "mr": "संग्रहात इतर अपलोड सुरू आहेत. थोड्या वेळाने प्रयत्न करा."
+  },
+  "Their email address": {
+    "hi": "उनका ईमेल पता",
+    "mr": "त्यांचा ईमेल पत्ता"
+  },
+  "This context changed. Reload it before saving your edits.": {
+    "hi": "यह संदर्भ बदल गया है। बदलाव सहेजने से पहले दोबारा खोलें।",
+    "mr": "हा संदर्भ बदलला आहे. बदल जतन करण्यापूर्वी पुन्हा उघडा."
+  },
+  "This delivery plan is not shared with this verified care-team doctor.": {
+    "hi": "यह प्रसव योजना इस सत्यापित देखभाल डॉक्टर से साझा नहीं है।",
+    "mr": "ही प्रसूती योजना या पडताळलेल्या देखभाल डॉक्टरांशी सामायिक नाही."
+  },
+  "This doctor’s daily request capacity is full": {
+    "hi": "इस डॉक्टर की रोज़ की अनुरोध सीमा पूरी है",
+    "mr": "या डॉक्टरांची रोजची विनंती मर्यादा पूर्ण झाली आहे"
+  },
+  "This entry changed. Refresh the page and reopen it.": {
+    "hi": "यह प्रविष्टि बदली है। पृष्ठ ताज़ा करके दोबारा खोलें।",
+    "mr": "ही नोंद बदलली आहे. पान अद्ययावत करून पुन्हा उघडा."
+  },
+  "This entry changed. Refresh the page before deleting it.": {
+    "hi": "यह प्रविष्टि बदली है। हटाने से पहले पृष्ठ ताज़ा करें।",
+    "mr": "ही नोंद बदलली आहे. काढण्यापूर्वी पान अद्ययावत करा."
+  },
+  "This item could not be found.": {
+    "hi": "यह मद नहीं मिली।",
+    "mr": "ही बाब सापडली नाही."
+  },
+  "This plan changed. Reload before saving; your draft is still open.": {
+    "hi": "योजना बदल गई है। सहेजने से पहले दोबारा खोलें; आपका मसौदा सुरक्षित है।",
+    "mr": "योजना बदलली आहे. जतन करण्यापूर्वी पुन्हा उघडा; तुमचा मसुदा सुरक्षित आहे."
+  },
+  "This pregnancy context is not shared with this clinician.": {
+    "hi": "गर्भावस्था का यह संदर्भ इस चिकित्सक से साझा नहीं है।",
+    "mr": "हा गर्भावस्था संदर्भ या डॉक्टरांशी सामायिक नाही."
+  },
+  "This record is not shared with this verified care-team clinician.": {
+    "hi": "यह रिकॉर्ड इस सत्यापित देखभाल चिकित्सक से साझा नहीं है।",
+    "mr": "ही नोंद या पडताळलेल्या देखभाल डॉक्टरांशी सामायिक नाही."
+  },
+  "This request window is already taken. Please choose another.": {
+    "hi": "यह समय पहले ही लिया जा चुका है। दूसरा समय चुनें।",
+    "mr": "ही वेळ आधीच घेतली आहे. दुसरी वेळ निवडा."
+  },
+  "This time does not match the unit’s configured OPD day or request window": {
+    "hi": "यह समय यूनिट के तय OPD दिन या अनुरोध अवधि से मेल नहीं खाता",
+    "mr": "ही वेळ युनिटच्या ठरलेल्या OPD दिवशी किंवा विनंती कालावधीत बसत नाही"
+  },
+  "Token {{0}}": {
+    "hi": "टोकन {{0}}",
+    "mr": "टोकन {{0}}"
+  },
+  "Too many plan entries.": {
+    "hi": "योजना में बहुत ज़्यादा प्रविष्टियाँ हैं।",
+    "mr": "योजनेत खूप नोंदी आहेत."
+  },
+  "Track how you feel, take the Edinburgh Postnatal Depression Scale (EPDS), or ask a clinician for support.": {
+    "hi": "मन की स्थिति दर्ज करें, EPDS चेक-इन भरें या चिकित्सक से सहायता माँगें।",
+    "mr": "मनःस्थिती नोंदवा, EPDS तपासणी भरा किंवा डॉक्टरांकडे मदत मागा."
+  },
+  "Transition history ({{9}})": {
+    "hi": "स्थिति बदलने का इतिहास ({{9}})",
+    "mr": "स्थिती बदलांचा इतिहास ({{9}})"
+  },
+  "UNIT {{0}}": {
+    "hi": "यूनिट {{0}}",
+    "mr": "युनिट {{0}}"
+  },
+  "Undo": {
+    "hi": "वापस करें",
+    "mr": "पूर्ववत करा"
+  },
+  "Unit {{0}}": {
+    "hi": "यूनिट {{0}}",
+    "mr": "युनिट {{0}}"
+  },
+  "Until {{0}}": {
+    "hi": "{{0}} तक",
+    "mr": "{{0}} पर्यंत"
+  },
+  "Until {{1}}": {
+    "hi": "{{1}} तक",
+    "mr": "{{1}} पर्यंत"
+  },
+  "Up to 1,000 characters. Include only what is relevant.": {
+    "hi": "अधिकतम 1,000 अक्षर। केवल संबंधित जानकारी लिखें।",
+    "mr": "कमाल 1,000 अक्षरे. फक्त संबंधित माहिती लिहा."
+  },
+  "Update Care Timeline": {
+    "hi": "देखभाल टाइमलाइन अपडेट करें",
+    "mr": "देखभाल कालरेषा अद्ययावत करा"
+  },
+  "Update bed state": {
+    "hi": "बेड की स्थिति अपडेट करें",
+    "mr": "खाटेची स्थिती अद्ययावत करा"
+  },
+  "Update emergency contact": {
+    "hi": "आपातकालीन संपर्क बदलें",
+    "mr": "आपत्कालीन संपर्क बदला"
+  },
+  "Update identifier already used": {
+    "hi": "अपडेट की पहचान पहले इस्तेमाल हुई है",
+    "mr": "अद्यतनाचा ओळख क्रमांक आधीच वापरला आहे"
+  },
+  "Update not synchronised": {
+    "hi": "अपडेट सिंक नहीं हुआ",
+    "mr": "अद्यतन समक्रमित झाले नाही"
+  },
+  "Update status": {
+    "hi": "स्थिति अपडेट करें",
+    "mr": "स्थिती अद्ययावत करा"
+  },
+  "Update transport plan": {
+    "hi": "यातायात योजना अपडेट करें",
+    "mr": "प्रवासाची योजना अद्ययावत करा"
+  },
+  "Uploaded {{4}} · {{5}} · SHA-256 {{6}}": {
+    "hi": "अपलोड {{4}} · {{5}} · SHA-256 {{6}}",
+    "mr": "अपलोड {{4}} · {{5}} · SHA-256 {{6}}"
+  },
+  "Urgency Notes": {
+    "hi": "तत्कालता के नोट",
+    "mr": "तातडीची नोंद"
+  },
+  "Urgency Notes:": {
+    "hi": "तत्कालता के नोट:",
+    "mr": "तातडीची नोंद:"
+  },
+  "Use a valid time.": {
+    "hi": "सही समय भरें।",
+    "mr": "वैध वेळ भरा."
+  },
+  "Use completed weeks from 0 to 42.": {
+    "hi": "0 से 42 तक पूरे सप्ताह भरें।",
+    "mr": "0 ते 42 पर्यंत पूर्ण आठवडे भरा."
+  },
+  "Use your postnatal care contacts for recovery concerns.": {
+    "hi": "रिकवरी की चिंताओं के लिए प्रसव के बाद की देखभाल के संपर्कों का उपयोग करें।",
+    "mr": "पुनर्प्राप्तीच्या चिंतांसाठी प्रसूतीनंतरच्या देखभालीचे संपर्क वापरा."
+  },
+  "Useful": {
+    "hi": "उपयोगी",
+    "mr": "उपयुक्त"
+  },
+  "User {{0}}": {
+    "hi": "उपयोगकर्ता {{0}}",
+    "mr": "वापरकर्ता {{0}}"
+  },
+  "Verified at: {{0}}": {
+    "hi": "सत्यापन का समय: {{0}}",
+    "mr": "पडताळणीची वेळ: {{0}}"
+  },
+  "Verify request": {
+    "hi": "अनुरोध सत्यापित करें",
+    "mr": "विनंती पडताळा"
+  },
+  "View edit history": {
+    "hi": "बदलाव का इतिहास देखें",
+    "mr": "बदलांचा इतिहास पाहा"
+  },
+  "Visit access unavailable": {
+    "hi": "विज़िट देखने की अनुमति उपलब्ध नहीं",
+    "mr": "भेट पाहण्याची परवानगी उपलब्ध नाही"
+  },
+  "Ward capacity": {
+    "hi": "वार्ड की क्षमता",
+    "mr": "वॉर्डची क्षमता"
+  },
+  "Was:": {
+    "hi": "पहले:",
+    "mr": "पूर्वी:"
+  },
+  "We couldn’t load the hospital dataset.": {
+    "hi": "अस्पताल की जानकारी लोड नहीं हो सकी।",
+    "mr": "रुग्णालयाची माहिती लोड करता आली नाही."
+  },
+  "What happened?": {
+    "hi": "क्या हुआ?",
+    "mr": "काय घडले?"
+  },
+  "What is making this hard? Your care team will see this and can help.": {
+    "hi": "किस वजह से मुश्किल हो रही है? आपकी देखभाल टीम यह देखेगी और मदद कर सकती है।",
+    "mr": "कशामुळे कठीण होत आहे? तुमचे देखभाल पथक हे पाहील आणि मदत करू शकेल."
+  },
+  "What kind of help do they need?": {
+    "hi": "उन्हें किस तरह की मदद चाहिए?",
+    "mr": "त्यांना कोणत्या प्रकारची मदत हवी?"
+  },
+  "What would you like your clinician to review? Include a relevant record or date.": {
+    "hi": "आप चिकित्सक से किसकी समीक्षा चाहते हैं? संबंधित रिकॉर्ड या तारीख लिखें।",
+    "mr": "डॉक्टरांनी कशाचे पुनरावलोकन करावे असे तुम्हाला वाटते? संबंधित नोंद किंवा तारीख द्या."
+  },
+  "Who would you like to invite?": {
+    "hi": "आप किसे आमंत्रित करना चाहते हैं?",
+    "mr": "तुम्हाला कोणाला निमंत्रित करायचे आहे?"
+  },
+  "Why this facility appears": {
+    "hi": "यह केंद्र क्यों दिख रहा है",
+    "mr": "हे केंद्र का दिसते"
+  },
+  "Write a note before releasing it": {
+    "hi": "जारी करने से पहले नोट लिखें",
+    "mr": "देण्यापूर्वी नोंद लिहा"
+  },
+  "Your care team has tried to reach you{{0}}.": {
+    "hi": "आपकी देखभाल टीम ने आपसे संपर्क करने की कोशिश की{{0}}।",
+    "mr": "तुमच्या देखभाल पथकाने तुमच्याशी संपर्क करण्याचा प्रयत्न केला{{0}}."
+  },
+  "Your library is full. Remove an entry to make space.": {
+    "hi": "संग्रह भर गया है। जगह के लिए एक प्रविष्टि हटाएँ।",
+    "mr": "संग्रह भरला आहे. जागेसाठी एखादी नोंद काढा."
+  },
+  "Your library storage is full. Remove an attachment before adding another.": {
+    "hi": "संग्रह की जगह भर गई है। नई फ़ाइल जोड़ने से पहले एक संलग्न फ़ाइल हटाएँ।",
+    "mr": "संग्रहाची जागा भरली आहे. नवीन फाइल जोडण्यापूर्वी एखादी जोडलेली फाइल काढा."
+  },
+  "baby-{{0}}-{{1}}": {
+    "hi": "baby-{{0}}-{{1}}",
+    "mr": "baby-{{0}}-{{1}}"
+  },
+  "birth-{{0}}": {
+    "hi": "birth-{{0}}",
+    "mr": "birth-{{0}}"
+  },
+  "card{{0}}": {
+    "hi": "card{{0}}",
+    "mr": "card{{0}}"
+  },
+  "child-{{0}}": {
+    "hi": "child-{{0}}",
+    "mr": "child-{{0}}"
+  },
+  "e.g. Psychiatry": {
+    "hi": "जैसे, मनोचिकित्सा",
+    "mr": "उदाहरणार्थ, मानसोपचार"
+  },
+  "e.g., Gestational diabetes": {
+    "hi": "जैसे, गर्भावस्था का मधुमेह",
+    "mr": "उदाहरणार्थ, गर्भावस्थेतील मधुमेह"
+  },
+  "flag-{{0}}": {
+    "hi": "flag-{{0}}",
+    "mr": "flag-{{0}}"
+  },
+  "function": {
+    "hi": "function",
+    "mr": "function"
+  },
+  "near {{0}}": {
+    "hi": "{{0}} के पास",
+    "mr": "{{0}} जवळ"
+  },
+  "operational only": {
+    "hi": "केवल संचालन की जानकारी",
+    "mr": "फक्त कामकाजाची माहिती"
+  },
+  "panel-{{0}}": {
+    "hi": "panel-{{0}}",
+    "mr": "panel-{{0}}"
+  },
+  "pill {{0}}": {
+    "hi": "गोली {{0}}",
+    "mr": "गोळी {{0}}"
+  },
+  "post-{{0}}": {
+    "hi": "post-{{0}}",
+    "mr": "post-{{0}}"
+  },
+  "preference match": {
+    "hi": "पसंद से मेल",
+    "mr": "पसंतीशी जुळते"
+  },
+  "ready-{{0}}": {
+    "hi": "ready-{{0}}",
+    "mr": "ready-{{0}}"
+  },
+  "token-{{0}}": {
+    "hi": "token-{{0}}",
+    "mr": "token-{{0}}"
+  },
+  "vault-{{0}}": {
+    "hi": "vault-{{0}}",
+    "mr": "vault-{{0}}"
+  },
+  "with Dr.": {
+    "hi": "डॉ. के साथ",
+    "mr": "डॉ. सोबत"
+  },
+  "with access": {
+    "hi": "देखने की अनुमति के साथ",
+    "mr": "पाहण्याच्या परवानगीसह"
+  },
+  "{{0}} available": {
+    "hi": "{{0}} उपलब्ध",
+    "mr": "{{0}} उपलब्ध"
+  },
+  "{{0}} edit(s)": {
+    "hi": "{{0}} बदलाव",
+    "mr": "{{0}} बदल"
+  },
+  "{{0}} gaps": {
+    "hi": "{{0}} देखभाल की कमियाँ",
+    "mr": "{{0}} देखभालीतील उणिवा"
+  },
+  "{{0}} given": {
+    "hi": "{{0}} को दिया गया",
+    "mr": "{{0}} रोजी दिले"
+  },
+  "{{0}} kicks": {
+    "hi": "{{0}} हलचल",
+    "mr": "{{0}} हालचाली"
+  },
+  "{{0}} records · page {{1}} of {{2}}": {
+    "hi": "{{0}} रिकॉर्ड · पृष्ठ {{1}} / {{2}}",
+    "mr": "{{0}} नोंदी · पान {{1}} / {{2}}"
+  },
+  "{{0}} records →": {
+    "hi": "{{0}} रिकॉर्ड →",
+    "mr": "{{0}} नोंदी →"
+  },
+  "{{0}} suggestion: {{1}}": {
+    "hi": "{{0}} सुझाव: {{1}}",
+    "mr": "{{0}} सूचना: {{1}}"
+  },
+  "{{0}} wards": {
+    "hi": "{{0}} वार्ड",
+    "mr": "{{0}} वॉर्ड"
+  },
+  "{{0}}.json": {
+    "hi": "{{0}}.json",
+    "mr": "{{0}}.json"
+  },
+  "{{0}}/{{1}} mmHg": {
+    "hi": "{{0}}/{{1}} mmHg",
+    "mr": "{{0}}/{{1}} mmHg"
+  },
+  "{{0}}/{{1}} mmHg{{2}}{{3}}": {
+    "hi": "{{0}}/{{1}} mmHg{{2}}{{3}}",
+    "mr": "{{0}}/{{1}} mmHg{{2}}{{3}}"
+  },
+  "{{0}}: {{1}} / {{2}} points": {
+    "hi": "{{0}}: {{1}} / {{2}} अंक",
+    "mr": "{{0}}: {{1}} / {{2}} गुण"
+  },
+  "{{0}}{{0}} Twins": {
+    "hi": "{{0}}{{0}} जुड़वाँ",
+    "mr": "{{0}}{{0}} जुळे"
+  },
+  "{{0}}{{1}}/sbar": {
+    "hi": "{{0}}{{1}}/sbar",
+    "mr": "{{0}}{{1}}/sbar"
+  },
+  "{{1}} patients · {{2}} open gaps · {{3}} outreach attempts": {
+    "hi": "{{1}} मरीज़ · {{2}} देखभाल की कमियाँ · {{3}} संपर्क प्रयास",
+    "mr": "{{1}} रुग्ण · {{2}} देखभालीतील उणिवा · {{3}} संपर्क प्रयत्न"
+  },
+  "{{1}} · day {{2}} · documents: {{3}}": {
+    "hi": "{{1}} · दिन {{2}} · दस्तावेज़: {{3}}",
+    "mr": "{{1}} · दिवस {{2}} · कागदपत्रे: {{3}}"
+  },
+  "{{1}} · owner: {{2}}": {
+    "hi": "{{1}} · ज़िम्मेदार: {{2}}",
+    "mr": "{{1}} · जबाबदार: {{2}}"
+  },
+  "{{1}} · {{2}} · reviewed {{3}}": {
+    "hi": "{{1}} · {{2}} · समीक्षा {{3}}",
+    "mr": "{{1}} · {{2}} · पुनरावलोकन {{3}}"
+  },
+  "{{2}} days overdue. Staff must approve; this is not an automatic booking.": {
+    "hi": "{{2}} दिन की देरी। स्टाफ की मंजूरी चाहिए; यह अपने आप बुकिंग नहीं है।",
+    "mr": "{{2}} दिवस उशीर. कर्मचाऱ्यांची मंजुरी आवश्यक; ही आपोआप झालेली भेट नोंदणी नाही."
+  },
+  "{{2}} occupied": {
+    "hi": "{{2}} भरे हुए",
+    "mr": "{{2}} भरलेल्या"
+  },
+  "{{2}} recorded rate": {
+    "hi": "{{2}} दर्ज दर",
+    "mr": "{{2}} नोंदवलेला दर"
+  },
+  "{{2}} · recorded days only": {
+    "hi": "{{2}} · केवल दर्ज दिन",
+    "mr": "{{2}} · फक्त नोंदवलेले दिवस"
+  },
+  "{{2}} · {{3}} beds": {
+    "hi": "{{2}} · {{3}} बेड",
+    "mr": "{{2}} · {{3}} खाटा"
+  },
+  "{{2}}. This is a screening result.": {
+    "hi": "{{2}}। यह जाँच का परिणाम है।",
+    "mr": "{{2}}. हा तपासणीचा निकाल आहे."
+  },
+  "{{3}} beds": {
+    "hi": "{{3}} बेड",
+    "mr": "{{3}} खाटा"
+  },
+  "{{3}} registered people": {
+    "hi": "{{3}} पंजीकृत लोग",
+    "mr": "{{3}} नोंदणीकृत व्यक्ती"
+  },
+  "{{4}} beds available": {
+    "hi": "{{4}} उपलब्ध बेड",
+    "mr": "{{4}} उपलब्ध खाटा"
+  },
+  "{{4}} · Owner: {{5}}": {
+    "hi": "{{4}} · ज़िम्मेदार: {{5}}",
+    "mr": "{{4}} · जबाबदार: {{5}}"
+  },
+  "{{5}} Referral": {
+    "hi": "{{5}} रेफ़रल",
+    "mr": "{{5}} संदर्भपत्र"
+  },
+  "{{5}} available": {
+    "hi": "{{5}} उपलब्ध",
+    "mr": "{{5}} उपलब्ध"
+  },
+  "{{5}} functional ventilators": {
+    "hi": "{{5}} चालू वेंटिलेटर",
+    "mr": "{{5}} कार्यरत व्हेंटिलेटर"
+  },
+  "{{6}} maintenance": {
+    "hi": "{{6}} रखरखाव में",
+    "mr": "{{6}} देखभालीसाठी बंद"
+  },
+  "{{9}} Baby": {
+    "hi": "{{9}} बच्चा",
+    "mr": "{{9}} बाळ"
+  },
+  "· Specialist: {{0}}": {
+    "hi": "· विशेषज्ञ: {{0}}",
+    "mr": "· तज्ज्ञ: {{0}}"
+  },
+  "Chat with DaiHealth": {
+    "hi": "दाईहेल्थ से बात करें",
+    "mr": "दाईहेल्थशी बोला"
+  },
+  "{{0}} recorded steps": {
+    "hi": "{{0}} दर्ज चरण",
+    "mr": "नोंदवलेले {{0}} टप्पे"
+  },
+  "{{0}} recorded step": {
+    "hi": "{{0}} दर्ज चरण",
+    "mr": "नोंदवलेला {{0}} टप्पा"
+  },
+  "FAQs use prepared answers; reminders, eligibility and default care ordering use deterministic rules.": {
+    "hi": "आम सवालों के जवाब पहले से तैयार हैं। रिमाइंडर, पात्रता और देखभाल का सामान्य क्रम तय नियमों पर आधारित हैं।",
+    "mr": "नेहमीच्या प्रश्नांची उत्तरे आधीच तयार आहेत. आठवणी, पात्रता आणि देखभालीचा सामान्य क्रम ठरलेल्या नियमांवर आधारित आहेत."
+  },
+  "Ask your care team whether any blood-support planning is needed for you.": {
+    "hi": "देखभाल टीम से पूछें कि आपके लिए रक्त सहायता की तैयारी ज़रूरी है या नहीं।",
+    "mr": "तुमच्यासाठी रक्तसहाय्याचे नियोजन आवश्यक आहे का हे देखभाल पथकाला विचारा."
+  },
+  "Ultrasound history could not be loaded. Please try again.": {
+    "hi": "अल्ट्रासाउंड का इतिहास लोड नहीं हुआ। कृपया फिर कोशिश करें।",
+    "mr": "अल्ट्रासाऊंडचा इतिहास लोड झाला नाही. कृपया पुन्हा प्रयत्न करा."
+  },
+  "Exploring now: Uterus": {
+    "hi": "अभी देख रहे हैं: गर्भाशय",
+    "mr": "आता पाहत आहात: गर्भाशय"
+  },
+  "Exploring now: Placenta": {
+    "hi": "अभी देख रहे हैं: प्लेसेंटा",
+    "mr": "आता पाहत आहात: वार"
+  },
+  "Animation file contains no clip": {
+    "hi": "एनीमेशन फ़ाइल में कोई क्लिप नहीं है",
+    "mr": "अॅनिमेशन फाइलमध्ये क्लिप नाही"
+  },
+  "Educational uterus anatomy; drag to rotate, pinch to zoom": {
+    "hi": "गर्भाशय की शैक्षिक रचना; घुमाने के लिए खींचें, बड़ा करने के लिए उँगलियाँ फैलाएँ",
+    "mr": "गर्भाशयाची शैक्षणिक रचना; फिरवण्यासाठी ओढा, मोठे करण्यासाठी बोटे पसरवा"
+  },
+  "Interactive illustrative anatomy. Drag to rotate; pinch to zoom.": {
+    "hi": "शरीर रचना का शैक्षिक चित्र। घुमाने के लिए खींचें; बड़ा करने के लिए उँगलियाँ फैलाएँ।",
+    "mr": "शरीररचनेचे संवादात्मक चित्रण. फिरवण्यासाठी ओढा; मोठे करण्यासाठी बोटे पसरवा."
+  },
+  "Invalid avatar bounds": {
+    "hi": "अवतार का आकार सही नहीं है",
+    "mr": "अवताराचा आकार योग्य नाही"
+  },
+  "Left": {
+    "hi": "बायाँ",
+    "mr": "डावे"
+  },
+  "Right": {
+    "hi": "दायाँ",
+    "mr": "उजवे"
+  },
+  "Schematic 3D pregnancy illustration": {
+    "hi": "गर्भावस्था का सरल 3D शैक्षिक चित्र",
+    "mr": "गर्भावस्थेचे सोपे 3D शैक्षणिक चित्र"
+  },
+  "white": {
+    "hi": "सफ़ेद",
+    "mr": "पांढरा"
+  },
+  "talking": {
+    "hi": "बोल रहा है",
+    "mr": "बोलत आहे"
+  },
+  "Bip001.quaternion": {
+    "hi": "Bip001.quaternion",
+    "mr": "Bip001.quaternion"
+  },
+  "Doctor.fbx": {
+    "hi": "Doctor.fbx",
+    "mr": "Doctor.fbx"
+  },
+  "Talking.fbx": {
+    "hi": "Talking.fbx",
+    "mr": "Talking.fbx"
+  },
+  "idle.fbx": {
+    "hi": "idle.fbx",
+    "mr": "idle.fbx"
+  },
+  "blob:": {
+    "hi": "blob:",
+    "mr": "blob:"
+  },
+  "textures/": {
+    "hi": "textures/",
+    "mr": "textures/"
+  },
+  "{{0}}Doctor.fbx": {
+    "hi": "{{0}}Doctor.fbx",
+    "mr": "{{0}}Doctor.fbx"
+  },
+  "{{0}}textures/{{1}}": {
+    "hi": "{{0}}textures/{{1}}",
+    "mr": "{{0}}textures/{{1}}"
   }
 }
