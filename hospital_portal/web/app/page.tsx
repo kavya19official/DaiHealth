@@ -8,7 +8,7 @@ import { SustainabilityPanel } from "./sustainability";
 import { OperationsIntelligencePanel } from "./operations-intelligence";
 import { GoldenHourLayer } from "./golden-hour";
 import { IncomingCare } from "./incoming-care";
-import { FollowupWorklist } from "./followup-worklist";
+import { PatientCareHub } from "./patient-care-hub";
 import { AshaCopilot } from "./asha";
 import { ClinicalMonitoring, PatientMonitoring } from "./clinical-monitor";
 type Row = Record<string, any>;
@@ -33,10 +33,7 @@ const days = [
 const operationNav = [
   ["overview", "Today’s overview", "◈"],
   ["incomingCare", "Incoming care", "✚"],
-  ["patients", "Patient registry", "♡"],
-  ["appointments", "Appointments & queue", "◷"],
-  ["followups", "Follow-up worklist", "✓"],
-  ["gaps", "Recorded care gaps", "☷"],
+  ["patientCare", "Patient Care Hub", "♡"],
   ["careReviews", "Clinical review & summaries", "▤"],
   ["clinicalMonitor", "Clinical monitoring", "▥"],
   ["readiness", "Delivery readiness", "✚"],
@@ -69,6 +66,7 @@ const administrationNav = [
 const workspacePermissions: Record<string, string> = {
   management: "facility.write",
   incomingCare: "coordination.read",
+  patientCare: "patient.read",
   careTasks: "care.read",
   careReviews: "care.read",
   followups: "coordination.read",
@@ -122,6 +120,7 @@ const titles: Record<string, [string, string]> = {
   "quality-board": ["Ward quality dashboard", "Suppressed recorded measures; no hospital ranking."],
   capacity: ["Capacity & readiness", "Recorded beds, blood and scheduled staff; freshness is shown without ranking facilities."],
   incomingCare: ["Incoming care", "Emergency arrivals, patient requests and facility transfers in one coordinated workspace."],
+  patientCare: ["Patient Care Hub", "Patients, appointments, care gaps and follow-ups in one connected workspace."],
   management: ["Facility & staff management", "Onboarding, services, slots and accountable staff access."],
   careTasks: [
     "Follow-up & outreach",
@@ -359,7 +358,7 @@ export default function Home() {
     setError("");
     try {
       if (view === "clinicalMonitor") { if (sequence === loadSequence.current) setData(null); return; }
-      if (view === "incomingCare" || view === "followups" || view === "ashaCopilot") { const structure = await api("/facilities/" + user.facility_id + "/structure"); if (sequence === loadSequence.current) setData(structure); return; }
+      if (view === "incomingCare" || view === "patientCare" || view === "followups" || view === "ashaCopilot") { const structure = await api("/facilities/" + user.facility_id + "/structure"); if (sequence === loadSequence.current) setData(structure); return; }
       const params = new URLSearchParams();
       Object.entries(filters).forEach(([key, value]) => {
         if (value) params.set(key, String(value));
@@ -924,12 +923,22 @@ export default function Home() {
           {view === "incomingCare" && (
             <IncomingCare key={user.id+user.facility_id} api={api} permissions={user.permissions} role={user.role} facilityId={user.facility_id}/>
           )}
+          {view === "patientCare" && (
+            <PatientCareHub
+              key={user.id+user.facility_id}
+              api={api}
+              openPatient={async id => {
+                try {
+                  setPatient(await api("/patients/" + id));
+                } catch (e) {
+                  setError((e as Error).message);
+                }
+              }}
+            />
+          )}
           {view === "clinicalMonitor" && user.permissions.includes("monitor.read") && <ClinicalMonitoring
             key={user.id+user.facility_id} api={api} canReview={user.permissions.includes("monitor.review")}
             openPatient={async id=>{setPatient(await api("/patients/"+id));}}/>}
-          {view === "followups" && (
-            <FollowupWorklist key={user.id+user.facility_id} api={api} permissions={user.permissions} userId={user.id}/>
-          )}
           {view === "ashaCopilot" && <AshaCopilot key={user.id+user.facility_id} api={api} user={user}/>}
           {data && (
             <>
