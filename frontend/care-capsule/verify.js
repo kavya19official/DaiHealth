@@ -4,9 +4,12 @@ import { translate, locale, fieldLabels, fieldText } from './language.js';
 const $ = id => document.getElementById('capsule-' + id);
 const readiness = $('ready');
 const status = $('status');
+const statusHome = status.parentElement;
 const result = $('result');
 const video = $('video');
 const camera = $('camera');
+const cameraLabel = camera.querySelector('span');
+const viewfinder = $('viewfinder');
 const storageKey = 'dai-care-capsule-trust-v1';
 const languageKey = 'dai-care-capsule-language';
 const strings = [...document.querySelectorAll('[data-text]')].map(node => [node, node.textContent]);
@@ -81,18 +84,51 @@ function node(tag, text) {
   return item;
 }
 
+const summaryGroups = [
+  ['Patient details', ['patient_name', 'date_of_birth']],
+  ['Clinical essentials', ['allergies', 'blood_group', 'medical_conditions', 'current_medications', 'latest_measurements']],
+  ['Pregnancy and risk', ['pregnancy_week', 'expected_delivery', 'recorded_risk', 'risk_factors', 'previous_complications']],
+  ['Recent history', ['recent_visits', 'recent_child_history', 'vaccines']]
+];
+
 function renderResult() {
+  statusHome.append(status);
   result.replaceChildren();
+  result.hidden = !verifiedData;
   if (!verifiedData) return;
   const data = verifiedData;
-  const fields = document.createElement('dl');
-  for (const [key, value] of Object.entries(data.fields)) {
-    fields.append(node('dt', t(fieldLabels[key])), node('dd', fieldText(key, value)));
-  }
-  result.append(node('h2', t(data.subject === 'mother' ? 'Maternal emergency summary' : 'Child emergency summary')),
+  const header = node('header', '');
+  header.className = 'capsule-summary-head';
+  header.append(node('h2', t(data.subject === 'mother' ? 'Maternal emergency summary' : 'Child emergency summary')),
+    status,
     node('p', t('Issued') + ' ' + new Date(data.iat * 1000).toLocaleDateString(locale(language)) + ' · ' +
-      t('Expires') + ' ' + new Date(data.exp * 1000).toLocaleString(locale(language))), fields,
-    node('p', t('This snapshot contains the fields chosen by the patient. Confirm identity and check for newer information when possible.')));
+      t('Expires') + ' ' + new Date(data.exp * 1000).toLocaleString(locale(language))));
+  const grid = node('div', '');
+  grid.className = 'capsule-summary-grid';
+  for (const [title, keys] of summaryGroups) {
+    const included = keys.filter(key => Object.hasOwn(data.fields, key));
+    if (!included.length) continue;
+    const section = node('section', '');
+    section.className = 'capsule-summary-group';
+    const fields = node('dl', '');
+    for (const key of included) {
+      fields.append(node('dt', t(fieldLabels[key])), node('dd', fieldText(key, data.fields[key], '\n', language)));
+    }
+    section.append(node('h3', t(title)), fields);
+    grid.append(section);
+  }
+  const footer = node('footer', '');
+  footer.className = 'capsule-summary-footer';
+  const chart = node('a', t('Open doctor workspace'));
+  chart.className = 'capsule-chart-link';
+  chart.href = '/auth.html?role=doctor';
+  footer.append(
+    node('p', t('This snapshot contains the fields chosen by the patient. Confirm identity and check for newer information when possible.')),
+    node('p', t('For the full chart and original reports, sign in to the doctor workspace with patient sharing enabled.')),
+    chart
+  );
+  result.classList.add('capsule-card');
+  result.append(header, grid, footer);
 }
 
 function clearResult() {
@@ -140,7 +176,10 @@ async function scan(value) {
   clearResult();
   setStatus('Checking the capsule…');
   const synced = navigator.onLine ? await sync() : false;
-  if (scanGeneration === verification) await open(code, synced);
+  if (scanGeneration === verification) {
+    await open(code, synced);
+    if (verifiedData && lastCode === code) result.focus();
+  }
 }
 
 async function refresh() {
@@ -172,7 +211,8 @@ function decode(source, width, height) {
   return window.jsQR(image.data, image.width, image.height)?.data;
 }
 function renderCameraLabel() {
-  camera.textContent = t(stream ? 'Stop camera' : 'Start camera');
+  cameraLabel.textContent = t(stream ? 'Stop camera' : 'Start camera');
+  viewfinder.classList.toggle('is-scanning', !!stream);
 }
 
 function stopCamera() {
