@@ -200,3 +200,73 @@ scripts/
 - Add assignment system (assign specific staff to patients)
 - Generate outreach reports and analytics
 - Add bulk actions for multiple patients
+
+## Doctor care workbench (24 November 2026)
+
+Open **Doctor → Care tools** (`/doctor.html#care-tools`). The existing dashboard,
+white surfaces, lavender top banner and floating Dhruv remain in place.
+
+- **Maternal registries:** live views over the authorised assigned roster, saved
+  stage/attention filters, chart links and current-authorisation CSV export.
+  Child mode directs users to separate child records. Saved registries store
+  filter definitions rather than snapshots of patient charts.
+- **Clinic flow:** explicit clinic hours, candidate schedule openings, recorded
+  waiting times, overlap/untimed warnings and confirmed maternal follow-up
+  booking through the existing server-side access/conflict checks. Suggestions
+  do not reserve rooms or confirm clinical urgency. Booking supports 30-minute
+  follow-ups; alternate slot lengths are planning views.
+- **Knowledge desk:** PubMed search links, editable evidence notebooks, source
+  excerpts, findings and limitations. Optional Gemini highlights must match an
+  exact supplied excerpt. This is source extraction, not independent literature
+  verification or a medical recommendation engine.
+- **Education studio:** editable handouts, presentation outlines, newsletters,
+  blogs, video scripts and messages, with audience, language, campaign, planned
+  date and references. Optional Gemini format/language adaptation requires
+  explicit opt-in and a separate apply step. Numbers are checked against the
+  source; clinical meaning and translation still require clinician review.
+  Approved versions can be exported as text or printed/saved as PDF. Editing
+  invalidates approval. Planned dates do not imply delivery.
+- **Practice insights:** recorded appointment completion, cancellations,
+  no-shows and repeat-visit counts over 30 days; aggregate inquiry/first-visit
+  logs, goals and referral relationship notes. These are not measured retention,
+  whole-practice financial results or automatic marketing attribution.
+- **Connections:** an explicit integration checklist covering EMR/LIS/imaging,
+  ABDM, drug safety, external messaging and clinical validation. No placeholder
+  connection is presented as operational.
+
+### Persistence and deployment
+
+`backend/db/care_workbench.sql` is included in both local migration lists. Restart
+with `npm run stop`, then `npm start`, to apply it locally. Production PostgreSQL
+also needs this migration before enabling the new routes.
+
+`GET/POST /api/doctor/workbench`, `PATCH/DELETE /api/doctor/workbench/:id` require
+an authenticated verified doctor. Every item is owner-scoped, versioned and
+server-persisted; create/edit/approve/delete events are recorded atomically.
+Approval requires source references and explicit review. Education and evidence
+are drafts until approved. Exports re-read the current saved version.
+
+`POST /api/doctor/workbench/highlights` and `/adapt` reuse the existing
+`DAI_CONSULTATION_AI_ENABLED`, `DAI_CONSULTATION_AI_MODEL` and `GEMINI_API_KEY`
+configuration. Keys stay server-side. These actions send only user-selected
+public content after explicit consent, have request deadlines and per-clinician
+rate/concurrency controls, and do not save or approve output automatically.
+Patient information must not be copied into these public-content tools.
+
+### External work still required
+
+Real hospital interoperability needs provider details, access agreements,
+credentials, patient-matching and consent testing. ABDM needs sandbox onboarding
+and conformance work; drug checks need an appropriate licensed database.
+WhatsApp/email campaigns need a delivery provider, recipient consent, opt-outs
+and delivery receipts. Clinical sign-off, a consented pilot, outcome measurement
+and production load/security testing remain required before clinical deployment.
+The local/synthetic workflows do not demonstrate reduced loss to follow-up.
+
+### Checks
+
+- `node --test backend/careWorkbench.test.js`
+- `scripts/test-care-workbench-browser.cjs` exercises desktop/mobile registries,
+  booking, evidence consent, proposed adaptation, approval, edit invalidation,
+  exports, dark mode and viewport fit using synthetic data and a stub AI provider.
+- Existing doctor navigation/dashboard browser checks remain applicable.
