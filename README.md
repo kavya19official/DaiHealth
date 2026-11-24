@@ -50,6 +50,10 @@ delivery and recovery, to her child's first years, shared safely between the mot
 From **Reports & records** or the child dashboard, select **Create Care Capsule**. Choose the maternal
 or child record, review and select the fields, and choose English or Hindi for the printed card. Save or print the QR. The QR carries the selected
 values, so anyone who has the QR can read them. Choose only what you want to carry.
+The capsule can include the date of birth, up to three completed visits, and, for maternal records,
+previous complications and recent clinic measurements. Choose a compact set of fields so the QR
+remains easy to scan. Use the signed-in doctor workspace for the full chart and original reports
+when the patient has granted access.
 
 Open **Care Capsule verifier** on the clinician's device while online and wait for **Ready for offline
 scanning**. The verifier works without a DaiHealth account. Once prepared, it checks signatures and

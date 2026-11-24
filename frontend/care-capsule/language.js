@@ -30,6 +30,27 @@ const hindi = {
   'Expires': 'वैधता समाप्ति',
   'This snapshot contains the fields chosen by the patient. Confirm identity and check for newer information when possible.':
     'इसमें मरीज़ की चुनी हुई जानकारी है। पहचान की पुष्टि करें और संभव हो तो नई जानकारी की जाँच करें।',
+  'Date of birth': 'जन्म की तारीख',
+  'Previous pregnancy complications': 'पिछली गर्भावस्था की जटिलताएँ',
+  'Recent completed visits': 'हाल में पूरी हुई मुलाक़ातें',
+  'Latest clinic measurements': 'क्लिनिक में दर्ज नवीनतम माप',
+  'Blood pressure': 'रक्तचाप',
+  'Haemoglobin': 'हीमोग्लोबिन',
+  'Weight': 'वज़न',
+  'Blood glucose': 'रक्त शर्करा',
+  'Patient details': 'मरीज़ की जानकारी',
+  'Clinical essentials': 'ज़रूरी स्वास्थ्य जानकारी',
+  'Pregnancy and risk': 'गर्भावस्था और जोखिम',
+  'Recent history': 'हाल का स्वास्थ्य इतिहास',
+  'Scan a Care Capsule': 'केयर कैप्सूल स्कैन करें',
+  'Use your camera or choose a photo of the QR.': 'कैमरे का उपयोग करें या QR की तस्वीर चुनें।',
+  'Keep the QR inside the frame.': 'QR को फ़्रेम के अंदर रखें।',
+  'Offline access': 'ऑफ़लाइन सुविधा',
+  'Open doctor workspace': 'डॉक्टर का कार्यक्षेत्र खोलें',
+  'For the full chart and original reports, sign in to the doctor workspace with patient sharing enabled.':
+    'पूरा रिकॉर्ड और मूल रिपोर्ट देखने के लिए डॉक्टर के कार्यक्षेत्र में साइन इन करें। मरीज़ की साझा करने की अनुमति ज़रूरी है।',
+  'A portable summary of the health information the patient chose to share.':
+    'मरीज़ की चुनी हुई स्वास्थ्य जानकारी का पोर्टेबल सारांश।',
   'Patient name': 'मरीज़ का नाम',
   'Recorded medical conditions': 'दर्ज स्वास्थ्य स्थितियाँ',
   'Recorded current medicines': 'वर्तमान में दर्ज दवाएँ',
@@ -69,6 +90,10 @@ export const locale = language => language === 'hi' ? 'hi-IN' : 'en-IN';
 
 export const fieldLabels = {
   patient_name: 'Patient name',
+  date_of_birth: 'Date of birth',
+  previous_complications: 'Previous pregnancy complications',
+  recent_visits: 'Recent completed visits',
+  latest_measurements: 'Latest clinic measurements',
   allergies: 'Recorded allergies',
   blood_group: 'Recorded blood group',
   medical_conditions: 'Recorded medical conditions',
@@ -81,7 +106,18 @@ export const fieldLabels = {
   recent_child_history: 'Recent recorded child health events'
 };
 
-export function fieldText(key, value, separator = '\n') {
+const measurements = {
+  bp: ['Blood pressure', 'mmHg'], hb: ['Haemoglobin', 'g/dL'],
+  weight: ['Weight', 'kg'], glucose: ['Blood glucose', 'mg/dL']
+};
+
+export function fieldText(key, value, separator = '\n', language = 'en') {
+  if (key === 'recent_visits') return value.map(entry => [entry.title, entry.date].filter(Boolean).join(' · ')).join(separator);
+  if (key === 'latest_measurements') return value.map(entry => {
+    const [label, unit] = measurements[entry.metric];
+    const reading = Array.isArray(entry.value) ? entry.value.join('/') : entry.value;
+    return translate(language, label) + ' · ' + reading + ' ' + unit + ' · ' + entry.date;
+  }).join(separator);
   if (key === 'vaccines') return value.map(entry => entry.code + ' · ' + entry.date).join(separator);
   if (key === 'recent_child_history') return value.map(entry => entry.title + ' · ' + entry.date).join(separator);
   if (key === 'risk_factors') return value.join(separator);

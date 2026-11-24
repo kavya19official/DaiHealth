@@ -38,16 +38,22 @@ test('only mother-selected fields are carried by the QR and revocation sync is p
   try {
     await pool.exec(`
       CREATE TABLE users (id int PRIMARY KEY, closed_at timestamp);
-      CREATE TABLE mother_profiles (user_id int, full_name text, blood_group text, allergies text, pregnancy_status text,
-        lmp_date date, care_start_date date, edd_date date, risk_level text, risk_factors jsonb, medical_conditions text, current_medications text);
+      CREATE TABLE mother_profiles (user_id int, full_name text, date_of_birth date, blood_group text, allergies text, pregnancy_status text,
+        lmp_date date, care_start_date date, edd_date date, risk_level text, risk_factors jsonb, medical_conditions text, current_medications text, previous_complications text);
+      CREATE TABLE appointments (id int, mother_id int, child_id int, reason text, requested_date date, status text);
+      CREATE TABLE clinical_dashboard_entries (id int, mother_id int, recorded_on date, values_json jsonb);
       CREATE TABLE child_health_events (id int, child_id int, title text, event_date date, event_type text);
       CREATE TABLE children (id int, mother_id int, name text, blood_group text, allergies text, date_of_birth date);
       CREATE TABLE child_vaccinations (child_id int, vaccine_code text, given_on date);
       INSERT INTO users VALUES (1,NULL),(2,NULL);
-      INSERT INTO mother_profiles VALUES (1,'Demo mother','A+','Synthetic allergy','pregnant',CURRENT_DATE-70,NULL,CURRENT_DATE+210,
-        'Synthetic risk','[{"label":"Synthetic factor"}]','Synthetic condition','Synthetic medicine');
+      INSERT INTO mother_profiles VALUES (1,'Demo mother','2000-11-16','A+','Synthetic allergy','pregnant',CURRENT_DATE-70,NULL,CURRENT_DATE+210,
+        'Synthetic risk','[{"label":"Synthetic factor"}]','Synthetic condition','Synthetic medicine','Past complication');
       INSERT INTO children VALUES (11,1,'Demo infant','B+','  Latex / लेटेक्स  ',CURRENT_DATE),(12,2,'Other child',NULL,NULL,CURRENT_DATE);
       INSERT INTO child_vaccinations VALUES (11,'BCG',CURRENT_DATE);
+      INSERT INTO appointments VALUES (1,1,NULL,'Maternal checkup',CURRENT_DATE,'completed'),
+        (2,1,11,'Child checkup',CURRENT_DATE,'completed'),(3,1,NULL,'Pending visit',CURRENT_DATE,'pending');
+      INSERT INTO clinical_dashboard_entries VALUES (1,1,CURRENT_DATE,'{"bp_systolic":118,"bp_diastolic":76,"hb":11.2}'),
+        (2,2,CURRENT_DATE,'{"weight_kg":70}');
       INSERT INTO child_health_events VALUES (1,11,'Recorded checkup',CURRENT_DATE,'checkup');
     `);
     await pool.exec(await fs.readFile(path.join(__dirname, 'db/care_capsules.sql'), 'utf8'));
@@ -92,9 +98,23 @@ test('only mother-selected fields are carried by the QR and revocation sync is p
     assert.equal(motherFields.patient_name, 'Demo mother');
     assert.equal(motherFields.medical_conditions, 'Synthetic condition');
     assert.equal(motherFields.current_medications, 'Synthetic medicine');
+    assert.equal(motherFields.previous_complications, 'Past complication');
+    assert.equal(motherFields.date_of_birth, '2000-11-16');
+    assert.deepEqual(motherFields.recent_visits.map(visit => visit.title), ['Maternal checkup']);
+    assert.deepEqual(motherFields.latest_measurements.map(entry => [entry.metric,entry.value]), [['bp',[118,76]],['hb',11.2]]);
+    const expanded = await mint({ fields: { latest_measurements: motherFields.latest_measurements,
+      recent_visits: motherFields.recent_visits, previous_complications: motherFields.previous_complications } });
+    assert.equal(expanded.status, 201, JSON.stringify(expanded.data));
+    const expandedPng = PNG.sync.read(Buffer.from(expanded.data.qr.split(',')[1], 'base64'));
+    const expandedCode = capsuleCode(scan(new Uint8ClampedArray(expandedPng.data), expandedPng.width, expandedPng.height).data);
+    const expandedFields = (await verifyCapsule(expandedCode, snapshot)).fields;
+    assert.deepEqual(expandedFields.latest_measurements, motherFields.latest_measurements);
+    assert.equal(expandedFields.patient_name, undefined);
     assert.match(motherFields.expected_delivery, /^\d{4}-\d{2}-\d{2}$/);
     assert.equal((await mint({ fields: { recent_child_history: [] } })).status, 400);
     const childFields = (await call(issue + '/fields?child_id=11')).data.fields;
+    assert.deepEqual(childFields.recent_visits.map(visit => visit.title), ['Child checkup']);
+    assert.equal(childFields.latest_measurements, undefined);
     const child = await mint({ child_id: 11, fields: { vaccines: childFields.vaccines, allergies: childFields.allergies,
       patient_name: childFields.patient_name, recent_child_history: childFields.recent_child_history } });
     assert.equal(child.status, 201, JSON.stringify(child.data));

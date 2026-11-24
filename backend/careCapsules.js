@@ -57,10 +57,44 @@ function capsuleUrl(req, value, env) {
   }
 }
 
+async function recentVisits(pool, mother, child) {
+  const { rows } = await pool.query(`
+    SELECT to_char(requested_date,'YYYY-MM-DD') AS date,LEFT(reason,140) AS title
+    FROM appointments WHERE mother_id=$1 AND child_id IS NOT DISTINCT FROM $2::int
+      AND status='completed' AND requested_date<=CURRENT_DATE
+    ORDER BY requested_date DESC,id DESC LIMIT 3`, [mother, child]);
+  return rows.length ? rows : null;
+}
+
+async function latestMeasurements(pool, mother) {
+  const { rows } = await pool.query(`
+    SELECT to_char(recorded_on,'YYYY-MM-DD') AS date, values_json
+    FROM clinical_dashboard_entries WHERE mother_id=$1 AND recorded_on<=CURRENT_DATE
+    ORDER BY recorded_on DESC,id DESC LIMIT 30`, [mother]);
+  const metrics = [];
+  const entries = {
+    bp: data => Number.isFinite(data.bp_systolic) && Number.isFinite(data.bp_diastolic)
+      ? [data.bp_systolic, data.bp_diastolic] : null,
+    hb: data => data.hb,
+    weight: data => data.weight_kg,
+    glucose: data => data.glucose_mg_dl
+  };
+  for (const [metric, extract] of Object.entries(entries)) {
+    for (const row of rows) {
+      const value = extract(row.values_json || {});
+      if (Number.isFinite(value) || Array.isArray(value)) {
+        metrics.push({ metric, value, date: row.date });
+        break;
+      }
+    }
+  }
+  return metrics.length ? metrics : null;
+}
+
 async function subjectFields(pool, mother, child) {
   if (child != null) {
     const { rows: [profile] } = await pool.query(
-      'SELECT name,blood_group,allergies FROM children WHERE id=$1 AND mother_id=$2', [child, mother]
+      'SELECT name,blood_group,allergies,date_of_birth FROM children WHERE id=$1 AND mother_id=$2', [child, mother]
     );
     if (!profile) return null;
     const { rows } = await pool.query(`
@@ -74,15 +108,17 @@ async function subjectFields(pool, mother, child) {
       ORDER BY event_date DESC,id DESC LIMIT 2`, [child])).rows;
     return {
       patient_name: recordedText(profile.name),
+      date_of_birth: utcDate(profile.date_of_birth),
       allergies: recordedText(profile.allergies),
       blood_group: blood(profile.blood_group),
       vaccines: rows.length ? rows : null,
-      recent_child_history: events.length ? events : null
+      recent_child_history: events.length ? events : null,
+      recent_visits: await recentVisits(pool, mother, child)
     };
   }
   const { rows: [profile] } = await pool.query(`
-    SELECT full_name,blood_group,allergies,pregnancy_status,lmp_date,care_start_date,edd_date,
-      risk_level,risk_factors,medical_conditions,current_medications
+    SELECT full_name,date_of_birth,blood_group,allergies,pregnancy_status,lmp_date,care_start_date,edd_date,
+      risk_level,risk_factors,medical_conditions,current_medications,previous_complications
     FROM mother_profiles WHERE user_id=$1`, [mother]);
   if (!profile) return null;
   profile.lmp_date = utcDate(profile.lmp_date);
@@ -91,11 +127,18 @@ async function subjectFields(pool, mother, child) {
   const pregnancyWeek = Number.isInteger(week) && week >= 0 && week <= 45 ? week : null;
   const factors = (Array.isArray(profile.risk_factors) ? profile.risk_factors : [])
     .map(factor => shortText(factor?.label)).filter(Boolean).slice(0, 3);
+  const [visits, measurements] = await Promise.all([
+    recentVisits(pool, mother, null), latestMeasurements(pool, mother)
+  ]);
   return {
     patient_name: recordedText(profile.full_name),
+    date_of_birth: utcDate(profile.date_of_birth),
     allergies: recordedText(profile.allergies),
     medical_conditions: recordedText(profile.medical_conditions),
     current_medications: recordedText(profile.current_medications),
+    previous_complications: recordedText(profile.previous_complications),
+    recent_visits: visits,
+    latest_measurements: measurements,
     blood_group: blood(profile.blood_group),
     recorded_risk: shortText(profile.risk_level),
     risk_factors: factors.length ? factors : null,

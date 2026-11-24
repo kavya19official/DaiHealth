@@ -24,10 +24,19 @@ export function capsuleCode(input) {
 const text = value => typeof value === 'string' && value.length > 0 && [...value].length <= 140;
 const recordedText = value => typeof value === 'string' && !!value.trim() && new TextEncoder().encode(value).length <= 2048;
 const date = value => typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value);
-const motherFields = new Set(['recorded_risk', 'risk_factors', 'pregnancy_week', 'expected_delivery', 'medical_conditions', 'current_medications']);
+const motherFields = new Set(['recorded_risk', 'risk_factors', 'pregnancy_week', 'expected_delivery', 'medical_conditions', 'current_medications', 'previous_complications', 'latest_measurements']);
 const childFields = new Set(['vaccines', 'recent_child_history']);
 const validators = {
   patient_name: recordedText,
+  date_of_birth: date,
+  previous_complications: recordedText,
+  recent_visits: value => Array.isArray(value) && value.length > 0 && value.length <= 3 &&
+    value.every(entry => entry && Object.keys(entry).length === 2 && date(entry.date) &&
+      (entry.title === null || typeof entry.title === 'string' && [...entry.title].length <= 140)),
+  latest_measurements: value => Array.isArray(value) && value.length > 0 && value.length <= 4 &&
+    value.every(entry => entry && Object.keys(entry).length === 3 && date(entry.date) &&
+      (entry.metric === 'bp' ? Array.isArray(entry.value) && entry.value.length === 2 && entry.value.every(Number.isFinite) :
+        ['hb', 'weight', 'glucose'].includes(entry.metric) && Number.isFinite(entry.value))),
   allergies: recordedText,
   medical_conditions: recordedText,
   current_medications: recordedText,
