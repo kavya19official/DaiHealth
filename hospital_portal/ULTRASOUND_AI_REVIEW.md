@@ -29,27 +29,20 @@ Use the real fetal ultrasound frames under `frontend/assets/ultrasound-demo/` wi
 
 ## Start locally
 
-Use the full application launcher from the repository root with Node.js 22.13+ and Python 3.12. Create the environment file once. Keep the same image key to reopen frames encrypted during previous runs.
+Use the full application launcher from the repository root with Node.js 22.13+ and Python 3.12:
 
 ```sh
-mkdir -p .local
-umask 077
-python3 - <<'PY' > .local/ultrasound.env
-import secrets
-print("export DAI_ULTRASOUND_ENABLED=true")
-print("export DAI_ULTRASOUND_IMAGE_KEY=" + secrets.token_hex(32))
-print("export DAI_ULTRASOUND_GATEWAY_TOKEN=" + secrets.token_urlsafe(48))
-print("export DAI_ULTRASOUND_SERVICE_TOKEN=" + secrets.token_urlsafe(48))
-PY
-. ./.local/ultrasound.env
+npm run stop
 npm start
 ```
+
+The local launcher enables the ultrasound workspace, starts its private services and creates persistent encryption and service keys in `.local/config.json` (owner-only permissions). It reuses existing keys, including keys from a previous `.local/ultrasound.env`, so saved frames remain readable. Keep this local configuration with the encrypted image store; never commit it. Explicit `DAI_ULTRASOUND_ENABLED=false` still disables the workspace. Hosted deployments require their own explicit service and secret configuration.
 
 Open `http://localhost:3001` and use linked synthetic mother and doctor accounts with a confirmed or completed appointment and an active pregnancy with recorded dates. The local seed reuses the synthetic hospital cohort. Keep any live identifying or clinical data out of the synthetic demo.
 
 ## Troubleshoot a missing workspace
 
-Apply the ultrasound workflow update to the same checkout you launch. Stop the running app with `npm run stop`, source the existing `.local/ultrasound.env` in that checkout, then run `npm start`. Open the address printed by the launcher, normally `http://localhost:3001`. Restarting Safari alone does not reload the backend routes.
+Apply the ultrasound workflow update to the same checkout you launch. Stop the running app with `npm run stop`, then run `npm start`. Open the address printed by the launcher, normally `http://localhost:3001`. Restarting Safari alone does not reload the backend routes.
 
 An unauthenticated `curl -i http://localhost:3001/api/patient/ultrasound/options` should return **401 JSON**. An HTML **404** means that process lacks the ultrasound route. A signed-in **503** with the disabled message means ultrasound is not enabled in the running process. Postpartum accounts can view scan history and released reports. The upload form requires an active pregnancy.
 
@@ -63,7 +56,7 @@ The original `ultrasound_analysis` table used hospital-portal UUID ownership. Th
 
 ## Deployment
 
-- **Docker Compose.** The full-app Compose file runs the gateway, clinical portal and private ML service together with persistent local state. Source the three persistent secrets as above and run `docker compose -f compose.ultrasound.yaml up --build`. The app port is published to loopback; the private API and ML ports stay inside the container. The separate hospital-only Compose stack is for the hospital preview and its forecasting service.
+- **Docker Compose.** The full-app Compose file runs the gateway, clinical portal and private ML service together with persistent local state. Configure the three persistent secrets described in the deployment section and run `docker compose -f compose.ultrasound.yaml up --build`. The app port is published to loopback; the private API and ML ports stay inside the container. The separate hospital-only Compose stack is for the hospital preview and its forecasting service.
 - **Render.** Use the root Dockerfile with the repository's `render.yaml`. Set `DAI_ULTRASOUND_IMAGE_KEY` to a stable 64-digit hex key. The blueprint generates separate gateway and ML tokens and uses the existing persistent disk. Use the Docker launcher so the same service hosts the patient/doctor pages and starts the private applications. If the service exists with different settings, check its dashboard configuration and current commit before deploying. Auto-deploy is disabled in the blueprint. Keep the deployment in synthetic demo mode until your site's clinical, consent, and production controls are configured.
 - **Private model.** The launcher starts the default loopback ML listener when ultrasound is enabled, independently of patient ranking. A separate private HTTPS ML origin can be configured by setting `DAI_ULTRASOUND_ML_ORIGIN` and the same private service credential on both ends. Install the evaluated model's Torch runtime in the private service and set `DAI_ULTRASOUND_MODEL_DIR` there. The default Docker image supports quality checks and manual review.
 

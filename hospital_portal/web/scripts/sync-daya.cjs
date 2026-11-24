@@ -3,9 +3,9 @@ const fs=require('node:fs');const path=require('node:path');
 const web=path.resolve(__dirname,'..');
 const source=process.env.DAI_FRONTEND_ASSET_DIR || path.resolve(web,'../../frontend');
 const destination=path.join(web,'public/daya');
-const entries=['js/i18n.js','i18n.css','locales','js/demo-guide.js','js/care-chatbot.js','js/care-chatbot.css','js/daya-knowledge.js','js/daya-avatar.mjs','assets/dr-daya','vendor/three'];
+const entries=['shared/name-localization.js','js/i18n.js','i18n.css','locales','js/demo-guide.js','js/care-chatbot.js','js/care-chatbot.css','js/daya-knowledge.js','js/daya-avatar.mjs','assets/dr-daya','vendor/three'];
 for(const entry of entries){
- const from=path.join(source,entry),to=path.join(destination,entry);
+ const from=entry.startsWith('shared/')?path.resolve(source,'..',entry):path.join(source,entry),to=path.join(destination,entry);
  if(!fs.existsSync(from))throw new Error('Missing shared Dr. Daya asset: '+from);
  fs.mkdirSync(path.dirname(to),{recursive:true});fs.cpSync(from,to,{recursive:true});
 }

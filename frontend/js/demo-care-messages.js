@@ -1,6 +1,7 @@
 /* Shared in-app inbox. Server checks each care connection before returning messages. */
 (function(){'use strict';
 let info,root,peer='',generation=0,refreshing=false,sending=false,filter='all',query='',older=null,history=[],loading=false;
+const nameMatches=(value,term)=>window.DaiNames?window.DaiNames.matches(value,term):String(value||'').toLowerCase().includes(term);
 const drafts=new Map(),pending=new Map();
 const E=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const base=()=> (window.DaiAPI?.API_BASE||'/api')+'/demo/care-messages';
@@ -13,7 +14,7 @@ const day=value=>new Date(value).toLocaleDateString('en-IN',{day:'numeric',month
 function status(text){if(root)root.querySelector('[data-cm-status]').textContent=text;}
 function renderList(){
  if(!root)return;
- const contacts=info.contacts.filter(c=>(filter!=='unread'||c.unread>0)&&(c.name+' '+(c.last_message?.body||'')).toLowerCase().includes(query));
+ const contacts=info.contacts.filter(c=>(filter!=='unread'||c.unread>0)&&(nameMatches(c.name,query)||(c.last_message?.body||'').toLowerCase().includes(query)));
  root.querySelector('[data-cm-list]').innerHTML=contacts.map(c=>'<button type="button" class="cm-contact '+(String(c.id)===peer?'is-selected':'')+'" data-cm-peer="'+c.id+'" aria-pressed="'+(String(c.id)===peer)+'"><span class="cm-avatar">'+E(initials(c.name))+'</span><span class="cm-contact-copy"><span class="cm-contact-top"><strong>'+E(c.name)+'</strong><time>'+E(time(c.last_message?.created_at))+'</time></span><span class="cm-contact-bottom"><span>'+E(c.last_message?(c.last_message.mine?'You: ':'')+c.last_message.body:'Start a conversation')+'</span>'+(c.unread?'<b class="cm-unread" aria-label="'+c.unread+' unread messages">'+c.unread+'</b>':'')+'</span></span></button>').join('')||'<p class="cm-empty">'+(info.contacts.length?'No conversations match your search.':'No connected patients available yet.')+'</p>';
  const unread=info.contacts.reduce((n,c)=>n+(c.unread||0),0);
  root.querySelector('[data-cm-count]').textContent=unread?unread+' unread':info.contacts.length+(info.contacts.length===1?' contact':' contacts');
@@ -73,7 +74,7 @@ function newChat(){
  dialog.id='cmNewChat';dialog.className='cm-new-dialog';dialog.setAttribute('aria-labelledby','cmNewTitle');
  dialog.innerHTML='<header><div><h2 id="cmNewTitle">New chat</h2><p>Choose a connected '+(info.role==='doctor'?'patient':'clinician')+'</p></div><button type="button" class="cm-icon" data-cm-close aria-label="Close new chat">×</button></header><label class="cm-search"><span aria-hidden="true">⌕</span><input type="search" aria-label="Find a contact" placeholder="Search by name" autofocus></label><div class="cm-new-contacts"></div>';
  const list=dialog.querySelector('.cm-new-contacts');
- function render(){const term=dialog.querySelector('input').value.toLowerCase();const contacts=info.contacts.filter(c=>c.name.toLowerCase().includes(term));list.innerHTML=contacts.map(c=>'<button type="button" class="cm-contact" data-cm-start="'+c.id+'"><span class="cm-avatar">'+E(initials(c.name))+'</span><span class="cm-contact-copy"><strong>'+E(c.name)+'</strong><small>'+(c.last_message?'Continue conversation':'Start a conversation')+'</small></span><span aria-hidden="true">→</span></button>').join('')||'<p class="cm-empty">No connected contacts match. Try another name.</p>';}
+ function render(){const term=dialog.querySelector('input').value.toLowerCase();const contacts=info.contacts.filter(c=>nameMatches(c.name,term));list.innerHTML=contacts.map(c=>'<button type="button" class="cm-contact" data-cm-start="'+c.id+'"><span class="cm-avatar">'+E(initials(c.name))+'</span><span class="cm-contact-copy"><strong>'+E(c.name)+'</strong><small>'+(c.last_message?'Continue conversation':'Start a conversation')+'</small></span><span aria-hidden="true">→</span></button>').join('')||'<p class="cm-empty">No connected contacts match. Try another name.</p>';}
  document.body.append(dialog);render();dialog.querySelector('input').oninput=render;
  dialog.addEventListener('click',e=>{if(e.target.closest('[data-cm-close]'))dialog.close();const b=e.target.closest('[data-cm-start]');if(b){filter='all';query='';root.querySelector('[data-cm-search]').value='';root.querySelectorAll('[data-cm-filter]').forEach(f=>f.setAttribute('aria-pressed',String(f.dataset.cmFilter==='all')));choose(b.dataset.cmStart);dialog.close();root.querySelector('textarea').focus();}});
  dialog.addEventListener('close',()=>{dialog.remove();if(!root.classList.contains('cm-chat-open'))opener?.focus();});dialog.showModal();

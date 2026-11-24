@@ -314,3 +314,10 @@ Keys remain server-side. It preserves checkpoints and reports a daily quota
 failure directly. The static assets include complete catalogues; users do
 not need an AI key or quota to change the interface language. Prepared AI speech
 still depends on its configured service and device audio permissions.
+
+Display names now use offline Hindi/Marathi transliteration in patient and doctor
+headers, rosters, dialogs, chats, facility labels and named UI fragments. Saved
+spellings and record identifiers remain unchanged. Search matches the original
+and both display scripts. Curated demo spellings cover Nivara Sethi and Hemangini
+Batra; other names use approximate phonetic transliteration. User-entered notes
+and messages remain in their original language.

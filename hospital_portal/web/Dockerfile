@@ -4,6 +4,7 @@ COPY hospital_portal/web/package*.json ./
 RUN npm ci
 COPY hospital_portal/web/ .
 COPY frontend/ /frontend/
+COPY shared/name-localization.js /shared/name-localization.js
 ENV DAI_FRONTEND_ASSET_DIR=/frontend
 ARG API_ORIGIN=http://api:8000
 ENV API_ORIGIN=$API_ORIGIN

@@ -11,7 +11,7 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body>{children}<link rel="stylesheet" href={`${process.env.NEXT_PUBLIC_DAI_BASE_PATH || ""}/daya/i18n.css?v=app-4`} /><Script src={`${process.env.NEXT_PUBLIC_DAI_BASE_PATH || ""}/daya/js/i18n.js?v=app-4`} strategy="afterInteractive" /><Script src={`${process.env.NEXT_PUBLIC_DAI_BASE_PATH || ""}/daya/js/care-chatbot.js?v=daya-3d-1`} strategy="lazyOnload" /><Script src={`${process.env.NEXT_PUBLIC_DAI_BASE_PATH || ""}/daya/js/demo-guide.js?v=1`} strategy="afterInteractive" /></body>
+      <body>{children}<link rel="stylesheet" href={`${process.env.NEXT_PUBLIC_DAI_BASE_PATH || ""}/daya/i18n.css?v=app-4`} /><Script src={`${process.env.NEXT_PUBLIC_DAI_BASE_PATH || ""}/daya/js/i18n.js?v=names-5`} strategy="afterInteractive" /><Script src={`${process.env.NEXT_PUBLIC_DAI_BASE_PATH || ""}/daya/js/care-chatbot.js?v=daya-3d-1`} strategy="lazyOnload" /><Script src={`${process.env.NEXT_PUBLIC_DAI_BASE_PATH || ""}/daya/js/demo-guide.js?v=1`} strategy="afterInteractive" /></body>
     </html>
   );
 }

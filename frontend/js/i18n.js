@@ -76,7 +76,19 @@
   var script = document.currentScript;
   var localeBase = new URL('../locales/', script ? script.src : location.href);
   var names = { en:'English', hi:'हिन्दी', mr:'मराठी' };
-  var excluded = 'script,style,noscript,textarea,pre,code,kbd,[contenteditable]:not([contenteditable="false"]),[translate="no"],[data-no-i18n],.notranslate,#userName,.user-chip__name,.dp-person-name strong,.dp-person-top>div>strong,.dpp-header h2,.wb-table-scroll td:first-child strong,.wb-row>div:first-child>strong,.care-chatbot__message--user,.cm-message p,.user-chip .user-name,[data-patient-name]';
+  var excluded = 'script,style,noscript,textarea,pre,code,kbd,[contenteditable]:not([contenteditable="false"]),[translate="no"],[data-no-i18n],.notranslate,.care-chatbot__message--user,.cm-message p';
+  var nameSelectors = '#userName,.user-chip__name,.user-chip .user-name,.dw-patient-name strong,.dp-person-name strong,.dp-person-top>div>strong,.dpp-header h2,.wb-table-scroll td:first-child strong,[data-patient-name],[data-person-name],[data-localize-name],.cm-contact-top strong,.cm-contact-copy>strong,[data-cm-chat-name],.facility-label strong,.facility-card h3,.leaflet-popup-content>div>strong,[data-demo-results] h3,[data-demo-results] li>strong';
+  var initialsSelectors = '.patient-initials,.dw-avatar,#dwDoctorInitials,.dd-avatar,.cm-avatar,[data-cm-chat-initials]';
+  var nameLoading;
+  function loadNames() {
+    if(global.DaiNames)return Promise.resolve();
+    if(!nameLoading)nameLoading=new Promise(function(resolve,reject){var tag=document.createElement('script');tag.src=new URL('../shared/name-localization.js?v=names-1',script?script.src:location.href).href;tag.onload=resolve;tag.onerror=function(){tag.remove();nameLoading=null;reject(Error('Name display unavailable'));};document.head.appendChild(tag);});
+    return nameLoading;
+  }
+  function nameFragments(value,code) {
+    if(!global.DaiNames||code==='en')return value;
+    return value.replace(/[A-Za-zÀ-ž]+(?:['’][A-Za-zÀ-ž]+)?(?:[ .-]+[A-Za-zÀ-ž]+(?:['’][A-Za-zÀ-ž]+)?)*\.?/g,function(part){return global.DaiNames.looksLikeName(part)?global.DaiNames.localize(part,code):part;});
+  }
   function storageGet(key) { try { return localStorage.getItem(key); } catch (_) { return null; } }
   function cookieLanguage() { var m=document.cookie.match(/(?:^|; )dai_lang=(en|hi|mr)(?:;|$)/);return m ? m[1] : null; }
   var explicit = cookieLanguage() || storageGet(KEY);
@@ -118,7 +130,7 @@
     if(clean!==key && dict[clean])return preserveSpace(original,key.replace(clean,dict[clean]));
     for(var i=0;i<patterns.length;i++){var p=patterns[i],match=key.match(p.re);if(match&&dict[p.en]){var result=dict[p.en];p.tokens.forEach(function(token,n){result=result.split(token).join(match[n+1]);});return preserveSpace(original,result);}}
     // Only known source phrases may be substituted. Unknown text stays unchanged.
-    // This handles e.g. "Pregnancy, week 28" without translating a patient's name.
+    // Display names are transliterated separately; saved records remain unchanged.
     if(code===lang && key.length<2600){
       var replacements=[],available=key;
       for(var j=0;j<fragments.length;j++){var phrase=fragments[j],at=available.toLowerCase().indexOf(phrase.toLowerCase());if(at<0)continue;var before=at?available[at-1]:'',after=available[at+phrase.length]||'';if(/[A-Za-z]/.test(before)||/[A-Za-z]/.test(after))continue;if(phrase.split(/\s+/).length<2 && phrase.length<8)continue;var token='\u0001'+replacements.length+'\u0002';replacements.push(dict[phrase]);available=available.slice(0,at)+token+available.slice(at+phrase.length);if(!/[A-Za-z]{2}/.test(available))break;}
@@ -126,7 +138,7 @@
     }
     return localizeDates(original,code);
   }
-  function translate(value,code) { var key=(code||lang)+'|'+String(value);if(memo.has(key))return memo.get(key);var result=translateRaw(value,code);if(memo.size>8000)memo.clear();memo.set(key,result);return result; }
+  function translate(value,code) { var key=(code||lang)+'|'+String(value);if(memo.has(key))return memo.get(key);var selected=code||lang;var result=nameFragments(translateRaw(value,code),selected);if(memo.size>8000)memo.clear();memo.set(key,result);return result; }
   function t(key) { var en=STRINGS.en[key] || source && source.legacy && source.legacy[key];if(en)return translate(en);return STRINGS[lang] && STRINGS[lang][key] || key; }
   async function readCatalogue(file) {
     var url=new URL(file+'?v=20261124-3',localeBase).href,response;
@@ -136,15 +148,15 @@
   async function load(code) {
     if(code==='en' && !source)return;
     if(!names[code] || code==='en'){prepare();return;}
-    if(!pending[code])pending[code]=Promise.all([source?Promise.resolve(source):readCatalogue('source.json'),dictionaries[code]?Promise.resolve(dictionaries[code]):readCatalogue(code+'.json')]).then(function(values){source=values[0];dictionaries[code]=values[1];prepare();}).catch(function(e){delete pending[code];throw e;});
+    if(!pending[code])pending[code]=Promise.all([source?Promise.resolve(source):readCatalogue('source.json'),dictionaries[code]?Promise.resolve(dictionaries[code]):readCatalogue(code+'.json'),loadNames()]).then(function(values){source=values[0];dictionaries[code]=values[1];prepare();}).catch(function(e){delete pending[code];throw e;});
     return pending[code];
   }
   function isExcluded(node) { if(node.nodeType===3&&/^[A-Z]{2,}[-:][A-Z0-9_:/-]*\d[A-Z0-9_:/-]*$/.test(node.data.trim()))return true;var el=node.nodeType===1?node:node.parentElement;return !el||Boolean(el.closest(excluded))||Boolean(el.closest('[data-dai-language],#patientLanguage,#setLang')); }
   function textNode(node) {
     if(isExcluded(node)||!normalize(node.data)||!/[A-Za-z\u0900-\u097f]/.test(node.data))return;
-    var entry=records.get(node),value=node.data;
-    if(!entry||value!==entry.last)entry={original:canonical(value),space:value,last:value};
-    var out=translate(entry.original);out=preserveSpace(entry.space,out.trim());
+    var entry=records.get(node),value=node.data,isName=Boolean(node.parentElement.closest(nameSelectors)),isInitials=Boolean(node.parentElement.closest(initialsSelectors));
+    if(!entry||value!==entry.last)entry={original:isName||isInitials?normalize(value):canonical(value),space:value,last:value};
+    var out=(isName||isInitials)&&global.DaiNames?global.DaiNames.localize(entry.original,lang,{initials:isInitials}):translate(entry.original);out=preserveSpace(entry.space,out.trim());
     if(value!==out)node.data=out;
     entry.last=out;records.set(node,entry);
   }

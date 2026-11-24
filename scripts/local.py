@@ -86,18 +86,34 @@ def stop_launcher(wait_timeout=60):
 def config():
     STATE.mkdir(exist_ok=True)
     file = STATE / "config.json"
-    if not file.exists():
-        file.write_text(
-            json.dumps(
-                {
-                    "jwt_secret": secrets.token_urlsafe(48),
-                    "demo_password": "Dai-Synthetic-2026!",
-                },
-                indent=2,
-            )
-        )
-        file.chmod(0o600)
-    return json.loads(file.read_text())
+    cfg = json.loads(file.read_text()) if file.exists() else {
+        "jwt_secret": secrets.token_urlsafe(48), "demo_password": "Dai-Synthetic-2026!",
+    }
+    before = dict(cfg)
+    # Retain keys from the earlier opt-in setup so existing frames remain readable.
+    previous = {}
+    legacy = STATE / "ultrasound.env"
+    if legacy.exists():
+        for line in legacy.read_text().splitlines():
+            line = line.strip().removeprefix("export ")
+            if "=" in line and not line.startswith("#"):
+                key, value = line.split("=", 1)
+                previous[key.strip()] = value.strip().strip("\"").strip("'")
+    cfg.setdefault("ultrasound_enabled", True)
+    for field, variable, make in [
+        ("ultrasound_image_key", "DAI_ULTRASOUND_IMAGE_KEY", lambda: secrets.token_hex(32)),
+        ("ultrasound_gateway_token", "DAI_ULTRASOUND_GATEWAY_TOKEN", lambda: secrets.token_urlsafe(48)),
+        ("ultrasound_service_token", "DAI_ULTRASOUND_SERVICE_TOKEN", lambda: secrets.token_urlsafe(48)),
+    ]:
+        if field not in cfg:
+            cfg[field] = os.environ.get(variable) or previous.get(variable) or make()
+    if not file.exists() or cfg != before:
+        temporary = file.with_suffix(".tmp")
+        temporary.write_text(json.dumps(cfg, indent=2))
+        temporary.chmod(0o600)
+        temporary.replace(file)
+    file.chmod(0o600)
+    return cfg
 
 
 def environment(cfg):
@@ -130,6 +146,18 @@ def environment(cfg):
             "npm_config_cache": str(STATE / "npm-cache"),
         }
     )
+    # Only the local persisted config enables this by default. Hosted launches
+    # pass a minimal config and keep their explicit deployment opt-in.
+    if cfg.get("ultrasound_enabled") is True:
+        env.setdefault("DAI_ULTRASOUND_ENABLED", "true")
+    if env.get("DAI_ULTRASOUND_ENABLED") == "true":
+        for field, variable in [
+            ("ultrasound_image_key", "DAI_ULTRASOUND_IMAGE_KEY"),
+            ("ultrasound_gateway_token", "DAI_ULTRASOUND_GATEWAY_TOKEN"),
+            ("ultrasound_service_token", "DAI_ULTRASOUND_SERVICE_TOKEN"),
+        ]:
+            if cfg.get(field):
+                env.setdefault(variable, cfg[field])
     return env
 
 
@@ -146,14 +174,15 @@ def ml_required(env):
     return ranking_enabled(env) or local_ultrasound(env)
 
 
-def dependencies():
+def dependencies(env=None):
+    env = os.environ if env is None else env
     if not PY.exists():
         run([sys.executable, "-m", "venv", VENV])
     reqs = [
         ROOT / "hospital_portal/requirements.txt",
         ROOT / "synthetic_data/requirements.txt",
     ]
-    if ml_required(os.environ):
+    if ml_required(env):
         reqs.append(ROOT / "ml-service/requirements.txt")
     signature = hashlib.sha256(b"".join(p.read_bytes() for p in reqs)).hexdigest()
     marker = STATE / "python-dependencies"
@@ -179,7 +208,7 @@ def dependencies():
 
 def prepare(env):
     if env.get("DAI_HOSTED_DEMO") != "true" and env.get("DAI_CONTAINER_DEMO") != "true":
-        dependencies()
+        dependencies(env)
     if not (ROOT / "synthetic_data/output/dai.db").exists():
         run([PY, ROOT / "synthetic_data/generate.py"], env=env)
     if not (ROOT / "backend/data/dai-hospital.db").exists():
@@ -220,8 +249,10 @@ def build_web(env):
     for folder in ["frontend/assets/dr-daya", "frontend/vendor/three"]:
         files += sorted((ROOT / folder).rglob("*"))
     files += [ROOT / "frontend/js" / name for name in [
-        "care-chatbot.js", "care-chatbot.css", "daya-avatar.mjs", "daya-knowledge.js", "demo-guide.js"
+        "care-chatbot.js", "care-chatbot.css", "daya-avatar.mjs", "daya-knowledge.js", "demo-guide.js", "i18n.js"
     ]]
+    files += sorted((ROOT / "frontend/locales").rglob("*.json"))
+    files += [ROOT / "frontend/i18n.css", ROOT / "shared/name-localization.js"]
     fingerprint = hashlib.sha256(
         b"".join(
             str(p.relative_to(ROOT)).encode() + p.read_bytes()

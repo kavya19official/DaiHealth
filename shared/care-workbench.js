@@ -1,5 +1,6 @@
 (function(root,factory){if(typeof module==='object'&&module.exports)module.exports=factory();else root.CareWorkbench=factory();})(typeof window!=='undefined'?window:this,function(){
 'use strict';
+const nameMatches=(value,query)=>{const helper=typeof module==='object'&&module.exports?require('./name-localization'):window.DaiNames;return helper?helper.matches(value,query):String(value??'').toLowerCase().includes(query);};
 const dateOK=s=>typeof s==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(s)&&!isNaN(Date.parse(s+'T12:00:00Z'))&&new Date(s+'T12:00:00Z').toISOString().slice(0,10)===s;
 const minutes=t=>/^\d\d:\d\d(?::\d\d)?$/.test(t||'')&&Number(t.slice(0,2))<24&&Number(t.slice(3,5))<60?Number(t.slice(0,2))*60+Number(t.slice(3,5)):null;
 const time=m=>String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0');
@@ -9,7 +10,7 @@ function registry(data,filter={}){
   const week=p.stage?.week;
   const stage=p.stage?.delivered?'postpartum':Number.isFinite(week)?'t'+(week<14?1:week<28?2:3):'unknown';
   const due=p.edd&&p.edd>=data.date&&p.edd<=new Date(Date.parse(data.date+'T12:00:00Z')+14*86400000).toISOString().slice(0,10);
-  return (!q||[p.name,p.uhid,p.abha].some(s=>String(s||'').toLowerCase().includes(q)))&&(!filter.stage||filter.stage==='all'||stage===filter.stage)&&(!filter.gap||filter.gap==='all'||filter.gap==='overdue'&&p.overdue>0||filter.gap==='due14'&&due||filter.gap==='marked'&&!!p.clinicianRisk||filter.gap==='unshared'&&!p.clinical_shared);
+  return (!q||[p.name,p.uhid,p.abha].some(s=>nameMatches(s,q)))&&(!filter.stage||filter.stage==='all'||stage===filter.stage)&&(!filter.gap||filter.gap==='all'||filter.gap==='overdue'&&p.overdue>0||filter.gap==='due14'&&due||filter.gap==='marked'&&!!p.clinicianRisk||filter.gap==='unshared'&&!p.clinical_shared);
  });
 }
 function operations(data,options={}){
