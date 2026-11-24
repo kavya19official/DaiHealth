@@ -38,7 +38,7 @@ import { translate, locale, fieldLabels, fieldText } from './language.js';
         </select></label>
         <button type="submit">Create capsule QR</button>
       </form>
-      <section class="capsule-print-sheet" hidden></section>
+      <section class="capsule-print-sheet" translate="no" hidden></section>
       <section data-active></section>
       <p><a href="/care-capsule/index.html" target="_blank" rel="noopener">Open the clinician’s offline verifier</a></p>`;
     const status = dialog.querySelector('[role=status]');
@@ -122,8 +122,9 @@ import { translate, locale, fieldLabels, fieldText } from './language.js';
           checkbox.type = 'checkbox';
           checkbox.name = 'field';
           checkbox.value = name;
-          const preview = fieldText(name, value, ', ');
-          label.append(checkbox, document.createTextNode(' ' + fieldLabels[name] + ' · ' + preview));
+          const preview = node('span', fieldText(name, value, ', '));
+          preview.setAttribute('translate', 'no');
+          label.append(checkbox, document.createTextNode(' ' + fieldLabels[name] + ' · '), preview);
           fields.append(label);
           available++;
         }

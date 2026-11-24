@@ -14903,9 +14903,26 @@
     "blob:": "blob:",
     "textures/": "textures/",
     "{{0}}Doctor.fbx": "{{0}}Doctor.fbx",
-    "{{0}}textures/{{1}}": "{{0}}textures/{{1}}"
+    "{{0}}textures/{{1}}": "{{0}}textures/{{1}}",
+    "A portable summary of the health information the patient chose to share.": "रुग्णाने सामायिक करण्यासाठी निवडलेल्या आरोग्य माहितीचा सोबत ठेवता येणारा सारांश.",
+    "Blood glucose": "रक्तातील साखर",
+    "Clinical essentials": "आवश्यक वैद्यकीय माहिती",
+    "For the full chart and original reports, sign in to the doctor workspace with patient sharing enabled.": "संपूर्ण नोंद आणि मूळ अहवाल पाहण्यासाठी रुग्णाच्या सामायिकरण परवानगीसह डॉक्टर कार्यक्षेत्रात साइन इन करा.",
+    "Keep the QR inside the frame.": "QR चौकटीच्या आत ठेवा.",
+    "Latest clinic measurements": "दवाखान्यातील अलीकडील मोजमापे",
+    "Offline access": "ऑफलाइन माहिती पाहा",
+    "Open doctor workspace": "डॉक्टर कार्यक्षेत्र उघडा",
+    "Patient details": "रुग्णाचे तपशील",
+    "Pregnancy and risk": "गर्भावस्था आणि जोखीम",
+    "Previous pregnancy complications": "पूर्वीच्या गर्भावस्थेतील गुंतागुंत",
+    "Recent completed visits": "अलीकडे पूर्ण झालेल्या भेटी",
+    "Recent history": "अलीकडील इतिहास",
+    "Scan a Care Capsule": "केअर कॅप्सूल स्कॅन करा",
+    "Use your camera or choose a photo of the QR.": "कॅमेरा वापरा किंवा QR चा फोटो निवडा.",
+    "footer": "footer",
+    "viewfinder": "viewfinder"
   },
-  "sourceHash": "bfe6230a93f59e2739451786d47d2b1601b2d593a43bde15616d49538f45fc9d",
+  "sourceHash": "3d67f22ee57a8d94fe0067ad2ad8c74090681919a3e84b3f9b347d3c405ab156",
   "legacy": {
     "nav.pregnancy-library": "माझी गर्भधारणा लायब्ररी",
     "nav.ultrasound": "अल्ट्रासाउंड स्कॅन",
@@ -15112,5 +15129,5 @@
     "saveSettings": "सेटिंग्ज जतन करा",
     "settingsSaved": "सेटिंग्ज जतन केल्या"
   },
-  "hash": "d38a664df910edcb29ef1956343a9816480076effa62f7846de82b9a760ab31f"
+  "hash": "74849fc20129234eba142088d6d1ee98ad14eee5ee6e57dfe916870ccfc4b2da"
 }

@@ -7242,5 +7242,73 @@
   "{{0}}textures/{{1}}": {
     "hi": "{{0}}textures/{{1}}",
     "mr": "{{0}}textures/{{1}}"
+  },
+  "A portable summary of the health information the patient chose to share.": {
+    "hi": "मरीज़ की चुनी हुई स्वास्थ्य जानकारी का साथ रखने योग्य सार।",
+    "mr": "रुग्णाने सामायिक करण्यासाठी निवडलेल्या आरोग्य माहितीचा सोबत ठेवता येणारा सारांश."
+  },
+  "Blood glucose": {
+    "hi": "रक्त शर्करा",
+    "mr": "रक्तातील साखर"
+  },
+  "Clinical essentials": {
+    "hi": "ज़रूरी चिकित्सकीय जानकारी",
+    "mr": "आवश्यक वैद्यकीय माहिती"
+  },
+  "For the full chart and original reports, sign in to the doctor workspace with patient sharing enabled.": {
+    "hi": "पूरा रिकॉर्ड और मूल रिपोर्ट देखने के लिए मरीज़ की साझाकरण अनुमति के साथ डॉक्टर कार्यक्षेत्र में साइन इन करें।",
+    "mr": "संपूर्ण नोंद आणि मूळ अहवाल पाहण्यासाठी रुग्णाच्या सामायिकरण परवानगीसह डॉक्टर कार्यक्षेत्रात साइन इन करा."
+  },
+  "Keep the QR inside the frame.": {
+    "hi": "QR को चौखटे के अंदर रखें।",
+    "mr": "QR चौकटीच्या आत ठेवा."
+  },
+  "Latest clinic measurements": {
+    "hi": "क्लिनिक के सबसे हाल के माप",
+    "mr": "दवाखान्यातील अलीकडील मोजमापे"
+  },
+  "Offline access": {
+    "hi": "ऑफ़लाइन जानकारी देखें",
+    "mr": "ऑफलाइन माहिती पाहा"
+  },
+  "Open doctor workspace": {
+    "hi": "डॉक्टर कार्यक्षेत्र खोलें",
+    "mr": "डॉक्टर कार्यक्षेत्र उघडा"
+  },
+  "Patient details": {
+    "hi": "मरीज़ का विवरण",
+    "mr": "रुग्णाचे तपशील"
+  },
+  "Pregnancy and risk": {
+    "hi": "गर्भावस्था और जोखिम",
+    "mr": "गर्भावस्था आणि जोखीम"
+  },
+  "Previous pregnancy complications": {
+    "hi": "पिछली गर्भावस्था की जटिलताएँ",
+    "mr": "पूर्वीच्या गर्भावस्थेतील गुंतागुंत"
+  },
+  "Recent completed visits": {
+    "hi": "हाल में पूरी हुई विज़िट",
+    "mr": "अलीकडे पूर्ण झालेल्या भेटी"
+  },
+  "Recent history": {
+    "hi": "हाल का इतिहास",
+    "mr": "अलीकडील इतिहास"
+  },
+  "Scan a Care Capsule": {
+    "hi": "केयर कैप्सूल स्कैन करें",
+    "mr": "केअर कॅप्सूल स्कॅन करा"
+  },
+  "Use your camera or choose a photo of the QR.": {
+    "hi": "कैमरा इस्तेमाल करें या QR की तस्वीर चुनें।",
+    "mr": "कॅमेरा वापरा किंवा QR चा फोटो निवडा."
+  },
+  "footer": {
+    "hi": "footer",
+    "mr": "footer"
+  },
+  "viewfinder": {
+    "hi": "viewfinder",
+    "mr": "viewfinder"
   }
 }
