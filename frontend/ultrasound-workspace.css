@@ -90,3 +90,5 @@
 .uw-plane-results dt { font-size: .8rem; color: var(--uw-muted); }
 .uw-plane-results dd { margin: 0; overflow-wrap: anywhere; }
 .uw-plane-results dd span { display: block; margin-top: .1rem; font-size: .83rem; color: var(--uw-muted); }
+.uw-model-badge { width: fit-content; padding: .35rem .7rem; border: 1px solid var(--uw-line); border-radius: .5rem; font-weight: 600; }
+.uw-model-badge[data-status="ready"] { color: #245a41; background: #e9f6ec; border-color: #c6e4d1; }

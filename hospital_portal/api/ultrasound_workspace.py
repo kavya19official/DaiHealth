@@ -171,6 +171,12 @@ def register_workspace(app, engine, service, key, demo=False):
         return {"items": [safe_record(row, grant.role) for row in rows[:25]], "archived": legacy,
                 "has_more": len(rows) > 25 or bool(legacy and len(history) > 25)}
 
+    @app.get("/internal/ultrasound-workspace/scans/status", include_in_schema=False)
+    async def status(request: Request, response: Response):
+        authorize(request)
+        response.headers.update(CACHE)
+        return await service.model_status()
+
     @app.get("/internal/ultrasound-workspace/scans/{scan_id}", include_in_schema=False)
     def detail(scan_id: UUID, request: Request, response: Response):
         grant, _ = authorize(request)
@@ -309,7 +315,7 @@ def register_workspace(app, engine, service, key, demo=False):
                     if (row["reviewed_at"] or row["analysis"]["state"] != "model_unavailable"
                             or (row["analysis"].get("measurements") or {}).get("demo")):
                         raise HTTPException(409, "Only unavailable analysis can be retried before review")
-                    values["analysis"] = queued()
+                    values["analysis"] = {**queued(), "auto_recovered": row["analysis"].get("auto_recovered", False)}
                 changed = conn.execute(update(scans).where(*scope(grant), scans.c.id == scan_id,
                     scans.c.revision == form.revision, scans.c.released_at.is_(None)).values(**values)).rowcount
                 if not changed:

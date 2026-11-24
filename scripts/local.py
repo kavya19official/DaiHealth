@@ -209,15 +209,6 @@ def dependencies(env=None):
 def prepare(env):
     if env.get("DAI_HOSTED_DEMO") != "true" and env.get("DAI_CONTAINER_DEMO") != "true":
         dependencies(env)
-    if (local_ultrasound(env) and not env.get("DAI_ULTRASOUND_MODEL_DIR")
-            and "DAI_ULTRASOUND_PLANE_WEIGHTS" not in env):
-        weights = STATE / "models/SonoNet16.npz"
-        env["DAI_ULTRASOUND_PLANE_WEIGHTS"] = str(weights)
-        try:
-            run([PY, "-m", "ultrasound.sononet", weights], env=env, cwd=ROOT / "ml-service")
-        except subprocess.CalledProcessError:
-            print("SonoNet16 could not be installed. Scans stay in manual review. "
-                  "Restore GitHub access and restart to retry installation.", flush=True)
     if not (ROOT / "synthetic_data/output/dai.db").exists():
         run([PY, ROOT / "synthetic_data/generate.py"], env=env)
     if not (ROOT / "backend/data/dai-hospital.db").exists():

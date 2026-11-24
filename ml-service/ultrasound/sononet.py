@@ -5,7 +5,6 @@ from io import BytesIO
 import os
 from pathlib import Path
 import tempfile
-from urllib.request import urlopen
 
 import numpy as np
 from PIL import Image
@@ -13,10 +12,8 @@ from scipy.special import softmax
 
 from .imaging import quality
 
-REVISION = "6c4df39927e42f5b873c09a733bc658ff1ff419c"
-WEIGHTS_URL = f"https://raw.githubusercontent.com/baumgach/SonoNet-weights/{REVISION}/SonoNet16.npz"
+BUNDLED_WEIGHTS = Path(__file__).resolve().parent / "assets/SonoNet16.npz"
 WEIGHTS_SHA256 = "bbbf9dde2b3af686c247a3074d890ceb685cd63fc1fc2af7e704edc07810c53f"
-MAX_WEIGHTS = 4 * 1024 * 1024
 CLASSES = ("three_vessel", "four_chamber", "abdomen", "background", "brain_cerebellum",
            "brain_transventricular", "femur", "kidneys", "lips", "left_outflow",
            "profile", "right_outflow", "spine_coronal", "spine_sagittal")
@@ -36,8 +33,7 @@ def install(destination):
             return
         except ValueError:
             pass
-    with urlopen(WEIGHTS_URL, timeout=15) as response:
-        data = verify_weights(response.read(MAX_WEIGHTS + 1))
+    data = verify_weights(BUNDLED_WEIGHTS.read_bytes())
     destination.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.NamedTemporaryFile(dir=destination.parent, delete=False) as temporary:
         scratch = Path(temporary.name)
@@ -147,6 +143,6 @@ def classify(image, predictor, progress):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Install the pinned SonoNet16 weights.")
+    parser = argparse.ArgumentParser(description="Copy the bundled, verified SonoNet16 weights.")
     parser.add_argument("destination", type=Path)
     install(parser.parse_args().destination)

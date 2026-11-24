@@ -50,6 +50,7 @@ test('ultrasound gateway binds authenticated ownership, doctor selection and fac
       assert.equal(grant.method,options.method);
       assert.equal(grant.sha256,createHash('sha256').update(options.body || '').digest('hex'));
       requests.push(grant);
+      if (url.pathname.endsWith('/status')) return Response.json({state:'ready',model:'sononet16'});
       return url.pathname.endsWith('/image') ?
         new Response(Buffer.from([137,80,78,71]),{headers:{'Content-Type':'image/png'}}) :
         Response.json({items:[]});
@@ -65,6 +66,12 @@ test('ultrasound gateway binds authenticated ownership, doctor selection and fac
   const doctor = {'x-test-account':'42','x-test-role':'doctor'};
   const upload = {...mother,'x-dai-ultrasound':'upload','content-type':'image/png'};
   assert.equal((await fetch(base+scan)).status,401);
+  assert.equal((await fetch(base+scan+'/status')).status,401);
+  assert.equal((await fetch(base+scan+'/status',{headers:doctor})).status,403);
+  const liveStatus = await fetch(base+scan+'/status',{headers:mother});
+  assert.deepEqual(await liveStatus.json(),{state:'ready',model:'sononet16'});
+  assert.equal(liveStatus.headers.get('cache-control'),'private, no-store');
+  assert.equal(requests.at(-1).patient,101);
   assert.equal((await fetch(base+doctorScan,{headers:mother})).status,403);
   assert.equal((await fetch(base+'/api/doctor/patients/102/ultrasound',{headers:doctor})).status,403);
   assert.deepEqual((await (await fetch(base+scan+'/options',{headers:mother})).json()).doctors.map(row=>row.id),[42]);

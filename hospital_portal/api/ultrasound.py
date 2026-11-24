@@ -169,7 +169,11 @@ class Ultrasound:
                 or origin.path not in {"", "/"} or (origin.scheme != "https" and
                     (origin.scheme != "http" or origin.hostname not in {"127.0.0.1", "localhost", "::1"}))):
             raise RuntimeError("DAI_ULTRASOUND_ML_ORIGIN must be loopback HTTP or private HTTPS")
-        self.url = origin.geturl().rstrip("/") + "/internal/ultrasound/analyze"
+        self.origin = origin.geturl().rstrip("/") + "/internal/ultrasound"
+        self.url = self.origin + "/analyze"
+        self._status_cache = None
+        self._status_expires = 0
+        self._status_lock = asyncio.Lock()
         self.retention = int(config.get("DAI_ULTRASOUND_IMAGE_RETENTION_DAYS", "30"))
         if not 1 <= self.retention <= 365:
             raise RuntimeError("DAI_ULTRASOUND_IMAGE_RETENTION_DAYS must be between 1 and 365")
@@ -184,6 +188,36 @@ class Ultrasound:
             return self.cipher.decrypt(payload[:12], payload[12:], identifier.encode())
         except (InvalidTag, ValueError):
             raise HTTPException(503, "Private image could not be opened") from None
+
+    async def model_status(self):
+        clock = asyncio.get_running_loop().time
+        async with self._status_lock:
+            if self._status_cache is not None and clock() < self._status_expires:
+                return self._status_cache
+            status = {"state": "service_unreachable"}
+            try:
+                async with asyncio.timeout(5):
+                    async with httpx.AsyncClient(trust_env=False) as client:
+                        reply = await client.get(self.origin + "/status", headers={
+                            "Authorization": "Bearer " + self.token,
+                        })
+                        if reply.status_code == 200:
+                            data = reply.json()
+                            state = data.get("state") if isinstance(data, dict) else None
+                            if state in ("disabled", "warming", "model_error"):
+                                status = {"state": state}
+                            elif state == "ready" and data.get("model") in ("sononet16", "archive"):
+                                status = {"state": state, "model": data["model"]}
+                        elif reply.status_code == 404:
+                            status = {"state": "service_outdated"}
+                        elif reply.status_code in (401, 403):
+                            status = {"state": "service_auth_error"}
+            except (TimeoutError, httpx.HTTPError, ValueError):
+                pass
+            self._status_cache = status
+            interval = {"service_unreachable": 1, "warming": 1, "model_error": 15}
+            self._status_expires = clock() + interval.get(status["state"], 5)
+            return status
 
     async def analyze(self, png, progress=None):
         try:

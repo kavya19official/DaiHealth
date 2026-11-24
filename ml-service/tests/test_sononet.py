@@ -1,5 +1,4 @@
 import io
-import os
 from pathlib import Path
 
 from fastapi import FastAPI
@@ -51,18 +50,17 @@ def test_each_panel_reaches_the_classifier_as_a_distinct_tensor():
 
 
 def test_published_weights_on_private_inference_endpoint():
-    weights = os.getenv("DAI_TEST_SONONET_WEIGHTS")
-    if not weights:
-        pytest.skip("Set DAI_TEST_SONONET_WEIGHTS to the pinned checkpoint to exercise real inference")
     app = FastAPI()
-    register_inference(app, {
-        "DAI_ULTRASOUND_PLANE_WEIGHTS": weights, "DAI_ULTRASOUND_SERVICE_TOKEN": "n"*40,
-    })
+    register_inference(app, {"DAI_ULTRASOUND_SERVICE_TOKEN": "n"*40})
     png = io.BytesIO()
     stacked_sample().save(png, "PNG")
     with TestClient(app) as client:
+        url = "/internal/ultrasound/status"
+        assert client.get(url).status_code == 401
+        auth = {"Authorization": "Bearer " + "n"*40}
+        assert client.get(url, headers=auth).json() == {"state": "ready", "model": "sononet16"}
         response = client.post("/internal/ultrasound/analyze", content=png.getvalue(), headers={
-            "Authorization": "Bearer " + "n"*40, "Content-Type": "image/png",
+            **auth, "Content-Type": "image/png",
         })
     assert response.status_code == 200
     result = response.json()
@@ -71,3 +69,15 @@ def test_published_weights_on_private_inference_endpoint():
     assert [view["view"] for view in result["planes"]] == ["top", "bottom"]
     assert [view["label"] for view in result["planes"]] == ["abdomen", "four_chamber"]
     assert all(view["score"] > .80 for view in result["planes"])
+
+
+def test_readiness_reports_a_bad_override(tmp_path):
+    app = FastAPI()
+    register_inference(app, {
+        "DAI_ULTRASOUND_PLANE_WEIGHTS": str(tmp_path / "missing.npz"),
+        "DAI_ULTRASOUND_SERVICE_TOKEN": "n"*40,
+    })
+    with TestClient(app) as client:
+        assert client.get("/internal/ultrasound/status", headers={
+            "Authorization": "Bearer " + "n"*40,
+        }).json() == {"state": "model_error"}

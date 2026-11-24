@@ -151,6 +151,9 @@ module.exports = function register(app, {pool, authenticateToken, authorizeRole,
     await forward(res,{...grant,...await context(grant.patient),doctor:selected, facilities,facility:facilities[0]},
       '', 'POST',req.body,req.get('content-type'));
   }));
+  app.get(patientPath+'/status', ...mother, guard(async (req,res) => {
+    await forward(res, patientGrant(req), '/status');
+  }));
   app.get(patientPath+'/:scanId', ...mother, guard(async (req,res) => {
     if (!SCAN_ID.test(req.params.scanId)) return res.status(404).json({error:'Scan not available.'});
     await forward(res, patientGrant(req), '/'+req.params.scanId);

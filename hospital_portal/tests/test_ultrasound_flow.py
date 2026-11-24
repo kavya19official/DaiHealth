@@ -125,3 +125,51 @@ def test_workspace_release_privacy_concurrency_and_retention(tmp_path):
         assert call(client,mother,route+"/image").status_code == 410
         assert call(client,mother).json()["items"][0]["report"] is not None
     engine.dispose()
+
+
+def test_recovery_attempts_only_pending_retained_scans_once(tmp_path):
+    from uuid import uuid4
+    from hospital_portal.api.ultrasound import unavailable
+
+    engine = database("sqlite:///" + str(tmp_path / "recovery.sqlite"))
+    initialize(engine)
+    scans = s.ultrasound_workspace_scan
+    service = Ultrasound({
+        "DAI_ULTRASOUND_ENABLED":"true", "DAI_ULTRASOUND_IMAGE_KEY":"21"*32,
+        "DAI_ULTRASOUND_SERVICE_TOKEN":"fixture-inference-key-for-tests-only",
+    })
+    seen = []
+
+    async def analyze(frame, progress):
+        seen.append(frame)
+        return unavailable("inference_unavailable")
+
+    service.analyze = analyze
+    pending_id = str(uuid4())
+    now = utc()
+    failed = unavailable("no_approved_model").model_dump(exclude_none=True)
+    with engine.begin() as db:
+        for scan_id, extra in [
+            (pending_id, {}),
+            (str(uuid4()), {"started_at":now}),
+            (str(uuid4()), {"reviewed_at":now}),
+            (str(uuid4()), {"released_at":now}),
+            (str(uuid4()), {"image_expires_at":now-timedelta(days=1)}),
+            (str(uuid4()), {"image_ciphertext":None}),
+            (str(uuid4()), {"analysis":{**failed,"measurements":{"demo":True}}}),
+        ]:
+            values = dict(id=scan_id,patient_account_id=101,doctor_account_id=42,
+                          facility_ref="fixture-facility",episode="2026-01-01",image_digest=hashlib.sha256(scan_id.encode()).hexdigest(),
+                          image_expires_at=now+timedelta(days=1),image_ciphertext=service.encrypt(scan_id,b"stored raster"),
+                          analysis=failed,pregnancy_context={},revision=1)
+            db.execute(scans.insert().values(**(values | extra)))
+    assert not asyncio.run(process_next(engine,service))
+    assert asyncio.run(process_next(engine,service,recover=True))
+    assert seen == [b"stored raster"]
+    assert not asyncio.run(process_next(engine,service,recover=True))
+    with engine.connect() as db:
+        row = db.execute(select(scans.c.analysis,scans.c.revision).where(scans.c.id==pending_id)).one()
+        assert row.revision == 2 and row.analysis["auto_recovered"] is True
+        assert db.scalar(select(s.audit_log.c.action).where(s.audit_log.c.entity_id==pending_id,
+                                                           s.audit_log.c.action=="workspace_analysis_recovered"))
+    engine.dispose()

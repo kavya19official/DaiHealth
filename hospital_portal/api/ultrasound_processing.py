@@ -62,10 +62,17 @@ def assessment(analysis):
                 model_ran=state in PREDICTIONS, requires_doctor_review=True)
 
 
-def claim(engine):
+def claim(engine, recover=False):
     state = scans.c.analysis["state"].as_string()
-    eligible = or_(state == "queued", and_(state.in_(ACTIVE[1:]),
-                                          scans.c.updated_at < utc() - timedelta(minutes=2)))
+    if recover:
+        eligible = and_(state == "model_unavailable",
+                        scans.c.analysis["auto_recovered"].as_boolean().is_not(True),
+                        scans.c.analysis["measurements"]["demo"].as_boolean().is_not(True),
+                        scans.c.image_ciphertext.is_not(None), scans.c.image_expires_at > utc(),
+                        scans.c.started_at.is_(None), scans.c.reviewed_at.is_(None), scans.c.released_at.is_(None))
+    else:
+        eligible = or_(state == "queued", and_(state.in_(ACTIVE[1:]),
+                                              scans.c.updated_at < utc() - timedelta(minutes=2)))
     with engine.begin() as conn:
         row = conn.execute(select(scans.c.id, scans.c.analysis, scans.c.image_expires_at,
                                   scans.c.image_ciphertext).where(eligible)
@@ -74,22 +81,34 @@ def claim(engine):
             return None
         lease = uuid4().hex
         started = utc()
-        acquired = conn.execute(update(scans).where(scans.c.id == row["id"], eligible).values(
-            analysis={**queued(), "state": "claimed", "lease": lease,
-                      "started_at": started.isoformat()}, updated_at=started)).rowcount
-        return (row, lease, started.isoformat()) if acquired else None
+        recovered = recover or row["analysis"].get("auto_recovered") is True
+        values = dict(analysis={**queued(), "state": "claimed", "lease": lease,
+                                "started_at": started.isoformat(), "auto_recovered": recovered},
+                      updated_at=started)
+        if recover:
+            values["revision"] = scans.c.revision + 1
+        acquired = conn.execute(update(scans).where(scans.c.id == row["id"], eligible)
+                                .values(**values)).rowcount
+        if acquired and recover:
+            conn.execute(s.audit_log.insert().values(
+                action="workspace_analysis_recovered", entity_type="ultrasound_workspace_scan",
+                entity_id=row["id"], details={"previous_state": "model_unavailable"},
+            ))
+        return (row, lease, started.isoformat(), recovered) if acquired else None
 
 
-async def process_next(engine, service):
-    item = await run_in_threadpool(claim, engine)
+async def process_next(engine, service, recover=False):
+    item = await run_in_threadpool(claim, engine, recover)
     if not item:
         return False
-    row, lease, started = item
+    row, lease, started, recovered = item
     stage_times = {}
 
     def persist(result, final=False):
         now = utc()
         result = {**result, "steps": list(stage_times), "stage_times": dict(stage_times), "started_at": started}
+        if recovered:
+            result["auto_recovered"] = True
         if final:
             result.update(finished_at=now.isoformat(), flag=review_flag(result))
         else:
@@ -127,6 +146,9 @@ async def analysis_loop(engine, service):
     while True:
         try:
             if await process_next(engine, service):
+                continue
+            status = await service.model_status()
+            if status == {"state": "ready", "model": "sononet16"} and await process_next(engine, service, recover=True):
                 continue
         except Exception:
             logging.getLogger(__name__).exception("Ultrasound analysis queue unavailable")

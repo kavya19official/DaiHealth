@@ -126,7 +126,8 @@
     const name = element('p',null,{class:'uw-filename'});
     const consent = element('input', null, {type:'checkbox', required:''});
     const doctor = clinician ? null : select(options, 'Choose a doctor');
-    const submit = element('button','Upload for review',{type:'submit',class:'uw-button',disabled:''});
+    const submitLabel = clinician ? 'Upload for review' : 'Upload & analyze';
+    const submit = element('button',submitLabel,{type:'submit',class:'uw-button',disabled:''});
     let frame;
     let previewUrl;
 
@@ -178,7 +179,7 @@
           'content-type':frame.type,'x-dai-ultrasound':'upload','x-dai-ultrasound-consent':'yes',
         }});
       }, result => result.duplicate ? 'This image is already in your scan history.' : 'Scan uploaded for review.');
-      submit.textContent = 'Upload for review';
+      submit.textContent = submitLabel;
       submit.disabled = false;
     });
     return form;
@@ -535,6 +536,32 @@
     setTimeout(refresh, record.processing ? 250 : 7000);
   }
 
+  async function showAnalysisStatus(badge, view) {
+    let state;
+    let model;
+    try {
+      ({state,model} = await request(patientPath + '/status'));
+    } catch {
+      state = 'status_unavailable';
+    }
+    if (!badge.isConnected || generation !== view) return;
+    const labels = {
+      ready: model === 'sononet16' ? 'Live AI ready · SonoNet16' : 'Live AI ready · Research archive model',
+      warming: 'Starting the ultrasound model…',
+      disabled: 'AI model disabled on this server. Doctor review is available.',
+      model_error: 'The AI model could not load. Restart DaiHealth and check the ML service log.',
+      service_unreachable: 'The ultrasound AI service is unreachable. Doctor review is available.',
+      service_outdated: 'The ultrasound AI service needs an update. Restart DaiHealth from the updated checkout.',
+      service_auth_error: 'The ultrasound AI service rejected its connection. Check the service configuration.',
+      status_unavailable: 'Live AI status unavailable. Check the running DaiHealth version.',
+    };
+    badge.textContent = labels[state] || labels.status_unavailable;
+    badge.dataset.status = state;
+    if (state !== 'ready') setTimeout(() => {
+      if (badge.isConnected && generation === view) showAnalysisStatus(badge, view);
+    }, state === 'warming' || state === 'service_unreachable' ? 2500 : 10000);
+  }
+
   async function load() {
     const active = ++generation;
     revokePreviews();
@@ -558,6 +585,11 @@
       } else {
         root.append(element('p',options.can_upload ? 'A confirmed appointment with a verified doctor is needed to share a scan.' :
           'New uploads require an active pregnancy with recorded dates.'));
+      }
+      if (!clinician) {
+        const badge = element('p','Checking live AI…',{class:'uw-model-badge',role:'status'});
+        root.prepend(badge);
+        showAnalysisStatus(badge,active);
       }
       const data = await request(base() + '?offset=' + offset);
       if (active !== generation) return;

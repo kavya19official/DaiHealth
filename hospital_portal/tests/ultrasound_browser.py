@@ -51,6 +51,8 @@ def main():
         expect(page.get_by_role("alert").filter(has_text="does not have the ultrasound route")).to_be_visible()
         page.unroute(missing_route)
         page.get_by_role("button", name="Try again", exact=True).click()
+        if live:
+            expect(page.get_by_text("Live AI ready · SonoNet16",exact=True)).to_be_visible(timeout=15000)
         form = page.locator("#panel-ultrasound form")
         test_frame, width = frame(live)
         form.get_by_label("Ultrasound image").set_input_files(test_frame)
@@ -61,7 +63,7 @@ def main():
         form.get_by_role("checkbox").check()
         with page.expect_response(lambda r: "/api/patient/ultrasound?doctor=" in r.url and
                                   r.request.method == "POST") as result:
-            form.get_by_role("button",name="Upload for review").click()
+            form.get_by_role("button",name="Upload & analyze").click()
         assert result.value.ok, result.value.text()
         expect(page.get_by_text("Scan uploaded for review.",exact=True)).to_be_visible(timeout=20000)
         scan_id = result.value.json()["id"]

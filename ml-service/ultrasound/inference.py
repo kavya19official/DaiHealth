@@ -1,6 +1,7 @@
 """Authenticated stateless inference on the existing DaiHealth ML service."""
 import asyncio
 import json
+import logging
 import math
 import os
 from pathlib import Path
@@ -22,6 +23,7 @@ from .training import LOW_CONFIDENCE, NON_NORMAL_SCORE, WEIGHTS
 
 bearer = HTTPBearer(auto_error=False)
 CACHE = {"Cache-Control": "no-store"}
+LOG = logging.getLogger(__name__)
 
 
 def load_model(directory):
@@ -90,7 +92,8 @@ def register_inference(app, config=None, model_loader=load_model):
     config = os.environ if config is None else config
     key = config.get("DAI_ULTRASOUND_SERVICE_TOKEN", "")
     directory = config.get("DAI_ULTRASOUND_MODEL_DIR")
-    plane_weights = config.get("DAI_ULTRASOUND_PLANE_WEIGHTS")
+    plane_weights = config.get("DAI_ULTRASOUND_PLANE_WEIGHTS", str(sononet.BUNDLED_WEIGHTS))
+    model_name = "archive" if directory else "sononet16" if plane_weights else None
     busy = BoundedSemaphore(1)
     model = None
 
@@ -99,6 +102,30 @@ def register_inference(app, config=None, model_loader=load_model):
                 credential.credentials.encode(), key.encode())):
             raise HTTPException(401, "Internal credential required",
                                 headers={**CACHE, "WWW-Authenticate": "Bearer"})
+
+    def model_ready(progress=None):
+        nonlocal model
+        if model is None:
+            if progress:
+                progress("model_loading")
+            model = model_loader(Path(directory)) if directory else sononet.load(plane_weights)
+        return model
+
+    @app.get("/internal/ultrasound/status", include_in_schema=False, dependencies=[Depends(authorize)])
+    def status():
+        if not model_name:
+            return JSONResponse({"state": "disabled"}, headers=CACHE)
+        if model is None:
+            if not busy.acquire(blocking=False):
+                return JSONResponse({"state": "warming"}, headers=CACHE)
+            try:
+                model_ready()
+            except Exception as error:
+                LOG.warning("Ultrasound model could not load (%s)", type(error).__name__)
+                return JSONResponse({"state": "model_error"}, headers=CACHE)
+            finally:
+                busy.release()
+        return JSONResponse({"state": "ready", "model": model_name}, headers=CACHE)
 
     def run(raw, progress):
         nonlocal model
@@ -114,25 +141,20 @@ def register_inference(app, config=None, model_loader=load_model):
         if not directory and not plane_weights:
             return dict(state="model_unavailable", quality=stats, reasons=["no_approved_model"])
         try:
+            loaded = model_ready(progress)
             if not directory:
-                if model is None:
-                    progress("model_loading")
-                    model = sononet.load(plane_weights)
-                planes = sononet.classify(image, model, progress)
+                planes = sononet.classify(image, loaded, progress)
                 if not any(view["state"] == "classified" for view in planes):
                     return dict(state="quality_issue", quality=stats, reasons=["unusable_views"])
                 return dict(state="plane_analysis", quality=stats, reasons=[],
                             model_version=sononet.WEIGHTS_SHA256, planes=planes)
-            if model is None:
-                progress("model_loading")
-                model = model_loader(Path(directory))
-            predictor, model_id = model
+            predictor, model_id = loaded
             progress("preprocessing")
             tensor = preprocess(image)
             progress("inference")
             return dict(**score_image(predictor, model_id, tensor), quality=stats)
-        except (OSError, RuntimeError, ValueError, KeyError, TypeError, ImportError, EOFError,
-                AttributeError, OverflowError):
+        except Exception as error:
+            LOG.warning("Ultrasound model could not analyze the frame (%s)", type(error).__name__)
             model = None
             return dict(state="model_unavailable", quality=stats, reasons=["model_load_or_inference_failed"])
 

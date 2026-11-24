@@ -147,7 +147,7 @@ def test_internal_route_authentication_quality_and_score_states(tmp_path):
         assert route not in client.get("/openapi.json").json()["paths"]
 
     app = FastAPI()
-    register_inference(app, {**config, "DAI_ULTRASOUND_MODEL_DIR": ""})
+    register_inference(app, {**config, "DAI_ULTRASOUND_MODEL_DIR": "", "DAI_ULTRASOUND_PLANE_WEIGHTS": ""})
     with TestClient(app) as client:
         reply = client.post(route, headers=headers, content=png(7)).json()
         assert reply["state"] == "model_unavailable" and reply["reasons"] == ["no_approved_model"]
