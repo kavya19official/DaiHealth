@@ -116,6 +116,176 @@ function Metric({
     </section>
   );
 }
+
+function CapacityExplorer({ rows, navigate }: { rows: Row[]; navigate: (view:string)=>void }) {
+  const groups = Array.from(new Set(rows.map((row) => String(row.resource || "Other"))));
+  const [selected, setSelected] = useState(groups[0] || "");
+  const [query,setQuery]=useState(""),[groupFilter,setGroupFilter]=useState(""),[locationFilter,setLocationFilter]=useState(""),[availability,setAvailability]=useState("all");
+  const selectedRows = rows.filter((row) => String(row.resource || "Other") === selected);
+  const category = (location:string) => selected === "Beds" ? (/^ward/i.test(location)?"General wards":/nicu|picu|hdu|ccu/i.test(location)?"Critical-care units":/labour|lr-/i.test(location)?"Labour rooms":"Other care areas") : selected === "Blood" ? location.split(" · ")[0] : "All locations";
+  const categories=Array.from(new Set(selectedRows.map(row=>category(String(row.location))))).sort();
+  const locationValue=(location:string)=>selected==="Blood"?location.split(" · ").slice(1).join(" · ")||location:location;
+  const locations=Array.from(new Set(selectedRows.filter(row=>!groupFilter||category(String(row.location))===groupFilter).map(row=>locationValue(String(row.location))))).sort();
+  const visible = selectedRows.filter((row)=>String(row.location).toLowerCase().includes(query.toLowerCase())&&(!groupFilter||category(String(row.location))===groupFilter)&&(!locationFilter||locationValue(String(row.location))===locationFilter)&&(availability==="all"||(availability==="available"&&Number(row.recorded_available)>0)||(availability==="none"&&Number(row.recorded_available)===0)));
+  const reset=()=>{setQuery("");setGroupFilter("");setLocationFilter("");setAvailability("all")};
+  return (
+    <section className="resource-explorer">
+      <header className="explorer-intro">
+        <div><span className="eyebrow">RESOURCE OVERVIEW</span><h2>What capacity do you want to check?</h2><p>Choose one resource group first. Details appear only for that group, so teams can find what they need quickly.</p></div>
+        <div className="explorer-guide"><b>1</b> Choose a group <i /> <b>2</b> Review availability <i /> <b>3</b> Confirm with the team</div>
+      </header>
+      <div className="resource-groups">
+        {groups.map((group) => {
+          const items = rows.filter((row) => String(row.resource || "Other") === group);
+          const available = items.reduce((sum, row) => sum + Number(row.recorded_available || 0), 0);
+          return <button key={group} className={selected === group ? "active" : ""} onClick={() => {setSelected(group);reset()}}>
+            <span>{group === "Beds" ? "▱" : group === "Blood" ? "♦" : group === "Staff" ? "♧" : "✚"}</span>
+            <strong>{nice(group)}</strong><small>{items.length} recorded locations</small><b>{count(available)} available</b>
+          </button>;
+        })}
+      </div>
+      <section className="explorer-detail card">
+        <div className="card-head"><div><span className="eyebrow">SELECTED RESOURCE</span><h2>{nice(selected)}</h2><p>Search a ward, blood group, component, staff member or recorded location.</p></div><span className="pill neutral">Confirm before transfer</span></div>
+        <div className="quick-filter-bar capacity-filters"><label className="filter-search">Search {selected.toLowerCase()}<input value={query} onChange={e=>setQuery(e.target.value)} placeholder={selected==="Beds"?"Enter ward name or number…":selected==="Blood"?"Enter A+, O-, plasma, platelets…":"Enter location, role or name…"}/></label><label>{selected==="Beds"?"Ward group":selected==="Blood"?"Blood group":"Location group"}<select value={groupFilter} onChange={e=>{setGroupFilter(e.target.value);setLocationFilter("")}}><option value="">All groups</option>{categories.map(value=><option key={value} value={value}>{value}</option>)}</select></label><label>{selected==="Blood"?"Blood component":"Exact location"}<select value={locationFilter} onChange={e=>setLocationFilter(e.target.value)}><option value="">All {selected==="Blood"?"components":"locations"}</option>{locations.map(value=><option key={value} value={value}>{value}</option>)}</select></label><label>Availability<select value={availability} onChange={e=>setAvailability(e.target.value)}><option value="all">All records</option><option value="available">Available only</option><option value="none">Not available</option></select></label>{(query||groupFilter||locationFilter||availability!=="all")&&<button onClick={reset}>Clear filters</button>}</div>
+        {selected==="Beds"&&<div className="bed-search-note"><div><strong>Need an exact bed serial number?</strong><span>This capacity view contains ward totals. Open the bed board to search individual bed IDs and see whether each bed is available.</span></div><button onClick={()=>navigate("beds")}>Search individual beds</button></div>}
+        <div className="capacity-detail-grid">
+          {visible.map((row, index) => <article key={index}>
+            <div><strong>{row.location}</strong><small>Last confirmed {row.last_confirmed ? date(row.last_confirmed) : "not recorded"}</small></div>
+            <b>{row.recorded_available ?? "—"}</b>
+            <p>{row.basis}</p>
+          </article>)}
+        </div>
+        {!visible.length && <div className="empty">No records match these filters. Clear or change a filter to continue.</div>}
+      </section>
+    </section>
+  );
+}
+
+function CriticalCareExplorer({ units, admissions }: { units: Row[]; admissions: Row[] }) {
+  const [selected, setSelected] = useState(units[0]?.name || "");
+  const [query,setQuery]=useState(""),[careType,setCareType]=useState(""),[bedStatus,setBedStatus]=useState("all"),[admissionStatus,setAdmissionStatus]=useState("all");
+  const careCategory=(name:string)=>/obstetric|obg/i.test(name)?"Maternal critical care":/nicu/i.test(name)?"Newborn intensive care":/picu|paediatric/i.test(name)?"Child critical care":"Other specialist care";
+  const filteredUnits=units.filter(row=>String(row.name).toLowerCase().includes(query.toLowerCase())&&(!careType||careCategory(row.name)===careType)&&(bedStatus==="all"||(bedStatus==="available"&&Number(row.available)>0)||(bedStatus==="full"&&Number(row.available)===0)));
+  const unit = filteredUnits.find((row) => row.name === selected) || filteredUnits[0];
+  const occupancy = unit?.capacity ? Math.round((unit.occupied / unit.capacity) * 100) : 0;
+  const related = admissions.filter((row) => row.ward === unit?.name&&(admissionStatus==="all"||(admissionStatus==="current"&&!row.discharged_at)||(admissionStatus==="discharged"&&row.discharged_at)));
+  const categories = [
+    ["Maternal critical care", units.filter((row) => /obstetric|obg/i.test(row.name))],
+    ["Newborn intensive care", units.filter((row) => /nicu/i.test(row.name))],
+    ["Child critical care", units.filter((row) => /picu|paediatric/i.test(row.name))],
+  ] as [string, Row[]][];
+  return <section className="critical-explorer">
+    <header className="explorer-intro"><div><span className="eyebrow">CRITICAL & NEONATAL CARE</span><h2>Choose the type of specialist care</h2><p>Units are grouped by who they care for. Select a unit to see beds, equipment and its admission activity.</p></div><div className="critical-total"><strong>{units.reduce((sum,row)=>sum+Number(row.available||0),0)}</strong><span>beds recorded available across specialist units</span></div></header>
+    <div className="quick-filter-bar critical-filters"><label className="filter-search">Search unit or ward<input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search NICU, PICU, HDU…"/></label><label>Care group<select value={careType} onChange={e=>setCareType(e.target.value)}><option value="">All care groups</option>{Array.from(new Set(units.map(row=>careCategory(row.name)))).map(value=><option key={value}>{value}</option>)}</select></label><label>Bed availability<select value={bedStatus} onChange={e=>setBedStatus(e.target.value)}><option value="all">All units</option><option value="available">Beds available</option><option value="full">At capacity</option></select></label>{(query||careType||bedStatus!=="all")&&<button onClick={()=>{setQuery("");setCareType("");setBedStatus("all")}}>Clear filters</button>}</div>
+    {!unit&&<div className="empty">No specialist units match these filters.</div>}
+    {unit&&<>
+    <div className="critical-layout">
+      <aside className="critical-groups">
+        {categories.map(([label])=>[label,filteredUnits.filter(row=>careCategory(row.name)===label)] as [string,Row[]]).filter(([,items])=>items.length).map(([label,items])=><section key={label}><h3>{label}</h3>{items.map((row)=><button key={row.name} className={unit.name===row.name?"active":""} onClick={()=>setSelected(row.name)}><span><strong>{row.name}</strong><small>{row.available} beds available</small></span><b>{row.occupied}/{row.capacity}</b></button>)}</section>)}
+      </aside>
+      <section className="critical-detail card">
+        <div className="card-head"><div><span className="eyebrow">SELECTED UNIT</span><h2>{unit.name}</h2><p>A focused snapshot of this care location.</p></div><span className={"readiness-state "+(occupancy>=95?"full":occupancy>=85?"busy":"ready")}>{occupancy>=95?"At capacity":occupancy>=85?"Limited capacity":"Capacity available"}</span></div><div className="critical-metrics"><article><strong>{unit.available}</strong><span>Available beds</span></article><article><strong>{unit.occupied}</strong><span>Occupied beds</span></article><article><strong>{unit.ventilators||0}</strong><span>Functional ventilators</span></article><article><strong>{occupancy}%</strong><span>Occupancy</span></article></div><div className="capacity-track large"><i style={{width:occupancy+"%"}} /></div>
+        <div className="unit-admissions"><div className="subsection-filter"><h3>Admissions in this unit <span>{related.length}</span></h3><label>Show<select value={admissionStatus} onChange={e=>setAdmissionStatus(e.target.value)}><option value="all">All admissions</option><option value="current">Currently admitted</option><option value="discharged">Discharged</option></select></label></div>{related.slice(0,8).map((row)=><article key={row.admission_id}><div><strong>{row.admission_id}</strong><small>Admitted {date(row.admitted_at)}</small></div><span>{row.discharged_at?"Discharged":"Currently admitted"}</span><p>{nice(row.admission_reason)}</p></article>)}{!related.length&&<div className="empty">No admissions match this filter.</div>}</div>
+      </section>
+    </div>
+    </>}
+  </section>;
+}
+
+function DiagnosticsExplorer({ rows }: { rows: Row[] }) {
+  type PatientReports = { id: string; name: string; reports: Row[] };
+  const grouped = new Map<string, PatientReports>();
+  rows.forEach((row) => {
+    const key = String(row.portal_mother_id || row.mother_name);
+    const current: PatientReports = grouped.get(key) || { id: key, name: row.mother_name, reports: [] };
+    current.reports.push(row);
+    grouped.set(key, current);
+  });
+  const patients: PatientReports[] = Array.from(grouped.values());
+  const [selected, setSelected] = useState<string>(patients[0]?.id || "");
+  const [query,setQuery]=useState(""),[reportStatus,setReportStatus]=useState("all");
+  const filteredPatients=patients.filter(item=>(name(item.name)+" "+item.id).toLowerCase().includes(query.toLowerCase())&&(reportStatus==="all"||(reportStatus==="attention"&&item.reports.some(row=>/abnormal|critical/i.test(row.result_flag)))||(reportStatus==="pending"&&item.reports.some(row=>!/done|completed/i.test(row.status)))||(reportStatus==="complete"&&item.reports.every(row=>/done|completed/i.test(row.status)))));
+  const patient = filteredPatients.find((item) => item.id === selected) || filteredPatients[0];
+  return <section className="diagnostics-explorer">
+    <header className="explorer-intro"><div><span className="eyebrow">PATIENT REPORT OVERVIEW</span><h2>Select a patient, then review their tests</h2><p>Each patient appears once. Open their profile to see completed, pending and attention-needed reports.</p></div><div className="diagnostic-summary"><strong>{patients.length}</strong><span>patients with recorded investigations</span></div></header>
+    <div className="quick-filter-bar diagnostic-filters"><label className="filter-search">Search patient name or ID<input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Enter patient name, UHID or serial number…"/></label><label>Report status<select value={reportStatus} onChange={e=>setReportStatus(e.target.value)}><option value="all">All patients</option><option value="attention">Needs review</option><option value="pending">Has pending tests</option><option value="complete">All tests completed</option></select></label>{(query||reportStatus!=="all")&&<button onClick={()=>{setQuery("");setReportStatus("all")}}>Clear filters</button>}</div>
+    <div className="diagnostic-layout">
+      <aside className="patient-report-list">{filteredPatients.map((item)=>{const done=item.reports.filter(r=>/done|completed/i.test(r.status)).length;const attention=item.reports.filter(r=>/abnormal|critical/i.test(r.result_flag)).length;return <button key={item.id} className={patient?.id===item.id?"active":""} onClick={()=>setSelected(item.id)}><span className="patient-initials">{name(item.name).split(" ").map(x=>x[0]).join("").slice(0,2)}</span><span><strong>{name(item.name)}</strong><small>{item.id} · {done} of {item.reports.length} completed</small></span>{attention>0&&<b>{attention} needs review</b>}</button>})}{!filteredPatients.length&&<div className="empty">No patient matches this search.</div>}</aside>
+      {patient&&<section className="patient-report-detail card"><div className="card-head"><div><span className="eyebrow">SELECTED PATIENT</span><h2>{name(patient.name)}</h2><p>{patient.reports.length} recorded tests in this care journey.</p></div><div className="report-progress"><strong>{patient.reports.filter(r=>/done|completed/i.test(r.status)).length}/{patient.reports.length}</strong><span>completed</span></div></div><div className="report-cards">{patient.reports.map((row)=><article key={row.investigation_id}><div><strong>{nice(row.test_type)}</strong>{state(row.status)}</div><p>Ordered {date(row.ordered_date)} · Due {date(row.due_date)}</p><footer><span>{row.completed_date?"Completed "+date(row.completed_date):"Result pending"}</span><b className={/abnormal|critical/i.test(row.result_flag)?"attention":""}>{nice(row.result_flag||"No result yet")}</b></footer></article>)}</div></section>}
+    </div>
+  </section>;
+}
+
+function DeliveryReadinessExplorer({ rows, summary, services }: { rows:Row[]; summary:Row; services:Row }) {
+  const parseReasons=(value:unknown):string[]=>{
+    if(Array.isArray(value)) return value.map(String);
+    const text=String(value||"").trim();
+    if(!text) return [];
+    try { const parsed=JSON.parse(text); if(Array.isArray(parsed)) return parsed.map(String); } catch {}
+    return text.split(",").map(item=>item.trim()).filter(Boolean);
+  };
+  const reasonLabel=(value:string)=>({anaemia_mild:"Mild anaemia",twins:"Twin pregnancy",twins_mcda:"MCDA twin pregnancy",fgr:"Fetal growth restriction",prior_two_cs:"Two previous C-sections"}[value]||nice(value));
+  const patientIdentity=(row:Row)=>{
+    const raw=name(String(row.name||""));
+    const serial=String(row.portal_mother_id||row.mother_id||raw.match(/(\d{5,})$/)?.[1]||"Record pending");
+    return {display:raw.replace(/\s+\d{5,}$/,""),serial};
+  };
+  const [query,setQuery]=useState(""),[stage,setStage]=useState(""),[reason,setReason]=useState(""),[selected,setSelected]=useState("");
+  const stages=Array.from(new Set(rows.map(row=>String(row.stage)))).filter(Boolean).sort();
+  const reasons=Array.from(new Set(rows.flatMap(row=>parseReasons(row.reason)))).sort();
+  const filtered=rows.filter(row=>{const identity=patientIdentity(row),rowReasons=parseReasons(row.reason);return (identity.display+" "+identity.serial).toLowerCase().includes(query.toLowerCase())&&(!stage||row.stage===stage)&&(!reason||rowReasons.includes(reason));});
+  const selectedRow=filtered.find(row=>patientIdentity(row).serial===selected)||filtered[0];
+  const reset=()=>{setQuery("");setStage("");setReason("");setSelected("")};
+  return <section className="delivery-readiness-explorer">
+    <header className="explorer-intro readiness-intro"><div><span className="eyebrow">ARRIVAL PREPARATION</span><h2>Know who needs preparation before delivery</h2><p>Start with a patient, understand the recorded readiness reasons, then coordinate beds, blood and the receiving team.</p></div><div className="explorer-guide"><b>1</b> Find patient <i/><b>2</b> Review needs <i/><b>3</b> Confirm resources</div></header>
+    <div className="readiness-capacity-strip"><article><span>Available beds</span><strong>{summary.beds.available}</strong><small>Recorded capacity</small></article><article><span>PRBC units</span><strong>{summary.blood_units}</strong><small>Matching still required</small></article><article><span>On-call team</span><strong>{summary.on_call.length}</strong><small>At snapshot time</small></article><article><span>C-section service</span><strong>{services.c_section?"Ready":"Check"}</strong><small>{nice(services.emergency_obstetric_care)}</small></article></div>
+    <div className="quick-filter-bar readiness-filters"><label className="filter-search">Find a patient<input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search name, UHID or serial number…"/></label><label>Care stage<select value={stage} onChange={e=>setStage(e.target.value)}><option value="">All care stages</option>{stages.map(value=><option key={value} value={value}>{nice(value)}</option>)}</select></label><label>Preparation need<select value={reason} onChange={e=>setReason(e.target.value)}><option value="">All recorded needs</option>{reasons.map(value=><option key={value} value={value}>{reasonLabel(value)}</option>)}</select></label>{(query||stage||reason)&&<button onClick={reset}>Clear filters</button>}</div>
+    <div className="readiness-layout">
+      <aside className="readiness-patient-list"><div className="readiness-list-title"><div><span className="eyebrow">PATIENT WORKLIST</span><h3>{filtered.length} patients</h3></div><small>Select one to view details</small></div>{filtered.map(row=>{const identity=patientIdentity(row),isActive=selectedRow&&patientIdentity(selectedRow).serial===identity.serial;return <button key={identity.serial} className={isActive?"active":""} onClick={()=>setSelected(identity.serial)}><span className="patient-initials">{identity.display.split(" ").map(part=>part[0]).join("").slice(0,2)}</span><span><strong>{identity.display}</strong><small>{identity.serial} · {nice(row.stage)} · {row.gestation_weeks} weeks</small></span><b>{parseReasons(row.reason).length} needs</b></button>})}{!filtered.length&&<div className="empty">No patient matches these filters.</div>}</aside>
+      {selectedRow&&(()=>{const identity=patientIdentity(selectedRow),patientReasons=parseReasons(selectedRow.reason);return <section className="readiness-patient-detail card"><div className="card-head"><div><span className="eyebrow">SELECTED PATIENT</span><h2>{identity.display}</h2><p>{identity.serial} · {nice(selectedRow.stage)} · {selectedRow.gestation_weeks} weeks</p></div><span className="readiness-state busy">Preparation needed</span></div><div className="readiness-date-panel"><span>Expected delivery date</span><strong>{new Date(String(selectedRow.edd).slice(0,10)+"T12:00:00").toLocaleDateString("en-IN",{day:"numeric",month:"long",year:"numeric"})}</strong><small>Use the recorded date to plan; confirm any change with the clinical team.</small></div><div className="readiness-needs"><h3>What the team should prepare for</h3><p>These are clinician-recorded context markers, not an automated risk score.</p><div>{patientReasons.map(item=><span key={item}>{reasonLabel(item)}</span>)}</div></div><div className="readiness-actions"><article><b>1</b><span><strong>Review the record</strong><small>Confirm the source note and current plan.</small></span></article><article><b>2</b><span><strong>Check resources</strong><small>Verify bed, blood and relevant service availability.</small></span></article><article><b>3</b><span><strong>Confirm receiving team</strong><small>Record human acceptance before transfer or admission.</small></span></article></div><div className="callout">Resource matching, theatre booking and receiving-team acceptance always require human confirmation.</div></section>})()}
+    </div>
+  </section>;
+}
+
+function BloodBankExplorer({ rows }: { rows: Row[] }) {
+  const order = ["O+", "O-", "A+", "A-", "B+", "B-", "AB+", "AB-"];
+  const groups = Array.from(new Set(rows.map((row) => String(row.blood_group)))).sort((a,b)=>order.indexOf(a)-order.indexOf(b));
+  const components = Array.from(new Set(rows.map((row) => String(row.component)))).sort();
+  const [query,setQuery]=useState(""),[group,setGroup]=useState(""),[component,setComponent]=useState(""),[availability,setAvailability]=useState("all");
+  const filtered = rows.filter((row)=>{
+    const haystack=(row.blood_group+" "+row.component).toLowerCase();
+    const units=Number(row.units_available||0);
+    return haystack.includes(query.toLowerCase())&&(!group||row.blood_group===group)&&(!component||row.component===component)&&(availability==="all"||(availability==="available"&&units>0)||(availability==="low"&&units>0&&units<=3)||(availability==="empty"&&units===0));
+  });
+  return <section className="filtered-workspace">
+    <header className="explorer-intro"><div><span className="eyebrow">BLOOD BANK FINDER</span><h2>Find the required blood stock quickly</h2><p>Search or choose a blood group, component and availability. Recorded stock is shown instantly.</p></div><div className="diagnostic-summary"><strong>{filtered.reduce((sum,row)=>sum+Number(row.units_available||0),0)}</strong><span>matching units recorded</span></div></header>
+    <div className="quick-filter-bar"><label className="filter-search">Search blood stock<input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search A+, O-, plasma, platelets…"/></label><label>Blood group<select value={group} onChange={e=>setGroup(e.target.value)}><option value="">All blood groups</option>{groups.map(value=><option key={value} value={value}>{value}</option>)}</select></label><label>Component<select value={component} onChange={e=>setComponent(e.target.value)}><option value="">All components</option>{components.map(value=><option key={value} value={value}>{nice(value)}</option>)}</select></label><label>Availability<select value={availability} onChange={e=>setAvailability(e.target.value)}><option value="all">All stock</option><option value="available">Available</option><option value="low">Low stock (1–3)</option><option value="empty">No stock</option></select></label>{(query||group||component||availability!=="all")&&<button onClick={()=>{setQuery("");setGroup("");setComponent("");setAvailability("all")}}>Clear filters</button>}</div>
+    <div className="blood-selector">{groups.map(value=>{const units=rows.filter(row=>row.blood_group===value).reduce((sum,row)=>sum+Number(row.units_available||0),0);return <button key={value} className={group===value?"active":""} onClick={()=>setGroup(group===value?"":value)}><strong>{value}</strong><span>{units} units</span></button>})}</div>
+    <Card title="Matching blood stock" hint={`${filtered.length} component records match your filters. Confirm compatibility and issue approval separately.`}><Table headers={["Blood group","Component","Units available","Availability","Snapshot"]} rows={filtered.map(row=>[<strong key={row.blood_group}>{row.blood_group}</strong>,nice(row.component),row.units_available,<span key="stock" className={Number(row.units_available)===0?"pill amber":Number(row.units_available)<=3?"pill neutral":"pill green"}>{Number(row.units_available)===0?"No stock":Number(row.units_available)<=3?"Low stock":"Available"}</span>,row.snapshot_date])}/></Card>
+  </section>;
+}
+
+function EquipmentExplorer({ rows }: { rows: Row[] }) {
+  const types=Array.from(new Set(rows.map(row=>String(row.type)))).sort(), wards=Array.from(new Set(rows.map(row=>String(row.ward)))).sort(), statuses=Array.from(new Set(rows.map(row=>String(row.status)))).sort();
+  const [query,setQuery]=useState(""),[type,setType]=useState(""),[ward,setWard]=useState(""),[status,setStatus]=useState("");
+  const filtered=rows.filter(row=>(row.type+" "+row.ward).toLowerCase().includes(query.toLowerCase())&&(!type||row.type===type)&&(!ward||row.ward===ward)&&(!status||row.status===status));
+  return <section className="filtered-workspace"><div className="quick-filter-bar"><label className="filter-search">Search equipment<input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search monitor, ventilator or ward…"/></label><label>Equipment type<select value={type} onChange={e=>setType(e.target.value)}><option value="">All equipment</option>{types.map(value=><option key={value} value={value}>{nice(value)}</option>)}</select></label><label>Ward<select value={ward} onChange={e=>setWard(e.target.value)}><option value="">All wards</option>{wards.map(value=><option key={value} value={value}>{value}</option>)}</select></label><label>Status<select value={status} onChange={e=>setStatus(e.target.value)}><option value="">All statuses</option>{statuses.map(value=><option key={value} value={value}>{nice(value)}</option>)}</select></label>{(query||type||ward||status)&&<button onClick={()=>{setQuery("");setType("");setWard("");setStatus("")}}>Clear filters</button>}</div><Card title="Equipment & biomedical resources" hint={`${filtered.length} of ${rows.length} records shown. Installed and functional quantities come from the ward ledger.`}><Table headers={["Equipment","Ward","Installed","Functional","Status","Last service"]} rows={filtered.map(row=>[nice(row.type),row.ward,row.installed_quantity,row.functional_quantity,state(row.status),row.last_service_date])}/></Card></section>;
+}
+
+function StaffingExplorer({ rows, data }: { rows: Row[]; data: Row }) {
+  const [tab,setTab]=useState("posts"),[query,setQuery]=useState(""),[filter,setFilter]=useState("");
+  const source:Row[]=tab==="posts"?(data.posts||[]):tab==="doctors"?rows:(data.rosters||[]);
+  const options=Array.from(new Set(source.map(row=>String(tab==="posts"?row.cadre:tab==="doctors"?row.specialty:row.shift)))).filter(Boolean).sort();
+  const filtered=source.filter(row=>Object.values(row).join(" ").toLowerCase().includes(query.toLowerCase())&&(!filter||String(tab==="posts"?row.cadre:tab==="doctors"?row.specialty:row.shift)===filter));
+  return <Card title="People & coverage" hint="Search the establishment, clinical team or recorded shift roster."><div className="inner-tabs">{[["posts","Staff establishment"],["doctors","Doctors & units"],["rosters","Shift & on-call roster"]].map(([id,title])=><button className={tab===id?"active":""} key={id} onClick={()=>{setTab(id);setFilter("");setQuery("")}}>{title}</button>)}</div><div className="quick-filter-bar compact"><label className="filter-search">Search {tab==="posts"?"staff posts":tab==="doctors"?"doctors":"roster"}<input value={query} onChange={e=>setQuery(e.target.value)} placeholder={tab==="doctors"?"Name, qualification, unit…":tab==="rosters"?"Name, role, ward…":"Cadre or role…"}/></label><label>{tab==="posts"?"Cadre":tab==="doctors"?"Specialty":"Shift"}<select value={filter} onChange={e=>setFilter(e.target.value)}><option value="">All</option>{options.map(value=><option key={value} value={value}>{nice(value)}</option>)}</select></label>{(query||filter)&&<button onClick={()=>{setQuery("");setFilter("")}}>Clear filters</button>}</div>{tab==="posts"?<Table headers={["Cadre","Sanctioned","In position","Vacancies"]} rows={filtered.map(row=>[row.cadre,row.sanctioned,row.in_position,row.sanctioned-row.in_position])}/>:tab==="doctors"?<Table headers={["Fictional clinician","Specialty","Designation","Qualification","Unit","Experience"]} rows={filtered.map(row=>[name(row.name),row.specialty,row.designation,row.qualification,row.unit_code||"—",row.experience_years+" years"])}/>:<Table headers={["Staff member","Role","Shift","Time","Ward"]} rows={filtered.map(row=>[name(row.name),row.role,row.shift,row.start_time+"–"+row.end_time,row.ward])}/>}</Card>;
+}
+
+function AmbulanceExplorer({ rows }: { rows: Row[] }) {
+  const [query,setQuery]=useState(""),[type,setType]=useState(""),[status,setStatus]=useState("");
+  const types=Array.from(new Set(rows.map(row=>String(row.type)))).sort(),statuses=Array.from(new Set(rows.map(row=>String(row.status)))).sort();
+  const filtered=rows.filter(row=>(row.vehicle_label+" "+row.type).toLowerCase().includes(query.toLowerCase())&&(!type||row.type===type)&&(!status||row.status===status));
+  return <section className="filtered-workspace"><div className="quick-filter-bar"><label className="filter-search">Search ambulance<input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Vehicle number or ambulance type…"/></label><label>Type<select value={type} onChange={e=>setType(e.target.value)}><option value="">All types</option>{types.map(value=><option key={value} value={value}>{nice(value)}</option>)}</select></label><label>Status<select value={status} onChange={e=>setStatus(e.target.value)}><option value="">All statuses</option>{statuses.map(value=><option key={value} value={value}>{nice(value)}</option>)}</select></label>{(query||type||status)&&<button onClick={()=>{setQuery("");setType("");setStatus("")}}>Clear filters</button>}</div><Card title="Ambulance fleet" hint={`${filtered.length} of ${rows.length} vehicles shown. Status is a recorded snapshot, not live dispatch tracking.`}><Table headers={["Vehicle","Type","Status","Oxygen","Neonatal transport","Last service"]} rows={filtered.map(row=>[row.vehicle_label,nice(row.type),state(row.status),row.oxygen_supported?"Yes":"No",row.neonatal_transport?"Yes":"No",row.last_service_date])}/></Card></section>;
+}
 export function OperationalOverview({
   summary,
   structure,
@@ -417,11 +587,10 @@ export function SnapshotView({
   setFilters: (v: Row) => void;
   navigate: (v: string) => void;
 }) {
-  const [tab, setTab] = useState("posts");
   const rows: Row[] = data.items || [];
   if(view === "care-gap-map") return <CareGapMap data={data} filters={filters} setFilters={setFilters} navigate={navigate}/>;
   if(view === "quality-board") return <section className="card"><h2>Ward quality</h2><p>{data.source_notes}</p><p>Groups under 10 mothers and sparse outcomes are withheld. Missing values are never shown as zero.</p><div style={{overflowX:"auto"}}><table><thead><tr><th>Recorded ward</th><th>People band</th><th>Recorded missed visits</th><th>Median referral turnaround</th><th>Recorded vaccine coverage</th></tr></thead><tbody>{rows.map((r,i)=><tr key={i}><td>{r.ward}</td><td>{r.suppressed?"Suppressed":r.people_band}</td><td>{r.missed_visit_pct==null?"Withheld / insufficient":r.missed_visit_pct+"%"}</td><td>{r.median_referral_days==null?"Withheld / insufficient":r.median_referral_days.toFixed(1)+" days"}</td><td>{r.recorded_vaccination_coverage_pct==null?"Withheld / insufficient":r.recorded_vaccination_coverage_pct+"%"}</td></tr>)}</tbody></table></div>{!rows.length&&<p>No ward assignments recorded for this facility.</p>}</section>;
-  if(view === "capacity") return <section className="card"><h2>Capacity & readiness</h2><p>Recorded snapshots only. Confirm with the receiving team before travel or transfer. Scheduled staff does not confirm presence.</p><div style={{overflowX:"auto"}}><table><thead><tr><th>Resource</th><th>Ward / component / person</th><th>Recorded quantity</th><th>Last confirmed</th><th>Meaning</th></tr></thead><tbody>{rows.map((r,i)=><tr key={i}><td>{r.resource}</td><td>{r.location}</td><td>{r.recorded_available ?? "Not recorded"}</td><td>{r.last_confirmed || "Not confirmed"}</td><td>{r.basis}</td></tr>)}</tbody></table></div>{!rows.length&&<p>No capacity snapshots recorded for this facility.</p>}</section>;
+  if(view === "capacity") return <CapacityExplorer rows={rows} navigate={navigate}/>;
 
   if (view === "beds")
     return (
@@ -522,210 +691,13 @@ export function SnapshotView({
       </>
     );
   if (view === "critical")
-    return (
-      <>
-        <div className="critical-grid">
-          {rows.map((c) => (
-            <section className="card critical-card" key={c.name}>
-              <span className="critical-icon">✚</span>
-              <h2>{c.name}</h2>
-              <strong>
-                {c.occupied}
-                <small> / {c.capacity}</small>
-              </strong>
-              <div className="capacity-track">
-                <i style={{ width: (c.occupied / c.capacity) * 100 + "%" }} />
-              </div>
-              <p>
-                {c.available} beds available · {c.ventilators || 0} functional
-                ventilators
-              </p>
-              <span className="pill neutral">Recorded snapshot</span>
-            </section>
-          ))}
-        </div>
-        <Card
-          title="Critical-care admission log"
-          hint="Recent recorded admissions. Patient identities are omitted from this capacity view."
-        >
-          <Table
-            headers={[
-              "Admission ID",
-              "Care location",
-              "Admitted",
-              "Discharged",
-              "Reason",
-            ]}
-            rows={(data.admissions || []).map((r: Row) => [
-              r.admission_id,
-              r.ward,
-              r.admitted_at,
-              r.discharged_at || "Currently admitted",
-              nice(r.admission_reason),
-            ])}
-          />
-        </Card>
-      </>
-    );
-  if (view === "blood") {
-    const groups = Array.from(new Set(rows.map((r) => r.blood_group)));
-    return (
-      <>
-        <div className="blood-groups">
-          {groups.map((g) => (
-            <div className="card blood-group" key={g}>
-              <span>♦</span>
-              <h2>{g}</h2>
-              <strong>
-                {count(
-                  rows
-                    .filter((r) => r.blood_group === g)
-                    .reduce((n, r) => n + r.units_available, 0),
-                )}
-              </strong>
-              <small>units across components</small>
-            </div>
-          ))}
-        </div>
-        <Card
-          title="Blood bank stock"
-          hint="Latest daily component snapshot. This is stock visibility, not a cross-match or issue approval."
-        >
-          <Table
-            headers={[
-              "Blood group",
-              "Component",
-              "Units available",
-              "Snapshot",
-            ]}
-            rows={rows.map((r) => [
-              <strong key={r.blood_group}>{r.blood_group}</strong>,
-              r.component,
-              r.units_available,
-              r.snapshot_date,
-            ])}
-          />
-        </Card>
-      </>
-    );
-  }
-  if (view === "staffing")
-    return (
-      <Card
-        title="People & coverage"
-        hint="Sanctioned posts, fictional clinicians and the snapshot shift roster."
-      >
-        <div className="inner-tabs">
-          {[
-            ["posts", "Staff establishment"],
-            ["doctors", "Doctors & units"],
-            ["rosters", "Shift & on-call roster"],
-          ].map(([id, title]) => (
-            <button
-              className={tab === id ? "active" : ""}
-              key={id}
-              onClick={() => setTab(id)}
-            >
-              {title}
-            </button>
-          ))}
-        </div>
-        {tab === "posts" ? (
-          <Table
-            headers={["Cadre", "Sanctioned", "In position", "Vacancies"]}
-            rows={data.posts.map((r: Row) => [
-              r.cadre,
-              r.sanctioned,
-              r.in_position,
-              r.sanctioned - r.in_position,
-            ])}
-          />
-        ) : tab === "doctors" ? (
-          <Table
-            headers={[
-              "Fictional clinician",
-              "Specialty",
-              "Designation",
-              "Qualification",
-              "Unit",
-              "Experience",
-            ]}
-            rows={rows.map((r) => [
-              name(r.name),
-              r.specialty,
-              r.designation,
-              r.qualification,
-              r.unit_code || "—",
-              r.experience_years + " years",
-            ])}
-          />
-        ) : (
-          <Table
-            headers={["Staff member", "Role", "Shift", "Time", "Ward"]}
-            rows={data.rosters.map((r: Row) => [
-              name(r.name),
-              r.role,
-              r.shift,
-              r.start_time + "–" + r.end_time,
-              r.ward,
-            ])}
-          />
-        )}
-      </Card>
-    );
+    return <CriticalCareExplorer units={rows} admissions={data.admissions || []}/>;
+  if (view === "blood") return <BloodBankExplorer rows={rows}/>;
+  if (view === "staffing") return <StaffingExplorer rows={rows} data={data}/>;
+  if (view === "equipment") return <EquipmentExplorer rows={rows}/>;
+  if (view === "ambulances") return <AmbulanceExplorer rows={rows}/>;
   if (view === "readiness")
-    return (
-      <>
-        <div className="metrics">
-          <Metric
-            title="Available beds"
-            value={summary.beds.available}
-            detail="Recorded source availability"
-          />
-          <Metric
-            title="PRBC units"
-            value={summary.blood_units}
-            detail="All groups; matching is still required"
-          />
-          <Metric
-            title="Roster on call"
-            value={summary.on_call.length}
-            detail="At snapshot time"
-          />
-          <Metric
-            title="C-section service"
-            value={data.services.c_section ? "Configured" : "Not configured"}
-            detail={data.services.emergency_obstetric_care}
-          />
-        </div>
-        <Card
-          title="Arrival preparation worklist"
-          hint="Clinician-confirmed flags are preserved. Availability does not establish that a patient is clinically safe."
-        >
-          <Table
-            headers={[
-              "Mother",
-              "Stage",
-              "Gestation",
-              "EDD",
-              "Clinician-recorded reason",
-            ]}
-            rows={rows.map((r) => [
-              name(r.name),
-              r.stage,
-              r.gestation_weeks + " weeks",
-              r.edd,
-              r.reason,
-            ])}
-          />
-          <div className="callout">
-            Individual blood matching, OT booking, reservations and
-            receiving-team acceptance require human confirmation in the later
-            workflow phase.
-          </div>
-        </Card>
-      </>
-    );
+    return <DeliveryReadinessExplorer rows={rows} summary={summary} services={data.services}/>;
   const views: Record<
     string,
     {
@@ -735,51 +707,11 @@ export function SnapshotView({
       row: (r: Row) => React.ReactNode[];
     }
   > = {
-    equipment: {
-      title: "Equipment & biomedical resources",
-      hint: "Installed and functional quantities are read from the same ward ledger.",
-      headers: [
-        "Equipment",
-        "Ward",
-        "Installed",
-        "Functional",
-        "Status",
-        "Last service",
-      ],
-      row: (r) => [
-        nice(r.type),
-        r.ward,
-        r.installed_quantity,
-        r.functional_quantity,
-        state(r.status),
-        r.last_service_date,
-      ],
-    },
     organisation: {
       title: "Organisation & responsible officers",
       hint: "All office holders are fictional.",
       headers: ["Role", "Fictional office holder", "Demo email", "Appointed"],
       row: (r) => [r.role_name, name(r.person_name), r.email, r.appointed_on],
-    },
-    ambulances: {
-      title: "Ambulance fleet",
-      hint: "Vehicle status is a recorded snapshot. GPS tracking and dispatch actions are not live.",
-      headers: [
-        "Vehicle",
-        "Type",
-        "Status",
-        "Oxygen",
-        "Neonatal transport",
-        "Last service",
-      ],
-      row: (r) => [
-        r.vehicle_label,
-        r.type,
-        state(r.status),
-        r.oxygen_supported ? "Yes" : "No",
-        r.neonatal_transport ? "Yes" : "No",
-        r.last_service_date,
-      ],
     },
     census: {
       title: "Daily delivery census",
@@ -877,29 +809,8 @@ export function SnapshotView({
         state(r.outcome),
       ],
     },
-    diagnostics: {
-      title: "Diagnostics & result flow",
-      hint: "Recorded orders within your cohort. Upload and automatic care-gap completion remain a separate workflow.",
-      headers: [
-        "Mother",
-        "Test",
-        "Ordered",
-        "Due",
-        "Completed",
-        "Status",
-        "Result flag",
-      ],
-      row: (r) => [
-        name(r.mother_name),
-        nice(r.test_type),
-        r.ordered_date,
-        r.due_date,
-        r.completed_date || "Pending",
-        state(r.status),
-        nice(r.result_flag),
-      ],
-    },
   };
+  if (view === "diagnostics") return <DiagnosticsExplorer rows={rows}/>;
   const v = views[view];
   return v ? (
     <Card title={v.title} hint={v.hint}>

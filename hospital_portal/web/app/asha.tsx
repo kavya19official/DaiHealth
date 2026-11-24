@@ -128,6 +128,9 @@ export function AshaCopilot({ api, user }: { api: Api; user: Row }) {
   const [assignForm, setAssignForm] = useState({ asha_id: "", mother_id: "", village_id: "", household_label: "" });
   const [motherQuery, setMotherQuery] = useState("");
   const [motherResults, setMotherResults] = useState<Row[]>([]);
+  const [adminTab, setAdminTab] = useState<"overview" | "assign">("overview");
+  const [selectedWorker, setSelectedWorker] = useState("");
+  const [selectedVillage, setSelectedVillage] = useState("");
 
   useEffect(() => {
     if (!isWorker) return;
@@ -419,66 +422,32 @@ export function AshaCopilot({ api, user }: { api: Api; user: Row }) {
   const stats = dash?.stats || {};
 
   if (!isWorker) {
+    const workers: Row[] = oversight?.workers || [];
+    const villages: Row[] = roster?.villages || [];
+    const activeWorker = workers.find((worker) => worker.asha_id === selectedWorker) || workers[0];
+    const totals = workers.reduce((value, worker) => ({
+      assigned: value.assigned + Number(worker.assigned || 0),
+      visits: value.visits + Number(worker.visits_7d || 0),
+      notes: value.notes + Number(worker.notes || 0),
+      camps: value.camps + Number(worker.camps || 0),
+    }), { assigned: 0, visits: 0, notes: 0, camps: 0 });
     return (
-      <section className="card asha-admin">
-        <div className="card-head">
-          <div>
-            <h2>ASHA Copilot · oversight</h2>
-            <p>
-              Community health worker beats, visits and health camps · {label}
-            </p>
-          </div>
-        </div>
-        {oversight && (
-          <>
-            <h3>Workers</h3>
-            <div className="table-scroll">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Worker</th>
-                    <th>Assigned</th>
-                    <th>Visits · 7d</th>
-                    <th>Notes</th>
-                    <th>Camps</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {oversight.workers.map((w: Row) => (
-                    <tr key={w.asha_id}>
-                      <td>{String(w.name || "").replace(/^SYNTHETIC /, "")}</td>
-                      <td>{w.assigned}</td>
-                      <td>{w.visits_7d}</td>
-                      <td>{w.notes}</td>
-                      <td>{w.camps}</td>
-                    </tr>
-                  ))}
-                  {!oversight.workers.length && (
-                    <tr>
-                      <td colSpan={5} className="empty">
-                        No ASHA workers in this facility yet.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </>
-        )}
-        {roster && (
-          <>
-            <h3>Villages & assignment</h3>
-            <div className="asha-villages">
-              {roster.villages.map((v: Row) => (
-                <span key={v.id} className="pill neutral">
-                  {v.name} · {v.anganwadi_name || "no anganwadi"}
-                </span>
-              ))}
-              {!roster.villages.length && (
-                <span className="small">No villages defined.</span>
-              )}
-            </div>
-            <form className="asha-assign" onSubmit={async (e) => {
+      <section className="community-admin">
+        <header className="community-hero">
+          <div><span className="eyebrow">COMMUNITY CARE</span><h2>Connect hospital care with families at home</h2><p>Community Care helps the hospital coordinate ASHA workers who visit assigned families, record field updates—even offline—and sync those updates back to the care team.</p></div>
+          <div className="community-purpose"><article><b>1</b><strong>Assign families</strong><span>Link a patient to a worker and village</span></article><article><b>2</b><strong>Complete field visits</strong><span>Record visits, notes and camp activity</span></article><article><b>3</b><strong>Sync with hospital</strong><span>Bring community updates into one record</span></article></div>
+        </header>
+        <div className="community-stats"><article><strong>{workers.length}</strong><span>ASHA workers<small>In this facility</small></span></article><article><strong>{totals.assigned}</strong><span>Assigned families<small>Current field coverage</small></span></article><article><strong>{totals.visits}</strong><span>Visits this week<small>Recorded in 7 days</small></span></article><article><strong>{totals.camps}</strong><span>Health camps<small>Recorded activity</small></span></article></div>
+        <nav className="community-tabs" aria-label="Community care sections"><button className={adminTab==="overview"?"active":""} onClick={()=>setAdminTab("overview")}>Coverage overview</button><button className={adminTab==="assign"?"active":""} onClick={()=>setAdminTab("assign")}>Assign a patient</button></nav>
+        {adminTab === "overview" && <>
+          <section><div className="card-head"><div><h2>Community health workers</h2><p>Select a worker to understand their current field workload.</p></div>{activeWorker&&<span className="pill neutral">Selected: {String(activeWorker.name||"").replace(/^SYNTHETIC /,"")}</span>}</div>
+            <div className="worker-grid">{workers.map((worker)=><button className={activeWorker?.asha_id===worker.asha_id?"worker-card active":"worker-card"} key={worker.asha_id} onClick={()=>setSelectedWorker(worker.asha_id)}><header><span className="worker-avatar">{String(worker.name||"A").replace(/^SYNTHETIC /,"").split(" ").map((part:string)=>part[0]).join("").slice(0,2)}</span><span><strong>{String(worker.name||"").replace(/^SYNTHETIC /,"")}</strong><small>Community health worker</small></span></header><div><span><b>{worker.assigned}</b> families</span><span><b>{worker.visits_7d}</b> visits</span><span><b>{worker.notes}</b> notes</span></div></button>)}</div>
+            {!workers.length&&<div className="empty">No ASHA workers are assigned to this facility yet.</div>}
+          </section>
+          <section><div className="card-head"><div><h2>Villages and Anganwadi coverage</h2><p>Choose a village to focus the coverage view before assigning new families.</p></div></div><div className="village-strip">{villages.map((v)=><button key={v.id} className={selectedVillage===v.id?"active":""} onClick={()=>setSelectedVillage(v.id)}><strong>{String(v.name).replace(/^SYNTHETIC /,"")}</strong> · {String(v.anganwadi_name||"Anganwadi not recorded").replace(/^SYNTHETIC /,"")}</button>)}</div>{!villages.length&&<div className="empty">No village coverage has been configured.</div>}</section>
+        </>}
+        {adminTab === "assign" && roster && (
+          <form className="card community-assign-card asha-assign" onSubmit={async (e) => {
               e.preventDefault();
               try {
                 await api("/asha/assignments", {
@@ -497,7 +466,7 @@ export function AshaCopilot({ api, user }: { api: Api; user: Row }) {
                 setError((err as Error).message);
               }
             }}>
-              <h4>Assign beneficiary to worker</h4>
+              <span className="eyebrow">NEW COMMUNITY ASSIGNMENT</span><h3>Connect a patient with an ASHA worker</h3><p>Choose the worker and village, then find one patient from the permitted registry.</p>
               <div className="form-grid">
                 <label>
                   ASHA worker
@@ -562,10 +531,9 @@ export function AshaCopilot({ api, user }: { api: Api; user: Row }) {
                 </div>
               )}
               <button className="primary" disabled={!assignForm.asha_id || !assignForm.mother_id}>
-                Assign beneficiary →
+                Confirm assignment
               </button>
             </form>
-          </>
         )}
         {error && <div role="alert" className="error">{error}</div>}
       </section>

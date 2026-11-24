@@ -93,6 +93,13 @@ export function CarePanel({
   const canWrite = permissions.includes("care.write"),
     canReview = permissions.includes("care.review"),
     clinical = ["consultant", "resident"].includes(role);
+  const selectedPatient = options.mothers.find((m: Row) => m.id === mother);
+  const pendingReviews = items.filter((item) =>
+    ["pending_review", "acknowledged", "needs_correction"].includes(item.status),
+  ).length;
+  const approvedReviews = items.filter((item) =>
+    ["approved", "closed"].includes(item.status),
+  ).length;
   const load = useCallback(async () => {
     setBusy(true);
     setError("");
@@ -328,6 +335,21 @@ export function CarePanel({
         </div>
       )}
       {busy && <p role="status">Loading / saving linked records…</p>}
+      {reviews && (
+        <section className="review-journey" aria-label="Clinical review workflow">
+          <div className={mother ? "complete" : "active"}>
+            <b>1</b><span><strong>Choose patient</strong><small>Open an authorised record</small></span>
+          </div>
+          <i />
+          <div className={mother ? "active" : ""}>
+            <b>2</b><span><strong>Write draft</strong><small>Use recorded facts and plain language</small></span>
+          </div>
+          <i />
+          <div>
+            <b>3</b><span><strong>Clinical review</strong><small>Approve, correct or close</small></span>
+          </div>
+        </section>
+      )}
       {!reviews && (
         <section className="card">
           <div className="card-head">
@@ -403,16 +425,16 @@ export function CarePanel({
           </div>
         </section>
       )}
-      <div className="care-columns">
-        <section className="card" id="care-create">
+      <div className={"care-columns" + (reviews ? " review-columns" : "")}>
+        <section className={"card" + (reviews ? " review-create-card" : "")} id="care-create">
           <div className="card-head">
             <div>
               <h2>
-                {reviews ? "Create a review draft" : "Create a care task"}
+                {reviews ? "Start a clinical review" : "Create a care task"}
               </h2>
               <p>
                 {reviews
-                  ? "Only consultant-approved summaries appear as confirmed next steps."
+                  ? "Choose a patient, capture the recorded context, then send it to the review inbox."
                   : "Keep maternal and child identities separate, with an explicit linked record."}
               </p>
             </div>
@@ -420,6 +442,17 @@ export function CarePanel({
           {canWrite ? (
             <form className="form-body care-form" onSubmit={create}>
               {patientFields()}
+              {reviews && selectedPatient && (
+                <div className="selected-review-patient">
+                  <span>{compact(selectedPatient.details.name).split(" ").map((part: string) => part[0]).join("").slice(0, 2)}</span>
+                  <div>
+                    <small>SELECTED PATIENT</small>
+                    <strong>{compact(selectedPatient.details.name)}</strong>
+                    <p>{selectedPatient.source_id} · authorised record</p>
+                  </div>
+                  <button type="button" onClick={() => setMother("")}>Change</button>
+                </div>
+              )}
               {sourceGap && (
                 <div className="notice">
                   Linked: {sourceGap.expected_item} · {sourceGap.due_date}
@@ -469,18 +502,20 @@ export function CarePanel({
               {reviews ? (
                 <>
                   <label>
-                    Recorded concern / plain-language next steps
+                    What was recorded and what happens next?
                     <textarea
                       name="content"
+                      placeholder="Summarise the recorded concern, agreed next step and who should follow up. Do not add an unverified diagnosis."
                       required
                       minLength={5}
                       maxLength={4000}
                     />
                   </label>
                   <label>
-                    Source visit / report reference
+                    Supporting visit or report
                     <input
                       name="source"
+                      placeholder="Example: Postnatal visit · 24 Nov 2026"
                       required
                       minLength={3}
                       maxLength={1000}
@@ -528,14 +563,15 @@ export function CarePanel({
                 </>
               )}
               <button className="primary" disabled={busy || !mother}>
-                {reviews ? "Save for review" : "Assign task"}
+                {reviews ? "Send to review inbox" : "Assign task"}
               </button>
+              {reviews && <p className="review-safety-note">Nothing is published to the patient until an authorised clinician approves it.</p>}
             </form>
           ) : (
             <div className="empty">Your role has read-only access.</div>
           )}
         </section>
-        <section className="card">
+        <section className={"card" + (reviews ? " review-inbox-card" : "")}>
           <div className="card-head">
             <div>
               <h2>{reviews ? "Review inbox" : "Owned follow-up queue"}</h2>
@@ -560,6 +596,13 @@ export function CarePanel({
               </select>
             )}
           </div>
+          {reviews && (
+            <div className="review-inbox-summary">
+              <article><span>Waiting for action</span><strong>{pendingReviews}</strong></article>
+              <article><span>Approved or closed</span><strong>{approvedReviews}</strong></article>
+              <article><span>Total drafts</span><strong>{total}</strong></article>
+            </div>
+          )}
           <div className="care-records">
             {items.map((row) => {
               const d = row.details;
@@ -729,10 +772,16 @@ export function CarePanel({
               );
             })}
             {!items.length && (
-              <div className="empty">
-                No {reviews ? "review drafts" : "care tasks"} yet. Create one
-                from an authorised patient record.
-              </div>
+              reviews ? (
+                <div className="review-empty-state">
+                  <span>✓</span>
+                  <h3>The review inbox is clear</h3>
+                  <p>No summaries are waiting for clinical action. Start a draft from an authorised patient record when new context needs review.</p>
+                  <button className="secondary" onClick={() => document.getElementById("care-create")?.scrollIntoView({ behavior: "smooth" })}>Create a review draft</button>
+                </div>
+              ) : (
+                <div className="empty">No care tasks yet. Create one from an authorised patient record.</div>
+              )
             )}
           </div>
           <div className="care-pagination">
