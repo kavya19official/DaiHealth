@@ -1,4 +1,5 @@
 import { capsuleCode, verifyCapsule } from './verify-data.js';
+import { translate, locale, fieldLabels, fieldText } from './language.js';
 
 const $ = id => document.getElementById('capsule-' + id);
 const readiness = $('ready');
@@ -7,10 +8,32 @@ const result = $('result');
 const video = $('video');
 const camera = $('camera');
 const storageKey = 'dai-care-capsule-trust-v1';
-const labels = {
-  allergies: 'Recorded allergies', blood_group: 'Recorded blood group', recorded_risk: 'Last recorded risk level',
-  risk_factors: 'Recorded risk factors', pregnancy_week: 'Pregnancy week when issued', vaccines: 'Most recent recorded vaccine doses'
-};
+const languageKey = 'dai-care-capsule-language';
+const strings = [...document.querySelectorAll('[data-text]')].map(node => [node, node.textContent]);
+let language = 'en';
+let readyMessage = '';
+let statusMessage = '';
+let verifiedData = null;
+try { if (localStorage.getItem(languageKey) === 'hi') language = 'hi'; } catch { /* Private mode. */ }
+const t = text => translate(language, text);
+
+function setStatus(message) {
+  statusMessage = message;
+  status.textContent = t(message);
+}
+
+function renderLanguage() {
+  document.documentElement.lang = language;
+  document.title = t('Care Capsule verifier · DaiHealth');
+  $('language').value = language;
+  for (const [node, text] of strings) node.textContent = t(text);
+  for (const node of document.querySelectorAll('[data-label]')) node.setAttribute('aria-label', t(node.dataset.label));
+  renderCameraLabel();
+  updateReady(readyMessage);
+  setStatus(statusMessage);
+  renderResult();
+}
+
 let trust, stream, pending, lastCode, timer, shellReady = false, savedTrust = false, cameraGeneration = 0;
 try {
   trust = JSON.parse(localStorage.getItem(storageKey));
@@ -19,9 +42,11 @@ try {
   trust = null;
 }
 
-function updateReady(message) {
+function updateReady(message = '') {
+  readyMessage = message;
   const prepared = shellReady && savedTrust ? 'Ready for offline scanning.' : 'Offline setup is incomplete.';
-  readiness.textContent = [prepared, trust?.synced_at && ('Last key and revocation sync: ' + new Date(trust.synced_at).toLocaleString() + '.'), message].filter(Boolean).join(' ');
+  readiness.textContent = [t(prepared), trust?.synced_at && (t('Last key and revocation sync:') + ' ' +
+    new Date(trust.synced_at).toLocaleString(locale(language)) + '.'), t(message)].filter(Boolean).join(' ');
 }
 
 function sync() {
@@ -56,30 +81,46 @@ function node(tag, text) {
   return item;
 }
 
+function renderResult() {
+  result.replaceChildren();
+  if (!verifiedData) return;
+  const data = verifiedData;
+  const fields = document.createElement('dl');
+  for (const [key, value] of Object.entries(data.fields)) {
+    fields.append(node('dt', t(fieldLabels[key])), node('dd', fieldText(key, value)));
+  }
+  result.append(node('h2', t(data.subject === 'mother' ? 'Maternal emergency summary' : 'Child emergency summary')),
+    node('p', t('Issued') + ' ' + new Date(data.iat * 1000).toLocaleDateString(locale(language)) + ' · ' +
+      t('Expires') + ' ' + new Date(data.exp * 1000).toLocaleString(locale(language))), fields,
+    node('p', t('This snapshot contains the fields chosen by the patient. Confirm identity and check for newer information when possible.')));
+}
+
+function clearResult() {
+  verifiedData = null;
+  renderResult();
+}
+
 let verification = 0;
 let expiryTimer;
 async function open(code, synced) {
   const generation = ++verification;
   clearTimeout(expiryTimer);
-  result.replaceChildren();
-  status.textContent = 'Verifying signature…';
+  clearResult();
+  setStatus('Verifying signature…');
   lastCode = code;
   try {
     const data = await verifyCapsule(code, trust);
     if (generation !== verification) return;
     expiryTimer = setTimeout(() => open(code, false), Math.min(2147483647, Math.max(0, data.exp * 1000 - Date.now())));
-    status.textContent = 'Signature verified · ' + (synced ? 'Revocations checked online.' : 'Revocations checked against the last sync.');
-    const fields = document.createElement('dl');
-    for (const [key, value] of Object.entries(data.fields)) {
-      const text = key === 'vaccines' ? value.map(entry => entry.code + ' · ' + entry.date).join('\n') : key === 'risk_factors' ? value.join('\n') : value;
-      fields.append(node('dt', labels[key]), node('dd', text));
-    }
-    result.append(node('h2', data.subject === 'mother' ? 'Maternal emergency summary' : 'Child emergency summary'),
-      node('p', 'Issued ' + new Date(data.iat * 1000).toLocaleDateString() + ' · expires ' +
-        new Date(data.exp * 1000).toLocaleString()), fields,
-      node('p', 'This snapshot contains the fields chosen by the patient. Confirm identity and check for newer information when possible.'));
+    setStatus(synced ? 'Signature verified · Revocations checked online.' :
+      'Signature verified · Revocations checked against the last sync.');
+    verifiedData = data;
+    renderResult();
   } catch (error) {
-    if (generation === verification) status.textContent = error.message;
+    if (generation === verification) {
+      const message = error.message;
+      setStatus(translate('hi', message) === message ? 'Could not verify this capsule.' : message);
+    }
   }
 }
 
@@ -89,15 +130,15 @@ async function scan(value) {
   if (!code) {
     verification++;
     lastCode = null;
-    result.replaceChildren();
-    status.textContent = 'No DaiHealth Care Capsule found.';
+    clearResult();
+    setStatus('No DaiHealth Care Capsule found.');
     return;
   }
   stopCamera();
   lastCode = code;
   const scanGeneration = ++verification;
-  result.replaceChildren();
-  status.textContent = 'Checking the capsule…';
+  clearResult();
+  setStatus('Checking the capsule…');
   const synced = navigator.onLine ? await sync() : false;
   if (scanGeneration === verification) await open(code, synced);
 }
@@ -130,6 +171,10 @@ function decode(source, width, height) {
   const image = context.getImageData(0, 0, canvas.width, canvas.height);
   return window.jsQR(image.data, image.width, image.height)?.data;
 }
+function renderCameraLabel() {
+  camera.textContent = t(stream ? 'Stop camera' : 'Start camera');
+}
+
 function stopCamera() {
   cameraGeneration++;
   clearTimeout(timer);
@@ -137,7 +182,7 @@ function stopCamera() {
   stream = null;
   video.srcObject = null;
   video.hidden = true;
-  camera.textContent = 'Start camera';
+  renderCameraLabel();
 }
 function frame() {
   if (!stream) return;
@@ -160,29 +205,36 @@ camera.onclick = async () => {
     stream = media;
     video.srcObject = stream;
     video.hidden = false;
-    camera.textContent = 'Stop camera';
-    status.textContent = 'Point the camera at the Care Capsule QR.';
+    renderCameraLabel();
+    setStatus('Point the camera at the Care Capsule QR.');
     frame();
   } catch {
     stopCamera();
-    status.textContent = 'Camera unavailable. Upload a QR photo or paste the capsule link.';
+    setStatus('Camera unavailable. Upload a QR photo or paste the capsule link.');
   } finally { camera.disabled = false; }
 };
 $('image').onchange = async event => {
   const file = event.target.files[0];
   event.target.value = '';
   if (!file) return;
-  if (file.size > 12 * 1024 * 1024) { status.textContent = 'Choose an image smaller than 12 MB.'; return; }
+  if (file.size > 12 * 1024 * 1024) { setStatus('Choose an image smaller than 12 MB.'); return; }
   let bitmap;
   try {
     bitmap = await createImageBitmap(file);
     await scan(decode(bitmap, bitmap.width, bitmap.height));
   } catch {
-    status.textContent = 'Could not read this image.';
+    setStatus('Could not read this image.');
   } finally { bitmap?.close(); }
 };
 document.addEventListener('visibilitychange', () => { if (document.hidden) stopCamera(); });
 window.addEventListener('pagehide', stopCamera);
+
+$('language').onchange = () => {
+  language = $('language').value === 'hi' ? 'hi' : 'en';
+  try { localStorage.setItem(languageKey, language); } catch { /* Private mode. */ }
+  renderLanguage();
+};
+renderLanguage();
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/care-capsule/sw.js')

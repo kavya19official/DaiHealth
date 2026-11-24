@@ -3,7 +3,7 @@ const { createHmac, timingSafeEqual } = require('node:crypto');
 
 const publicCapsulePaths = new Set([
   '/api/care-capsule/trust', '/care-capsule/index.html', '/care-capsule/capsule.css',
-  '/care-capsule/verify.js', '/care-capsule/verify-data.js', '/care-capsule/sw.js',
+  '/care-capsule/language.js', '/care-capsule/verify.js', '/care-capsule/verify-data.js', '/care-capsule/sw.js',
   '/vendor/qr/jsQR.js', '/vendor/three/examples/jsm/libs/fflate.module.js'
 ]);
 

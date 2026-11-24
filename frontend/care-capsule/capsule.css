@@ -10,7 +10,7 @@
 .capsule-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem; }
 .capsule-card video { max-width: 100%; max-height: 16rem; }
 .capsule-card dt { font-weight: 700; }
-.capsule-card dd { margin: 0 0 .75rem; white-space: pre-line; overflow-wrap: anywhere; }
+.capsule-card dd { margin: 0 0 .75rem; white-space: pre-wrap; overflow-wrap: anywhere; }
 .capsule-issuer img { width: min(100%, 26rem); height: auto; display: block; }
 .capsule-issuer p { overflow-wrap: anywhere; }
 @media print {
@@ -20,3 +20,5 @@
   body.capsule-print .capsule-issuer > :not(.capsule-print-sheet) { display: none !important; }
   body.capsule-print .capsule-print-sheet button, body.capsule-print .capsule-print-sheet a { display: none !important; }
 }
+
+.capsule-page #capsule-language { font: inherit; margin-inline-start: .4rem; }

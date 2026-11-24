@@ -22,15 +22,26 @@ export function capsuleCode(input) {
 }
 
 const text = value => typeof value === 'string' && value.length > 0 && [...value].length <= 140;
+const recordedText = value => typeof value === 'string' && !!value.trim() && new TextEncoder().encode(value).length <= 2048;
+const date = value => typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value);
+const motherFields = new Set(['recorded_risk', 'risk_factors', 'pregnancy_week', 'expected_delivery', 'medical_conditions', 'current_medications']);
+const childFields = new Set(['vaccines', 'recent_child_history']);
 const validators = {
-  allergies: text,
+  patient_name: recordedText,
+  allergies: recordedText,
+  medical_conditions: recordedText,
+  current_medications: recordedText,
+  expected_delivery: date,
   blood_group: value => /^(A|B|AB|O)[+-]$/.test(value),
   recorded_risk: text,
   risk_factors: value => Array.isArray(value) && value.length > 0 && value.length <= 3 && value.every(text),
   pregnancy_week: value => Number.isInteger(value) && value >= 0 && value <= 45,
   vaccines: value => Array.isArray(value) && value.length > 0 && value.length <= 4 &&
     value.every(entry => entry && Object.keys(entry).length === 2 &&
-      typeof entry.code === 'string' && entry.code.length <= 20 && /^\d{4}-\d{2}-\d{2}$/.test(entry.date))
+      typeof entry.code === 'string' && entry.code.length <= 20 && date(entry.date)),
+  recent_child_history: value => Array.isArray(value) && value.length > 0 && value.length <= 2 &&
+    value.every(entry => entry && Object.keys(entry).length === 2 &&
+      typeof entry.title === 'string' && [...entry.title].length <= 160 && date(entry.date))
 };
 
 export async function verifyCapsule(code, trust, now = Math.floor(Date.now() / 1000)) {
@@ -54,8 +65,8 @@ export async function verifyCapsule(code, trust, now = Math.floor(Date.now() / 1
       !Number.isInteger(data.iat) || !Number.isInteger(data.exp) || data.exp <= data.iat ||
       data.exp - data.iat > 30 * secondsPerDay || !validFields?.length ||
       validFields.some(([name, value]) => !Object.hasOwn(validators, name) || !validators[name](value) ||
-        (name === 'vaccines' && data.subject !== 'child') ||
-        (['recorded_risk', 'risk_factors', 'pregnancy_week'].includes(name) && data.subject !== 'mother'))) {
+        (childFields.has(name) && data.subject !== 'child') ||
+        (motherFields.has(name) && data.subject !== 'mother'))) {
     throw Error('The signed capsule format is invalid.');
   }
   if (trust.revoked.includes(data.id)) throw Error('Revoked. Ask the patient for a current capsule.');

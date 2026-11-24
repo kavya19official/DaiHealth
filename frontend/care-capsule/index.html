@@ -11,25 +11,31 @@
 </head>
 <body class="capsule-page">
   <main>
-    <h1>Care Capsule verifier</h1>
-    <p>Prepare this page online before going offline. Scan the patient’s QR to read the fields they chose to share.</p>
-    <section class="capsule-card" aria-label="Verifier setup">
+    <h1 data-text>Care Capsule verifier</h1>
+    <label><span data-text>Language</span>
+      <select id="capsule-language">
+        <option value="en" lang="en">English</option>
+        <option value="hi" lang="hi">हिन्दी</option>
+      </select>
+    </label>
+    <p data-text>Prepare this page online before going offline. Scan the patient’s QR to read the fields they chose to share.</p>
+    <section class="capsule-card" data-label="Verifier setup" aria-label="Verifier setup">
       <p id="capsule-ready" role="status">Checking offline readiness…</p>
-      <button type="button" id="capsule-sync">Sync keys and revocations</button>
+      <button type="button" id="capsule-sync" data-text>Sync keys and revocations</button>
     </section>
-    <section class="capsule-card" aria-label="Scan a capsule">
+    <section class="capsule-card" data-label="Scan a capsule" aria-label="Scan a capsule">
       <div class="capsule-actions">
         <button type="button" id="capsule-camera">Start camera</button>
-        <label>Scan a QR image<input type="file" id="capsule-image" accept="image/*"></label>
+        <label><span data-text>Scan a QR image</span><input type="file" id="capsule-image" accept="image/*"></label>
       </div>
       <video id="capsule-video" playsinline muted autoplay hidden></video>
       <form id="capsule-form">
-        <label for="capsule-input">Or paste the capsule link</label>
+        <label for="capsule-input" data-text>Or paste the capsule link</label>
         <input id="capsule-input" autocomplete="off" spellcheck="false" maxlength="1200" required>
-        <button>Verify capsule</button>
+        <button data-text>Verify capsule</button>
       </form>
       <p id="capsule-status" role="status"></p>
-      <section id="capsule-result" aria-label="Verified capsule"></section>
+      <section id="capsule-result" data-label="Verified capsule" aria-label="Verified capsule"></section>
     </section>
   </main>
   <script src="/vendor/qr/jsQR.js"></script>

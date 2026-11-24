@@ -48,12 +48,12 @@ delivery and recovery, to her child's first years, shared safely between the mot
 ### Care Capsule
 
 From **Reports & records** or the child dashboard, select **Create Care Capsule**. Choose the maternal
-or child record, review and select the fields, and save or print the QR. The QR carries the selected
+or child record, review and select the fields, and choose English or Hindi for the printed card. Save or print the QR. The QR carries the selected
 values, so anyone who has the QR can read them. Choose only what you want to carry.
 
 Open **Care Capsule verifier** on the clinician's device while online and wait for **Ready for offline
 scanning**. The verifier works without a DaiHealth account. Once prepared, it checks signatures and
-expiry offline and labels the date of its last revocation sync. Test by disconnecting, reloading,
+expiry offline and labels the date of its last revocation sync. The verifier can switch between English and Hindi offline while keeping recorded allergy text and vaccine codes as stored. Test by disconnecting, reloading,
 and scanning the printed QR. Reconnect and use **Sync keys and revocations** to check new revocations.
 
 Hosted deployments should configure `DAI_CARE_CAPSULE_KEYS` with comma-separated, random 32-byte

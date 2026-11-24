@@ -1,11 +1,9 @@
+import { translate, locale, fieldLabels, fieldText } from './language.js';
+
 (function () {
   'use strict';
   const entry = document.querySelector('[data-issue-capsule]');
   if (!entry) return;
-  const labels = {
-    allergies: 'Recorded allergies', blood_group: 'Recorded blood group', recorded_risk: 'Last recorded risk level',
-    risk_factors: 'Recorded risk factors', pregnancy_week: 'Pregnancy week when issued', vaccines: 'Four most recent recorded vaccine doses'
-  };
   const api = window.DaiAPI.API_BASE;
   async function request(path = '', options) {
     const response = await fetch(api + '/patient/care-capsules' + path, {
@@ -35,6 +33,9 @@
         <fieldset><legend>Fields to share</legend><div data-fields></div></fieldset>
         <label>Expires in<select name="days"><option>1</option><option selected>7</option><option>30</option></select> days</label>
         <label><input name="confirmed" type="checkbox" required> I agree to share the selected fields in this portable QR.</label>
+        <label>Printed card language<select name="card_language">
+          <option value="en" lang="en">English</option><option value="hi" lang="hi">हिन्दी</option>
+        </select></label>
         <button type="submit">Create capsule QR</button>
       </form>
       <section class="capsule-print-sheet" hidden></section>
@@ -48,6 +49,23 @@
     const submit = form.querySelector('[type=submit]');
     let values = {};
     let generation = 0;
+    let printedCapsule = null;
+
+    function renderCardLanguage() {
+      if (!printedCapsule) return;
+      const language = form.elements.card_language.value;
+      const t = text => translate(language, text);
+      print.lang = language;
+      print.querySelector('h3').textContent = t('DaiHealth Care Capsule');
+      print.querySelector('img').alt = t('Signed Care Capsule QR');
+      print.querySelector('[data-print-expires]').textContent = t('Expires') + ' ' +
+        new Date(printedCapsule.expires_at).toLocaleString(locale(language));
+      print.querySelector('[data-print-instruction]').textContent = t('Scan with a prepared DaiHealth Care Capsule verifier.');
+      print.querySelector('button').textContent = t('Print capsule');
+      print.querySelector('a').textContent = t('Save QR image');
+    }
+    form.elements.card_language.onchange = renderCardLanguage;
+
 
     dialog.querySelector('[data-close]').onclick = () => dialog.close();
     dialog.addEventListener('close', () => {
@@ -70,6 +88,7 @@
             await request('/' + capsule.id, { method: 'DELETE' });
             row.remove();
             if (print.dataset.id === capsule.id) {
+              printedCapsule = null;
               print.replaceChildren();
               print.hidden = true;
             }
@@ -97,14 +116,14 @@
         values = data.fields;
         let available = 0;
         for (const [name, value] of Object.entries(values)) {
-          if (value == null || !Object.hasOwn(labels, name)) continue;
+          if (value == null || !Object.hasOwn(fieldLabels, name)) continue;
           const label = document.createElement('label');
           const checkbox = document.createElement('input');
           checkbox.type = 'checkbox';
           checkbox.name = 'field';
           checkbox.value = name;
-          const preview = name === 'vaccines' ? value.map(row => row.code + ' (' + row.date + ')').join(', ') : name === 'risk_factors' ? value.join(', ') : value;
-          label.append(checkbox, document.createTextNode(' ' + labels[name] + ' · ' + preview));
+          const preview = fieldText(name, value, ', ');
+          label.append(checkbox, document.createTextNode(' ' + fieldLabels[name] + ' · ' + preview));
           fields.append(label);
           available++;
         }
@@ -149,10 +168,14 @@
           window.addEventListener('afterprint', () => document.body.classList.remove('capsule-print'), { once: true });
           window.print();
         };
-        print.replaceChildren(node('h3', 'DaiHealth Care Capsule'), image,
-          node('p', 'Expires ' + new Date(capsule.expires_at).toLocaleString()),
-          node('p', 'Scan with a prepared DaiHealth Care Capsule verifier.'), button, document.createTextNode(' '), save);
+        const expiry = node('p', '');
+        expiry.dataset.printExpires = '';
+        const instruction = node('p', '');
+        instruction.dataset.printInstruction = '';
+        print.replaceChildren(node('h3', ''), image, expiry, instruction, button, document.createTextNode(' '), save);
         print.dataset.id = capsule.id;
+        printedCapsule = capsule;
+        renderCardLanguage();
         print.hidden = false;
         form.elements.confirmed.checked = false;
         status.textContent = 'Care Capsule ready.';

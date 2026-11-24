@@ -10,6 +10,7 @@ const order = BigInt('0xffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2
 const encode = value => Buffer.from(value).toString('base64url');
 const utcDate = value => value instanceof Date ? value.toISOString().slice(0, 10) : value;
 const shortText = value => typeof value === 'string' ? [...value.trim()].slice(0, 140).join('') || null : null;
+const recordedText = value => typeof value === 'string' && value.trim() ? value : null;
 const blood = value => /^(A|B|AB|O)[+-]$/.test(value || '') ? value : null;
 
 function signingKeys(env) {
@@ -59,34 +60,49 @@ function capsuleUrl(req, value, env) {
 async function subjectFields(pool, mother, child) {
   if (child != null) {
     const { rows: [profile] } = await pool.query(
-      'SELECT blood_group,allergies FROM children WHERE id=$1 AND mother_id=$2', [child, mother]
+      'SELECT name,blood_group,allergies FROM children WHERE id=$1 AND mother_id=$2', [child, mother]
     );
     if (!profile) return null;
     const { rows } = await pool.query(`
       SELECT vaccine_code AS code,to_char(given_on,'YYYY-MM-DD') AS date
       FROM child_vaccinations WHERE child_id=$1 AND given_on<=CURRENT_DATE
       ORDER BY given_on DESC,vaccine_code ASC LIMIT 4`, [child]);
+    const events = (await pool.query(`
+      SELECT title,to_char(event_date,'YYYY-MM-DD') AS date
+      FROM child_health_events WHERE child_id=$1 AND event_date<=CURRENT_DATE
+        AND event_type IN ('checkup','illness','injury','hospitalisation','surgery','medication')
+      ORDER BY event_date DESC,id DESC LIMIT 2`, [child])).rows;
     return {
-      allergies: shortText(profile.allergies),
+      patient_name: recordedText(profile.name),
+      allergies: recordedText(profile.allergies),
       blood_group: blood(profile.blood_group),
-      vaccines: rows.length ? rows : null
+      vaccines: rows.length ? rows : null,
+      recent_child_history: events.length ? events : null
     };
   }
   const { rows: [profile] } = await pool.query(`
-    SELECT blood_group,allergies,pregnancy_status,lmp_date,care_start_date,risk_level,risk_factors
+    SELECT full_name,blood_group,allergies,pregnancy_status,lmp_date,care_start_date,edd_date,
+      risk_level,risk_factors,medical_conditions,current_medications
     FROM mother_profiles WHERE user_id=$1`, [mother]);
   if (!profile) return null;
   profile.lmp_date = utcDate(profile.lmp_date);
   profile.care_start_date = utcDate(profile.care_start_date);
-  const week = stage(profile).week;
+  const { week, edd } = stage(profile);
+  const pregnancyWeek = Number.isInteger(week) && week >= 0 && week <= 45 ? week : null;
   const factors = (Array.isArray(profile.risk_factors) ? profile.risk_factors : [])
     .map(factor => shortText(factor?.label)).filter(Boolean).slice(0, 3);
   return {
-    allergies: shortText(profile.allergies),
+    patient_name: recordedText(profile.full_name),
+    allergies: recordedText(profile.allergies),
+    medical_conditions: recordedText(profile.medical_conditions),
+    current_medications: recordedText(profile.current_medications),
     blood_group: blood(profile.blood_group),
     recorded_risk: shortText(profile.risk_level),
     risk_factors: factors.length ? factors : null,
-    pregnancy_week: Number.isInteger(week) && week >= 0 && week <= 45 ? week : null
+    pregnancy_week: pregnancyWeek,
+    expected_delivery: profile.pregnancy_status === 'pregnant'
+      ? utcDate(profile.edd_date) || (pregnancyWeek !== null ? utcDate(edd) : null)
+      : null
   };
 }
 
@@ -147,6 +163,9 @@ function register(app, { pool, authenticateToken, authorizeRole, env = process.e
         if (JSON.stringify(available[name]) !== JSON.stringify(preview)) {
           return res.status(409).json({ error: 'The selected values changed. Reopen Care Capsule and review the latest values.' });
         }
+        if (typeof preview === 'string' && Buffer.byteLength(preview) > 2048) {
+          return res.status(400).json({ error: 'One selected field is too long for a capsule. Choose a smaller set of fields.' });
+        }
         fields[name] = available[name];
       }
       const issued = Math.floor(Date.now() / 1000);
@@ -154,6 +173,9 @@ function register(app, { pool, authenticateToken, authorizeRole, env = process.e
         v: 1, id: crypto.randomUUID(), subject: child == null ? 'mother' : 'child',
         iat: issued, exp: issued + body.days * day, fields
       };
+      if (Buffer.byteLength(JSON.stringify(payload)) > 4096) {
+        return res.status(400).json({ error: 'The capsule is too large. Select fewer fields.' });
+      }
       const url = capsuleUrl(req, signCapsule(payload, keys[0]), env);
       if (!url) return res.status(503).json({ error: 'Open DaiHealth on its HTTPS address to create a capsule.' });
       if (Buffer.byteLength(url) > 900) return res.status(400).json({ error: 'The capsule is too large to scan reliably. Select fewer fields.' });
