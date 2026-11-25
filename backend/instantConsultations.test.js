@@ -102,8 +102,12 @@ test('instant consultation dispatch, privacy, races, timeout, consent and releas
   await expect(send(patient,'/inbox'),403);
   await expect(send(patient,'','POST',{...concern,consent:false}),400);
   await expect(availability(unknown,'available'),403);
+  assert.equal((await expect(send(patient,'/mine'),200)).online_doctors,0);
   await expect(availability(first,'available'),200);
   await expect(availability(second,'available'),200);
+  const ready = await expect(send(patient,'/mine'),200);
+  assert.equal(ready.online_doctors,2);
+  assert.equal(ready.available_doctors,2);
   await expect(send(patient,'','POST',{...concern,language:'ta'}),400);
   const {id} = await expect(send(patient,'','POST',{...concern,language:'mr'}),202);
   assert.equal((await mine(patient,id)).language,'mr');
@@ -113,6 +117,8 @@ test('instant consultation dispatch, privacy, races, timeout, consent and releas
   assert.ok(!('concern' in offered.offers[0]));
   assert.equal((await inbox(second)).offers.length,0);
   await expect(send(first,'/'+id+'/context'),404);
+  // The next available doctor is now outside the nearby search radius.
+  await pool.query('UPDATE facilities SET longitude=80 WHERE id=$1',[far]);
   await expect(respond(first,id,'decline'),200);
   assert.equal((await inbox(second)).offers[0].id,id);
 
@@ -145,6 +151,9 @@ test('instant consultation dispatch, privacy, races, timeout, consent and releas
 
   await expect(availability(first,'offline'),200);
   const {id: waiting} = await expect(send(other,'','POST',concern),202);
+  const busyNetwork = await expect(send(other,'/mine'),200);
+  assert.equal(busyNetwork.online_doctors,1);
+  assert.equal(busyNetwork.available_doctors,0);
   assert.equal((await mine(other,waiting)).status,'searching');
   await expect(send(second,'/'+id+'/complete','POST',note),200);
   assert.equal((await mine(patient,id)).guidance,note.guidance);

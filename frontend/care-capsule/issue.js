@@ -10,7 +10,7 @@ import { translate, locale, fieldLabels, fieldText } from './language.js';
       credentials: 'include', cache: 'no-store', signal: AbortSignal.timeout(12000), ...options
     });
     const data = await response.json();
-    if (!response.ok) throw Error(data.error || 'Sign in as a patient to manage Care Capsules.');
+    if (!response.ok) throw Error(data.error || 'Sign in as a patient to manage swasthyaCards.');
     return data;
   }
 
@@ -23,9 +23,9 @@ import { translate, locale, fieldLabels, fieldText } from './language.js';
   entry.onclick = async () => {
     const dialog = document.createElement('dialog');
     dialog.className = 'capsule-issuer';
-    dialog.setAttribute('aria-label', 'Create a Care Capsule');
+    dialog.setAttribute('aria-label', 'Create a swasthyaCard');
     dialog.innerHTML = `
-      <div class="capsule-actions"><h2>Create a Care Capsule</h2><button type="button" data-close>Close</button></div>
+      <div class="capsule-actions"><h2>Create a swasthyaCard</h2><button type="button" data-close>Close</button></div>
       <p>Anyone holding the QR can read the fields you select. Keep the paper or saved image private.</p>
       <p role="status"></p>
       <form hidden>
@@ -36,7 +36,7 @@ import { translate, locale, fieldLabels, fieldText } from './language.js';
         <label>Printed card language<select name="card_language">
           <option value="en" lang="en">English</option><option value="hi" lang="hi">हिन्दी</option>
         </select></label>
-        <button type="submit">Create capsule QR</button>
+        <button type="submit">Create swasthyaCard QR</button>
       </form>
       <section class="capsule-print-sheet" translate="no" hidden></section>
       <section data-active></section>
@@ -56,12 +56,12 @@ import { translate, locale, fieldLabels, fieldText } from './language.js';
       const language = form.elements.card_language.value;
       const t = text => translate(language, text);
       print.lang = language;
-      print.querySelector('h3').textContent = t('DaiHealth Care Capsule');
-      print.querySelector('img').alt = t('Signed Care Capsule QR');
+      print.querySelector('h3').textContent = t('DaiHealth swasthyaCard');
+      print.querySelector('img').alt = t('Signed swasthyaCard QR');
       print.querySelector('[data-print-expires]').textContent = t('Expires') + ' ' +
         new Date(printedCapsule.expires_at).toLocaleString(locale(language));
-      print.querySelector('[data-print-instruction]').textContent = t('Scan with a prepared DaiHealth Care Capsule verifier.');
-      print.querySelector('button').textContent = t('Print capsule');
+      print.querySelector('[data-print-instruction]').textContent = t('Scan with a prepared DaiHealth swasthyaCard verifier.');
+      print.querySelector('button').textContent = t('Print swasthyaCard');
       print.querySelector('a').textContent = t('Save QR image');
     }
     form.elements.card_language.onchange = renderCardLanguage;
@@ -76,9 +76,9 @@ import { translate, locale, fieldLabels, fieldText } from './language.js';
     dialog.showModal();
 
     function activeCapsules(capsules) {
-      active.replaceChildren(node('h3', 'Active capsules'));
+      active.replaceChildren(node('h3', 'Active swasthyaCards'));
       for (const capsule of capsules) {
-        const row = node('div', (capsule.subject === 'child' ? 'Child' : 'Maternal') + ' capsule · expires ' +
+        const row = node('div', (capsule.subject === 'child' ? 'Child' : 'Maternal') + ' swasthyaCard · expires ' +
           new Date(capsule.expires_at).toLocaleString() + ' ');
         const button = node('button', 'Revoke');
         button.type = 'button';
@@ -92,7 +92,7 @@ import { translate, locale, fieldLabels, fieldText } from './language.js';
               print.replaceChildren();
               print.hidden = true;
             }
-            status.textContent = 'Capsule revoked. Offline verifiers will flag it after their next sync.';
+            status.textContent = 'swasthyaCard revoked. Offline verifiers will flag it after their next sync.';
           } catch (error) {
             status.textContent = error.message;
           } finally { button.disabled = false; }
@@ -100,7 +100,7 @@ import { translate, locale, fieldLabels, fieldText } from './language.js';
         row.append(button);
         active.append(row);
       }
-      if (!capsules.length) active.append(node('p', 'No active capsules.'));
+      if (!capsules.length) active.append(node('p', 'No active swasthyaCards.'));
     }
 
     async function loadFields() {
@@ -145,7 +145,7 @@ import { translate, locale, fieldLabels, fieldText } from './language.js';
         return;
       }
       submit.disabled = form.elements.subject.disabled = true;
-      status.textContent = 'Signing your capsule…';
+      status.textContent = 'Signing your swasthyaCard…';
       try {
         const capsule = await request('', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -157,11 +157,11 @@ import { translate, locale, fieldLabels, fieldText } from './language.js';
         if (!dialog.open) return;
         const image = document.createElement('img');
         image.src = capsule.qr;
-        image.alt = 'Signed Care Capsule QR';
+        image.alt = 'Signed swasthyaCard QR';
         const save = node('a', 'Save QR image');
         save.href = capsule.qr;
-        save.download = 'dai-care-capsule.png';
-        const button = node('button', 'Print capsule');
+        save.download = 'dai-swasthyaCard.png';
+        const button = node('button', 'Print swasthyaCard');
         button.onclick = async () => {
           await image.decode();
           if (!dialog.open) return;
@@ -179,7 +179,7 @@ import { translate, locale, fieldLabels, fieldText } from './language.js';
         renderCardLanguage();
         print.hidden = false;
         form.elements.confirmed.checked = false;
-        status.textContent = 'Care Capsule ready.';
+        status.textContent = 'swasthyaCard ready.';
         activeCapsules((await request()).capsules);
       } catch (error) {
         status.textContent = error.message;
@@ -189,7 +189,7 @@ import { translate, locale, fieldLabels, fieldText } from './language.js';
     };
 
     try {
-      status.textContent = 'Loading Care Capsule…';
+      status.textContent = 'Loading swasthyaCard…';
       const data = await request();
       if (!dialog.open) return;
       for (const child of data.children) {

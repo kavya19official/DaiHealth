@@ -472,7 +472,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 <link rel="apple-touch-icon" href="/assets/dai-app-192.png">
 <link rel="stylesheet" href="/dai-mobile.css?v=1">
 <script defer src="/js/dai-mobile.js?v=1"></script>
-  <link rel="stylesheet" href="/instant-consultations.css?v=1">
+  <link rel="stylesheet" href="/instant-consultations.css?v=2">
 <link rel="stylesheet" href="record-connections.css?v=1">
 <link rel="stylesheet" href="patient-child-profile.css?v=2">
 <link rel="stylesheet" href="connected-demo-polish.css?v=1">
@@ -734,7 +734,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
   <button type="button" class="btn btn--secondary care-scan-launch" data-care-scan-open>Scan a document</button>
   <div id="connectedRecords"></div>
 <div id="connectedReportArea"><div class="record-filters connected-record-filters"><label>Search<input id="recordSearch" type="search" placeholder="Name, date or centre"></label><label>Type<select id="recordTypeFilter"><option value="">All types</option><option value="blood">Blood tests</option><option value="urine">Urine</option><option value="scan_imaging">Scans</option><option value="screening">Screening</option><option value="discharge_summary">Discharge summaries</option><option value="prescription">Prescriptions</option><option value="vaccination">Vaccination certificates</option><option value="documents">Documents & IDs</option></select></label><label>From date<input id="recordDateFilter" type="date"></label><label>Patient<select id="recordSubjectFilter"><option value="">Mother</option><option value="all">Mother & all babies</option></select></label></div>
-<button type="button" class="btn btn--primary btn--sm" data-issue-capsule>Create Care Capsule</button>
+<button type="button" class="btn btn--primary btn--sm" data-issue-capsule>Create swasthyaCard</button>
 <label class="rc-source-filter">Report source<select id="recordSourceFilter"><option value="">All sources</option><option value="manual">Manual & clinician uploads</option><option value="abdm">ABHA / ABDM demo</option><option value="digilocker">DigiLocker demo</option></select></label><div id="recordCategoryChips"></div><div id="reportsDocsList"></div><details class="connected-upload" id="connectedUploadDetails"><summary>＋ Upload an original report</summary><p>Self-uploaded files await clinician verification. Choose the correct person and milestone. No automatic interpretation is performed.</p><form class="form-grid" id="docUploadForm" style="max-width:100%;margin-bottom:1rem">
           <div class="form-group">
             <label for="docTitle">Title</label>
@@ -2111,7 +2111,7 @@ boot().then(function () { return renderMessagesFromAppts(); });
   <button type="button" data-mobile-panel="profile"><svg aria-hidden="true"><use href="#i-user"/></svg><span>Profile</span></button>
   <button type="button" data-mobile-menu aria-controls="sidebar" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg><span>More</span></button>
 </nav>
-  <script defer src="/js/instant-consultations.js?v=5"></script>
+  <script defer src="/js/instant-consultations.js?v=6"></script>
 <script defer src="js/record-connections.js?v=2"></script>
 </body>
 </html>

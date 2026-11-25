@@ -51,3 +51,8 @@
   .connect-heading { align-items: stretch; }
   .connect-heading > .btn { flex: 1 1 100%; }
 }
+
+.connect-pulse{display:inline-block;width:.6rem;height:.6rem;margin-right:.5rem;border-radius:50%;background:#16a34a;box-shadow:0 0 0 0 #16a34a80;animation:connect-pulse 1.4s infinite}
+.connect-search{color:#5b5675;font-size:.9rem}
+@keyframes connect-pulse{70%{box-shadow:0 0 0 .6rem #16a34a00}100%{box-shadow:0 0 0 0 #16a34a00}}
+@media (prefers-reduced-motion:reduce){.connect-pulse{animation:none}}

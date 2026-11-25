@@ -32,6 +32,8 @@
   let history = [];
   let pending = null;
   let lastPresence = 0;
+  let onlineDoctors = null;
+  let availableDoctors = null;
 
   const esc = value => String(value ?? '').replace(/[&<>"']/g, char => (
     { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[char]
@@ -161,6 +163,17 @@
       </details>`;
   }
 
+  function searchNote(visit) {
+    const minutes = Math.max(1, Math.ceil((new Date(visit.search_until) - Date.now()) / 60000));
+    const left = `We’ll keep trying for about ${minutes} more minute${minutes === 1 ? '' : 's'}.`;
+    if (visit.status === 'offered') return 'Waiting for the doctor to respond. ' + left;
+    if (onlineDoctors === 0) return `No doctor is online right now. ${left} You can cancel and open Nearby Care at any time.`;
+    if (availableDoctors === 0 && onlineDoctors > 0) {
+      return `Doctors are online, but none can take a new request right now. ${left}`;
+    }
+    return left;
+  }
+
   function renderPatient() {
     pending = history.find(openStatus) || null;
     const latest = history[0];
@@ -173,13 +186,14 @@
     form.hidden = !!pending || guest;
     showWarning();
     renderSection(currentContainer, pending ? `<article class="connect-item">
-      <h3>${esc(statuses[pending.status])}</h3><p>${esc(pending.concern)}</p>
+      <h3>${['searching','offered'].includes(pending.status) ? '<span class="connect-pulse" aria-hidden="true"></span>' : ''}${esc(statuses[pending.status])}</h3><p>${esc(pending.concern)}</p>
+      ${['searching','offered'].includes(pending.status) ? `<p class="connect-search">${esc(searchNote(pending))}</p>` : ''}
       ${pending.doctor_name ? `<p>${physician(pending)}</p>` : ''}
       <div class="connect-actions">
         ${canCall(pending) ? button('Join audio call','call',pending.id,true) : ''}
         ${button('Cancel consultation','cancel',pending.id)}
       </div></article>` : latest && latest.status === 'unavailable'
-      ? `<p>${esc(statuses.unavailable)}</p>` : '');
+      ? `<article class="connect-item"><h3>${esc(statuses.unavailable)}</h3><p>You can send a new request below, or find care close to you.</p><div class="connect-actions">${button('Open Nearby Care','nearby')}</div></article>` : '');
     renderSection(historyContainer, `<h3>Consultation history</h3>${history.filter(v => !openStatus(v)).map(visitHistory).join('') || '<p>Your completed consultations will appear here.</p>'}`);
   }
 
@@ -212,7 +226,8 @@
     const shortcutButton = shortcut.querySelector('button');
     const shortcutLabel = count ? `Requests (${count})` : 'Requests';
     if (shortcutButton.textContent !== shortcutLabel) shortcutButton.textContent = shortcutLabel;
-    setAnnouncement(`${effective[0].toUpperCase()+effective.slice(1)} · ${count ? `${count} new request${count === 1 ? '' : 's'}` : 'No new requests'}`);
+    setAnnouncement(effective === 'offline' ? 'You are Offline. Patients cannot reach you. Open the inbox and set Available.'
+      : `${effective[0].toUpperCase()+effective.slice(1)} · ${count ? `${count} new request${count === 1 ? '' : 's'}` : 'No new requests'}`);
     renderSection(currentContainer, `<p>Current status <strong>${esc(effective)}</strong> · Capacity ${esc(inbox.capacity)}</p>
       <div class="connect-list">${(inbox.offers || []).map(offer => `<article class="connect-item">
       <h3>${offer.emergency_warning?'Urgent · ':''}${esc(categories[offer.category])}</h3>
@@ -242,7 +257,10 @@
         }
         renderDoctor();
       } else {
-        history = (await request('/mine')).items;
+        const mine = await request('/mine');
+        history = mine.items;
+        onlineDoctors = Number.isInteger(mine.online_doctors) ? mine.online_doctors : null;
+        availableDoctors = Number.isInteger(mine.available_doctors) ? mine.available_doctors : null;
         renderPatient();
       }
     } catch (err) {

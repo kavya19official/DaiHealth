@@ -20,7 +20,7 @@ function signingKeys(env) {
     secrets.push(encode(crypto.createHmac('sha256', env.JWT_SECRET).update('dai-care-capsule-v1').digest()));
   }
   if (secrets.some(secret => !/^[A-Za-z0-9_-]{43}$/.test(secret) || encode(Buffer.from(secret, 'base64url')) !== secret)) {
-    throw Error('Care Capsule signing seeds must be 32-byte base64url values.');
+    throw Error('swasthyaCard signing seeds must be 32-byte base64url values.');
   }
   return [...new Set(secrets)].map(secret => {
     const n = BigInt('0x' + Buffer.from(secret, 'base64url').toString('hex'));
@@ -152,13 +152,13 @@ async function subjectFields(pool, mother, child) {
 function register(app, { pool, authenticateToken, authorizeRole, env = process.env }) {
   const own = [authenticateToken, authorizeRole(['mother'])];
   const keys = signingKeys(env);
-  const fail = res => res.status(500).json({ error: 'Could not complete the Care Capsule request.' });
+  const fail = res => res.status(500).json({ error: 'Could not complete the swasthyaCard request.' });
   const childId = value => value == null || value === '' ? null : Number(value);
   const validChild = value => value === null || Number.isInteger(value) && value > 0 && value <= 2147483647;
 
   app.get('/api/care-capsule/trust', async (req, res) => {
     res.set('Cache-Control', 'no-store');
-    if (!keys.length) return res.status(503).json({ error: 'Care Capsule signing is unavailable.' });
+    if (!keys.length) return res.status(503).json({ error: 'swasthyaCard signing is unavailable.' });
     try {
       const { rows } = await pool.query('SELECT c.id FROM care_capsules c LEFT JOIN users u ON u.id=c.mother_id WHERE c.expires_at>NOW() AND (c.revoked_at IS NOT NULL OR u.id IS NULL OR u.closed_at IS NOT NULL)');
       res.json({ version: 1, synced_at: new Date().toISOString(),
@@ -194,7 +194,7 @@ function register(app, { pool, authenticateToken, authorizeRole, env = process.e
         typeof selection !== 'object' || Array.isArray(selection) || !Object.keys(selection).length) {
       return res.status(400).json({ error: 'Select available fields, choose an expiry, and confirm sharing.' });
     }
-    if (!keys.length) return res.status(503).json({ error: 'Care Capsule signing is unavailable.' });
+    if (!keys.length) return res.status(503).json({ error: 'swasthyaCard signing is unavailable.' });
     try {
       const available = await subjectFields(pool, req.user.id, child);
       if (!available) return res.status(404).json({ error: 'Record unavailable.' });
@@ -204,7 +204,7 @@ function register(app, { pool, authenticateToken, authorizeRole, env = process.e
           return res.status(400).json({ error: 'Select only available fields.' });
         }
         if (JSON.stringify(available[name]) !== JSON.stringify(preview)) {
-          return res.status(409).json({ error: 'The selected values changed. Reopen Care Capsule and review the latest values.' });
+          return res.status(409).json({ error: 'The selected values changed. Reopen swasthyaCard and review the latest values.' });
         }
         if (typeof preview === 'string' && Buffer.byteLength(preview) > 2048) {
           return res.status(400).json({ error: 'One selected field is too long for a capsule. Choose a smaller set of fields.' });

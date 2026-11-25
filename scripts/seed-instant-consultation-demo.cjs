@@ -3,7 +3,8 @@
 const DEMO_FACILITY_PREFIX = require('./seed-delhi-demo.cjs').PREFIX;
 
 module.exports = async function seedInstantConsultationDemo(db) {
-  // Only the launcher-managed cohort establishes this recorded affiliation.
+  // Only the launcher-managed cohort establishes this recorded affiliation. Every synthetic doctor gets one,
+  // so any of them can switch to Available and receive Doctor Connect requests.
   if (process.env.DAI_LOCAL !== 'true') return;
   await db.query(`INSERT INTO doctor_facilities
       (doctor_id,facility_id,role,specialization,languages,qualification_verified,verification_details,accepts_new_patients,active)
@@ -15,6 +16,6 @@ module.exports = async function seedInstantConsultationDemo(db) {
     CROSS JOIN LATERAL (
       SELECT f.id FROM facilities f WHERE f.facility_code LIKE $1 AND f.active ORDER BY f.id LIMIT 1
     ) facility
-    WHERE clinician.email='doctor@dai-synthetic.invalid' AND clinician.role='doctor' AND clinician.closed_at IS NULL
+    WHERE clinician.role='doctor' AND clinician.closed_at IS NULL
     ON CONFLICT(doctor_id,facility_id) DO NOTHING`, [DEMO_FACILITY_PREFIX + '%']);
 };

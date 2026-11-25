@@ -98,11 +98,15 @@ function register(app, { pool, authenticateToken, authorizeRole, env = process.e
   const offerAccess = `NOT ${revokedSql('ic.mother_id','o.doctor_id','o.facility_id')}`;
   const candidateAccess = `NOT ${revokedSql('ic.mother_id','choices.doctor_id','choices.facility_id')}`;
 
+  const doctorLoad = id => `(SELECT count(*) FROM instant_consultations c
+    WHERE c.doctor_id=${id} AND c.status IN ('accepted','in_progress'))
+    + (SELECT count(*) FROM instant_consultation_offers o
+      WHERE o.doctor_id=${id} AND o.status='offered')`;
+
   async function candidates(db, visit) {
     const location = await patientLocation(db, visit.mother_id);
     const { rows } = await db.query(`SELECT choices.*,
-        (SELECT count(*) FROM instant_consultations c WHERE c.doctor_id=choices.doctor_id AND c.status IN ('accepted','in_progress'))
-        + (SELECT count(*) FROM instant_consultation_offers o WHERE o.doctor_id=choices.doctor_id AND o.status='offered') AS load
+        ${doctorLoad('choices.doctor_id')} AS load
       FROM (
         SELECT df.doctor_id, df.facility_id, COALESCE(df.specialization,dp.specialization) AS specialization,
           df.languages, f.latitude, f.longitude
@@ -114,7 +118,11 @@ function register(app, { pool, authenticateToken, authorizeRole, env = process.e
         AND ${candidateAccess}
         AND NOT EXISTS(SELECT 1 FROM instant_consultation_offers o
           WHERE o.consultation_id=ic.id AND o.doctor_id=choices.doctor_id)`, [visit.id, PRESENCE_SECONDS]);
-    return rankDoctors(rows.filter(row => Number(row.load) < capacity), location, visit.category, visit.language);
+    const free = rows.filter(row => Number(row.load) < capacity);
+    // Doctor Connect is audio-only, so when nobody is inside the nearby radius (or a clinic has no
+    // coordinates recorded) we widen the search instead of leaving the patient with no doctor.
+    const nearby = rankDoctors(free, location, visit.category, visit.language);
+    return nearby.length || !location ? nearby : rankDoctors(free, null, visit.category, visit.language);
   }
 
   async function offerNext(db, visit) {
@@ -224,7 +232,15 @@ function register(app, { pool, authenticateToken, authorizeRole, env = process.e
   app.get(ROOT + '/mine', ...mother, endpoint(async (req, res) => {
     const { rows } = await pool.query(details + ` WHERE ic.mother_id=$1
       ORDER BY (ic.status IN ${OPEN}) DESC, ic.created_at DESC LIMIT 30`, [req.user.id]);
-    res.json({ items: rows });
+    const { rows: [presence] } = await pool.query(`SELECT
+      count(DISTINCT df.doctor_id)::int AS online_doctors,
+      (count(DISTINCT df.doctor_id) FILTER (WHERE av.status='available' AND
+        ${doctorLoad('df.doctor_id')} < $2))::int AS available_doctors
+      FROM (SELECT DISTINCT df.doctor_id ${doctorAffiliations}) df
+      JOIN instant_doctor_availability av ON av.doctor_id=df.doctor_id
+      WHERE av.status IN ('available','busy')
+        AND av.last_seen>clock_timestamp()-make_interval(secs=>$1)`, [PRESENCE_SECONDS, capacity]);
+    res.json({ items: rows, ...presence });
   }));
 
   app.post(ROOT + '/:id/cancel', ...mother, endpoint(async (req, res) => {

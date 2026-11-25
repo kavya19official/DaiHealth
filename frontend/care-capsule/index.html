@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="referrer" content="no-referrer">
   <meta name="theme-color" content="#5b21b6">
-  <title>Care Capsule verifier · DaiHealth</title>
+  <title>swasthyaCard verifier · DaiHealth</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
@@ -17,7 +17,7 @@
   <header class="cv-top">
     <a class="cv-brand" href="/" aria-label="DaiHealth">
       <img src="/assets/logo-circle.png" alt="" width="40" height="40">
-      <span><strong>DaiHealth</strong><small data-text>Care Capsule verifier</small></span>
+      <span><strong>DaiHealth</strong><small data-text>swasthyaCard verifier</small></span>
     </a>
     <label class="cv-lang"><span data-text>Language</span>
       <select id="capsule-language">
@@ -30,7 +30,7 @@
   <main>
     <section class="cv-hero">
       <div>
-        <h1 data-text>Scan a patient’s Care Capsule</h1>
+        <h1 data-text>Scan a patient’s swasthyaCard</h1>
         <p data-text>Prepare this page online before going offline. Scan the patient’s QR to read the fields they chose to share.</p>
         <div class="cv-ready" role="status"><span class="cv-dot" id="capsule-dot" aria-hidden="true"></span><span id="capsule-ready">Checking offline readiness…</span></div>
         <button type="button" id="capsule-sync" class="cv-btn cv-btn--ghost"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v5h-5"/></svg><span data-text>Sync keys and revocations</span></button>
@@ -38,12 +38,12 @@
       <img class="cv-hero-img" src="/assets/child-illustration.png" alt="" width="160" height="160">
     </section>
 
-    <section class="cv-card" data-label="Scan a capsule" aria-label="Scan a capsule">
+    <section class="cv-card" data-label="Scan a swasthyaCard" aria-label="Scan a swasthyaCard">
       <div class="cv-scanner" id="capsule-scanner">
         <video id="capsule-video" playsinline muted autoplay hidden></video>
         <div class="cv-placeholder" id="capsule-placeholder">
           <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><path d="M8 8h3v3H8zM13 8h3v3h-3zM8 13h3v3H8zM14 14h2v2h-2z"/></svg>
-          <p data-text>Point the camera at the Care Capsule QR.</p>
+          <p data-text>Point the camera at the swasthyaCard QR.</p>
         </div>
         <div class="cv-frame" aria-hidden="true"><i></i><i></i><i></i><i></i><b></b></div>
       </div>
@@ -52,14 +52,14 @@
         <label class="cv-btn cv-btn--ghost cv-file"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 16l4-4 3 3 4-5 5 6M4 5h16v14H4z"/></svg><span data-text>Scan a QR image</span><input type="file" id="capsule-image" accept="image/*"></label>
       </div>
       <form id="capsule-form" class="cv-paste">
-        <label for="capsule-input" data-text>Or paste the capsule link</label>
+        <label for="capsule-input" data-text>Or paste the swasthyaCard link</label>
         <div><input id="capsule-input" autocomplete="off" spellcheck="false" maxlength="1200" required placeholder="DAIC1.…">
-        <button class="cv-btn cv-btn--primary" data-text>Verify capsule</button></div>
+        <button class="cv-btn cv-btn--primary" data-text>Verify swasthyaCard</button></div>
       </form>
       <p id="capsule-status" class="cv-status" role="status"></p>
     </section>
 
-    <section id="capsule-result" class="cv-result" tabindex="-1" hidden data-label="Verified capsule" aria-label="Verified capsule"></section>
+    <section id="capsule-result" class="cv-result" tabindex="-1" hidden data-label="Verified swasthyaCard" aria-label="Verified swasthyaCard"></section>
   </main>
   <script src="/vendor/qr/jsQR.js"></script>
   <script type="module" src="/care-capsule/verify.js"></script>
