@@ -1,14 +1,9 @@
 'use strict';
 
-const cacheName = 'dai-care-capsule-shell-v8-scanner-languages';
+const cacheName = 'dai-care-capsule-shell-v6-redesign';
 const shell = '/care-capsule/index.html';
-const assets = [
-  '/shared/name-localization.js', '/js/i18n.js', '/i18n.css', '/locales/source.json', '/locales/hi.json', '/locales/mr.json',
-  shell, '/care-capsule/capsule.css', '/care-capsule/verify.js', '/care-capsule/verify-data.js',
-  '/care-capsule/language.js', '/assets/care-team.jpg', '/care-capsule/icons.svg',
-  '/care-capsule/fonts/inter.woff2', '/care-capsule/fonts/noto-devanagari.woff2',
-  '/vendor/qr/jsQR.js', '/vendor/three/examples/jsm/libs/fflate.module.js'
-];
+const assets = [shell, "/shared/name-localization.js", "/js/i18n.js", "/i18n.css", "/locales/source.json", "/locales/hi.json", "/locales/mr.json", '/care-capsule/capsule.css', '/care-capsule/verify.js',
+  '/care-capsule/verify-data.js', '/care-capsule/language.js', '/vendor/qr/jsQR.js', '/assets/logo-circle.png', '/assets/child-illustration.png', '/assets/mother-illustration.jpeg', '/vendor/three/examples/jsm/libs/fflate.module.js'];
 
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(cacheName).then(cache => cache.addAll(assets)).then(() => self.skipWaiting()));
