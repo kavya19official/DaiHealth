@@ -1,0 +1,59 @@
+{
+  "_comment": "Deterministic, clinician-reviewable clinical rules for the intelligence engine. Values are configurable thresholds, not diagnoses. Pregnancy-specific where noted; generic adult ranges are not applied blindly.",
+  "version": "2026-11-25",
+  "parameters": {
+    "bp_systolic":  { "label": "Systolic blood pressure", "unit": "mmHg", "fields": ["bp_systolic"], "gestation_bands": [
+      { "max_week": 20, "low": 90, "high": 140 },
+      { "max_week": null, "low": 90, "high": 140 } ],
+      "severe_high": 160, "pair": "bp_diastolic" },
+    "bp_diastolic": { "label": "Diastolic blood pressure", "unit": "mmHg", "fields": ["bp_diastolic"], "gestation_bands": [
+      { "max_week": 20, "low": 60, "high": 90 },
+      { "max_week": null, "low": 60, "high": 90 } ],
+      "severe_high": 110, "pair": "bp_systolic" },
+    "hb":           { "label": "Haemoglobin", "unit": "g/dL", "fields": ["hb"], "gestation_bands": [
+      { "max_week": 13, "low": 11.0, "high": 14.5 },
+      { "max_week": 27, "low": 10.5, "high": 14.0 },
+      { "max_week": null, "low": 10.0, "high": 13.5 } ],
+      "delta_review": 1.0 },
+    "weight_kg":    { "label": "Weight", "unit": "kg", "fields": ["weight_kg"], "gestation_bands": [
+      { "max_week": null, "low": null, "high": null } ],
+      "delta_review": 1.0, "note": "Trend is reviewed in context of pre-pregnancy weight and gestational age; no universal gain threshold is asserted." },
+    "glucose_mg_dl":{ "label": "Blood glucose", "unit": "mg/dL", "fields": ["glucose_mg_dl"], "gestation_bands": [
+      { "max_week": null, "low": 70, "high": 140 } ],
+      "context_required": true },
+    "fundal_height_cm": { "label": "Fundal height", "unit": "cm", "fields": ["fundal_height_cm"], "gestation_bands": [
+      { "max_week": null, "low": null, "high": null } ],
+      "ga_dependent": true, "expected_cm_per_week_after_20": 1.0, "tolerance_cm": 3 },
+    "fetal_heart_rate": { "label": "Fetal heart rate", "unit": "bpm", "fields": ["fetal_heart_rate"], "source_kind": "clinic_scan", "gestation_bands": [
+      { "max_week": null, "low": 110, "high": 160 } ] },
+    "pulse":        { "label": "Maternal pulse", "unit": "bpm", "fields": ["pulse"], "gestation_bands": [
+      { "max_week": null, "low": 60, "high": 100 } ] },
+    "temperature_c":{ "label": "Temperature", "unit": "°C", "fields": ["temperature_c"], "gestation_bands": [
+      { "max_week": null, "low": 36.1, "high": 37.5 } ] },
+    "spo2_percent": { "label": "Oxygen saturation", "unit": "%", "fields": ["spo2_percent", "oxygen_saturation"], "gestation_bands": [
+      { "max_week": null, "low": 95, "high": 100 } ] }
+  },
+  "investigations": {
+    "haemoglobin":   { "label": "Haemoglobin", "unit": "g/dL", "low": 10.0, "high": 13.5, "delta_review": 1.0 },
+    "platelet_count":{ "label": "Platelet count", "unit": "×10⁹/L", "low": 150, "high": 400, "delta_review": 50 },
+    "blood_glucose": { "label": "Blood glucose", "unit": "mg/dL", "low": 70, "high": 140 },
+    "urine_protein": { "label": "Urine protein", "qualitative": true, "abnormal": ["positive", "trace", "1+", "2+", "3+", "4+"] },
+    "tsh":           { "label": "TSH", "unit": "mIU/L", "low": 0.4, "high": 4.0, "trimester_high": [2.5, 3.0, 3.0] },
+    "creatinine":    { "label": "Creatinine", "unit": "mg/dL", "low": 0.4, "high": 0.9 },
+    "blood_group":   { "label": "Blood group & Rh", "required_by_week": 16 }
+  },
+  "careGaps": [
+    { "key": "blood_group", "label": "Blood group and Rh typing", "by_week": 16, "test_codes": ["blood_group"] },
+    { "key": "haemoglobin", "label": "Haemoglobin assessment", "by_week": 12, "test_codes": ["haemoglobin"] },
+    { "key": "cbc", "label": "Complete blood count", "by_week": 12, "test_codes": ["platelet_count", "wbc", "rbc"] },
+    { "key": "urine", "label": "Urine examination", "by_week": 16, "test_codes": ["urine_protein", "urine_glucose"] },
+    { "key": "glucose_screen", "label": "Gestational diabetes screening", "by_week": 24, "by_week_repeat": 32, "test_codes": ["ogtt_fasting", "ogtt_1h", "ogtt_2h", "glucose_mg_dl"] },
+    { "key": "anomaly_scan", "label": "Anomaly ultrasound", "by_week": 22, "ultrasound_type": "anomaly" },
+    { "key": "growth_scan", "label": "Growth ultrasound", "by_week": 32, "ultrasound_type": "growth" }
+  ],
+  "trends": {
+    "min_points": 3,
+    "decline_review": { "hb": -1.0, "weight_kg": -0.5, "platelet_count": -50 },
+    "rise_review":   { "bp_systolic": 20, "bp_diastolic": 15, "weight_kg": 1.0, "glucose_mg_dl": 40 }
+  }
+}
