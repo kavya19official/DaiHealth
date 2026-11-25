@@ -3,15 +3,18 @@
   'use strict';
   const panel = document.getElementById('panel-daily');
   if (!panel) return;
+  const home = document.getElementById('homeKickCounter');
   const api = window.DaiAPI;
+  const homeField = id => home?.querySelector('[data-daily="' + id + '"]');
   const get = id => panel.querySelector('[data-daily="' + id + '"]');
   const language = () => window.DaiI18n?.getLang() === 'hi';
   const text = (en, hi) => language() ? hi : en;
   let day = '', owner = null, loading = 0, kick = null, contraction = null;
-  let lastContraction = null, wellness = null, loaded = false, busy = false;
+  let lastContraction = null, wellness = null, loaded = false, loadedDay = '', busy = false, startingFromHome = false;
 
-  function notice(message) {
+  function notice(message, showOnHome = startingFromHome || !!kick) {
     get('status').textContent = message;
+    if (showOnHome && homeField('status')) homeField('status').textContent = message;
   }
 
   function seconds(start) {
@@ -47,6 +50,17 @@
     get('kick-tap').disabled = !kick || kick.count >= 200 || busy;
     get('kick-save').disabled = !kick || busy;
     get('kick-discard').disabled = !kick || busy;
+    if (home) {
+      for (const key of ['kick-time', 'kick-count']) {
+        const value = get(key).textContent;
+        if (homeField(key).textContent !== value) homeField(key).textContent = value;
+      }
+      for (const action of ['start', 'tap', 'save', 'discard']) {
+        const control = homeField('kick-' + action);
+        control.hidden = action === 'start' ? !!kick : !kick;
+        control.disabled = action === 'start' ? busy || startingFromHome || !!contraction : get('kick-' + action).disabled;
+      }
+    }
     get('contraction-time').textContent = clock(contraction ? seconds(contraction.start) : 0);
     get('contraction-start').disabled = !!contraction || busy || !loaded || day !== api.localDateStr();
     get('contraction-save').disabled = !contraction || busy;
@@ -94,6 +108,7 @@
     }
     wellness = results[0];
     loaded = true;
+    loadedDay = requestedDay;
     panel.querySelectorAll('form button, input[type="checkbox"], [data-action="water"]').forEach(el => { el.disabled = false; });
     get('water-count').textContent = wellness.water_glasses;
     get('iron').checked = wellness.supplements.iron === true;
@@ -135,7 +150,7 @@
       if(path==='/patient/home/journal'){kind='symptom';const form=panel.querySelector('[data-form=symptom]');data={codes:[...form.querySelectorAll('[name=symptom]:checked')].map(i=>i.value),severity:form.elements.severity.value,note:body.note.replace(/^\[Symptoms\] /,'')};at=new Date(day+'T'+form.elements.time.value+':00+05:30').toISOString();}
       if(path==='/health-logs'){kind=body.log_type;data=body.data;at=body.logged_at;}
       result=kind?await window.DaiDaily.save(kind,data,body.date||day,at):await api.apiRequest(path,{method,body});
-      if(result?.queued){notice(text('Encrypted on this device · waiting to sync. Your input stays here.','डिवाइस पर एन्क्रिप्ट किया · सिंक बाकी है। आपका लिखा यहाँ रहेगा।'));return false;}
+      if(result?.queued){notice(text('Encrypted on this device · waiting to sync. Your input stays here.','डिवाइस पर एन्क्रिप्ट किया · सिंक बाकी है। आपका लिखा यहाँ रहेगा।'));return body.log_type === 'kick_session' ? result : false;}
 
       notice(result ? text('Saved', 'सहेजा गया') : text('Not saved. Your entry is still here. Try again.', 'सहेजा नहीं गया। आपका रिकॉर्ड यहाँ है। फिर कोशिश करें।'));
       return !!result;
@@ -146,9 +161,24 @@
     }
   }
 
-  panel.addEventListener('click', async event => {
+  async function handleAction(event) {
     const action = event.target.closest('[data-action]')?.dataset.action;
-    if (!action || busy) return;
+    if (!action || busy || startingFromHome || (event.currentTarget === home && home.hidden)) return;
+    if (event.currentTarget === home && action === 'kick-start' && !kick) {
+      startingFromHome = true;
+      const startButton = homeField('kick-start');
+      startButton.disabled = true;
+      try {
+        day = api.localDateStr();
+        get('day').value = day;
+        get('day').max = day;
+        if (!loaded || get('pregnancy').hidden || loadedDay !== day) await load();
+        if (home.hidden || get('pregnancy').hidden) return;
+      } finally {
+        startingFromHome = false;
+        updateTimers();
+      }
+    }
     if (action === 'retry') return load();
     if (action === 'listen') {
       if (!window.speechSynthesis) return notice(text('Read-aloud is unavailable in this browser.', 'इस ब्राउज़र में पढ़कर सुनाना उपलब्ध नहीं है।'));
@@ -159,14 +189,24 @@
     }
     if (!loaded) return;
     if (action === 'water' && await write('/wellness/water', {date: day})) await load();
-    if (action === 'kick-start') kick = {start: Date.now(), count: 0};
+    if (action === 'kick-start' && !get('pregnancy').hidden && !kick && day === api.localDateStr()) {
+      kick = {start: Date.now(), count: 0};
+      notice('', true);
+    }
     if (action === 'kick-tap' && kick && kick.count < 200) kick.count++;
-    if (action === 'kick-discard') kick = null;
+    if (action === 'kick-discard') {
+      kick = null;
+      notice('', true);
+    }
     if (action === 'kick-save' && kick) {
       if (seconds(kick.start) > 21600) return notice(text('This session exceeds six hours. Discard it and start a new one.', 'यह सत्र छह घंटे से लंबा है। हटाकर नया शुरू करें।'));
-      if (await write('/health-logs', {log_type:'kick_session', data:{kicks:kick.count,duration_sec:seconds(kick.start)},logged_at:new Date(kick.start).toISOString()})) {
+      const saved = await write('/health-logs', {log_type:'kick_session', data:{kicks:kick.count,duration_sec:seconds(kick.start)},logged_at:new Date(kick.start).toISOString()});
+      if (saved) {
         kick = null;
-        await load();
+        if (!saved.queued) {
+          await load();
+          notice(text('Movement session saved.', 'हलचल का सत्र सहेजा गया।'), true);
+        }
       }
     }
     if (action === 'contraction-start') contraction = {start:Date.now(), gap:lastContraction == null ? null : Date.now() - lastContraction};
@@ -178,7 +218,9 @@
       }
     }
     updateTimers();
-  });
+  }
+  panel.addEventListener('click', handleAction);
+  home?.addEventListener('click', handleAction);
 
   panel.addEventListener('change', async event => {
     if (event.target === get('day')) {
@@ -212,7 +254,7 @@
   });
 
   function translate() {
-    panel.querySelectorAll('[data-hi]').forEach(el => { el.textContent = language() ? el.dataset.hi : el.dataset.en; });
+    document.querySelectorAll('#panel-daily [data-hi], #homeKickCounter [data-hi]').forEach(el => { el.textContent = language() ? el.dataset.hi : el.dataset.en; });
     const nav = document.querySelector('[data-panel="daily"] span');
     if (nav) nav.textContent = text('Daily tracking', 'दैनिक रिकॉर्ड');
     if (location.hash === '#daily') {
@@ -238,5 +280,6 @@
   });
   setInterval(() => { if (!document.hidden && (kick || contraction)) updateTimers(); }, 1000);
   translate();
+  updateTimers();
   open();
 })();

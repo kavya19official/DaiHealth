@@ -173,6 +173,8 @@
   }
   function update(next,prefs,c){
     mount();if(!next?.user)return;state=next;selectedChild=c||selectedChild;
+    const counter=$('homeKickCounter');
+    if(counter)counter.hidden=next.user.pregnancy_status!=='pregnant'||!!next.user.guest;
     if(!next.homeLoaded&&!next.offline&&!next.user.guest){
       $('homeOpenJourney').setAttribute('aria-busy','true');
       $('homeOpenCounts').textContent='Loading your recorded care plan…';

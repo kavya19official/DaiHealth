@@ -334,3 +334,14 @@ body[data-home-theme=dark] #panel-dashboard.open-home :is(#homeOpenJourney,#home
 .oh-donut-legend strong{font-size:17px;font-weight:750}
 .oh-donut-legend>small{font-size:9px;line-height:1.6;color:var(--ink-2);margin-top:1px}
 @media(max-width:700px){.oh-care-donut{gap:14px;padding:14px 12px}.oh-donut-visual{width:112px;height:112px;flex-basis:112px}.oh-donut-total>strong{font-size:25px}.oh-donut-legend>div{font-size:11px;gap:7px}.oh-donut-eyebrow{font-size:8px}.oh-donut-legend{gap:7px}}
+
+.home-care-rail { display: grid; align-content: start; gap: .75rem; min-width: 0; }
+#panel-dashboard .home-kick { padding: .9rem 1rem; background: var(--surface, #fff); border: 1px solid var(--line); border-radius: 1rem; }
+#panel-dashboard .home-kick[hidden], #panel-dashboard .home-kick button[hidden] { display: none; }
+.home-kick h2 { margin: 0 0 .35rem; font-size: 1rem; }
+.home-kick-count { display: flex; justify-content: space-between; align-items: baseline; gap: .5rem; font-variant-numeric: tabular-nums; }
+.home-kick-count strong { font-size: 1.4rem; }
+.home-kick .daily-actions { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .35rem; }
+.home-kick .btn { min-height: 44px; padding: .35rem .7rem; font-size: .83rem; }
+.home-kick p { margin: .4rem 0 0; font-size: .8rem; line-height: 1.45; }
+.home-kick [role="status"]:empty { display: none; }
