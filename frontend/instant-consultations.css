@@ -1,0 +1,53 @@
+.connect-card {
+  color: var(--ink, var(--dw-text, #302349));
+  background: var(--surface, var(--dw-card, #fff));
+  border: 1px solid var(--line, var(--dw-border, #e5dced));
+  border-radius: 18px;
+  margin: 0 0 18px;
+  padding: clamp(14px, 3vw, 24px);
+}
+.connect-heading, .connect-actions, .connect-dialog > header {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .55rem;
+}
+.connect-heading, .connect-dialog > header { justify-content: space-between; }
+.connect-heading h2, .connect-dialog h2 { margin: .2rem 0; overflow-wrap: anywhere; }
+.connect-heading small { font-weight: 750; color: var(--brand-strong, #654188); }
+.connect-card p, .connect-dialog p { margin: .5rem 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.connect-card .btn, .connect-dialog .btn, .connect-shortcut .btn { min-height: 44px; white-space: normal; }
+.connect-shortcut .btn { padding-inline: .65rem; }
+#panel-records > .connect-shortcut { margin: 0 0 12px; }
+.connect-dialog {
+  width: min(670px, calc(100% - 24px));
+  max-height: calc(100dvh - 24px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: clamp(14px, 3vw, 24px);
+}
+.connect-dialog form, .connect-fields, .connect-list { display: grid; gap: .75rem; min-width: 0; }
+.connect-fields { grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%),1fr)); }
+.connect-dialog label { display: grid; gap: .25rem; min-width: 0; }
+.connect-dialog .connect-check { display: flex; align-items: flex-start; gap: .55rem; padding: .3rem 0; }
+.connect-check input { min-width: 20px; min-height: 20px; }
+.connect-dialog :is(input:not([type="checkbox"]), textarea, select) {
+  width: 100%; min-width: 0; padding: .5rem;
+  border: 1px solid #9889a6; border-radius: 8px; font: inherit; font-size: max(1rem, 16px);
+}
+.connect-dialog button[type="submit"] { justify-self: start; }
+.connect-item, .connect-history-row {
+  margin: .65rem 0; padding: .8rem;
+  border: 1px solid var(--line, #e5dced); border-radius: 12px;
+}
+.connect-history-row summary { cursor: pointer; padding: .45rem 0; overflow-wrap: anywhere; }
+.connect-warning, .connect-dialog [role="alert"] {
+  border-left: 4px solid #a83437; padding: .65rem;
+  background: #fff1e9; color: #672522;
+}
+.connect-card [hidden], .connect-dialog [hidden] { display: none !important; }
+
+@media (max-width: 560px) {
+  .connect-heading { align-items: stretch; }
+  .connect-heading > .btn { flex: 1 1 100%; }
+}

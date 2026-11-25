@@ -472,6 +472,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 <link rel="apple-touch-icon" href="/assets/dai-app-192.png">
 <link rel="stylesheet" href="/dai-mobile.css?v=1">
 <script defer src="/js/dai-mobile.js?v=1"></script>
+  <link rel="stylesheet" href="/instant-consultations.css?v=1">
 </head>
 <body class="patient-view">
 <a class="skip-link" href="#main-content" data-i18n="a11y.skip" style="position:absolute;left:1rem;top:-5rem;z-index:500;padding:.7rem 1rem;border-radius:0 0 10px 10px;background:var(--ink);color:#fff">Skip to main content</a>
@@ -2085,7 +2086,7 @@ boot().then(function () { return renderMessagesFromAppts(); });
 <script src="js/delhi-patient-journey.js?v=4"></script>
 <script src="js/demo-request-patient.js?v=3"></script>
 <script src="js/patient-followup-state.js?v=4"></script>
-<script src="js/clinical-review.js?v=4"></script><script src="js/ai-usage.js?v=2"></script><script src="js/demo-care-messages.js?v=3"></script><script src="js/demo-guide.js?v=1"></script><script src="js/patient-tour.js?v=3"></script><script src="/shared/daily-tracking.js?v=1"></script><script src="js/patient-daily-enhanced.js?v=2"></script><script src="js/patient-daily.js?v=2"></script><script src="js/postpartum-infant.js?v=1"></script><script src="/shared/birth-plan.js?v=2"></script><script src="/shared/birth-plan-experience.js?v=1"></script><script src="js/patient-report-birth.js?v=4"></script><script src="js/birth-plan-experience.js?v=1"></script><script src="js/remote-followup.js?v=1"></script><script src="js/platform-rights.js?v=3"></script><script src="js/family-circle-experience.js?v=1"></script><script src="js/daicare.js" defer></script>
+<script src="js/clinical-review.js?v=4"></script><script src="js/ai-usage.js?v=2"></script><script src="js/demo-care-messages.js?v=3"></script><script src="js/demo-guide.js?v=1"></script><script src="js/patient-tour.js?v=3"></script><script src="/shared/daily-tracking.js?v=1"></script><script src="js/patient-daily-enhanced.js?v=2"></script><script src="js/patient-daily.js?v=2"></script><script src="js/postpartum-infant.js?v=1"></script><script src="/shared/birth-plan.js?v=2"></script><script src="/shared/birth-plan-experience.js?v=1"></script><script src="js/patient-report-birth.js?v=4"></script><script src="js/birth-plan-experience.js?v=1"></script><script src="js/remote-followup.js?v=instant-1"></script><script src="js/platform-rights.js?v=3"></script><script src="js/family-circle-experience.js?v=1"></script><script src="js/daicare.js" defer></script>
 <script type="module" src="/care-capsule/issue.js"></script>
 <nav class="dai-mobile-nav" aria-label="Patient mobile navigation" data-dai-mobile-nav="patient">
   <button type="button" data-mobile-panel="dashboard"><svg aria-hidden="true"><use href="#i-home"/></svg><span data-copy="nav.dashboard">Home</span></button>
@@ -2095,5 +2096,6 @@ boot().then(function () { return renderMessagesFromAppts(); });
   <button type="button" data-mobile-panel="profile"><svg aria-hidden="true"><use href="#i-user"/></svg><span>Profile</span></button>
   <button type="button" data-mobile-menu aria-controls="sidebar" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg><span>More</span></button>
 </nav>
+  <script defer src="/js/instant-consultations.js?v=1"></script>
 </body>
 </html>
