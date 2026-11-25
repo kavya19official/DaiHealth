@@ -114,7 +114,11 @@ function register(app, { pool, authenticateToken, authorizeRole, env = process.e
         AND ${candidateAccess}
         AND NOT EXISTS(SELECT 1 FROM instant_consultation_offers o
           WHERE o.consultation_id=ic.id AND o.doctor_id=choices.doctor_id)`, [visit.id, PRESENCE_SECONDS]);
-    return rankDoctors(rows.filter(row => Number(row.load) < capacity), location, visit.category, visit.language);
+    const free = rows.filter(row => Number(row.load) < capacity);
+    // Doctor Connect is audio-only, so when nobody is inside the nearby radius (or a clinic has no
+    // coordinates recorded) we widen the search instead of leaving the patient with no doctor.
+    const nearby = rankDoctors(free, location, visit.category, visit.language);
+    return nearby.length || !location ? nearby : rankDoctors(free, null, visit.category, visit.language);
   }
 
   async function offerNext(db, visit) {
@@ -224,7 +228,10 @@ function register(app, { pool, authenticateToken, authorizeRole, env = process.e
   app.get(ROOT + '/mine', ...mother, endpoint(async (req, res) => {
     const { rows } = await pool.query(details + ` WHERE ic.mother_id=$1
       ORDER BY (ic.status IN ${OPEN}) DESC, ic.created_at DESC LIMIT 30`, [req.user.id]);
-    res.json({ items: rows });
+    const { rows: [online] } = await pool.query(`SELECT count(DISTINCT df.doctor_id)::int AS n ${doctorAffiliations}
+      AND EXISTS (SELECT 1 FROM instant_doctor_availability av WHERE av.doctor_id=df.doctor_id
+        AND av.status='available' AND av.last_seen>clock_timestamp()-make_interval(secs=>$1))`, [PRESENCE_SECONDS]);
+    res.json({ items: rows, online_doctors: online?.n || 0 });
   }));
 
   app.post(ROOT + '/:id/cancel', ...mother, endpoint(async (req, res) => {
