@@ -12,7 +12,7 @@ function setupShell(){document.body.classList.add('doctor-workspace');try{docume
  document.querySelectorAll('.sidebar .nav-item[data-panel]').forEach(b=>{const span=document.createElement('span');span.className='dw-label';span.textContent=b.dataset.dwLabel||b.textContent.trim();b.setAttribute('aria-label',span.textContent);b.textContent='';b.innerHTML=icon(b.dataset.dwNavIcon||'grid');b.appendChild(span);if(['attention','records'].includes(b.dataset.panel)){const badge=document.createElement('span');badge.className='dw-count';badge.dataset.dwBadge=b.dataset.panel;b.appendChild(badge);}});
  document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'){e.preventDefault();document.getElementById('searchInput').focus();}if(e.key==='Escape')document.body.classList.remove('dw-menu-open');});
  document.getElementById('dwTheme').onclick=()=>{const theme=document.body.dataset.dwTheme==='dark'?'light':'dark';document.body.dataset.dwTheme=theme;try{localStorage.setItem('dai-doctor-theme',theme);}catch{}};
- document.getElementById('dwCollapse').onclick=()=>{if(matchMedia('(max-width:900px)').matches)document.body.classList.toggle('dw-menu-open');else document.body.classList.toggle('dw-collapsed');};
+ document.getElementById('dwCollapse').onclick=()=>{if(matchMedia('(max-width:1024px)').matches)document.body.classList.toggle('dw-menu-open');else document.body.classList.toggle('dw-collapsed');};
  document.getElementById('dwSidebarLogout').onclick=()=>document.getElementById('docLogout').click();
  document.getElementById('searchInput').addEventListener('input',e=>{query=e.target.value;if(data){renderTables();nav('patients');}});
  document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;

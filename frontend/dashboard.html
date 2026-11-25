@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>दाई — Mother Dashboard</title>
 <meta name="theme-color" content="#7c3aed">
 <link rel="icon" href="assets/logo.jpeg">
@@ -466,6 +466,12 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 <link rel="stylesheet" href="family-circle-experience.css?v=1">
 <link rel="stylesheet" href="/care-capsule/capsule.css">
 <link rel="stylesheet" href="/i18n.css?v=app-4">
+<link rel="manifest" href="/dai.webmanifest">
+<meta name="theme-color" content="#6229b8">
+<meta name="apple-mobile-web-app-title" content="DaiHealth">
+<link rel="apple-touch-icon" href="/assets/dai-app-192.png">
+<link rel="stylesheet" href="/dai-mobile.css?v=1">
+<script defer src="/js/dai-mobile.js?v=1"></script>
 </head>
 <body class="patient-view">
 <a class="skip-link" href="#main-content" data-i18n="a11y.skip" style="position:absolute;left:1rem;top:-5rem;z-index:500;padding:.7rem 1rem;border-radius:0 0 10px 10px;background:var(--ink);color:#fff">Skip to main content</a>
@@ -517,6 +523,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 </div>
 </div>
     <div class="user-chip"><span class="patient-initials" id="patientInitials">♡</span><div><div class="user-chip__name" id="userName">—</div><div class="user-chip__role">Mother / Patient</div></div></div>
+    <button type="button" id="sosBtn" class="patient-sos"><svg width="21" height="21"><use href="#i-phone"/></svg><span><strong>SOS</strong><small data-copy="emergencyHelp">Emergency help</small></span></button>
   </div>
 </header>
 
@@ -550,7 +557,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
  <div id="clinicalDashboardHome"></div>
  <div class="home-hero-grid">
   <section class="home-journey home-surface" id="homeJourneyCard"><button type="button" class="home-listen" data-listen="homeJourneyCard" aria-label="Listen to this card"><svg aria-hidden="true"><use href="#i-speaker"/></svg></button><div class="home-journey-copy"><span class="home-kicker">YOUR LITTLE UNIVERSE</span><h2 id="homeJourneyTitle" data-copy="journeyTitle">A journey full of little wonders.</h2><p id="homeJourneyText" data-copy="journeyText">Your next chapter, with a little support along the way.</p><div id="homeBabyTabs" class="home-baby-tabs" role="tablist" aria-label="Choose a baby for home logs"></div><div id="homeJourneyProgress"></div><button type="button" id="shareJourney" class="home-share"><svg aria-hidden="true"><use href="#i-heart"/></svg> Save a milestone card ↗</button></div><div class="home-illustration"><div class="illustration-halo"></div><img id="homeStageImage" alt="Original illustration of a mother holding her baby" width="1024" height="1536" fetchpriority="high"><span class="illustration-caption">Every little moment matters.</span></div></section>
-  <article class="home-next home-surface" id="nextStepCard" aria-labelledby="nextStepTitle"><button type="button" class="home-listen" data-listen="nextStepCard" aria-label="Listen to this card"><svg aria-hidden="true"><use href="#i-speaker"/></svg></button><span class="home-kicker" data-copy="oneThingToday">ONE THING FOR TODAY</span><div class="home-next-icon"><svg aria-hidden="true"><use href="#i-clipboard"/></svg></div><span id="nextStepStatus" class="care-label">Care plan</span><h2 id="nextStepTitle">Your next little step</h2><p id="nextStepWhy">Loading your recorded care plan.</p><div id="nextStepPlace" class="home-next-place"></div><button type="button" class="btn btn--primary" id="nextStepBook" data-go="appointments"><span data-copy="bookNow">Book a visit</span><svg aria-hidden="true"><use href="#i-arrow"/></svg></button><button type="button" class="home-directions" id="nextStepDirections">Get directions ↗</button><small data-copy="careTeamDecides">Your care team decides the care you need.</small></article>
+  <article class="home-next home-surface" id="nextStepCard" aria-labelledby="nextStepTitle"><button type="button" class="home-listen" data-listen="nextStepCard" aria-label="Listen to this card"><svg aria-hidden="true"><use href="#i-speaker"/></svg></button><span class="home-kicker" data-copy="oneThingToday">ONE THING FOR TODAY</span><div class="home-next-icon"><svg aria-hidden="true"><use href="#i-clipboard"/></svg></div><span id="nextStepStatus" class="care-label">Care plan</span><h2 id="nextStepTitle">Your next little step</h2><p id="nextStepWhy">Loading your recorded care plan.</p><div id="nextStepPlace" class="home-next-place"></div><button type="button" class="btn btn--primary" id="nextStepBook" data-go="appointments"><span data-copy="bookNow">Book a visit</span><svg aria-hidden="true"><use href="#i-arrow"/></svg></button><button type="button" class="home-directions" id="nextStepDirections" aria-label="Directions to registered centre"><svg aria-hidden="true"><use href="#i-arrow"/></svg></button><small data-copy="careTeamDecides">Your care team decides the care you need.</small></article>
  </div>
  <section class="home-quick home-surface" aria-label="Quick actions"><button type="button" data-go="records" class="quick-tile"><span><svg aria-hidden="true"><use href="#i-file"/></svg></span><strong data-copy="nav.records">My records</strong></button><button type="button" data-go="facilities" class="quick-tile"><span><svg aria-hidden="true"><use href="#i-search"/></svg></span><strong data-copy="nav.facilities">Find care</strong></button><button type="button" data-go="appointments" class="quick-tile"><span><svg aria-hidden="true"><use href="#i-cal"/></svg></span><strong data-copy="nav.appointments">Book a visit</strong></button><button type="button" data-go="companion" class="quick-tile"><span><svg aria-hidden="true"><use href="#i-msg"/></svg></span><strong data-copy="askDaya">Ask DAI</strong></button><button type="button" data-go="children" class="quick-tile"><span><svg aria-hidden="true"><use href="#i-baby"/></svg></span><strong data-copy="nav.children">Vaccinations</strong></button><button type="button" data-go="schemes" class="quick-tile"><span><svg aria-hidden="true"><use href="#i-shield"/></svg></span><strong data-copy="nav.schemes">Schemes</strong></button></section>
  <section class="home-ask-bar" aria-label="Ask DAI"><span class="home-ask-symbol">✦</span><div><strong data-copy="somethingOnMind">Something on your mind?</strong><span data-copy="askDaiText">Ask DAI. A little clarity, in your language.</span></div><form id="homeAskForm"><label class="sr-only" for="homeAskInput">Ask DAI a question</label><input id="homeAskInput" maxlength="1000" placeholder="Ask me about your care…"><button type="submit" aria-label="Send question"><svg aria-hidden="true"><use href="#i-arrow"/></svg></button></form><button type="button" id="homeAskVoice" class="home-voice" aria-label="Talk to Dhruv"><svg aria-hidden="true"><use href="#i-mic"/></svg><span>Speak</span></button></section>
@@ -1063,7 +1070,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 
 
 </div></div></div>
-<button type="button" id="sosBtn" class="patient-sos"><svg width="21" height="21"><use href="#i-phone"/></svg><span><strong>SOS</strong><small data-copy="emergencyHelp">Emergency help</small></span></button><div class="toast" id="toast" role="status"></div>
+<div class="toast" id="toast" role="status"></div>
 
 <dialog id="careScanDialog" class="ct-help-dialog care-scan-dialog" aria-labelledby="careScanTitle">
   <header class="care-scan-header">
@@ -1321,7 +1328,7 @@ function renderDemoMessages() {
 
 function $(id) { return document.getElementById(id); }
 
-function showPanel(id) {
+function showPanel(id, keepSidebarOpen = false) {
   window.FacilityDiscovery?.closeModals();
   document.querySelectorAll('.panel').forEach(function (p) { p.classList.remove('is-active'); });
   document.querySelectorAll('.nav-item[data-panel]').forEach(function (n) { n.classList.remove('is-active'); });
@@ -1331,7 +1338,7 @@ function showPanel(id) {
   if (nav) nav.classList.add('is-active');
   try { history.replaceState(null, '', '#' + id); } catch (e) {}
   window.scrollTo({ top: 0, behavior: 'smooth' });
-  closeSidebar();
+  if (!keepSidebarOpen) closeSidebar();
   PatientExperience.route(id);
   window.dispatchEvent(new CustomEvent("dai:patient-panel", { detail: { panel: id } }));
   // Panel navigation changes history without firing hashchange; load this view explicitly.
@@ -1750,7 +1757,7 @@ document.querySelectorAll('.tabs button').forEach(function (b) {
 
 function route() {
   var h = (location.hash || '#dashboard').replace('#', '') || 'dashboard';
-  if ($('panel-' + h)) showPanel(h);
+  if ($('panel-' + h)) showPanel(h, true);
 }
 
 
@@ -2080,5 +2087,13 @@ boot().then(function () { return renderMessagesFromAppts(); });
 <script src="js/patient-followup-state.js?v=4"></script>
 <script src="js/clinical-review.js?v=4"></script><script src="js/ai-usage.js?v=2"></script><script src="js/demo-care-messages.js?v=3"></script><script src="js/demo-guide.js?v=1"></script><script src="js/patient-tour.js?v=3"></script><script src="/shared/daily-tracking.js?v=1"></script><script src="js/patient-daily-enhanced.js?v=2"></script><script src="js/patient-daily.js?v=2"></script><script src="js/postpartum-infant.js?v=1"></script><script src="/shared/birth-plan.js?v=2"></script><script src="/shared/birth-plan-experience.js?v=1"></script><script src="js/patient-report-birth.js?v=4"></script><script src="js/birth-plan-experience.js?v=1"></script><script src="js/remote-followup.js?v=1"></script><script src="js/platform-rights.js?v=3"></script><script src="js/family-circle-experience.js?v=1"></script><script src="js/daicare.js" defer></script>
 <script type="module" src="/care-capsule/issue.js"></script>
+<nav class="dai-mobile-nav" aria-label="Patient mobile navigation" data-dai-mobile-nav="patient">
+  <button type="button" data-mobile-panel="dashboard"><svg aria-hidden="true"><use href="#i-home"/></svg><span data-copy="nav.dashboard">Home</span></button>
+  <button type="button" data-mobile-panel="timeline"><svg aria-hidden="true"><use href="#i-clock"/></svg><span>Pregnancy Journey</span></button>
+  <button type="button" data-mobile-panel="records"><svg aria-hidden="true"><use href="#i-file"/></svg><span>Health Records</span></button>
+  <button type="button" data-mobile-panel="appointments" aria-label="Appointments"><svg aria-hidden="true"><use href="#i-cal"/></svg><span class="dai-appointment-label" data-copy="nav.appointments">Appointments</span><span class="dai-appointment-short" aria-hidden="true">Visits</span></button>
+  <button type="button" data-mobile-panel="profile"><svg aria-hidden="true"><use href="#i-user"/></svg><span>Profile</span></button>
+  <button type="button" data-mobile-menu aria-controls="sidebar" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg><span>More</span></button>
+</nav>
 </body>
 </html>

@@ -257,7 +257,7 @@ function Table({
   rows: React.ReactNode[][];
 }) {
   return (
-    <div className="table-scroll">
+    <div className="table-scroll" role="region" aria-label="Scrollable table" tabIndex={0}>
       <table>
         <thead>
           <tr>
@@ -318,6 +318,27 @@ export default function Home() {
   const [editor, setEditor] = useState<Row | null>(null);
   const [notification, setNotification] = useState("");
   const [menu, setMenu] = useState(false);
+  const menuButton = useRef<HTMLButtonElement>(null);
+  const closeMenuButton = useRef<HTMLButtonElement>(null);
+  const closeMenu = useCallback(() => {
+    setMenu(false);
+    requestAnimationFrame(() => menuButton.current?.focus());
+  }, []);
+  useEffect(() => {
+    if (!menu) return;
+    closeMenuButton.current?.focus();
+    const breakpoint = matchMedia("(max-width: 1024px)");
+    const resize = () => { if (!breakpoint.matches) setMenu(false); };
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") closeMenu();
+    };
+    breakpoint.addEventListener("change", resize);
+    document.addEventListener("keydown", handleEscape);
+    return () => {
+      breakpoint.removeEventListener("change", resize);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [menu, closeMenu]);
   const api = useCallback(
     async (path: string, options: RequestInit = {}, access = token) => {
       const response = await fetch((process.env.NEXT_PUBLIC_DAI_BASE_PATH || "") + "/api" + path, {
@@ -744,16 +765,20 @@ export default function Home() {
         : "operations",
     );
     setWorkspaceData(null);
-    setMenu(false);
+    if (menu) closeMenu();
     setNotification("");
   }
   return (
-    <div className="portal-shell">
+    <div className="portal-shell" data-menu-open={menu || undefined}>
       {user.permissions.includes("coordination.read") && <GoldenHourLayer key={user.id + user.facility_id} api={api} permissions={user.permissions} onOpenBoard={() => navigate("incomingCare")} />}
       <a className="skip" href="#main">
         Skip to workspace
       </a>
-      <aside className={"sidebar " + (menu ? "open" : "")}>
+      {menu && <button className="workspace-menu-backdrop" aria-label="Close navigation" tabIndex={-1} onClick={closeMenu} />}
+      <aside id="hospital-navigation" className={"sidebar " + (menu ? "open" : "")}>
+        <button type="button" className="workspace-menu-close" ref={closeMenuButton} onClick={closeMenu}>
+          Close navigation
+        </button>
         <a className="brand" href="/">
           दाई{" "}
           <span>
@@ -802,12 +827,15 @@ export default function Home() {
           </button>
         </footer>
       </aside>
-      <div className="workspace">
+      <div className="workspace" inert={menu || undefined}>
         <header className="topbar">
           <button
             className="menu-button"
-            onClick={() => setMenu(!menu)}
-            aria-label="Toggle navigation"
+            ref={menuButton}
+            onClick={() => setMenu(true)}
+            aria-label="Open navigation"
+            aria-expanded={menu}
+            aria-controls="hospital-navigation"
           >
             ☰
           </button>

@@ -361,7 +361,7 @@ export function CarePanel({
               </p>
             </div>
           </div>
-          <div className="table-scroll">
+          <div className="table-scroll" role="region" aria-label="Scrollable table" tabIndex={0}>
             <table>
               <thead>
                 <tr>
