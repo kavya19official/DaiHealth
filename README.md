@@ -199,6 +199,8 @@ On Windows PowerShell set variables first, for example `$env:DAI_PORT=3011; npm 
 
 ## Configuration
 
+See [Doctor Connect](docs/DOCTOR-CONNECT.md) for immediate audio consultations, Nearby Care matching and the local demonstration.
+
 See [DaiCare and postpartum mental health](docs/DAICARE.md) for clinician enrolment, on-call coverage and WebRTC setup.
 
 See [feature audit and setup](docs/FEATURE-AUDIT-SETUP.md) for CareScan, ASHA Copilot and consent receipts.
