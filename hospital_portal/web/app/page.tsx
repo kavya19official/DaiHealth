@@ -3,15 +3,16 @@ import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
 import { OperationalOverview, SnapshotView } from "./operations";
 import { ForecastPanel } from "./forecasts";
 import { CarePanel, PatientCoordination } from "./care";
-import { AdministrationPanel, AffiliationSwitcher, InvitationAcceptance, PatientStaffRecords, CreateReferral } from "./administration";
+import { AffiliationSwitcher, InvitationAcceptance, PatientStaffRecords, CreateReferral } from "./administration";
 import { SustainabilityPanel } from "./sustainability";
-import { OperationsIntelligencePanel } from "./operations-intelligence";
 import { GoldenHourLayer } from "./golden-hour";
 import { IncomingCare } from "./incoming-care";
 import { PatientCareHub } from "./patient-care-hub";
 import { AshaCopilot } from "./asha";
 import { ClinicalMonitoring, PatientMonitoring } from "./clinical-monitor";
 type Row = Record<string, any>;
+type NavItem = readonly [string, string];
+type NavGroup = { label: string; items: readonly NavItem[] };
 type User = {
   id: string;
   name: string;
@@ -43,28 +44,50 @@ const operationNav = [
   ["diagnostics", "Diagnostics & results", "▤"],
   ["ashaCopilot", "Community care", "⌂"],
 ];
-const administrationNav = [
-  ["management", "Facility & staff management", "✚"],
-  ["adminOverview", "Administration overview", "◈"],
-  ["forecasts", "ML forecasts & stock planning", "⌁"],
-  ["sustainability", "Green hospital", "♧"],
-  ["intelligence", "Operations intelligence", "✧"],
-  ["facility", "Facility master", "✚"],
-  ["organisation", "Organisation & roles", "♧"],
-  ["structure", "Departments & units", "▦"],
-  ["beds", "Wards & bed board", "▱"],
-  ["clinics", "Clinics & services", "▤"],
-  ["blood", "Blood bank snapshot", "♦"],
-  ["staffing", "Staffing & on-call roster", "♧"],
-  ["equipment", "Equipment & resources", "✣"],
-  ["ambulances", "Ambulance fleet", "⇢"],
-  ["census", "Daily census", "▥"],
-  ["audit", "Access & audit", "◎"],
-  ["credentials", "Credential verification", "✓"],
-  ["roadmap", "Build phases", "↗"],
-];
+const administrationGroups: readonly NavGroup[] = [
+  {
+    label: "Overview",
+    items: [["adminOverview", "Administration dashboard"]],
+  },
+  {
+    label: "Facility setup",
+    items: [
+      ["facility", "Facility profile"],
+      ["structure", "Clinical structure"],
+      ["clinics", "Clinics & services"],
+    ],
+  },
+  {
+    label: "Workforce",
+    items: [
+      ["organisation", "Roles & responsibilities"],
+      ["staffing", "Staffing & on-call"],
+    ],
+  },
+  {
+    label: "Capacity & resources",
+    items: [
+      ["beds", "Wards & bed board"],
+      ["blood", "Blood bank"],
+      ["equipment", "Equipment"],
+      ["ambulances", "Ambulances"],
+    ],
+  },
+  {
+    label: "Insights & planning",
+    items: [
+      ["census", "Daily activity & census"],
+      ["forecasts", "Forecasts & stock planning"],
+      ["sustainability", "Green hospital"],
+    ],
+  },
+  {
+    label: "Governance",
+    items: [["audit", "Access & audit"]],
+  },
+] as const;
+const administrationNav = administrationGroups.flatMap((group) => group.items);
 const workspacePermissions: Record<string, string> = {
-  management: "facility.write",
   incomingCare: "coordination.read",
   patientCare: "patient.read",
   careTasks: "care.read",
@@ -72,7 +95,6 @@ const workspacePermissions: Record<string, string> = {
   followups: "coordination.read",
   clinicalMonitor: "monitor.read",
   sustainability: "green.read",
-  intelligence: "operations.read",
   forecasts: "forecast.read",
   "care-gap-map": "quality.read",
   "quality-board": "quality.read",
@@ -94,7 +116,6 @@ const workspacePermissions: Record<string, string> = {
   patients: "patient.read",
   ashaCopilot: "asha.read",
   audit: "audit.read",
-  credentials: "user.verify",
 };
 const snapshotViews = new Set([
   "care-gap-map",
@@ -122,7 +143,6 @@ const titles: Record<string, [string, string]> = {
   goldenHour: ["Golden hour", "Emergency arrivals, patient requests and facility transfers in one coordinated workspace."],
   incomingCare: ["Incoming care", "Emergency arrivals, patient requests and facility transfers in one coordinated workspace."],
   patientCare: ["Patient Care Hub", "Patients, appointments, care gaps and follow-ups in one connected workspace."],
-  management: ["Facility & staff management", "Onboarding, services, slots and accountable staff access."],
   careTasks: [
     "Follow-up & outreach",
     "Owned care tasks, access barriers and evidence-backed follow-through.",
@@ -137,7 +157,6 @@ const titles: Record<string, [string, string]> = {
     "ASHA Copilot",
     "Offline-first community visits, village routes, voice notes and health-camp updates.",
   ],
-  intelligence: ["Operations intelligence", "Bounded agents, explainable maintenance planning and measured AI usage."],
   sustainability: [
     "Green hospital",
     "Resource observations and accountable actions, without unsupported impact claims.",
@@ -182,7 +201,7 @@ const titles: Record<string, [string, string]> = {
     "Ambulance fleet",
     "A recorded view of ALS, BLS and neonatal transport capability.",
   ],
-  census: ["Daily census", "Recorded delivery activity, by date and mode."],
+  census: ["Daily activity & census", "Recorded patient flow and delivery activity, grouped into a clearer operational view."],
   appointments: [
     "Appointments & queue",
     "Browse the recorded appointment list and attendance status for your care cohort.",
@@ -223,23 +242,58 @@ const titles: Record<string, [string, string]> = {
     "My patients",
     "Only records permitted by your facility, unit and assignment. Every read is audited.",
   ],
-  credentials: [
-    "Credential verification",
-    "Synthetic clinical identities require a registration number, department and administrator verification.",
-  ],
   audit: [
     "Access & audit",
     "A traceable record of patient access, authentication and accepted changes.",
-  ],
-  roadmap: [
-    "Build phases",
-    "Acceptance gates keep the readiness layer honest as each workflow becomes available.",
   ],
 };
 const nice = (v: unknown) => String(v ?? "—").replaceAll("_", " ");
 const compact = (v: string) =>
   v?.replace("DAI SYNTHETIC ", "DAI · ").replace("Dr SYNTHETIC ", "Dr. ") ||
   "—";
+function HospitalNavIcon({ name }: { name: string }) {
+  const type: Record<string, string> = {
+    overview: "home", adminOverview: "home", incomingCare: "activity", patientCare: "heart",
+    careReviews: "file", clinicalMonitor: "activity", readiness: "shield", capacity: "grid",
+    "care-gap-map": "search", critical: "activity", diagnostics: "clipboard", ashaCopilot: "user",
+    forecasts: "trend", sustainability: "heart", facility: "home",
+    organisation: "user", structure: "grid", beds: "grid", clinics: "calendar", blood: "droplet",
+    staffing: "user", equipment: "settings", ambulances: "arrow", census: "clipboard", audit: "shield",
+  };
+  const icon = type[name] || "grid";
+  return <svg className="hospital-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    {icon === "home" && <><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></>}
+    {icon === "heart" && <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>}
+    {icon === "user" && <><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></>}
+    {icon === "calendar" && <><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></>}
+    {icon === "file" && <><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></>}
+    {icon === "search" && <><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></>}
+    {icon === "activity" && <path d="M3 12h4l3-7 4 14 3-7h4"/>}
+    {icon === "shield" && <><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/></>}
+    {icon === "grid" && <><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></>}
+    {icon === "droplet" && <><path d="M12 2.5S5.5 10 5.5 15a6.5 6.5 0 0 0 13 0C18.5 10 12 2.5 12 2.5Z"/><path d="M9.5 16.5c.7 1 1.6 1.5 2.8 1.5"/></>}
+    {icon === "trend" && <><path d="m3 17 6-6 4 4 8-9"/><path d="M15 6h6v6"/></>}
+    {icon === "clipboard" && <><rect x="4" y="4" width="16" height="18" rx="2"/><path d="M9 4V2h6v2M8 10h8M8 14h8M8 18h5"/></>}
+    {icon === "settings" && <><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></>}
+    {icon === "arrow" && <><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></>}
+  </svg>;
+}
+const auditGroup = (action: unknown) => {
+  const value = String(action || "").toLowerCase();
+  if (/login|logout|auth|otp|session|verify|credential|permission|access/.test(value)) return "Security & access";
+  if (/read|view|open|search|list|export/.test(value)) return "Record views";
+  return "Administrative changes";
+};
+const auditActionLabel = (action: unknown) => {
+  const value = String(action || "activity").toLowerCase();
+  if (value === "read") return "viewed";
+  if (/create|add/.test(value)) return "created";
+  if (/update|edit|patch/.test(value)) return "updated";
+  if (/delete|remove/.test(value)) return "deleted";
+  if (/verify|approve|accept/.test(value)) return "verified";
+  if (/login|sign_in/.test(value)) return "signed in to";
+  return nice(value);
+};
 function Pill({
   children,
   color = "purple",
@@ -313,11 +367,18 @@ export default function Home() {
   const [password, setPassword] = useState(process.env.NEXT_PUBLIC_DAI_HOSTED_DEMO === "true" ? "" : "Dai-Synthetic-2026!");
   const [otp, setOtp] = useState("");
   const [records, setRecords] = useState<Row[]>([]);
+  const [auditFilters, setAuditFilters] = useState({
+    query: "",
+    action: "",
+    entity: "",
+    group: "",
+  });
   const [patientTotal, setPatientTotal] = useState(0);
   const [patient, setPatient] = useState<Row | null>(null);
   const [editor, setEditor] = useState<Row | null>(null);
   const [notification, setNotification] = useState("");
   const [menu, setMenu] = useState(false);
+  const [openAdminGroup, setOpenAdminGroup] = useState("");
   const menuButton = useRef<HTMLButtonElement>(null);
   const closeMenuButton = useRef<HTMLButtonElement>(null);
   const closeMenu = useCallback(() => {
@@ -395,9 +456,7 @@ export default function Home() {
                 (filters.page - 1) * 25 +
                 "&q=" +
                 encodeURIComponent(filters.q || "")
-              : view === "credentials"
-                ? "/users"
-                : view === "audit"
+              : view === "audit"
                   ? "/audit"
                   : null;
       const [structure, nextSummary, extra] = await Promise.all([
@@ -602,6 +661,28 @@ export default function Home() {
     data?.wards.find((w: Row) => w.id === id)?.name || "—";
   const unitName = (id: string) =>
     data?.units.find((u: Row) => u.id === id)?.code || "—";
+  const auditActions = [...new Set(records.map((r) => String(r.action || "")).filter(Boolean))].sort();
+  const auditEntities = [...new Set(records.map((r) => String(r.entity_type || "")).filter(Boolean))].sort();
+  const filteredAuditRecords = records.filter((record) => {
+    const query = auditFilters.query.trim().toLowerCase();
+    const searchable = [
+      record.actor_name,
+      record.actor_role,
+      record.action,
+      record.entity_type,
+      record.entity_id,
+      JSON.stringify(record.details || {}),
+    ].join(" ").toLowerCase();
+    return (
+      (!query || searchable.includes(query)) &&
+      (!auditFilters.action || record.action === auditFilters.action) &&
+      (!auditFilters.entity || record.entity_type === auditFilters.entity) &&
+      (!auditFilters.group || auditGroup(record.action) === auditFilters.group)
+    );
+  });
+  const groupedAuditRecords = ["Record views", "Administrative changes", "Security & access"]
+    .map((group) => ({ group, items: filteredAuditRecords.filter((record) => auditGroup(record.action) === group) }))
+    .filter(({ items }) => items.length);
   const actions = (kind: string, r: Row) =>
     canEdit ? (
       <div className="row-actions">
@@ -753,9 +834,13 @@ export default function Home() {
       user.permissions.includes(permission)
     );
   };
-  const allowed = (
-    mode === "operations" ? operationNav : administrationNav
-  ).filter(([id]) => canOpen(id));
+  const allowedOperations = operationNav.filter(([id]) => canOpen(id));
+  const allowedAdministrationGroups = administrationGroups
+    .map((group) => ({
+      ...group,
+      items: group.items.filter(([id]) => canOpen(id)),
+    }))
+    .filter((group) => group.items.length);
   function navigate(id: string) {
     setView(id);
     setFilters({ page: 1, q: "", status: "", ward: "", area: "" });
@@ -782,7 +867,7 @@ export default function Home() {
         <a className="brand" href="/">
           दाई{" "}
           <span>
-            DAI<small>HOSPITAL READINESS</small>
+            DAI<small>YOUR CARE COMPANION</small>
           </span>
         </a>
         <div className="sidebar-workspace-label">
@@ -794,37 +879,80 @@ export default function Home() {
             : "HOSPITAL ADMINISTRATION"}
         </div>
         <nav>
-          {allowed.map(([id, title, icon]) => (
-            <button
-              key={id}
-              className={view === id ? "active" : ""}
-              aria-current={view === id ? "page" : undefined}
-              onClick={() => {
-                navigate(id);
-              }}
-            >
-              <span aria-hidden>{icon}</span>
-              {title}
-            </button>
-          ))}
+          {mode === "operations" ? (
+            allowedOperations.map(([id, title]) => (
+              <button
+                key={id}
+                className={view === id ? "active" : ""}
+                aria-current={view === id ? "page" : undefined}
+                onClick={() => navigate(id)}
+              >
+                <HospitalNavIcon name={id} />
+                {title}
+              </button>
+            ))
+          ) : (
+            allowedAdministrationGroups.map((group) => {
+              const active = group.items.some(([id]) => id === view);
+              const directItem = group.items.length === 1 ? group.items[0] : null;
+              if (directItem) {
+                const [id, title] = directItem;
+                return (
+                  <button
+                    key={id}
+                    className={view === id ? "active" : ""}
+                    aria-current={view === id ? "page" : undefined}
+                    onClick={() => navigate(id)}
+                  >
+                    <HospitalNavIcon name={id} />
+                    {title}
+                  </button>
+                );
+              }
+              return (
+                <details className="sidebar-nav-group" key={group.label} open={active || openAdminGroup === group.label}>
+                  <summary onClick={(event) => {
+                    event.preventDefault();
+                    setOpenAdminGroup((current) => current === group.label ? "" : group.label);
+                  }}>
+                    <span>{group.label}</span>
+                    <i aria-hidden="true">⌄</i>
+                  </summary>
+                  <div>
+                    {group.items.map(([id, title]) => (
+                      <button
+                        key={id}
+                        className={view === id ? "active" : ""}
+                        aria-current={view === id ? "page" : undefined}
+                        onClick={() => navigate(id)}
+                      >
+                        <HospitalNavIcon name={id} />
+                        {title}
+                      </button>
+                    ))}
+                  </div>
+                </details>
+              );
+            })
+          )}
         </nav>
         <footer>
-          <span className="dot" /> Connected care network
-          <p>
-            Connected records.
-            <br />
-            Clear responsibility.
-          </p>
-          <button
-            className="text-button"
-            onClick={async () => {
-              await api("/auth/logout", { method: "POST" });
-              setToken("");
-              setUser(null);
-            }}
-          >
-            Sign out ↗
-          </button>
+          <div className="sidebar-care-card">
+            <svg className="sidebar-care-heart" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            <div>
+              <strong>Connected care. Clear responsibility.</strong>
+              <button
+                className="text-button"
+                onClick={async () => {
+                  await api("/auth/logout", { method: "POST" });
+                  setToken("");
+                  setUser(null);
+                }}
+              >
+                Sign out →
+              </button>
+            </div>
+          </div>
         </footer>
       </aside>
       <div className="workspace" inert={menu || undefined}>
@@ -972,7 +1100,6 @@ export default function Home() {
           {view === "ashaCopilot" && <AshaCopilot key={user.id+user.facility_id} api={api} user={user}/>}
           {data && (
             <>
-              {view === "management" && <AdministrationPanel key={user.id + user.facility_id} api={api}/>}
               {(view === "careTasks" || view === "careReviews") && (
                 <CarePanel
                   key={user.id + view}
@@ -983,7 +1110,6 @@ export default function Home() {
                   reviews={view === "careReviews"}
                 />
               )}
-              {view === "intelligence" && <OperationsIntelligencePanel key={user.id+user.facility_id} api={api} permissions={user.permissions} onOpenGreen={()=>setView("sustainability")}/>}
               {view === "sustainability" && (
                 <SustainabilityPanel
                   key={user.id}
@@ -1034,11 +1160,15 @@ export default function Home() {
               )}
               {view === "facility" && (
                 <>
-                  <section className="card">
-                    <div className="card-head">
-                      <div>
-                        <h2>{compact(facility.name)}</h2>
-                        <p>{facility.source_id}</p>
+                  <section className="facility-master card">
+                    <header className="facility-master-hero">
+                      <div className="facility-master-identity">
+                        <span className="facility-master-mark" aria-hidden="true">✚</span>
+                        <div>
+                          <span className="eyebrow">Facility profile</span>
+                          <h2>{compact(facility.name)}</h2>
+                          <p>{facility.source_id} · {facility.address}</p>
+                        </div>
                       </div>
                       {canEdit && (
                         <button
@@ -1050,60 +1180,65 @@ export default function Home() {
                           Edit facility
                         </button>
                       )}
-                    </div>
-                    <dl className="details">
-                      {[
-                        ["Tier", nice(facility.tier)],
-                        ["Ownership", nice(facility.ownership)],
-                        ["Address", facility.address],
-                        ["Coordinates", facility.lat + ", " + facility.lng],
-                        ["NABH", nice(facility.nabh_status)],
-                        ["NABL", facility.nabl_status],
-                        [
-                          "ABDM facility ID",
-                          facility.abdm_facility_id ||
-                            "Not connected · roadmap",
-                        ],
-                        [
-                          "Authorized / functional beds",
-                          facility.authorized_beds +
-                            " / " +
-                            facility.functional_beds,
-                        ],
-                        [
-                          "24×7 emergency",
-                          facility.emergency_24x7 ? "Enabled" : "Disabled",
-                        ],
-                        [
-                          "SOS participation",
-                          facility.sos_participating ? "Enabled" : "Disabled",
-                        ],
-                      ].map(([k, v]) => (
-                        <div key={k}>
-                          <dt>{k}</dt>
-                          <dd>{v}</dd>
+                    </header>
+
+                    <div className="facility-summary-grid">
+                      <article className="facility-summary-card">
+                        <div className="facility-summary-title"><span aria-hidden="true">⌂</span><h3>Identity & location</h3></div>
+                        <dl>
+                          <div><dt>Facility tier</dt><dd>{nice(facility.tier)}</dd></div>
+                          <div><dt>Ownership</dt><dd>{nice(facility.ownership)}</dd></div>
+                          <div><dt>Coordinates</dt><dd>{facility.lat}, {facility.lng}</dd></div>
+                        </dl>
+                      </article>
+
+                      <article className="facility-summary-card">
+                        <div className="facility-summary-title"><span aria-hidden="true">✓</span><h3>Accreditation</h3></div>
+                        <dl>
+                          <div><dt>NABH</dt><dd>{nice(facility.nabh_status)}</dd></div>
+                          <div><dt>NABL</dt><dd>{facility.nabl_status}</dd></div>
+                          <div><dt>ABDM facility ID</dt><dd>{facility.abdm_facility_id || "Not connected"}</dd></div>
+                        </dl>
+                      </article>
+
+                      <article className="facility-summary-card facility-capacity-card">
+                        <div className="facility-summary-title"><span aria-hidden="true">▱</span><h3>Bed capacity</h3></div>
+                        <div className="facility-capacity-numbers">
+                          <div><strong>{facility.authorized_beds}</strong><span>Authorized beds</span></div>
+                          <div><strong>{facility.functional_beds}</strong><span>Functional beds</span></div>
                         </div>
-                      ))}
-                    </dl>
-                    <div className="card-head">
-                      <h3>Configured capabilities</h3>
+                        <p>{Math.max(0, Number(facility.authorized_beds) - Number(facility.functional_beds))} beds currently not functional</p>
+                      </article>
+
+                      <article className="facility-summary-card">
+                        <div className="facility-summary-title"><span aria-hidden="true">＋</span><h3>Emergency readiness</h3></div>
+                        <div className="facility-status-list">
+                          <div><span>24×7 emergency</span><b className={facility.emergency_24x7 ? "ready" : "inactive"}>{facility.emergency_24x7 ? "Enabled" : "Disabled"}</b></div>
+                          <div><span>SOS participation</span><b className={facility.sos_participating ? "ready" : "inactive"}>{facility.sos_participating ? "Enabled" : "Disabled"}</b></div>
+                        </div>
+                      </article>
                     </div>
-                    <div className="permission-list">
+
+                    <section className="facility-capabilities">
+                      <div>
+                        <span className="eyebrow">Services</span>
+                        <h3>Configured capabilities</h3>
+                        <p>Services currently recorded for this facility.</p>
+                      </div>
+                      <div className="facility-capability-grid">
                       {Object.entries(facility.capabilities)
                         .filter(([key]) => key !== "hospital_id")
                         .map(([key, value]) => (
-                          <Pill key={key} color={value ? "green" : "neutral"}>
-                            {nice(key)}:{" "}
-                            {typeof value === "boolean"
-                              ? value
-                                ? "Yes"
-                                : "No"
-                              : String(value)}
-                          </Pill>
+                          <div className={value ? "available" : "unavailable"} key={key}>
+                            <span aria-hidden="true">{value ? "✓" : "—"}</span>
+                            <strong>{nice(key)}</strong>
+                            <small>{typeof value === "boolean" ? (value ? "Available" : "Not available") : String(value)}</small>
+                          </div>
                         ))}
-                    </div>
+                      </div>
+                    </section>
                   </section>
-                  <section className="card">
+                  <section className="card facility-roles-card">
                     <div className="card-head">
                       <h2>Organisation & accountable roles</h2>
                       <Pill>Fictional office holders</Pill>
@@ -1313,141 +1448,87 @@ export default function Home() {
                   </div>
                 </section>
               )}
-              {view === "credentials" && (
-                <section className="card">
-                  <div className="card-head">
-                    <div>
-                      <h2>Clinical identity checks</h2>
-                      <p>
-                        Verification is simulated; no NMC or HPR lookup is
-                        performed.
-                      </p>
-                    </div>
-                    <Pill>{label}</Pill>
-                  </div>
-                  <Table
-                    headers={[
-                      "Fictional clinician",
-                      "Role",
-                      "Registration",
-                      "Department",
-                      "Status",
-                      "",
-                    ]}
-                    rows={records
-                      .filter((r) =>
-                        ["consultant", "resident"].includes(r.role),
-                      )
-                      .map((r) => [
-                        compact(r.name),
-                        nice(r.role),
-                        r.registration_no,
-                        departmentName(r.department_id),
-                        <Pill key={r.id} color={r.verified ? "green" : "amber"}>
-                          {r.verified ? "Verified (synthetic)" : "Unverified"}
-                        </Pill>,
-                        <button
-                          key={r.id}
-                          className="text-button"
-                          onClick={() =>
-                            setEditor({ kind: "verification", record: r })
-                          }
-                        >
-                          Review
-                        </button>,
-                      ])}
-                  />
-                </section>
-              )}
               {view === "audit" && (
-                <section className="card">
-                  <div className="card-head">
-                    <h2>Accountable access</h2>
-                    <p>Latest 100 entries from your facility.</p>
+                <section className="audit-workspace">
+                  <div className="audit-summary-grid">
+                    {["Record views", "Administrative changes", "Security & access"].map((group) => (
+                      <button
+                        key={group}
+                        className={auditFilters.group === group ? "active" : ""}
+                        onClick={() => setAuditFilters({ ...auditFilters, group: auditFilters.group === group ? "" : group })}
+                      >
+                        <span>{group === "Record views" ? "◉" : group === "Administrative changes" ? "✎" : "✓"}</span>
+                        <strong>{records.filter((record) => auditGroup(record.action) === group).length}</strong>
+                        <small>{group}</small>
+                      </button>
+                    ))}
                   </div>
-                  <Table
-                    headers={["Time", "Action", "Entity", "Record", "Inputs"]}
-                    rows={records.map((r) => [
-                      new Date(r.created_at).toLocaleString("en-IN"),
-                      r.action,
-                      r.entity_type,
-                      r.entity_id,
-                      JSON.stringify(r.details),
-                    ])}
-                  />
-                </section>
-              )}
-              {view === "roadmap" && (
-                <>
-                  <section className="card">
-                    <div className="card-head">
+
+                  <section className="audit-filter-card card">
+                    <div className="audit-filter-intro">
                       <div>
-                        <h2>Build one accepted phase at a time.</h2>
-                        <p>
-                          The supplied document references a missing phase plan;
-                          this sequence preserves its dependencies.
-                        </p>
+                        <h2>Find activity</h2>
+                        <p>Search the latest 100 permitted events from this facility.</p>
                       </div>
+                      <span>{filteredAuditRecords.length} matching events</span>
                     </div>
-                    <div className="phase-list">
-                      {[
-                        [
-                          "01",
-                          "Foundation & access",
-                          "In review",
-                          "Next.js, FastAPI, UUID schema, existing data import, M1 structure CRUD and M2 scoped access. Local API checks pass; PostgreSQL/PostGIS deployment still pending.",
-                        ],
-                        [
-                          "02",
-                          "Beds & clinical capacity",
-                          "Planned",
-                          "M3 admissions, M4 live bed twin and M5 labour room, theatres and neonatal capacity. WebSocket channels and reservations with expiry.",
-                        ],
-                        [
-                          "03",
-                          "Completion & continuity",
-                          "Planned",
-                          "M6 separate newborn records, birth doses and PNC; M7 simulated diagnostics with working care-gap closure.",
-                        ],
-                        [
-                          "04",
-                          "Readiness, referral & SOS",
-                          "Planned",
-                          "On-call and blood availability, clinician-confirmed arrivals, human-accepted referrals and two-step SOS.",
-                        ],
-                        [
-                          "05",
-                          "Operational ML forecasts",
-                          "Trained on synthetic data",
-                          "Delivery load, NICU admission counts and eight stock-demand targets: trained models, 24-month scenario history and time-ordered evaluation. Live inventory writes, external integrations and quality reporting remain roadmap.",
-                        ],
-                      ].map(([n, title, status, detail]) => (
-                        <div key={n}>
-                          <span className="phase-number">{n}</span>
-                          <div>
-                            <h3>
-                              {title}{" "}
-                              <Pill color={n === "01" ? "amber" : "neutral"}>
-                                {status}
-                              </Pill>
-                            </h3>
-                            <p>{detail}</p>
-                          </div>
-                        </div>
-                      ))}
+                    <div className="audit-filters">
+                      <label className="audit-search">
+                        <span>Search activity</span>
+                        <input
+                          type="search"
+                          value={auditFilters.query}
+                          onChange={(event) => setAuditFilters({ ...auditFilters, query: event.target.value })}
+                          placeholder="Search staff, action, record or ID"
+                        />
+                      </label>
+                      <label>
+                        <span>Action</span>
+                        <select value={auditFilters.action} onChange={(event) => setAuditFilters({ ...auditFilters, action: event.target.value })}>
+                          <option value="">All actions</option>
+                          {auditActions.map((action) => <option value={action} key={action}>{nice(action)}</option>)}
+                        </select>
+                      </label>
+                      <label>
+                        <span>Record type</span>
+                        <select value={auditFilters.entity} onChange={(event) => setAuditFilters({ ...auditFilters, entity: event.target.value })}>
+                          <option value="">All record types</option>
+                          {auditEntities.map((entity) => <option value={entity} key={entity}>{nice(entity)}</option>)}
+                        </select>
+                      </label>
+                      <button className="secondary" onClick={() => setAuditFilters({ query: "", action: "", entity: "", group: "" })}>Clear filters</button>
                     </div>
                   </section>
-                  <section className="card">
-                    <div className="card-head">
-                      <h2>Assumptions requiring verification</h2>
-                    </div>
-                    <ul className="assumptions">
-                      {data.provenance?.assumptions.map((a: string) => (
-                        <li key={a}>{a}</li>
-                      ))}
-                    </ul>
-                  </section>
-                </>
+
+                  {groupedAuditRecords.length ? groupedAuditRecords.map(({ group, items }) => (
+                    <section className="audit-group card" key={group}>
+                      <header>
+                        <div><h2>{group}</h2><p>{group === "Record views" ? "Patient and facility records opened by authorised users." : group === "Administrative changes" ? "Updates that changed hospital or care information." : "Sign-in, permissions and verification-related activity."}</p></div>
+                        <span>{items.length} events</span>
+                      </header>
+                      <div className="audit-event-list">
+                        {items.map((record) => (
+                          <article className="audit-event" key={record.id}>
+                            <span className="audit-event-icon" aria-hidden="true">{group === "Record views" ? "◉" : group === "Administrative changes" ? "✎" : "✓"}</span>
+                            <div className="audit-event-main">
+                              <strong>{compact(record.actor_name || "Authorised user")} <b>{auditActionLabel(record.action)}</b> {nice(record.entity_type)} record</strong>
+                              <span>{new Date(record.created_at).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })} · {nice(record.actor_role || "authorised staff")}</span>
+                            </div>
+                            <Pill color={group === "Security & access" ? "green" : "purple"}>{nice(record.action)}</Pill>
+                            <details>
+                              <summary>Technical details</summary>
+                              <dl>
+                                <div><dt>Record ID</dt><dd>{record.entity_id || "—"}</dd></div>
+                                <div><dt>Event ID</dt><dd>{record.id || "—"}</dd></div>
+                                <div><dt>Inputs</dt><dd><code>{JSON.stringify(record.details || {}, null, 2)}</code></dd></div>
+                              </dl>
+                            </details>
+                          </article>
+                        ))}
+                      </div>
+                    </section>
+                  )) : <div className="empty audit-empty">No audit events match these filters.</div>}
+                </section>
               )}
             </>
           )}

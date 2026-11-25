@@ -815,7 +815,11 @@ def create_app(engine=None):
     def audit_view(u=Depends(require("audit.read"))):
         with engine.connect() as c:
             items = c.execute(
-                select(s.audit_log)
+                select(
+                    *s.audit_log.c,
+                    s.user.c.name.label("actor_name"),
+                    s.user.c.role.label("actor_role"),
+                )
                 .join(s.user, s.audit_log.c.actor_id == s.user.c.id)
                 .where(
                     or_(

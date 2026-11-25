@@ -127,14 +127,14 @@ function ForecastChart({
               x2={width - right}
               y1={y(max * t)}
               y2={y(max * t)}
-              stroke="#eee7f4"
+              stroke="#e9e2f5"
             />
             <text
               x={left - 10}
               y={y(max * t) + 4}
               textAnchor="end"
-              fill="#95859f"
-              fontSize="10"
+              fill="#5b5675"
+              fontSize="13"
             >
               {num(max * t)}
             </text>
@@ -145,15 +145,15 @@ function ForecastChart({
           y={top}
           width={width - right - x(history.length - 1)}
           height={height - top - bottom}
-          fill="#f8f4fd"
+          fill="#faf5ff"
         />
-        <polygon points={band} fill="#d9c8ee" opacity=".7" />
-        <path d={historyPath} fill="none" stroke="#a99ab9" strokeWidth="2.5" />
+        <polygon points={band} fill="#c4b5fd" opacity=".55" />
+        <path d={historyPath} fill="none" stroke="#5b5675" strokeWidth="3" />
         <path
           d={predictionPath}
           fill="none"
-          stroke="#8053b2"
-          strokeWidth="3"
+          stroke="#7c3aed"
+          strokeWidth="3.5"
           strokeDasharray="5 4"
         />
         <line
@@ -161,14 +161,14 @@ function ForecastChart({
           x2={x(history.length - 1)}
           y1={top}
           y2={height - bottom}
-          stroke="#bda3d2"
+          stroke="#8b5cf6"
           strokeDasharray="3 4"
         />
         <text
           x={x(history.length - 1) + 8}
           y={top + 12}
-          fill="#9977b5"
-          fontSize="9"
+          fill="#6d28d9"
+          fontSize="13"
         >
           Forecast starts
         </text>
@@ -179,8 +179,8 @@ function ForecastChart({
                 x={x(i)}
                 y={height - 10}
                 textAnchor="middle"
-                fill="#95859f"
-                fontSize="9"
+                fill="#5b5675"
+                fontSize="12"
               >
                 {day(r.date)}
               </text>
@@ -209,9 +209,9 @@ function ForecastChart({
               x2={x(hover)}
               y1={top}
               y2={height - bottom}
-              stroke="#bea4d3"
+              stroke="#8b5cf6"
             />
-            <circle cx={x(hover)} cy={y(hovered.value)} r="4" fill="#8053b2" />
+            <circle cx={x(hover)} cy={y(hovered.value)} r="4.5" fill="#7c3aed" />
           </g>
         )}
       </svg>

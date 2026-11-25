@@ -117,6 +117,84 @@ function Metric({
   );
 }
 
+function CensusExplorer({ rows, snapshotAt }: { rows: Row[]; snapshotAt?: string }) {
+  const ordered = [...rows].sort((a, b) => String(a.date).localeCompare(String(b.date)));
+  const [period, setPeriod] = useState("7");
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
+  const [activity, setActivity] = useState("all");
+  const baseRows = period === "all" ? ordered : ordered.slice(-Number(period));
+  const visibleRows = baseRows.filter((row) => {
+    const day = String(row.date || "").slice(0, 10);
+    const hasActivity = ["admissions", "discharges", "referrals_in", "referrals_out", "deliveries"]
+      .some((key) => Number(row[key] || 0) > 0);
+    return (!fromDate || day >= fromDate) && (!toDate || day <= toDate) && (activity === "all" || hasActivity);
+  });
+  const sum = (key: string) => visibleRows.reduce((total, row) => total + Number(row[key] || 0), 0);
+  const latest = visibleRows[visibleRows.length - 1];
+  const totals = {
+    admissions: sum("admissions"),
+    discharges: sum("discharges"),
+    referrals: sum("referrals_in") + sum("referrals_out"),
+    deliveries: sum("deliveries"),
+  };
+  const trendRows = visibleRows.slice(-14);
+  const trendMax = Math.max(1, ...trendRows.flatMap((row) => [Number(row.admissions || 0), Number(row.discharges || 0), Number(row.deliveries || 0)]));
+  const formatDay = (value: string, withYear = true) => new Date(value.slice(0, 10) + "T12:00:00").toLocaleDateString("en-IN", { day: "numeric", month: "short", ...(withYear ? { year: "numeric" } : {}) });
+  const clearDates = () => { setFromDate(""); setToDate(""); };
+  const value = (amount: unknown) => <strong className={Number(amount || 0) ? "census-value active" : "census-value"}>{Number(amount || 0).toLocaleString("en-IN")}</strong>;
+
+  return <section className="census-workspace">
+    <header className="census-intro">
+      <div><span className="eyebrow">RECORDED OPERATIONS</span><h2>Understand daily activity at a glance</h2><p>Review patient movement and delivery activity separately, then use the date controls to focus on the period you need.</p></div>
+      <div className="census-data-state"><span className="dot"/><strong>Recorded snapshot</strong><small>{snapshotAt ? formatDay(snapshotAt) : "Snapshot date unavailable"} · Read only</small></div>
+    </header>
+
+    <div className="census-controls card">
+      <div className="census-periods" aria-label="Date period">
+        {["7", "14", "30", "all"].map((option) => <button key={option} className={period === option && !fromDate && !toDate ? "active" : ""} onClick={() => { setPeriod(option); clearDates(); }}>{option === "all" ? "All records" : `Last ${option} days`}</button>)}
+      </div>
+      <label>From<input type="date" value={fromDate} onChange={(event) => { setFromDate(event.target.value); setPeriod("all"); }}/></label>
+      <label>To<input type="date" value={toDate} onChange={(event) => { setToDate(event.target.value); setPeriod("all"); }}/></label>
+      <label>Activity<select value={activity} onChange={(event) => setActivity(event.target.value)}><option value="all">All recorded days</option><option value="active">Days with activity</option></select></label>
+      {(fromDate || toDate || activity !== "all") && <button className="census-clear" onClick={() => { clearDates(); setPeriod("7"); setActivity("all"); }}>Clear filters</button>}
+    </div>
+
+    <div className="census-metrics">
+      <article><span>Admissions</span><strong>{totals.admissions}</strong><small>During selected period</small></article>
+      <article><span>Discharges</span><strong>{totals.discharges}</strong><small>During selected period</small></article>
+      <article><span>Referrals</span><strong>{totals.referrals}</strong><small>{sum("referrals_in")} in · {sum("referrals_out")} out</small></article>
+      <article><span>Deliveries</span><strong>{totals.deliveries}</strong><small>{latest ? `Latest recorded day: ${formatDay(String(latest.date), false)}` : "No matching records"}</small></article>
+    </div>
+
+    <section className="census-trend card">
+      <header><div><h2>Activity trend</h2><p>Latest {trendRows.length} matching days. Hover a bar to inspect its value.</p></div><div className="census-legend"><span><i className="admissions"/>Admissions</span><span><i className="discharges"/>Discharges</span><span><i className="deliveries"/>Deliveries</span></div></header>
+      {trendRows.length ? <div className="census-chart" style={{ gridTemplateColumns: `repeat(${trendRows.length}, minmax(42px, 1fr))` }}>
+        {trendRows.map((row) => <div className="census-chart-day" key={row.date}>
+          <div className="census-bars">
+            <i className="admissions" title={`${row.admissions || 0} admissions`} style={{ height: `${Math.max(Number(row.admissions || 0) ? 8 : 2, Number(row.admissions || 0) / trendMax * 100)}%` }}/>
+            <i className="discharges" title={`${row.discharges || 0} discharges`} style={{ height: `${Math.max(Number(row.discharges || 0) ? 8 : 2, Number(row.discharges || 0) / trendMax * 100)}%` }}/>
+            <i className="deliveries" title={`${row.deliveries || 0} deliveries`} style={{ height: `${Math.max(Number(row.deliveries || 0) ? 8 : 2, Number(row.deliveries || 0) / trendMax * 100)}%` }}/>
+          </div>
+          <span>{formatDay(String(row.date), false)}</span>
+        </div>)}
+      </div> : <div className="empty">No activity matches the selected period.</div>}
+    </section>
+
+    <div className="census-table-grid">
+      <section className="card census-table-card">
+        <header><div><span className="eyebrow">PATIENT FLOW</span><h2>Admissions, discharges & referrals</h2></div><span>{visibleRows.length} days</span></header>
+        <div className="table-scroll"><table><thead><tr><th>Date</th><th>Admissions</th><th>Discharges</th><th>Referrals in</th><th>Referrals out</th></tr></thead><tbody>{visibleRows.length ? visibleRows.map((row) => <tr key={row.date}><td>{formatDay(String(row.date))}</td><td>{value(row.admissions)}</td><td>{value(row.discharges)}</td><td>{value(row.referrals_in)}</td><td>{value(row.referrals_out)}</td></tr>) : <tr><td colSpan={5}><div className="empty">No patient-flow records match these filters.</div></td></tr>}</tbody></table></div>
+      </section>
+      <section className="card census-table-card">
+        <header><div><span className="eyebrow">DELIVERY ACTIVITY</span><h2>Deliveries by mode</h2></div><span>{totals.deliveries} total</span></header>
+        <div className="table-scroll"><table><thead><tr><th>Date</th><th>Total</th><th>Normal</th><th>Assisted</th><th>Elective LSCS</th><th>Emergency LSCS</th></tr></thead><tbody>{visibleRows.length ? visibleRows.map((row) => <tr key={row.date}><td>{formatDay(String(row.date))}</td><td>{value(row.deliveries)}</td><td>{value(row.normal)}</td><td>{value(row.assisted)}</td><td>{value(row.elective_lscs)}</td><td>{value(row.emergency_lscs)}</td></tr>) : <tr><td colSpan={6}><div className="empty">No delivery records match these filters.</div></td></tr>}</tbody></table></div>
+      </section>
+    </div>
+    <p className="census-footnote">This page reports recorded operational events. It does not forecast demand or reserve beds, staff, theatres or transport.</p>
+  </section>;
+}
+
 function CapacityExplorer({ rows, navigate }: { rows: Row[]; navigate: (view:string)=>void }) {
   const groups = Array.from(new Set(rows.map((row) => String(row.resource || "Other"))));
   const [selected, setSelected] = useState(groups[0] || "");
@@ -696,6 +774,7 @@ export function SnapshotView({
   if (view === "staffing") return <StaffingExplorer rows={rows} data={data}/>;
   if (view === "equipment") return <EquipmentExplorer rows={rows}/>;
   if (view === "ambulances") return <AmbulanceExplorer rows={rows}/>;
+  if (view === "census") return <CensusExplorer rows={rows} snapshotAt={data.as_of_date}/>;
   if (view === "readiness")
     return <DeliveryReadinessExplorer rows={rows} summary={summary} services={data.services}/>;
   const views: Record<
@@ -712,32 +791,6 @@ export function SnapshotView({
       hint: "All office holders are fictional.",
       headers: ["Role", "Fictional office holder", "Demo email", "Appointed"],
       row: (r) => [r.role_name, name(r.person_name), r.email, r.appointed_on],
-    },
-    census: {
-      title: "Daily delivery census",
-      hint: "Recorded events from the operating ledger; these are not model forecasts.",
-      headers: [
-        "Date",
-        "Admissions",
-        "Discharges",
-        "Referrals in / out",
-        "Total deliveries",
-        "Normal",
-        "Assisted",
-        "Elective LSCS",
-        "Emergency LSCS",
-      ],
-      row: (r) => [
-        r.date,
-        r.admissions,
-        r.discharges,
-        r.referrals_in + " / " + r.referrals_out,
-        r.deliveries,
-        r.normal || 0,
-        r.assisted || 0,
-        r.elective_lscs || 0,
-        r.emergency_lscs || 0,
-      ],
     },
     appointments: {
       title: "Appointments & recorded queue",

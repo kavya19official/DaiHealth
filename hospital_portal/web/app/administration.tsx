@@ -155,23 +155,133 @@ export function AdministrationPanel({ api }: { api: Api }) {
       : section === "service"
         ? serviceFields
         : staffFields;
+  const profileEssentialFields = ["organisation", "address", "pincode", "contact"];
+  const renderField = (k: string) => {
+    const label = k.replaceAll("_", " ");
+    const options =
+      k === "role"
+        ? data.roles.map((r: string) => ({ id: r, name: r }))
+        : k === "department_id"
+          ? data.departments
+          : k === "unit_id"
+            ? data.units.filter((r: Row) => r.department_id === draft.department_id)
+            : k === "clinician_id"
+              ? [
+                  ...data.users,
+                  ...data.affiliations
+                    .filter((r: Row) => r.user_id)
+                    .map((r: Row) => ({ ...r, id: r.user_id })),
+                ].filter(
+                  (r: Row) =>
+                    r.department_id === draft.department_id &&
+                    ["consultant", "resident"].includes(r.role),
+                )
+              : null;
+    const isRequired =
+      section === "profile"
+        ? profileEssentialFields.includes(k)
+        : !["starts_at", "ends_at", "closure_reason", "registration_no"].includes(k);
+    return (
+      <label className="admin-field" key={k}>
+        <span>{label}</span>
+        {options ? (
+          <select
+            value={draft[k] || ""}
+            required={
+              (["role", "department_id"].includes(k) && section !== "staff") ||
+              k === "role"
+            }
+            onChange={(e) =>
+              setDraft({
+                ...draft,
+                [k]: e.target.value,
+                ...(k === "department_id"
+                  ? { unit_id: "", clinician_id: "" }
+                  : {}),
+              })
+            }
+          >
+            <option value="">Select / none</option>
+            {options.map((r: Row) => (
+              <option key={r.id} value={r.id}>
+                {r.name || r.code}
+              </option>
+            ))}
+          </select>
+        ) : ["available", "active", "verified", "accepts_referrals"].includes(k) ? (
+          <input
+            type="checkbox"
+            checked={!!draft[k]}
+            onChange={(e) => setDraft({ ...draft, [k]: e.target.checked })}
+          />
+        ) : k === "verification_documents" ? (
+          <>
+            <textarea
+              placeholder="Uploaded document references appear here"
+              value={
+                Array.isArray(draft[k]) ? draft[k].join("\n") : draft[k] || ""
+              }
+              onChange={(e) => setDraft({ ...draft, [k]: e.target.value })}
+            />
+            <small>Optional document references, one per line.</small>
+          </>
+        ) : (
+          <input
+            required={isRequired}
+            placeholder={
+              k === "organisation"
+                ? "Hospital or facility name"
+                : k === "address"
+                  ? "Street, area and city"
+                  : k === "pincode"
+                    ? "6-digit pincode"
+                    : k === "contact"
+                      ? "Primary phone number"
+                      : "Optional"
+            }
+            type={
+              k.endsWith("_at")
+                ? "datetime-local"
+                : ["capacity", "latitude", "longitude"].includes(k)
+                  ? "number"
+                  : k === "email"
+                    ? "email"
+                    : "text"
+            }
+            step="any"
+            value={
+              k.endsWith("_at") && draft[k]
+                ? new Date(
+                    new Date(draft[k]).getTime() -
+                      new Date(draft[k]).getTimezoneOffset() * 60000,
+                  )
+                    .toISOString()
+                    .slice(0, 16)
+                : (draft[k] ?? "")
+            }
+            onChange={(e) => setDraft({ ...draft, [k]: e.target.value })}
+          />
+        )}
+      </label>
+    );
+  };
   return (
     <div className="admin-manager">
       <div className="toolbar">
         {[
-          ["profile", "Facility onboarding"],
-          ["service", "Services & slots"],
-          ["staff", "Staff & access"],
+          ["profile", "1. Facility details"],
+          ["service", "2. Services & slots"],
+          ["staff", "3. Staff access"],
         ].map(([k, label]) => (
           <button key={k} onClick={() => edit(k)} aria-pressed={section === k}>
             {label}
           </button>
         ))}
       </div>
-      <p>
-        Manage the current facility only. Existing departments, wards and care
-        capacity remain under Departments & units and Wards & bed board.
-      </p>
+      <div className="admin-manager-intro">
+        <strong>Choose one task, complete the essential fields, then save.</strong>
+        <span>Advanced details stay optional and can be added later.</span>
+      </div>
       {error && <p role="alert">{error}</p>}
       {message && (
         <p role="status" style={{ overflowWrap: "anywhere" }}>
@@ -179,7 +289,9 @@ export function AdministrationPanel({ api }: { api: Api }) {
         </p>
       )}
       {section === "profile" && (
-        <section>
+        <details className="admin-upload-panel">
+          <summary>Verification documents (optional)</summary>
+          <section>
           <label>
             Upload verification PDF (up to 5 MB)
             <input
@@ -247,7 +359,8 @@ export function AdministrationPanel({ api }: { api: Api }) {
                 </button>
               </p>
             ))}
-        </section>
+          </section>
+        </details>
       )}
       <div className="admin-manager-grid">
         <form onSubmit={save}>
@@ -258,138 +371,28 @@ export function AdministrationPanel({ api }: { api: Api }) {
                 ? "Service availability / appointment slot"
                 : "Invite or update staff"}
           </h2>
-          {fields.map((k) => {
-            const label = k.replaceAll("_", " ");
-            const options =
-              k === "role"
-                ? data.roles.map((r: string) => ({ id: r, name: r }))
-                : k === "department_id"
-                  ? data.departments
-                  : k === "unit_id"
-                    ? data.units.filter(
-                        (r: Row) => r.department_id === draft.department_id,
-                      )
-                    : k === "clinician_id"
-                      ? [
-                          ...data.users,
-                          ...data.affiliations
-                            .filter((r: Row) => r.user_id)
-                            .map((r: Row) => ({ ...r, id: r.user_id })),
-                        ].filter(
-                          (r: Row) =>
-                            r.department_id === draft.department_id &&
-                            ["consultant", "resident"].includes(r.role),
-                        )
-                      : null;
-            return (
-              <label
-                key={k}
-                style={{
-                  display: "grid",
-                  gap: 4,
-                  marginBottom: 12,
-                  textTransform: "capitalize",
-                }}
-              >
-                {label}
-                {options ? (
-                  <select
-                    value={draft[k] || ""}
-                    required={
-                      (["role", "department_id"].includes(k) &&
-                        section !== "staff") ||
-                      k === "role"
-                    }
-                    onChange={(e) =>
-                      setDraft({
-                        ...draft,
-                        [k]: e.target.value,
-                        ...(k === "department_id"
-                          ? { unit_id: "", clinician_id: "" }
-                          : {}),
-                      })
-                    }
-                  >
-                    <option value="">Select / none</option>
-                    {options.map((r: Row) => (
-                      <option key={r.id} value={r.id}>
-                        {r.name || r.code}
-                      </option>
-                    ))}
-                  </select>
-                ) : [
-                    "available",
-                    "active",
-                    "verified",
-                    "accepts_referrals",
-                  ].includes(k) ? (
-                  <input
-                    type="checkbox"
-                    checked={!!draft[k]}
-                    onChange={(e) =>
-                      setDraft({ ...draft, [k]: e.target.checked })
-                    }
-                  />
-                ) : k === "verification_documents" ? (
-                  <>
-                    <textarea
-                      value={
-                        Array.isArray(draft[k])
-                          ? draft[k].join("\n")
-                          : draft[k] || ""
-                      }
-                      onChange={(e) =>
-                        setDraft({ ...draft, [k]: e.target.value })
-                      }
-                    />
-                    <small>
-                      Document references, one per line. These references do not
-                      verify the facility or upload files.
-                    </small>
-                  </>
-                ) : (
-                  <input
-                    required={
-                      ![
-                        "starts_at",
-                        "ends_at",
-                        "closure_reason",
-                        "registration_no",
-                      ].includes(k)
-                    }
-                    type={
-                      k.endsWith("_at")
-                        ? "datetime-local"
-                        : ["capacity", "latitude", "longitude"].includes(k)
-                          ? "number"
-                          : k === "email"
-                            ? "email"
-                            : "text"
-                    }
-                    step="any"
-                    value={
-                      k.endsWith("_at") && draft[k]
-                        ? new Date(
-                            new Date(draft[k]).getTime() -
-                              new Date(draft[k]).getTimezoneOffset() * 60000,
-                          )
-                            .toISOString()
-                            .slice(0, 16)
-                        : (draft[k] ?? "")
-                    }
-                    onChange={(e) =>
-                      setDraft({ ...draft, [k]: e.target.value })
-                    }
-                  />
-                )}
-              </label>
-            );
-          })}
-          <label>
-            Reason for this change
+          {section === "profile" ? (
+            <>
+              <p className="admin-step-label">Essential details</p>
+              {profileEssentialFields.map(renderField)}
+              <details className="admin-optional-fields">
+                <summary>Add location, hours and emergency details</summary>
+                <div>
+                  {fields
+                    .filter((k) => !profileEssentialFields.includes(k))
+                    .map(renderField)}
+                </div>
+              </details>
+            </>
+          ) : (
+            fields.map(renderField)
+          )}
+          <label className="admin-field admin-reason-field">
+            <span>Reason for this change</span>
             <textarea
               required
               minLength={5}
+              placeholder="For example: annual profile review"
               value={draft.reason || ""}
               onChange={(e) => setDraft({ ...draft, reason: e.target.value })}
             />
