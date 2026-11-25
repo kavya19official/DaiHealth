@@ -33,6 +33,7 @@
   let pending = null;
   let lastPresence = 0;
   let onlineDoctors = null;
+  let availableDoctors = null;
 
   const esc = value => String(value ?? '').replace(/[&<>"']/g, char => (
     { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[char]
@@ -160,8 +161,11 @@
   function searchNote(visit) {
     const minutes = Math.max(1, Math.ceil((new Date(visit.search_until) - Date.now()) / 60000));
     const left = `We’ll keep trying for about ${minutes} more minute${minutes === 1 ? '' : 's'}.`;
+    if (visit.status === 'offered') return 'Waiting for the doctor to respond. ' + left;
     if (onlineDoctors === 0) return `No doctor is online right now. ${left} You can cancel and open Nearby Care at any time.`;
-    if (onlineDoctors > 0) return `${onlineDoctors} doctor${onlineDoctors === 1 ? ' is' : 's are'} online now. ${left}`;
+    if (availableDoctors === 0 && onlineDoctors > 0) {
+      return `Doctors are online, but none can take a new request right now. ${left}`;
+    }
     return left;
   }
 
@@ -230,6 +234,7 @@
         const mine = await request('/mine');
         history = mine.items;
         onlineDoctors = Number.isInteger(mine.online_doctors) ? mine.online_doctors : null;
+        availableDoctors = Number.isInteger(mine.available_doctors) ? mine.available_doctors : null;
         renderPatient();
       }
     } catch (err) {
