@@ -41,7 +41,7 @@ function Table({
   rows: React.ReactNode[][];
 }) {
   return (
-    <div className="table-scroll">
+    <div className="table-scroll" role="region" aria-label="Scrollable table" tabIndex={0}>
       <table>
         <thead>
           <tr>

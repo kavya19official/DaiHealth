@@ -32,10 +32,20 @@ def main():
     password = os.getenv("DAI_TEST_PASSWORD", "Dai-Synthetic-2026!")
     assert patient_email.endswith("@dai-synthetic.invalid") and doctor_email.endswith("@dai-synthetic.invalid")
     live = os.getenv("DAI_TEST_EXPECT_SONONET") == "true"
+    mobile = os.getenv("DAI_TEST_MOBILE") == "true"
     with sync_playwright() as playwright:
         browser = playwright.chromium.launch(executable_path=os.getenv("DAI_TEST_CHROMIUM"),
                                              args=["--no-sandbox"])
-        patient, doctor = browser.new_context(), browser.new_context()
+        options = dict(viewport={"width": 390, "height": 844}, is_mobile=True, has_touch=True) if mobile else {}
+        patient, doctor = browser.new_context(**options), browser.new_context(**options)
+
+        def open_patient_scans(page):
+            if page.locator("#panel-ultrasound").is_visible():
+                return
+            if mobile:
+                page.locator("[data-mobile-menu]").tap()
+            page.get_by_role("button", name="Ultrasound scans", exact=True).click()
+
         for email, context in [(patient_email,patient),(doctor_email,doctor)]:
             login = context.request.post(origin+"/api/auth/login",data={"email":email,"password":password})
             assert login.ok, login.text()
@@ -46,7 +56,7 @@ def main():
         page.route(missing_route, lambda route: route.fulfill(
             status=404, content_type="text/html", body="Cannot GET /api/patient/ultrasound/options",
         ))
-        page.get_by_role("button", name="Ultrasound scans", exact=True).click()
+        open_patient_scans(page)
         expect(page.locator("#pageTitle")).to_have_text("Ultrasound scans")
         expect(page.get_by_role("alert").filter(has_text="does not have the ultrasound route")).to_be_visible()
         page.unroute(missing_route)
@@ -98,7 +108,7 @@ def main():
             expect(page.get_by_text("Analysis queued for this scan.",exact=True)).to_be_visible()
             expect(patient_scan.get_by_text("AI analysis unavailable.",exact=False)).to_be_visible(timeout=35000)
         page.reload(wait_until="domcontentloaded")
-        page.get_by_role("button", name="Ultrasound scans", exact=True).click()
+        expect(page.locator("#panel-ultrasound")).to_be_visible()
         expect(patient_scan.get_by_text("Review recommended",exact=True)).to_be_visible()
 
         doctor_image = doctor.request.get(origin + f"/api/doctor/patients/{mother_id}/ultrasound/{scan_id}/image")
@@ -108,7 +118,10 @@ def main():
         assert private.tobytes() == original.tobytes()
         clinical = doctor.new_page()
         clinical.goto(origin+"/doctor.html",wait_until="domcontentloaded")
-        clinical.get_by_role("button",name="Ultrasound Review",exact=True).click()
+        if mobile:
+            clinical.locator('[data-mobile-panel="ultrasound"]').tap()
+        else:
+            clinical.get_by_role("button",name="Ultrasound Review",exact=True).click()
         clinical.locator("#panel-ultrasound").get_by_role("combobox",name="Choose a patient").select_option(str(mother_id))
         review = clinical.locator("#panel-ultrasound article").first
         expect(review.get_by_text("Scan views analyzed" if live else "Model unavailable",exact=True)).to_be_visible()

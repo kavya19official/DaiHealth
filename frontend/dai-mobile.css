@@ -1,0 +1,201 @@
+/* Responsive layer for the existing DAI web workspaces. */
+.dai-mobile-nav, .dai-drawer-close { display: none; }
+body.patient-view .topbar .patient-sos { position: static; flex: none; }
+
+@media (min-width: 1025px) {
+  body.patient-view .topbar { padding-right: 24px; }
+  body.patient-view .topbar .user-chip { display: flex; }
+}
+
+@media (max-width: 1024px) {
+  :root {
+    --dai-gutter: clamp(12px, 2.5vw, 24px);
+    --dai-inset-left: max(var(--dai-gutter), env(safe-area-inset-left));
+    --dai-inset-right: max(var(--dai-gutter), env(safe-area-inset-right));
+    --dai-bottom-space: calc(76px + env(safe-area-inset-bottom));
+  }
+
+  .patient-view, .doctor-workspace {
+    --dai-nav-bg: var(--dw-card, #fff);
+    --dai-nav-ink: var(--dw-text, #372f50);
+    --dai-nav-active: var(--dw-soft, #f1e8ff);
+    --dai-nav-line: var(--dw-border, #e5ddee);
+  }
+
+  body:is(.patient-view, .doctor-workspace) .app { grid-template-columns: minmax(0, 1fr); }
+  body:is(.patient-view, .doctor-workspace) :is(.main,.content,.panel) { min-inline-size: 0; max-inline-size: 100%; }
+  body:is(.patient-view, .doctor-workspace) .content {
+    padding-inline: var(--dai-inset-left) var(--dai-inset-right) !important;
+    padding-bottom: calc(var(--dai-bottom-space) + 24px) !important;
+  }
+
+  .dai-mobile-nav {
+    position: fixed;
+    inset: auto 0 0;
+    z-index: 65;
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 2px;
+    min-height: var(--dai-bottom-space);
+    padding: 5px max(4px, env(safe-area-inset-right)) max(5px, env(safe-area-inset-bottom)) max(4px, env(safe-area-inset-left));
+    background: var(--dai-nav-bg);
+    color: var(--dai-nav-ink);
+    border-top: 1px solid var(--dai-nav-line);
+    box-shadow: 0 -6px 26px #25183b14;
+  }
+  .dai-mobile-nav[data-dai-mobile-nav="doctor"] { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  body.doctor-workspace:not([data-dw-theme="dark"]) .dai-mobile-nav { --dai-nav-active: #f1e8ff; }
+  .dai-mobile-nav [data-mobile-panel="appointments"] { letter-spacing: -.25px; }
+  .dai-mobile-nav button {
+    display: grid; align-content: center; justify-items: center; gap: 4px;
+    min-height: 60px; min-width: 0; padding: 4px 1px;
+    text-align: center; line-height: 1.15; font: inherit; font-size: clamp(10px, 1.7vw, 13px);
+    font-weight: 650; color: inherit; border: 0; border-radius: 10px; background: transparent;
+    overflow-wrap: anywhere; -webkit-tap-highlight-color: transparent;
+  }
+  .dai-mobile-nav button:is([aria-current="page"],[data-active]) {
+    color: var(--dw-text, #54229c); background: var(--dai-nav-active); font-weight: 800;
+  }
+  .dai-mobile-nav svg { display: block; width: 19px; height: 19px; }
+  .dai-appointment-short { display: none; }
+  .dai-mobile-nav button:focus-visible, .dai-drawer-close:focus-visible { outline: 2px solid var(--brand, #6229b8); outline-offset: -2px; }
+  .dai-drawer-visible :is(.dai-mobile-nav,#daiCareChatbot) { visibility: hidden; }
+  .dai-drawer-visible { overflow: hidden; }
+  .dai-drawer-close {
+    display: block; flex: none; min-height: 44px; padding: .5rem .75rem;
+    margin-bottom: .5rem; color: inherit; font: inherit; text-align: left;
+    border: 1px solid var(--dai-nav-line); border-radius: 10px; background: var(--dai-nav-bg);
+  }
+  body.patient-view .sidebar, body.doctor-workspace .sidebar {
+    position: fixed; inset: 0 auto 0 0; z-index: 110;
+    box-sizing: border-box; width: min(320px, 88vw); height: 100dvh;
+    padding: max(12px, env(safe-area-inset-top)) 12px max(12px, env(safe-area-inset-bottom)) var(--dai-inset-left);
+    overflow-y: auto; overscroll-behavior: contain;
+  }
+  body.patient-view .sidebar { transform: translateX(-110%); visibility: hidden; }
+  body.patient-view .sidebar.is-open { transform: none; visibility: visible; }
+  body.doctor-workspace .sidebar { display: none; height: 100dvh; }
+  body.doctor-workspace.dw-menu-open .sidebar { display: flex; }
+  body.patient-view .sidebar-backdrop.is-open, body.doctor-workspace.dw-menu-open .dw-menu-backdrop {
+    display: block; position: fixed; inset: 0; z-index: 105;
+  }
+  body:is(.patient-view, .doctor-workspace) .sidebar :is(.nav-item,summary) { min-height: 44px; white-space: normal; }
+
+  body.patient-view .topbar, body.doctor-workspace .topbar {
+    position: relative; top: auto; z-index: 41;
+    height: auto; min-height: 0; flex-wrap: wrap; gap: 8px;
+    padding: max(8px,env(safe-area-inset-top)) var(--dai-inset-right) 8px var(--dai-inset-left);
+  }
+  body.patient-view .topbar .menu-btn, body.doctor-workspace .topbar #dwCollapse { display: none; }
+  body.patient-view .topbar .patient-crumb { display: flex; min-width: 0; flex: 1 1 8rem; overflow-wrap: anywhere; }
+  body:is(.patient-view, .doctor-workspace) .topbar__right {
+    display: flex; flex-wrap: wrap; gap: 6px; flex-shrink: 1; max-width: 100%; min-width: 0;
+  }
+  body.patient-view .stage-banner {
+    position: relative; top: auto; z-index: auto; gap: 10px;
+    padding-inline: var(--dai-inset-left) var(--dai-inset-right);
+  }
+  body.patient-view .stage-banner :is(.stage-summary,.stage-due) { min-width: 0; overflow-wrap: anywhere; }
+  body.patient-view .topbar .patient-sos {
+    position: static; min-height: 44px; min-width: 54px; padding: 6px 8px; margin: 0; width: auto;
+  }
+  body.patient-view .topbar .patient-sos span { display: block; }
+  body.patient-view .topbar .patient-sos small { display: none; }
+  body.patient-view .topbar .patient-sos svg { width: 16px; height: 16px; }
+  body:is(.patient-view, .doctor-workspace) .topbar :is(.icon-btn,.read-page,#patientLanguage,.dw-top-help) { min-height: 44px; }
+  body.patient-view .notif-pop {
+    position: fixed; top: auto; inset-inline: var(--dai-inset-left) var(--dai-inset-right);
+    width: auto; max-width: 100%; max-height: min(65dvh, 490px); overflow: auto;
+  }
+  body:is(.patient-view,.doctor-workspace) #daiCareChatbot { bottom: calc(var(--dai-bottom-space) + 10px); right: var(--dai-inset-right); }
+  body:is(.patient-view,.doctor-workspace) :is(.sticky-next,.patient-sticky,.care-sticky) { bottom: var(--dai-bottom-space); }
+  body:is(.patient-view,.doctor-workspace) .topbar :is(.search,.dd-modes) { min-inline-size: 0; }
+  body.doctor-workspace .topbar .search { order: 2; flex: 1 1 100%; max-width: none; }
+  body.doctor-workspace .topbar .search input { min-inline-size: 0; width: 100%; min-height: 44px; }
+  body.doctor-workspace .topbar kbd { display: none; }
+  body.doctor-workspace .topbar .dd-modes { flex-wrap: wrap; }
+  body.doctor-workspace .topbar .dd-modes button { min-height: 44px; }
+
+  /* Native scrolling is limited to wide data tables or existing chart regions. */
+  .dai-table-scroll { display: block; min-width: 0; max-width: 100%; overflow-x: auto; overscroll-behavior-inline: contain; }
+  .dai-table-scroll:focus-visible { outline: 2px solid var(--brand, #6229b8); outline-offset: -2px; }
+  body:is(.patient-view,.doctor-workspace) .content :is(img,video,iframe,canvas) { max-inline-size: 100%; }
+  body:is(.patient-view,.doctor-workspace) .content :is(input,select,textarea) { max-inline-size: 100%; min-inline-size: 0; }
+  body:is(.patient-view,.doctor-workspace) :is(dialog,.patient-dialog,.dw-modal,.dp-calendar-detail) {
+    max-inline-size: calc(100vw - var(--dai-inset-left) - var(--dai-inset-right));
+    max-block-size: calc(100dvh - 24px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    overflow-y: auto;
+  }
+  body:is(.patient-view,.doctor-workspace) .content :is(.button,.btn,.uw-button,.link-btn,.pl-button) {
+    min-height: 44px; max-inline-size: 100%; white-space: normal;
+  }
+  body:is(.patient-view,.doctor-workspace) .content :is(.content-grid,.main-grid,.road-grid,.dp-person-top,.dw-card,.appointment-card,.uw-card,.uw-form) {
+    min-width: 0;
+  }
+  body:is(.patient-view,.doctor-workspace) [data-ultrasound-workspace] { grid-template-columns: minmax(0,1fr); }
+  .uw-upload :is(input[type=file],select), .uw-form :is(select,textarea) {
+    width: 100%; max-inline-size: 100%; min-width: 0; font-size: 1rem;
+  }
+  [data-ultrasound-workspace] label:has(input[type=checkbox]) { min-height: 44px; align-items: start; }
+  [data-ultrasound-workspace] input[type=checkbox] { flex: none; width: 20px; height: 20px; }
+  body:is(.patient-view,.doctor-workspace) .toast { bottom: calc(var(--dai-bottom-space) + 16px); max-width: 86vw; }
+  .uw-image { touch-action: pan-y pinch-zoom; }
+}
+
+@media (max-width: 600px) {
+  .dai-appointment-label { font-size: 9.5px; white-space: nowrap; }
+  body:is(.patient-view,.doctor-workspace) #daiCareChatbot .care-chatbot__launcher {
+    width: 48px; min-height: 48px; padding: 4px; justify-content: center;
+  }
+  body:is(.patient-view,.doctor-workspace) #daiCareChatbot .care-chatbot__launcher > span:last-child {
+    position: absolute; width: 1px; height: 1px; overflow: hidden; white-space: nowrap; clip-path: inset(50%);
+  }
+  body.patient-view .topbar__right { flex: 1 1 100%; margin: 0; justify-content: flex-start; }
+  body.patient-view .topbar .patient-crumb { flex: 1 1 100%; }
+  body.patient-view .topbar #patientLanguage { min-width: 68px; width: auto; font-size: .78rem; }
+  body.patient-view .stage-banner { flex-wrap: wrap; }
+  body.patient-view .stage-summary { flex: 1 1 55%; }
+  #panel-dashboard:is(.open-home,.reference-home) :is(.oh-hero-band,.oh-main-row,.oh-middle-row,.oh-bottom-row,.home-hero-grid,.home-middle-grid,.home-insight-grid,.home-support-grid) {
+    grid-template-columns: minmax(0,1fr);
+  }
+  #panel-dashboard:is(.open-home,.reference-home) .home-journey { min-height: 0; }
+  #panel-dashboard.reference-home .oh-next-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) 44px;
+  }
+  #panel-dashboard.reference-home #nextStepDirections {
+    position: static; width: 44px; min-height: 44px; height: auto;
+    border: 1px solid var(--line); background: var(--brand-pale);
+  }
+  #panel-dashboard .oh-middle-row #homeAppointmentCard { order: -3; }
+  #panel-dashboard .oh-middle-row #homeHealthCard { order: -2; }
+  #panel-dashboard .oh-middle-row #homeOpenPending { order: -1; }
+  #panel-dashboard:is(.open-home,.reference-home) .home-journey :is(.home-heading,.home-journey-copy) { min-width: 0; overflow-wrap: anywhere; }
+  #panel-dashboard:is(.open-home,.reference-home) .oh-hero-band { margin-inline: 0; padding-inline: 0; }
+  body.patient-view #panel-dashboard .home-illustration img { max-height: 235px; object-fit: contain; }
+  body.patient-view #main-content :is(.road-timeline,.road-chapter,.road-stop,.road-stop-content,.connected-appointment-card) { min-inline-size: 0; }
+  body.patient-view #main-content :is(.record-filters,.appointment-filters,.patient-appointments-toolbar) { flex-wrap: wrap; }
+  body:is(.patient-view,.doctor-workspace) .content :is(input:not([type=checkbox]):not([type=radio]),select,textarea) { font-size: max(1rem, 16px); }
+  body.doctor-workspace :is(.dr-summary-row,.dp-appointment-cards,.dp-people-grid,.dp-roster,.dw-grid,.dd-stats,.dd-priority-v6) { grid-template-columns: minmax(0,1fr); }
+  body.doctor-workspace .dr-home .dd-hero { min-height: 0; padding: 18px; grid-template-columns: minmax(0,1fr); }
+  body.doctor-workspace .dr-home .dd-hero img { max-height: 180px; object-fit: contain; }
+  body.doctor-workspace .topbar__right { margin-left: 0; }
+  body.doctor-workspace .dp-head { flex-wrap: wrap; align-items: start; }
+  body.doctor-workspace :is(.dp-head-actions,.dp-date-controls,.dp-chips) { min-width: 0; max-width: 100%; flex-wrap: wrap; }
+  body.doctor-workspace :is(.dp-chip,.dp-head-actions button,.dp-date-controls button) {
+    min-height: 44px; white-space: normal;
+  }
+  body.doctor-workspace .content :is(.dp-head,.doctor-merged-heading,.ds-header,.page-section-heading) { min-height: 0; padding: 16px !important; }
+  .uw-scan-layout { grid-template-columns: minmax(0,1fr); }
+  .uw-drop input::file-selector-button { min-height: 44px; }
+  body:is(.auth-page,.caregiver-view) :is(input,select,textarea) { font-size: 1rem; }
+}
+
+@media (max-width: 400px) {
+  .dai-mobile-nav .dai-appointment-label { display: none; }
+  .dai-mobile-nav .dai-appointment-short { display: inline; }
+}
+
+@media (max-width: 375px) {
+  .dai-mobile-nav button { letter-spacing: -.15px; }
+  body.patient-view .topbar__right { gap: 4px; }
+}

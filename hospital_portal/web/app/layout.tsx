@@ -1,9 +1,19 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import "leaflet/dist/leaflet.css";
+import "./mobile.css";
 import Script from "next/script";
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#6229b8",
+};
 export const metadata: Metadata = {
   title: "DAI · Hospital readiness",
+  manifest: "/dai.webmanifest",
+  appleWebApp: { title: "DaiHealth" },
+  icons: { apple: "/assets/dai-app-192.png" },
   description: "DAI synthetic hospital readiness and coordination portal",
 };
 export default function RootLayout({

@@ -1,0 +1,141 @@
+.workspace-menu-close, .workspace-menu-backdrop {
+  display: none;
+}
+
+@media (max-width: 1024px) {
+  .portal-shell {
+    display: block;
+  }
+
+  body:has(.portal-shell[data-menu-open]) {
+    overflow: hidden;
+  }
+
+  .portal-shell > .sidebar {
+    display: none;
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: 125;
+    width: min(310px, 88vw);
+    height: 100dvh;
+    padding-top: max(14px, env(safe-area-inset-top));
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    box-shadow: 10px 0 40px #44315322;
+  }
+
+  .portal-shell > .sidebar.open {
+    display: flex;
+  }
+
+  .workspace-menu-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 124;
+    border: 0;
+    background: #1c15275c;
+  }
+
+  .portal-shell .menu-button, .workspace-menu-close {
+    display: block;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 8px;
+    border: 1px solid #e5d9ed;
+    border-radius: 10px;
+    color: var(--purple);
+    background: #fff;
+  }
+
+  .workspace-menu-close {
+    flex: none;
+    margin-bottom: 12px;
+    text-align: left;
+  }
+
+  .portal-shell > .sidebar nav button, .workspace-switch button {
+    min-height: 44px;
+  }
+
+  .workspace, .page, .page-heading > *, .workspace-toolbar > *, .card {
+    min-width: 0;
+  }
+
+  .portal-shell .topbar {
+    position: relative;
+    height: auto;
+    min-height: 66px;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: max(10px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) 10px max(12px, env(safe-area-inset-left));
+  }
+
+  .portal-shell .facility-label {
+    flex: 1 1 9rem;
+    max-width: none;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .portal-shell .facility-label strong {
+    font-size: clamp(12px, 1.6vw, 14px);
+  }
+
+  .portal-shell .icon-button, .portal-shell .demo-info summary {
+    min-height: 44px;
+  }
+
+  .portal-shell .demo-info summary {
+    display: flex;
+    align-items: center;
+  }
+
+  .workspace-toolbar, .page-heading, .row-actions {
+    flex-wrap: wrap;
+  }
+
+  .page {
+    padding-inline: max(12px, env(safe-area-inset-left)) max(12px, env(safe-area-inset-right));
+    padding-bottom: calc(48px + env(safe-area-inset-bottom));
+  }
+
+  .table-scroll {
+    overscroll-behavior-inline: contain;
+  }
+
+  .table-scroll:focus-visible {
+    outline: 2px solid var(--purple);
+    outline-offset: -2px;
+  }
+
+  .table-scroll :is(button, a) {
+    min-height: 44px;
+  }
+
+  .table-scroll:has(table)::before {
+    content: "Scroll to see more columns";
+    display: block;
+    position: sticky;
+    left: 0;
+    padding: 8px 12px;
+    color: #62556d;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 600px) {
+  .portal-shell :is(input, select, textarea), .login-card input {
+    font-size: 16px;
+    max-width: 100%;
+  }
+
+  .portal-shell .page-heading p {
+    font-size: 13px;
+  }
+
+  .workspace-toolbar {
+    gap: 12px;
+  }
+}

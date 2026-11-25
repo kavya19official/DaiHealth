@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>दाई — Doctor Dashboard</title>
 <meta name="theme-color" content="#7c3aed">
 <link rel="icon" href="assets/logo.jpeg">
@@ -121,11 +121,17 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 <link rel="stylesheet" href="care-workbench.css?v=1">
 <script src="/js/i18n.js?v=names-5"></script>
 <link rel="stylesheet" href="/i18n.css?v=app-4">
+<link rel="manifest" href="/dai.webmanifest">
+<meta name="theme-color" content="#6229b8">
+<meta name="apple-mobile-web-app-title" content="DaiHealth">
+<link rel="apple-touch-icon" href="/assets/dai-app-192.png">
+<link rel="stylesheet" href="/dai-mobile.css?v=1">
+<script defer src="/js/dai-mobile.js?v=1"></script>
 </head>
 <body class="doctor-workspace">
 <button type="button" class="dw-menu-backdrop" data-dw-close-menu aria-label="Close sidebar"></button>
 <div class="app">
-<aside class="sidebar">
+<aside class="sidebar" id="doctorSidebar">
   <a class="sidebar__brand patient-brand" href="auth.html" aria-label="DAI sign in"><span class="patient-brand__hindi" lang="hi">दाई</span><span class="patient-brand__english">DAI<small>YOUR CARE COMPANION</small></span></a>
 <nav class="sidebar__nav" aria-label="Doctor navigation"><span class="dw-nav-caption">CARE</span><button type="button" class="nav-item is-active" data-panel="dashboard" data-dw-nav-icon="grid" data-dw-label="Dashboard">Dashboard</button><button type="button" class="nav-item" data-panel="patients" data-dw-nav-icon="people" data-dw-label="My Patients">My Patients</button><a class="nav-item" href="/care-capsule/index.html">Care Capsule verifier</a><button type="button" class="nav-item" data-panel="ultrasound" data-dw-nav-icon="heart" data-dw-label="Ultrasound Review">Ultrasound Review</button><button type="button" class="nav-item" data-panel="appointments" data-dw-nav-icon="clock" data-dw-label="Appointments &amp; schedule">Appointments &amp; schedule</button><span class="dw-nav-caption">FOLLOW-UP</span><button type="button" class="nav-item" data-panel="attention" data-dw-nav-icon="attention" data-dw-label="Needs attention &amp; outreach">Needs attention &amp; outreach</button><span class="dw-nav-caption">HOSPITAL</span><button type="button" class="nav-item" data-panel="readiness" data-dw-nav-icon="heart" data-dw-label="Delivery & Readiness">Delivery & Readiness</button><button type="button" class="nav-item" data-panel="wards" data-dw-nav-icon="bed" data-dw-label="Labour Room & Wards">Labour Room & Wards</button><button type="button" class="nav-item" data-panel="referrals" data-dw-nav-icon="arrow" data-dw-label="Emergency & Referrals">Emergency & Referrals</button><button type="button" class="nav-item" data-panel="messages" data-dw-nav-icon="message" data-dw-label="Messages">Messages</button><button type="button" class="nav-item" data-panel="analytics" data-dw-nav-icon="chart" data-dw-label="Analytics">Analytics</button><button type="button" class="nav-item" data-panel="care-tools" data-dw-nav-icon="grid" data-dw-label="Care tools">Care tools</button>
 
@@ -757,5 +763,12 @@ boot();
 <script src="js/care-chatbot.js?v=ai-needed-1"></script>
 <script src="js/report-intake.js"></script><script src="js/doctor-report-review.js?v=2"></script><script src="js/clinical-review.js?v=4"></script><script src="js/ai-usage.js?v=2"></script><script src="js/demo-care-messages.js?v=3"></script><script src="js/demo-guide.js?v=1"></script><script src="js/doctor-coordination-requests.js?v=2"></script><script src="js/remote-followup.js?v=1"></script><script src="js/clinical-tools.js?v=1"></script><script src="js/daicare.js" defer></script>
 <script src="/shared/care-workbench.js?v=1"></script><script src="js/care-workbench.js?v=1"></script>
+<nav class="dai-mobile-nav" aria-label="Doctor mobile navigation" data-dai-mobile-nav="doctor">
+  <button type="button" data-mobile-panel="dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z"/></svg><span>Overview</span></button>
+  <button type="button" data-mobile-panel="patients"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M16 3a4 4 0 0 1 0 8M22 21v-2a4 4 0 0 0-3-3.87M13 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0"/></svg><span>Patients</span></button>
+  <button type="button" data-mobile-panel="appointments"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 8v4l3 2M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0"/></svg><span>Consults</span></button>
+  <button type="button" data-mobile-panel="ultrasound"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8"/></svg><span>Ultrasound</span></button>
+  <button type="button" data-mobile-menu aria-controls="doctorSidebar" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg><span>More</span></button>
+</nav>
 </body>
 </html>
