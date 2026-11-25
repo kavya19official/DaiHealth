@@ -10,7 +10,7 @@ npm start
 ```
 
 1. Open `http://localhost:3001/auth.html?role=doctor` in a separate browser profile. Sign in as `doctor@dai-synthetic.invalid` with the local demo password `Dai-Synthetic-2026!`.
-2. Open **Incoming Patient Requests** and select **Available**. Keep that dashboard open. The synthetic setup adds an affiliated Nearby Care facility for this existing local demo doctor.
+2. Open **Incoming Patient Requests** and select **Available**. Keep that dashboard open. The synthetic setup gives local demo doctors a verified Nearby Care affiliation.
 3. In another profile, sign in as `mother@dai-synthetic.invalid` using the same demo password. Open `http://localhost:3001/dashboard.html` if sign-in takes you to the child workspace.
 4. Choose **Talk to a Doctor Now** and send a synthetic concern with sharing consent. Select the checkbox about a possible emergency to see the persistent 112 message and Nearby Care link. This choice has no effect on matching.
 5. Accept the offer as the doctor. Both participants choose **Join audio call** and grant microphone access. The call view reports a peer connection after WebRTC connects, and the request records that the consultation started after both participants report a connection.
@@ -34,7 +34,7 @@ Production clinicians need a verified account and an active, verified Nearby Car
 | `DAI_INSTANT_DOCTOR_CAPACITY` | 1 | Maximum simultaneous offers and consultations per clinician |
 | `DAI_TURN_URL`, `DAI_TURN_USERNAME`, `DAI_TURN_PASSWORD` | unset | Existing WebRTC relay for calls between networks where direct connectivity is unavailable |
 
-Calling uses the existing remote-visit signaling store. Use a single backend instance for calls unless signaling is moved to a shared transport. Browser microphone access needs HTTPS in production, or localhost during development. Keep TURN credentials out of source control and configure a private, deployment-scoped relay. The workspace polls every 2.5 seconds while open; it requires a live connection. When saved location coordinates are available, the routing radius is 25 km. Without a resolved location, matches come from the available affiliated network.
+Calling uses the existing remote-visit signaling store. Use a single backend instance for calls unless signaling is moved to a shared transport. Browser microphone access needs HTTPS in production, or localhost during development. Keep TURN credentials out of source control and configure a private, deployment-scoped relay. The workspace polls every 2.5 seconds while open; it requires a live connection. When saved location coordinates are available, routing checks within 25 km first. If there are no available candidates in range, or the location is missing, it searches the wider affiliated network. The patient sees when doctors are offline, busy, or considering an offer.
 
 The clinician records the outcome and recommendations. DaiHealth has no automated emergency classification in this workflow. Released clinician notes appear in the patient's consultation history and complete-record export. The consultation does not create an appointment or grant additional access to the clinical chart.
 

@@ -105,7 +105,9 @@ test('instant consultation dispatch, privacy, races, timeout, consent and releas
   assert.equal((await expect(send(patient,'/mine'),200)).online_doctors,0);
   await expect(availability(first,'available'),200);
   await expect(availability(second,'available'),200);
-  assert.equal((await expect(send(patient,'/mine'),200)).online_doctors,2);
+  const ready = await expect(send(patient,'/mine'),200);
+  assert.equal(ready.online_doctors,2);
+  assert.equal(ready.available_doctors,2);
   const {id} = await expect(send(patient,'','POST',concern),202);
   assert.equal((await expect(send(patient,'','POST',concern),202)).id,id);
   const offered = await inbox(first);
@@ -147,6 +149,9 @@ test('instant consultation dispatch, privacy, races, timeout, consent and releas
 
   await expect(availability(first,'offline'),200);
   const {id: waiting} = await expect(send(other,'','POST',concern),202);
+  const busyNetwork = await expect(send(other,'/mine'),200);
+  assert.equal(busyNetwork.online_doctors,1);
+  assert.equal(busyNetwork.available_doctors,0);
   assert.equal((await mine(other,waiting)).status,'searching');
   await expect(send(second,'/'+id+'/complete','POST',note),200);
   assert.equal((await mine(patient,id)).guidance,note.guidance);
