@@ -2,6 +2,26 @@ const hindi = {
   'Care Capsule verifier · DaiHealth': 'केयर कैप्सूल सत्यापन · DaiHealth',
   'Care Capsule verifier': 'केयर कैप्सूल सत्यापन',
   'Language': 'भाषा',
+  'Scan a patient’s Care Capsule': 'मरीज़ का केयर कैप्सूल स्कैन करें',
+  'Signature verified': 'हस्ताक्षर सत्यापित',
+  'Revocations checked online.': 'रद्द कैप्सूल की जाँच ऑनलाइन हुई।',
+  'Revocations checked against the last sync.': 'रद्द कैप्सूल की जाँच पिछले अपडेट से हुई।',
+  'Name not shared': 'नाम साझा नहीं किया गया',
+  'Risk': 'जोखिम',
+  'Week': 'सप्ताह',
+  'weeks': 'सप्ताह',
+  'Allergies': 'एलर्जी',
+  'Pregnancy progress': 'गर्भावस्था की प्रगति',
+  'Week when the capsule was issued': 'कैप्सूल जारी होने के समय का सप्ताह',
+  'days to go': 'दिन बाकी',
+  'Due today': 'आज प्रसव की अनुमानित तारीख है',
+  'days past due date': 'दिन अनुमानित तारीख से अधिक',
+  'day left': 'दिन बाकी',
+  'days left': 'दिन बाकी',
+  'h left': 'घंटे बाकी',
+  'Need the full medical history?': 'पूरा स्वास्थ्य इतिहास चाहिए?',
+  'Open clinician sign-in': 'डॉक्टर साइन-इन खोलें',
+  'The QR only carries the fields the patient chose to share. The complete history stays in the patient’s record and can be opened by their care team after sign-in.': 'QR में केवल वही जानकारी है जो मरीज़ ने साझा करने के लिए चुनी। पूरा इतिहास मरीज़ के रिकॉर्ड में रहता है और उनकी केयर टीम साइन-इन के बाद उसे देख सकती है।',
   'Prepare this page online before going offline. Scan the patient’s QR to read the fields they chose to share.':
     'ऑफ़लाइन जाने से पहले इस पेज को ऑनलाइन तैयार करें। मरीज़ की चुनी हुई जानकारी पढ़ने के लिए उनका QR स्कैन करें।',
   'Verifier setup': 'सत्यापन की तैयारी',
@@ -27,30 +47,10 @@ const hindi = {
   'Maternal emergency summary': 'माँ की आपातकालीन स्वास्थ्य जानकारी',
   'Child emergency summary': 'बच्चे की आपातकालीन स्वास्थ्य जानकारी',
   'Issued': 'जारी किया गया',
+  'Expired': 'वैधता समाप्त',
   'Expires': 'वैधता समाप्ति',
   'This snapshot contains the fields chosen by the patient. Confirm identity and check for newer information when possible.':
     'इसमें मरीज़ की चुनी हुई जानकारी है। पहचान की पुष्टि करें और संभव हो तो नई जानकारी की जाँच करें।',
-  'Date of birth': 'जन्म की तारीख',
-  'Previous pregnancy complications': 'पिछली गर्भावस्था की जटिलताएँ',
-  'Recent completed visits': 'हाल में पूरी हुई मुलाक़ातें',
-  'Latest clinic measurements': 'क्लिनिक में दर्ज नवीनतम माप',
-  'Blood pressure': 'रक्तचाप',
-  'Haemoglobin': 'हीमोग्लोबिन',
-  'Weight': 'वज़न',
-  'Blood glucose': 'रक्त शर्करा',
-  'Patient details': 'मरीज़ की जानकारी',
-  'Clinical essentials': 'ज़रूरी स्वास्थ्य जानकारी',
-  'Pregnancy and risk': 'गर्भावस्था और जोखिम',
-  'Recent history': 'हाल का स्वास्थ्य इतिहास',
-  'Scan a Care Capsule': 'केयर कैप्सूल स्कैन करें',
-  'Use your camera or choose a photo of the QR.': 'कैमरे का उपयोग करें या QR की तस्वीर चुनें।',
-  'Keep the QR inside the frame.': 'QR को फ़्रेम के अंदर रखें।',
-  'Offline access': 'ऑफ़लाइन सुविधा',
-  'Open doctor workspace': 'डॉक्टर का कार्यक्षेत्र खोलें',
-  'For the full chart and original reports, sign in to the doctor workspace with patient sharing enabled.':
-    'पूरा रिकॉर्ड और मूल रिपोर्ट देखने के लिए डॉक्टर के कार्यक्षेत्र में साइन इन करें। मरीज़ की साझा करने की अनुमति ज़रूरी है।',
-  'A portable summary of the health information the patient chose to share.':
-    'मरीज़ की चुनी हुई स्वास्थ्य जानकारी का पोर्टेबल सारांश।',
   'Patient name': 'मरीज़ का नाम',
   'Recorded medical conditions': 'दर्ज स्वास्थ्य स्थितियाँ',
   'Recorded current medicines': 'वर्तमान में दर्ज दवाएँ',
@@ -90,10 +90,6 @@ export const locale = language => language === 'hi' ? 'hi-IN' : 'en-IN';
 
 export const fieldLabels = {
   patient_name: 'Patient name',
-  date_of_birth: 'Date of birth',
-  previous_complications: 'Previous pregnancy complications',
-  recent_visits: 'Recent completed visits',
-  latest_measurements: 'Latest clinic measurements',
   allergies: 'Recorded allergies',
   blood_group: 'Recorded blood group',
   medical_conditions: 'Recorded medical conditions',
@@ -106,18 +102,7 @@ export const fieldLabels = {
   recent_child_history: 'Recent recorded child health events'
 };
 
-const measurements = {
-  bp: ['Blood pressure', 'mmHg'], hb: ['Haemoglobin', 'g/dL'],
-  weight: ['Weight', 'kg'], glucose: ['Blood glucose', 'mg/dL']
-};
-
-export function fieldText(key, value, separator = '\n', language = 'en') {
-  if (key === 'recent_visits') return value.map(entry => [entry.title, entry.date].filter(Boolean).join(' · ')).join(separator);
-  if (key === 'latest_measurements') return value.map(entry => {
-    const [label, unit] = measurements[entry.metric];
-    const reading = Array.isArray(entry.value) ? entry.value.join('/') : entry.value;
-    return translate(language, label) + ' · ' + reading + ' ' + unit + ' · ' + entry.date;
-  }).join(separator);
+export function fieldText(key, value, separator = '\n') {
   if (key === 'vaccines') return value.map(entry => entry.code + ' · ' + entry.date).join(separator);
   if (key === 'recent_child_history') return value.map(entry => entry.title + ' · ' + entry.date).join(separator);
   if (key === 'risk_factors') return value.join(separator);
