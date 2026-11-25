@@ -9,8 +9,12 @@ import { translate, locale, fieldLabels, fieldText } from './language.js';
     const response = await fetch(api + '/patient/care-capsules' + path, {
       credentials: 'include', cache: 'no-store', signal: AbortSignal.timeout(12000), ...options
     });
-    const data = await response.json();
-    if (!response.ok) throw Error(data.error || 'Sign in as a patient to manage swasthyaCards.');
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw Object.assign(new Error(data.error || 'Could not load your swasthyaCard. Please try again.'), {
+        status: response.status
+      });
+    }
     return data;
   }
 
@@ -28,6 +32,7 @@ import { translate, locale, fieldLabels, fieldText } from './language.js';
       <div class="capsule-actions"><h2>Create a swasthyaCard</h2><button type="button" data-close>Close</button></div>
       <p>Anyone holding the QR can read the fields you select. Keep the paper or saved image private.</p>
       <p role="status"></p>
+      <p data-patient-signin hidden><a href="/auth.html?role=mother">Sign in as a patient</a></p>
       <form hidden>
         <label>Record<select name="subject"><option value="">My maternal record</option></select></label>
         <fieldset><legend>Fields to share</legend><div data-fields></div></fieldset>
@@ -42,6 +47,7 @@ import { translate, locale, fieldLabels, fieldText } from './language.js';
       <section data-active></section>
       <p><a href="/care-capsule/index.html" target="_blank" rel="noopener">Open the clinician’s offline verifier</a></p>`;
     const status = dialog.querySelector('[role=status]');
+    const signIn = dialog.querySelector('[data-patient-signin]');
     const form = dialog.querySelector('form');
     const fields = form.querySelector('[data-fields]');
     const active = dialog.querySelector('[data-active]');
@@ -50,6 +56,19 @@ import { translate, locale, fieldLabels, fieldText } from './language.js';
     let values = {};
     let generation = 0;
     let printedCapsule = null;
+
+    function showError(error) {
+      if (!dialog.open) return;
+      if (error.status === 401 || error.status === 403) {
+        form.hidden = true;
+        active.replaceChildren();
+        print.hidden = true;
+        status.textContent = 'A patient sign-in is required to create a swasthyaCard from your records.';
+        signIn.hidden = false;
+        return;
+      }
+      status.textContent = error.message;
+    }
 
     function renderCardLanguage() {
       if (!printedCapsule) return;
@@ -94,7 +113,7 @@ import { translate, locale, fieldLabels, fieldText } from './language.js';
             }
             status.textContent = 'swasthyaCard revoked. Offline verifiers will flag it after their next sync.';
           } catch (error) {
-            status.textContent = error.message;
+            showError(error);
           } finally { button.disabled = false; }
         };
         row.append(button);
@@ -131,7 +150,7 @@ import { translate, locale, fieldLabels, fieldText } from './language.js';
         status.textContent = available ? '' : 'This record has no shareable fields yet.';
         submit.disabled = !available;
       } catch (error) {
-        if (requested === generation) status.textContent = error.message;
+        if (requested === generation) showError(error);
       }
     }
 
@@ -182,7 +201,7 @@ import { translate, locale, fieldLabels, fieldText } from './language.js';
         status.textContent = 'swasthyaCard ready.';
         activeCapsules((await request()).capsules);
       } catch (error) {
-        status.textContent = error.message;
+        showError(error);
       } finally {
         submit.disabled = form.elements.subject.disabled = false;
       }
@@ -201,7 +220,7 @@ import { translate, locale, fieldLabels, fieldText } from './language.js';
       form.hidden = false;
       await loadFields();
     } catch (error) {
-      status.textContent = error.message;
+      showError(error);
     }
   };
 })();

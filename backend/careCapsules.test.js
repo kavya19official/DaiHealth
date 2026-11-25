@@ -63,21 +63,28 @@ test('only mother-selected fields are carried by the QR and revocation sync is p
       pool, env: { DAI_CARE_CAPSULE_KEYS: randomBytes(32).toString('base64url') },
       authenticateToken(req, res, next) {
         if (!req.headers['x-fixture-user']) return res.sendStatus(401);
-        req.user = { id: Number(req.headers['x-fixture-user']), role: 'mother' };
+        req.user = { id: Number(req.headers['x-fixture-user']), role: req.get('x-fixture-role') || 'mother' };
         next();
       },
-      authorizeRole: () => (req, res, next) => next()
+      authorizeRole: roles => (req, res, next) => roles.includes(req.user.role) ? next() : res.sendStatus(403)
     });
     server = await new Promise(resolve => { const s = app.listen(0, '127.0.0.1', () => resolve(s)); });
     const base = 'http://127.0.0.1:' + server.address().port;
     const issue = '/api/patient/care-capsules';
-    async function call(url, { actor = 1, method = 'GET', body } = {}) {
+    async function call(url, { actor = 1, role = 'mother', method = 'GET', body } = {}) {
       const headers = { Origin: base, 'Content-Type': 'application/json' };
       if (actor) headers['x-fixture-user'] = String(actor);
+      headers['x-fixture-role'] = role;
       const response = await fetch(base + url, { method, headers, body: body && JSON.stringify(body) });
       return { status: response.status, data: await response.json().catch(() => null) };
     }
     const mint = body => call(issue, { method: 'POST', body: { confirmed: true, days: 7, ...body } });
+    assert.equal((await call(issue, { actor: null })).status, 401);
+    assert.equal((await call(issue, { role: 'doctor' })).status, 403);
+    assert.equal((await call(issue + '/fields', { role: 'doctor' })).status, 403);
+    assert.equal((await call(issue, { role: 'doctor', method: 'POST',
+      body: { confirmed: true, days: 7, fields: { blood_group: 'A+' } } })).status, 403);
+    assert.equal((await call(issue)).status, 200);
     assert.equal((await call(issue + '/fields?child_id=12')).status, 404);
     assert.equal((await mint({ fields: { allergies: 'stale' } })).status, 409);
     assert.equal((await mint({ fields: { name: 'Patient' } })).status, 400);
