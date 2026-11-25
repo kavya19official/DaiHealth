@@ -68,11 +68,14 @@
     <div class="connect-heading"><div><small>Doctor Connect</small><h2>Connect to a Doctor</h2></div>
     ${button('Talk to a Doctor Now','open','',true)}</div>
     <p>Have a concern? Connect with an available healthcare professional for expert guidance.</p>
+    <div class="connect-how"><h3>How your call works</h3><ol><li><span>1</span>Share your concern</li><li><span>2</span>A doctor accepts</li><li><span>3</span>Join your audio call</li></ol></div>
     <div class="connect-actions">
       ${button('I have a health concern','open','pregnancy')}
       ${button('I need medical guidance','open','other')}
       ${button('Nearby Care','nearby')}
     </div>
+    <div class="connect-ready"><strong>A little preparation helps</strong><p>Keep your reports, medicine list and questions ready for the conversation.</p></div>
+    <p class="connect-reassurance">You choose what to share. The call starts when you and the doctor both join.</p>
     ${warning}
     <p data-connect-announcement role="status"></p>
   `;
@@ -92,7 +95,7 @@
         <label>What would you like help with?<textarea name="concern" maxlength="1000" rows="3" required placeholder="Briefly describe what you want to discuss"></textarea></label>
         <div class="connect-fields">
           <label>Concern category<select name="category">${Object.entries(categories).map(([key,label]) => `<option value="${key}">${label}</option>`).join('')}</select></label>
-          <label>Preferred language<select name="language"><option value="en">English</option><option value="hi">हिन्दी</option></select></label>
+          <label>Preferred language<select name="language"><option value="en">English</option><option value="hi">हिन्दी</option><option value="mr">मराठी</option></select></label>
         </div>
         <label class="connect-check"><input type="checkbox" name="emergency_warning"> I think this may be an emergency, or I’m unsure whether I can wait.</label>
         <label class="connect-check"><input type="checkbox" name="consent" required> Share my concern and identity with the clinician who accepts this audio consultation.</label>
@@ -101,10 +104,12 @@
     <div data-connect-current></div>
     <div data-connect-clinical></div>
     <div data-connect-history></div>`;
-  home.prepend(root);
+  const patientHero = !doctor && home.querySelector('.home-hero-grid');
+  if (patientHero) (patientHero.querySelector('.home-care-rail')||patientHero).append(root);
+  else home.prepend(root);
   shortcut.className = 'connect-shortcut';
   if (doctor) {
-    shortcut.innerHTML = button('Requests','open');
+    shortcut.innerHTML = button('Requests','open')+'<button type="button" data-connect-sound aria-pressed="false">Enable call alerts</button>';
     document.querySelector('.topbar__right')?.append(shortcut);
   } else {
     shortcut.innerHTML = button('Doctor Connect history','history');
@@ -178,7 +183,28 @@
     renderSection(historyContainer, `<h3>Consultation history</h3>${history.filter(v => !openStatus(v)).map(visitHistory).join('') || '<p>Your completed consultations will appear here.</p>'}`);
   }
 
+  let callAudio=null,soundEnabled=false,seenOffers=new Set();
+  function ringOffer(){
+    if(!soundEnabled||!callAudio)return;
+    void callAudio.resume().then(()=>{for(let i=0;i<3;i++){const o=callAudio.createOscillator(),g=callAudio.createGain(),t=callAudio.currentTime+i*.42;o.type='sine';o.frequency.value=660;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.10,t+.03);g.gain.exponentialRampToValueAtTime(.001,t+.25);o.connect(g);g.connect(callAudio.destination);o.start(t);o.stop(t+.28);}}).catch(()=>{});
+  }
+  function alertIncoming(){
+    const offers=inbox.offers||[],newOffer=offers.some(o=>!seenOffers.has(o.id));
+    seenOffers=new Set(offers.map(o=>o.id));
+    let banner=document.querySelector('[data-connect-incoming-alert]');
+    if(!offers.length){banner?.remove();return;}
+    if(!banner){banner=document.createElement('aside');banner.className='connect-incoming-alert';banner.setAttribute('data-connect-incoming-alert','');banner.setAttribute('role','status');document.body.append(banner);}
+    const signature=offers.map(o=>o.id+':'+o.emergency_warning).join('|');
+    if(banner.dataset.signature===signature)return;banner.dataset.signature=signature;
+    banner.innerHTML='<strong>'+(offers.some(o=>o.emergency_warning)?'Urgent patient call request':'Incoming patient call request')+'</strong><p>Review and accept to join the consultation.</p><button type="button" class="btn btn--primary">Review request</button>';
+    banner.querySelector('button').onclick=()=>{if(!panel.open)panel.showModal();void refresh(true);};
+    if(newOffer)ringOffer();
+  }
+  shortcut.querySelector('[data-connect-sound]')?.addEventListener('click',async function(){
+    try{if(!callAudio)callAudio=new(window.AudioContext||window.webkitAudioContext)();await callAudio.resume();soundEnabled=!soundEnabled;this.setAttribute('aria-pressed',String(soundEnabled));this.textContent=soundEnabled?'Call alerts on':'Enable call alerts';if(soundEnabled)ringOffer();}catch{this.textContent='Sound unavailable · visual alerts on';}
+  });
   function renderDoctor() {
+    alertIncoming();
     availability.value = inbox.status || 'offline';
     const count = inbox.offers?.length || 0;
     const visits = inbox.visits || [];
@@ -189,8 +215,8 @@
     setAnnouncement(`${effective[0].toUpperCase()+effective.slice(1)} · ${count ? `${count} new request${count === 1 ? '' : 's'}` : 'No new requests'}`);
     renderSection(currentContainer, `<p>Current status <strong>${esc(effective)}</strong> · Capacity ${esc(inbox.capacity)}</p>
       <div class="connect-list">${(inbox.offers || []).map(offer => `<article class="connect-item">
-      <h3>${esc(categories[offer.category])}</h3>
-      <p>${offer.language === 'hi' ? 'Hindi' : 'English'} · ${esc(offer.facility_name)}</p>
+      <h3>${offer.emergency_warning?'Urgent · ':''}${esc(categories[offer.category])}</h3>
+      <p>${offer.language === 'hi' ? 'Hindi' : offer.language === 'mr' ? 'Marathi' : 'English'} · ${esc(offer.facility_name)}</p>
       <p>Requested ${dateTime(offer.created_at)} · Respond by ${dateTime(offer.expires_at)}</p>
       <p>Patient identity and concern become visible after acceptance.</p>
       <div class="connect-actions">${button('Accept request','accept',offer.id,true)}${button('Decline request','decline',offer.id)}</div>
@@ -358,6 +384,11 @@
     });
   });
 
+  window.DaiInstantConsultations={open(options={}){
+    if(!panel.open)panel.showModal();
+    if(form){form.elements.emergency_warning.checked=options.emergency===true;form.elements.category.value='pregnancy';if(options.concern)form.elements.concern.value=String(options.concern).slice(0,1000);else if(options.emergency&&!form.elements.concern.value)form.elements.concern.value='Urgent request: I need to speak to a clinician. Symptoms not provided yet.';const lang=document.documentElement.lang;form.elements.language.value=['en','hi','mr'].includes(lang)?lang:'en';showWarning();form.elements.concern.focus();}
+    if(!guest)enabled=true;void refresh(true);
+  }};
   if (!guest) {
     enabled = true;
     void refresh();

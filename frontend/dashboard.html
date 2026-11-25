@@ -429,13 +429,13 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 .badge.muted { background: var(--ground); color: var(--ink-3); }
 
 </style>
-<link rel="stylesheet" href="ultrasound-workspace.css?v=8">
+<link rel="stylesheet" href="ultrasound-workspace.css?v=11">
 <script src="js/dai-api.js"></script>
-<script src="js/ultrasound-workspace.js?v=8" defer></script>
+<script src="js/ultrasound-workspace.js?v=12" defer></script>
 <link rel="stylesheet" href="pregnancy-library.css?v=1">
 <script src="js/pregnancy-library-guide.js?v=1" defer></script>
 <script src="js/pregnancy-library.js?v=1" defer></script>
-<script src="/js/i18n.js?v=names-5"></script>
+<script src="/js/i18n.js?v=three-langs-names-5"></script>
 <script src="js/form-validation.js"></script>
 <script src="js/patient-prefs.js"></script>
 <link rel="stylesheet" href="facility-matching.css">
@@ -453,7 +453,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 <link rel="stylesheet" href="patient-home-open.css?v=10">
 <link rel="stylesheet" href="patient-hospital-stay.css?v=1">
 <link rel="stylesheet" href="patient-tour.css?v=2">
-<link rel="stylesheet" href="patient-home-reference.css?v=1">
+<link rel="stylesheet" href="patient-home-reference.css?v=4">
 <link rel="stylesheet" href="patient-recovery-access.css?v=1"><link rel="stylesheet" href="patient-recovery.css?v=2">
 <link rel="stylesheet" href="dashboard-charts.css?v=1">
 <link rel="stylesheet" href="patient-daily.css?v=3">
@@ -463,7 +463,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 <link rel="stylesheet" href="daicare.css"><link rel="stylesheet" href="sukoon.css?v=2">
 <link rel="stylesheet" href="pregnancy-mirror.css?v=6">
 <link rel="stylesheet" href="patient-uterus-model.css?v=2">
-<link rel="stylesheet" href="family-circle-experience.css?v=1">
+<link rel="stylesheet" href="family-circle-experience.css?v=2">
 <link rel="stylesheet" href="/care-capsule/capsule.css">
 <link rel="stylesheet" href="/i18n.css?v=app-4">
 <link rel="manifest" href="/dai.webmanifest">
@@ -473,6 +473,9 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 <link rel="stylesheet" href="/dai-mobile.css?v=1">
 <script defer src="/js/dai-mobile.js?v=1"></script>
   <link rel="stylesheet" href="/instant-consultations.css?v=1">
+<link rel="stylesheet" href="record-connections.css?v=1">
+<link rel="stylesheet" href="patient-child-profile.css?v=2">
+<link rel="stylesheet" href="connected-demo-polish.css?v=1">
 </head>
 <body class="patient-view">
 <a class="skip-link" href="#main-content" data-i18n="a11y.skip" style="position:absolute;left:1rem;top:-5rem;z-index:500;padding:.7rem 1rem;border-radius:0 0 10px 10px;background:var(--ink);color:#fff">Skip to main content</a>
@@ -505,7 +508,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 <div class="app">
 <aside class="sidebar" id="sidebar">
   <a class="sidebar__brand patient-brand" href="auth.html" aria-label="DAI sign in"><span class="patient-brand__hindi" lang="hi">दाई</span><span class="patient-brand__english">DAI<small>YOUR CARE COMPANION</small></span></a>
-<nav class="sidebar__nav" aria-label="Patient navigation"><span class="nav-caption">YOUR EVERYDAY SPACE</span><button type="button" class="nav-item is-active" data-panel="dashboard"><svg aria-hidden="true"><use href="#i-home"/></svg><span data-copy="nav.dashboard">Home</span></button><details class="home-care-nav" id="homeCareNavigation"><summary><svg aria-hidden="true"><use href="#i-heart"/></svg><span>My care</span><span class="nav-chevron">⌄</span></summary><div><button type="button" class="nav-item" data-panel="timeline"><svg aria-hidden="true"><use href="#i-clock"/></svg><span data-copy="nav.timeline">Care timeline</span></button><button type="button" class="nav-item" data-panel="gaps"><svg aria-hidden="true"><use href="#i-clipboard"/></svg><span data-copy="nav.gaps">Pending care</span></button><button type="button" class="nav-item" data-panel="birth-readiness"><svg aria-hidden="true"><use href="#i-shield"/></svg><span>Birth readiness</span></button><button type="button" class="nav-item" data-panel="postpartum"><svg aria-hidden="true"><use href="#i-heart"/></svg><span data-copy="nav.postpartum">After delivery</span></button></div></details><button type="button" class="nav-item" data-panel="birth-plan"><svg aria-hidden="true"><use href="#i-clipboard"/></svg><span data-copy="nav.birth-plan">Birth plan</span></button><button type="button" class="nav-item" data-panel="daily"><svg aria-hidden="true"><use href="#i-clipboard"/></svg><span>Daily tracking</span></button><button type="button" class="nav-item" data-panel="sukoon"><svg aria-hidden="true"><use href="#i-heart"/></svg><span data-copy="nav.sukoon">Sukoon</span></button><button type="button" class="nav-item" data-panel="appointments"><svg aria-hidden="true"><use href="#i-cal"/></svg><span data-copy="nav.appointments">Appointments</span></button><button type="button" class="nav-item" data-panel="pregnancy-library"><svg aria-hidden="true"><use href="#i-file"/></svg><span data-copy="nav.pregnancy-library">My Pregnancy Library</span></button><button type="button" class="nav-item" data-panel="pregnancy-mirror"><svg aria-hidden="true"><use href="#i-scan"/></svg><span data-copy="nav.pregnancy-mirror">Pregnancy mirror</span></button><button type="button" class="nav-item" data-panel="uterus-model"><svg aria-hidden="true"><use href="#i-heart"/></svg><span data-copy="nav.uterus-model">Uterus model</span></button><button type="button" class="nav-item" data-panel="children"><svg aria-hidden="true"><use href="#i-baby"/></svg><span data-copy="nav.children">My children</span></button><button type="button" class="nav-item" data-panel="hospital-stay" hidden><svg aria-hidden="true"><use href="#i-heart"/></svg><span data-copy="nav.hospital-stay">My Hospital Stay</span></button><button type="button" class="nav-item" data-panel="ultrasound"><svg aria-hidden="true"><use href="#i-scan"/></svg><span data-copy="nav.ultrasound">Ultrasound scans</span></button><button type="button" class="nav-item" data-panel="records"><svg aria-hidden="true"><use href="#i-file"/></svg><span data-copy="nav.records">Reports & records</span></button><button type="button" class="nav-item" data-panel="facilities"><svg aria-hidden="true"><use href="#i-search"/></svg><span data-copy="nav.facilities">Nearby care</span></button><button type="button" class="nav-item" data-panel="schemes"><svg aria-hidden="true"><use href="#i-shield"/></svg><span data-copy="nav.schemes">Schemes & support</span></button><button type="button" class="nav-item" data-panel="family"><svg aria-hidden="true"><use href="#i-user"/></svg><span data-copy="nav.family">Family & consent</span></button><span class="nav-caption nav-caption-secondary">HERE TO HELP</span><button type="button" class="nav-item" data-panel="messages"><svg aria-hidden="true"><use href="#i-bell"/></svg><span data-copy="nav.messages">Updates</span></button><button type="button" class="nav-item" data-panel="settings"><svg aria-hidden="true"><use href="#i-set"/></svg><span data-copy="nav.settings">Settings</span></button></nav><div class="sidebar__footer"><span class="privacy-symbol">♡</span><div><strong data-copy="yourInformation">Your information. Your choice.</strong><button class="link-btn" data-go="family" data-copy="manageSharing">Manage sharing →</button></div></div>
+<nav class="sidebar__nav" aria-label="Patient navigation"><span class="nav-caption">YOUR EVERYDAY SPACE</span><button type="button" class="nav-item is-active" data-panel="dashboard"><svg aria-hidden="true"><use href="#i-home"/></svg><span data-copy="nav.dashboard">Home</span></button><details class="home-care-nav" id="homeCareNavigation"><summary><svg aria-hidden="true"><use href="#i-heart"/></svg><span>My care</span><span class="nav-chevron">⌄</span></summary><div><button type="button" class="nav-item" data-panel="timeline"><svg aria-hidden="true"><use href="#i-clock"/></svg><span data-copy="nav.timeline">Care timeline</span></button><button type="button" class="nav-item" data-panel="gaps"><svg aria-hidden="true"><use href="#i-clipboard"/></svg><span data-copy="nav.gaps">Pending care</span></button><button type="button" class="nav-item" data-panel="birth-readiness"><svg aria-hidden="true"><use href="#i-shield"/></svg><span>Birth readiness</span></button><button type="button" class="nav-item" data-panel="postpartum"><svg aria-hidden="true"><use href="#i-heart"/></svg><span data-copy="nav.postpartum">After delivery</span></button></div></details><button type="button" class="nav-item" data-panel="birth-plan"><svg aria-hidden="true"><use href="#i-clipboard"/></svg><span data-copy="nav.birth-plan">Birth plan</span></button><button type="button" class="nav-item" data-panel="daily"><svg aria-hidden="true"><use href="#i-clipboard"/></svg><span>Daily tracking</span></button><button type="button" class="nav-item" data-panel="sukoon"><svg aria-hidden="true"><use href="#i-heart"/></svg><span data-copy="nav.sukoon">Sukoon</span></button><button type="button" class="nav-item" data-panel="care-messages"><svg aria-hidden="true"><use href="#i-msg"/></svg><span>Messages</span></button><button type="button" class="nav-item" data-panel="appointments"><svg aria-hidden="true"><use href="#i-cal"/></svg><span data-copy="nav.appointments">Appointments</span></button><button type="button" class="nav-item" data-panel="pregnancy-library"><svg aria-hidden="true"><use href="#i-file"/></svg><span data-copy="nav.pregnancy-library">My Pregnancy Library</span></button><button type="button" class="nav-item" data-panel="pregnancy-mirror"><svg aria-hidden="true"><use href="#i-scan"/></svg><span data-copy="nav.pregnancy-mirror">Pregnancy mirror</span></button><button type="button" class="nav-item" data-panel="uterus-model"><svg aria-hidden="true"><use href="#i-heart"/></svg><span data-copy="nav.uterus-model">Uterus model</span></button><button type="button" class="nav-item" data-panel="children"><svg aria-hidden="true"><use href="#i-baby"/></svg><span data-copy="nav.children">My children</span></button><button type="button" class="nav-item" data-panel="hospital-stay" hidden><svg aria-hidden="true"><use href="#i-heart"/></svg><span data-copy="nav.hospital-stay">My Hospital Stay</span></button><button type="button" class="nav-item" data-panel="ultrasound"><svg aria-hidden="true"><use href="#i-scan"/></svg><span data-copy="nav.ultrasound">Ultrasound scans</span></button><button type="button" class="nav-item" data-panel="records"><svg aria-hidden="true"><use href="#i-file"/></svg><span data-copy="nav.records">Reports & records</span></button><button type="button" class="nav-item" data-panel="facilities"><svg aria-hidden="true"><use href="#i-search"/></svg><span data-copy="nav.facilities">Nearby care</span></button><button type="button" class="nav-item" data-panel="schemes"><svg aria-hidden="true"><use href="#i-shield"/></svg><span data-copy="nav.schemes">Schemes & support</span></button><button type="button" class="nav-item" data-panel="family"><svg aria-hidden="true"><use href="#i-user"/></svg><span data-copy="nav.family">Family & consent</span></button><span class="nav-caption nav-caption-secondary">HERE TO HELP</span><button type="button" class="nav-item" data-panel="messages"><svg aria-hidden="true"><use href="#i-bell"/></svg><span data-copy="nav.messages">Updates</span></button><button type="button" class="nav-item" data-panel="settings"><svg aria-hidden="true"><use href="#i-set"/></svg><span data-copy="nav.settings">Settings</span></button></nav><div class="sidebar__footer"><span class="privacy-symbol">♡</span><div><strong data-copy="yourInformation">Your information. Your choice.</strong><button class="link-btn" data-go="family" data-copy="manageSharing">Manage sharing →</button></div></div>
 </aside>
 
 <div class="main">
@@ -515,7 +518,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
   </button>
   <div class="search" role="search" hidden><svg width="16" height="16"><use href="#i-search"/></svg><input type="search" id="globalSearch" placeholder="Search anything..." data-i18n-placeholder="search.placeholder" aria-label="Search"></div>
   <div class="patient-crumb"><span data-copy="patientSpace">MY CARE SPACE</span><strong id="pageTitle">Home</strong></div>
-  <div class="topbar__right"><select id="patientLanguage" aria-label="Page language" onchange="window.DaiI18n?.setLang(this.value)"><option value="en">English</option><option value="hi">हिंदी</option><option value="mr">मराठी</option><option value="ta">தமிழ்</option><option value="bn">বাংলা</option></select><button type="button" class="read-page" id="readPage" aria-label="Read this page aloud" title="Read this page aloud"><svg width="17" height="17"><use href="#i-msg"/></svg><span data-copy="listen">Listen</span></button>
+  <div class="topbar__right"><select id="patientLanguage" aria-label="Page language" onchange="window.DaiI18n?.setLang(this.value)"><option value="en">English</option><option value="hi">हिंदी</option><option value="mr">मराठी</option></select><button type="button" class="read-page" id="readPage" aria-label="Read this page aloud" title="Read this page aloud"><svg width="17" height="17"><use href="#i-msg"/></svg><span data-copy="listen">Listen</span></button>
     <div style="position:relative">
 <button class="icon-btn" type="button" aria-label="Notifications" id="notifBtn"><svg width="18" height="18"><use href="#i-bell"/></svg><span class="badge" id="notifCount" style="display:none">0</span></button>
 <div class="notif-pop" id="notifPop" role="dialog" aria-label="Notifications">
@@ -677,8 +680,9 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
   <div id="emergencyPlanRoot" style="margin-top:1rem"></div>
 </div>
 
+<section class="panel" id="panel-care-messages"><div class="page-section-heading"><h1>Messages</h1><p>Your conversations with your care team.</p></div></section>
 <!-- APPOINTMENTS -->
-<section class="panel" id="panel-ultrasound" aria-label="Ultrasound scans"><div class="page-section-heading"><h1 data-copy="nav.ultrasound">Ultrasound scans</h1></div><div data-ultrasound-workspace="patient"></div></section>
+
 <div class="panel" id="panel-appointments"><div class="page-section-heading"><h1 data-copy="nav.appointments">Appointments</h1><p data-copy="appointmentsIntro">See upcoming and past visits. Request changes without losing your care history.</p></div>
   <div id="connectedAppointments"></div><div id="visitSummaries"></div><div class="main-grid legacy-appointments" style="display:none">
     <div class="card section-card">
@@ -702,6 +706,8 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
     </div>
   </div>
 </div>
+
+<section class="panel" id="panel-ultrasound" aria-label="Ultrasound scans"><div class="page-section-heading"><h1 data-copy="nav.ultrasound">Ultrasound scans</h1></div><div data-ultrasound-workspace="patient"></div></section>
 
 <!-- TIMELINE -->
 <div class="panel" id="panel-timeline"><div class="page-section-heading"><h1 data-copy="nav.timeline">Care timeline</h1><p data-copy="timelineIntro">Your visits and milestones, with a plain-language explanation at each step.</p></div>
@@ -729,7 +735,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
   <div id="connectedRecords"></div>
 <div id="connectedReportArea"><div class="record-filters connected-record-filters"><label>Search<input id="recordSearch" type="search" placeholder="Name, date or centre"></label><label>Type<select id="recordTypeFilter"><option value="">All types</option><option value="blood">Blood tests</option><option value="urine">Urine</option><option value="scan_imaging">Scans</option><option value="screening">Screening</option><option value="discharge_summary">Discharge summaries</option><option value="prescription">Prescriptions</option><option value="vaccination">Vaccination certificates</option><option value="documents">Documents & IDs</option></select></label><label>From date<input id="recordDateFilter" type="date"></label><label>Patient<select id="recordSubjectFilter"><option value="">Mother</option><option value="all">Mother & all babies</option></select></label></div>
 <button type="button" class="btn btn--primary btn--sm" data-issue-capsule>Create Care Capsule</button>
-<div id="recordCategoryChips"></div><div id="reportsDocsList"></div><details class="connected-upload" id="connectedUploadDetails"><summary>＋ Upload an original report</summary><p>Self-uploaded files await clinician verification. Choose the correct person and milestone. No automatic interpretation is performed.</p><form class="form-grid" id="docUploadForm" style="max-width:100%;margin-bottom:1rem">
+<label class="rc-source-filter">Report source<select id="recordSourceFilter"><option value="">All sources</option><option value="manual">Manual & clinician uploads</option><option value="abdm">ABHA / ABDM demo</option><option value="digilocker">DigiLocker demo</option></select></label><div id="recordCategoryChips"></div><div id="reportsDocsList"></div><details class="connected-upload" id="connectedUploadDetails"><summary>＋ Upload an original report</summary><p>Self-uploaded files await clinician verification. Choose the correct person and milestone. No automatic interpretation is performed.</p><form class="form-grid" id="docUploadForm" style="max-width:100%;margin-bottom:1rem">
           <div class="form-group">
             <label for="docTitle">Title</label>
             <input id="docTitle" name="title" required maxlength="200" placeholder="e.g. Blood count report">
@@ -803,7 +809,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
         <label for="setLang" data-i18n="settings.lang">Language</label>
         <select id="setLang" name="lang">
           <option value="en">English</option>
-          <option value="hi">हिन्दी</option><option value="mr">मराठी</option><option value="ta">தமிழ்</option><option value="bn">বাংলা</option>
+          <option value="hi">हिन्दी</option><option value="mr">मराठी</option>
         </select>
       </div>
       <fieldset class="prefs-fieldset">
@@ -942,11 +948,11 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
           <option value="hindi">Hindi</option>
           <option value="english">English</option>
           <option value="marathi">Marathi</option>
-          <option value="tamil">Tamil</option>
-          <option value="telugu">Telugu</option>
-          <option value="bengali">Bengali</option>
-          <option value="kannada">Kannada</option>
-          <option value="gujarati">Gujarati</option>
+
+
+
+
+
         </select>
       </div>
       <div class="form-group">
@@ -1164,26 +1170,26 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
   </fieldset>
 </template>
 
-<script src="/shared/emergency-triage.js"></script>
+<script src="/shared/emergency-triage.js?v=symptoms-2"></script>
 <script src="/shared/postpartum-rules.js"></script>
 <script src="js/follow-through.js"></script>
 <script src="js/visit-summary-patient.js?v=2"></script>
 <script src="js/care-coordination-patient.js?v=2"></script>
-<script src="js/care-extensions.js?v=2"></script>
+<script src="/shared/maternity-pain-check.js?v=1"></script><script src="js/care-extensions.js?v=sos-choices-2"></script>
 <link rel="stylesheet" href="js/golden-hour.css?v=1">
 <script src="js/golden-hour.js?v=1" defer></script>
 <script src="/shared/voice-triage.js"></script>
 <script src="js/dai-didi.js?v=dhruv-voice-8" defer></script>
-<script src="/shared/who-growth-standards.js"></script><script src="/shared/child-reference.js"></script><script src="js/patient-visuals.js?v=1"></script><script src="js/patient-polish.js?v=1"></script><script src="js/patient-home-model.js?v=1"></script><script src="js/patient-home-reference.js?v=2"></script><script src="js/dashboard-charts.js?v=1"></script><script src="js/patient-home.js?v=graphs-1"></script><script src="js/patient-model.js?v=3"></script><script src="js/patient-offline.js?v=3"></script><script src="js/patient-copy.js?v=4"></script><script src="js/timeline-push.js?v=1"></script><script src="js/timeline-assistance.js?v=2"></script><script src="js/timeline-trust.js?v=1"></script><script src="js/timeline-tools.js?v=1"></script><script src="js/patient-journey.js?v=6"></script><script src="js/patient-pending-model.js?v=3"></script><script src="js/patient-pending.js?v=5"></script><script src="js/pending-care-capabilities.js?v=3"></script><script src="js/patient-appointments-model.js?v=1"></script><script src="/shared/clinical-ledger.js?v=ledger-1"></script><script src="js/patient-connected.js?v=ledger-1"></script><script src="js/patient-hospital-stay.js?v=1"></script><script src="js/support-model.js?v=1"></script>
+<script src="/shared/who-growth-standards.js"></script><script src="/shared/child-reference.js"></script><script src="js/patient-visuals.js?v=1"></script><script src="js/patient-polish.js?v=1"></script><script src="js/patient-home-model.js?v=1"></script><script src="js/patient-home-reference.js?v=5"></script><script src="js/dashboard-charts.js?v=3"></script><script src="js/patient-home.js?v=graphs-1"></script><script src="js/patient-model.js?v=3"></script><script src="js/patient-offline.js?v=3"></script><script src="js/patient-copy.js?v=chat-nav-4"></script><script src="js/timeline-push.js?v=1"></script><script src="js/timeline-assistance.js?v=2"></script><script src="js/timeline-trust.js?v=1"></script><script src="js/timeline-tools.js?v=1"></script><script src="js/patient-journey.js?v=6"></script><script src="js/patient-pending-model.js?v=3"></script><script src="js/patient-pending.js?v=5"></script><script src="js/pending-care-capabilities.js?v=3"></script><script src="js/patient-appointments-model.js?v=1"></script><script src="/shared/clinical-ledger.js?v=ledger-1"></script><script src="js/patient-connected.js?v=ledger-records-3"></script><script src="js/patient-hospital-stay.js?v=1"></script><script src="js/support-model.js?v=1"></script>
 <script src="js/patient-support.js?v=2"></script>
 <script src="js/birth-readiness.js?v=3"></script>
 <link rel="stylesheet" href="doctor-readiness-experience.css?v=delivery-2">
 <script src="js/patient-labour-callin.js?v=1"></script>
 <script src="js/clinical-dashboard.js?v=ledger-1"></script>
-<script src="js/patient-home-open.js?v=13"></script>
+<script src="js/patient-home-open.js?v=17"></script>
 <script src="js/patient-timeline-live.js?v=2"></script>
 <script src="js/care-scan.js" defer></script>
-<script src="/shared/child-development.js?v=1"></script><script src="js/child-growth-development.js?v=1"></script><script src="/shared/pregnancy-mirror.js?v=5"></script><script src="js/mirror-voice.js?v=2"></script><script src="js/pregnancy-mirror.js?v=8"></script><script src="/shared/uterus-learning.js?v=1"></script><script src="js/patient-uterus-model.js?v=4"></script><script src="/shared/sukoon.js?v=2"></script><script src="js/sukoon-vault.js?v=1"></script><script src="js/sukoon.js?v=2"></script><script src="js/patient-dashboard.js?v=7"></script>
+<script src="/shared/child-development.js?v=1"></script><script src="js/child-growth-development.js?v=2"></script><script src="/shared/pregnancy-mirror.js?v=5"></script><script src="js/mirror-voice.js?v=2"></script><script src="js/pregnancy-mirror.js?v=8"></script><script src="/shared/uterus-learning.js?v=1"></script><script src="js/patient-uterus-model.js?v=4"></script><script src="/shared/sukoon.js?v=2"></script><script src="js/sukoon-vault.js?v=1"></script><script src="js/sukoon.js?v=2"></script><script src="js/patient-child-profile.js?v=2"></script><script src="js/patient-dashboard.js?v=8"></script>
 <script src="js/care-timeline-enhanced.js"></script><script src="js/missed-care-outreach.js?v=3"></script>
 <script>
 (function () {
@@ -2083,7 +2089,7 @@ boot().then(function () { return renderMessagesFromAppts(); });
 })();
 </script>
 <script src="js/little-world-model.js?v=1"></script>
-<script src="js/patient-recovery-access.js?v=1"></script><script src="js/patient-recovery-model.js?v=2"></script><script src="js/patient-recovery.js?v=2"></script><script src="js/little-world.js?v=3"></script>
+<script src="js/patient-recovery-access.js?v=3"></script><script src="js/patient-recovery-model.js?v=2"></script><script src="js/patient-recovery.js?v=2"></script><script src="js/little-world.js?v=3"></script>
 <script src="vendor/leaflet/leaflet.js"></script>
 <script src="vendor/leaflet/markercluster.js"></script>
 <script src="js/nearby-world.js?v=5"></script>
@@ -2095,7 +2101,7 @@ boot().then(function () { return renderMessagesFromAppts(); });
 <script src="js/delhi-patient-journey.js?v=4"></script>
 <script src="js/demo-request-patient.js?v=3"></script>
 <script src="js/patient-followup-state.js?v=4"></script>
-<script src="js/clinical-review.js?v=4"></script><script src="js/ai-usage.js?v=2"></script><script src="js/demo-care-messages.js?v=3"></script><script src="js/demo-guide.js?v=1"></script><script src="js/patient-tour.js?v=3"></script><script src="/shared/daily-tracking.js?v=1"></script><script src="js/patient-daily-enhanced.js?v=2"></script><script src="js/patient-daily.js?v=3"></script><script src="js/postpartum-infant.js?v=1"></script><script src="/shared/birth-plan.js?v=2"></script><script src="/shared/birth-plan-experience.js?v=1"></script><script src="js/patient-report-birth.js?v=4"></script><script src="js/birth-plan-experience.js?v=1"></script><script src="js/remote-followup.js?v=instant-1"></script><script src="js/platform-rights.js?v=3"></script><script src="js/family-circle-experience.js?v=1"></script><script src="js/daicare.js" defer></script>
+<script src="js/clinical-review.js?v=4"></script><script src="js/ai-usage.js?v=2"></script><script src="js/demo-care-messages.js?v=flow-3"></script><script src="js/demo-guide.js?v=1"></script><script src="js/patient-tour.js?v=3"></script><script src="/shared/daily-tracking.js?v=1"></script><script src="js/patient-daily-enhanced.js?v=2"></script><script src="js/patient-daily.js?v=3"></script><script src="js/postpartum-infant.js?v=1"></script><script src="/shared/birth-plan.js?v=2"></script><script src="/shared/birth-plan-experience.js?v=1"></script><script src="js/patient-report-birth.js?v=4"></script><script src="js/birth-plan-experience.js?v=1"></script><script src="js/remote-followup.js?v=instant-1"></script><script src="js/platform-rights.js?v=3"></script><script src="js/family-circle-experience.js?v=4"></script><script src="js/daicare.js" defer></script>
 <script type="module" src="/care-capsule/issue.js"></script>
 <nav class="dai-mobile-nav" aria-label="Patient mobile navigation" data-dai-mobile-nav="patient">
   <button type="button" data-mobile-panel="dashboard"><svg aria-hidden="true"><use href="#i-home"/></svg><span data-copy="nav.dashboard">Home</span></button>
@@ -2105,6 +2111,7 @@ boot().then(function () { return renderMessagesFromAppts(); });
   <button type="button" data-mobile-panel="profile"><svg aria-hidden="true"><use href="#i-user"/></svg><span>Profile</span></button>
   <button type="button" data-mobile-menu aria-controls="sidebar" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg><span>More</span></button>
 </nav>
-  <script defer src="/js/instant-consultations.js?v=1"></script>
+  <script defer src="/js/instant-consultations.js?v=5"></script>
+<script defer src="js/record-connections.js?v=2"></script>
 </body>
 </html>

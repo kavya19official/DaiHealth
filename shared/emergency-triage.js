@@ -42,6 +42,9 @@
      ambulance and do not travel alone; 'urgent' = speak to a doctor / go to a
      facility today, do not wait. */
   var SYMPTOMS = [
+    {code:'pain_needs_review',context:'both',level:'urgent',label:'Sudden, persistent, worsening or severe pain needing review',why:'The cause of pain cannot be established by this checklist. Contact maternity care promptly.',firstAid:[]},
+    {code:'one_leg_pain',context:'both',level:'urgent',label:'Pain in one leg, especially with swelling, redness or warmth',why:'One-sided leg symptoms need prompt clinical assessment.',firstAid:[]},
+    {code:'urinary_pain',context:'both',level:'urgent',label:'Pain or burning when passing urine',why:'Urinary symptoms with pain in pregnancy need clinical review.',firstAid:[]},
     // ---- both ----------------------------------------------------------------
     { code: 'heavy_bleeding', context: 'both', level: 'emergency',
       label: 'Heavy bleeding (soaking a pad in an hour or less)',

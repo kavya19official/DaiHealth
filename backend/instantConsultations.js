@@ -31,7 +31,7 @@ function rankDoctors(rows, location, category, language) {
     return {
       ...row, distance,
       specialtyMatch: Number(specialties.test(row.specialization || '')),
-      languageMatch: Number(languages.some(x => (language === 'hi' ? /^(hi|hindi|हिन्दी|हिंदी)$/i : /^(en|english)$/i).test(String(x).trim())))
+      languageMatch: Number(languages.some(x => (language === 'hi' ? /^(hi|hindi|हिन्दी|हिंदी)$/i : language === 'mr' ? /^(mr|marathi|मराठी)$/i : /^(en|english)$/i).test(String(x).trim())))
     };
   }).filter(row => !location || row.distance !== null && row.distance <= NEARBY_RADIUS_KM);
   return ranked.sort((a, b) => b.specialtyMatch - a.specialtyMatch || b.languageMatch - a.languageMatch
@@ -188,7 +188,7 @@ function register(app, { pool, authenticateToken, authorizeRole, env = process.e
     const body = req.body || {};
     const concern = textField(body.concern, 'concern', 1000);
     const category = body.category || 'other';
-    if (!CATEGORIES.includes(category) || !['en','hi'].includes(body.language) || body.consent !== true
+    if (!CATEGORIES.includes(category) || !['en','hi','mr'].includes(body.language) || body.consent !== true
         || (body.emergency_warning !== undefined && typeof body.emergency_warning !== 'boolean')) {
       failure(400, 'Choose a language and confirm sharing for this consultation.');
     }
@@ -269,7 +269,7 @@ function register(app, { pool, authenticateToken, authorizeRole, env = process.e
     await requireDoctor(pool, id);
     const { rows: [av] } = await pool.query('SELECT status FROM instant_doctor_availability WHERE doctor_id=$1', [id]);
     const { rows: offers } = await pool.query(`SELECT o.consultation_id AS id,o.expires_at,ic.category,
-        ic.language,ic.created_at,f.name AS facility_name
+        ic.language,ic.emergency_warning,ic.created_at,f.name AS facility_name
       FROM instant_consultation_offers o JOIN instant_consultations ic ON ic.id=o.consultation_id
       JOIN facilities f ON f.id=o.facility_id
       WHERE o.doctor_id=$1 AND o.status='offered' AND ic.status='offered' AND o.expires_at>clock_timestamp()

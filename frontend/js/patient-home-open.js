@@ -22,7 +22,7 @@
   function setupNavigation() {
     const nav=document.querySelector('.sidebar__nav');if(!nav)return;
     const find=id=>nav.querySelector('[data-panel="'+id+'"]');
-    const groups=[['Care',['dashboard','mycare','appointments','pregnancy-mirror','uterus-model','children','hospital-stay']],['Records',['records']],['Help',['facilities','schemes','family','companion','messages','settings']]];
+    const groups=[['Care',['dashboard','mycare','appointments','care-messages','pregnancy-mirror','uterus-model','children','hospital-stay']],['Records',['records','ultrasound']],['Help',['facilities','schemes','family','companion','messages','settings']]];
     nav.querySelectorAll('.nav-caption').forEach(n=>n.remove());
     for(const [title,ids] of groups){const caption=document.createElement('span');caption.className='nav-caption';caption.dataset.homeNavLabel=title;caption.textContent=title;nav.append(caption);for(const id of ids){const item=id==='mycare'?$('homeCareNavigation'):find(id);if(item)nav.append(item);}}
   }
@@ -33,6 +33,7 @@
     const greeting=root.querySelector('.home-heading'),copy=root.querySelector('.home-journey-copy');
     // Keep the complete family hero at the top, with its greeting inside the purple panel.
     root.prepend(hero);copy.prepend(greeting);greeting.querySelector('.eyebrow').hidden=true;
+    const doctorConnect=root.querySelector('.connect-card');if(doctorConnect)(hero.querySelector('.home-care-rail')||hero).append(doctorConnect);
     root.querySelector('#homeJourneyTitle').hidden=true;root.querySelector('#homeJourneyText').hidden=true;
     copy.querySelector('.home-kicker').hidden=true;
     const identity=document.createElement('div');identity.className='oh-baby-identity';identity.append($('homeJourneyProgress'),$('homeBabyTabs'));copy.append(identity,$('shareJourney'));

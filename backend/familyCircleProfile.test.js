@@ -1,0 +1,44 @@
+'use strict';
+const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs/promises'),path=require('node:path'),os=require('node:os'),express=require('express');
+const {createLocalPool}=require('./localPool'),{migrations}=require('../scripts/seed-local.cjs');
+const {reconcileNivaraChildren}=require('../scripts/reconcile-nivara-children.cjs');
+const {seedNivaraFamily}=require('../scripts/seed-nivara-family.cjs'),{readHousehold,register}=require('./familyCircleProfile');
+test('fictional household links real child records, preserves vaccine facts and permissions, and isolates owners',async()=>{
+ const dir=await fs.mkdtemp(path.join(os.tmpdir(),'dai-family-profile-')),pool=createLocalPool(path.join(dir,'db'));let server;
+ try{
+  for(const name of migrations)await pool.query(await fs.readFile(path.join(__dirname,'db',name),'utf8'));
+  const add=async(email,role)=>(await pool.query('INSERT INTO users(email,password_hash,role) VALUES($1,\'fake\',$2) RETURNING id',[email,role])).rows[0].id;
+  const mother=await add('nivara@dai-synthetic.invalid','mother'),doctor=await add('doctor@dai-synthetic.invalid','doctor'),other=await add('other@dai-synthetic.invalid','mother');
+  await pool.query("INSERT INTO mother_profiles(user_id,full_name,pregnancy_status,lmp_date,edd_date) VALUES($1,'Nivara Sethi','pregnant','2026-05-11','2027-02-15'),($2,'Other mother','planning',NULL,NULL)",[mother,other]);
+  await pool.query("INSERT INTO doctor_profiles(user_id,full_name,specialization,medical_license_number) VALUES($1,'SYNTHETIC Hemangini Batra','OBG','SYNTHETIC-ONLY')",[doctor]);
+  await pool.query('CREATE TABLE dai_local_source_link(entity TEXT,target_id INTEGER,source_id TEXT)');await pool.query("INSERT INTO dai_local_source_link VALUES('mother',$1,'MOTHER-SYN-0000001')",[mother]);
+  const child=(await pool.query("INSERT INTO children(mother_id,name,date_of_birth,sex,notes) VALUES($1,'CHILD-SYN-0000002','2026-06-29','male','Synthetic source CHILD-SYN-0000002') RETURNING id",[mother])).rows[0].id;
+  const unrelated=(await pool.query("INSERT INTO children(mother_id,name,date_of_birth,sex) VALUES($1,'Unrelated child','2025-01-01','female') RETURNING id",[other])).rows[0].id;
+  await pool.query("INSERT INTO appointments(mother_id,child_id,doctor_id,requested_date,reason,status) VALUES($1,$2,$3,'2026-11-25','Other earlier child visit','confirmed')",[mother,child,doctor]);
+  await assert.rejects(()=>seedNivaraFamily(pool),/Only the local/);
+  await seedNivaraFamily(pool,{local:true});await seedNivaraFamily(pool,{local:true});
+  const obsolete=(await pool.query("INSERT INTO children(mother_id,name,date_of_birth,sex,notes) VALUES($1,'CHILD-SYN-0000001','2026-06-29','female','Synthetic birth order 1; source CHILD-SYN-0000001') RETURNING id",[mother])).rows[0].id;
+  await pool.query("INSERT INTO dai_local_source_link VALUES('child',$1,'CHILD-SYN-0000001')",[obsolete]);
+  await assert.rejects(()=>reconcileNivaraChildren(pool,null),/restricted to the local/);
+  const corrected=await reconcileNivaraChildren(pool,null,{local:true,backupDir:path.join(dir,'backups')});
+  assert.equal(corrected.removed_obsolete_demo,true);
+  assert.deepEqual((await pool.query('SELECT name FROM children WHERE mother_id=$1',[mother])).rows.map(c=>c.name),['Aarav Sethi']);
+  assert.equal((await fs.readdir(path.join(dir,'backups'))).length,1);
+  assert.equal((await reconcileNivaraChildren(pool,null,{local:true,backupDir:path.join(dir,'backups')})).removed_obsolete_demo,false);
+  const family=await readHousehold(pool,mother);assert.equal(family.child.id,child);assert.equal(family.child.name,'Aarav Sethi');assert.equal(family.child.date_of_birth,'2024-05-18');assert.equal(Number(family.child.birth_weight_kg),3.1);
+  assert.equal(Number(family.child.growth[0].weight_kg),12.4);assert.equal(Number(family.child.growth[0].height_cm),89);assert.equal(family.child.growth.length,2);
+  assert.deepEqual(family.child.vaccinations,[]);assert.equal(family.child.next_review.requested_date,'2026-11-28');assert.equal(family.child.next_review.status,'pending');
+  assert.equal(family.current_journey.pregnancy_status,'pregnant');assert.deepEqual(family.people.map(p=>p.name),['Kabir Sethi','Ritu Sharma']);
+  assert.equal((await pool.query('SELECT * FROM family_access_grants')).rows.length,0);
+  assert.equal((await pool.query('SELECT * FROM child_health_events WHERE child_id=$1',[child])).rows.length,1);
+  assert.equal((await pool.query("SELECT * FROM appointments WHERE child_id=$1 AND requested_date='2026-11-28'",[child])).rows.length,1);
+  assert.equal((await pool.query('SELECT name FROM children WHERE id=$1',[unrelated])).rows[0].name,'Unrelated child');
+  assert.equal(await readHousehold(pool,other),null);
+  const app=express();register(app,{pool,authenticateToken(req,res,next){if(!req.headers['x-user'])return res.sendStatus(401);req.user={id:Number(req.headers['x-user']),role:req.headers['x-role']||'mother'};next();},authorizeRole:roles=>(req,res,next)=>roles.includes(req.user.role)?next():res.sendStatus(403)});
+  server=await new Promise(resolve=>{const s=app.listen(0,'127.0.0.1',()=>resolve(s))});const url='http://127.0.0.1:'+server.address().port+'/api/patient/family-circle-profile';
+  assert.equal((await fetch(url)).status,401);assert.equal((await fetch(url,{headers:{'x-user':String(doctor),'x-role':'doctor'}})).status,403);
+  const own=await fetch(url,{headers:{'x-user':String(mother)}});assert.match(own.headers.get('cache-control'),/no-store/);assert.equal((await own.json()).household.child.name,'Aarav Sethi');
+  assert.deepEqual(await(await fetch(url,{headers:{'x-user':String(other)}})).json(),{household:null});
+  await pool.query('UPDATE family_circle_profiles SET record=$2::jsonb WHERE mother_id=$1',[mother,JSON.stringify({child_id:unrelated})]);assert.equal(await readHousehold(pool,mother),null);
+ }finally{if(server)await new Promise(r=>server.close(r));await pool.end();await fs.rm(dir,{recursive:true,force:true})}
+});

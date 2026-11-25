@@ -415,7 +415,7 @@
   function openSOS(preset) {
     if (sos.el) closeSOS();
     sos.opener = document.activeElement;
-    sos.step = 1; sos.codes = []; sos.note = ''; sos.triage = null; sos.summary = null; sos.eventId = null; sos.actions = []; sos.saved = null;
+    sos.step = 0; sos.pain = {}; sos.codes = []; sos.note = ''; sos.triage = null; sos.summary = null; sos.eventId = null; sos.actions = []; sos.saved = null;
     sos.context = (state.emCtx && state.emCtx.context) || (state.pp && state.pp.active ? 'postpartum' : 'pregnant');
     injectStyles();
     var ov = document.createElement('div');
@@ -462,7 +462,8 @@
   function renderSOS() {
     if (!sos.el) return;
     var body = $('sosBody');
-    var inner = stepsNav();
+    if(sos.step===0){body.innerHTML=sosChoices();wireChoices(body);return;}
+    var inner = '<div class="sos-quick-exit"><button type="button" class="link-btn" data-sos-choices>← Help options</button><a href="tel:112">Call 112 now</a></div>'+stepsNav();
     if (sos.step === 1) inner += stepSituation();
     else if (sos.step === 2) inner += stepActions();
     else if (sos.step === 3) inner += stepSummary();
@@ -471,27 +472,29 @@
     Array.prototype.forEach.call(body.querySelectorAll('.cx-steps button'), function (b) {
       b.addEventListener('click', function () { sos.step = Number(b.getAttribute('data-step')); renderSOS(); });
     });
+    body.querySelector('[data-sos-choices]').onclick=function(){if($('sosNote'))sos.note=$('sosNote').value;sos.step=0;renderSOS();};
     wireStep();
   }
 
+  function sosChoices(){return '<div class="sos-choice-intro"><span>YOU CHOOSE HOW TO GET HELP</span><h2>What do you need right now?</h2><p>No questions are required to call for help.</p></div><div class="sos-choice-grid"><article class="sos-choice sos-choice-ambulance"><span aria-hidden="true">☎</span><h3>Call an ambulance</h3><p>Severe symptoms, heavy bleeding, chest pain, trouble breathing or feeling faint? Get emergency help now.</p><a href="tel:112" class="btn btn--primary">Call 112</a><a href="tel:108" class="link-btn">Call 108 · where available</a><small>Opens your phone dialler. DAI does not dispatch an ambulance.</small></article><article class="sos-choice"><span aria-hidden="true">♧</span><h3>Contact a doctor</h3><p>Request an audio consultation or message your connected care team.</p><button type="button" class="btn btn--primary" data-sos-doctor>Request doctor call</button><button type="button" class="link-btn" data-sos-text>Message my care team</button><small>Acceptance is not guaranteed. Do not wait for a reply if symptoms are severe.</small></article><article class="sos-choice"><span aria-hidden="true">▤</span><h3>Describe my symptoms</h3><p>If you feel able, answer a few optional questions to prepare a clear summary for your clinician.</p><button type="button" class="btn btn--secondary" data-sos-questionnaire>Start optional symptom check</button><small>You can stop and call at any time. This cannot diagnose the cause of pain.</small></article></div>';}
+  function wireChoices(body){
+    body.querySelector('[data-sos-questionnaire]').onclick=function(){sos.step=1;renderSOS();};
+    body.querySelector('[data-sos-doctor]').onclick=function(){var note=[window.MaternityPainCheck?.summarize(sos.pain||{}).description,sos.note].filter(Boolean).join(' | ');closeSOS();window.DaiInstantConsultations?.open({emergency:true,concern:note});};
+    body.querySelector('[data-sos-text]').onclick=function(){closeSOS();window.DaiDemoMessages?.openDoctor();};
+  }
   function stepSituation() {
-    var list = EM.symptomsFor(sos.context);
-    var em = list.filter(function (s) { return s.level === 'emergency'; });
-    var ur = list.filter(function (s) { return s.level !== 'emergency'; });
-    function row(s) { return '<label class="cx-check' + (s.level === 'emergency' ? ' is-em' : '') + '"><input type="checkbox" data-sym="' + esc(s.code) + '"' + (sos.codes.indexOf(s.code) >= 0 ? ' checked' : '') + '><span>' + esc(s.label) + '</span></label>'; }
-    var active = state.emCtx && state.emCtx.active_event_id;
-    return '<div class="cx-banner" style="background:#fff1f2;border-color:#fda4af"><b style="color:#be123c">If this is an emergency, call now — you can fill in the rest on the way.</b><div class="cx-actions">' +
-      callBtn('112', 'Call 112', true) + callBtn('108', 'Call 108') + '</div></div>' +
-      (active ? '<div class="cx-banner" style="background:#fffbeb;border-color:#fcd34d"><b>You have an open emergency record from the last 24 hours.</b> <button type="button" class="btn btn--ghost btn--sm" id="sosResume">Open it</button></div>' : '') +
-      '<div class="cx-seg" role="group" aria-label="Your situation" style="margin:.6rem 0">' +
-      '<button type="button" data-ctx="pregnant" class="' + (sos.context === 'pregnant' ? 'is-on' : '') + '">I am pregnant</button> ' +
-      '<button type="button" data-ctx="postpartum" class="' + (sos.context === 'postpartum' ? 'is-on' : '') + '">I have had my baby</button></div>' +
-      '<div class="cx-sub" style="margin:.4rem 0 .1rem"><b>What is happening?</b> Tick everything that applies.</div>' +
-      '<div class="cx-sub" style="margin:.5rem 0 0;color:#be123c"><b>Needs an ambulance</b></div>' + em.map(row).join('') +
-      '<div class="cx-sub" style="margin:.7rem 0 0;color:#b45309"><b>Needs a doctor or facility today</b></div>' + ur.map(row).join('') +
-      '<div class="cx-field" style="margin-top:.7rem"><label for="sosNote">Anything else to tell the doctor? (optional)</label><textarea id="sosNote" rows="2" maxlength="500">' + esc(sos.note) + '</textarea></div>' +
-      '<div style="margin-top:.9rem"><button type="button" class="btn btn--primary btn--full" id="sosGo" style="background:var(--rose);min-height:48px">Get help &amp; guidance</button></div>' +
-      '<p class="cx-sub" style="margin-top:.5rem">Not sure? Tick nothing and press the button — if you are worried, treat it as urgent.</p>';
+    var list=EM.symptomsFor(sos.context);
+    function row(s){return '<label class="cx-check"><input type="checkbox" data-sym="'+esc(s.code)+'"'+(sos.codes.indexOf(s.code)>=0?' checked':'')+'><span>'+esc(s.label)+'</span></label>';}
+    var fields=window.MaternityPainCheck?.fields||[];
+    return '<h2>Tell your care team what you feel</h2><p class="cx-sub">Every question is optional. Pain deserves to be heard; this check cannot decide whether it is physical or psychological.</p><div class="cx-seg"><button type="button" data-ctx="pregnant" class="'+(sos.context==='pregnant'?'is-on':'')+'">I am pregnant</button><button type="button" data-ctx="postpartum" class="'+(sos.context==='postpartum'?'is-on':'')+'">I have had my baby</button></div><div class="sos-pain-fields">'+fields.map(function(f){return '<label>'+esc(f[1])+'<select data-sos-pain="'+f[0]+'"><option value="">Not sure / skip</option>'+f[2].map(function(o){return '<option value="'+o[0]+'"'+(sos.pain&&sos.pain[f[0]]===o[0]?' selected':'')+'>'+esc(o[1])+'</option>';}).join('')+'</select></label>';}).join('')+'</div><div data-sos-pain-alert role="status"></div><details class="sos-warning-signs" open><summary>Any other symptoms? Select what applies.</summary>'+list.map(row).join('')+'</details><label class="cx-field">Anything else to tell the doctor? (optional)<textarea id="sosNote" rows="2" maxlength="500">'+esc(sos.note)+'</textarea></label><button type="button" class="btn btn--primary" id="sosGo">Review guidance & save symptom summary</button><p class="cx-sub">No answer rules out a problem. If you are worried, contact maternity care promptly.</p><details class="sos-sources"><summary>Sources for these questions</summary><a href="https://www.nhs.uk/pregnancy/common-symptoms/stomach-pain/" target="_blank" rel="noopener">NHS · stomach pain in pregnancy</a><br><a href="https://www.cdc.gov/hearher/maternal-warning-signs/index.html" target="_blank" rel="noopener">CDC · urgent maternal warning signs</a><p>Reviewed 25 November 2026. Symptom summary only; clinical review required before clinical deployment.</p></details>';
+  }
+
+  function updatePainAlert(){
+    var target=$('sosBody')?.querySelector('[data-sos-pain-alert]');if(!target)return;
+    var pain=window.MaternityPainCheck?.summarize(sos.pain||{}),codes=Array.from(new Set(sos.codes.concat(pain?.codes||[])));
+    if(!codes.length){target.textContent='';return;}
+    var t=EM.triage(codes,{context:sos.context,gestWeeks:state.emCtx?.gest_weeks});
+    target.className='sos-pain-warning';target.setAttribute('role','alert');target.innerHTML='<strong>'+esc(t.headline)+'</strong><p>Do not wait to finish this check.</p><a href="tel:112">Call 112</a>';
   }
 
   function stepActions() {
@@ -576,6 +579,8 @@
   function wireStep() {
     var body = $('sosBody');
     if (sos.step === 1) {
+      Array.prototype.forEach.call(body.querySelectorAll('[data-sos-pain]'),function(input){input.addEventListener('change',function(){sos.pain=sos.pain||{};sos.pain[input.dataset.sosPain]=input.value;updatePainAlert();});});
+      updatePainAlert();
       Array.prototype.forEach.call(body.querySelectorAll('[data-ctx]'), function (b) {
         b.addEventListener('click', function () { sos.note = $('sosNote').value; sos.context = b.getAttribute('data-ctx'); sos.codes = []; renderSOS(); });
       });
@@ -584,6 +589,7 @@
           var code = c.getAttribute('data-sym');
           sos.codes = sos.codes.filter(function (x) { return x !== code; });
           if (c.checked) sos.codes.push(code);
+          updatePainAlert();
         });
       });
       var go = $('sosGo');
@@ -631,6 +637,7 @@
 
   async function submitSituation() {
     sos.note = $('sosNote') ? $('sosNote').value.trim() : sos.note;
+    var pain=window.MaternityPainCheck?.summarize(sos.pain||{});if(pain){sos.codes=Array.from(new Set(sos.codes.concat(pain.codes)));sos.note=[pain.description,sos.note].filter(Boolean).join(' | ').slice(0,500);}
     var ctxObj = { context: sos.context, gestWeeks: state.emCtx && state.emCtx.gest_weeks != null && sos.context === 'pregnant' ? state.emCtx.gest_weeks : undefined };
     // 1) Instant, on-device guidance (works offline). Recent BP is added by the server copy below.
     sos.triage = EM.triage(sos.codes, ctxObj);

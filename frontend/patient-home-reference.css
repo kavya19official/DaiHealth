@@ -68,3 +68,52 @@ body.mother-reference[data-home-theme=dark]{--mr-border:#493558;--mr-soft:#33243
 .mr-methodology{font-size:calc(9px * var(--patient-scale,1));color:var(--mr-muted);margin:11px 0 0;line-height:1.5}#panel-dashboard.reference-home .home-next-place{display:flex;gap:8px;align-items:flex-start}#panel-dashboard.reference-home .home-next-place>svg{width:19px;height:19px;color:var(--mr-purple);flex-shrink:0}#panel-dashboard.reference-home .home-next-place small{display:block;color:var(--mr-muted);font-size:calc(9px * var(--patient-scale,1));margin-bottom:3px}.reference-home .mr-support{min-height:210px}
 
 #panel-dashboard.reference-home .mr-more-body>#shareJourney{display:inline-flex!important;margin:8px 0 16px;font-size:calc(12px * var(--patient-scale,1));min-height:42px;padding:10px 16px;border:1px solid var(--mr-border);border-radius:12px;color:var(--brand)}
+
+/* Keep detailed care tools on their dedicated pages, outside the Home overview. */
+#panel-dashboard .cg-details-grid,
+#panel-dashboard .cg-attention,
+#panel-dashboard #homeDailyTracking,
+#panel-dashboard #pregnancyLibraryCard,
+#panel-dashboard #motherRecordedCharts,
+#panel-dashboard #motherGraphsButton{display:none!important}
+
+/* Hero copy and a useful pregnancy snapshot on the left; care tools on the right. */
+#panel-dashboard.reference-home .oh-hero-band{align-items:start;background:transparent;overflow:visible}
+#homeHeroMain{display:grid;gap:18px;min-width:0}
+#panel-dashboard.reference-home #homeHeroMain>.home-journey{min-height:480px;background:linear-gradient(120deg,var(--mr-soft),var(--surface,#fff))!important}
+#panel-dashboard.reference-home .home-care-rail{min-width:0}
+#panel-dashboard .home-care-rail>.connect-card{width:100%;aspect-ratio:1;min-width:0;box-sizing:border-box;margin:0;padding:clamp(18px,2vw,26px);display:flex;flex-direction:column;justify-content:center;gap:12px;border-radius:22px}
+#panel-dashboard .home-care-rail>.connect-card .connect-heading{display:flex;flex-direction:column;align-items:stretch;gap:14px}
+#panel-dashboard .home-care-rail>.connect-card h2{font-size:clamp(20px,1.8vw,26px);line-height:1.2;margin:5px 0 0;letter-spacing:-.6px}
+#panel-dashboard .home-care-rail>.connect-card p{font-size:14px;line-height:1.5;margin:0}
+#panel-dashboard .home-care-rail>.connect-card small{color:var(--brand-strong);font-weight:700}
+#panel-dashboard .home-care-rail>.connect-card .btn{font-size:13px;line-height:1.35;min-height:42px;padding:9px 12px;border-radius:12px}
+#panel-dashboard .home-care-rail>.connect-card .connect-actions{gap:8px}
+#panel-dashboard .home-care-rail>.connect-card .connect-actions>.btn{flex:1 1 40%}
+#panel-dashboard .home-care-rail>.connect-card [data-connect-announcement]:empty{display:none}
+.mr-pregnancy-glance{background:var(--surface,#fff);border:1px solid var(--mr-border);border-radius:22px;padding:24px;display:grid;gap:18px}
+.mr-glance-title{display:flex;align-items:center;gap:12px}.mr-glance-title h2{font-size:20px;line-height:1.3;margin:0;font-weight:750}
+.mr-glance-icon{display:grid;place-items:center;width:42px;height:42px;background:var(--mr-soft);color:var(--brand-strong);border-radius:14px}.mr-glance-icon svg{width:23px;height:23px}
+.mr-glance-facts{display:grid;grid-template-columns:1fr 1fr;gap:18px}.mr-glance-facts>div{display:grid;align-content:start;gap:7px}.mr-glance-facts strong{font-size:23px;font-weight:750;line-height:1.25}.mr-glance-facts small{font-size:12px;line-height:1.5;color:var(--ink-muted)}
+.mr-pregnancy-glance>button{justify-self:start;background:var(--mr-soft);color:var(--brand-strong);padding:11px 16px;border:0;border-radius:12px;min-height:44px;font:inherit;font-size:14px;font-weight:700;cursor:pointer}
+@media(max-width:1000px){#panel-dashboard.reference-home #homeHeroMain>.home-journey{min-height:380px}#panel-dashboard .home-care-rail>.connect-card{aspect-ratio:auto;min-height:300px}}
+@media(max-width:600px){#panel-dashboard.reference-home #homeHeroMain>.home-journey{min-height:340px}.mr-pregnancy-glance{padding:19px}.mr-glance-title h2{font-size:18px}.mr-glance-facts strong{font-size:19px}.mr-glance-facts{gap:12px}}
+
+/* A date-based doughnut fills the left column; useful call guidance fills the right. */
+.mr-pregnancy-progress{padding:24px;background:var(--surface,#fff);border:1px solid var(--mr-border);border-radius:22px;min-width:0}
+.mr-pregnancy-progress[hidden]{display:none}.mr-progress-heading>span{font-size:10px;font-weight:750;letter-spacing:1.4px;color:var(--brand-strong)}
+.mr-progress-heading h2{font-size:23px;letter-spacing:-.5px;margin:7px 0 20px;line-height:1.3;font-weight:750}
+.mr-progress-content{display:grid;grid-template-columns:minmax(150px,210px) minmax(0,1fr);align-items:center;gap:28px}
+.mr-progress-donut{width:100%;aspect-ratio:1;border-radius:50%;background:conic-gradient(from -90deg,var(--brand,#7c3aed) 0 var(--journey-percent),var(--mr-soft) var(--journey-percent) 100%);display:grid;place-items:center;position:relative;box-shadow:0 8px 28px #7439db0b}
+.mr-progress-donut::before{content:'';position:absolute;inset:20px;border-radius:50%;background:var(--surface,#fff)}
+.mr-progress-donut>div{position:relative;text-align:center;display:grid;gap:4px;max-width:65%}.mr-progress-donut strong{font-size:42px;line-height:1.1;letter-spacing:-1.5px;color:var(--brand-strong)}.mr-progress-donut span{font-size:11px;line-height:1.4;color:var(--ink-muted)}
+.mr-progress-legend{display:grid;gap:20px}.mr-progress-legend>div{display:flex;align-items:flex-start;gap:10px}.mr-progress-swatch{width:11px;height:11px;margin-top:5px;border-radius:50%;background:var(--brand,#7c3aed);flex-shrink:0}.mr-progress-swatch--remaining{background:var(--mr-soft);border:1px solid var(--mr-border)}
+.mr-progress-legend>div>span{display:grid;gap:5px}.mr-progress-legend small{font-size:12px;color:var(--ink-muted)}.mr-progress-legend strong{font-size:19px;line-height:1.3}.mr-progress-legend p{font-size:13px;line-height:1.6;color:var(--ink-muted);margin:0}.mr-progress-note{font-size:11px;line-height:1.5;color:var(--ink-muted);margin:20px 0 0;padding-top:14px;border-top:1px solid var(--mr-border)}
+#panel-dashboard .home-care-rail>.connect-card{justify-content:space-between;gap:14px}
+.connect-how h3{font-size:14px;line-height:1.4;margin:0 0 10px;font-weight:750}
+.connect-how ol{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;list-style:none;padding:0;margin:0}
+.connect-how li{display:flex;flex-direction:column;align-items:flex-start;gap:7px;font-size:12px;line-height:1.4;color:var(--ink-muted)}.connect-how li>span{display:grid;place-items:center;width:25px;height:25px;border-radius:9px;background:var(--mr-soft);color:var(--brand-strong);font-weight:750}
+.connect-ready{padding:14px;background:var(--mr-soft);border-radius:14px}.connect-ready strong{display:block;font-size:13px;line-height:1.4;margin-bottom:5px}
+#panel-dashboard .home-care-rail>.connect-card .connect-ready p{font-size:12px;line-height:1.5}
+#panel-dashboard .home-care-rail>.connect-card .connect-reassurance{font-size:11px;line-height:1.6;color:var(--ink-muted);padding-top:12px;border-top:1px solid var(--mr-border)}
+@media(max-width:600px){.mr-pregnancy-progress{padding:20px}.mr-progress-content{grid-template-columns:minmax(120px,150px) minmax(0,1fr);gap:18px}.mr-progress-donut::before{inset:15px}.mr-progress-donut strong{font-size:33px}.mr-progress-donut span{font-size:10px}.mr-progress-legend strong{font-size:15px}.mr-progress-legend p{font-size:12px}.mr-progress-heading h2{font-size:21px}}

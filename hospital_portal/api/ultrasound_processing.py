@@ -42,10 +42,14 @@ def assessment(analysis):
     state = analysis.get("state")
     quality = analysis.get("quality") or {}
     demo = bool((analysis.get("measurements") or {}).get("demo"))
+    live_demo = bool(demo and analysis.get("demo_live_inference") is True
+                     and state == "plane_analysis" and analysis.get("model_version")
+                     and analysis.get("planes") and analysis.get("finished_at"))
+    scripted_demo = demo and not live_demo
     problems = [code for code in analysis.get("reasons", []) if code in QUALITY_REASONS]
-    if state == "quality_issue" and not demo:
+    if state == "quality_issue" and not scripted_demo:
         grade = "poor"
-    elif not demo and quality.get("width") and quality.get("height"):
+    elif not scripted_demo and quality.get("width") and quality.get("height"):
         strong = (min(quality["width"], quality["height"]) >= 144 and quality.get("std", 0) >= 12
                   and quality.get("dynamic_range", 0) >= 42 and quality.get("focus", 0) >= 3)
         grade = "good" if strong else "acceptable"
@@ -57,8 +61,9 @@ def assessment(analysis):
                 steps=[step for step in analysis.get("steps", []) if step in STAGES],
                 started_at=analysis.get("started_at"), finished_at=analysis.get("finished_at"),
                 stage_times=analysis.get("stage_times", {}),
-                flag=None if demo else analysis.get("flag") or review_flag(analysis),
-                planes=analysis.get("planes") if state == "plane_analysis" and not demo else None,
+                live_demo_analysis=live_demo,
+                flag=None if scripted_demo else analysis.get("flag") or review_flag(analysis),
+                planes=analysis.get("planes") if state == "plane_analysis" and not scripted_demo else None,
                 model_ran=state in PREDICTIONS, requires_doctor_review=True)
 
 

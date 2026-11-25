@@ -185,11 +185,11 @@
   }
   function schedule(node) { queued.add(node);if(timer)return;timer=setTimeout(function(){timer=null;var work=Array.from(queued);queued.clear();work.forEach(visit);installSelector();},24); }
   function syncSelectors() {
-    document.querySelectorAll('[data-dai-language],#patientLanguage,#setLang').forEach(function(el){Object.keys(names).forEach(function(code){var option=Array.from(el.options||[]).find(function(o){return o.value===code;});if(!option){option=document.createElement('option');option.value=code;el.appendChild(option);}if(option.textContent!==names[code])option.textContent=names[code];});if(el.value!==lang)el.value=lang;});
+    document.querySelectorAll('[data-dai-language],#patientLanguage,#setLang').forEach(function(el){Array.from(el.options||[]).forEach(function(o){if(!names[o.value])o.remove();});Object.keys(names).forEach(function(code){var option=Array.from(el.options||[]).find(function(o){return o.value===code;});if(!option){option=document.createElement('option');option.value=code;el.appendChild(option);}if(option.textContent!==names[code])option.textContent=names[code];});if(el.value!==lang)el.value=lang;});
   }
   function hasPreference(){return Boolean(cookieLanguage()||storageGet(KEY));}
   async function setLang(next,options) {
-    if(!names[next]&&!STRINGS[next])return;
+    if(!names[next])return;
     var changed=lang!==next,version=++languageVersion;lang=next;document.documentElement.lang=lang;
     if(!options||options.persist!==false){try{localStorage.setItem(KEY,lang);}catch(_){}try{document.cookie='dai_lang='+lang+'; Path=/; Max-Age=31536000; SameSite=Lax';}catch(_){} }
     syncSelectors();

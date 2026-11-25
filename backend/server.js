@@ -308,7 +308,11 @@ app.post('/api/auth/login', async (req, res) => {
     }
 
     // Find user
-    const userResult = await pool.query('SELECT * FROM users WHERE lower(email) = lower($1)', [String(email).trim()]);
+    // Preserve the launcher shortcut after curating the local fictional Nivara persona.
+    const localMotherShortcut = process.env.DAI_LOCAL === 'true' && String(email).trim().toLowerCase() === 'mother@dai-synthetic.invalid';
+    const userResult = await pool.query(`SELECT * FROM users WHERE lower(email) = lower($1)
+      OR ($2::boolean AND email='nivara@dai-synthetic.invalid' AND role='mother')
+      ORDER BY CASE WHEN lower(email)=lower($1) THEN 0 ELSE 1 END LIMIT 1`, [String(email).trim(),localMotherShortcut]);
     if (userResult.rows.length === 0) {
       return res.status(401).json({ error: 'Invalid email or password' });
     }
@@ -928,6 +932,8 @@ require('./clinicalContinuity')(app,{pool,authenticateToken,authorizeRole});
 require('./instantConsultations')(app,{pool,authenticateToken,authorizeRole});
 require('./qualityDashboard')(app,{pool,authenticateToken,authorizeRole});
 require('./platformRights')(app,{pool,authenticateToken,authorizeRole});
+require('./familyCircleProfile').register(app,{pool,authenticateToken,authorizeRole});
+require('./recordConnections').register(app,{pool,authenticateToken,authorizeRole});
 require('./providerNotifications').register(app,{pool,authenticateToken,authorizeRole});
 require('./patientSupport')(app, { pool, authenticateToken, authorizeRole });
 const aiUsageTracker=require('./aiUsage').register(app,{pool,authenticateToken});

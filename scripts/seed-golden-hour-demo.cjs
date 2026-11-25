@@ -8,7 +8,7 @@ const crypto = require('node:crypto');
 const bcrypt = require('../backend/node_modules/bcrypt');
 
 async function seedGoldenHourDemo(client) {
-  const mother = (await client.query("SELECT id FROM users WHERE email = 'mother@dai-synthetic.invalid' AND role = 'mother'")).rows[0];
+  const mother = (await client.query("SELECT id FROM users WHERE email IN ('mother@dai-synthetic.invalid','nivara@dai-synthetic.invalid') AND role = 'mother'")).rows[0];
   if (!mother) return;
   await client.query(
     `UPDATE mother_profiles SET

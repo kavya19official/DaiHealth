@@ -5,7 +5,7 @@ async function seedDoctorShowcase(db,{local=process.env.DAI_LOCAL==='true',demo=
  if(!local||!demo)return {disabled:true};
  const version='doctor-showcase-v1';if((await db.query('SELECT 1 FROM dai_local_seed WHERE version=$1',[version])).rows.length)return {alreadySeeded:true};
  const doctor=(await db.query("SELECT u.id FROM users u JOIN doctor_profiles p ON p.user_id=u.id WHERE u.email='doctor@dai-synthetic.invalid' AND p.full_name LIKE '%Hemangini Batra%'")).rows[0];
- const template=(await db.query("SELECT id,password_hash FROM users WHERE email='mother@dai-synthetic.invalid'")).rows[0];if(!doctor||!template)return {skipped:true};
+ const template=(await db.query("SELECT id,password_hash FROM users WHERE email IN ('mother@dai-synthetic.invalid','nivara@dai-synthetic.invalid')")).rows[0];if(!doctor||!template)return {skipped:true};
  const add=n=>new Date(new Date(date+'T12:00:00Z').getTime()+n*86400000).toISOString().slice(0,10);
  await db.query('BEGIN');try{
   // Reserved accounts are never overwritten, even if the marker was removed manually.

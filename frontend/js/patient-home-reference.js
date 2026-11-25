@@ -40,6 +40,12 @@
     if(mounted||!$('homeOpenJourney'))return;mounted=true;
     document.body.classList.add('mother-reference');
     const root=$('panel-dashboard');root.classList.add('reference-home');
+    const hero=root.querySelector('.home-hero-grid');
+    const main=document.createElement('div');main.id='homeHeroMain';
+    hero.prepend(main);main.append($('homeJourneyCard'));
+    const glance=document.createElement('section');glance.id='homePregnancyGlance';glance.className='mr-pregnancy-glance';
+    main.append(glance);
+    const progress=document.createElement('section');progress.id='homePregnancyProgress';progress.className='mr-pregnancy-progress';progress.hidden=true;main.append(progress);
     const make=(id,cls)=>{const el=document.createElement('section');el.id=id;el.className=cls;return el;};
     const grid=make('motherHomeOverview','mr-overview');
     grid.append($('homeOpenJourney'));
@@ -64,6 +70,23 @@
   function update(data,prefs,child) {
     mount();if(!mounted||!data?.user)return;
     const M=window.PatientModel,stage=M.stage(data.user,data.post,data.children),today=M.today();
+    const lang=document.documentElement.lang.split('-')[0],g={
+      en:{title:'Your pregnancy at a glance',journey:'Your care at a glance',week:'weeks',day:'days',due:'Expected delivery',dates:'Based on your recorded dates',explore:'Explore your pregnancy',records:'Your care records',unknown:'Add dates in your profile'},
+      hi:{title:'आपकी गर्भावस्था एक नज़र में',journey:'आपकी देखभाल एक नज़र में',week:'सप्ताह',day:'दिन',due:'प्रसव की अनुमानित तारीख',dates:'आपकी दर्ज तारीखों के अनुसार',explore:'अपनी गर्भावस्था को जानें',records:'आपकी देखभाल के रिकॉर्ड',unknown:'प्रोफ़ाइल में तारीखें जोड़ें'},
+      mr:{title:'तुमची गर्भावस्था एका नजरेत',journey:'तुमची काळजी एका नजरेत',week:'आठवडे',day:'दिवस',due:'प्रसूतीची अपेक्षित तारीख',dates:'तुमच्या नोंदवलेल्या तारखांनुसार',explore:'तुमच्या गर्भावस्थेबद्दल जाणून घ्या',records:'तुमच्या काळजीच्या नोंदी',unknown:'प्रोफाइलमध्ये तारखा जोडा'}
+    }[lang]||{title:'Your pregnancy at a glance',journey:'Your care at a glance',week:'weeks',day:'days',due:'Expected delivery',dates:'Based on your recorded dates',explore:'Explore your pregnancy',records:'Your care records',unknown:'Add dates in your profile'};
+    const pregnant=data.user.pregnancy_status==='pregnant'&&!stage.delivered;
+    const elapsed=pregnant&&data.user.lmp_date?M.days(today,data.user.lmp_date):NaN;
+    const gestation=Number.isFinite(elapsed)&&elapsed>=0?Math.floor(elapsed/7)+' '+g.week+' · '+elapsed%7+' '+g.day:g.unknown;
+    const edd=pregnant?(data.user.edd_date||stage.edd):null;
+    $('homePregnancyGlance').innerHTML='<div class="mr-glance-title"><span class="mr-glance-icon" aria-hidden="true">'+icon('heart')+'</span><h2>'+E(pregnant?g.title:g.journey)+'</h2></div><div class="mr-glance-facts"><div><strong translate="no">'+E(pregnant?gestation:stage.label)+'</strong><small>'+E(g.dates)+'</small></div>'+(edd?'<div><small>'+E(g.due)+'</small><strong translate="no">'+E(new Date(edd).toLocaleDateString(lang||'en',{day:'numeric',month:'short',year:'numeric',timeZone:'Asia/Kolkata'}))+'</strong></div>':'')+'</div><button type="button" data-mr-go="'+(pregnant?'pregnancy-mirror':'records')+'">'+E(pregnant?g.explore:g.records)+' ↗</button>';
+    const total=pregnant&&edd&&data.user.lmp_date?M.days(edd,data.user.lmp_date):NaN;
+    const progress=$('homePregnancyProgress');
+    progress.hidden=!(Number.isFinite(elapsed)&&Number.isFinite(total)&&total>0&&elapsed>=0);
+    if(!progress.hidden){
+      const passed=Math.min(total,elapsed),remaining=Math.max(0,M.days(edd,today)),percent=Math.round(passed/total*100);
+      progress.innerHTML='<div class="mr-progress-heading"><span>'+T('ONE DAY CLOSER','हर दिन थोड़ा और करीब')+'</span><h2>'+T('Your pregnancy journey','आपकी गर्भावस्था का सफ़र')+'</h2></div><div class="mr-progress-content"><div class="mr-progress-donut" style="--journey-percent:'+passed/total*100+'%" role="img" aria-label="'+E(percent+'% · '+gestation+' · '+remaining+' '+g.day)+'"><div><strong>'+percent+'%</strong><span>'+T('of your dated journey','तारीखों पर आधारित सफ़र')+'</span></div></div><div class="mr-progress-legend"><div><i class="mr-progress-swatch" aria-hidden="true"></i><span><small>'+T('Time elapsed','बीता समय')+'</small><strong translate="no">'+E(gestation)+'</strong></span></div><div><i class="mr-progress-swatch mr-progress-swatch--remaining" aria-hidden="true"></i><span><small>'+T('Until the expected date','अनुमानित तारीख तक')+'</small><strong translate="no">'+Math.floor(remaining/7)+' '+g.week+' · '+remaining%7+' '+g.day+'</strong></span></div><p>'+T('Every little day is part of your story.','हर छोटा दिन आपकी कहानी का हिस्सा है।')+'</p></div></div><p class="mr-progress-note">'+T('Date-based progress, not a measure of your baby’s health.','यह दर्ज तारीखों पर आधारित प्रगति है, बच्चे की सेहत का माप नहीं।')+'</p>';
+    }
     if($('shareJourney').parentElement!==$('motherMoreCare').querySelector('.mr-more-body'))$('motherMoreCare').querySelector('.mr-more-body').prepend($('shareJourney'));
     $('motherMoreCare').querySelector('summary span').textContent=T('More of your care · readings, appointments, vaccines & nearby care','आपकी और देखभाल · रीडिंग, अपॉइंटमेंट, टीके और नज़दीकी देखभाल');
     const journey=$('homeOpenJourney');

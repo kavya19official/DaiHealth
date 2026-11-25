@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS instant_consultations (
   mother_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   concern VARCHAR(1000) NOT NULL,
   category TEXT NOT NULL CHECK (category IN ('pregnancy', 'medication', 'report', 'general', 'other')),
-  language TEXT NOT NULL CHECK (language IN ('en', 'hi')),
+  language TEXT NOT NULL CHECK (language IN ('en', 'hi', 'mr')),
   emergency_warning BOOLEAN NOT NULL DEFAULT FALSE,
   consent_at TIMESTAMPTZ NOT NULL DEFAULT clock_timestamp(),
   status TEXT NOT NULL DEFAULT 'searching'
@@ -64,5 +64,8 @@ CREATE TABLE IF NOT EXISTS instant_consultation_records (
   recommended_facility_id INTEGER REFERENCES facilities(id),
   created_at TIMESTAMPTZ NOT NULL DEFAULT clock_timestamp()
 );
+
+ALTER TABLE instant_consultations DROP CONSTRAINT IF EXISTS instant_consultations_language_check;
+ALTER TABLE instant_consultations ADD CONSTRAINT instant_consultations_language_check CHECK (language IN ('en','hi','mr'));
 
 COMMIT;

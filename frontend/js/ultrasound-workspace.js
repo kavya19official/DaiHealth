@@ -276,11 +276,12 @@
   function renderAssessment(target, record) {
     const result = record.assessment;
     if (!result) return;
-    target.append(element('h3', record.demo_image ? 'Demo assessment' : 'AI analysis'));
-    if (record.demo_image) {
-      target.append(element('p',record.demo_teaching_frame
-        ? 'Teaching frame for a fictional patient. No AI analysis was run.'
-        : 'Preloaded demo record with scripted results.',{class:'uw-demo-note'}));
+    const liveDemo = record.demo_image && result.live_demo_analysis === true;
+    target.append(element('h3', liveDemo ? 'AI analysis · SonoNet16' : record.demo_image ? 'Demo assessment' : 'AI analysis'));
+    if (liveDemo) target.append(element('p',
+      'Live model output on a public demonstration frame. This is not Nivara’s diagnostic result.', {class:'uw-demo-note'}));
+    if (record.demo_image && !liveDemo) {
+      target.append(element('p',record.demo_teaching_frame ? 'Teaching frame for a fictional patient. No AI analysis was run.' : 'Preloaded demo record with scripted results.',{class:'uw-demo-note'}));
       return;
     }
     const start = Date.parse(result.started_at || record.created_at);
@@ -455,9 +456,12 @@
 
   function scanDetails(details, record, archived) {
     details.replaceChildren();
-    renderAssessment(details,record);
+    const analysis = element('details',null,{class:'uw-analysis-fold'});
+    analysis.append(element('summary','AI frame analysis'));
+    renderAssessment(analysis,record);
+    details.append(analysis);
     if (clinician && !record.processing) review(details, archived ? {...record, archived, note:record.review_note} : record);
-    if (record.report) report(details,record.report,'Released clinician report');
+    if (record.report) { const released=element('details',null,{class:'uw-report-fold'});released.append(element('summary','Released clinician report'));report(released,record.report,'Clinician report');details.append(released); }
     if (archived && record.decision) details.append(element('p','Recorded decision · ' + decisions[record.decision]));
     if (clinician || record.report || archived) return;
     details.append(element('h4','Doctor review status'), element('p', record.processing
@@ -598,10 +602,10 @@
       if (active !== generation) return;
       const refresh = button('Refresh scans', load);
       if (clinician) root.append(uploadForm([]));
-      root.append(refresh, element('h2','Scan history'));
+      const historyHeading=element('header',null,{class:'uw-history-heading'});historyHeading.append(element('h2','Scan history'),refresh);root.append(historyHeading,element('p','Open a scan to view its image, AI frame analysis and clinician feedback.',{class:'uw-history-intro'}));
       if (!data.items.length && !data.archived?.length) root.append(element('p','No scans are available yet.'));
       for (const [index,scan] of data.items.entries()) {
-        root.append(scanCard(scan,false,scan.id === latestUpload || index === 0));
+        root.append(scanCard(scan,false,scan.id === latestUpload));
       }
       for (const scan of data.archived || []) root.append(scanCard(scan,true));
       if (offset) root.append(button('Previous scans',()=>{offset=Math.max(0,offset-25);load();}));

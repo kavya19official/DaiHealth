@@ -81,7 +81,7 @@ function newChat(){
 }
 function mount(){
  if(!info)return false;
- const host=info.role==='doctor'?document.getElementById('docMessages'):document.getElementById('panel-settings');if(!host)return false;
+ const host=info.role==='doctor'?document.getElementById('docMessages'):document.getElementById('panel-care-messages');if(!host)return false;
  if(root&&host.contains(root))return true;
  root=document.createElement('section');root.id='demoCareMessages';root.className='cm-panel';
  root.innerHTML='<aside class="cm-sidebar"><header class="cm-inbox-title"><div><h2>Messages</h2><p data-cm-count></p></div><button type="button" class="cm-icon" data-cm-refresh aria-label="Refresh conversations">↻</button></header><button type="button" class="cm-new-button" data-cm-new>＋ New chat</button><label class="cm-search"><span aria-hidden="true">⌕</span><input type="search" data-cm-search aria-label="Search patients and messages" placeholder="Search conversations"></label><div class="cm-filters" role="group" aria-label="Conversation filter"><button type="button" data-cm-filter="all" aria-pressed="true">All chats</button><button type="button" data-cm-filter="unread" aria-pressed="false">Unread</button></div><nav class="cm-contacts" data-cm-list aria-label="Patient conversations"></nav><p class="cm-demo-note">Synthetic demo · connected care only</p></aside><div class="cm-chat"><header class="cm-chat-header"><button type="button" class="cm-icon cm-back" data-cm-back aria-label="Back to conversations">←</button><span class="cm-avatar" data-cm-chat-initials>DAI</span><div><h3 data-cm-chat-name>Your conversations</h3><p data-cm-chat-sub>Choose a patient to start</p></div></header><div class="cm-thread" data-cm-thread aria-label="Conversation messages" aria-live="off"></div><div class="cm-compose"><p role="status" aria-live="polite" data-cm-status></p><form hidden><label class="cm-visually-hidden" for="cmMessageInput">Your message</label><textarea id="cmMessageInput" rows="1" maxlength="2000" required placeholder="Type a message…"></textarea><button type="submit" data-cm-send aria-label="Send message">Send <span aria-hidden="true">➤</span></button></form><small>In-app messages · not an emergency channel</small></div></div>';
@@ -95,7 +95,7 @@ function mount(){
  root.addEventListener('click',e=>{const c=e.target.closest('[data-cm-peer]');if(c)choose(c.dataset.cmPeer);const f=e.target.closest('[data-cm-filter]');if(f){filter=f.dataset.cmFilter;root.querySelectorAll('[data-cm-filter]').forEach(b=>b.setAttribute('aria-pressed',String(b===f)));renderList();}if(e.target.closest('[data-cm-new]'))newChat();if(e.target.closest('[data-cm-refresh]'))refresh();if(e.target.closest('[data-cm-older]'))loadThread(true);if(e.target.closest('[data-cm-back]'))root.classList.remove('cm-chat-open');});
  renderList();renderHeader();renderMessages();return true;
 }
-window.DaiDemoMessages={mountDoctor:mount,refresh};
+window.DaiDemoMessages={mountDoctor:mount,refresh,async openDoctor(){document.querySelector('[data-panel=care-messages]')?.click();await refresh();const first=info?.contacts?.[0];if(first)choose(first.id);}};
 document.addEventListener('click',e=>{if(e.target.closest('[data-panel="messages"],[data-panel="settings"],[data-go="messages"]'))setTimeout(refresh,0);});
 window.addEventListener('hashchange',()=>{if(visible())refresh();});
 document.addEventListener('visibilitychange',()=>{if(visible())refresh();});

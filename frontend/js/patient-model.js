@@ -6,7 +6,8 @@ const iso=d=>new Date(d).toISOString().slice(0,10);
 const today=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Kolkata'}).format(new Date());
 const days=(a,b)=>Math.floor((Date.parse(String(a).slice(0,10)+'T00:00:00Z')-Date.parse(String(b).slice(0,10)+'T00:00:00Z'))/day);
 function stage(user={},post={},children=[],date=today()){
- if(post.active&&post.delivery?.date){const n=Math.max(0,days(date,post.delivery.date));return {label:n<=365?'Postpartum, day '+n:'Child care',detail:n<=42?'Recovery and postnatal follow-up':'Recovery and child care',progress:Math.min(100,n/42*100),delivered:true,edd:null,week:null};}
+ const earlierBirth=user.pregnancy_status==='pregnant'&&user.lmp_date&&post.delivery?.date&&days(user.lmp_date,post.delivery.date)>0;
+ if(post.active&&post.delivery?.date&&!earlierBirth){const n=Math.max(0,days(date,post.delivery.date));return {label:n<=365?'Postpartum, day '+n:'Child care',detail:n<=42?'Recovery and postnatal follow-up':'Recovery and child care',progress:Math.min(100,n/42*100),delivered:true,edd:null,week:null};}
  if(user.pregnancy_status==='delivered'||(!user.lmp_date&&!user.care_start_date&&children.length)){const birth=children[0]?.date_of_birth;return {label:birth?'Child care · '+Math.max(0,days(date,birth))+' days old':'After delivery',detail:'Your recovery and each child’s care',progress:100,delivered:true,edd:null,week:null};}
  const start=user.lmp_date||user.care_start_date;const n=start?days(date,start):NaN;const w=Number.isFinite(n)?Math.max(0,Math.floor(n/7)):null;
  if(user.pregnancy_status==='planning'||w===null)return {label:'Your care journey',detail:'Add your pregnancy dates in profile',progress:0,delivered:false,edd:null,week:null};

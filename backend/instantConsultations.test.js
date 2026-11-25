@@ -104,7 +104,9 @@ test('instant consultation dispatch, privacy, races, timeout, consent and releas
   await expect(availability(unknown,'available'),403);
   await expect(availability(first,'available'),200);
   await expect(availability(second,'available'),200);
-  const {id} = await expect(send(patient,'','POST',concern),202);
+  await expect(send(patient,'','POST',{...concern,language:'ta'}),400);
+  const {id} = await expect(send(patient,'','POST',{...concern,language:'mr'}),202);
+  assert.equal((await mine(patient,id)).language,'mr');
   assert.equal((await expect(send(patient,'','POST',concern),202)).id,id);
   const offered = await inbox(first);
   assert.equal(offered.offers[0].id,id);

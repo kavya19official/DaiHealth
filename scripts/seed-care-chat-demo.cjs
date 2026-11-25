@@ -7,7 +7,7 @@ async function seedCareChatDemo(client,{local=process.env.DAI_LOCAL==='true',dem
  if(!local||!demo)return {disabled:true};
  if((await client.query('SELECT 1 FROM dai_local_seed WHERE version=$1',[VERSION])).rows.length)return {alreadySeeded:true};
  const pair=(await client.query(`SELECT mp.user_id AS mother_id,dp.user_id AS doctor_id FROM mother_profiles mp
- JOIN users mu ON mu.id=mp.user_id AND mu.email='mother@dai-synthetic.invalid'
+ JOIN users mu ON mu.id=mp.user_id AND mu.email IN ('mother@dai-synthetic.invalid','nivara@dai-synthetic.invalid')
  JOIN dai_local_source_link ml ON ml.entity='mother' AND ml.target_id=mp.user_id AND ml.source_id='MOTHER-SYN-0000001'
  CROSS JOIN doctor_profiles dp JOIN users du ON du.id=dp.user_id AND du.email='doctor@dai-synthetic.invalid'
  JOIN dai_local_source_link dl ON dl.entity='doctor' AND dl.target_id=dp.user_id
