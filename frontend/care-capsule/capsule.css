@@ -129,3 +129,10 @@
 @media (max-width:520px){.cv-hero-img{display:none}.cv-paste div{flex-direction:column}.cv-patient{align-items:flex-start}}
 @media (prefers-reduced-motion:reduce){.cv-frame b,.cv-skeleton{animation:none}}
 @media print{.capsule-page .cv-top,.capsule-page .cv-hero,.capsule-page .cv-card,.cv-more{display:none!important}}
+
+.cv-patient { flex-wrap: wrap; }
+.cv-patient > p { margin: 0; }
+.cv-info dl { margin: 0; }
+.cv-info dt { font-weight: 600; }
+.cv-info dd { margin: .15rem 0 .7rem; white-space: pre-wrap; overflow-wrap: anywhere; }
+.cv-info dd:last-child { margin-bottom: 0; }

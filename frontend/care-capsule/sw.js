@@ -1,6 +1,6 @@
 'use strict';
 
-const cacheName = 'dai-care-capsule-shell-v6-redesign';
+const cacheName = 'dai-care-capsule-shell-v7-verified-details';
 const shell = '/care-capsule/index.html';
 const assets = [shell, "/shared/name-localization.js", "/js/i18n.js", "/i18n.css", "/locales/source.json", "/locales/hi.json", "/locales/mr.json", '/care-capsule/capsule.css', '/care-capsule/verify.js',
   '/care-capsule/verify-data.js', '/care-capsule/language.js', '/vendor/qr/jsQR.js', '/assets/logo-circle.png', '/assets/child-illustration.png', '/assets/mother-illustration.jpeg', '/vendor/three/examples/jsm/libs/fflate.module.js'];

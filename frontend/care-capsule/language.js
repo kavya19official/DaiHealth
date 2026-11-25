@@ -51,6 +51,19 @@ const hindi = {
   'Expires': 'वैधता समाप्ति',
   'This snapshot contains the fields chosen by the patient. Confirm identity and check for newer information when possible.':
     'इसमें मरीज़ की चुनी हुई जानकारी है। पहचान की पुष्टि करें और संभव हो तो नई जानकारी की जाँच करें।',
+  'Patient details': 'मरीज़ की जानकारी',
+  'Clinical essentials': 'ज़रूरी स्वास्थ्य जानकारी',
+  'Pregnancy and risk': 'गर्भावस्था और जोखिम',
+  'Recent history': 'हाल का स्वास्थ्य इतिहास',
+  'Date of birth': 'जन्म की तारीख',
+  'Previous pregnancy complications': 'पिछली गर्भावस्था की जटिलताएँ',
+  'Recent completed visits': 'हाल की पूरी हुई मुलाक़ातें',
+  'Latest recorded measurements': 'हाल के दर्ज माप',
+  'Blood pressure': 'रक्तचाप',
+  'Haemoglobin': 'हीमोग्लोबिन',
+  'Weight': 'वज़न',
+  'Blood glucose': 'रक्त शर्करा',
+  'For the full chart and original reports, sign in to the doctor workspace with patient sharing enabled.': 'पूरा स्वास्थ्य रिकॉर्ड और मूल रिपोर्ट देखने के लिए डॉक्टर के खाते में साइन इन करें। मरीज़ की अनुमति ज़रूरी है।',
   'Patient name': 'मरीज़ का नाम',
   'Recorded medical conditions': 'दर्ज स्वास्थ्य स्थितियाँ',
   'Recorded current medicines': 'वर्तमान में दर्ज दवाएँ',
@@ -90,6 +103,10 @@ export const locale = language => language === 'hi' ? 'hi-IN' : 'en-IN';
 
 export const fieldLabels = {
   patient_name: 'Patient name',
+  date_of_birth: 'Date of birth',
+  previous_complications: 'Previous pregnancy complications',
+  recent_visits: 'Recent completed visits',
+  latest_measurements: 'Latest recorded measurements',
   allergies: 'Recorded allergies',
   blood_group: 'Recorded blood group',
   medical_conditions: 'Recorded medical conditions',
@@ -102,7 +119,27 @@ export const fieldLabels = {
   recent_child_history: 'Recent recorded child health events'
 };
 
-export function fieldText(key, value, separator = '\n') {
+const measurements = {
+  bp: ['Blood pressure', 'mmHg'],
+  hb: ['Haemoglobin', 'g/dL'],
+  weight: ['Weight', 'kg'],
+  glucose: ['Blood glucose', 'mg/dL']
+};
+
+export function fieldText(key, value, separator = '\n', language = 'en') {
+  const formatDate = date => new Date(date + 'T00:00:00Z')
+    .toLocaleDateString(locale(language), { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+  if (key === 'date_of_birth' || key === 'expected_delivery') return formatDate(value);
+  if (key === 'recent_visits') {
+    return value.map(entry => [entry.title, formatDate(entry.date)].filter(Boolean).join(' · ')).join(separator);
+  }
+  if (key === 'latest_measurements') {
+    return value.map(entry => {
+      const [label, unit] = measurements[entry.metric];
+      const reading = Array.isArray(entry.value) ? entry.value.join('/') : entry.value;
+      return translate(language, label) + ' · ' + reading + ' ' + unit + ' · ' + formatDate(entry.date);
+    }).join(separator);
+  }
   if (key === 'vaccines') return value.map(entry => entry.code + ' · ' + entry.date).join(separator);
   if (key === 'recent_child_history') return value.map(entry => entry.title + ' · ' + entry.date).join(separator);
   if (key === 'risk_factors') return value.join(separator);
