@@ -92,7 +92,8 @@
     if(pending){$('nextStepTitle').textContent=pending.title;$('nextStepWhy').textContent=T('Your recorded care plan recommends a follow-up.','आपकी दर्ज देखभाल योजना में फॉलो-अप है।');}
     const months=stage.delivered&&validDate(data.post?.delivery?.date)?window.PatientHomeModel.age(data.post.delivery.date,today).months:null;
     $('nextStepBook').querySelector('span').textContent=T('Book appointment','अपॉइंटमेंट बुक करें');
-    if(months!==null)$('homeGreetingSub').textContent=T('You’re '+months+' '+(months===1?'month':'months')+' into your postpartum journey.','प्रसव के बाद आपके सफ़र के '+months+' महीने हो चुके हैं।');
+    const greetingSub=$('homeGreetingSub');greetingSub.className='';
+    if(months!==null)greetingSub.textContent=T('You’re '+months+' '+(months===1?'month':'months')+' into your postpartum journey.','प्रसव के बाद आपके सफ़र के '+months+' महीने हो चुके हैं।');
     const image=$('homeStageImage');
     if(stage.delivered&&(data.children||[]).length>=2){image.src='assets/patient/mother-twins-v1.png';image.alt=T('Illustration of a mother holding two babies','दो बच्चों को गोद में लिए माँ का चित्र');}
     $('homeBabyTabs').querySelectorAll('[data-home-child]').forEach((b,i)=>{const c=(data.children||[])[i];if(!c)return;const age=window.PatientHomeLayout.validBirthDate(c,today)?window.PatientHomeModel.age(c.date_of_birth,today):null;const name=/^CHILD-SYN-/.test(c.name||'')?T('Baby ','बच्चा ')+(i+1):c.name||T('Baby ','बच्चा ')+(i+1);b.innerHTML='<span class="mr-baby-avatar" aria-hidden="true">'+icon('baby')+'</span><span><strong>'+E(name)+'</strong><small>'+E(age?T(age.label,age.days+' दिन'):T('Age not recorded','उम्र दर्ज नहीं'))+'</small></span><span aria-hidden="true">›</span>';});

@@ -73,6 +73,20 @@ body[data-home-theme=dark] #panel-dashboard.open-home .home-next,body[data-home-
 #panel-dashboard.open-home #homeDevelopment h3{font-size:20px;max-width:220px;margin-bottom:12px;color:var(--ink)}
 #panel-dashboard.open-home #homeDevelopment p{font-size:11px;line-height:1.75;margin-bottom:12px}
 #panel-dashboard.open-home #homeDevelopment .oh-baby-art{position:absolute;right:-8px;top:16px;width:85px;height:100px;display:grid;place-items:center;font-size:53px;transform:rotate(5deg)}
+
+/* Patient Home keeps the complete family hero before the clinical workspace. */
+.clinical-home-ready #panel-dashboard.open-home>.home-hero-grid{display:grid}
+
+/* Balance the clinical workspace without pinning one column during scrolling. */
+@media(min-width:901px){
+  #panel-dashboard #clinicalDashboardHome .cg-right{display:contents}
+  #panel-dashboard #clinicalDashboardHome .cg-metrics-section{grid-column:2;grid-row:1;align-self:stretch;display:flex;flex-direction:column}
+  #panel-dashboard #clinicalDashboardHome .cg-metrics{flex:1;grid-auto-rows:1fr}
+  #panel-dashboard #clinicalDashboardHome .cg-metric{display:flex;flex-direction:column;justify-content:space-between}
+  #panel-dashboard #clinicalDashboardHome .cg-details-grid{grid-column:1/-1;grid-row:2;grid-template-columns:1fr}
+  #panel-dashboard #clinicalDashboardHome .cg-attention{grid-column:1/-1;grid-row:3}
+  #panel-dashboard #clinicalDashboardHome .cg-appointments{max-height:430px;overflow-y:auto;scrollbar-gutter:stable;padding-right:6px}
+}
 .oh-baby-art svg{width:80px;height:80px;filter:drop-shadow(0 6px 12px rgba(109,63,214,.08))}
 #panel-dashboard.open-home .oh-development-source{display:block;font-size:8px!important;color:var(--ink-muted)!important;margin-top:8px;line-height:1.6}
 .oh-baby-logs{border-top:1px solid var(--line);padding-top:11px;margin-top:12px}.oh-baby-logs>summary{font-size:10px;color:var(--brand);cursor:pointer;list-style:none;min-height:27px}

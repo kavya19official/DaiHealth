@@ -31,7 +31,8 @@
     root.classList.add('open-home');setupNavigation();
     const hero=root.querySelector('.home-hero-grid');hero.classList.add('oh-hero-band');
     const greeting=root.querySelector('.home-heading'),copy=root.querySelector('.home-journey-copy');
-    copy.prepend(greeting);greeting.querySelector('.eyebrow').hidden=true;
+    // Keep the complete family hero at the top, with its greeting inside the purple panel.
+    root.prepend(hero);copy.prepend(greeting);greeting.querySelector('.eyebrow').hidden=true;
     root.querySelector('#homeJourneyTitle').hidden=true;root.querySelector('#homeJourneyText').hidden=true;
     copy.querySelector('.home-kicker').hidden=true;
     const identity=document.createElement('div');identity.className='oh-baby-identity';identity.append($('homeJourneyProgress'),$('homeBabyTabs'));copy.append(identity,$('shareJourney'));
@@ -42,7 +43,7 @@
     const note=document.createElement('span');note.className='oh-photo-note';note.textContent='A little care. A world of possibility.';root.querySelector('.home-illustration').append(note);
     const top=section('homeOpenMain','oh-main-row','');
     top.append(section('homeOpenJourney','oh-open-section oh-journey',header('MY JOURNEY','Every step, connected.','Full timeline','timeline')+'<div class="oh-journey-meta" id="homeOpenCounts">Loading your recorded care plan…</div><div id="homeOpenTimeline" class="oh-timeline" aria-label="Recorded care milestones"></div><div class="oh-timeline-legend"><span class="oh-done">✓ Done</span><span class="oh-late">◷ To catch up</span><span>○ Upcoming</span></div><div class="oh-journey-foot"><span>Small steps. A continuous story of care.</span><button type="button" class="link-btn" data-oh-go="gaps">See what’s next →</button></div>'));
-    const developmentCard=$('homeDevelopmentCard'),babyLogs=$('homeBabyLogArea');const logs=document.createElement('details');logs.className='oh-baby-logs';logs.innerHTML='<summary>Feeding & sleep notes +</summary>';logs.append(babyLogs);developmentCard.append(logs);hero.after(top);
+    const developmentCard=$('homeDevelopmentCard'),babyLogs=$('homeBabyLogArea');const logs=document.createElement('details');logs.className='oh-baby-logs';logs.innerHTML='<summary>Feeding & sleep notes +</summary>';logs.append(babyLogs);developmentCard.append(logs);($('clinicalDashboardHome')||hero).after(top);
     const middle=section('homeOpenMiddle','oh-middle-row','');
     middle.append(section('homeOpenPending','oh-open-section oh-pending',header('A LITTLE ATTENTION','Your next little steps','All pending care','gaps')+'<div id="homeOpenPendingRows" class="oh-pending-rows"><p>Loading recorded items…</p></div>'));
     top.append(middle.firstElementChild);middle.append($('homeHealthCard'),developmentCard,$('homeAppointmentCard'));top.after(middle);
@@ -57,8 +58,10 @@
     document.addEventListener('focusin',e=>e.target.closest('.oh-dose-ring')?.classList.remove('tooltip-dismissed'));
     document.addEventListener('pointerleave',e=>e.target.classList?.remove('tooltip-dismissed'),true);
 
-    const extras=document.createElement('details');extras.id='patientPersonalTools';extras.className='oh-extras';extras.innerHTML='<summary><span>Personal tools</span><span>Journal · Check-ins · 3D viewer +</span></summary><div class="oh-extras-body"></div>';
-    extras.querySelector('div').append($('homeCheckinCard'),logs,$('homeJournalCard'),$('clinicalDashboardHome'));$('panel-settings').append(extras);
+    const extras=document.createElement('details');extras.id='patientPersonalTools';extras.className='oh-extras';extras.innerHTML='<summary><span>Personal tools</span><span>Journal · Check-ins +</span></summary><div class="oh-extras-body"></div>';
+    // Keep the interactive 3D clinical journey on the patient Home screen.
+    // Only the personal check-in, baby logs and journal belong in Settings.
+    extras.querySelector('div').append($('homeCheckinCard'),logs,$('homeJournalCard'));$('panel-settings').append(extras);
     extras.addEventListener('toggle',()=>window.dispatchEvent(new Event('resize')));
     const voice=document.createElement('button');voice.type='button';voice.className='oh-header-voice';voice.setAttribute('aria-label','Ask Dhruv by voice');voice.innerHTML='<svg aria-hidden="true"><use href="#i-mic"/></svg>';voice.onclick=()=>window.PatientExperience?.askDaya(null,'voice');root.querySelector('.home-display-controls').prepend(voice);
     const today=document.createElement('span');today.className='oh-today';today.textContent=new Date().toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short',timeZone:'Asia/Kolkata'});root.querySelector('.home-display-controls').prepend(today);
@@ -72,7 +75,9 @@
     const st=window.PatientModel.stage(state.user,state.post,state.children),next=relevant()[0],hi=document.documentElement.lang==='hi';
     const intro=$('panel-dashboard').querySelector('.patient-tour-welcome'),controls=$('panel-dashboard').querySelector('.home-display-controls');if(intro&&controls&&controls.parentElement!==intro)intro.append(controls);
     if($('shareJourney').parentElement!==$('homeJourneyProgress').parentElement)$('homeJourneyProgress').parentElement.append($('shareJourney'));
-    $('homeGreetingSub').textContent=hi?(!st.delivered?(st.week===null?'आपका देखभाल सफ़र':'गर्भावस्था · सप्ताह '+st.week):st.label.startsWith('Postpartum')?'प्रसव के बाद · दिन '+st.label.match(/\d+/)?.[0]:selectedChild?'बच्चा · '+window.PatientHomeModel.age(selectedChild.date_of_birth,window.PatientModel.today()).days+' दिन':'बच्चे की देखभाल'):st.label;$('homeGreetingSub').className='oh-stage-chip';const todayLabel=$('panel-dashboard').querySelector('.oh-today');if(todayLabel)todayLabel.textContent=new Date().toLocaleDateString(document.documentElement.lang||'en-IN',{weekday:'short',day:'numeric',month:'short',timeZone:'Asia/Kolkata'});if(st.delivered&&selectedChild&&!Display.validBirthDate(selectedChild,window.PatientModel.today())){$('homeGreetingSub').textContent=T('Child care','बच्चे की देखभाल');$('homeJourneyProgress').innerHTML='<span class="oh-missing-age">'+T('Age not recorded','उम्र दर्ज नहीं')+'</span>';}
+    const referenceHero=$('panel-dashboard').classList.contains('reference-home');
+    if(!referenceHero){$('homeGreetingSub').textContent=hi?(!st.delivered?(st.week===null?'आपका देखभाल सफ़र':'गर्भावस्था · सप्ताह '+st.week):st.label.startsWith('Postpartum')?'प्रसव के बाद · दिन '+st.label.match(/\d+/)?.[0]:selectedChild?'बच्चा · '+window.PatientHomeModel.age(selectedChild.date_of_birth,window.PatientModel.today()).days+' दिन':'बच्चे की देखभाल'):st.label;$('homeGreetingSub').className='oh-stage-chip';}
+    const todayLabel=$('panel-dashboard').querySelector('.oh-today');if(todayLabel)todayLabel.textContent=new Date().toLocaleDateString(document.documentElement.lang||'en-IN',{weekday:'short',day:'numeric',month:'short',timeZone:'Asia/Kolkata'});if(st.delivered&&selectedChild&&!Display.validBirthDate(selectedChild,window.PatientModel.today())){if(!referenceHero)$('homeGreetingSub').textContent=T('Child care','बच्चे की देखभाल');$('homeJourneyProgress').innerHTML='<span class="oh-missing-age">'+T('Age not recorded','उम्र दर्ज नहीं')+'</span>';}
     $('nextStepWhy').textContent=next?(hi?'आपकी दर्ज देखभाल में अगला कदम।':'The next item in your recorded care plan.'):(hi?'अपनी देखभाल का प्लान देखें।':'Review your recorded care plan.');
     const detail=$('homeNextDetails').querySelector('div');detail.textContent=next?.guidance||next?.why||(hi?'आगे की देखभाल अपनी टीम से तय करें।':'Discuss your next follow-up with your care team.');
     $('nextStepDirections').innerHTML='<svg aria-hidden="true"><use href="#i-arrow"/></svg>';
