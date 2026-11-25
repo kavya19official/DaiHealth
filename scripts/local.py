@@ -207,6 +207,12 @@ def dependencies(env=None):
 
 
 def prepare(env):
+    workspace_seed = env.get("DAI_SEED_WORKSPACE_FOUNDATION") == "true"
+    if workspace_seed and (
+        env.get("DAI_HOSTED_DEMO") == "true" or env.get("DAI_CONTAINER_DEMO") == "true" or
+        env.get("DAI_ULTRASOUND_ENABLED") != "true"
+    ):
+        raise RuntimeError("The workspace cohort requires the local synthetic launcher with ultrasound enabled.")
     if env.get("DAI_HOSTED_DEMO") != "true" and env.get("DAI_CONTAINER_DEMO") != "true":
         dependencies(env)
     if not (ROOT / "synthetic_data/output/dai.db").exists():
@@ -216,6 +222,11 @@ def prepare(env):
     run([PY, "-m", "hospital_portal.api.seed"], env=env)
     patient_env = env | {"DATABASE_URL": "", "DB_SSL": "false"}
     run(["node", ROOT / "scripts/seed-local.cjs"], env=patient_env)
+    if env.get("DAI_ULTRASOUND_ENABLED") == "true":
+        run([PY, ROOT / "scripts/seed-ultrasound-demo.py", "--manifest",
+             STATE / "clinical-foundation-ultrasound.json"], env=env)
+    if workspace_seed:
+        run([PY, "-m", "scripts.seed_workspace_foundation"], env=env)
     if not (ROOT / "hospital_portal/ml_service/artifacts/current.json").exists():
         run([PY, "-m", "hospital_portal.ml_service.train", "--persist"], env=env)
     else:

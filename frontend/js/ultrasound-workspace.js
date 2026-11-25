@@ -278,7 +278,9 @@
     if (!result) return;
     target.append(element('h3', record.demo_image ? 'Demo assessment' : 'AI analysis'));
     if (record.demo_image) {
-      target.append(element('p','Preloaded demo record with scripted results.',{class:'uw-demo-note'}));
+      target.append(element('p',record.demo_teaching_frame
+        ? 'Teaching frame for a fictional patient. No AI analysis was run.'
+        : 'Preloaded demo record with scripted results.',{class:'uw-demo-note'}));
       return;
     }
     const start = Date.parse(result.started_at || record.created_at);

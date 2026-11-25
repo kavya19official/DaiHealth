@@ -1,28 +1,38 @@
 'use strict';
 const fs=require('node:fs'),path=require('node:path');
 const config=require('./continuity-config.json');
+const {readClinicalRecords}=require('./clinicalRecords');
 const today=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Kolkata'}).format(new Date());
 const day=d=>(new Date(d+'T00:00:00Z').getUTCDay()+6)%7;
 const dateValid=d=>typeof d==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(d)&&!Number.isNaN(Date.parse(d+'T00:00:00Z'))&&new Date(d+'T00:00:00Z').toISOString().slice(0,10)===d;
 const minutes=s=>Number(s.slice(0,2))*60+Number(s.slice(3,5));
 const time=n=>String(Math.floor(n/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0');
 const fail=(message,status=400)=>Object.assign(new Error(message),{status});
-function openPortal(readOnly=true){const file=process.env.DAI_PORTAL_DB||path.join(__dirname,'../.local/portal.db');if(process.env.DAI_LOCAL!=='true'||!fs.existsSync(file))return null;const {DatabaseSync}=require('node:sqlite');const db=new DatabaseSync(file,{readOnly});if(!readOnly)db.exec('PRAGMA busy_timeout=3000');return db;}
+function openPortal(readOnly=true){const file=process.env.DAI_PORTAL_DB||path.join(__dirname,'../.local/portal.db');if(process.env.DAI_LOCAL!=='true'||!fs.existsSync(file))return null;const {DatabaseSync}=require('node:sqlite');const db=new DatabaseSync(file,{readOnly});db.exec('PRAGMA busy_timeout=5000');return db;}
 async function catalogue(pool,motherId){
- const base=(await pool.query('SELECT u.id,dp.full_name,dp.specialization,dp.facility_name FROM users u LEFT JOIN doctor_profiles dp ON dp.user_id=u.id WHERE u.role=\'doctor\' ORDER BY dp.full_name')).rows;
- const db=openPortal();if(!db)return {doctors:base.map(d=>({...d,sessions:[],booking_supported:false})),facilities:[],assigned_doctor_id:null};
+ const base=(await pool.query(`SELECT u.id,u.closed_at,dp.full_name,dp.specialization,dp.qualifications,dp.facility_name,
+   dp.credential_verified,dp.availability_status,dp.next_available_at,dp.data_label,
+   (SELECT a.facility_uuid FROM appointments a WHERE a.doctor_id=u.id AND a.facility_uuid IS NOT NULL ORDER BY a.id LIMIT 1) AS facility_id
+   FROM users u LEFT JOIN doctor_profiles dp ON dp.user_id=u.id WHERE u.role='doctor' AND u.closed_at IS NULL ORDER BY dp.full_name`)).rows;
+ const careTeam=(await pool.query('SELECT DISTINCT doctor_id,facility_uuid FROM appointments WHERE mother_id=$1 AND facility_uuid IS NOT NULL',[motherId])).rows;
+ const assigned=new Set(careTeam.map(row=>Number(row.doctor_id)));
+ const localDoctor=d=>{const next=d.next_available_at?new Date(d.next_available_at):null;const sessions=next&&!Number.isNaN(next.getTime())?[{day:(next.getUTCDay()+6)%7,start:config.fallback_session_start,end:config.fallback_session_end,kind:'ANC',room:'Synthetic callback clinic'}]:[];return {...d,next_available_at:next&&!Number.isNaN(next.getTime())?next.toISOString():null,portal_uuid:null,source_id:null,facility_id:d.facility_id||null,unit_id:null,unit_label:null,room:null,languages:['English','Hindi'],max_daily_patients:6,sessions,assigned:assigned.has(Number(d.id)),booking_supported:sessions.length>0,slot_minutes:config.request_window_minutes,slot_note:'Synthetic demonstration clinic window; not a live facility schedule.'};};
+ const db=openPortal();if(!db)return {doctors:base.map(localDoctor),facilities:[],assigned_doctor_id:base.find(d=>assigned.has(Number(d.id)))?.id||null};
  try{
-  if(!(await pool.query("SELECT to_regclass('public.dai_local_source_link') AS found")).rows[0]?.found)return {doctors:[],facilities:[]};
+  if(!(await pool.query("SELECT to_regclass('public.dai_local_source_link') AS found")).rows[0]?.found)return {doctors:base.map(localDoctor),facilities:[],assigned_doctor_id:base.find(d=>assigned.has(Number(d.id)))?.id||null};
   const links=(await pool.query("SELECT * FROM dai_local_source_link WHERE entity='doctor' OR (entity='mother' AND target_id=$1)",[motherId])).rows;
   const motherLink=links.find(x=>x.entity==='mother'),mother=motherLink?db.prepare('SELECT * FROM mother WHERE id=?').get(motherLink.portal_uuid):null;
   const facilities=db.prepare('SELECT id,name,tier,ownership,address,lat,lng,capabilities FROM facility').all().map(f=>({...f,registered:f.id===mother?.registered_facility_id,capabilities:JSON.parse(f.capabilities||'{}'),fee_status:'Confirm charges and eligibility with the centre',hours:'See the selected clinic session'})).sort((a,b)=>Number(b.registered)-Number(a.registered)||a.name.localeCompare(b.name));
   const doctors=[];
-  for(const d of base){const link=links.find(x=>x.entity==='doctor'&&x.target_id===d.id);if(!link)continue;const u=db.prepare('SELECT * FROM portal_user WHERE id=? AND verified=1').get(link.portal_uuid);if(!u)continue;const unit=u.unit_id?db.prepare('SELECT * FROM unit WHERE id=?').get(u.unit_id):null;
+  for(const d of base){
+   const link=links.find(x=>x.entity==='doctor'&&x.target_id===d.id);
+   if(!link){if(d.data_label==='Synthetic'&&d.credential_verified)doctors.push(localDoctor(d));continue;}
+   const u=db.prepare('SELECT * FROM portal_user WHERE id=? AND verified=1').get(link.portal_uuid);if(!u)continue;const unit=u.unit_id?db.prepare('SELECT * FROM unit WHERE id=?').get(u.unit_id):null;
    // Hospital configuration is the authority for unit days and rooms. Sessions are a demo booking window.
    const days=[...new Set([unit?.anc_day,unit?.gynae_day,unit?.opd_day].filter(x=>Number.isInteger(x)))];
    const sessions=days.map(weekday=>({day:weekday,start:config.fallback_session_start,end:config.fallback_session_end,kind:weekday===unit?.anc_day?'ANC':weekday===unit?.gynae_day?'Gynaecology':'Paediatrics',room:unit?.room||null}));
    let languages=[],maxDaily=null;const sourceFile=path.resolve(process.env.DAI_HOSPITAL_DB||path.join(__dirname,'data/dai-hospital.db'));if(fs.existsSync(sourceFile)){const {DatabaseSync}=require('node:sqlite'),source=new DatabaseSync(sourceFile,{readOnly:true});try{const recorded=source.prepare('SELECT day,start_time,end_time FROM doctor_schedules WHERE doctor_id=? AND is_on_call=0').all(u.source_id);for(const session of sessions){const match=recorded.find(r=>r.day===session.day);if(match){session.start=match.start_time;session.end=match.end_time;}}if(source.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='doctors'").get()){const profile=source.prepare('SELECT languages_spoken,max_daily_patients FROM doctors WHERE doctor_id=?').get(u.source_id);if(profile){try{languages=JSON.parse(profile.languages_spoken);}catch{languages=String(profile.languages_spoken||'').split(',').filter(Boolean);}maxDaily=profile.max_daily_patients;}}}finally{source.close();}}
-   doctors.push({...d,portal_uuid:u.id,source_id:u.source_id,facility_id:u.facility_id,unit_id:u.unit_id,unit_label:unit?.code||null,room:unit?.room||null,languages,max_daily_patients:maxDaily,sessions,assigned:u.id===mother?.assigned_doctor_id,booking_supported:sessions.length>0,slot_minutes:config.request_window_minutes,slot_note:config.assumptions});
+   doctors.push({...d,next_available_at:d.next_available_at instanceof Date?d.next_available_at.toISOString():d.next_available_at||null,portal_uuid:u.id,source_id:u.source_id,facility_id:u.facility_id,unit_id:u.unit_id,unit_label:unit?.code||null,room:unit?.room||null,languages,max_daily_patients:maxDaily,sessions,assigned:assigned.has(Number(d.id))||u.id===mother?.assigned_doctor_id,booking_supported:sessions.length>0,slot_minutes:config.request_window_minutes,slot_note:config.assumptions});
   }
   doctors.sort((a,b)=>Number(b.assigned)-Number(a.assigned)||Number(b.facility_id===mother?.registered_facility_id)-Number(a.facility_id===mother?.registered_facility_id)||a.full_name.localeCompare(b.full_name));
   return {doctors,facilities,assigned_doctor_id:doctors.find(d=>d.assigned)?.id||null,data_label:'Simulated on synthetic data',slot_assumptions:config};
@@ -66,18 +76,63 @@ async function syncBridge(pool){
   for(const a of rows){if(!a.facility_uuid)continue;const version=String(a.updated_at);upsert.run('patient:'+a.id,a.mother_source_id,a.facility_uuid,a.unit_uuid,a.doctor,String(a.requested_date).slice(0,10),a.requested_time?.slice(0,5)||'',a.slot_end?.slice(0,5)||'',a.reason||'',a.status,version);await pool.query('UPDATE patient_hospital_outbox SET synced_at=NOW() WHERE appointment_id=$1 AND updated_at<=$2',[a.id,a.outbox_version]);}
  }finally{db.close();}
 }
+async function readVisits(pool, motherId) {
+  const { rows } = await pool.query(`
+    SELECT a.id AS appointment_id, to_char(a.requested_date,'YYYY-MM-DD') AS visit_date,
+      CASE WHEN a.requested_date >= m.lmp_date THEN (a.requested_date - m.lmp_date) / 7 END AS gestational_week_at_visit,
+      d.full_name AS doctor, d.facility_name AS facility, d.credential_verified AS doctor_verified,
+      m.height_cm, e.id AS observation_id, e.source_kind, e.values_json,
+      s.summary_text, s.follow_up, s.pending_tests
+    FROM appointments a
+    JOIN mother_profiles m ON m.user_id=a.mother_id
+    JOIN doctor_profiles d ON d.user_id=a.doctor_id
+    JOIN clinical_dashboard_entries e
+      ON e.appointment_id=a.id AND e.mother_id=a.mother_id AND e.doctor_id=a.doctor_id
+      AND e.recorded_on=a.requested_date
+    LEFT JOIN visit_summaries s ON s.appointment_id=a.id AND s.mother_id=a.mother_id
+      AND s.doctor_id=a.doctor_id AND s.status='approved'
+    WHERE a.mother_id=$1 AND a.status='completed'
+    ORDER BY a.requested_date DESC, a.id DESC, e.id ASC`, [motherId]);
+  const visits = new Map();
+  const fields = ['bp_systolic','bp_diastolic','weight_kg','hb','fundal_height_cm','fetal_heart_rate',
+    'pulse','temperature_c','spo2_percent','glucose_mg_dl'];
+  for (const row of rows) {
+    const visit = visits.get(row.appointment_id) || {
+      appointment_id:row.appointment_id, visit_date:row.visit_date,
+      gestational_week_at_visit:row.gestational_week_at_visit, doctor:row.doctor,
+      doctor_verified:row.doctor_verified, facility:row.facility,
+      summary_text:row.summary_text, follow_up:row.follow_up, pending_tests:row.pending_tests,
+      observation_ids:[], height_cm:row.height_cm ? Number(row.height_cm) : null,
+    };
+    visit.observation_ids.push(row.observation_id);
+    for (const field of fields) {
+      if (typeof row.values_json?.[field] === 'number') visit[field] = row.values_json[field];
+    }
+    visits.set(row.appointment_id,visit);
+  }
+  return [...visits.values()].map(visit => ({...visit,
+    bmi:visit.weight_kg != null && visit.height_cm > 0 ?
+      Number((visit.weight_kg / (visit.height_cm / 100) ** 2).toFixed(1)) : null,
+  }));
+}
+
 async function readRecords(pool,id){
- const profile=(await pool.query('SELECT full_name,blood_group,allergies,medical_conditions,current_medications,previous_complications,emergency_contact_name,emergency_contact_phone,lmp_date,edd_date,gravida,parity FROM mother_profiles WHERE user_id=$1',[id])).rows[0]||{};
- const db=openPortal(),clinical={visits:[],delivery:null,outcomes:[],babies:[],clinician_status:null};
+ const [profile,clinicalRecords]=await Promise.all([
+  pool.query('SELECT full_name,date_of_birth,height_cm,pre_pregnancy_weight_kg,blood_group,allergies,medical_conditions,current_medications,previous_complications,obstetric_history,emergency_contact_name,emergency_contact_phone,lmp_date,edd_date,gravida,parity,risk_level,risk_factors,data_label FROM mother_profiles WHERE user_id=$1',[id]).then(r=>r.rows[0]||{}),
+  readClinicalRecords(pool,id)
+ ]);
+ for(const key of ['date_of_birth','lmp_date','edd_date'])if(profile[key])profile[key]=String(profile[key]).slice(0,10);
+ const db=openPortal(),clinical={visits:[],delivery:null,outcomes:[],babies:[],clinician_status:null,anc_visits:clinicalRecords.anc_visits,investigations:clinicalRecords.investigations,observations:clinicalRecords.observations,ledger_provenance:clinicalRecords.provenance};let importedSource=false;
  if(db)try{const found=(await pool.query("SELECT to_regclass('public.dai_local_source_link') AS found")).rows[0]?.found;const link=found?(await pool.query("SELECT * FROM dai_local_source_link WHERE entity='mother' AND target_id=$1",[id])).rows[0]:null;const mother=link?db.prepare('SELECT * FROM mother WHERE id=?').get(link.portal_uuid):null;
-  if(mother){const marked=mother.validated_by?db.prepare('SELECT name,verified FROM portal_user WHERE id=?').get(mother.validated_by):null;if(mother.clinician_high_risk&&marked?.verified)clinical.clinician_status={doctor:marked.name,reason:mother.high_risk_reason_by_clinician};const childLinks=(await pool.query("SELECT source_id,target_id FROM dai_local_source_link WHERE entity='child'")).rows;clinical.blood_group=mother.blood_group;clinical.babies=db.prepare('SELECT source_id,birth_order,details FROM child WHERE mother_id=? ORDER BY birth_order').all(mother.id).map(c=>({...c,local_child_id:childLinks.find(x=>x.source_id===c.source_id)?.target_id||null,details:JSON.parse(c.details||'{}')}));
+  if(mother){importedSource=true;const marked=mother.validated_by?db.prepare('SELECT name,verified FROM portal_user WHERE id=?').get(mother.validated_by):null;if(mother.clinician_high_risk&&marked?.verified)clinical.clinician_status={doctor:marked.name,reason:mother.high_risk_reason_by_clinician};const childLinks=(await pool.query("SELECT source_id,target_id FROM dai_local_source_link WHERE entity='child'")).rows;clinical.blood_group=mother.blood_group;clinical.babies=db.prepare('SELECT source_id,birth_order,details FROM child WHERE mother_id=? ORDER BY birth_order').all(mother.id).map(c=>({...c,local_child_id:childLinks.find(x=>x.source_id===c.source_id)?.target_id||null,details:JSON.parse(c.details||'{}')}));
    const sourceFile=path.resolve(process.env.DAI_HOSPITAL_DB||path.join(__dirname,'data/dai-hospital.db'));if(fs.existsSync(sourceFile)){const {DatabaseSync}=require('node:sqlite'),s=new DatabaseSync(sourceFile,{readOnly:true});try{
     clinical.visits=s.prepare('SELECT a.visit_date,a.gestational_week_at_visit,a.bp_systolic,a.bp_diastolic,a.weight_kg,a.hb,a.fundal_height_cm,d.name doctor,h.name facility FROM anc_visits a JOIN pregnancies p USING(pregnancy_id) JOIN doctors d USING(doctor_id) JOIN hospitals h ON h.hospital_id=a.hospital_id WHERE p.mother_id=? ORDER BY a.visit_date DESC').all(mother.source_id);
     clinical.outcomes=s.prepare('SELECT d.delivered_at,d.mode,d.complications,d.discharged_at,h.name hospital FROM delivery_records d JOIN pregnancies p USING(pregnancy_id) JOIN hospitals h ON h.hospital_id=d.hospital_id WHERE p.mother_id=? ORDER BY d.delivered_at DESC LIMIT 20').all(mother.source_id);clinical.delivery=clinical.outcomes[0]||null;
    }finally{s.close();}}
   }
  }finally{db.close();}
- return {profile,clinical,data_label:'Simulated on synthetic data',provenance:'Clinical source records and separately labelled profile entries. Unknown values are not inferred.'};
+ clinical.visits=[...await readVisits(pool,id),...clinical.visits].sort((a,b)=>String(b.visit_date||'').localeCompare(String(a.visit_date||'')));
+ return {profile,clinical,data_label:profile.data_label||(importedSource?'Simulated on synthetic data':null),provenance:'Clinical source records and separately labelled profile entries. Unknown values are not inferred.'};
 }
 module.exports=function registerContinuity(app,{pool,authenticateToken,authorizeRole}){
  const own=[authenticateToken,authorizeRole(['mother'])];
@@ -90,4 +145,4 @@ module.exports=function registerContinuity(app,{pool,authenticateToken,authorize
  }catch(e){res.status(500).json({error:'Could not load appointment windows'});}});
  app.get('/api/patient/records',...own,async(req,res)=>{try{const records=await readRecords(pool,req.user.id);await pool.query("INSERT INTO patient_access_events(mother_id,event_type,details) VALUES($1,'self_records_view','{}')",[req.user.id]);res.set('Cache-Control','no-store').json(records);}catch(e){console.error('Records:',e.message);res.status(500).json({error:'Could not load your records'});}});
 };
-Object.assign(module.exports,{catalogue,validateBooking,queueBridge,syncBridge,readRecords,dateValid,sessionFor});
+Object.assign(module.exports,{catalogue,validateBooking,queueBridge,syncBridge,readRecords,readVisits,dateValid,sessionFor});

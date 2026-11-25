@@ -10,15 +10,15 @@ function clinicalSnapshot(visits,limit=2){
   {type:'haemoglobin',unit:'g/dL',field:'hb'}
  ].map(metric=>{
   const rows=valid.filter(v=>v[metric.field]!=null).slice(0,limit);
-  return {...metric,readings:rows.map(v=>({value:Number(v[metric.field]),diastolic:metric.type==='blood_pressure'?Number(v.bp_diastolic):undefined,date:v.visit_date,doctor:v.doctor_name,source:'clinician_record'}))};
- }).concat([{type:'blood_glucose',unit:'mg/dL',readings:[]}]);
+  return {...metric,readings:rows.map(v=>({value:Number(v[metric.field]),diastolic:metric.type==='blood_pressure'&&v.bp_diastolic!=null?Number(v.bp_diastolic):undefined,date:v.visit_date,doctor:v.doctor_name,source:'clinician_record'}))};
+ }).concat([{type:'blood_glucose',unit:'mg/dL',readings:valid.filter(v=>v.glucose_mg_dl!=null).slice(0,limit).map(v=>({value:v.glucose_mg_dl,date:v.visit_date,doctor:v.doctor_name,source:'clinician_record'}))}]);
 }
 function sourceOverview(link,limit=2){
  const portal=path.resolve(__dirname,'../.local/portal.db'),source=path.resolve(process.env.DAI_HOSPITAL_DB||path.join(__dirname,'data/dai-hospital.db'));
  if(!link||!fs.existsSync(portal)||!fs.existsSync(source))return null;
  const {DatabaseSync}=require('node:sqlite');let p,s;
  try{
-  p=new DatabaseSync(portal,{readOnly:true});s=new DatabaseSync(source,{readOnly:true});
+  p=new DatabaseSync(portal,{readOnly:true});p.exec('PRAGMA busy_timeout=5000');s=new DatabaseSync(source,{readOnly:true});
   const mother=p.prepare('SELECT * FROM mother WHERE id=?').get(link.portal_uuid);if(!mother)return null;
   const staff=p.prepare("SELECT source_id,name FROM portal_user WHERE verified=1 AND role IN ('consultant','resident','hospital_admin')").all();
   const verified=new Set(staff.map(d=>d.source_id));
@@ -43,8 +43,13 @@ module.exports=function registerPatientExperience(app,{pool,authenticateToken,au
     source=sourceOverview(link);
     if(source?.assigned_doctor_uuid){const row=(await pool.query("SELECT target_id FROM dai_local_source_link WHERE entity='doctor' AND portal_uuid=$1",[source.assigned_doctor_uuid])).rows[0];source.assigned_doctor_id=row?.target_id||null;delete source.assigned_doctor_uuid;}
    }
+   const linkedVisits = await require('./patientContinuity').readVisits(pool,req.user.id);
+   const recorded = clinicalSnapshot(linkedVisits.map(v=>({...v,doctor_id:true,doctor_name:v.doctor})));
+   const metrics = recorded.map(m => ({...m,readings:[...m.readings,
+      ...(source?.metrics.find(x=>x.type===m.type)?.readings || [])]
+      .sort((a,b)=>b.date.localeCompare(a.date)).slice(0,2)}));
    await pool.query("INSERT INTO patient_access_events(mother_id,event_type,details) VALUES($1,'self_view','{}')",[req.user.id]);
-   res.set('Cache-Control','no-store').json(source||{metrics:clinicalSnapshot([]),clinician_status:null,registered_facility:null,facilities:[]});
+   res.set('Cache-Control','no-store').json({...{clinician_status:null,registered_facility:null,facilities:[]},...source,metrics});
   }catch(e){console.error('Patient overview:',e.message);res.status(500).json({error:'Could not load clinician-shared information'});}
  });
  app.patch('/api/patient/appointments/:id',...own,async(req,res)=>{
@@ -77,10 +82,10 @@ module.exports=function registerPatientExperience(app,{pool,authenticateToken,au
  });
  app.get('/api/patient/export',...own,async(req,res)=>{
   try{
-   const [profile,timeline,appointments,children,health,documents,checkins,journal,babyLogs,support,clinicalEntries,clinicalPlan,clinicalConsent,clinicalAdherence]=await Promise.all([
-    pool.query('SELECT * FROM mother_profiles WHERE user_id=$1',[req.user.id]),pool.query('SELECT * FROM care_milestones WHERE mother_id=$1',[req.user.id]),pool.query('SELECT * FROM appointments WHERE mother_id=$1',[req.user.id]),pool.query('SELECT * FROM children WHERE mother_id=$1',[req.user.id]),pool.query('SELECT * FROM health_logs WHERE mother_id=$1',[req.user.id]),pool.query('SELECT id,title,doc_type,uploaded_at,verification_status FROM patient_documents WHERE mother_id=$1 AND deleted_at IS NULL',[req.user.id]),pool.query('SELECT check_date,tasks,mood FROM patient_daily_checkins WHERE mother_id=$1',[req.user.id]),pool.query('SELECT * FROM patient_journal WHERE mother_id=$1',[req.user.id]),pool.query('SELECT * FROM patient_baby_logs WHERE mother_id=$1',[req.user.id]),pool.query('SELECT * FROM patient_support_progress WHERE mother_id=$1',[req.user.id]),pool.query('SELECT * FROM clinical_dashboard_entries WHERE mother_id=$1',[req.user.id]),pool.query('SELECT * FROM clinical_dashboard_plan WHERE mother_id=$1',[req.user.id]),pool.query('SELECT * FROM clinical_dashboard_consent WHERE mother_id=$1',[req.user.id]),pool.query('SELECT * FROM clinical_dashboard_adherence WHERE mother_id=$1',[req.user.id])]);
+   const [profile,timeline,appointments,children,health,documents,checkins,journal,babyLogs,support,clinicalEntries,clinicalPlan,clinicalConsent,clinicalAdherence,ancVisits,investigations]=await Promise.all([
+    pool.query('SELECT * FROM mother_profiles WHERE user_id=$1',[req.user.id]),pool.query('SELECT * FROM care_milestones WHERE mother_id=$1',[req.user.id]),pool.query('SELECT * FROM appointments WHERE mother_id=$1',[req.user.id]),pool.query('SELECT * FROM children WHERE mother_id=$1',[req.user.id]),pool.query('SELECT * FROM health_logs WHERE mother_id=$1',[req.user.id]),pool.query('SELECT id,title,doc_type,uploaded_at,verification_status FROM patient_documents WHERE mother_id=$1 AND deleted_at IS NULL',[req.user.id]),pool.query('SELECT check_date,tasks,mood FROM patient_daily_checkins WHERE mother_id=$1',[req.user.id]),pool.query('SELECT * FROM patient_journal WHERE mother_id=$1',[req.user.id]),pool.query('SELECT * FROM patient_baby_logs WHERE mother_id=$1',[req.user.id]),pool.query('SELECT * FROM patient_support_progress WHERE mother_id=$1',[req.user.id]),pool.query('SELECT * FROM clinical_dashboard_entries WHERE mother_id=$1',[req.user.id]),pool.query('SELECT * FROM clinical_dashboard_plan WHERE mother_id=$1',[req.user.id]),pool.query('SELECT * FROM clinical_dashboard_consent WHERE mother_id=$1',[req.user.id]),pool.query('SELECT * FROM clinical_dashboard_adherence WHERE mother_id=$1',[req.user.id]),pool.query('SELECT * FROM anc_visits WHERE mother_id=$1 ORDER BY visit_date DESC,id DESC',[req.user.id]),pool.query('SELECT * FROM clinical_investigations WHERE mother_id=$1 ORDER BY COALESCE(resulted_on,collected_on) DESC NULLS LAST,id DESC',[req.user.id])]);
    await pool.query("INSERT INTO patient_access_events(mother_id,event_type) VALUES($1,'data_export')",[req.user.id]);
-   res.set({'Cache-Control':'no-store','Content-Disposition':'attachment; filename="dai-my-records.json"'}).json({exported_at:new Date().toISOString(),profile:profile.rows[0],timeline:timeline.rows,appointments:appointments.rows,children:children.rows,self_entered_health_logs:health.rows,documents:documents.rows,personal_checkins:checkins.rows,journal:journal.rows,baby_logs:babyLogs.rows,support_checklists:support.rows,clinical_entries:clinicalEntries.rows,clinical_plan:clinicalPlan.rows,clinical_summary_consent:clinicalConsent.rows,clinical_adherence:clinicalAdherence.rows,document_files:'Download individual documents from Reports and records.'});
+   res.set({'Cache-Control':'no-store','Content-Disposition':'attachment; filename="dai-my-records.json"'}).json({exported_at:new Date().toISOString(),profile:profile.rows[0],timeline:timeline.rows,appointments:appointments.rows,children:children.rows,self_entered_health_logs:health.rows,documents:documents.rows,personal_checkins:checkins.rows,journal:journal.rows,baby_logs:babyLogs.rows,support_checklists:support.rows,clinical_entries:clinicalEntries.rows,clinical_plan:clinicalPlan.rows,clinical_summary_consent:clinicalConsent.rows,clinical_adherence:clinicalAdherence.rows,anc_visits:ancVisits.rows,clinical_investigations:investigations.rows,document_files:'Download individual documents from Reports and records.'});
   }catch(e){res.status(500).json({error:'Could not export your records'});}
  });
  app.post('/api/patient/deletion-request',...own,async(req,res)=>{

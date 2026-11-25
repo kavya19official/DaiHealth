@@ -32,3 +32,11 @@ CREATE TABLE IF NOT EXISTS clinical_dashboard_adherence (
  done BOOLEAN NOT NULL,
  PRIMARY KEY(mother_id,plan_id,log_date)
 );
+
+-- Optional provenance for an ANC observation recorded during a completed visit.
+ALTER TABLE clinical_dashboard_entries
+  ADD COLUMN IF NOT EXISTS appointment_id INTEGER REFERENCES appointments(id) ON DELETE SET NULL;
+CREATE INDEX IF NOT EXISTS clinical_dashboard_entries_appointment
+  ON clinical_dashboard_entries(appointment_id) WHERE appointment_id IS NOT NULL;
+
+ALTER TABLE doctor_profiles ADD COLUMN IF NOT EXISTS qualification TEXT;

@@ -366,6 +366,8 @@ def scan_batch(engine, demo, cursor=None, limit=125, today=None, include_ultraso
             mid = m["id"]
             simulated = demo and m["consent_flags"].get("synthetic_demo") is True
             as_of = day(manifest["as_of_date"]) if simulated and manifest else None if simulated else today
+            if simulated and (m["source_id"] or "").startswith("foundation-mother-"):
+                as_of = day(m["details"].get("workspace_snapshot_date"))
             if as_of is None:
                 continue
             profile = pregnancy(m, synthetic.get(mid, {}), as_of)

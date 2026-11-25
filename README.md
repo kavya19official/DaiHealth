@@ -90,6 +90,8 @@ Later runs reuse all of that and start much faster.
 
 ---
 
+The optional [Doctor Workspace foundation cohort](docs/DOCTOR-WORKSPACE-FOUNDATION.md) adds twelve longitudinal synthetic cases and four assigned clinicians to the existing local app.
+
 ## Video demo rehearsal
 
 Run `npm run demo` for optional, clearly labelled synthetic video fixtures. Open

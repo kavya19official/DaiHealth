@@ -7,9 +7,7 @@ const { DatabaseSync } = require('node:sqlite');
 const { createLocalPool } = require('../backend/localPool');
 const bcrypt = require('../backend/node_modules/bcrypt');
 const ROOT = path.join(__dirname, '..');
-const migrations = ['auth_and_wellness.sql', 'care_timeline_and_appointments.sql', 'mother_dashboard.sql', 'antenatal_profile.sql', 'child_dashboard.sql', 'child_dashboard_v2.sql', 'child_health_v3.sql', 'hospital_platform.sql', 'patient_preferences.sql', 'patient_documents.sql', 'care_extensions_v4.sql', 'facility_discovery.sql', 'referral_continuity.sql', 'patient_experience.sql', 'patient_home.sql', 'patient_continuity.sql', 'access_matching.sql', 'patient_support.sql', 'clinical_dashboard.sql', 'birth_readiness.sql', 'document_intake_offline.sql', 'missed_care_outreach.sql', 'green_hospital_dashboard.sql', 'smart_referral_handoff.sql', 'doctor_operations.sql', 'facility_freshness.sql', 'patient_ml.sql', 'patient_access_controls.sql', 'follow_through.sql', 'privacy_analytics.sql', 'privacy_analytics_snapshots.sql', 'demo_care_messages.sql', 'visit_summaries.sql', 'clinical_review_requests.sql', 'ai_usage.sql', 'care_coordination.sql', 'clinician_report_uploads.sql', 'hospital_stay.sql', 'care_step_workflow.sql', 'timeline_history.sql', 'timeline_location_consent.sql', 'timeline_push.sql', 'postpartum_infant_tracking.sql', 'patient_report_birth.sql', 'child_development.sql', 'connected_care.sql', 'family_circle.sql', 'didi_voice.sql', 'care_scan.sql', 'consent_audit.sql', 'consent_audit_hardening.sql', 'patient_daily_tracking.sql', 'email_signup.sql', 'daicare.sql', 'golden_hour.sql', 'sukoon.sql', 'clinical_history_consent.sql', 'care_message_reads.sql', 'care_workbench.sql', 'care_capsules.sql', 'pregnancy_library.sql', 'instant_consultations.sql'];
-// Reference data (Delhi facility directory). Kept apart from `migrations` so tests that build a bare schema stay small.
-const directories = ['delhi_directory.sql'];
+const { migrations, directories } = require('./seed-local.cjs');
 
 async function seedLocal() {
   if (process.env.DAI_LOCAL !== 'true' || path.resolve(process.env.DAI_LOCAL_DB_DIR || '') !== path.join(ROOT,'.local/patient-db')) throw new Error('Local seed is restricted to the launcher-managed local database.');
@@ -48,8 +46,8 @@ async function seedLocal() {
       console.log('Patient/doctor cohort already imported:', previous.rows[0].counts);
       return;
     }
-    const mothers = source.prepare('SELECT m.*,p.name FROM mother m JOIN patient p ON p.id=m.patient_id ORDER BY m.source_id').all();
-    const doctors = source.prepare("SELECT u.*, f.name AS facility_name FROM portal_user u JOIN facility f ON f.id=u.facility_id WHERE u.source_id NOT LIKE 'demo:%' ORDER BY u.source_id").all();
+    const mothers = source.prepare("SELECT m.*,p.name FROM mother m JOIN patient p ON p.id=m.patient_id WHERE m.source_id NOT LIKE 'foundation-mother-%' ORDER BY m.source_id").all();
+    const doctors = source.prepare("SELECT u.*, f.name AS facility_name FROM portal_user u JOIN facility f ON f.id=u.facility_id WHERE u.source_id NOT LIKE 'demo:%' AND u.source_id NOT LIKE 'foundation-doctor-%' ORDER BY u.source_id").all();
     const children = source.prepare('SELECT c.*,p.name FROM child c JOIN patient p ON p.id=c.patient_id ORDER BY c.source_id').all();
     const defaultDoctor = mothers[0].assigned_doctor_id;
     const hash = await bcrypt.hash(process.env.DAI_DEMO_PASSWORD, 10);

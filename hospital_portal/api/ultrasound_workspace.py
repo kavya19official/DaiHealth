@@ -75,6 +75,8 @@ def safe_record(row, role):
         processing=processing,
         demo_image=bool(((row["analysis"] or {}).get("measurements") or {}).get("demo")),
     )
+    if (analysis.get("measurements") or {}).get("teaching_frame") is True:
+        record["demo_teaching_frame"] = True
     if (analysis.get("state") == "model_unavailable" and record["image_available"]
             and not row["reviewed_at"] and not released and not record["demo_image"]):
         record["retry_revision"] = row["revision"]

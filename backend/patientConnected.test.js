@@ -1,10 +1,10 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs'),path=require('node:path');
 const M=require('../frontend/js/patient-model'),Child=require('../shared/child-reference');
-function view(){const timers=[];const roots=Object.fromEntries(['connectedAppointments','connectedRecords','connectedReportArea','reportsDocsList'].map(id=>[id,{innerHTML:'',hidden:false}])),events={};
- const records={profile:{full_name:'SYNTHETIC Mother <img>'},clinical:{visits:[],babies:[{local_child_id:12,birth_order:2,details:{birth_weight_g:2400,apgar_1min:8,apgar_5min:9}},{local_child_id:11,birth_order:1,details:{birth_weight_g:2100,apgar_1min:7,apgar_5min:8}}]}};
+function view(recordsOverride){const timers=[];const roots=Object.fromEntries(['connectedAppointments','connectedRecords','connectedReportArea','reportsDocsList'].map(id=>[id,{innerHTML:'',hidden:false}])),events={};
+ const records=recordsOverride||{profile:{full_name:'SYNTHETIC Mother <img>'},clinical:{visits:[],babies:[{local_child_id:12,birth_order:2,details:{birth_weight_g:2400,apgar_1min:8,apgar_5min:9}},{local_child_id:11,birth_order:1,details:{birth_weight_g:2100,apgar_1min:7,apgar_5min:8}}]}};
  const document={hidden:false,querySelector:()=>null,getElementById:id=>roots[id]||null,documentElement:{lang:'en'},addEventListener:(type,fn)=>events[type]=fn};
- const window={PatientAppointmentsModel:require('../frontend/js/patient-appointments-model'),PatientVisuals:require('../frontend/js/patient-visuals'),PatientModel:M,AnvayaChild:Child,DaiAPI:{apiRequest:async url=>url.includes('booking-options')?{doctors:[],facilities:[]}:url==='/documents'?{documents:[]}:records},PatientExperience:{}};
+ const window={ClinicalLedger:require('../shared/clinical-ledger'),PatientAppointmentsModel:require('../frontend/js/patient-appointments-model'),PatientVisuals:require('../frontend/js/patient-visuals'),PatientModel:M,AnvayaChild:Child,DaiAPI:{apiRequest:async url=>url.includes('booking-options')?{doctors:[],facilities:[]}:url==='/documents'?{documents:[]}:records},PatientExperience:{}};
  vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../frontend/js/patient-connected.js'),'utf8'),{window,document,Date,Map,Set,console,navigator:{onLine:true},location:{hash:'#appointments'},setInterval:fn=>{timers.push(fn);return timers.length;}});
  return {window,roots,events,timers};
 }
@@ -38,4 +38,17 @@ test('appointment polling refreshes saved status and hospital requests remain a 
  v.window.PatientExperience.update=next=>v.window.PatientConnected.update({...state,...next});
  await v.timers[0]();assert.match(v.roots.connectedAppointments.innerHTML,/Clinic confirmed/);assert.doesNotMatch(v.roots.connectedAppointments.innerHTML,/Visit recorded · staff-confirmed<\/span>/);
  v.window.DaiPatientRequests={rows:[{id:'request-1',status:'accepted'}]};await click(v,{connectedTab:'requests'});assert.match(v.roots.connectedAppointments.innerHTML,/Requests · 1/);assert.match(v.roots.connectedAppointments.innerHTML,/connectedRequestSlot/);assert.doesNotMatch(v.roots.connectedAppointments.innerHTML,/data-appointment-id=/);
+});
+
+test('clinical ledger preserves pending values, provenance, units and strict unknown dates',async()=>{
+ const records={data_label:'Synthetic',profile:{full_name:'Synthetic fixture',height_cm:162,pre_pregnancy_weight_kg:60,lmp_date:'2026-01-01',edd_date:'2026-10-08',date_of_birth:'1998-02-30',gravida:2,parity:1,risk_level:'routine'},clinical:{visits:[],babies:[],anc_visits:[{id:1,visit_date:'2026-02-30',gestational_week:9,visit_type:'booking',status:'completed',notes:'Plan <script>alert(1)</script>',follow_up_date:'2026-13-01',doctor_name:'Demo doctor',qualifications:'MBBS, MD',facility_name:'Demo facility',requested_time:'09:30',source_type:'appointment',source_record_id:1,appointment_id:1,data_label:'Synthetic'}],investigations:[{id:1,test_name:'Haemoglobin',panel_code:'antenatal_bloods',specimen_context:'Peripheral blood',status:'recorded',value_numeric:11.2,unit:'g/dL',reference_text:'11.0–13.0 g/dL',collected_on:'2026-03-12',resulted_on:'2026-03-12',source_type:'laboratory_record',source_record_id:'lab-1',data_label:'Synthetic'},{id:2,test_name:'75 g OGTT',status:'awaiting_result',value_numeric:null,value_text:null,unit:'mg/dL',collected_on:'2026-06-01',resulted_on:null,source_type:'laboratory_record',source_record_id:'lab-2',data_label:'Synthetic'}],observations:[{id:1,observed_at:'invalid-date',recorded_on:'2026-03-12T10:00:00Z',source_kind:'clinic_entry',values:{weight_kg:64.4,bp_systolic:118,bp_diastolic:76,pulse:82,temperature_c:36.7,oxygen_saturation:99},measurement_status:'recorded',source_record_id:'entry-1',data_label:'Synthetic'}]}};
+ const v=view(records);v.window.PatientConnected.update(state);await new Promise(setImmediate);await click(v,{recordTab:'vault'});
+ const html=v.roots.connectedRecords.innerHTML;
+ assert.match(html,/Awaiting result/);
+ assert.doesNotMatch(html,/<strong class="cl-result">[^<]*75 g OGTT/);
+ assert.match(html,/11\.2 g\/dL/);assert.match(html,/11\.0–13\.0 g\/dL/);assert.match(html,/12 Mar 2026/);
+ assert.match(html,/Plan &lt;script&gt;/);assert.doesNotMatch(html,/Plan <script>/);
+ assert.match(html,/Synthetic record/);assert.match(html,/BMI from latest recorded weight[\s\S]*24\.5 kg\/m²/);
+ assert.match(html,/Date not recorded/);assert.ok(!html.includes('undefined'));assert.ok(!html.includes('NaN'));
+ assert.ok(!html.includes('cl-anc-title'));
 });
