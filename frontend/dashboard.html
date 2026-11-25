@@ -430,7 +430,7 @@ a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}i
 
 </style>
 <link rel="stylesheet" href="ultrasound-workspace.css?v=11">
-<script src="js/dai-api.js"></script>
+<script src="js/dai-api.js?v=workspace-role-1"></script>
 <script src="js/ultrasound-workspace.js?v=12" defer></script>
 <link rel="stylesheet" href="pregnancy-library.css?v=1">
 <script src="js/pregnancy-library-guide.js?v=1" defer></script>
@@ -1891,8 +1891,8 @@ async function boot() {
     if(api.apiRequest.lastNetworkError){var fallback=await PatientExperience.restore();if(fallback){currentUser=fallback.user;motherMilestones=fallback.milestones;await PatientExperience.init({...patientBridge,user:currentUser,offlineOnly:true});route();}}
     return;
   }
-  if (currentUser.role === 'doctor') {
-    window.location.href = 'doctor.html';
+  if (currentUser.role !== 'mother') {
+    window.location.replace(api.workspaceForUser(currentUser));
     return;
   }
 

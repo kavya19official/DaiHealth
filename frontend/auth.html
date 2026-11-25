@@ -8,7 +8,7 @@
 <link rel="icon" href="assets/logo.jpeg">
 <link rel="stylesheet" href="styles.css">
 <link rel="stylesheet" href="auth.css">
-<script src="js/dai-api.js"></script>
+<script src="js/dai-api.js?v=workspace-role-1"></script>
 
 <script src="/js/i18n.js?v=names-5"></script>
 <link rel="stylesheet" href="/i18n.css?v=app-4">
@@ -211,11 +211,7 @@ async function hospitalLogin() {
 
 
 function redirectForUser(user) {
-  if (user && user.role === 'caregiver') return 'caregiver.html';
-  if (user && user.role === 'doctor') return 'doctor.html';
-  if (user && (user.role === 'hospital' || user.role === 'admin' || user.role === 'care_team')) return 'hospital.html';
-  if (user && user.pregnancy_status === 'delivered' && user.has_child) return 'child-dashboard.html';
-  return 'dashboard.html';
+  return window.DaiAPI.workspaceForUser(user);
 }
 
 async function submitAuth(path, payload, btn) {

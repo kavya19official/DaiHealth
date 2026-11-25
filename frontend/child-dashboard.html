@@ -941,7 +941,7 @@ button, input { font: inherit; }
 </style>
 <script src="/shared/who-growth-standards.js"></script>
 <script src="/shared/child-reference.js"></script>
-<script src="js/dai-api.js"></script>
+<script src="js/dai-api.js?v=workspace-role-1"></script>
 <script src="js/follow-through.js"></script>
 <script src="js/patient-prefs.js"></script>
 <link rel="stylesheet" href="little-world.css?v=1">
@@ -2448,7 +2448,7 @@ async function boot() {
 
   currentUser = await api.fetchCurrentUser();
   if (!currentUser) return;
-  if (currentUser.role === 'doctor') { window.location.href = 'doctor.html'; return; }
+  if (currentUser.role !== 'mother') { window.location.replace(api.workspaceForUser(currentUser)); return; }
 
   await Promise.all([loadChildren(), loadNotifications(), loadDoctors()]);
   await Promise.all(children.map(loadChildAppointments));

@@ -78,6 +78,20 @@
     return data ? data.user : null;
   }
 
+  function workspaceForUser(user) {
+    switch (user?.role) {
+      case 'doctor': return 'doctor.html';
+      case 'caregiver': return 'caregiver.html';
+      case 'hospital':
+      case 'admin':
+      case 'care_team':
+      case 'front_desk': return 'hospital.html';
+      case 'mother': return user.pregnancy_status === 'delivered' && user.has_child
+        ? 'child-dashboard.html' : 'dashboard.html';
+      default: return 'auth.html';
+    }
+  }
+
   function localDateStr(d) {
     d = d || new Date();
     var y = d.getFullYear();
@@ -138,6 +152,7 @@
     API_BASE: API_BASE,
     apiRequest: apiRequest,
     fetchCurrentUser: fetchCurrentUser,
+    workspaceForUser: workspaceForUser,
     toast: toast,
     localDateStr: localDateStr,
     fmtDate: fmtDate,
