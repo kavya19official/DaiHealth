@@ -531,8 +531,8 @@
     "hi": "प्रोफ़ाइल खोलें",
     "mr": "प्रोफाइल उघडा"
   },
-  "Care Capsule verifier": {
-    "hi": "केयर कैप्सूल की जाँच",
+  "swasthyaCard verifier": {
+    "hi": "swasthyaCard की जाँच",
     "mr": "केअर कॅप्सूलची पडताळणी"
   },
   "1st": {
@@ -815,7 +815,7 @@
     "hi": "{{4}} ने {{5}} को सत्यापित किया",
     "mr": "{{4}} यांनी {{5}} रोजी पडताळले"
   },
-  "Verified capsule": {
+  "Verified swasthyaCard": {
     "hi": "सत्यापित कैप्सूल",
     "mr": "पडताळलेली कॅप्सूल"
   },
@@ -867,7 +867,7 @@
     "hi": "सत्यापित करें और साझा करें",
     "mr": "पडताळा आणि शेअर करा"
   },
-  "Verify capsule": {
+  "Verify swasthyaCard": {
     "hi": "कैप्सूल सत्यापित करें",
     "mr": "कॅप्सूल पडताळा"
   },
@@ -1155,7 +1155,7 @@
     "hi": "गोल्डन आवर",
     "mr": "सुवर्ण तास"
   },
-  "Could not verify this capsule.": {
+  "Could not verify this swasthyaCard.": {
     "hi": "इस कैप्सूल की पुष्टि नहीं हो सकी।",
     "mr": "या कॅप्सूलची पडताळणी करता आली नाही."
   },
@@ -5123,9 +5123,9 @@
     "hi": "मेरी निजी जगह बनाएँ",
     "mr": "माझी खासगी जागा तयार करा"
   },
-  "Create Care Capsule": {
-    "hi": "केयर कैप्सूल बनाएँ",
-    "mr": "केअर कॅप्सूल तयार करा"
+  "Create swasthyaCard": {
+    "hi": "swasthyaCard बनाएँ",
+    "mr": "swasthyaCard तयार करा"
   },
   "Let’s take care of you and your little ones. ♡": {
     "hi": "आइए, आपका और आपके नन्हों का ख्याल रखें। ♡",
@@ -5843,9 +5843,9 @@
     "hi": "नया रेफ़रल बनाएँ",
     "mr": "नवीन संदर्भपत्र तयार करा"
   },
-  "Create a Care Capsule": {
-    "hi": "केयर कैप्सूल बनाएँ",
-    "mr": "केअर कॅप्सूल तयार करा"
+  "Create a swasthyaCard": {
+    "hi": "swasthyaCard बनाएँ",
+    "mr": "swasthyaCard तयार करा"
   },
   "Create a care task": {
     "hi": "देखभाल का काम जोड़ें",
@@ -5867,7 +5867,7 @@
     "hi": "शिविर बनाएँ",
     "mr": "शिबिर तयार करा"
   },
-  "Create capsule QR": {
+  "Create swasthyaCard QR": {
     "hi": "कैप्सूल का QR बनाएँ",
     "mr": "कॅप्सूलचा QR तयार करा"
   },
@@ -7295,9 +7295,9 @@
     "hi": "हाल का इतिहास",
     "mr": "अलीकडील इतिहास"
   },
-  "Scan a Care Capsule": {
-    "hi": "केयर कैप्सूल स्कैन करें",
-    "mr": "केअर कॅप्सूल स्कॅन करा"
+  "Scan a swasthyaCard": {
+    "hi": "swasthyaCard स्कैन करें",
+    "mr": "swasthyaCard स्कॅन करा"
   },
   "Use your camera or choose a photo of the QR.": {
     "hi": "कैमरा इस्तेमाल करें या QR की तस्वीर चुनें।",

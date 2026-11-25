@@ -30,7 +30,7 @@ function setStatus(message) {
 
 function renderLanguage() {
   document.documentElement.lang = language;
-  document.title = t('Care Capsule verifier · DaiHealth');
+  document.title = t('swasthyaCard verifier · DaiHealth');
   $('language').value = language;
   for (const [node, text] of strings) node.textContent = t(text);
   for (const node of document.querySelectorAll('[data-label]')) node.setAttribute('aria-label', t(node.dataset.label));
@@ -158,7 +158,7 @@ async function open(code, synced) {
   } catch (error) {
     if (generation === verification) {
       const message = error.message;
-      setStatus(translate('hi', message) === message ? 'Could not verify this capsule.' : message);
+      setStatus(translate('hi', message) === message ? 'Could not verify this swasthyaCard.' : message);
     }
   }
 }
@@ -170,14 +170,14 @@ async function scan(value) {
     verification++;
     lastCode = null;
     clearResult();
-    setStatus('No DaiHealth Care Capsule found.');
+    setStatus('No DaiHealth swasthyaCard found.');
     return;
   }
   stopCamera();
   lastCode = code;
   const scanGeneration = ++verification;
   clearResult();
-  setStatus('Checking the capsule…');
+  setStatus('Checking the swasthyaCard…');
   const synced = navigator.onLine ? await sync() : false;
   if (scanGeneration === verification) {
     await open(code, synced);
@@ -249,11 +249,11 @@ camera.onclick = async () => {
     video.srcObject = stream;
     video.hidden = false;
     renderCameraLabel();
-    setStatus('Point the camera at the Care Capsule QR.');
+    setStatus('Point the camera at the swasthyaCard QR.');
     frame();
   } catch {
     stopCamera();
-    setStatus('Camera unavailable. Upload a QR photo or paste the capsule link.');
+    setStatus('Camera unavailable. Upload a QR photo or paste the swasthyaCard link.');
   } finally { camera.disabled = false; }
 };
 $('image').onchange = async event => {
