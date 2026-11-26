@@ -119,7 +119,7 @@ function register(app, { pool, authenticateToken, authorizeRole, env = process.e
         AND NOT EXISTS(SELECT 1 FROM instant_consultation_offers o
           WHERE o.consultation_id=ic.id AND o.doctor_id=choices.doctor_id)`, [visit.id, PRESENCE_SECONDS]);
     const free = rows.filter(row => Number(row.load) < capacity);
-    // Doctor Connect is audio-only, so when nobody is inside the nearby radius (or a clinic has no
+    // For remote consultations, when nobody is inside the nearby radius (or a clinic has no
     // coordinates recorded) we widen the search instead of leaving the patient with no doctor.
     const nearby = rankDoctors(free, location, visit.category, visit.language);
     return nearby.length || !location ? nearby : rankDoctors(free, null, visit.category, visit.language);
