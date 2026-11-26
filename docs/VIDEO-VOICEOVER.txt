@@ -1,0 +1,122 @@
+DAI — ONE MOTHER, ONE CONNECTED CARE JOURNEY
+Complete English voiceover with filming cues
+Estimated narration: approximately 7–8 minutes at a clear presentation pace. Cut typing, login waits and page-loading pauses. Use montage labels for secondary tools; do not rush the live handoffs.
+
+BEFORE RECORDING
+Use separate browser profiles for patient and doctor. Keep the hospital in a third profile. Prepare labelled fictional PDFs and public demonstration ultrasound frames. Make Hemangini Available and enable call alerts. Use headphones for the audio-call scene. Never dial real emergency services during filming. Keep “Synthetic demonstration” visible. Nivara is the patient; Hemangini is the doctor; Aarav is Nivara’s one born child. Reference date: 25 November 2026.
+
+SCENE 1 — LANDING PAGE: THE PROBLEM
+[Slowly scroll the landing page. Show the three portal options.]
+
+“A mother should not have to become the messenger between every lab, doctor and hospital she visits.
+
+Yet her pregnancy journey can be scattered across paper files, nursing charts, prescriptions and separate systems. The family carries the information. The clinician searches for context. A pending test or missed follow-up can disappear between visits.
+
+DAI connects the mother, her doctor and hospital teams around one care journey—comparing expected care with recorded care, making gaps visible, and helping people act. Clinical decisions remain with healthcare professionals.”
+
+SCENE 2 — NIVARA’S HOME AND TWO LIVE HANDOFFS
+[Sign in as Nivara. Briefly show the same Home screen at phone width. Point to gestation, EDD, care step and kick counter.]
+
+“Meet Nivara Sethi. She is 28 weeks and two days pregnant, with an expected delivery date of 15 February. Her son Aarav is two years and six months old.
+
+Her mobile-friendly Home brings together her care plan, pregnancy stage, next care step and a patient-recorded kick counter. Expandable charts organise dated measurements and trends, supporting our aim of bringing nursing-chart information into a longitudinal digital record.”
+
+[Doctor Connect: enter a fictional concern, confirm consent, send. Switch to Hemangini: show incoming request, accept. Both select Join audio call.]
+
+“Here, Nivara requests a doctor conversation. The request appears on Hemangini’s portal. After acceptance, both can join an audio call. This is a live connection between the portals, not a separate demonstration screen.”
+
+[Return to Nivara. Book a visit with Hemangini using an available window. Switch to doctor, find that date, confirm. Return to patient and refresh.]
+
+“She can also request a visit. Hemangini receives the booking and confirms it. Back on Nivara’s screen, the same appointment now shows confirmed. Calendar views, upcoming visits, Aarav’s follow-ups, facility details and directions help the family plan their next step.”
+
+SCENE 3 — DAILY CARE, EDUCATION AND THE FAMILY
+[Montage: My Care timeline, Pending care, Birth readiness; Messages with a brief doctor reply.]
+
+“My Care presents a path through the care timeline, pending items and birth readiness. Messages keep the conversation connected between visits.”
+
+[Pregnancy Mirror: enable camera with consent, enable hand control, peel and restore layers. Show Nutrition and Common Myths. Uterus model: rotate, open/close cutaway and play narration.]
+
+“Pregnancy Mirror uses on-device camera tracking and hand gestures to explore illustrative anatomy. The layers are a learning visual, not a scan inside Nivara’s body. Nutrition and Common Myths add accessible education. The interactive uterus model and spoken explanations help make unfamiliar anatomy easier to understand.”
+
+[Open Aarav’s world. Sweep through vaccination records, care-entry charts, birth details, milestones, growth, visits and reports.]
+
+“Aarav has his own profile: vaccinations, birth details, growth records, milestones, visits and follow-ups. His history stays separate from the current pregnancy.”
+
+[Birth Plan tabs: preferences/conversation, labour journey, full plan, birth pass. Daily Tracking: water, supplements, food, symptoms, wellbeing, measurements and sharing.]
+
+“Birth Plan records preferences, conversations, labour preparation and a portable birth pass. Daily Tracking brings together water, prescribed supplements, food, symptoms, wellbeing and measurements, with deliberate sharing choices.”
+
+[Sukoon: Today, Your week, Rest, Open when, Together and Night sky. Then Pregnancy Library photos.]
+
+“Pregnancy also has an emotional journey. Sukoon offers a private space for feelings, rest, reflection and support during pregnancy and after birth. It supports wellbeing without diagnosing depression. Pregnancy Library preserves photographs and memories across stages.”
+
+SCENE 4 — REPORTS WITHOUT THE BAG OF PAPER
+[Reports & records: show manual upload and linked-record routes side by side. Upload a fictional report and share it with Hemangini.]
+
+“Reports are a major continuity problem. Nivara should not need to carry a bag of paper, and her doctor should not need to search through it to find one result.
+
+DAI offers two routes. An external report can be uploaded and organised manually. The second is our proposed ABHA-connected workflow: at a participating, ABDM-enabled lab, Nivara asks for her report to be linked to her ABHA address. She then authorises the records her clinician can access.
+
+ABHA and DigiLocker can support this consent-based record journey. Entering an ABHA number alone never unlocks records. In this prototype, the connection and consent flow uses clearly labelled fictional documents; live government integration is pending.”
+
+[Create swasthyaCard: choose fields, expiry and consent. Show QR, then doctor verifier.]
+
+“Her swasthyaCard turns selected information into a signed, expiring QR. A prepared verifier can read that selected snapshot, including offline. It does not automatically expose her full profile or every report.”
+
+[Ultrasound: upload area, compact history, AI frame analysis, clinician report and review badge.]
+
+“Ultrasound records show image-quality information, SonoNet16 research frame classification, review flags and clinician feedback. Awaiting review and released reports remain distinct. AI frame analysis supports review; it does not diagnose Nivara from a demonstration image.”
+
+[Nearby Care map → directions; Schemes and Support; Family Circle; Updates and Settings. Toggle English/Hindi/Marathi; show Dhruv.]
+
+“Nearby Care connects location-based discovery to directions. Schemes and Support provides possible benefits and document guidance, with eligibility requiring confirmation. Family Circle shows Kabir, Ritu and Aarav while keeping responsibilities separate from access permissions. Updates, settings, English, Hindi, Marathi and the voiced companion support accessibility.”
+
+SCENE 5 — THE DOCTOR’S WORKSPACE
+[Doctor Home: patient counts, seen today, due this week, clinical insights and incoming requests. Open Nivara.]
+
+“Hemangini begins with her patient panel, today’s activity, patients due soon and clinical insights. Nivara’s profile combines overview, visit preparation, history, reports, prescriptions and messages, alongside evidence tools, calculators and an intelligence view.”
+
+[Dictate a short fictional consultation. Show transcript → structured draft. Doctor edits, adds medicine details, reviews, approves and generates PDF. Return to patient record.]
+
+“Voice-assisted documentation addresses a practical burden: clinicians should not have to type every word or rely on someone else to capture the consultation.
+
+With consent, speech becomes text, and the drafting workflow organises recorded information into complaints, findings, assessment, investigations, advice and follow-up. The clinician corrects the draft, enters or verifies medicines and doses, and approves the final prescription and PDF. Nothing becomes an approved prescription simply because AI drafted it.”
+
+[Montage: ultrasound review; appointments and schedule; attention/outreach; delivery readiness; labour room/wards; emergency/referrals; messages; analytics; care tools.]
+
+“Her workspace also connects ultrasound review, appointments and calendar schedules, attention and outreach queues, delivery readiness, wards, referrals, messages, analytics and care tools. A clinic can prepare a structured handover when a patient needs a larger facility.”
+
+SCENE 6 — URGENT HELP AND THE HOSPITAL
+[Patient SOS: show all three choices. Do not activate a real emergency call. Show optional symptom check without submitting a real incident.]
+
+“SOS offers three choices: call emergency services, request clinician contact, or optionally describe symptoms. Questions never block calling. Pain is not dismissed as psychological, and no answer gives an automatic all-clear. Severe warning signs direct attention to urgent assessment; routine messages are not an emergency service.”
+
+[Hospital sign-in. Golden Hour popup and sound after user interaction. Review one synthetic SBAR and accept one case. Keep remaining examples for later.]
+
+“On the hospital portal, Golden Hour brings a synthetic incoming pre-alert into view: reported symptoms, travel context, relevant history and a readiness checklist. The receiving team reviews and accepts or redirects it. An alert is not a confirmed bed or a dispatched ambulance. In a real emergency, care comes first; staff can complete documentation afterward, preserving the actual event time.”
+
+[Operations montage: Today’s overview, Incoming care, Patient Care Hub/My patients, clinical reviews, delivery readiness, capacity, district map, critical/neonatal care, diagnostics, community/ASHA.]
+
+“Operations connects today’s overview, incoming care, patients, appointments, open gaps, follow-ups and clinical reviews. Delivery and capacity views, district care-gap maps, critical and neonatal care, diagnostics and community/ASHA workflows support coordinated follow-through.”
+
+[Administration montage: facility, clinical structure, clinics, staffing/on-call, wards/beds, blood, equipment, ambulances, activity/census, forecasts, Green hospital and audit.]
+
+“Administration brings facility setup, clinical structure, services, roles, staffing, beds, blood, equipment, ambulances and census together. Forecasts use trained models with baseline comparisons on synthetic operating data to explore upcoming demand and stock needs—not to guarantee that shortages cannot happen.
+
+Sustainable care and Green Hospital highlight avoidable repeat tests, unnecessary trips and resource use, while access controls and audit trails keep actions accountable.”
+
+CLOSING
+[Return to the three portal views; finish on Nivara and Hemangini’s connected visit/report.]
+
+“DAI’s goal is simple: a mother who does not have to repeat her story, a clinician who starts with context, and a care team that can see what still needs to happen. One connected journey, with people in control.”
+
+ACCURACY NOTES — NOT SPOKEN
+- Kick counter: patient-tapped logging, not an established agentic-AI feature.
+- Transcription: Sarvam route; Gemini structured drafting when configured, with local/manual alternatives. Wispr Flow may supply text externally; do not call it an integrated Whisper pipeline.
+- SonoNet16 is the default research plane classifier. EfficientNet-B0 belongs to an optional separate archive training path; do not imply both powered the displayed result.
+- Forecast family: multi-output RandomForestRegressor, target normalisation and per-target seasonal-baseline selection, trained/evaluated on synthetic data.
+- Maps: Leaflet/OpenStreetMap for in-app maps; directions can open Google Maps. Do not call it “OpenLeaf”.
+- No claim that ABHA is unused, that digital nursing charts do not exist elsewhere, that a prototype prevents clinical harm, or that scheme eligibility is automatically certified.
+- Private Sukoon notes and personal memories are not silently shared with clinicians.
+- Offline swasthyaCard verification relies on prepared keys and the last available revocation information.
+- Source links: https://abdm.gov.in/strapicms/uploads/HIP_HIU_Guidelines_f85df336ec.pdf ; https://www.pib.gov.in/PressReleasePage.aspx?PRID=1874894 ; https://www.nhs.uk/pregnancy/keeping-well/have-a-healthy-diet/ ; https://www.nhs.uk/best-start-in-life/pregnancy/healthy-eating-in-pregnancy/

@@ -22,3 +22,6 @@ ml-service/data/generated
 ml-service/reports
 
 ml-service/ultrasound/local
+
+# Static Vercel output is not part of the Render image
+.vercel

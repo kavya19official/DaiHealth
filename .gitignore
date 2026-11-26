@@ -49,3 +49,6 @@ ml-service/ultrasound/local/
 backend/data/*.db
 **/node_modules/
 ml-service/ultrasound/local/*.zip
+
+# Generated Vercel deployment output and private deployment credentials
+.vercel/

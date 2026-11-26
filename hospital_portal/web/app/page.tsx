@@ -35,6 +35,7 @@ const operationNav = [
   ["overview", "Today’s overview", "◈"],
   ["incomingCare", "Incoming care", "✚"],
   ["patientCare", "Patient Care Hub", "♡"],
+  ["patients", "My patients", "♧"],
   ["careReviews", "Clinical review & summaries", "▤"],
   ["clinicalMonitor", "Clinical monitoring", "▥"],
   ["readiness", "Delivery readiness", "✚"],
@@ -459,6 +460,18 @@ export default function Home() {
               : view === "audit"
                   ? "/audit"
                   : null;
+      // Patient access must not depend on permission to read operational summaries.
+      if (view === "patients") {
+        const [structure, cohort] = await Promise.all([
+          api("/facilities/" + user.facility_id + "/structure"),
+          api(extraPath!),
+        ]);
+        if (sequence !== loadSequence.current) return;
+        setData(structure);
+        setRecords(cohort.items || []);
+        setPatientTotal(cohort.total || 0);
+        return;
+      }
       const [structure, nextSummary, extra] = await Promise.all([
         api("/facilities/" + user.facility_id + "/structure"),
         api("/workspace/summary"),
@@ -1385,6 +1398,7 @@ export default function Home() {
                       {patientTotal.toLocaleString("en-IN")} permitted records
                     </span>
                   </div>
+                  {!busy && records.length === 0 && <div className="empty" role="status"><h3>No matching patient records</h3><p>Try another name or clear the search. Only patients permitted by this facility, unit and assignment are shown.</p></div>}
                   <Table
                     headers={[
                       "Mother",

@@ -136,3 +136,10 @@
 .cv-info dt { font-weight: 600; }
 .cv-info dd { margin: .15rem 0 .7rem; white-space: pre-wrap; overflow-wrap: anywhere; }
 .cv-info dd:last-child { margin-bottom: 0; }
+
+/* The embedded verifier shares the doctor workspace's white cards and violet banner. */
+.capsule-page.cv-embedded{margin:0;padding:0;background:#fff;color:#30283b;font-family:"Plus Jakarta Sans","Noto Sans Devanagari",Inter,sans-serif}
+.cv-embedded .cv-top{display:none}.cv-embedded main{max-width:none;padding:0;margin:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px}.cv-embedded .cv-hero{grid-column:1/-1;max-width:none;margin:0 0 2px;padding:24px 28px;border-radius:22px;border:1px solid #e8def5;background:linear-gradient(115deg,#efe6ff,#faf7ff);gap:22px}.cv-embedded .cv-hero h1{font-size:27px;line-height:1.3;font-weight:800;color:#30243c}.cv-embedded .cv-hero p{font-size:13px;line-height:1.65;max-width:650px;color:#776584}.cv-embedded .cv-hero-img{height:115px;width:115px;object-fit:contain;border-radius:20px}.cv-embedded .cv-card{margin:0;padding:22px;border-radius:20px;border:1px solid #e9e0f4;box-shadow:0 4px 20px #63458006;grid-column:1/-1}.cv-embedded .cv-scanner{max-width:350px;margin:0 auto 18px;height:220px;min-height:0;border-radius:17px}.cv-embedded .cv-actions{justify-content:center}.cv-embedded .cv-paste{max-width:680px;margin:20px auto 0}.cv-embedded .cv-paste label{font-weight:750}.cv-embedded .cv-btn{border-radius:12px;font-weight:750;min-height:42px}.cv-embedded .cv-ready{font-size:12px}.cv-embedded .cv-result{grid-column:1/-1;margin:0}.cv-embedded .cv-frame{inset:24px}.cv-embedded .cv-placeholder{padding:20px}.cv-embedded .cv-hero .cv-btn{font-size:12px}
+@media(max-width:650px){.cv-embedded main{display:block}.cv-embedded .cv-hero{padding:21px;margin-bottom:16px}.cv-embedded .cv-hero h1{font-size:23px}.cv-embedded .cv-hero-img{display:none}.cv-embedded .cv-card{padding:17px}.cv-embedded .cv-scanner{height:200px}}
+
+.cv-embedded .cv-ready{color:#675279}.cv-embedded .cv-hero .cv-btn--ghost{color:#7246a3;background:#fff;border:1px solid #dacbed}.cv-embedded .dai-language-control{display:none!important}

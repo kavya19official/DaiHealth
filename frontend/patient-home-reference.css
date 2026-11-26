@@ -73,9 +73,7 @@ body.mother-reference[data-home-theme=dark]{--mr-border:#493558;--mr-soft:#33243
 #panel-dashboard .cg-details-grid,
 #panel-dashboard .cg-attention,
 #panel-dashboard #homeDailyTracking,
-#panel-dashboard #pregnancyLibraryCard,
-#panel-dashboard #motherRecordedCharts,
-#panel-dashboard #motherGraphsButton{display:none!important}
+#panel-dashboard #pregnancyLibraryCard{display:none!important}
 
 /* Hero copy and a useful pregnancy snapshot on the left; care tools on the right. */
 #panel-dashboard.reference-home .oh-hero-band{align-items:start;background:transparent;overflow:visible}
@@ -117,3 +115,22 @@ body.mother-reference[data-home-theme=dark]{--mr-border:#493558;--mr-soft:#33243
 #panel-dashboard .home-care-rail>.connect-card .connect-ready p{font-size:12px;line-height:1.5}
 #panel-dashboard .home-care-rail>.connect-card .connect-reassurance{font-size:11px;line-height:1.6;color:var(--ink-muted);padding-top:12px;border-top:1px solid var(--mr-border)}
 @media(max-width:600px){.mr-pregnancy-progress{padding:20px}.mr-progress-content{grid-template-columns:minmax(120px,150px) minmax(0,1fr);gap:18px}.mr-progress-donut::before{inset:15px}.mr-progress-donut strong{font-size:33px}.mr-progress-donut span{font-size:10px}.mr-progress-legend strong{font-size:15px}.mr-progress-legend p{font-size:12px}.mr-progress-heading h2{font-size:21px}}
+
+/* End Home at the compact model and recorded measurements. */
+#panel-dashboard #clinicalDashboardHome ~ *,
+#panel-dashboard #clinicalDashboardHome .cg-ledger,
+#panel-dashboard #motherGraphsButton{display:none!important}
+#panel-dashboard #clinicalDashboardHome{margin-bottom:0}
+#panel-dashboard #clinicalDashboardHome .cg-layout{grid-template-columns:minmax(280px,.9fr) minmax(0,1.6fr);align-items:start;gap:20px}
+#panel-dashboard #clinicalDashboardHome .cg-model-card{position:relative;top:auto;padding:18px;border-radius:22px}
+#panel-dashboard #clinicalDashboardHome .cg-scene{height:340px}
+#panel-dashboard #clinicalDashboardHome .cg-metrics-section{padding:20px;border-radius:22px}
+#panel-dashboard #clinicalDashboardHome .cg-metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+#panel-dashboard #clinicalDashboardHome .cg-metric{padding:16px;min-height:0;display:flex;flex-direction:column;gap:10px}
+#panel-dashboard #clinicalDashboardHome .cg-metric>strong{font-size:28px;margin:0;line-height:1.3}
+#panel-dashboard #clinicalDashboardHome .cg-metric>svg{height:56px;max-height:56px;margin:0;width:100%}
+#panel-dashboard #clinicalDashboardHome .cg-metric>p{margin:0;font-size:10px;line-height:1.5}
+#panel-dashboard #clinicalDashboardHome .cg-metric>small{font-size:10px;line-height:1.5}
+#panel-dashboard #clinicalDashboardHome .cg-section-heading{gap:12px;flex-wrap:wrap}
+@media(max-width:1000px){#panel-dashboard #clinicalDashboardHome .cg-layout{grid-template-columns:1fr}#panel-dashboard #clinicalDashboardHome .cg-model-card{max-width:none}#panel-dashboard #clinicalDashboardHome .cg-scene{max-width:500px;margin:auto}}
+@media(max-width:500px){#panel-dashboard #clinicalDashboardHome .cg-metrics-section{padding:14px}#panel-dashboard #clinicalDashboardHome .cg-metrics{gap:10px}#panel-dashboard #clinicalDashboardHome .cg-metric{padding:12px}#panel-dashboard #clinicalDashboardHome .cg-metric>strong{font-size:23px}}

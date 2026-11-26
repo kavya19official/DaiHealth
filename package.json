@@ -14,7 +14,9 @@
     "timeline:vendors": "node scripts/sync-timeline-vendor.cjs",
     "setup:patient-postgis": "node scripts/setup-patient-postgis.cjs",
     "test:sukoon": "node --test backend/sukoon.test.js backend/dayaSpeech.test.js backend/daicare.test.js",
-    "test:mirror": "node --test backend/pregnancyMirror.test.js"
+    "test:mirror": "node --test backend/pregnancyMirror.test.js",
+    "build:vercel": "node scripts/build-vercel.cjs",
+    "deploy:env": "node scripts/prepare-deploy-env.cjs"
   },
   "engines": {
     "node": ">=22.13.0"

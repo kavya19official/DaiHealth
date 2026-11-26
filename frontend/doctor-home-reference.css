@@ -96,3 +96,58 @@ body.doctor-reference #daiCareChatbot{position:fixed;right:max(20px,env(safe-are
 @media(min-width:1800px){.dr-top-row{grid-template-columns:minmax(0,1fr) 330px}.dr-insights h2{font-size:25px}.dr-insights header p{font-size:14px}.dr-insight-chip{font-size:11px}.dr-insights>small{font-size:11px}}
 @media(max-width:1200px){.dr-top-row{grid-template-columns:minmax(0,1fr) 270px;gap:14px}.dr-top-row .dd-hero{grid-template-columns:1fr;padding:22px}.dr-top-row .dd-hero-art{display:none}.dr-insights{padding:19px 19px 15px}}
 @media(max-width:800px){.dr-top-row{grid-template-columns:1fr}.dr-top-row .dd-hero{min-height:0}.dr-insights{min-height:260px}.dr-insight-art{min-height:125px}.dr-insights header p{max-width:none}.dr-insight-chip-left{left:15%;top:20px}.dr-insight-chip-right{right:15%;bottom:20px}}
+
+/* Align the hero with a compact right-hand clinical rail. */
+.dr-hero-rail{display:grid;gap:16px;grid-template-rows:minmax(0,1fr) auto;min-width:0}
+.dr-hero-rail .dr-insights{padding:18px;min-height:0}
+.dr-hero-rail .dr-insight-art{min-height:75px;margin:0 -8px 4px}
+.dr-hero-rail .dr-insight-art svg{height:90px;width:170px}
+.dr-hero-rail .dr-insights h2{font-size:21px}
+.dr-hero-rail .dr-insight-chip{font-size:8px;padding:4px 7px}
+.dr-hero-rail .dr-insight-chip-left{top:8px}.dr-hero-rail .dr-insight-chip-right{bottom:8px}
+.dr-hero-rail .connect-card--compact{box-sizing:border-box;display:flex;flex-direction:column;gap:10px;justify-content:space-between;min-width:0;min-height:240px;margin:0;padding:20px;border-radius:20px;background:var(--dw-card,#fff);border:1px solid var(--dw-border,#eae4ff);box-shadow:0 5px 24px #68469306}
+.dr-hero-rail .connect-card--compact .connect-heading{display:contents}
+.dr-hero-rail .connect-card--compact .connect-heading>div{order:0}
+.dr-hero-rail .connect-card--compact h2{font-size:20px;line-height:1.35;font-weight:800;letter-spacing:-.4px;margin:6px 0 0}
+.dr-hero-rail .connect-card--compact small{font-size:11px}
+.dr-hero-rail .connect-card--compact [data-connect-announcement]{order:1;font-size:12px;line-height:1.65;margin:0;color:var(--dw-muted,#746a82)}
+.dr-hero-rail .connect-card--compact .connect-heading>.btn{order:2;width:100%;font-size:12px;min-height:43px;padding:10px 12px;border-radius:13px;box-shadow:none}
+@media(max-width:800px){.dr-hero-rail{grid-template-columns:1fr 1fr;grid-template-rows:auto}.dr-hero-rail .connect-card--compact{min-height:240px}}
+@media(max-width:550px){.dr-hero-rail{grid-template-columns:1fr}.dr-hero-rail .connect-card--compact{min-height:220px}}
+/* Compact dashboard header: keep the greeting and both actions in one short row. */
+.dr-home .dr-top-row{gap:14px;margin-bottom:16px}
+.dr-home .dr-top-row>.dd-hero{min-height:0;padding:22px 24px;gap:12px;grid-template-columns:minmax(0,1fr) 165px;align-items:center}
+.dr-home .dr-top-row .dd-hero h1{font-size:clamp(26px,2.25vw,34px);line-height:1.18;letter-spacing:-1px;margin:8px 0}
+.dr-home .dr-top-row .dd-hero-copy>.dr-intro{font-size:12px;line-height:1.55;margin-bottom:8px}
+.dr-home .dr-top-row .dd-hero-copy>.dr-date{font-size:10px;margin-bottom:8px}
+.dr-home .dr-top-row .dd-clinician-context{font-size:10px;line-height:1.55;margin:7px 0 12px}
+.dr-home .dr-top-row .dd-hero-art{height:190px;margin-bottom:-22px;width:165px;align-self:end}
+.dr-home .dr-top-row .dd-hero-actions{gap:10px}
+.dr-home .dr-top-row .dd-hero-actions .dw-primary{min-height:36px;padding:9px 13px;font-size:11px}
+.dr-hero-rail{gap:12px;grid-template-rows:auto auto;align-content:start}
+.dr-hero-rail .dr-insights{padding:14px 16px}
+.dr-hero-rail .dr-insights header{padding-right:48px}
+.dr-hero-rail .dr-insights h2{font-size:18px;margin:4px 0 6px}
+.dr-hero-rail .dr-insights header p{font-size:11px;line-height:1.5}
+.dr-hero-rail .dr-insight-art{position:absolute;right:7px;top:12px;width:58px;height:68px;min-height:0;margin:0;opacity:.85}
+.dr-hero-rail .dr-insight-art svg{width:68px;height:68px}
+.dr-hero-rail .dr-insight-chip,.dr-hero-rail .dr-insights>small{display:none}
+.dr-hero-rail .dr-insight-action{margin-top:12px;min-height:34px;font-size:11px;padding:5px 12px;gap:8px}
+.dr-hero-rail .dr-insight-action>span{width:24px;height:24px;font-size:17px;margin-left:-4px}
+.dr-hero-rail .connect-card--compact{min-height:0;padding:14px 16px;gap:8px;justify-content:start}
+.dr-hero-rail .connect-card--compact h2{font-size:17px;margin-top:4px;line-height:1.25}
+.dr-hero-rail .connect-card--compact small{font-size:10px}
+.dr-hero-rail .connect-card--compact [data-connect-announcement]{font-size:11px;line-height:1.5}
+.dr-hero-rail .connect-card--compact .connect-heading>.btn{min-height:35px;font-size:11px;padding:8px 10px;border-radius:11px;margin-top:2px}
+.dr-home .dd-glance{gap:12px;margin:0 0 16px}
+.dr-home .dd-glance>button{padding:16px 18px;min-height:0}
+.dr-home .dd-glance strong{font-size:32px;line-height:1.15}
+@media(max-width:1200px){.dr-home .dr-top-row>.dd-hero{grid-template-columns:1fr;padding:20px}.dr-home .dr-top-row .dd-hero-art{display:none}}
+@media(max-width:800px){.dr-home .dr-top-row>.dd-hero{padding:22px;min-height:0}.dr-hero-rail{grid-template-columns:1fr 1fr;align-items:stretch}.dr-hero-rail .dr-insights,.dr-hero-rail .connect-card--compact{min-height:0}.dr-home .dd-glance strong{font-size:27px}}
+@media(max-width:550px){.dr-hero-rail{grid-template-columns:1fr}.dr-home .dr-top-row .dd-hero h1{font-size:27px;max-width:none}.dr-home .dr-top-row .dd-hero-copy>p{max-width:none}.dr-home .dd-glance>button{padding:14px}}
+/* Slightly stronger typography across the doctor dashboard. */
+.doctor-reference #panel-dashboard .dr-home{font-weight:550}
+.doctor-reference #panel-dashboard .dr-home :is(h1,h2,h3,h4){font-weight:850}
+.doctor-reference #panel-dashboard .dr-home :is(p,small,.dd-metric-detail){font-weight:600}
+.doctor-reference #panel-dashboard .dr-home :is(strong,b,th){font-weight:800}
+.doctor-reference #panel-dashboard .dr-home :is(button,.dw-eyebrow,.dr-insight-eyebrow,.dd-stage>strong){font-weight:750}

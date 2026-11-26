@@ -3371,3 +3371,8 @@ body,
   height: 19px;
   flex-basis: 19px;
 }
+
+/* Shared page banners: consistent hierarchy across hospital workspaces. */
+.page-heading{padding:24px 28px;border-radius:22px;background:linear-gradient(115deg,#ece3fb,#f6f0ff 72%,#f0e9fd);border:1px solid #e5d9f5;margin:14px 0 24px;gap:22px;box-shadow:0 3px 16px #77539105;overflow:hidden}
+.page-heading>div:first-child{min-width:0}.page-heading .eyebrow{font-size:10px;letter-spacing:1.5px;font-weight:800;color:#84649e}.page-heading h1{font-family:"Plus Jakarta Sans","Noto Sans Devanagari",sans-serif;font-size:clamp(26px,2.6vw,36px);font-weight:800;line-height:1.2;letter-spacing:-1px;margin:8px 0 10px;color:#32243f}.page-heading p{font-size:13px;line-height:1.65;color:#766180;margin:0;max-width:740px}.page-heading .account{flex-shrink:0;box-shadow:none;background:#ffffffcc;border:1px solid #e6dbf2}.command-banner,.hero{border-radius:24px;overflow:hidden}.card-head h2{font-weight:800;letter-spacing:-.4px}
+@media(max-width:700px){.page-heading{padding:20px;border-radius:20px;align-items:flex-start;flex-direction:column;gap:16px}.page-heading h1{font-size:27px}.page-heading .account{align-self:flex-end}.page-heading p{font-size:12px}}

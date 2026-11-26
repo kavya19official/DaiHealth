@@ -774,7 +774,7 @@ def create_app(engine=None):
                 for r in c.execute(
                     select(s.mother)
                     .where(*filters)
-                    .order_by(s.mother.c.id)
+                    .order_by(func.lower(s.mother.c.details["name"].as_string()), s.mother.c.id)
                     .offset(offset)
                     .limit(limit)
                 ).mappings()

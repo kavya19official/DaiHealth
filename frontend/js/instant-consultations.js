@@ -108,7 +108,28 @@
     <div data-connect-history></div>`;
   const patientHero = !doctor && home.querySelector('.home-hero-grid');
   if (patientHero) (patientHero.querySelector('.home-care-rail')||patientHero).append(root);
-  else home.prepend(root);
+  else if (doctor) {
+    root.classList.add('connect-card--compact');
+    // Share the right-hand rail with insights, including after dashboard refreshes.
+    const placeDoctorCard = () => {
+      const top = home.querySelector('.dr-top-row');
+      if (top) {
+        let rail = top.querySelector('.dr-hero-rail');
+        if (!rail) { rail=document.createElement('div');rail.className='dr-hero-rail';top.append(rail); }
+        const insights = top.querySelector('.dr-insights');
+        if (insights && insights.parentElement !== rail) rail.prepend(insights);
+        if (root.parentElement !== rail) rail.append(root);
+      } else {
+        const hero=home.querySelector('.dd-hero');
+        if (hero) { if(hero.nextElementSibling!==root)hero.after(root); }
+        else if (!home.contains(root)) home.append(root);
+      }
+    };
+    placeDoctorCard();
+    const placement = new MutationObserver(placeDoctorCard);
+    placement.observe(home,{childList:true,subtree:true});
+    window.addEventListener('pagehide',()=>placement.disconnect(),{once:true});
+  } else home.prepend(root);
   shortcut.className = 'connect-shortcut';
   if (doctor) {
     shortcut.innerHTML = button('Requests','open')+'<button type="button" data-connect-sound aria-pressed="false">Enable call alerts</button>';

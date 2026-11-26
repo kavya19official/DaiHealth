@@ -414,3 +414,7 @@ Open **My Pregnancy Library** on the Mother Dashboard for a private timeline, me
 ## Ultrasound scans
 
 Patients can securely upload a frame to a verified clinician from their care team. Doctors can review scan history, image quality and pregnancy context and release a report with follow-up instructions. See [the ultrasound setup and deployment guide](hospital_portal/ULTRASOUND_AI_REVIEW.md).
+
+## Vercel + Render deployment
+
+See [the deployment steps](docs/DEPLOY-VERCEL-RENDER.md). The frontend build accepts `DAI_BACKEND_ORIGIN`; the Render Docker service preserves the three-portal synthetic demo on a persistent disk. Generate private Render settings with `npm run deploy:env` (never commit `.local/deployment/render.env`).

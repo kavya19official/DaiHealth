@@ -14,7 +14,7 @@
       ? '/api'
       : isLocal
         ? location.protocol + '//' + location.hostname + ':3001/api'
-        : 'https://daihealth.onrender.com/api'
+        : '/api'
   );
 
   function toast(msg) {

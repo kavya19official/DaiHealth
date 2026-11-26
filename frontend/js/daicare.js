@@ -272,6 +272,6 @@
     });
   }
 
-  if(appointmentPanel)appointmentNetwork();
+  // Doctor discovery stays in Nearby Care; keep appointments focused on visits.
   if(!doctor&&postpartumPanel)patientWellbeing();
 })();

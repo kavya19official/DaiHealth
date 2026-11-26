@@ -31,10 +31,10 @@ def hosted_environment():
             raise RuntimeError(f"Set {name} to a unique secret of at least 32 characters.")
     if len({os.environ[name] for name in required}) != len(required):
         raise RuntimeError("Use separate secrets for demo access, demo accounts and JWTs.")
-    origin = os.environ.get("RENDER_EXTERNAL_URL", "").rstrip("/")
+    origin = (os.environ.get("DAI_PUBLIC_ORIGIN") or os.environ.get("RENDER_EXTERNAL_URL", "")).rstrip("/")
     parsed = urlsplit(origin)
-    if parsed.scheme != "https" or not parsed.hostname or parsed.path or parsed.query or parsed.fragment:
-        raise RuntimeError("Set RENDER_EXTERNAL_URL to the public HTTPS origin.")
+    if parsed.scheme != "https" or not parsed.hostname or parsed.username or parsed.password or parsed.path or parsed.query or parsed.fragment:
+        raise RuntimeError("Set DAI_PUBLIC_ORIGIN or RENDER_EXTERNAL_URL to the public HTTPS origin.")
     web_port = int(os.environ.get("DAI_HOSTED_WEB_PORT", "3104"))
     api_port = int(os.environ.get("DAI_HOSTED_API_PORT", "8100"))
     api_origin = f"http://127.0.0.1:{api_port}"
@@ -50,5 +50,7 @@ def hosted_environment():
         DAI_PORTAL_API_ORIGIN=api_origin,
         API_ORIGIN=api_origin,
         PATIENT_DOCS_DIR=str(ROOT / ".local/documents"),
+        HOSPITAL_STATE_FILE=str(ROOT / ".local/hospital-demo-state.json"),
+        HOSPITAL_UPLOAD_DIR=str(ROOT / ".local/hospital-uploads"),
     )
     return env

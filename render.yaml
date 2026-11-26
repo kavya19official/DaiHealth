@@ -17,8 +17,10 @@ services:
         generateValue: true
       - key: DAI_DEMO_ACCESS_KEY
         generateValue: true
-      - key: GEMINI_API_KEY
+      - key: DAI_PUBLIC_ORIGIN
         sync: false
+      - key: DAI_SEED_NIVARA_DEMO
+        value: "true"
       - key: ML_ENABLED
         value: "true"
       - key: PATIENT_ML_RANKING_ENABLED
@@ -30,6 +32,8 @@ services:
       - key: DAI_ULTRASOUND_ENABLED
         value: "true"
       - key: DAI_ULTRASOUND_IMAGE_KEY
+        sync: false
+      - key: DAI_RECORD_CONNECTIONS_KEY
         sync: false
       - key: DAI_ULTRASOUND_GATEWAY_TOKEN
         generateValue: true

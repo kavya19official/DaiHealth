@@ -222,6 +222,10 @@ def prepare(env):
     run([PY, "-m", "hospital_portal.api.seed"], env=env)
     patient_env = env | {"DATABASE_URL": "", "DB_SSL": "false"}
     run(["node", ROOT / "scripts/seed-local.cjs"], env=patient_env)
+    if env.get("DAI_HOSTED_DEMO") == "true" and env.get("DAI_SEED_NIVARA_DEMO") == "true":
+        run(["node", ROOT / "scripts/seed-hosted-nivara.cjs"], env=patient_env)
+        if env.get("DAI_ULTRASOUND_ENABLED") == "true":
+            run([PY, ROOT / "scripts/seed-hosted-nivara-scans.py"], env=env)
     if env.get("DAI_ULTRASOUND_ENABLED") == "true":
         run([PY, ROOT / "scripts/seed-ultrasound-demo.py", "--manifest",
              STATE / "clinical-foundation-ultrasound.json"], env=env)
