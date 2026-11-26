@@ -46,7 +46,7 @@ def seed(engine, source=None, config=None):
         return [dict(r) for r in src.execute(sql)]
 
     def records(name):
-        return rows("SELECT * FROM " + name)
+        return (dict(row) for row in src.execute("SELECT * FROM " + name))
 
     snap = cfg["as_of_date"] + "T12:00:00+00:00"
     snapshot = stamp(snap)
@@ -66,14 +66,14 @@ def seed(engine, source=None, config=None):
     children = [r for r in records("newborns") if r["mother_id"] in mids]
     cids = {r["child_id"] for r in children}
     assignments = {r["mother_id"]: r for r in records("mother_unit_assignments")}
-    doctors = records("doctors")
+    doctors = list(records("doctors"))
     doctor_units = {r["doctor_id"]: r["unit_id"] for r in records("doctor_units")}
-    beds = records("beds")
+    beds = list(records("beds"))
     bed_states = {r["bed_id"]: r for r in records("hospital_bed_states")}
-    hospitals = records("hospitals")
+    hospitals = list(records("hospitals"))
     labels = {r["ward_id"]: r for r in records("ward_labels")}
     source_patients = records("patients")
-    admissions = records("admissions")
+    admissions = list(records("admissions"))
     facilities_by_patient = {r["patient_id"]: r["hospital_id"] for r in admissions}
     for m in mothers:
         facilities_by_patient[m["mother_id"]] = m["registered_hospital_id"]
@@ -453,10 +453,12 @@ def seed(engine, source=None, config=None):
                         "reason": r["action_recommended"],
                     },
                 )
+        with source.open("rb") as source_file:
+            source_sha256 = hashlib.file_digest(source_file, "sha256").hexdigest()
         add(
             s.seed_manifest,
             "dai-source-v1",
-            source_sha256=hashlib.sha256(source.read_bytes()).hexdigest(),
+            source_sha256=source_sha256,
             as_of_date=cfg["as_of_date"],
             counts=counts.copy(),
             assumptions=cfg["assumptions"],

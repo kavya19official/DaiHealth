@@ -206,6 +206,12 @@ def dependencies(env=None):
             mark.write_text(sig)
 
 
+def node_command(env, heap_mib, *args):
+    if env.get("DAI_LOW_MEMORY") == "true":
+        return ["node", f"--max-old-space-size={heap_mib}", *args]
+    return ["node", *args]
+
+
 def prepare(env):
     workspace_seed = env.get("DAI_SEED_WORKSPACE_FOUNDATION") == "true"
     if workspace_seed and (
@@ -219,11 +225,15 @@ def prepare(env):
         run([PY, ROOT / "synthetic_data/generate.py"], env=env)
     if not (ROOT / "backend/data/dai-hospital.db").exists():
         run([PY, ROOT / "synthetic_data/build_hospital_admin.py"], env=env)
+    if env.get("DAI_HOSTED_DEMO") == "true":
+        print("Preparing the synthetic hospital database...", flush=True)
     run([PY, "-m", "hospital_portal.api.seed"], env=env)
     patient_env = env | {"DATABASE_URL": "", "DB_SSL": "false"}
-    run(["node", ROOT / "scripts/seed-local.cjs"], env=patient_env)
+    if env.get("DAI_HOSTED_DEMO") == "true":
+        print("Preparing the synthetic patient and doctor database...", flush=True)
+    run(node_command(env, 96, ROOT / "scripts/seed-local.cjs"), env=patient_env)
     if env.get("DAI_HOSTED_DEMO") == "true" and env.get("DAI_SEED_NIVARA_DEMO") == "true":
-        run(["node", ROOT / "scripts/seed-hosted-nivara.cjs"], env=patient_env)
+        run(node_command(env, 96, ROOT / "scripts/seed-hosted-nivara.cjs"), env=patient_env)
         if env.get("DAI_ULTRASOUND_ENABLED") == "true":
             run([PY, ROOT / "scripts/seed-hosted-nivara-scans.py"], env=env)
     if env.get("DAI_ULTRASOUND_ENABLED") == "true":
@@ -238,7 +248,7 @@ def prepare(env):
             [
                 PY,
                 "-c",
-                "from hospital_portal.ml_service.store import manifest,forecast; from hospital_portal.ml_service.train import persist_predictions; m=manifest(); persist_predictions([forecast(n[:-5]) for n in m['files'] if n.startswith('HOSP-SYN-') and n.endswith('.json')])",
+                "from hospital_portal.ml_service.store import manifest,forecast; from hospital_portal.ml_service.persistence import persist_predictions; m=manifest(); persist_predictions(forecast(n[:-5]) for n in m['files'] if n.startswith('HOSP-SYN-') and n.endswith('.json'))",
             ],
             env=env,
         )
@@ -364,6 +374,16 @@ def main():
         return
     if action not in ("setup", "run"):
         raise RuntimeError("Use npm start, npm run setup, or npm run doctor.")
+    if hosted:
+        from render_demo import patient_database
+
+        with patient_database(env) as runtime_env:
+            launch(action, runtime_env, hosted)
+    else:
+        launch(action, env, hosted)
+
+
+def launch(action, env, hosted):
     api_port = int(env["DAI_PORTAL_API_ORIGIN"].rsplit(":", 1)[1])
     web_port = int(env["DAI_PORTAL_WEB_ORIGIN"].rsplit(":", 1)[1])
     ultrasound = env.get("DAI_ULTRASOUND_ENABLED") == "true"
@@ -418,15 +438,16 @@ def main():
                 (
                     [NPM, "run", "dev", "--", "--port", str(web_port)]
                     if env.get("DAI_DEV") == "true"
-                    else [
-                        "node",
+                    else node_command(
+                        env,
+                        112,
                         ROOT / "hospital_portal/web/node_modules/next/dist/bin/next",
                         "start",
                         "--hostname",
                         "127.0.0.1",
                         "--port",
                         str(web_port),
-                    ]
+                    )
                 ),
                 ROOT / "hospital_portal/web",
                 public_env
@@ -437,7 +458,7 @@ def main():
                 },
             ),
             (
-                ["node", "backend/server.js"],
+                node_command(env, 96, "backend/server.js"),
                 ROOT,
                 gateway_env | {"DATABASE_URL": "", "DB_SSL": "false"},
             ),

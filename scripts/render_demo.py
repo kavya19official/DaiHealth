@@ -1,15 +1,27 @@
 """Run the synthetic, single-instance DAI demo behind Render HTTPS."""
+from contextlib import contextmanager
 import os
+import pwd
+import shlex
+import subprocess
+from tempfile import TemporaryDirectory
 from pathlib import Path
 from urllib.parse import urlsplit
 
 from local import ROOT, environment
 
 
+TEMPORARY_STATE = Path("/tmp/dai-state")
+
+
+def state_directory():
+    return Path(os.environ.get("DAI_STATE_DIR", "/var/data")).resolve()
+
+
 def mount_state():
-    mount = Path(os.environ.get("DAI_STATE_DIR", "/var/data")).resolve()
+    mount = state_directory()
     # Render Free can explicitly opt in to disposable synthetic demo data.
-    if mount == Path("/tmp/dai-state").resolve():
+    if mount == TEMPORARY_STATE.resolve():
         mount.mkdir(mode=0o700, exist_ok=True)
     elif not mount.is_dir():
         raise RuntimeError(
@@ -42,6 +54,7 @@ def hosted_environment():
     env.update(
         NODE_ENV="production",
         DAI_DEV="false",
+        DAI_LOW_MEMORY="true" if state_directory() == TEMPORARY_STATE.resolve() else "false",
         DAI_VIDEO_DEMO="true",
         PORT=os.environ.get("PORT", "10000"),
         DAI_WEB_ORIGIN=origin,
@@ -54,3 +67,46 @@ def hosted_environment():
         HOSPITAL_UPLOAD_DIR=str(ROOT / ".local/hospital-uploads"),
     )
     return env
+
+
+@contextmanager
+def patient_database(env):
+    """Run a small Unix-socket-only PostgreSQL instance for the free hosted demo."""
+    if env.get("DAI_LOW_MEMORY") != "true":
+        yield env
+        return
+
+    state = state_directory()
+    cluster = state / "patient-postgres"
+    # PostgreSQL refuses to run as root. The image's postgres user owns the free demo cluster.
+    account = pwd.getpwnam("postgres") if os.geteuid() == 0 else None
+    identity = {"user": account.pw_uid, "group": account.pw_gid, "extra_groups": []} if account else {}
+
+    def postgres(command, *args):
+        subprocess.run([command, *args], check=True, **identity)
+
+    with TemporaryDirectory(prefix="dai-pg-", dir="/tmp") as socket:
+        if account:
+            os.chown(state, account.pw_uid, account.pw_gid)
+            os.chown(socket, account.pw_uid, account.pw_gid)
+        if not cluster.exists():
+            # Publish the cluster only after initdb succeeds, so failures can be retried.
+            with TemporaryDirectory(prefix="postgres-init-", dir=state) as workspace:
+                if account:
+                    os.chown(workspace, account.pw_uid, account.pw_gid)
+                stage = Path(workspace) / "data"
+                postgres("initdb", "-D", stage, "--username=postgres", "--auth-local=trust", "--auth-host=reject")
+                stage.rename(cluster)
+        options = shlex.join([
+            "-k", socket,
+            "-c", "listen_addresses=",
+            "-c", "shared_buffers=16MB",
+            "-c", "work_mem=1MB",
+            "-c", "maintenance_work_mem=16MB",
+            "-c", "max_connections=10",
+        ])
+        postgres("pg_ctl", "-D", cluster, "-l", cluster / "server.log", "-o", options, "-w", "start")
+        try:
+            yield env | {"DAI_PATIENT_PG_SOCKET": socket}
+        finally:
+            postgres("pg_ctl", "-D", cluster, "-m", "fast", "-w", "stop")

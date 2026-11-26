@@ -4,13 +4,13 @@ This is a single-instance, access-gated Health-a-thon demo. One HTTPS origin ser
 
 ## Free web service
 
-1. In Render, open the existing DAI **Web Service** or create one from the DAI GitHub repo. Select the `render-demo` branch, **Docker** runtime, and **Free** instance type. Use the repository-root `Dockerfile` and set the health check path to `/api/health`.
+1. In Render, open the existing DAI **Web Service** or create one from the DAI GitHub repo. Select the branch containing the deployment changes, **Docker** runtime, and **Free** instance type. Use the repository-root `Dockerfile` and set the health check path to `/api/health`.
 2. Clear any custom **Docker Command**. Set `DAI_STATE_DIR=/tmp/dai-state` in **Environment**. DAI creates this directory on startup.
 3. Set `JWT_SECRET`, `DAI_DEMO_ACCESS_KEY` and `DAI_DEMO_PASSWORD` to distinct values of at least 32 characters each. Generate each with a separate `openssl rand -hex 24` run. Keep existing secrets if already set. Add `GEMINI_API_KEY` if you want Gemini voice.
-4. Set `ML_ENABLED=false` and `PATIENT_ML_RANKING_ENABLED=false` to skip the optional patient ranker process. The image still includes the hospital forecast artifacts.
+4. Set `ML_ENABLED=false` and `PATIENT_ML_RANKING_ENABLED=false` to skip the optional patient ranker process. Leave `DAI_ULTRASOUND_ENABLED` off to stay within the Free memory limit. The image still includes the hospital forecast artifacts.
 5. Select **Manual Deploy → Deploy latest commit**. Once the service is live, open its URL and use the login instructions below.
 
-Render Free discards local databases and uploads on a restart, redeploy, or idle shutdown. Each fresh start seeds synthetic records. Use this option for a disposable demo.
+Render Free discards local databases and uploads on a restart, redeploy, or idle shutdown. Each fresh start seeds synthetic records. The Free service runs a small local PostgreSQL cluster in its temporary state directory. Use this option for a disposable demo.
 
 ## Paid Blueprint with persistent data
 

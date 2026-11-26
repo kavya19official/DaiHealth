@@ -1,9 +1,11 @@
 FROM node:24-bookworm-slim
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    ca-certificates libgomp1 python3 python3-venv tzdata \
+    ca-certificates libgomp1 postgresql-15 python3 python3-venv tzdata \
+    && pg_dropcluster --stop 15 main \
     && rm -rf /var/lib/apt/lists/*
 
+ENV PATH=/usr/lib/postgresql/15/bin:$PATH
 WORKDIR /app
 COPY backend/package*.json backend/
 COPY hospital_portal/web/package*.json hospital_portal/web/
