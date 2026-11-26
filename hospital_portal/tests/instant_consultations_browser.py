@@ -23,7 +23,7 @@ def main():
         ]:
             context = browser.new_context(
                 viewport={"width": 390 if role == "mother" else 768, "height": 844},
-                is_mobile=True, has_touch=True, permissions=["microphone"], service_workers="block",
+                is_mobile=True, has_touch=True, permissions=["microphone", "camera"], service_workers="block",
             )
             page = context.new_page()
 
@@ -70,12 +70,20 @@ def main():
         doctor_button = inbox.locator("[data-connect-clinical]").get_by_role("button", name="Join audio call")
         for page, button in [(mother,mother_button),(doctor,doctor_button)]:
             button.tap()
-            media = page.locator("dialog").filter(has=page.get_by_role("heading", name="Doctor Connect audio call"))
+            media = page.locator("dialog").filter(has=page.get_by_role("heading", name="Doctor Connect call"))
             expect(media).to_be_visible()
             media.get_by_role("button", name="Join audio call").tap()
         if EXPECT_CONNECTED:
             for page in pages:
                 expect(page.get_by_text("Audio or video connected.", exact=True)).to_be_visible(timeout=35000)
+                expect(page.locator("dialog [data-local]")).to_be_hidden()
+            for sender, receiver in [(doctor, mother), (mother, doctor)]:
+                sender.get_by_role("button", name="Turn on camera").tap()
+                expect(sender.locator("dialog [data-local]")).to_be_visible()
+                receiver.wait_for_function("document.querySelector('dialog [data-remote]').videoWidth > 0")
+                sender.get_by_role("button", name="Turn off camera").tap()
+                expect(sender.get_by_text("Camera off. Audio call continues.")).to_be_visible()
+                expect(sender.locator("dialog [data-local]")).to_be_hidden()
         else:
             # Some headless runners expose no ICE network interfaces. The app must keep
             # this state distinct from a connected consultation.
