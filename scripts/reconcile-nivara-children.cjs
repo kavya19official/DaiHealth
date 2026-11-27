@@ -5,9 +5,11 @@ async function reconcileNivaraChildren(db, portal, {local=false, backupDir}={}) 
  if(!local)throw Error('This correction is restricted to the local fictional Nivara household.');
  const mother=(await db.query(`SELECT u.id FROM users u JOIN mother_profiles p ON p.user_id=u.id JOIN dai_local_source_link l ON l.entity='mother' AND l.target_id=u.id WHERE u.email='nivara@dai-synthetic.invalid' AND p.full_name='Nivara Sethi' AND l.source_id='MOTHER-SYN-0000001'`)).rows[0];
  if(!mother)throw Error('Expected the curated fictional Nivara account.');
- const children=(await db.query('SELECT * FROM children WHERE mother_id=$1',[mother.id])).rows;
+ // Compare PostgreSQL DATE as calendar text: node-postgres parses DATE at local midnight,
+ // which shifts to the previous UTC day in Asia/Kolkata.
+ const children=(await db.query('SELECT *, date_of_birth::text AS recorded_birth_date FROM children WHERE mother_id=$1',[mother.id])).rows;
  const aarav=children.find(c=>c.name==='Aarav Sethi');
- if(!aarav||new Date(aarav.date_of_birth).toISOString().slice(0,10)!=='2024-05-18')throw Error('Aarav’s curated profile is required.');
+ if(!aarav||aarav.recorded_birth_date!=='2024-05-18')throw Error('Aarav’s curated profile is required.');
  const extra=children.find(c=>c.name==='CHILD-SYN-0000001'&&c.notes?.includes('source CHILD-SYN-0000001'));
  if(children.some(c=>c.id!==aarav.id&&c.id!==extra?.id))throw Error('Unexpected child record: no records were removed.');
  const references=(await db.query(`SELECT tc.table_name,kcu.column_name FROM information_schema.table_constraints tc JOIN information_schema.key_column_usage kcu ON kcu.constraint_name=tc.constraint_name AND kcu.constraint_schema=tc.constraint_schema JOIN information_schema.referential_constraints rc ON rc.constraint_name=tc.constraint_name AND rc.constraint_schema=tc.constraint_schema JOIN information_schema.constraint_column_usage ccu ON ccu.constraint_name=rc.unique_constraint_name AND ccu.constraint_schema=rc.unique_constraint_schema WHERE tc.constraint_type='FOREIGN KEY' AND ccu.table_name='children'`)).rows;

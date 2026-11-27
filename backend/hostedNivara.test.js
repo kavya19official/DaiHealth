@@ -1,8 +1,12 @@
 'use strict';
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs/promises'),os=require('node:os'),path=require('node:path');
 const {DatabaseSync}=require('node:sqlite'),{createLocalPool}=require('./localPool'),{migrations}=require('../scripts/seed-local.cjs'),{seedHostedNivara}=require('../scripts/seed-hosted-nivara.cjs');
-test('hosted fictional persona is consistent across portals and never resets later edits or revoked sharing',async()=>{
- const dir=await fs.mkdtemp(path.join(os.tmpdir(),'dai-hosted-persona-')),db=createLocalPool(path.join(dir,'db')),portal=new DatabaseSync(':memory:');
+for(const timezone of ['UTC','Asia/Kolkata','America/Los_Angeles'])test('hosted persona preserves calendar dates, edits and revoked sharing with node-postgres DATE values in '+timezone,async()=>{
+ const previousTimezone=process.env.TZ;process.env.TZ=timezone;
+ const dir=await fs.mkdtemp(path.join(os.tmpdir(),'dai-hosted-persona-')),embedded=createLocalPool(path.join(dir,'db')),portal=new DatabaseSync(':memory:');
+ // Reproduce the real node-postgres DATE parser, rather than PGlite's string transport.
+ const dateParser=require('pg').types.getTypeParser(1082);
+ const db={async query(...args){const result=await embedded.query(...args);for(const row of result.rows)if(row.date_of_birth!=null)row.date_of_birth=dateParser(row.date_of_birth instanceof Date?row.date_of_birth.toISOString().slice(0,10):row.date_of_birth);return result;},end:()=>embedded.end()};
  try{
   for(const file of migrations)await db.query(await fs.readFile(path.join(__dirname,'db',file),'utf8'));
   await db.query('CREATE TABLE dai_local_seed(version TEXT PRIMARY KEY,source_sha256 TEXT,counts JSONB)');
@@ -21,10 +25,16 @@ test('hosted fictional persona is consistent across portals and never resets lat
   const opts={backupDir:path.join(dir,'backups'),manifestPath:path.join(dir,'manifest.json')};const seeded=await seedHostedNivara(db,portal,opts);
   assert.equal(seeded.children,1);assert.equal((await db.query('SELECT name FROM children WHERE mother_id=$1',[mother])).rows[0].name,'Aarav Sethi');
   assert.equal(portal.prepare('SELECT COUNT(*) AS n FROM child').get().n,1);
+  // A genuinely different birthday must still fail before any child is removed.
+  await db.query("UPDATE children SET date_of_birth='2024-05-19' WHERE mother_id=$1",[mother]);
+  await assert.rejects(()=>require('../scripts/reconcile-nivara-children.cjs').reconcileNivaraChildren(db,portal,{local:true,...opts}),/Aarav’s curated profile is required/);
+  assert.equal(portal.prepare('SELECT COUNT(*) AS n FROM child').get().n,1);
+  await db.query("UPDATE children SET date_of_birth='2024-05-18' WHERE mother_id=$1",[mother]);
+
   const manifest=JSON.parse(await fs.readFile(opts.manifestPath,'utf8'));assert.equal(manifest.patient.email,'nivara@dai-synthetic.invalid');assert.equal(manifest.doctor.id,doctor);assert.equal(manifest.facility,'facility-link');
   assert.equal((await db.query('SELECT include_history FROM clinical_dashboard_consent')).rows[0].include_history,true);
   await db.query("UPDATE mother_profiles SET allergies='Edited after deployment' WHERE user_id=$1",[mother]);await db.query('UPDATE clinical_dashboard_consent SET revoked_at=NOW()');
   assert.equal((await seedHostedNivara(db,portal,opts)).alreadySeeded,true);
   assert.equal((await db.query('SELECT allergies FROM mother_profiles WHERE user_id=$1',[mother])).rows[0].allergies,'Edited after deployment');assert.ok((await db.query('SELECT revoked_at FROM clinical_dashboard_consent')).rows[0].revoked_at);
- }finally{portal.close();await db.end();await fs.rm(dir,{recursive:true,force:true});}
+ }finally{portal.close();await db.end();await fs.rm(dir,{recursive:true,force:true});if(previousTimezone===undefined)delete process.env.TZ;else process.env.TZ=previousTimezone;}
 });
