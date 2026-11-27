@@ -6,7 +6,7 @@ for(const timezone of ['UTC','Asia/Kolkata','America/Los_Angeles'])test('hosted 
  const dir=await fs.mkdtemp(path.join(os.tmpdir(),'dai-hosted-persona-')),embedded=createLocalPool(path.join(dir,'db')),portal=new DatabaseSync(':memory:');
  // Reproduce the real node-postgres DATE parser, rather than PGlite's string transport.
  const dateParser=require('pg').types.getTypeParser(1082);
- const db={async query(...args){const result=await embedded.query(...args);for(const row of result.rows)if(row.date_of_birth!=null)row.date_of_birth=dateParser(row.date_of_birth instanceof Date?row.date_of_birth.toISOString().slice(0,10):row.date_of_birth);return result;},end:()=>embedded.end()};
+ const db={async query(...args){const result=await embedded.query(...args);for(const field of result.fields||[])if(field.dataTypeID===1082)for(const row of result.rows)if(row[field.name]!=null)row[field.name]=dateParser(row[field.name] instanceof Date?row[field.name].toISOString().slice(0,10):row[field.name]);return result;},end:()=>embedded.end()};
  try{
   for(const file of migrations)await db.query(await fs.readFile(path.join(__dirname,'db',file),'utf8'));
   await db.query('CREATE TABLE dai_local_seed(version TEXT PRIMARY KEY,source_sha256 TEXT,counts JSONB)');
@@ -31,10 +31,28 @@ for(const timezone of ['UTC','Asia/Kolkata','America/Los_Angeles'])test('hosted 
   assert.equal(portal.prepare('SELECT COUNT(*) AS n FROM child').get().n,1);
   await db.query("UPDATE children SET date_of_birth='2024-05-18' WHERE mother_id=$1",[mother]);
 
-  const manifest=JSON.parse(await fs.readFile(opts.manifestPath,'utf8'));assert.equal(manifest.patient.email,'nivara@dai-synthetic.invalid');assert.equal(manifest.doctor.id,doctor);assert.equal(manifest.facility,'facility-link');
+  const manifest=JSON.parse(await fs.readFile(opts.manifestPath,'utf8'));assert.equal(manifest.patient.email,'nivara@dai-synthetic.invalid');assert.equal(manifest.doctor.id,doctor);assert.equal(manifest.facility,'facility-link');assert.equal(manifest.patient.lmp_date,'2026-05-11');assert.equal(manifest.patient.edd_date,'2027-02-15');
+  // Optional integration check uses the actual Python scan builder on the Node-produced manifest.
+  if(timezone==='Asia/Kolkata'&&process.env.DAI_VERIFY_SCAN_HANDOFF==='true'){
+   const python=process.env.PYTHON_BIN||path.join(__dirname,'../hospital_portal/.venv/bin/python');
+   const program=`import importlib.util,json,sys
+from datetime import datetime,timezone
+payload=json.load(sys.stdin)
+spec=importlib.util.spec_from_file_location('nivara_scan_rows',sys.argv[1])
+module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
+rows=list(module.build_rows(payload['patient'],payload['doctor'],payload['facility'],datetime(2026,11,27,tzinfo=timezone.utc)))
+print(json.dumps({'count':len(rows),'episodes':[r['episode'] for r in rows],'patient_ids':[r['patient_account_id'] for r in rows]}))`;
+   const handoff=JSON.parse(require('node:child_process').execFileSync(python,['-c',program,path.join(__dirname,'../scripts/seed-nivara-ultrasound.py')],{input:JSON.stringify(manifest),encoding:'utf8'}));
+   assert.equal(handoff.count,3);assert.deepEqual(handoff.episodes,['2026-05-11','2026-05-11','2026-05-11']);assert.deepEqual(handoff.patient_ids,[mother,mother,mother]);
+  }
+
   assert.equal((await db.query('SELECT include_history FROM clinical_dashboard_consent')).rows[0].include_history,true);
   await db.query("UPDATE mother_profiles SET allergies='Edited after deployment' WHERE user_id=$1",[mother]);await db.query('UPDATE clinical_dashboard_consent SET revoked_at=NOW()');
+  // Simulate the stale timestamp manifest left by a failed earlier scan-seeding attempt.
+  await fs.writeFile(opts.manifestPath,JSON.stringify({...manifest,patient:{...manifest.patient,lmp_date:'2026-05-10T18:30:00.000Z',edd_date:'2027-02-14T18:30:00.000Z'}}));
   assert.equal((await seedHostedNivara(db,portal,opts)).alreadySeeded,true);
+  const refreshed=JSON.parse(await fs.readFile(opts.manifestPath,'utf8'));assert.equal(refreshed.patient.lmp_date,'2026-05-11');assert.equal(refreshed.patient.edd_date,'2027-02-15');
+  await fs.unlink(opts.manifestPath);assert.equal((await seedHostedNivara(db,portal,opts)).alreadySeeded,true);assert.equal(JSON.parse(await fs.readFile(opts.manifestPath,'utf8')).patient.lmp_date,'2026-05-11');
   assert.equal((await db.query('SELECT allergies FROM mother_profiles WHERE user_id=$1',[mother])).rows[0].allergies,'Edited after deployment');assert.ok((await db.query('SELECT revoked_at FROM clinical_dashboard_consent')).rows[0].revoked_at);
  }finally{portal.close();await db.end();await fs.rm(dir,{recursive:true,force:true});if(previousTimezone===undefined)delete process.env.TZ;else process.env.TZ=previousTimezone;}
 });
