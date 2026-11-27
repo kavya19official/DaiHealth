@@ -23,3 +23,17 @@ test('deployed patient/doctor API uses same-origin cookies rather than a hard-co
  vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../frontend/js/dai-api.js'),'utf8'),{window,document,location,console,URLSearchParams,fetch(){}});
  assert.equal(window.DaiAPI.API_BASE,'/api');
 });
+
+const {deploymentStatus}=require('./deploymentStatus');
+test('deployment metadata identifies revision and disabled features without exposing private environment',()=>{
+ const info=deploymentStatus({RENDER_GIT_COMMIT:'a'.repeat(40),DAI_HOSTED_DEMO:'true',DAI_SEED_NIVARA_DEMO:'true',
+  ML_ENABLED:'true',PATIENT_ML_RANKING_ENABLED:'false',DAI_ULTRASOUND_ENABLED:'false',
+  JWT_SECRET:'private-signing-key',DAI_DEMO_ACCESS_KEY:'private-access-key',GEMINI_API_KEY:'private-provider-key'});
+ assert.equal(info.commit,'a'.repeat(40));assert.equal(info.hostedDemo,true);
+ assert.equal(info.configuredFeatures.nivaraDemo,true);
+ assert.equal(info.configuredFeatures.patientRanking,false);assert.equal(info.configuredFeatures.ultrasound,false);
+ assert.doesNotMatch(JSON.stringify(info),/private-|JWT_SECRET|GEMINI_API_KEY|DAI_DEMO_ACCESS_KEY/);
+ assert.equal(deploymentStatus({RENDER_GIT_COMMIT:'not-a-revision'}).commit,null);
+ assert.equal(deploymentStatus({ML_ENABLED:'true',PATIENT_ML_RANKING_ENABLED:'true',DAI_ULTRASOUND_ENABLED:'true'}).configuredFeatures.patientRanking,true);
+ assert.equal(deploymentStatus({DAI_ULTRASOUND_ENABLED:'true'}).configuredFeatures.ultrasound,true);
+});

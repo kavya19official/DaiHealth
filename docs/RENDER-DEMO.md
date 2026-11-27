@@ -2,7 +2,9 @@
 
 This is a single-instance, access-gated Health-a-thon demo. One HTTPS origin serves patient, doctor and hospital so the existing local appointment bridge can still share its SQLite state with FastAPI. Express exposes the Render port. Next.js, FastAPI and the optional patient ranker bind only to loopback. The image builds the UI and regenerates synthetic source data and hospital forecast artifacts without importing local databases.
 
-## Free web service
+For the full local feature set, use the paid persistent configuration below and the recovery checklist in [DEPLOY-VERCEL-RENDER.md](DEPLOY-VERCEL-RENDER.md). The Free path disables ultrasound and patient ML ranking; it is not feature parity.
+
+## Free web service (reduced features, disposable data)
 
 1. In Render, open the existing DAI **Web Service** or create one from the DAI GitHub repo. Select the branch containing the deployment changes, **Docker** runtime, and **Free** instance type. Use the repository-root `Dockerfile` and set the health check path to `/api/health`.
 2. Clear any custom **Docker Command**. Set `DAI_STATE_DIR=/tmp/dai-state` in **Environment**. DAI creates this directory on startup.

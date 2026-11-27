@@ -2,6 +2,20 @@
 
 The deployment files are ready. Patient/doctor static files are hosted on Vercel. The Render Docker service runs Express, FastAPI, the hospital Next.js UI and private Python ML services. Vercel proxies `/api` and `/hospital-admin` to that service, preserving same-origin authentication.
 
+## Recover an incomplete or stale Render deployment
+
+The Free instructions in `RENDER-DEMO.md` intentionally disable ultrasound and patient ML ranking. They are a reduced demo, not the full local configuration. Free also cannot attach the persistent disk used by this deployment. For the full-feature topology use the Blueprint's Standard/2 GB RAM configuration (or its current equivalent), one instance, and a persistent disk; verify actual memory usage after deployment.
+
+For the existing Render service:
+
+1. Confirm the linked repository is `kavya19official/DaiHealth`, branch `main`, repository root, Docker runtime, `./Dockerfile`, and no custom Docker Command. In Settings select Auto-Deploy **On Commit**. The Blueprint now uses the same setting; existing manually created services require changing it in the dashboard.
+2. To retain the demo database and uploaded reports, use a paid instance with a disk mounted at `/var/data`, and set `DAI_STATE_DIR=/var/data`. Moving from temporary storage does not migrate the old temporary data. Export needed reports before changing storage; recreate synthetic fixtures through the normal seed process.
+3. Keep current signing, encryption and account secrets. If the local private import file differs from the deployed service, reconcile the existing values privately; do not blindly replace all secrets. Add missing feature settings: `DAI_SEED_NIVARA_DEMO=true`, `DAI_ULTRASOUND_ENABLED=true`, `ML_ENABLED=true`, `PATIENT_ML_RANKING_ENABLED=true`, `PENDING_CARE_ASSISTANT=true`, `PENDING_CARE_PLANNER=true`. Ultrasound also needs its existing image key and distinct gateway/service tokens. Add the existing record-connection encryption key for the demo record flow. Provider features need their configured provider credentials separately.
+4. Select **Manual Deploy → Clear build cache & deploy**. Wait for the new deployment to be Live and check the startup log reaches `Hosted DAI is ready.` A green Express health response alone does not prove the hospital UI or ML service is ready.
+5. Open `/api/health`. `deployment.commit` must match the intended GitHub commit. `deployment.configuredFeatures` reports flags, not model readiness, provider availability or successful end-to-end checks. If `deployment` is absent, the service is still serving an older build.
+6. Sign out and sign in as `nivara@dai-synthetic.invalid`, then verify Aarav, the pregnancy profile, scan history and shared reports. Check the doctor and hospital portals too. Hosting installs the versioned fictional fixtures; it does not copy laptop-only uploads or database edits.
+7. If using Vercel, check `DAI_BACKEND_ORIGIN` points to this exact Render service and rebuild Vercel after changing it. Compare Render directly with Vercel to distinguish backend and frontend updates.
+
 ## 1. Render
 
 Create a **Web Service**, connect `kavya19official/DaiHealth`, select the branch containing these changes, and choose **Docker**.

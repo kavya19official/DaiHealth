@@ -4,7 +4,8 @@ services:
     runtime: docker
     plan: standard
     numInstances: 1
-    autoDeployTrigger: off
+    branch: main
+    autoDeployTrigger: commit
     healthCheckPath: /api/health
     disk:
       name: dai-demo-state
