@@ -2,6 +2,7 @@
 from contextlib import contextmanager
 import os
 import pwd
+import re
 import shlex
 import subprocess
 from tempfile import TemporaryDirectory
@@ -36,6 +37,25 @@ def mount_state():
     link.symlink_to(mount, target_is_directory=True)
 
 
+def validate_ultrasound_environment(env):
+    """Fail before database seeding; never invent or rotate image-encryption keys."""
+    if env.get("DAI_ULTRASOUND_ENABLED") != "true":
+        return
+    invalid = []
+    if not re.fullmatch(r"[a-fA-F0-9]{64}", env.get("DAI_ULTRASOUND_IMAGE_KEY", "")):
+        invalid.append("DAI_ULTRASOUND_IMAGE_KEY (64 hexadecimal characters)")
+    for name in ("DAI_ULTRASOUND_GATEWAY_TOKEN", "DAI_ULTRASOUND_SERVICE_TOKEN"):
+        if len(env.get(name, "")) < 32:
+            invalid.append(name + " (at least 32 characters)")
+    if invalid:
+        raise RuntimeError(
+            "Ultrasound is enabled but these Render environment settings are missing or invalid: "
+            + ", ".join(invalid)
+            + ". In Render > Environment, import the existing private render-ultrasound.env "
+            "settings and save/deploy. Reuse existing keys; do not rotate keys for encrypted scans."
+        )
+
+
 def hosted_environment():
     required = ("JWT_SECRET", "DAI_DEMO_PASSWORD", "DAI_DEMO_ACCESS_KEY")
     for name in required:
@@ -43,6 +63,7 @@ def hosted_environment():
             raise RuntimeError(f"Set {name} to a unique secret of at least 32 characters.")
     if len({os.environ[name] for name in required}) != len(required):
         raise RuntimeError("Use separate secrets for demo access, demo accounts and JWTs.")
+    validate_ultrasound_environment(os.environ)
     origin = (os.environ.get("DAI_PUBLIC_ORIGIN") or os.environ.get("RENDER_EXTERNAL_URL", "")).rstrip("/")
     parsed = urlsplit(origin)
     if parsed.scheme != "https" or not parsed.hostname or parsed.username or parsed.password or parsed.path or parsed.query or parsed.fragment:

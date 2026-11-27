@@ -16,6 +16,12 @@ For the existing Render service:
 6. Sign out and sign in as `nivara@dai-synthetic.invalid`, then verify Aarav, the pregnancy profile, scan history and shared reports. Check the doctor and hospital portals too. Hosting installs the versioned fictional fixtures; it does not copy laptop-only uploads or database edits.
 7. If using Vercel, check `DAI_BACKEND_ORIGIN` points to this exact Render service and rebuild Vercel after changing it. Compare Render directly with Vercel to distinguish backend and frontend updates.
 
+## If startup reports `KeyError: DAI_ULTRASOUND_IMAGE_KEY`
+
+Nivara's profile seed has completed; the ultrasound scan seed cannot encrypt its images because the enabled service has no image key. A code redeploy alone cannot supply an account environment setting. The launcher now checks all three required ultrasound settings before the database seed begins.
+
+On the preparation machine, `.local/deployment/render-ultrasound.env` contains only the ultrasound enabled flag and the three existing ultrasound secrets copied from the private `render.env`. In the affected Render service, open **Environment → Edit → Add variable → Import from .env**, paste that private file's contents, and select **Save, rebuild, and deploy**. This does not change JWT or account passwords. Never commit or share the file. For manual entry, use the values without surrounding quote characters. Do not create replacement image keys for an existing encrypted image store.
+
 ## 1. Render
 
 Create a **Web Service**, connect `kavya19official/DaiHealth`, select the branch containing these changes, and choose **Docker**.
