@@ -83,6 +83,14 @@ Dates remain the authored fictional dates; gestational age advances with the cal
 
 Patient reports, hospital upload files and hospital JSON state now use the persistent disk. Keep the service at one instance for this embedded database configuration.
 
+## Doctor Connect audio and video
+
+Use Nivara's patient account on one device and the assigned doctor's account on the other. Accept the request, open the same consultation on both devices and select Join on both. Allow microphone access. Each participant can preview their own camera before joining and turn it on/off during the call. Camera preview alone does not join or transmit a call. If browser autoplay is blocked, use Play remote audio.
+
+Google STUN discovery (`stun:stun.l.google.com:19302`) is enabled with the project owner's approval. It sees network/IP metadata, not patient records or call media. Set `DAI_STUN_URL` to a comma-separated list to use a different discovery service. STUN does not guarantee a connection on restricted Wi-Fi, VPNs or between different networks. Supply your own `DAI_TURN_URL`, `DAI_TURN_USERNAME`, `DAI_TURN_PASSWORD` for a relay when direct paths are blocked. TURN URLs may be comma-separated, for example UDP/TCP and TLS variants supplied by your provider. Do not use publicly shared TURN credentials.
+
+Keep one Render instance for in-memory signalling. Deploy the backend and updated frontend, then hard-refresh both devices before retrying. To run the isolated Chrome test with synthetic audio/video devices: `node scripts/test-remote-calls-browser.cjs`. It requires Chrome (override its executable with `DAI_CHROME_BIN`) and uses localhost test endpoints, not real patient accounts. It checks both join orders, video frames, camera off/on, rejoining, refreshed patient recovery, brief network-state changes and permission-denial feedback. This does not replace a test on two physical laptops against the deployed service.
+
 ## Optional live services
 
 - Audio calls across networks: add `DAI_TURN_URL`, `DAI_TURN_USERNAME` and `DAI_TURN_PASSWORD` for your own working TURN relay. None was configured locally when this deployment file was prepared. Basic HTTPS alone cannot guarantee remote audio connectivity.
